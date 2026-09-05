@@ -1,0 +1,103 @@
+# Status workflow (docs/TRACKING.md, "Commands, publication and history").
+#
+# views:     the committed generated views match the committed evidence, and S01 still closes.
+# producers: on macOS (arm64) and Linux (x64) rerun the registered producers, regenerate the
+#            views and publish them with the raw evidence as workflow artifacts. Nothing is
+#            committed back; evidence in the repository is captured and reviewed locally.
+#
+# The workflow requires only S01, the finished sprint. It never requires an unfinished
+# sprint to pass on a development change. Add ubuntu-24.04-arm and an x86_64 macOS
+# runner once their availability for this repository is confirmed (ADR 0002 targets).
+name: status
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: status-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # The evidence context records RUSTFLAGS, CARGO_BUILD_TARGET, RUSTC_WRAPPER, GOFLAGS,
+  # GOOS, GOARCH and CGO_ENABLED; leave them unset so committed evidence stays comparable.
+
+jobs:
+  views:
+    name: committed views are current
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Validate provenance and schemas
+        run: cargo xtask validate
+      - name: Regenerate the views from committed evidence
+        run: cargo xtask status
+      - name: Committed views match (dates in the generation line are ignored)
+        run: git diff --exit-code -I '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' -- STATUS.md status/status.json docs/status.html
+      - name: S01 still closes on committed evidence
+        run: cargo xtask check S01
+
+  producers:
+    name: producers on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.x"
+          cache-dependency-path: upstream/tsc/go.sum
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: Validate provenance and schemas
+        run: cargo xtask validate
+      - name: Tracker self-tests
+        run: cargo xtask run selftest
+      - name: Workspace build
+        run: cargo xtask run workspace
+      - name: Oracle build and version smoke
+        run: cargo xtask run oracle
+      - name: Formatting
+        run: cargo xtask run fmt
+      - name: Clippy
+        run: cargo xtask run clippy
+      - name: Dependency policy
+        run: cargo xtask run deny
+      - name: Regenerate views
+        run: cargo xtask status
+      - name: S01 closes on this runner's evidence
+        run: cargo xtask check S01
+      - name: Sprint S02 (informational until it closes)
+        run: cargo xtask check S02
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: status-${{ matrix.os }}
+          path: |
+            STATUS.md
+            status/status.json
+            docs/status.html
+            status/evidence/
+          if-no-files-found: error
