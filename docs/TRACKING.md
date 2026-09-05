@@ -53,7 +53,7 @@ The script requires a clean checkout, resolves the requested pin to the actual f
 
 The bootstrap checkout is sufficient for inventory generation. S01's oracle gate separately requires a registered, initialized `upstream/` submodule at that same pin, with the canonical Microsoft URL and a clean worktree.
 
-The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. S01 remains open for the three design notes under Proposed ADRs 0006, 0007 and 0013. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
+The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01 passes against the current bootstrap evidence. E1–E8 implementation and verification remain pending. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
 
 ## Function traceability
 
