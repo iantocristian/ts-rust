@@ -1,0 +1,4 @@
+[workspace]
+resolver = "2"
+members = ["xtask"]
+# Compiler crates are added under crates/ as they are created; see PLAN.md, section 8.

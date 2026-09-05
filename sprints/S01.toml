@@ -1,0 +1,44 @@
+# Sprint skeleton. The Phase 0 implementation plan will replace this file with the real
+# sprint set; the schema is documented in docs/TRACKING.md.
+id = "S01"
+title = "Contracts, workspace, oracle"
+goal = "The three contracts are written and reviewed, the workspace builds, the Go oracle is built from the pin, and the ledger and inventory are generated."
+exit = [
+  "adr.0006.status == Accepted",
+  "adr.0007.status == Accepted",
+  "adr.0013.status == Accepted",
+  "ledger.files_total > 0",
+  "functions.total > 0",
+]
+
+[[item]]
+id = "S01-1"
+title = "Node ownership contract as ADR 0006, reviewed by the owner"
+kind = "adr"
+ref = "0006"
+done_when = ["adr.0006.status == Accepted"]
+
+[[item]]
+id = "S01-2"
+title = "Symbol ownership contract as ADR 0007, reviewed by the owner"
+kind = "adr"
+ref = "0007"
+done_when = ["adr.0007.status == Accepted"]
+
+[[item]]
+id = "S01-3"
+title = "String representations contract as ADR 0013, reviewed by the owner"
+kind = "adr"
+ref = "0013"
+done_when = ["adr.0013.status == Accepted"]
+
+[[item]]
+id = "S01-4"
+title = "upstream/ submodule pinned at 1f70213d49; Go oracle built from it"
+kind = "task"
+
+[[item]]
+id = "S01-5"
+title = "Ledger and function inventory generated from the pin"
+kind = "task"
+done_when = ["ledger.files_total > 0", "functions.total > 0"]

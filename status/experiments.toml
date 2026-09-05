@@ -1,0 +1,67 @@
+# Spike experiments from the plan, section 9. Fill `measured` and `measured_at` when a
+# measurement exists; `pass` is computed by `cargo xtask status`. Extrapolations go in `note`.
+# op: how `measured` is compared to `threshold`.
+
+[E1]
+title = "Parser parity"
+measures = "Encoder-identical parses of 12,721 cases and 108 lib files"
+op = ">="
+threshold = 0.999
+unit = "ratio"
+nature = "measured"
+
+[E2]
+title = "Checker slice"
+measures = ".types and .errors.txt on the frozen conformance manifest"
+op = ">="
+threshold = 1.0
+unit = "ratio"
+nature = "measured"
+
+[E3]
+title = "Ownership"
+measures = "Shared bound file across two programs; disposal; edit with a retained snapshot; builder-arena release with a live cache entry; lazy JSDoc and content-mapper bundles; panic through one of two snapshots sharing a checker pool"
+op = "=="
+threshold = 1.0
+unit = "pass (1) or fail (0) under Miri and AddressSanitizer, memory back to baseline"
+nature = "measured"
+
+[E4]
+title = "Strings"
+measures = "Every string literal in the corpus including lone surrogates and malformed input bytes, through scanner, literal types and encoder; positions in UTF-8 and UTF-16"
+op = "=="
+threshold = 1.0
+unit = "byte-identical to the Go encoder (1) or not (0)"
+nature = "measured"
+
+[E5]
+title = "Memory"
+measures = "Peak RSS for parse and bind of the VS Code repository, Rust over Go"
+op = "<="
+threshold = 0.70
+unit = "ratio of Go"
+nature = "measured for parse and bind; extrapolated for checking"
+
+[E6]
+title = "CPU"
+measures = "Parse and bind wall time on the VS Code repository at 1 and 8 threads, Rust over Go (worst of the two)"
+op = "<="
+threshold = 1.0
+unit = "ratio of Go"
+nature = "measured for parse and bind; extrapolated for checking"
+
+[E7]
+title = "WebAssembly"
+measures = "Parser benchmark on wasm32 against the Go GOOS=js build: artifact size as a ratio (recorded here, must be <= 0.25) and parse throughput as a multiple (must be >= 2, recorded in note); plus the E2 checker slice built and run under an in-memory host with no native process or filesystem, matching the oracle (recorded in note)"
+op = "<="
+threshold = 0.25
+unit = "ratio of Go wasm size"
+nature = "measured for parsing only"
+
+[E8]
+title = "Embedding"
+measures = "A separate Rust consumer supplies the host and runs the E2 checker slice with repeated create, query and drop, passing the applicable E3 lifetime tests (recorded in note); a Node adapter benchmarks parse-and-encode in process, latency as a ratio of the --api socket path for a 10 KB file (recorded here)"
+op = "<="
+threshold = 0.10
+unit = "ratio of socket path"
+nature = "measured for parsing only"
