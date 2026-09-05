@@ -2,16 +2,23 @@
 
 The Rust rewrite of the TypeScript 7 native compiler and language server (the Go module under `tsc/` in microsoft/TypeScript, codename Corsa). Upstream is consumed as a pinned dependency; this repository is the workspace.
 
-Nothing here is compiler code yet. The repository holds the plan and the measurements it rests on.
+There is no compiler implementation yet. The repository contains the plan, upstream measurements and a tracking scaffold: a Cargo `xtask`, a file ledger, a function inventory, ADRs and generated status reports. Mapped functions and implementation labels are reported separately from verified parity.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `PLAN.md` | The plan. This is the canonical document; edit it here. |
-| `docs/corsa-in-rust.html` | The same plan as a designed, self-contained page. Published as a private page at https://claude.ai/code/artifact/6c72abf7-0d30-43fe-a7a8-6457828dcce8. Regenerate or edit by hand when `PLAN.md` changes. |
+| [PLAN.md](PLAN.md) | The canonical plan. Update the HTML mirror when it changes. |
+| [Plan page](docs/corsa-in-rust.html) | The designed HTML mirror. An earlier version was published as a private page at https://claude.ai/code/artifact/6c72abf7-0d30-43fe-a7a8-6457828dcce8; that external copy is not automatically synchronized. |
+| [Tracking](docs/TRACKING.md) | Ledger, function-mapping, evidence, experiment and sprint-check contracts. |
+| [Current status](STATUS.md), [dashboard](docs/status.html) | Generated reports; evidence validity and parity are separate from implementation and mapping counts. |
+| [Unmapped functions](status/unmapped-functions.json) | Complete function worklist linked from the compact JSON status summary. |
+| [Architecture decisions](docs/adr/README.md) | Accepted and proposed ADRs, including ownership contracts still awaiting review. |
+| `PORTS.toml`, `data/go-functions.tsv` | Upstream file ledger and function inventory used for traceability. |
+| `status/runs.toml`, `status/experiments.toml`, `sprints/` | Reviewed run specifications, experiment gates and required sprint checks. |
+| `xtask/` | Local commands for evidence capture, status generation and sprint validation. |
 | `data/import-graph.txt` | Internal import edges of the Go module (`importer imported`), produced by `go list`. 766 edges. |
-| `data/topological-order.txt` | The packages in dependency order, leaves first, produced by `tsort` over the graph. The crate map in the plan follows this order. |
+| `data/topological-order.txt` | The packages in dependency order, leaves first, produced by `tsort` over the graph. The plan's crate map groups related packages; its dependency slices also use the actual import edges. |
 | `data/MEASURED.txt` | Which TypeScript commit and Go version the data was measured with. |
 | `scripts/import-graph.sh` | Regenerates `data/` from a TypeScript checkout: `scripts/import-graph.sh ~/git/TypeScript`. |
 
@@ -22,7 +29,16 @@ Nothing here is compiler code yet. The repository holds the plan and the measure
 3. Section 9 for prototype dependencies, full parity gates and the spike experiments.
 4. Section 5 for the native, WebAssembly and Rust embedding cut-over criteria.
 5. Section 13 for remaining implementation choices and settled contracts.
+6. [Tracking](docs/TRACKING.md), [status](STATUS.md) and the [ADR index](docs/adr/README.md) for recorded work, current evidence and unresolved decisions.
+
+## Tracking work
+
+`cargo xtask run <run-id>` executes a reviewed specification from `status/runs.toml` and captures typed metrics with evidence bound to the upstream pin, command, that run's selected sources and declared corpus/configuration inputs. `cargo xtask status` validates that evidence and regenerates the reports; `cargo xtask check S01` enforces sprint exit criteria and required item checks. Source globs default to compiler crates, Cargo manifests/lockfile, `.cargo` configuration, Rust toolchain selectors, `xtask` and scripts. Documentation and policy edits do not invalidate measurements unless that producer explicitly consumes those files; declared inputs and case manifests are always hashed.
+
+The ledger's `status`, `rust` and `verify` fields are editable without regenerating upstream provenance. Threshold, sprint-check and ledger-progress changes reevaluate existing metrics; selected source or run-input changes invalidate affected evidence. Metric-producer contracts define the workload and assertions behind each measurement, so neither function markers nor a successful command alone establishes parity. See [Tracking](docs/TRACKING.md) for version-2 provenance, source selection and the run schema.
 
 ## Status
 
-Draft 3.2, 5 September 2026, measured against microsoft/TypeScript commit `1f70213d49`. This repository is the Rust workspace; upstream is to be pinned as a git submodule at `upstream/`. Native targets are macOS arm64/x64 and Linux x64/arm64 (glibc). The plan specifies file/lazy/bundle ownership, checker-local merges, generation-aware invalidation and raw-byte handling. The spike tests bounded memory, WebAssembly and embedding prototypes; full compiler WebAssembly and Rust-consumer acceptance are required before cut-over. The owner approves baseline divergences, and work is sequenced by dependency slices and parity gates rather than a calendar.
+Draft 3.2, 5 September 2026, measured against microsoft/TypeScript commit `1f70213d49`. The canonical `upstream/` submodule is registered, initialized and clean at `1f70213d4922b434345f639b441681e470c7cfc1`; the actual Go oracle build and `--version` smoke test have passing execution evidence. S01 remains open for the three unreviewed design notes: ADRs 0006, 0007 and 0013 remain Proposed. CI integration is planned; no workflow is installed yet. Bootstrap success does not establish Rust compiler parity or complete function coverage.
+
+Native targets are macOS arm64/x64 and Linux x64/arm64 (glibc). The plan specifies file/lazy/bundle ownership, checker-local merges, generation-aware invalidation and raw-byte handling. Repeated identity checks may be elided only within a proven ownership scope, with release-mode rejection required at every unproven boundary. The spike tests bounded memory, WebAssembly and embedding prototypes; full compiler WebAssembly and Rust-consumer acceptance are required before cut-over. The owner approves baseline divergences, and work is sequenced by dependency slices and parity gates rather than a calendar.

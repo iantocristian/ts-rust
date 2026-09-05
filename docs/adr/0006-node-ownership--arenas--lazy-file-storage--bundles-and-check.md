@@ -13,7 +13,13 @@ A file owner retains the immutable parsed and bound core plus synchronized appen
 
 ## Consequences
 
-Ids do not retain storage; snapshots, bundles, caches and returned handles retain owners explicitly. Draft 1's single immutable arena per file and its newer-to-older reference rule are withdrawn. Generation and provenance checks are boundary checks (registries, snapshots, public handles); internal accesses within an owner on ids it issued should not pay a per-access generation check in release builds, which the design note must state explicitly. This ADR becomes Accepted when the owner has reviewed the design note with the Go evidence attached.
+Ids do not retain storage; snapshots, bundles, caches and returned handles retain owners explicitly. Draft 1's single immutable arena per file and its newer-to-older reference rule are withdrawn.
+
+Checked resolution is the default in release builds. Repeated owner/generation checks may be elided only inside a validated ownership scope whose non-forgeable handles establish provenance and whose lease prevents storage replacement or slot reuse for the scope's duration. Internal cache entries, cross-arena links, independently retained ID lists and callback/reentrant paths must preserve that proof or validate when entering the scope; being internal is not itself proof. Fresh invariant owner brands or a private validated local-handle API can establish the scope. Ordinary ID newtypes, shared lifetimes and `Send`/`Sync` cannot establish checker identity by themselves. Bounds safety remains a separate requirement, and elided checks retain debug assertions for invariant diagnosis.
+
+A lease retaining storage does not establish that its generation is still active. The design note specifies how retirement stops new operations, how existing leases observe it, and how stale results are prevented from being published. Returning from a callback that can retire or replace the owner must preserve the active-scope proof or revalidate before resuming; ordinary recursion within an uninterrupted valid scope need not repeat checks.
+
+E3 must reject wrong-owner, stale, recycled and retired-generation handles in release mode, including cache imports, cross-arena links and callback reentry, alongside debug and sanitizer checks. This ADR remains Proposed until the owner has reviewed the design note and its Go evidence; these are required checks, not completed verification.
 
 ## Evidence
 
@@ -22,3 +28,5 @@ Ids do not retain storage; snapshots, bundles, caches and returned handles retai
 ## Amendments
 
 Draft 2 introduced four arena kinds; draft 3.2 added lazy file storage, bundle ownership and generation-checked identities after the third review.
+
+The tracking-scaffold review qualified release check elision with a validated ownership-scope proof and separated retained storage from active-generation validity.

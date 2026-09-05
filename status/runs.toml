@@ -1,0 +1,18 @@
+# Commands emit one JSON object to stdout: {"metrics": { ... }}.
+# The runner binds successful executions to command, inputs, target, configuration
+# and repository provenance. Failed or stale runs cannot pass gates.
+# Experiment runs e1-e8 are absent until their actual harnesses exist.
+
+[workspace]
+command = ["python3", "scripts/tracking-bootstrap.py", "workspace"]
+inputs = ["Cargo.toml", "Cargo.lock"]
+sources = ["crates/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/tracking-bootstrap.py"]
+target = "host"
+config = "debug"
+
+[oracle]
+command = ["python3", "scripts/tracking-bootstrap.py", "oracle"]
+inputs = ["data/upstream.json", ".gitmodules"]
+sources = ["upstream", "scripts/tracking-bootstrap.py", "xtask/**"]
+target = "host"
+config = "release"

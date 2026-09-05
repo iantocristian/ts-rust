@@ -1,67 +1,302 @@
-# Spike experiments from the plan, section 9. Fill `measured` and `measured_at` when a
-# measurement exists; `pass` is computed by `cargo xtask status`. Extrapolations go in `note`.
-# op: how `measured` is compared to `threshold`.
+# Phase 0 gates from PLAN.md, section 9. Every criterion is required.
+# Metrics come from successful, current evidence runs, never handwritten results.
+# No e1-e8 runner is registered until its actual harness exists; missing evidence
+# remains unknown and cannot pass. Keep workload limits in `nature`.
 
 [E1]
 title = "Parser parity"
-measures = "Encoder-identical parses of 12,721 cases and 108 lib files"
+nature = "Measured across the frozen 12,721-case corpus and 108 lib files"
+
+[[E1.criteria]]
+id = "encoder_parity"
+metric = "run.e1.parity"
 op = ">="
 threshold = 0.999
-unit = "ratio"
-nature = "measured"
+unit = "encoder-identical cases / frozen eligible cases"
+
+[[E1.criteria]]
+id = "frozen_denominator"
+metric = "run.e1.frozen_denominator"
+op = "=="
+threshold = true
+unit = "manifest and options match the committed denominator; no skipped cases"
 
 [E2]
 title = "Checker slice"
-measures = ".types and .errors.txt on the frozen conformance manifest"
-op = ">="
-threshold = 1.0
-unit = "ratio"
-nature = "measured"
+nature = "Measured on the frozen subset; throughput, allocations and retained memory are reported separately from parser results"
+
+[[E2.criteria]]
+id = "types_parity"
+metric = "run.e2.types_parity"
+op = "=="
+threshold = 1
+unit = "matching .types baselines / frozen subset"
+
+[[E2.criteria]]
+id = "errors_parity"
+metric = "run.e2.errors_parity"
+op = "=="
+threshold = 1
+unit = "matching .errors.txt baselines / frozen subset"
+
+[[E2.criteria]]
+id = "comparators"
+metric = "run.e2.comparators"
+op = "=="
+threshold = true
+unit = "comparator consistency and residual ID-sensitive fixtures pass"
 
 [E3]
 title = "Ownership"
-measures = "Shared bound file across two programs; disposal; edit with a retained snapshot; builder-arena release with a live cache entry; lazy JSDoc and content-mapper bundles; panic through one of two snapshots sharing a checker pool"
+nature = "Measured in the ownership harness; repeated through real servers in Phases 5/6. RSS is reported, not required to fall after each drop"
+
+[[E3.criteria]]
+id = "shared_bound_file"
+metric = "run.e3.shared_bound_file"
 op = "=="
-threshold = 1.0
-unit = "pass (1) or fail (0) under Miri and AddressSanitizer, memory back to baseline"
-nature = "measured"
+threshold = true
+unit = "two programs share a bound file; surviving queries pass after either program drops"
+
+[[E3.criteria]]
+id = "retained_snapshot_edit"
+metric = "run.e3.retained_snapshot_edit"
+op = "=="
+threshold = true
+unit = "old and new snapshots answer correctly across an edit"
+
+[[E3.criteria]]
+id = "independent_checker_merges"
+metric = "run.e3.independent_checker_merges"
+op = "=="
+threshold = true
+unit = "two checkers independently merge declarations over shared files"
+
+[[E3.criteria]]
+id = "concurrent_lazy_storage"
+metric = "run.e3.concurrent_lazy_storage"
+op = "=="
+threshold = true
+unit = "concurrent first-use JSDoc and token requests preserve file ownership"
+
+[[E3.criteria]]
+id = "mapper_bundle_disposal"
+metric = "run.e3.mapper_bundle_disposal"
+op = "=="
+threshold = true
+unit = "multi-output content-mapper bundles survive varied owner-release orders"
+
+[[E3.criteria]]
+id = "builder_cache_retention"
+metric = "run.e3.builder_cache_retention"
+op = "=="
+threshold = true
+unit = "live cache entries and returned handles retain builder arenas until released"
+
+[[E3.criteria]]
+id = "wrong_owner_rejected"
+metric = "run.e3.wrong_owner_rejected"
+op = "=="
+threshold = true
+unit = "every wrong-file and wrong-checker handle is explicitly rejected"
+
+[[E3.criteria]]
+id = "stale_and_recycled_ids_rejected"
+metric = "run.e3.stale_and_recycled_ids_rejected"
+op = "=="
+threshold = true
+unit = "every stale and recycled owner/generation identity is rejected"
+
+[[E3.criteria]]
+id = "shared_pool_panic_retirement"
+metric = "run.e3.shared_pool_panic_retirement"
+op = "=="
+threshold = true
+unit = "panic through one snapshot retires the shared pool generation in every dependent snapshot, project, lease and registry"
+
+[[E3.criteria]]
+id = "owners_return_to_baseline"
+metric = "run.e3.live_owner_delta"
+op = "=="
+threshold = 0
+unit = "maximum absolute live-owner count deviation from the pre-scenario baseline, across all final owner/lease drops"
+
+[[E3.criteria]]
+id = "allocations_return_to_baseline"
+metric = "run.e3.live_allocation_delta"
+op = "=="
+threshold = 0
+unit = "maximum absolute live-allocation count deviation from the pre-scenario baseline, across all final owner/lease drops"
+
+[[E3.criteria]]
+id = "miri"
+metric = "run.e3.miri"
+op = "=="
+threshold = true
+unit = "applicable ownership scenarios pass under Miri"
+
+[[E3.criteria]]
+id = "address_sanitizer"
+metric = "run.e3.address_sanitizer"
+op = "=="
+threshold = true
+unit = "ownership scenarios pass under AddressSanitizer"
+
+[[E3.criteria]]
+id = "release_boundaries"
+metric = "run.e3.release_boundaries"
+op = "=="
+threshold = true
+unit = "release builds reject stale/wrong-owner cache, cross-arena and reentrant handles and suppress results from retired generations; debug assertions also pass"
 
 [E4]
 title = "Strings"
-measures = "Every string literal in the corpus including lone surrogates and malformed input bytes, through scanner, literal types and encoder; positions in UTF-8 and UTF-16"
+nature = "Measured over corpus literals plus lone-surrogate, malformed-byte and BOM fixtures, including invalid bytes inside and outside strings and comments"
+
+[[E4.criteria]]
+id = "source_decoding"
+metric = "run.e4.source_decoding"
 op = "=="
-threshold = 1.0
-unit = "byte-identical to the Go encoder (1) or not (0)"
-nature = "measured"
+threshold = true
+unit = "source bytes, BOM removal and UTF-16 decoding match Go"
+
+[[E4.criteria]]
+id = "diagnostics"
+metric = "run.e4.diagnostics"
+op = "=="
+threshold = true
+unit = "scanner and literal diagnostics match Go on successful and malformed input"
+
+[[E4.criteria]]
+id = "token_literal_bytes"
+metric = "run.e4.token_literal_bytes"
+op = "=="
+threshold = true
+unit = "token bytes, literal values and literal types match Go without lossy repair"
+
+[[E4.criteria]]
+id = "utf8_positions"
+metric = "run.e4.utf8_positions"
+op = "=="
+threshold = true
+unit = "byte offsets and UTF-8 wire positions match Go"
+
+[[E4.criteria]]
+id = "utf16_positions"
+metric = "run.e4.utf16_positions"
+op = "=="
+threshold = true
+unit = "UTF-16 wire positions match Go"
+
+[[E4.criteria]]
+id = "encoder_success_error"
+metric = "run.e4.encoder_success_error"
+op = "=="
+threshold = true
+unit = "encoder success/error outcomes match Go, including malformed bytes"
+
+[[E4.criteria]]
+id = "encoder_output_bytes"
+metric = "run.e4.encoder_output_bytes"
+op = "=="
+threshold = true
+unit = "byte-identical encoder output wherever Go encodes successfully"
 
 [E5]
 title = "Memory"
-measures = "Peak RSS for parse and bind of the VS Code repository, Rust over Go"
+nature = "Measured for parse/bind and the checker subset's per-type footprint; full checking remains extrapolated"
+
+[[E5.criteria]]
+id = "peak_rss"
+metric = "run.e5.peak_rss_ratio"
 op = "<="
-threshold = 0.70
-unit = "ratio of Go"
-nature = "measured for parse and bind; extrapolated for checking"
+threshold = 0.7
+unit = "Rust / Go peak RSS for parse and bind of the pinned VS Code workload"
+
+[[E5.criteria]]
+id = "allocated_bytes"
+metric = "run.e5.allocated_bytes_ratio"
+op = "<="
+threshold = 0.7
+unit = "Rust / Go bytes allocated for the same parse/bind workload"
+
+[[E5.criteria]]
+id = "type_footprint"
+metric = "run.e5.type_footprint_ratio"
+op = "<="
+threshold = 0.8
+unit = "Rust / Go per-type footprint on the frozen checker subset"
 
 [E6]
 title = "CPU"
-measures = "Parse and bind wall time on the VS Code repository at 1 and 8 threads, Rust over Go (worst of the two)"
+nature = "Measured for parse and bind of the pinned VS Code workload; full checking remains extrapolated"
+
+[[E6.criteria]]
+id = "one_thread"
+metric = "run.e6.one_thread_wall_time_ratio"
 op = "<="
-threshold = 1.0
-unit = "ratio of Go"
-nature = "measured for parse and bind; extrapolated for checking"
+threshold = 1
+unit = "Rust / Go wall time at one thread"
+
+[[E6.criteria]]
+id = "eight_threads"
+metric = "run.e6.eight_threads_wall_time_ratio"
+op = "<="
+threshold = 1
+unit = "Rust / Go wall time at eight threads"
 
 [E7]
 title = "WebAssembly"
-measures = "Parser benchmark on wasm32 against the Go GOOS=js build: artifact size as a ratio (recorded here, must be <= 0.25) and parse throughput as a multiple (must be >= 2, recorded in note); plus the E2 checker slice built and run under an in-memory host with no native process or filesystem, matching the oracle (recorded in note)"
+nature = "Parser performance and checker-slice feasibility measured separately; full checking/emit parity and speed are not established"
+
+[[E7.criteria]]
+id = "parser_artifact_size"
+metric = "run.e7.parser_artifact_size_ratio"
 op = "<="
 threshold = 0.25
-unit = "ratio of Go wasm size"
-nature = "measured for parsing only"
+unit = "Rust wasm32 / Go GOOS=js parser artifact bytes"
+
+[[E7.criteria]]
+id = "parse_throughput"
+metric = "run.e7.parse_throughput_ratio"
+op = ">="
+threshold = 2
+unit = "Rust / Go parse throughput"
+
+[[E7.criteria]]
+id = "checker_parity"
+metric = "run.e7.checker_parity"
+op = "=="
+threshold = 1
+unit = "frozen E2 cases matching both diagnostics and types / frozen E2 cases"
+
+[[E7.criteria]]
+id = "portable_host"
+metric = "run.e7.portable_host"
+op = "=="
+threshold = true
+unit = "checker subset runs using an in-memory host without native process/filesystem dependencies"
 
 [E8]
 title = "Embedding"
-measures = "A separate Rust consumer supplies the host and runs the E2 checker slice with repeated create, query and drop, passing the applicable E3 lifetime tests (recorded in note); a Node adapter benchmarks parse-and-encode in process, latency as a ratio of the --api socket path for a 10 KB file (recorded here)"
+nature = "Separate Rust consumer feasibility and Node parse latency measured separately; full crate surface and workload budgets remain Phase 7 gates"
+
+[[E8.criteria]]
+id = "node_parse_latency"
+metric = "run.e8.node_parse_latency_ratio"
 op = "<="
-threshold = 0.10
-unit = "ratio of socket path"
-nature = "measured for parsing only"
+threshold = 0.1
+unit = "Node in-process / --api socket parse-and-encode latency for a 10 KB file"
+
+[[E8.criteria]]
+id = "rust_consumer_parity"
+metric = "run.e8.rust_consumer_parity"
+op = "=="
+threshold = 1
+unit = "frozen E2 cases matching diagnostics and types through the separate Rust consumer / frozen E2 cases"
+
+[[E8.criteria]]
+id = "lifetime_checks"
+metric = "run.e8.lifetime_checks"
+op = "=="
+threshold = true
+unit = "consumer-supplied host passes applicable E3 checks through repeated create/query/drop operations"

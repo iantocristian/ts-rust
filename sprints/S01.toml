@@ -1,44 +1,60 @@
-# Sprint skeleton. The Phase 0 implementation plan will replace this file with the real
-# sprint set; the schema is documented in docs/TRACKING.md.
+# Required items and exit checks must all pass against current evidence.
+# Contracts remain open until their actual design notes are reviewed.
 id = "S01"
 title = "Contracts, workspace, oracle"
-goal = "The three contracts are written and reviewed, the workspace builds, the Go oracle is built from the pin, and the ledger and inventory are generated."
+goal = "The three contracts are written and reviewed, the workspace builds, the registered upstream submodule matches the provenance pin, and that oracle builds and answers --version."
 exit = [
   "adr.0006.status == Accepted",
   "adr.0007.status == Accepted",
   "adr.0013.status == Accepted",
-  "ledger.files_total > 0",
-  "functions.total > 0",
+  "provenance.valid == 1",
+  "upstream.ready == 1",
+  "run.workspace.build == true",
+  "run.oracle.build == true",
+  "run.oracle.smoke == true",
 ]
 
 [[item]]
 id = "S01-1"
-title = "Node ownership contract as ADR 0006, reviewed by the owner"
+title = "Node ownership contract as ADR 0006, with its reviewed ownership design note"
 kind = "adr"
 ref = "0006"
+required = true
 done_when = ["adr.0006.status == Accepted"]
 
 [[item]]
 id = "S01-2"
-title = "Symbol ownership contract as ADR 0007, reviewed by the owner"
+title = "Symbol ownership contract as ADR 0007, with its reviewed ownership design note"
 kind = "adr"
 ref = "0007"
+required = true
 done_when = ["adr.0007.status == Accepted"]
 
 [[item]]
 id = "S01-3"
-title = "String representations contract as ADR 0013, reviewed by the owner"
+title = "Source/string/wire contract as ADR 0013, with its reviewed representation design note"
 kind = "adr"
 ref = "0013"
+required = true
 done_when = ["adr.0013.status == Accepted"]
 
 [[item]]
 id = "S01-4"
-title = "upstream/ submodule pinned at 1f70213d49; Go oracle built from it"
+title = "Registered upstream/ submodule matches the pin; its Go oracle builds and passes --version"
 kind = "task"
+required = true
+done_when = ["upstream.ready == 1", "run.oracle.build == true", "run.oracle.smoke == true"]
 
 [[item]]
 id = "S01-5"
-title = "Ledger and function inventory generated from the pin"
+title = "Ledger and function inventory have validated provenance from the same full upstream commit"
 kind = "task"
-done_when = ["ledger.files_total > 0", "functions.total > 0"]
+required = true
+done_when = ["provenance.valid == 1", "ledger.files_total > 0", "functions.total > 0"]
+
+[[item]]
+id = "S01-6"
+title = "The locked Rust workspace builds"
+kind = "task"
+required = true
+done_when = ["run.workspace.build == true"]

@@ -27,8 +27,10 @@
   .chart { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:12px; }
 </style>
 <div class="page">
-  <div class="eyebrow">Corsa in Rust &middot; generated 2026-09-05 &middot; upstream pin 1f70213d49</div>
+  <div class="eyebrow">Corsa in Rust &middot; generated 2026-09-05 &middot; upstream pin 1f70213d4922b434345f639b441681e470c7cfc1</div>
   <h1>Status</h1>
+  <p>Function mappings measure traceability. Baseline parity and required gates establish behavior. <a href="../STATUS.md">Detailed report</a> · <a href="TRACKING.md">Tracking contract</a> · <a href="../status/unmapped-functions.json">Unmapped-function worklist</a></p>
+
   <div class="tiles">
     <div class="tile"><b>0.0%</b><span>lines verified, of 291999</span></div>
     <div class="tile"><b>0 / 457</b><span>files verified</span></div>
@@ -37,14 +39,14 @@
     <div class="tile"><b>15 / 18</b><span>decisions accepted</span></div>
   </div>
   <h2>Over time</h2>
-  <div class="chart"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Verified lines and ported functions over time">
+  <div class="chart"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Verified lines and mapped functions over time">
   <line x1="40" y1="10" x2="40" y2="190" stroke="var(--line)"/><line x1="40" y1="190" x2="700" y2="190" stroke="var(--line)"/>
   <text x="4" y="14" class="ax">100%</text><text x="4" y="100" class="ax">50%</text><text x="12" y="190" class="ax">0%</text>
   <text x="40" y="208" class="ax">2026-09-05</text><text x="700" y="208" class="ax" text-anchor="end">2026-09-05</text>
-  <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="40.0,190.0 "/>
-  <polyline fill="none" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 3" points="40.0,190.0 "/>
+  <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="40.0,190.0 260.0,190.0 480.0,190.0 700.0,190.0 "/>
+  <polyline fill="none" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 3" points="40.0,190.0 260.0,190.0 480.0,190.0 700.0,190.0 "/>
 </svg>
-<div class="legend"><span class="acc">verified lines</span><span class="rust">ported functions</span></div></div>
+<div class="legend"><span class="acc">verified lines</span><span class="rust">mapped functions</span></div></div>
   <h2>By phase</h2>
   <table><thead><tr><th>Phase</th><th class="num">Files</th><th class="num">Lines</th><th>Verified</th><th class="num"></th></tr></thead><tbody>
 <tr><td>Phase 0</td><td class="num">36</td><td class="num">37883</td><td><div class="bar"><div style="width:0.0%"></div></div></td><td class="num">0.0%</td></tr>
@@ -57,17 +59,20 @@
 </tbody></table>
   <h2>Experiments</h2>
   <table><thead><tr><th></th><th>Title</th><th>Threshold</th><th>Measured</th><th>Result</th></tr></thead><tbody>
-<tr><td>E1</td><td>Parser parity</td><td>>= 0.999 ratio</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E2</td><td>Checker slice</td><td>>= 1 ratio</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E3</td><td>Ownership</td><td>== 1 pass (1) or fail (0) under Miri and AddressSanitizer, memory back to baseline</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E4</td><td>Strings</td><td>== 1 byte-identical to the Go encoder (1) or not (0)</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E5</td><td>Memory</td><td><= 0.7 ratio of Go</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E6</td><td>CPU</td><td><= 1 ratio of Go</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E7</td><td>WebAssembly</td><td><= 0.25 ratio of Go wasm size</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E8</td><td>Embedding</td><td><= 0.1 ratio of socket path</td><td>not yet</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E1</td><td>Parser parity</td><td>run.e1.parity &gt;= 0.999<br>run.e1.frozen_denominator == true</td><td>encoder_parity: missing<br>frozen_denominator: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E2</td><td>Checker slice</td><td>run.e2.types_parity == 1<br>run.e2.errors_parity == 1<br>run.e2.comparators == true</td><td>types_parity: missing<br>errors_parity: missing<br>comparators: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E3</td><td>Ownership</td><td>run.e3.shared_bound_file == true<br>run.e3.retained_snapshot_edit == true<br>run.e3.independent_checker_merges == true<br>run.e3.concurrent_lazy_storage == true<br>run.e3.mapper_bundle_disposal == true<br>run.e3.builder_cache_retention == true<br>run.e3.wrong_owner_rejected == true<br>run.e3.stale_and_recycled_ids_rejected == true<br>run.e3.shared_pool_panic_retirement == true<br>run.e3.live_owner_delta == 0<br>run.e3.live_allocation_delta == 0<br>run.e3.miri == true<br>run.e3.address_sanitizer == true<br>run.e3.release_boundaries == true</td><td>shared_bound_file: missing<br>retained_snapshot_edit: missing<br>independent_checker_merges: missing<br>concurrent_lazy_storage: missing<br>mapper_bundle_disposal: missing<br>builder_cache_retention: missing<br>wrong_owner_rejected: missing<br>stale_and_recycled_ids_rejected: missing<br>shared_pool_panic_retirement: missing<br>owners_return_to_baseline: missing<br>allocations_return_to_baseline: missing<br>miri: missing<br>address_sanitizer: missing<br>release_boundaries: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E4</td><td>Strings</td><td>run.e4.source_decoding == true<br>run.e4.diagnostics == true<br>run.e4.token_literal_bytes == true<br>run.e4.utf8_positions == true<br>run.e4.utf16_positions == true<br>run.e4.encoder_success_error == true<br>run.e4.encoder_output_bytes == true</td><td>source_decoding: missing<br>diagnostics: missing<br>token_literal_bytes: missing<br>utf8_positions: missing<br>utf16_positions: missing<br>encoder_success_error: missing<br>encoder_output_bytes: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E5</td><td>Memory</td><td>run.e5.peak_rss_ratio &lt;= 0.7<br>run.e5.allocated_bytes_ratio &lt;= 0.7<br>run.e5.type_footprint_ratio &lt;= 0.8</td><td>peak_rss: missing<br>allocated_bytes: missing<br>type_footprint: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E6</td><td>CPU</td><td>run.e6.one_thread_wall_time_ratio &lt;= 1<br>run.e6.eight_threads_wall_time_ratio &lt;= 1</td><td>one_thread: missing<br>eight_threads: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E7</td><td>WebAssembly</td><td>run.e7.parser_artifact_size_ratio &lt;= 0.25<br>run.e7.parse_throughput_ratio &gt;= 2<br>run.e7.checker_parity == 1<br>run.e7.portable_host == true</td><td>parser_artifact_size: missing<br>parse_throughput: missing<br>checker_parity: missing<br>portable_host: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E8</td><td>Embedding</td><td>run.e8.node_parse_latency_ratio &lt;= 0.1<br>run.e8.rust_consumer_parity == 1<br>run.e8.lifetime_checks == true</td><td>node_parse_latency: missing<br>rust_consumer_parity: missing<br>lifetime_checks: missing</td><td><span class="chip warn">pending</span></td></tr>
 </tbody></table>
+  <h2>Evidence</h2>
+  <table><thead><tr><th>Run</th><th>State</th><th>Artifact</th></tr></thead><tbody><tr><td>oracle</td><td>current</td><td><a href="../status/evidence/197de54d900bc9e1fbd570c3ac265a0df26fa3d899d67b71d319c948b7055c3a.json">result</a></td></tr>
+<tr><td>workspace</td><td>current</td><td><a href="../status/evidence/e6601e1ca92db97eb357d60682d02a57f5917bf36e79d54ef6294277db13e6ae.json">result</a></td></tr></tbody></table>
   <h2>Sprints</h2>
   <table><thead><tr><th>Sprint</th><th>Title</th><th class="num">Exit checks</th><th>State</th></tr></thead><tbody>
-<tr><td>S01</td><td>Contracts, workspace, oracle</td><td class="num">2 / 5</td><td><span class="chip warn">open</span></td></tr>
+<tr><td>S01</td><td>Contracts, workspace, oracle</td><td class="num">5 / 8</td><td><span class="chip warn">open</span></td></tr>
 </tbody></table>
 </div>

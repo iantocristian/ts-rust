@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
-"""Generate PORTS.toml, the port ledger, from the pinned upstream checkout.
+"""Generate the ledger, function inventory and provenance manifest together.
 
 Usage: scripts/ledger-init.py [path-to-TypeScript-checkout] [--pin COMMIT]
 
-One entry per non-test Go file under tsc/internal and tsc/cmd. Existing statuses
-and rust paths in a current PORTS.toml are preserved when the file is regenerated,
-so this can be re-run after a pin bump without losing progress.
+Defaults to this repository's upstream/ checkout. Pass ../TypeScript explicitly
+when bootstrapping before that checkout exists. The checkout must be clean and
+--pin, when provided, must resolve to its HEAD. Inputs are read from Git blobs.
 """
-import os, re, subprocess, sys
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+import tomllib
 
-UPSTREAM = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else os.path.expanduser("~/git/TypeScript")
-PIN = None
-if "--pin" in sys.argv:
-    PIN = sys.argv[sys.argv.index("--pin") + 1]
-if PIN is None:
-    PIN = subprocess.check_output(["git", "-C", UPSTREAM, "rev-parse", "--short", "HEAD"], text=True).strip()
-ROOT = os.path.join(UPSTREAM, "tsc")
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "PORTS.toml")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+GENERATED_FILE_FIELDS = ("go", "package", "crate", "phase", "kind", "pin", "source_hash", "loc")
 
 # Longest-prefix map from Go package (relative to tsc/) to (Rust crate, parity phase).
 CRATES = {
@@ -169,71 +172,273 @@ def in_scope(path, head):
     return False
 
 
-def load_existing():
-    keep = {}
-    if not os.path.exists(OUT):
-        return keep
-    cur = None
-    for line in open(OUT, encoding="utf-8"):
-        line = line.strip()
-        if line == "[[file]]":
-            cur = {}
-        elif cur is not None and "=" in line:
-            k, v = line.split("=", 1)
-            cur[k.strip()] = v.strip().strip('"')
-            if k.strip() == "go":
-                keep[cur["go"]] = cur
-    return keep
+def git(upstream, *args, input=None):
+    result = subprocess.run(["git", "-C", str(upstream), *args], input=input, capture_output=True)
+    if result.returncode:
+        raise ValueError(result.stderr.decode(errors="replace").strip())
+    return result.stdout
 
 
-existing = load_existing()
-entries = []
-for dirpath, dirnames, filenames in os.walk(ROOT):
-    rel_dir = os.path.relpath(dirpath, ROOT).replace(os.sep, "/")
-    dirnames[:] = [d for d in dirnames if d != "testdata" and not d.startswith("_") and not d.startswith(".")
-                   and not (rel_dir == "internal/fourslash" and d == "tests")]
-    if not (rel_dir.startswith("internal") or rel_dir.startswith("cmd")):
-        continue
-    for fn in sorted(filenames):
-        if not fn.endswith(".go") or fn.endswith("_test.go"):
+def resolve_pin(upstream, pin):
+    return git(upstream, "rev-parse", "--verify", "--end-of-options", pin + "^{commit}").decode().strip()
+
+
+def verify_checkout(upstream, requested_pin=None):
+    if not (upstream / "tsc").is_dir():
+        raise ValueError(f"missing upstream checkout at {upstream}; pass ../TypeScript explicitly for bootstrap")
+    top = Path(git(upstream, "rev-parse", "--show-toplevel").decode().strip()).resolve()
+    if top != upstream.resolve():
+        raise ValueError(f"upstream must be the checkout root, not {upstream}")
+    head = resolve_pin(upstream, "HEAD")
+    if requested_pin and resolve_pin(upstream, requested_pin) != head:
+        raise ValueError(f"requested pin {requested_pin} does not match upstream HEAD {head}")
+    if git(upstream, "status", "--porcelain=v1", "--untracked-files=all"):
+        raise ValueError("upstream checkout is dirty; commit, remove or restore its changes before generating")
+    return head
+
+
+def source_paths(upstream, pin):
+    paths = git(upstream, "ls-tree", "-rz", "--name-only", pin, "--", "tsc/internal", "tsc/cmd")
+    result = []
+    for raw in paths.split(b"\0"):
+        if not raw:
             continue
-        path = os.path.join(dirpath, fn)
-        rel = "tsc/" + rel_dir + "/" + fn
-        with open(path, encoding="utf-8", errors="replace") as f:
-            text = f.read()
+        path = raw.decode("utf-8")
+        if any(c in path for c in "\r\n\t"):
+            raise ValueError(f"unsupported control character in source path: {path!r}")
+        parts = path.split("/")
+        if (any(p == "testdata" or p.startswith(("_", ".")) for p in parts[:-1])
+                or path.startswith("tsc/internal/fourslash/tests/")
+                or not path.endswith(".go") or path.endswith("_test.go")):
+            continue
+        result.append(path)
+    return sorted(result)
+
+
+def read_blobs(upstream, pin, paths):
+    requests = "".join(f"{pin}:{p}\n" for p in paths).encode()
+    data = git(upstream, "cat-file", "--batch", input=requests)
+    blobs = {}
+    offset = 0
+    for path in paths:
+        end = data.index(b"\n", offset)
+        header = data[offset:end].split()
+        if len(header) != 3 or header[1] != b"blob":
+            raise ValueError(f"cannot read pinned source {pin}:{path}")
+        size = int(header[2])
+        offset = end + 1
+        blobs[path] = data[offset:offset + size]
+        offset += size + 1
+    return blobs
+
+
+def string_list(value, field, path, migrate_scalar=False):
+    if migrate_scalar and isinstance(value, str):
+        value = [value] if value else []
+    if not isinstance(value, list) or any(not isinstance(x, str) for x in value):
+        raise ValueError(f"{path}: {field} must be a list of strings")
+    return value
+
+
+def ledger_generated_projection(ledger):
+    """Validate and select the immutable provenance fields of a parsed ledger.
+
+    Editable status/rust/verify and TOML formatting are deliberately excluded.
+    Keep this projection and its canonical JSON encoding aligned with xtask.
+    """
+    if not isinstance(ledger, dict):
+        raise ValueError("ledger must be a table")
+    pin = ledger.get("pin")
+    if not isinstance(pin, str) or re.fullmatch(r"[0-9a-f]{40}", pin) is None:
+        raise ValueError("ledger pin must be a full lowercase commit SHA")
+    files = ledger.get("file")
+    if not isinstance(files, list):
+        raise ValueError("ledger file must be an array of tables")
+    projected = []
+    seen = set()
+    for index, entry in enumerate(files):
+        if not isinstance(entry, dict):
+            raise ValueError(f"ledger file[{index}] must be a table")
+        result = {}
+        for field in GENERATED_FILE_FIELDS:
+            if field not in entry:
+                raise ValueError(f"ledger file[{index}] is missing generated field {field}")
+            value = entry[field]
+            if field in {"phase", "loc"}:
+                if type(value) is not int or not 0 <= value <= 2**63 - 1:
+                    raise ValueError(f"ledger file[{index}] {field} must be a nonnegative 64-bit integer")
+            elif not isinstance(value, str) or not value:
+                raise ValueError(f"ledger file[{index}] {field} must be a nonempty string")
+            elif field == "pin" and re.fullmatch(r"[0-9a-f]{40}", value) is None:
+                raise ValueError(f"ledger file[{index}] pin must be a full lowercase commit SHA")
+            elif field == "source_hash" and re.fullmatch(r"[0-9a-f]{64}", value) is None:
+                raise ValueError(f"ledger file[{index}] source_hash must be a lowercase SHA-256 digest")
+            elif field == "kind" and value not in {"source", "generated", "harness", "out-of-scope"}:
+                raise ValueError(f"ledger file[{index}] has invalid kind {value!r}")
+            result[field] = value
+        if result["go"] in seen:
+            raise ValueError(f"duplicate ledger source path {result['go']}")
+        seen.add(result["go"])
+        projected.append(result)
+    return {"pin": pin, "file": sorted(projected, key=lambda entry: entry["go"])}
+
+
+def ledger_generated_sha256(ledger):
+    projection = ledger_generated_projection(ledger)
+    canonical = json.dumps(projection, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def build_ledger(upstream, pin, previous, blobs):
+    old_pin = resolve_pin(upstream, previous["pin"]) if previous.get("pin") else None
+    resolved_pins = {previous["pin"]: old_pin, old_pin: old_pin} if old_pin else {}
+
+    def full_pin(recorded):
+        if recorded not in resolved_pins:
+            resolved_pins[recorded] = resolve_pin(upstream, recorded)
+        return resolved_pins[recorded]
+
+    existing = {entry["go"]: entry for entry in previous.get("file", [])}
+    if len(existing) != len(previous.get("file", [])):
+        raise ValueError("existing ledger contains duplicate source paths")
+    # Old scaffolds had no content hash. Obtain it from their recorded commit
+    # before comparing, rather than treating unproven content as unchanged.
+    legacy = {}
+    for path, entry in existing.items():
+        if not entry.get("source_hash"):
+            recorded_pin = full_pin(entry.get("pin") or old_pin or pin)
+            legacy.setdefault(recorded_pin, []).append(path)
+    old_hashes = {}
+    for recorded_pin, paths in legacy.items():
+        old_hashes.update({p: hashlib.sha256(b).hexdigest() for p, b in read_blobs(upstream, recorded_pin, paths).items()})
+    entries = []
+    for path, content in blobs.items():
+        text = content.decode("utf-8")
         head = "\n".join(text.splitlines()[:15])
-        loc = text.count("\n")
-        pkg = rel_dir
+        pkg = path.removeprefix("tsc/").rsplit("/", 1)[0]
         krate, phase = crate_for(pkg)
         if any(pkg == p or pkg.startswith(p + "/") for p in HARNESS_PREFIXES):
             kind = "harness"
-        elif fn.endswith("_generated.go") or "Code generated" in head:
+        elif path.endswith("_generated.go") or "Code generated" in head:
             kind = "generated"
         else:
             kind = "source"
         if not in_scope(path, head):
             kind = "out-of-scope"
-        prev = existing.get(rel, {})
+        prev = existing.get(path, {})
         status = prev.get("status", "out-of-scope" if kind == "out-of-scope" else "planned")
-        entries.append({"go": rel, "package": pkg, "crate": krate, "phase": phase, "kind": kind,
-                        "status": status, "rust": prev.get("rust", ""), "pin": prev.get("pin", PIN), "loc": loc})
+        if status == "verified":
+            status = "ported"  # Verification is derived from evidence, never a hand-written status.
+        if status not in {"planned", "in-progress", "ported", "out-of-scope"}:
+            raise ValueError(f"{path}: unsupported status {status!r}")
+        source_hash = hashlib.sha256(content).hexdigest()
+        synchronized_pin = pin
+        if prev:
+            recorded = prev.get("pin") or old_pin or pin
+            synchronized_pin = full_pin(recorded)
+            previous_hash = prev.get("source_hash") or old_hashes.get(path)
+            if previous_hash == source_hash and synchronized_pin == old_pin:
+                synchronized_pin = pin
+        entries.append({
+            "go": path, "package": pkg, "crate": krate, "phase": phase,
+            "kind": kind, "status": status,
+            "rust": string_list(prev.get("rust", []), "rust", path, migrate_scalar=True),
+            "verify": string_list(prev.get("verify", []), "verify", path),
+            "pin": synchronized_pin, "source_hash": source_hash, "loc": text.count("\n"),
+        })
+    lines = [
+        "# Port ledger: non-test Go files from the pinned upstream tsc module.",
+        "# Regenerate with scripts/ledger-init.py; status, rust and verify are preserved.",
+        "# status: planned | in-progress | ported | out-of-scope; verification is computed.",
+        "# pin records last synchronization; source_hash hashes current upstream bytes.",
+        "# kind: source | generated | harness | out-of-scope",
+        f'pin = "{pin}"', "",
+    ]
+    for entry in entries:
+        lines.append("[[file]]")
+        for field, value in entry.items():
+            lines.append(f"{field} = {json.dumps(value, ensure_ascii=False)}")
+        lines.append("")
+    return ("\n".join(lines) + "\n").encode(), entries
 
-entries.sort(key=lambda e: e["go"])
-with open(OUT, "w", encoding="utf-8") as out:
-    out.write("# Port ledger: one entry per non-test Go file of the pinned upstream tsc module.\n")
-    out.write("# Regenerate with scripts/ledger-init.py; statuses and rust paths are preserved.\n")
-    out.write("# status: planned | in-progress | ported | verified | out-of-scope\n")
-    out.write("# kind: source | generated | harness | out-of-scope\n")
-    out.write(f'pin = "{PIN}"\n\n')
-    for e in entries:
-        out.write("[[file]]\n")
-        for k in ("go", "package", "crate", "phase", "kind", "status", "rust", "pin", "loc"):
-            v = e[k]
-            out.write(f"{k} = {v}\n" if isinstance(v, int) else f'{k} = "{v}"\n')
-        out.write("\n")
 
-from collections import Counter
-kinds = Counter(e["kind"] for e in entries)
-print(f"{len(entries)} entries -> {OUT}")
-print("by kind:", dict(kinds))
-print("in-scope LOC:", sum(e["loc"] for e in entries if e["kind"] != "out-of-scope"))
+def validate_inventory(content, pin, source_files):
+    lines = content.decode("utf-8").splitlines()
+    if len(lines) < 2 or lines[0] != f"# upstream {pin}" or lines[1] != "file\tpackage\treceiver\tname\tstart\tend\tid":
+        raise ValueError("function inventory has missing or mismatched provenance/schema")
+    keys = set()
+    for line in lines[2:]:
+        cols = line.split("\t")
+        if len(cols) != 7 or cols[0] not in source_files or not cols[6].startswith(cols[0] + ":"):
+            raise ValueError(f"invalid function inventory row: {line}")
+        if cols[6] in keys:
+            raise ValueError(f"duplicate function inventory ID: {cols[6]}")
+        keys.add(cols[6])
+
+
+def publish(outputs):
+    """Stage every output first, then publish the manifest last as a commit marker.
+
+    A crash between replacements leaves hash mismatches, which consumers reject.
+    Generation errors before this point cannot partially replace existing files.
+    """
+    staged = []
+    try:
+        for destination, content in outputs:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as out:
+                temp = Path(out.name)
+                staged.append((temp, destination))
+                out.write(content)
+                out.flush()
+                os.fsync(out.fileno())
+            os.chmod(temp, 0o644)
+        for temp, destination in staged:
+            os.replace(temp, destination)
+    finally:
+        for temp, _ in staged:
+            temp.unlink(missing_ok=True)
+
+
+def generate(output_root, upstream, requested_pin=None, inventory_command=None):
+    pin = verify_checkout(upstream, requested_pin)
+    ledger_path = output_root / "PORTS.toml"
+    previous = tomllib.loads(ledger_path.read_text()) if ledger_path.exists() else {}
+    paths = source_paths(upstream, pin)
+    if not paths:
+        raise ValueError("upstream pin contains no compiler Go source files")
+    ledger, entries = build_ledger(upstream, pin, previous, read_blobs(upstream, pin, paths))
+    command = inventory_command or ["go", "run", str(REPO_ROOT / "scripts/go-inventory/main.go")]
+    result = subprocess.run([*command, "--pin", pin, str(upstream / "tsc")], capture_output=True)
+    if result.returncode:
+        raise ValueError("function inventory generation failed: " + result.stderr.decode(errors="replace").strip())
+    inventory = result.stdout
+    validate_inventory(inventory, pin, set(paths))
+    if verify_checkout(upstream, pin) != pin:
+        raise ValueError("upstream changed during generation")
+    manifest = (json.dumps({
+        "schema_version": 2, "pin": pin,
+        "ledger_generated_sha256": ledger_generated_sha256(tomllib.loads(ledger.decode("utf-8"))),
+        "inventory_sha256": hashlib.sha256(inventory).hexdigest(),
+    }, indent=2) + "\n").encode()
+    publish([(ledger_path, ledger), (output_root / "data/go-functions.tsv", inventory),
+             (output_root / "data/upstream.json", manifest)])
+    return entries, pin
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("upstream", nargs="?", type=Path, default=REPO_ROOT / "upstream")
+    parser.add_argument("--pin", help="commit that must resolve to the clean upstream checkout's HEAD")
+    args = parser.parse_args()
+    try:
+        entries, pin = generate(REPO_ROOT, args.upstream.resolve(), args.pin)
+    except (ValueError, OSError, subprocess.SubprocessError) as error:
+        print(f"ledger-init: {error}", file=sys.stderr)
+        return 1
+    print(f"Generated {len(entries)} ledger entries and function inventory at {pin}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

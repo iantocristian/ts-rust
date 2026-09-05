@@ -3,6 +3,8 @@
 //! inventory, the experiments file, the ADRs, and the sprint files. It writes STATUS.md,
 //! status/status.json and docs/status.html, and with --record appends to status/history.jsonl.
 
+mod evidence;
+
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs;
@@ -12,6 +14,7 @@ use std::process::ExitCode;
 // ---------------------------------------------------------------- inputs
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Ledger {
     #[serde(default)]
     pin: String,
@@ -20,7 +23,7 @@ struct Ledger {
 }
 
 #[derive(Deserialize, Clone)]
-#[allow(dead_code)]
+#[serde(deny_unknown_fields)]
 struct LedgerFile {
     go: String,
     package: String,
@@ -30,34 +33,40 @@ struct LedgerFile {
     kind: String,
     status: String,
     #[serde(default)]
-    rust: String,
+    rust: Vec<String>,
     #[serde(default)]
+    verify: Vec<String>,
     pin: String,
-    #[serde(default)]
+    source_hash: String,
     loc: i64,
 }
 
 #[derive(Deserialize)]
-#[allow(dead_code)]
+#[serde(deny_unknown_fields)]
 struct Experiment {
     title: String,
-    #[serde(default)]
-    measures: String,
-    op: String,
-    threshold: f64,
-    #[serde(default)]
-    unit: String,
-    #[serde(default)]
     nature: String,
-    #[serde(default)]
-    measured: Option<f64>,
-    #[serde(default)]
-    measured_at: String,
-    #[serde(default)]
-    note: String,
+    criteria: Vec<Criterion>,
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Criterion {
+    id: String,
+    metric: String,
+    op: String,
+    threshold: serde_json::Value,
+    #[serde(default)]
+    unit: String,
+}
+impl Criterion {
+    fn check(&self) -> String {
+        format!("{} {} {}", self.metric, self.op, self.threshold)
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Sprint {
     id: String,
     title: String,
@@ -70,6 +79,7 @@ struct Sprint {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct SprintItem {
     id: String,
     title: String,
@@ -79,6 +89,11 @@ struct SprintItem {
     r#ref: String,
     #[serde(default)]
     done_when: Vec<String>,
+    #[serde(default = "required_by_default")]
+    required: bool,
+}
+fn required_by_default() -> bool {
+    true
 }
 
 // ---------------------------------------------------------------- metrics
@@ -88,6 +103,7 @@ struct SprintItem {
 enum Metric {
     Num(f64),
     Str(String),
+    Bool(bool),
 }
 
 type Metrics = BTreeMap<String, Metric>;
@@ -119,6 +135,10 @@ struct Report {
     experiments: Vec<(String, Experiment, Option<bool>)>,
     sprints: Vec<SprintResult>,
     adrs: Vec<(String, String, String)>,
+    context: Option<evidence::Context>,
+    evidence_states: BTreeMap<String, String>,
+    evidence_artifacts: BTreeMap<String, String>,
+    errors: Vec<String>,
 }
 
 struct SprintResult {
@@ -141,8 +161,10 @@ fn read_ledger(root: &Path) -> Ledger {
 fn read_experiments(root: &Path) -> BTreeMap<String, Experiment> {
     let p = root.join("status/experiments.toml");
     match fs::read_to_string(&p) {
-        Ok(text) => toml::from_str(&text).unwrap_or_else(|e| die(&format!("experiments.toml: {e}"))),
-        Err(_) => BTreeMap::new(),
+        Ok(text) => {
+            toml::from_str(&text).unwrap_or_else(|e| die(&format!("experiments.toml: {e}")))
+        }
+        Err(e) => die(&format!("experiments.toml: {e}")),
     }
 }
 
@@ -150,7 +172,11 @@ fn read_sprints(root: &Path) -> Vec<Sprint> {
     let dir = root.join("sprints");
     let mut out = Vec::new();
     if let Ok(rd) = fs::read_dir(&dir) {
-        let mut paths: Vec<PathBuf> = rd.flatten().map(|e| e.path()).filter(|p| p.extension().map(|x| x == "toml").unwrap_or(false)).collect();
+        let mut paths: Vec<PathBuf> = rd
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.extension().map(|x| x == "toml").unwrap_or(false))
+            .collect();
         paths.sort();
         for p in paths {
             let text = fs::read_to_string(&p).unwrap_or_default();
@@ -171,18 +197,39 @@ fn read_adrs(root: &Path) -> Vec<(String, String, String)> {
         let mut paths: Vec<PathBuf> = rd.flatten().map(|e| e.path()).collect();
         paths.sort();
         for p in paths {
-            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("").to_string();
-            if name.len() < 5 || !name[..4].chars().all(|c| c.is_ascii_digit()) || !name.ends_with(".md") {
+            let name = p
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("")
+                .to_string();
+            if name.len() < 5
+                || !name[..4].chars().all(|c| c.is_ascii_digit())
+                || !name.ends_with(".md")
+            {
                 continue;
             }
             let text = fs::read_to_string(&p).unwrap_or_default();
-            let title = text.lines().find(|l| l.starts_with("# ")).map(|l| l[2..].trim().to_string()).unwrap_or(name.clone());
+            let title = text
+                .lines()
+                .find(|l| l.starts_with("# "))
+                .map(|l| l[2..].trim().to_string())
+                .unwrap_or(name.clone());
             let status = text
                 .lines()
-                .find(|l| l.to_ascii_lowercase().starts_with("status:") || l.to_ascii_lowercase().starts_with("**status:**") || l.to_ascii_lowercase().starts_with("- status:"))
+                .find(|l| {
+                    l.to_ascii_lowercase().starts_with("status:")
+                        || l.to_ascii_lowercase().starts_with("**status:**")
+                        || l.to_ascii_lowercase().starts_with("- status:")
+                })
                 .map(|l| {
-                    let s = l.split(':').nth(1).unwrap_or("").trim().trim_end_matches("**").trim();
-                    s.split(|c: char| c == ',' || c == '(').next().unwrap_or("").trim().to_string()
+                    let s = l
+                        .split(':')
+                        .nth(1)
+                        .unwrap_or("")
+                        .trim()
+                        .trim_end_matches("**")
+                        .trim();
+                    s.split([',', '(']).next().unwrap_or("").trim().to_string()
                 })
                 .unwrap_or_else(|| "Unknown".to_string());
             out.push((name[..4].to_string(), title, status));
@@ -191,20 +238,27 @@ fn read_adrs(root: &Path) -> Vec<(String, String, String)> {
     out
 }
 
-/// Go function inventory: package -> set of "file:name" keys.
-fn read_inventory(root: &Path) -> BTreeMap<String, Vec<String>> {
-    let p = root.join("data/go-functions.tsv");
+/// Receiver-qualified inventory IDs, generated from one clean upstream commit.
+fn read_inventory(root: &Path) -> Result<BTreeMap<String, Vec<String>>, String> {
+    let text = fs::read_to_string(root.join("data/go-functions.tsv")).map_err(|e| e.to_string())?;
     let mut out: BTreeMap<String, Vec<String>> = BTreeMap::new();
-    if let Ok(text) = fs::read_to_string(&p) {
-        for line in text.lines().skip(1) {
-            let cols: Vec<&str> = line.split('\t').collect();
-            if cols.len() < 4 {
-                continue;
-            }
-            out.entry(cols[1].to_string()).or_default().push(format!("{}:{}", cols[0], cols[3]));
+    let mut seen = std::collections::BTreeSet::new();
+    for line in text.lines().skip(2) {
+        let cols: Vec<&str> = line.split('\t').collect();
+        if cols.len() != 7 || cols[6].is_empty() {
+            return Err("malformed inventory row".into());
         }
+        if !seen.insert(cols[6].to_string()) {
+            return Err(format!("duplicate inventory ID {}", cols[6]));
+        }
+        out.entry(cols[1].to_string())
+            .or_default()
+            .push(cols[6].to_string());
     }
-    out
+    if seen.is_empty() {
+        return Err("empty function inventory".into());
+    }
+    Ok(out)
 }
 
 /// Scan crates/**/*.rs for `port: <file>:<name>` markers.
@@ -223,7 +277,11 @@ fn scan_markers(root: &Path) -> Vec<String> {
                     if let Ok(text) = fs::read_to_string(&p) {
                         for line in text.lines() {
                             let t = line.trim_start();
-                            if let Some(rest) = t.strip_prefix("/// port:").or_else(|| t.strip_prefix("//! port:")).or_else(|| t.strip_prefix("// port:")) {
+                            if let Some(rest) = t
+                                .strip_prefix("/// port:")
+                                .or_else(|| t.strip_prefix("//! port:"))
+                                .or_else(|| t.strip_prefix("// port:"))
+                            {
                                 let m = rest.trim();
                                 if m.contains(':') {
                                     out.push(m.to_string());
@@ -244,13 +302,13 @@ fn scan_markers(root: &Path) -> Vec<String> {
 // ---------------------------------------------------------------- checks
 
 fn parse_number(s: &str) -> Option<f64> {
-    s.parse::<f64>().ok()
+    s.parse::<f64>().ok().filter(|n| n.is_finite())
 }
 
 /// Evaluate "<metric> <op> <value>". Returns None when the metric is unknown.
 fn eval_check(metrics: &Metrics, check: &str) -> Option<bool> {
     let parts: Vec<&str> = check.split_whitespace().collect();
-    if parts.len() < 3 {
+    if parts.len() != 3 {
         return None;
     }
     let value = parts[parts.len() - 1];
@@ -258,11 +316,22 @@ fn eval_check(metrics: &Metrics, check: &str) -> Option<bool> {
     let key = parts[..parts.len() - 2].join(" ");
     let m = metrics.get(&key)?;
     match m {
+        Metric::Bool(b) => match (op, value) {
+            ("==", "true") | ("!=", "false") => Some(*b),
+            ("==", "false") | ("!=", "true") => Some(!*b),
+            _ => None,
+        },
         Metric::Num(n) => {
-            let v = if let Some(v) = parse_number(value) { v } else if status_rank(value) >= 0.0 { status_rank(value) } else { return None };
+            let v = if let Some(v) = parse_number(value) {
+                v
+            } else if status_rank(value) >= 0.0 {
+                status_rank(value)
+            } else {
+                return None;
+            };
             Some(match op {
-                "==" => (*n - v).abs() < 1e-9,
-                "!=" => (*n - v).abs() >= 1e-9,
+                "==" => *n == v,
+                "!=" => *n != v,
                 ">=" => *n >= v,
                 "<=" => *n <= v,
                 ">" => *n > v,
@@ -296,27 +365,130 @@ fn eval_check(metrics: &Metrics, check: &str) -> Option<bool> {
 // ---------------------------------------------------------------- build report
 
 fn build_report(root: &Path) -> Report {
-    let ledger = read_ledger(root);
+    let mut ledger = read_ledger(root);
     let mut metrics: Metrics = BTreeMap::new();
+    let mut errors = Vec::new();
+    let provenance = evidence::provenance(root, &ledger.pin);
+    metrics.insert(
+        "provenance.valid".into(),
+        Metric::Num(if provenance.is_ok() { 1.0 } else { 0.0 }),
+    );
+    if let Err(e) = provenance {
+        errors.push(e);
+    }
+    let context = match evidence::Context::capture(root, &ledger.pin) {
+        Ok(c) => Some(c),
+        Err(e) => {
+            errors.push(e);
+            None
+        }
+    };
+    let mut loaded = evidence::Loaded::default();
+    if errors.is_empty() {
+        if let Some(ctx) = &context {
+            match evidence::load(root, ctx) {
+                Ok(e) => loaded = e,
+                Err(e) => errors.push(e),
+            }
+        }
+    }
+    metrics.extend(loaded.metrics.clone());
+    metrics.insert(
+        "upstream.ready".into(),
+        Metric::Num(if evidence::upstream_ready(root, &ledger.pin) {
+            1.0
+        } else {
+            0.0
+        }),
+    );
+    for f in &mut ledger.file {
+        if !matches!(
+            f.status.as_str(),
+            "planned" | "in-progress" | "ported" | "out-of-scope"
+        ) {
+            errors.push(format!(
+                "{}: status must be implementation state; verified is computed",
+                f.go
+            ));
+            f.status = "planned".into();
+        }
+        if f.source_hash.len() != 64
+            || !f.source_hash.bytes().all(|c| c.is_ascii_hexdigit())
+            || f.package.is_empty()
+        {
+            errors.push(format!("{}: invalid source provenance", f.go));
+        }
+        let rust_exists = !f.rust.is_empty()
+            && f.rust
+                .iter()
+                .all(|p| evidence::safe_path(p) && root.join(p).is_file());
+        if f.status == "ported" && !rust_exists {
+            errors.push(format!("{}: ported entry needs existing Rust paths", f.go));
+            f.status = "in-progress".into();
+        }
+        if f.status == "ported"
+            && f.pin == ledger.pin
+            && rust_exists
+            && !f.verify.is_empty()
+            && f.verify
+                .iter()
+                .all(|check| check.starts_with("run.") && eval_check(&metrics, check) == Some(true))
+        {
+            f.status = "verified".into();
+        }
+    }
 
-    let in_scope: Vec<LedgerFile> = ledger.file.iter().filter(|f| f.kind != "out-of-scope" && f.status != "out-of-scope").cloned().collect();
-    let counted: Vec<&LedgerFile> = in_scope.iter().filter(|f| f.kind == "source" || f.kind == "generated").collect();
+    let in_scope: Vec<LedgerFile> = ledger
+        .file
+        .iter()
+        .filter(|f| f.kind != "out-of-scope" && f.status != "out-of-scope")
+        .cloned()
+        .collect();
+    let counted: Vec<&LedgerFile> = in_scope
+        .iter()
+        .filter(|f| f.kind == "source" || f.kind == "generated")
+        .collect();
     let total = counted.len() as f64;
-    let ported = counted.iter().filter(|f| status_rank(&f.status) >= 2.0).count() as f64;
+    let ported = counted
+        .iter()
+        .filter(|f| status_rank(&f.status) >= 2.0)
+        .count() as f64;
     let verified = counted.iter().filter(|f| f.status == "verified").count() as f64;
     let in_progress = counted.iter().filter(|f| f.status == "in-progress").count() as f64;
     let loc_total: f64 = counted.iter().map(|f| f.loc as f64).fold(0.0, |a, x| a + x);
-    let loc_verified: f64 = counted.iter().filter(|f| f.status == "verified").map(|f| f.loc as f64).fold(0.0, |a, x| a + x);
-    let loc_ported: f64 = counted.iter().filter(|f| status_rank(&f.status) >= 2.0).map(|f| f.loc as f64).fold(0.0, |a, x| a + x);
-    let stale = counted.iter().filter(|f| !f.pin.is_empty() && !ledger.pin.is_empty() && f.pin != ledger.pin && status_rank(&f.status) >= 2.0).count() as f64;
+    let loc_verified: f64 = counted
+        .iter()
+        .filter(|f| f.status == "verified")
+        .map(|f| f.loc as f64)
+        .fold(0.0, |a, x| a + x);
+    let loc_ported: f64 = counted
+        .iter()
+        .filter(|f| status_rank(&f.status) >= 2.0)
+        .map(|f| f.loc as f64)
+        .fold(0.0, |a, x| a + x);
+    let stale = counted
+        .iter()
+        .filter(|f| {
+            !f.pin.is_empty()
+                && !ledger.pin.is_empty()
+                && f.pin != ledger.pin
+                && status_rank(&f.status) >= 2.0
+        })
+        .count() as f64;
     metrics.insert("ledger.files_total".into(), Metric::Num(total));
     metrics.insert("ledger.files_ported".into(), Metric::Num(ported));
     metrics.insert("ledger.files_verified".into(), Metric::Num(verified));
     metrics.insert("ledger.files_in_progress".into(), Metric::Num(in_progress));
     metrics.insert("ledger.files_stale".into(), Metric::Num(stale));
     metrics.insert("ledger.loc_total".into(), Metric::Num(loc_total));
-    metrics.insert("ledger.loc_ported_ratio".into(), Metric::Num(ratio(loc_ported, loc_total)));
-    metrics.insert("ledger.loc_verified_ratio".into(), Metric::Num(ratio(loc_verified, loc_total)));
+    metrics.insert(
+        "ledger.loc_ported_ratio".into(),
+        Metric::Num(ratio(loc_ported, loc_total)),
+    );
+    metrics.insert(
+        "ledger.loc_verified_ratio".into(),
+        Metric::Num(ratio(loc_verified, loc_total)),
+    );
 
     let mut by_phase: BTreeMap<i64, (f64, f64, f64)> = BTreeMap::new();
     let mut by_crate: BTreeMap<String, (f64, f64, f64)> = BTreeMap::new();
@@ -337,21 +509,40 @@ fn build_report(root: &Path) -> Report {
     for (ph, (t, v, n)) in &by_phase {
         metrics.insert(format!("ledger.phase[{ph}].loc_total"), Metric::Num(*t));
         metrics.insert(format!("ledger.phase[{ph}].files"), Metric::Num(*n));
-        metrics.insert(format!("ledger.phase[{ph}].loc_verified_ratio"), Metric::Num(ratio(*v, *t)));
+        metrics.insert(
+            format!("ledger.phase[{ph}].loc_verified_ratio"),
+            Metric::Num(ratio(*v, *t)),
+        );
     }
     for (c, (t, v, n)) in &by_crate {
         metrics.insert(format!("ledger.crate[{c}].loc_total"), Metric::Num(*t));
         metrics.insert(format!("ledger.crate[{c}].files"), Metric::Num(*n));
-        metrics.insert(format!("ledger.crate[{c}].loc_verified_ratio"), Metric::Num(ratio(*v, *t)));
+        metrics.insert(
+            format!("ledger.crate[{c}].loc_verified_ratio"),
+            Metric::Num(ratio(*v, *t)),
+        );
     }
     for f in &ledger.file {
-        metrics.insert(format!("file[{}].status", f.go), Metric::Str(f.status.clone()));
+        metrics.insert(
+            format!("file[{}].status", f.go),
+            Metric::Str(f.status.clone()),
+        );
     }
 
     // Function-level traceability.
-    let inventory = read_inventory(root);
+    let inventory = match read_inventory(root) {
+        Ok(i) => i,
+        Err(e) => {
+            errors.push(e);
+            BTreeMap::new()
+        }
+    };
     let markers = scan_markers(root);
-    let source_files: std::collections::HashSet<&str> = counted.iter().filter(|f| f.kind == "source").map(|f| f.go.as_str()).collect();
+    let source_files: std::collections::HashSet<&str> = counted
+        .iter()
+        .filter(|f| f.kind == "source")
+        .map(|f| f.go.as_str())
+        .collect();
     let mut all_keys: std::collections::HashSet<String> = std::collections::HashSet::new();
     let mut fn_total = 0.0;
     let mut per_pkg_total: BTreeMap<String, f64> = BTreeMap::new();
@@ -374,7 +565,11 @@ fn build_report(root: &Path) -> Report {
             if ported_keys.insert(m.clone()) {
                 fn_ported += 1.0;
                 let file = m.split(':').next().unwrap_or("");
-                let pkg = file.trim_start_matches("tsc/").rsplit_once('/').map(|(d, _)| d.to_string()).unwrap_or_default();
+                let pkg = file
+                    .trim_start_matches("tsc/")
+                    .rsplit_once('/')
+                    .map(|(d, _)| d.to_string())
+                    .unwrap_or_default();
                 *per_pkg_ported.entry(pkg).or_insert(0.0) += 1.0;
             }
         } else {
@@ -383,7 +578,10 @@ fn build_report(root: &Path) -> Report {
     }
     metrics.insert("functions.total".into(), Metric::Num(fn_total));
     metrics.insert("functions.ported".into(), Metric::Num(fn_ported));
-    metrics.insert("functions.ratio".into(), Metric::Num(ratio(fn_ported, fn_total)));
+    metrics.insert(
+        "functions.ratio".into(),
+        Metric::Num(ratio(fn_ported, fn_total)),
+    );
     let mut unported_by_package: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for (pkg, keys) in &inventory {
         let t = per_pkg_total.get(pkg).copied().unwrap_or(0.0);
@@ -393,32 +591,63 @@ fn build_report(root: &Path) -> Report {
         let p = per_pkg_ported.get(pkg).copied().unwrap_or(0.0);
         metrics.insert(format!("functions.package[{pkg}].total"), Metric::Num(t));
         metrics.insert(format!("functions.package[{pkg}].ported"), Metric::Num(p));
-        metrics.insert(format!("functions.package[{pkg}].ratio"), Metric::Num(ratio(p, t)));
-        let missing: Vec<String> = keys.iter().filter(|k| all_keys.contains(*k) && !ported_keys.contains(*k)).cloned().collect();
+        metrics.insert(
+            format!("functions.package[{pkg}].ratio"),
+            Metric::Num(ratio(p, t)),
+        );
+        let missing: Vec<String> = keys
+            .iter()
+            .filter(|k| all_keys.contains(*k) && !ported_keys.contains(*k))
+            .cloned()
+            .collect();
         if !missing.is_empty() {
             unported_by_package.insert(pkg.clone(), missing);
         }
     }
 
-    // Experiments.
+    // Every typed requirement participates; notes never supply passing evidence.
     let mut experiments = Vec::new();
     for (id, e) in read_experiments(root) {
-        let pass = e.measured.map(|m| match e.op.as_str() {
-            ">=" => m >= e.threshold,
-            "<=" => m <= e.threshold,
-            "==" => (m - e.threshold).abs() < 1e-9,
-            ">" => m > e.threshold,
-            "<" => m < e.threshold,
-            _ => false,
-        });
-        metrics.insert(format!("exp.{id}.threshold"), Metric::Num(e.threshold));
-        if let Some(m) = e.measured {
-            metrics.insert(format!("exp.{id}.measured"), Metric::Num(m));
+        let mut results = Vec::new();
+        let mut ids = std::collections::BTreeSet::new();
+        if e.criteria.is_empty() {
+            errors.push(format!("{id}: experiment has no criteria"));
         }
-        metrics.insert(format!("exp.{id}.pass"), Metric::Num(if pass == Some(true) { 1.0 } else { 0.0 }));
+        for c in &e.criteria {
+            if !ids.insert(&c.id)
+                || !(c.threshold.is_boolean() || c.threshold.as_f64().is_some_and(f64::is_finite))
+                || (c.threshold.is_boolean() && !matches!(c.op.as_str(), "==" | "!="))
+                || !c.metric.starts_with("run.")
+                || !matches!(c.op.as_str(), "==" | "!=" | ">=" | "<=" | ">" | "<")
+            {
+                errors.push(format!("{id}.{}: invalid criterion", c.id));
+                results.push(Some(false));
+                continue;
+            }
+            let result = eval_check(&metrics, &c.check());
+            metrics.insert(
+                format!("exp.{id}.{}.pass", c.id),
+                Metric::Num(if result == Some(true) { 1.0 } else { 0.0 }),
+            );
+            results.push(result);
+        }
+        let pass = if results.contains(&Some(false)) {
+            Some(false)
+        } else if !results.is_empty() && results.iter().all(|r| *r == Some(true)) {
+            Some(true)
+        } else {
+            None
+        };
+        metrics.insert(
+            format!("exp.{id}.pass"),
+            Metric::Num(if pass == Some(true) { 1.0 } else { 0.0 }),
+        );
         experiments.push((id, e, pass));
     }
-    let exp_pass = experiments.iter().filter(|(_, _, p)| *p == Some(true)).count() as f64;
+    let exp_pass = experiments
+        .iter()
+        .filter(|(_, _, p)| *p == Some(true))
+        .count() as f64;
     metrics.insert("exp.passed".into(), Metric::Num(exp_pass));
     metrics.insert("exp.total".into(), Metric::Num(experiments.len() as f64));
 
@@ -428,13 +657,34 @@ fn build_report(root: &Path) -> Report {
         metrics.insert(format!("adr.{n}.status"), Metric::Str(st.clone()));
     }
     metrics.insert("adr.total".into(), Metric::Num(adrs.len() as f64));
-    metrics.insert("adr.accepted".into(), Metric::Num(adrs.iter().filter(|(_, _, s)| s == "Accepted" || s == "Amended").count() as f64));
+    metrics.insert(
+        "adr.accepted".into(),
+        Metric::Num(
+            adrs.iter()
+                .filter(|(_, _, s)| s == "Accepted" || s == "Amended")
+                .count() as f64,
+        ),
+    );
 
     // Sprints (evaluated after all other metrics exist).
     let mut sprints = Vec::new();
+    let mut sprint_ids = std::collections::BTreeSet::new();
     for s in read_sprints(root) {
-        let exit: Vec<(String, Option<bool>)> = s.exit.iter().map(|c| (c.clone(), eval_check(&metrics, c))).collect();
-        let done = !exit.is_empty() && exit.iter().all(|(_, r)| *r == Some(true));
+        if !sprint_ids.insert(s.id.clone()) {
+            errors.push(format!("duplicate sprint ID {}", s.id));
+        }
+        let mut item_ids = std::collections::BTreeSet::new();
+        for it in &s.item {
+            if !item_ids.insert(&it.id) {
+                errors.push(format!("{}: duplicate item ID {}", s.id, it.id));
+            }
+        }
+        let exit: Vec<(String, Option<bool>)> = s
+            .exit
+            .iter()
+            .map(|c| (c.clone(), eval_check(&metrics, c)))
+            .collect();
+        let mut done = !exit.is_empty() && exit.iter().all(|(_, r)| *r == Some(true));
         let items: Vec<(String, String, Option<bool>)> = s
             .item
             .iter()
@@ -442,18 +692,85 @@ fn build_report(root: &Path) -> Report {
                 let r = if it.done_when.is_empty() {
                     None
                 } else {
-                    let rs: Vec<Option<bool>> = it.done_when.iter().map(|c| eval_check(&metrics, c)).collect();
+                    let rs: Vec<Option<bool>> = it
+                        .done_when
+                        .iter()
+                        .map(|c| eval_check(&metrics, c))
+                        .collect();
                     Some(rs.iter().all(|r| *r == Some(true)))
                 };
-                let label = if it.r#ref.is_empty() { it.title.clone() } else { format!("{} ({} {})", it.title, it.kind, it.r#ref) };
-                (it.id.clone(), label, r)
+                if it.required && r != Some(true) {
+                    done = false;
+                }
+                let label = if it.r#ref.is_empty() {
+                    it.title.clone()
+                } else {
+                    format!("{} ({} {})", it.title, it.kind, it.r#ref)
+                };
+                (
+                    it.id.clone(),
+                    format!("{label}{}", if it.required { "" } else { " [optional]" }),
+                    r,
+                )
             })
             .collect();
-        metrics.insert(format!("sprint.{}.done", s.id), Metric::Num(if done { 1.0 } else { 0.0 }));
-        sprints.push(SprintResult { id: s.id, title: s.title, goal: s.goal, done, exit, items });
+        done &= errors.is_empty() && unknown.is_empty();
+        metrics.insert(
+            format!("sprint.{}.done", s.id),
+            Metric::Num(if done { 1.0 } else { 0.0 }),
+        );
+        sprints.push(SprintResult {
+            id: s.id,
+            title: s.title,
+            goal: s.goal,
+            done,
+            exit,
+            items,
+        });
     }
 
-    Report { metrics, ledger_pin: ledger.pin, files_in_scope: in_scope, unported_by_package, unknown_markers: unknown, experiments, sprints, adrs }
+    if !errors.is_empty() || !unknown.is_empty() {
+        for sprint in &mut sprints {
+            sprint.done = false;
+            metrics.insert(format!("sprint.{}.done", sprint.id), Metric::Num(0.0));
+        }
+    }
+    Report {
+        metrics,
+        ledger_pin: ledger.pin,
+        files_in_scope: in_scope,
+        unported_by_package,
+        unknown_markers: unknown,
+        experiments,
+        sprints,
+        adrs,
+        context,
+        evidence_states: loaded.states,
+        evidence_artifacts: loaded.artifacts,
+        errors,
+    }
+}
+
+fn metric_text(metric: Option<&Metric>) -> String {
+    match metric {
+        Some(Metric::Num(n)) => n.to_string(),
+        Some(Metric::Bool(b)) => b.to_string(),
+        Some(Metric::Str(s)) => s.clone(),
+        None => "missing".into(),
+    }
+}
+fn pass_text(result: Option<bool>) -> &'static str {
+    match result {
+        Some(true) => "pass",
+        Some(false) => "fail",
+        None => "pending",
+    }
+}
+fn escape_html(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }
 
 // ---------------------------------------------------------------- outputs
@@ -471,7 +788,10 @@ fn pct(x: f64) -> String {
 
 fn today() -> String {
     // Civil date from the Unix epoch (Howard Hinnant's algorithm), UTC.
-    let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0);
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0);
     let z = secs.div_euclid(86_400) + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z - era * 146_097;
@@ -489,63 +809,166 @@ fn write_status_md(root: &Path, r: &Report) {
     let m = &r.metrics;
     let mut s = String::new();
     s.push_str("# Status\n\n");
-    s.push_str(&format!("Generated by `cargo xtask status` on {} against upstream pin `{}`. Do not edit; edit the ledger, the sprint files, the experiments file or the ADRs.\n\n", today(), r.ledger_pin));
+    s.push_str(&format!("Generated by `cargo xtask status` on {} against upstream pin `{}`. Do not edit. Implementation state is declared in the ledger; verification is derived from current evidence. Function counts measure mapping, not semantic completeness.\n\n", today(), r.ledger_pin));
     s.push_str("## Summary\n\n| | |\n|---|---|\n");
-    s.push_str(&format!("| Files in scope (source and generated) | {} |\n", num(m, "ledger.files_total")));
-    s.push_str(&format!("| Files ported / verified | {} / {} |\n", num(m, "ledger.files_ported"), num(m, "ledger.files_verified")));
-    s.push_str(&format!("| Lines verified | {} of {} ({}) |\n", num(m, "ledger.loc_total") * num(m, "ledger.loc_verified_ratio"), num(m, "ledger.loc_total"), pct(num(m, "ledger.loc_verified_ratio"))));
-    s.push_str(&format!("| Functions with a Rust counterpart | {} of {} ({}) |\n", num(m, "functions.ported"), num(m, "functions.total"), pct(num(m, "functions.ratio"))));
-    s.push_str(&format!("| Experiments passed | {} of {} |\n", num(m, "exp.passed"), num(m, "exp.total")));
-    s.push_str(&format!("| ADRs accepted | {} of {} |\n", num(m, "adr.accepted"), num(m, "adr.total")));
-    s.push_str(&format!("| Entries stale against the pin | {} |\n\n", num(m, "ledger.files_stale")));
+    s.push_str(&format!(
+        "| Files in scope (source and generated) | {} |\n",
+        num(m, "ledger.files_total")
+    ));
+    s.push_str(&format!(
+        "| Files ported / verified | {} / {} |\n",
+        num(m, "ledger.files_ported"),
+        num(m, "ledger.files_verified")
+    ));
+    s.push_str(&format!(
+        "| Lines verified | {} of {} ({}) |\n",
+        num(m, "ledger.loc_total") * num(m, "ledger.loc_verified_ratio"),
+        num(m, "ledger.loc_total"),
+        pct(num(m, "ledger.loc_verified_ratio"))
+    ));
+    s.push_str(&format!(
+        "| Mapped upstream functions | {} of {} ({}) |\n",
+        num(m, "functions.ported"),
+        num(m, "functions.total"),
+        pct(num(m, "functions.ratio"))
+    ));
+    s.push_str(&format!(
+        "| Experiments passed | {} of {} |\n",
+        num(m, "exp.passed"),
+        num(m, "exp.total")
+    ));
+    s.push_str(&format!(
+        "| ADRs accepted | {} of {} |\n",
+        num(m, "adr.accepted"),
+        num(m, "adr.total")
+    ));
+    s.push_str(&format!(
+        "| Entries stale against the pin | {} |\n\n",
+        num(m, "ledger.files_stale")
+    ));
 
     s.push_str("## By phase\n\n| Phase | Files | Lines | Verified |\n|---|---:|---:|---:|\n");
-    let mut phases: Vec<i64> = r.files_in_scope.iter().filter(|f| f.kind == "source" || f.kind == "generated").map(|f| f.phase).collect();
+    let mut phases: Vec<i64> = r
+        .files_in_scope
+        .iter()
+        .filter(|f| f.kind == "source" || f.kind == "generated")
+        .map(|f| f.phase)
+        .collect();
     phases.sort();
     phases.dedup();
     for ph in phases {
-        s.push_str(&format!("| {} | {} | {} | {} |\n", ph, num(m, &format!("ledger.phase[{ph}].files")), num(m, &format!("ledger.phase[{ph}].loc_total")), pct(num(m, &format!("ledger.phase[{ph}].loc_verified_ratio")))));
+        s.push_str(&format!(
+            "| {} | {} | {} | {} |\n",
+            ph,
+            num(m, &format!("ledger.phase[{ph}].files")),
+            num(m, &format!("ledger.phase[{ph}].loc_total")),
+            pct(num(m, &format!("ledger.phase[{ph}].loc_verified_ratio")))
+        ));
     }
 
     s.push_str("\n## By crate\n\n| Crate | Files | Lines | Verified |\n|---|---:|---:|---:|\n");
-    let mut crates: Vec<String> = r.files_in_scope.iter().filter(|f| f.kind == "source" || f.kind == "generated").map(|f| f.krate.clone()).collect();
+    let mut crates: Vec<String> = r
+        .files_in_scope
+        .iter()
+        .filter(|f| f.kind == "source" || f.kind == "generated")
+        .map(|f| f.krate.clone())
+        .collect();
     crates.sort();
     crates.dedup();
     for c in crates {
-        s.push_str(&format!("| `{}` | {} | {} | {} |\n", c, num(m, &format!("ledger.crate[{c}].files")), num(m, &format!("ledger.crate[{c}].loc_total")), pct(num(m, &format!("ledger.crate[{c}].loc_verified_ratio")))));
+        s.push_str(&format!(
+            "| `{}` | {} | {} | {} |\n",
+            c,
+            num(m, &format!("ledger.crate[{c}].files")),
+            num(m, &format!("ledger.crate[{c}].loc_total")),
+            pct(num(m, &format!("ledger.crate[{c}].loc_verified_ratio")))
+        ));
     }
 
-    s.push_str("\n## Function coverage by package\n\n| Package | Functions | Ported |\n|---|---:|---:|\n");
-    let mut pkgs: Vec<String> = m.keys().filter_map(|k| k.strip_prefix("functions.package[").and_then(|k| k.split(']').next()).map(|s| s.to_string())).collect();
+    s.push_str("\n## Function traceability by package\n\n[Canonical unmapped-function worklist](status/unmapped-functions.json).\n\n| Package | Functions | Mapped |\n|---|---:|---:|\n");
+    let mut pkgs: Vec<String> = m
+        .keys()
+        .filter_map(|k| {
+            k.strip_prefix("functions.package[")
+                .and_then(|k| k.split(']').next())
+                .map(|s| s.to_string())
+        })
+        .collect();
     pkgs.sort();
     pkgs.dedup();
     for p in pkgs {
-        s.push_str(&format!("| `{}` | {} | {} |\n", p, num(m, &format!("functions.package[{p}].total")), pct(num(m, &format!("functions.package[{p}].ratio")))));
+        s.push_str(&format!(
+            "| `{}` | {} | {} |\n",
+            p,
+            num(m, &format!("functions.package[{p}].total")),
+            pct(num(m, &format!("functions.package[{p}].ratio")))
+        ));
     }
     if !r.unknown_markers.is_empty() {
-        s.push_str("\n**Unknown markers** (name no upstream function; stale after a pin bump?):\n\n");
+        s.push_str(
+            "\n**Unknown markers** (name no upstream function; stale after a pin bump?):\n\n",
+        );
         for u in &r.unknown_markers {
             s.push_str(&format!("- `{u}`\n"));
         }
     }
 
-    s.push_str("\n## Experiments\n\n| | Title | Threshold | Measured | Pass | Nature |\n|---|---|---|---|---|---|\n");
-    for (id, e, pass) in &r.experiments {
-        let measured = e.measured.map(|v| format!("{v} ({})", e.measured_at)).unwrap_or_else(|| "not yet".into());
-        let p = match pass {
-            Some(true) => "yes",
-            Some(false) => "no",
-            None => "pending",
-        };
-        s.push_str(&format!("| {} | {} | {} {} {} | {} | {} | {} |\n", id, e.title, e.op, e.threshold, e.unit, measured, p, e.nature));
+    s.push_str("\n## Experiments\n\nEvery criterion is required. Missing or stale evidence leaves the experiment pending.\n\n| Experiment | Criterion | Required | Current | Pass |\n|---|---|---|---|---|\n");
+    for (id, e, _) in &r.experiments {
+        for c in &e.criteria {
+            let result = eval_check(m, &c.check());
+            s.push_str(&format!(
+                "| {}: {} | {} | `{}` {} | {} | {} |\n",
+                id,
+                e.title,
+                c.id,
+                c.check(),
+                c.unit,
+                metric_text(m.get(&c.metric)),
+                pass_text(result)
+            ));
+        }
+    }
+    for (id, e, _) in &r.experiments {
+        s.push_str(&format!("\n{}: {}.\n", id, e.nature));
+    }
+    s.push_str("\n## Evidence\n\n| Run | State | Artifact |\n|---|---|---|\n");
+    for (id, state) in &r.evidence_states {
+        let link = r
+            .evidence_artifacts
+            .get(id)
+            .map(|p| format!("[result]({p})"))
+            .unwrap_or_else(|| "—".into());
+        s.push_str(&format!("| {id} | {state} | {link} |\n"));
+    }
+    if !r.errors.is_empty() {
+        s.push_str("\n## Invalid tracking inputs\n\n");
+        for error in &r.errors {
+            s.push_str(&format!("- {error}\n"));
+        }
     }
 
     s.push_str("\n## Sprints\n\n");
     for sp in &r.sprints {
-        s.push_str(&format!("### {} {} {}\n\n{}\n\n", sp.id, sp.title, if sp.done { "(done)" } else { "(open)" }, sp.goal));
+        s.push_str(&format!(
+            "### {} {} {}\n\n{}\n\n",
+            sp.id,
+            sp.title,
+            if sp.done { "(done)" } else { "(open)" },
+            sp.goal
+        ));
         s.push_str("Exit checks:\n\n");
         for (c, res) in &sp.exit {
-            s.push_str(&format!("- [{}] `{}`{}\n", if *res == Some(true) { "x" } else { " " }, c, if res.is_none() { " (unknown metric)" } else { "" }));
+            s.push_str(&format!(
+                "- [{}] `{}`{}\n",
+                if *res == Some(true) { "x" } else { " " },
+                c,
+                if res.is_none() {
+                    " (unknown metric)"
+                } else {
+                    ""
+                }
+            ));
         }
         s.push_str("\nItems:\n\n");
         for (id, label, res) in &sp.items {
@@ -567,26 +990,77 @@ fn write_status_md(root: &Path, r: &Report) {
 }
 
 fn write_status_json(root: &Path, r: &Report) {
+    const WORKLIST: &str = "status/unmapped-functions.json";
+    let mut unmapped = r.unported_by_package.clone();
+    for functions in unmapped.values_mut() {
+        functions.sort();
+    }
+    let worklist = serde_json::to_vec_pretty(&serde_json::json!({
+        "schema_version": 1,
+        "pin": r.ledger_pin,
+        "unmapped_functions": unmapped,
+    }))
+    .unwrap();
+    fs::create_dir_all(root.join("status"))
+        .unwrap_or_else(|e| die(&format!("status directory: {e}")));
+    fs::write(root.join(WORKLIST), &worklist).unwrap_or_else(|e| die(&format!("{WORKLIST}: {e}")));
+
     let mut obj = serde_json::Map::new();
+    obj.insert("schema_version".into(), serde_json::json!(2));
+    obj.insert("context".into(), serde_json::json!(r.context));
+    obj.insert(
+        "evidence_states".into(),
+        serde_json::json!(r.evidence_states),
+    );
+    obj.insert(
+        "evidence_artifacts".into(),
+        serde_json::json!(r.evidence_artifacts),
+    );
+    obj.insert("errors".into(), serde_json::json!(r.errors));
     obj.insert("generated".into(), serde_json::Value::String(today()));
-    obj.insert("pin".into(), serde_json::Value::String(r.ledger_pin.clone()));
+    obj.insert(
+        "pin".into(),
+        serde_json::Value::String(r.ledger_pin.clone()),
+    );
     let mut metrics = serde_json::Map::new();
     for (k, v) in &r.metrics {
-        if k.starts_with("file[") {
-            continue;
-        }
         metrics.insert(k.clone(), serde_json::to_value(v).unwrap());
     }
     obj.insert("metrics".into(), serde_json::Value::Object(metrics));
-    let unported: serde_json::Map<String, serde_json::Value> = r.unported_by_package.iter().map(|(k, v)| (k.clone(), serde_json::json!(v.len()))).collect();
-    obj.insert("unported_functions_by_package".into(), serde_json::Value::Object(unported));
-    fs::create_dir_all(root.join("status")).ok();
-    fs::write(root.join("status/status.json"), serde_json::to_string_pretty(&serde_json::Value::Object(obj)).unwrap()).unwrap_or_else(|e| die(&format!("status.json: {e}")));
+    let unported: serde_json::Map<String, serde_json::Value> = r
+        .unported_by_package
+        .iter()
+        .map(|(k, v)| (k.clone(), serde_json::json!(v.len())))
+        .collect();
+    obj.insert(
+        "unported_functions_by_package".into(),
+        serde_json::Value::Object(unported),
+    );
+    obj.insert(
+        "unmapped_functions_file".into(),
+        serde_json::json!(WORKLIST),
+    );
+    obj.insert(
+        "unmapped_functions_sha256".into(),
+        serde_json::json!(evidence::hash(&worklist)),
+    );
+    fs::write(
+        root.join("status/status.json"),
+        serde_json::to_string_pretty(&serde_json::Value::Object(obj)).unwrap(),
+    )
+    .unwrap_or_else(|e| die(&format!("status.json: {e}")));
 }
 
+fn history_identity(value: &serde_json::Value) -> serde_json::Value {
+    serde_json::json!({"source": value["context"]["source_sha256"], "pin": value["context"]["upstream_pin"], "environment": value["context"]["environment"], "evidence": value["evidence_artifacts"], "metrics": value["metrics_sha256"]})
+}
 fn record_history(root: &Path, r: &Report) {
     let m = &r.metrics;
     let line = serde_json::json!({
+        "schema_version": 2,
+        "context": r.context,
+        "evidence_artifacts": r.evidence_artifacts,
+        "metrics_sha256": evidence::hash(&serde_json::to_vec(&r.metrics).unwrap()),
         "date": today(),
         "pin": r.ledger_pin,
         "loc_verified_ratio": num(m, "ledger.loc_verified_ratio"),
@@ -597,6 +1071,14 @@ fn record_history(root: &Path, r: &Report) {
     });
     let p = root.join("status/history.jsonl");
     let mut text = fs::read_to_string(&p).unwrap_or_default();
+    let identity = history_identity(&line);
+    if text
+        .lines()
+        .filter_map(|l| serde_json::from_str::<serde_json::Value>(l).ok())
+        .any(|v| history_identity(&v) == identity)
+    {
+        return;
+    }
     text.push_str(&line.to_string());
     text.push('\n');
     fs::write(&p, text).unwrap_or_else(|e| die(&format!("history.jsonl: {e}")));
@@ -608,7 +1090,14 @@ fn write_dashboard(root: &Path, r: &Report) {
     let points: Vec<(String, f64, f64)> = history
         .lines()
         .filter_map(|l| serde_json::from_str::<serde_json::Value>(l).ok())
-        .map(|v| (v["date"].as_str().unwrap_or("").to_string(), v["loc_verified_ratio"].as_f64().unwrap_or(0.0), v["functions_ratio"].as_f64().unwrap_or(0.0)))
+        .filter(|v| v["pin"].as_str() == Some(r.ledger_pin.as_str()) && v["schema_version"] == 2)
+        .map(|v| {
+            (
+                v["date"].as_str().unwrap_or("").to_string(),
+                v["loc_verified_ratio"].as_f64().unwrap_or(0.0),
+                v["functions_ratio"].as_f64().unwrap_or(0.0),
+            )
+        })
         .collect();
 
     let chart = {
@@ -625,14 +1114,14 @@ fn write_dashboard(root: &Path, r: &Report) {
         let first = points.first().map(|p| p.0.clone()).unwrap_or_default();
         let last = points.last().map(|p| p.0.clone()).unwrap_or_default();
         format!(
-            r#"<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="Verified lines and ported functions over time">
+            r#"<svg viewBox="0 0 {w} {h}" width="100%" role="img" aria-label="Verified lines and mapped functions over time">
   <line x1="40" y1="10" x2="40" y2="{y0}" stroke="var(--line)"/><line x1="40" y1="{y0}" x2="{x1}" y2="{y0}" stroke="var(--line)"/>
   <text x="4" y="14" class="ax">100%</text><text x="4" y="{ymid}" class="ax">50%</text><text x="12" y="{y0}" class="ax">0%</text>
   <text x="40" y="{yl}" class="ax">{first}</text><text x="{x1}" y="{yl}" class="ax" text-anchor="end">{last}</text>
   <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="{poly_loc}"/>
   <polyline fill="none" stroke="var(--rust)" stroke-width="2" stroke-dasharray="4 3" points="{poly_fn}"/>
 </svg>
-<div class="legend"><span class="acc">verified lines</span><span class="rust">ported functions</span></div>"#,
+<div class="legend"><span class="acc">verified lines</span><span class="rust">mapped functions</span></div>"#,
             w = w,
             h = h,
             y0 = h - 30.0,
@@ -643,7 +1132,12 @@ fn write_dashboard(root: &Path, r: &Report) {
     };
 
     let mut phase_rows = String::new();
-    let mut phases: Vec<i64> = r.files_in_scope.iter().filter(|f| f.kind == "source" || f.kind == "generated").map(|f| f.phase).collect();
+    let mut phases: Vec<i64> = r
+        .files_in_scope
+        .iter()
+        .filter(|f| f.kind == "source" || f.kind == "generated")
+        .map(|f| f.phase)
+        .collect();
     phases.sort();
     phases.dedup();
     for ph in phases {
@@ -663,19 +1157,19 @@ fn write_dashboard(root: &Path, r: &Report) {
             Some(false) => "crit",
             None => "warn",
         };
-        let label = match pass {
-            Some(true) => "pass",
-            Some(false) => "fail",
-            None => "pending",
-        };
-        exp_rows.push_str(&format!(
-            "<tr><td>{id}</td><td>{}</td><td>{} {} {}</td><td>{}</td><td><span class=\"chip {cls}\">{label}</span></td></tr>\n",
-            e.title,
-            e.op,
-            e.threshold,
-            e.unit,
-            e.measured.map(|v| v.to_string()).unwrap_or_else(|| "not yet".into())
-        ));
+        let criteria = e
+            .criteria
+            .iter()
+            .map(|c| escape_html(&c.check()))
+            .collect::<Vec<_>>()
+            .join("<br>");
+        let measurements = e
+            .criteria
+            .iter()
+            .map(|c| format!("{}: {}", escape_html(&c.id), metric_text(m.get(&c.metric))))
+            .collect::<Vec<_>>()
+            .join("<br>");
+        exp_rows.push_str(&format!("<tr><td>{id}</td><td>{}</td><td>{criteria}</td><td>{measurements}</td><td><span class=\"chip {cls}\">{}</span></td></tr>\n", escape_html(&e.title), pass_text(*pass)));
     }
     let mut sprint_rows = String::new();
     for sp in &r.sprints {
@@ -691,6 +1185,29 @@ fn write_dashboard(root: &Path, r: &Report) {
         ));
     }
 
+    let evidence_rows = r
+        .evidence_states
+        .iter()
+        .map(|(id, state)| {
+            let artifact = r
+                .evidence_artifacts
+                .get(id)
+                .map(|p| format!("<a href=\"../{}\">result</a>", escape_html(p)))
+                .unwrap_or_else(|| "—".into());
+            format!(
+                "<tr><td>{}</td><td>{}</td><td>{artifact}</td></tr>",
+                escape_html(id),
+                escape_html(state)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let errors_html = r
+        .errors
+        .iter()
+        .map(|e| format!("<p class=\"crit\">{}</p>", escape_html(e)))
+        .collect::<Vec<_>>()
+        .join("\n");
     let html = format!(
         r#"<title>Corsa in Rust Status</title>
 <style>
@@ -723,6 +1240,8 @@ fn write_dashboard(root: &Path, r: &Report) {
 <div class="page">
   <div class="eyebrow">Corsa in Rust &middot; generated {date} &middot; upstream pin {pin}</div>
   <h1>Status</h1>
+  <p>Function mappings measure traceability. Baseline parity and required gates establish behavior. <a href="../STATUS.md">Detailed report</a> · <a href="TRACKING.md">Tracking contract</a> · <a href="../status/unmapped-functions.json">Unmapped-function worklist</a></p>
+{errors_html}
   <div class="tiles">
     <div class="tile"><b>{loc_pct}</b><span>lines verified, of {loc_total}</span></div>
     <div class="tile"><b>{files_verified} / {files_total}</b><span>files verified</span></div>
@@ -738,6 +1257,8 @@ fn write_dashboard(root: &Path, r: &Report) {
   <h2>Experiments</h2>
   <table><thead><tr><th></th><th>Title</th><th>Threshold</th><th>Measured</th><th>Result</th></tr></thead><tbody>
 {exp_rows}</tbody></table>
+  <h2>Evidence</h2>
+  <table><thead><tr><th>Run</th><th>State</th><th>Artifact</th></tr></thead><tbody>{evidence_rows}</tbody></table>
   <h2>Sprints</h2>
   <table><thead><tr><th>Sprint</th><th>Title</th><th class="num">Exit checks</th><th>State</th></tr></thead><tbody>
 {sprint_rows}</tbody></table>
@@ -757,7 +1278,8 @@ fn write_dashboard(root: &Path, r: &Report) {
         adr_total = num(m, "adr.total"),
     );
     fs::create_dir_all(root.join("docs")).ok();
-    fs::write(root.join("docs/status.html"), html).unwrap_or_else(|e| die(&format!("status.html: {e}")));
+    fs::write(root.join("docs/status.html"), html)
+        .unwrap_or_else(|e| die(&format!("status.html: {e}")));
 }
 
 // ---------------------------------------------------------------- main
@@ -769,7 +1291,10 @@ fn die(msg: &str) -> ! {
 
 fn repo_root() -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR");
-    Path::new(manifest).parent().map(|p| p.to_path_buf()).unwrap_or_else(|| PathBuf::from("."))
+    Path::new(manifest)
+        .parent()
+        .map(|p| p.to_path_buf())
+        .unwrap_or_else(|| PathBuf::from("."))
 }
 
 fn main() -> ExitCode {
@@ -779,17 +1304,23 @@ fn main() -> ExitCode {
         Some("status") => {
             let r = build_report(&root);
             if !r.unknown_markers.is_empty() {
-                eprintln!("xtask: {} unknown port markers (listed in STATUS.md)", r.unknown_markers.len());
+                eprintln!(
+                    "xtask: {} unknown port markers (listed in STATUS.md)",
+                    r.unknown_markers.len()
+                );
             }
             write_status_md(&root, &r);
             write_status_json(&root, &r);
-            if args.iter().any(|a| a == "--record") {
+            if args.iter().any(|a| a == "--record")
+                && r.errors.is_empty()
+                && r.unknown_markers.is_empty()
+            {
                 record_history(&root, &r);
             }
             write_dashboard(&root, &r);
             let m = &r.metrics;
             println!(
-                "status: {} files in scope, {} verified ({} of lines), {} of {} functions ported, {} of {} experiments passed, {} sprints",
+                "status: {} files in scope, {} verified ({} of lines), {} of {} functions mapped, {} of {} experiments passed, {} sprints",
                 num(m, "ledger.files_total"),
                 num(m, "ledger.files_verified"),
                 pct(num(m, "ledger.loc_verified_ratio")),
@@ -799,21 +1330,65 @@ fn main() -> ExitCode {
                 num(m, "exp.total"),
                 r.sprints.len()
             );
-            if r.unknown_markers.is_empty() {
+            for e in &r.errors {
+                eprintln!("xtask: {e}");
+            }
+            if r.unknown_markers.is_empty() && r.errors.is_empty() {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::from(1)
+            }
+        }
+        Some("run") => {
+            let id = args
+                .get(1)
+                .unwrap_or_else(|| die("usage: cargo xtask run <run-id>"));
+            match evidence::run(&root, id, &read_ledger(&root).pin) {
+                Ok(true) => ExitCode::SUCCESS,
+                Ok(false) => ExitCode::from(1),
+                Err(e) => die(&e),
+            }
+        }
+        Some("validate") => {
+            let r = build_report(&root);
+            for e in &r.errors {
+                eprintln!("xtask: {e}");
+            }
+            for marker in &r.unknown_markers {
+                eprintln!("unknown port marker: {marker}");
+            }
+            if r.errors.is_empty() && r.unknown_markers.is_empty() {
                 ExitCode::SUCCESS
             } else {
                 ExitCode::from(1)
             }
         }
         Some("check") => {
-            let id = args.get(1).cloned().unwrap_or_else(|| die("usage: xtask check <sprint id>"));
+            let id = args
+                .get(1)
+                .cloned()
+                .unwrap_or_else(|| die("usage: xtask check <sprint id>"));
             let r = build_report(&root);
             match r.sprints.iter().find(|s| s.id == id) {
                 Some(s) => {
                     for (c, res) in &s.exit {
-                        println!("{} {}", match res { Some(true) => "pass ", Some(false) => "FAIL ", None => "??   " }, c);
+                        println!(
+                            "{} {}",
+                            match res {
+                                Some(true) => "pass ",
+                                Some(false) => "FAIL ",
+                                None => "??   ",
+                            },
+                            c
+                        );
                     }
-                    if s.done {
+                    for (id, label, result) in &s.items {
+                        println!("{} {} {}", pass_text(*result), id, label);
+                    }
+                    for e in &r.errors {
+                        eprintln!("xtask: {e}");
+                    }
+                    if s.done && r.errors.is_empty() && r.unknown_markers.is_empty() {
                         ExitCode::SUCCESS
                     } else {
                         ExitCode::from(1)
@@ -823,8 +1398,14 @@ fn main() -> ExitCode {
             }
         }
         _ => {
-            eprintln!("usage: cargo xtask status [--record] | cargo xtask check <sprint id>");
+            eprintln!("usage: cargo xtask status [--record] | validate | run <run-id> | check <sprint-id>");
             ExitCode::from(2)
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
+
+#[cfg(test)]
+mod worklist_tests;
