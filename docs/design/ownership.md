@@ -55,7 +55,7 @@ The checker resolver combines the program's file/bundle arena table with its own
 
 ### 2.4 Lazy storage
 
-A `FileOwner` has two arenas: the core arena, immutable after binding and readable without locks, and a lazy arena for nodes created after binding. The lazy arena uses fixed, separately allocated 256-node pages whose node addresses never move. One `RwLock<LazyState>` protects both caches, the page directory, allocation counters and publication: readers take its read guard; a miss drops that guard, takes the **same lock's write guard**, and rechecks before allocating. The writer initializes the complete node graph, then publishes the slots and cache entry before unlocking. There is no separate append mutex that bypasses cache readers.
+A `FileOwner` has two arenas: the core arena, immutable after binding and readable without locks, and a lazy arena for nodes created after binding. The lazy arena uses fixed, separately allocated 256-node pages whose node addresses never move. One `RwLock<LazyState>` protects both caches, the page directory, allocation counters and publication: readers take its read guard; a miss drops that guard, takes the **same lock's write guard**, and rechecks before allocating. The writer initializes the complete node graph, then publishes the slots and cache entry before unlocking. There is no separate append mutex that bypasses cache readers. This is a deliberate simplification of Go, which guards the two caches separately (`jsdocMu`, `ast/ast.go:2478`; `tokenCacheMu`, `ast/ast.go:2512`): under one lock a JSDoc parse blocks token creation on the same file for its duration. Go already holds `jsdocMu` exclusively while it parses (`ast/ast.go:2758–2768`), token requests come only from the language service, and both caches are per file, so the added serialization is bounded; if measurement shows contention, splitting the lock changes no published invariant.
 
 Resolving a published slot reads the directory and publication bounds under this lock and ties the resulting node reference to a retained file owner. Stable pages can then outlive the guard; the arena implementation must prove that later initialization of unused slots never creates an overlapping mutable reference to an already published node or page. Published nodes are immutable, and directory growth cannot invalidate node addresses. The narrow arena implementation and concurrent first-use paths require the E3 soundness checks before use. Lazy nodes keep their ids for the owner's lifetime. Tokens use the supplied `parent` node from the `(parent, range)` key (`ast/ast.go:2929`); kind mismatches and reparsed parents retain upstream's checks.
 
@@ -93,19 +93,21 @@ The API's `NodeHandle` stays `index.kind.path`. The index is the node's position
 
 ## 4. What E3 asserts for this note
 
-| Scenario | Assertion |
-|---|---|
-| Two programs share one bound file | both resolve the file's nodes through their own scopes; dropping one program does not affect the other; the file's owner count returns to the parse cache's single reference |
-| Edit while an old snapshot answers requests | the old snapshot keeps resolving ids of the old arena; the new snapshot resolves the new arena; ids of one arena imported into the other scope are rejected |
-| Concurrent first-use JSDoc and token requests, including page growth | read/write paths use the same lock; cache misses recheck; one published allocation per key; readers see initialized nodes and retain valid references across directory growth; kinds and supplied parents agree; semantic assertions plus sanitizer checks |
-| A mapper with three supplemental files, owners released in every order | the bundle's storage is freed only after the last of its holders drops; canonical/supplemental ids remain resolvable while any holder lives |
-| Checker AST factory | a synthetic expression resolves its checker type and file parent; a signature resolves its synthetic declaration after builder `release`; a different checker rejects the typed links; retained results preserve storage until their final drop |
-| Builder cache and emit-table retention | clone cached A into B, remove A's cache entry and rotate allocation; B's original links still resolve A; generation ids differ; storage is reclaimed only after all cache, side-table, dependent-handle and factory roots drop |
-| Repeated API printing and insertion formatting | outputs match Go; each request releases its scratch arenas after returning text; no synthetic handles are registered and session arena counts do not grow |
-| Wrong owner, stale, recycled and retired ids in release builds | `import` rejects an id of an arena the scope does not hold; a dropped arena's ids fail everywhere; a retired generation's lease fails at the next boundary while its storage is still held |
-| Parallel retirement versus publication | pause one slot before commitment, panic in another slot sharing the pool across two snapshots, then resume; no retired success or registry insertion commits; also exercise commitment-before-retirement ordering and callback reentry |
-| Node/symbol arena and slot exhaustion | allocate at injected `u32::MAX` boundaries; reject further allocation before wrap/truncation; owner metadata stays distinct across the full 32-bit arena range |
-| Owner and allocation counters | after every scenario's final drop, live owner and live allocation counts equal the pre-scenario baseline |
+| Scenario | Assertion | E3 criteria |
+|---|---|---|
+| Two programs share one bound file | both resolve the file's nodes through their own scopes; dropping one program does not affect the other; the file's owner count returns to the parse cache's single reference | `shared_bound_file` |
+| Edit while an old snapshot answers requests | the old snapshot keeps resolving ids of the old arena; the new snapshot resolves the new arena; ids of one arena imported into the other scope are rejected | `retained_snapshot_edit` |
+| Concurrent first-use JSDoc and token requests, including page growth | read/write paths use the same lock; cache misses recheck; one published allocation per key; readers see initialized nodes and retain valid references across directory growth; kinds and supplied parents agree; semantic assertions plus sanitizer checks | `concurrent_lazy_storage` |
+| A mapper with three supplemental files, owners released in every order | the bundle's storage is freed only after the last of its holders drops; canonical/supplemental ids remain resolvable while any holder lives | `mapper_bundle_disposal` |
+| Checker AST factory | a synthetic expression resolves its checker type and file parent; a signature resolves its synthetic declaration after builder `release`; a different checker rejects the typed links; retained results preserve storage until their final drop | `checker_ast_retention` |
+| Builder cache and emit-table retention | clone cached A into B, remove A's cache entry and rotate allocation; B's original links still resolve A; generation ids differ; storage is reclaimed only after all cache, side-table, dependent-handle and factory roots drop | `builder_cache_retention` |
+| Repeated API printing and insertion formatting | outputs match Go; each request releases its scratch arenas after returning text; no synthetic handles are registered and session arena counts do not grow | `api_scratch_disposal` |
+| Wrong owner, stale, recycled and retired ids in release builds | `import` rejects an id of an arena the scope does not hold; a dropped arena's ids fail everywhere; a retired generation's lease fails at the next boundary while its storage is still held | `wrong_owner_rejected`, `stale_and_recycled_ids_rejected`, `release_boundaries` |
+| Parallel retirement versus publication | pause one slot before commitment, panic in another slot sharing the pool across two snapshots, then resume; no retired success or registry insertion commits; also exercise commitment-before-retirement ordering and callback reentry | `shared_pool_panic_retirement`, `release_boundaries` |
+| Node/symbol arena and slot exhaustion | allocate at injected `u32::MAX` boundaries; reject further allocation before wrap/truncation; owner metadata stays distinct across the full 32-bit arena range | `id_exhaustion` |
+| Owner and allocation counters | after every scenario's final drop, live owner and live allocation counts equal the pre-scenario baseline | `owners_return_to_baseline`, `allocations_return_to_baseline` |
+
+Criterion ids refer to `status/experiments.toml`; `miri` and `address_sanitizer` run every scenario in this table.
 
 ## 5. Choices deliberately left to measurement
 

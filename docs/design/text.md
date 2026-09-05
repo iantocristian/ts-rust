@@ -74,21 +74,23 @@ The encoder writes the file text once and appends only strings that differ from 
 
 ## 3. What E4 asserts for this note
 
-| Fixture | Assertion |
-|---|---|
-| Every string literal in the corpus | literal value bytes, literal types and encoder strings byte-identical to the oracle |
-| Lone surrogates in escapes (`"\uD800"`, `"\uDC00"`, split pairs joined by concatenation and template cooking) | sentinel bytes identical; `combine_surrogate_pairs` produces the same code points at the same join points |
-| Malformed byte at token start, inside a comment, inside an identifier, inside a raw-copied literal | same diagnostics (`File_appears_to_be_binary` at 0, identifier end, raw bytes preserved) and same token boundaries |
-| `ToLowerJS` and `ToUpperJS` on sentinel bytes and on malformed byte `FF` | complete sentinels survive; `FF` becomes U+FFFD bytes `EF BF BD`, matching Go |
-| `TruncateByRunes` on `ED A0 80` with maximum length 1; `LowerFirstChar` on sentinel/malformed prefixes | truncation returns raw byte `ED`; helper-specific decoding, replacement and suffix copying match Go |
-| Original-source and synthesized string literals containing sentinels or malformed bytes | eligible source reuse preserves its bytes; regenerated literals apply Go's escapes, including `\uD800` and `\uFFFD`, with matching quote/escape flags |
-| UTF-8 BOM, UTF-16 LE BOM, UTF-16 BE BOM, unpaired surrogate under a UTF-16 BOM | same decoded bytes and offsets, U+FFFD where Go produces it |
-| Sentinel bytes in source text | API positions count one unit, LSP positions count three, both matching the oracle |
-| Astral and multi-byte characters, including UTF-16 offset 1 inside single-line `😀` | each conversion matches its own oracle path; the interior offset maps to bytes 1/0/4 for API/LSP/scanner respectively |
-| Byte slices ending or starting inside valid UTF-8 or a sentinel | bytes remain representable, slice validity is reclassified, and no invalid `&str` view is exposed |
-| CR, LF, CRLF, U+2028 and U+2029 | ECMAScript and LSP line maps each match Go; for `a<U+2028>b` or `a<U+2029>b`, their line starts are `[0, 4]` and `[0]` respectively |
-| Out-of-range lines, characters and absolute positions | preserve each API/LSP/scanner path's clamping, arithmetic or panic behavior, including both `allowEdits` settings |
-| Encoder success and failure | same success or error outcome per file; byte-identical output wherever the oracle encodes |
+| Fixture | Assertion | E4 criteria |
+|---|---|---|
+| Every string literal in the corpus | literal value bytes, literal types and encoder strings byte-identical to the oracle | `token_literal_bytes`, `encoder_output_bytes` |
+| Lone surrogates in escapes (`"\uD800"`, `"\uDC00"`, split pairs joined by concatenation and template cooking) | sentinel bytes identical; `combine_surrogate_pairs` produces the same code points at the same join points | `token_literal_bytes` |
+| Malformed byte at token start, inside a comment, inside an identifier, inside a raw-copied literal | same diagnostics (`File_appears_to_be_binary` at 0, identifier end, raw bytes preserved) and same token boundaries | `diagnostics`, `token_literal_bytes` |
+| `ToLowerJS` and `ToUpperJS` on sentinel bytes and on malformed byte `FF` | complete sentinels survive; `FF` becomes U+FFFD bytes `EF BF BD`, matching Go | `helper_printer_semantics` |
+| `TruncateByRunes` on `ED A0 80` with maximum length 1; `LowerFirstChar` on sentinel/malformed prefixes | truncation returns raw byte `ED`; helper-specific decoding, replacement and suffix copying match Go | `helper_printer_semantics` |
+| Original-source and synthesized string literals containing sentinels or malformed bytes | eligible source reuse preserves its bytes; regenerated literals apply Go's escapes, including `\uD800` and `\uFFFD`, with matching quote/escape flags | `helper_printer_semantics` |
+| UTF-8 BOM, UTF-16 LE BOM, UTF-16 BE BOM, unpaired surrogate under a UTF-16 BOM | same decoded bytes and offsets, U+FFFD where Go produces it | `source_decoding` |
+| Sentinel bytes in source text | API positions count one unit, LSP positions count three, both matching the oracle | `utf16_positions` |
+| Astral and multi-byte characters, including UTF-16 offset 1 inside single-line `😀` | each conversion matches its own oracle path; the interior offset maps to bytes 1/0/4 for API/LSP/scanner respectively | `utf16_positions` |
+| Byte slices ending or starting inside valid UTF-8 or a sentinel | bytes remain representable, slice validity is reclassified, and no invalid `&str` view is exposed | `slice_validity` |
+| CR, LF, CRLF, U+2028 and U+2029 | ECMAScript and LSP line maps each match Go; for `a<U+2028>b` or `a<U+2029>b`, their line starts are `[0, 4]` and `[0]` respectively | `utf8_positions` |
+| Out-of-range lines, characters and absolute positions | preserve each API/LSP/scanner path's clamping, arithmetic or panic behavior, including both `allowEdits` settings | `utf16_positions`, `utf8_positions` |
+| Encoder success and failure | same success or error outcome per file; byte-identical output wherever the oracle encodes | `encoder_success_error`, `encoder_output_bytes` |
+
+Criterion ids refer to `status/experiments.toml`.
 
 ## 4. Choices deliberately left to measurement
 

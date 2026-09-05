@@ -123,6 +123,8 @@ unit = "matching checker cases / frozen subset"
 
 E7 requires parser size, parser throughput, checker parity and a portable host. E8 requires Node latency, Rust-consumer parity and lifetime checks. E5 includes the per-type memory threshold. Notes and `nature` explain measurement limits but never supply passing values.
 
+The design notes behind ADRs 0006, 0007 and 0013 name the E3/E4 criterion ids each scenario row covers, and every criterion appears in at least one row, so a producer case can be traced to a note row and a criterion to its scenarios.
+
 Sprint checks use `<metric> <op> <value>`, with numeric comparisons, boolean equality and ADR/implementation states. Missing metrics cannot pass; malformed definitions, unknown fields and duplicate sprint/item IDs are errors. Required items default to `required = true`. They need nonempty `done_when` checks and block completion until every check passes. Only explicitly optional items may remain informational.
 
 S01 checks the reviewed contracts, provenance, registered upstream pin, actual workspace build, oracle build and version smoke. Merely having inventory entries cannot complete it. ADR acceptance is a reviewed human decision; changing an `Accepted` label is not a substitute for the required design note and review.

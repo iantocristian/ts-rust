@@ -71,17 +71,19 @@ A checker belongs to a pool generation. On a caught panic the pool retires the g
 
 ## 3. What E3 asserts for this note
 
-| Scenario | Assertion |
-|---|---|
-| Two programs share one bound file | both checkers resolve the same file symbol ids; each merges declarations into its own arena; `merged` maps differ; dropping one program leaves the other's answers unchanged |
-| Two checkers merge declarations over shared files | the file's symbols are unchanged after both merges; each checker's clone has the merged flags, declarations and exports upstream's `.symbols` baselines show |
-| Edit while an old snapshot answers | the old checker keeps resolving the old file's symbol ids; the new file's ids are rejected by the old checker's `import` and vice versa |
-| Two checkers in one pool generation have the same numeric type/signature slot | importing one checker's retained handle into the other's lease fails in debug and release builds, despite matching pool generation and in-range slot |
-| Returned type, signature, symbol and immutable type list outlive a lease | retaining the result keeps the exact owner and dependencies alive; releasing or replacing the pool slot does not rebind the result; access reacquires that owner's permit; final result/cache drops release storage without cycles |
-| Checker-created AST node retained with a signature or type | a synthetic signature declaration and a synthetic expression keep their checker AST/type dependencies; imports by another checker fail; dropping the checker context alone cannot free retained result storage |
-| Callback reentry changes or retires a checker | resumption reacquires the original owner's permit and revalidates exact identity and generation before using scoped values; same-numbered foreign slots and retired handles fail explicitly in release builds |
-| Retired generation with live results and registries | leases, retained results and registry lookups fail at their next operation boundary; storage remains valid while retained; counters return to baseline only after all leases, caches and external roots drop |
-| Arena counter boundaries | symbol/node encodings preserve identity and metadata owner kind across `2³¹−1` and `2³¹`; allocation at the full `u32` exhaustion boundary fails before wrap or reuse; zero-slot ids are rejected |
+| Scenario | Assertion | E3 criteria |
+|---|---|---|
+| Two programs share one bound file | both checkers resolve the same file symbol ids; each merges declarations into its own arena; `merged` maps differ; dropping one program leaves the other's answers unchanged | `shared_bound_file`, `independent_checker_merges` |
+| Two checkers merge declarations over shared files | the file's symbols are unchanged after both merges; each checker's clone has the merged flags, declarations and exports upstream's `.symbols` baselines show | `independent_checker_merges` |
+| Edit while an old snapshot answers | the old checker keeps resolving the old file's symbol ids; the new file's ids are rejected by the old checker's `import` and vice versa | `retained_snapshot_edit`, `wrong_owner_rejected` |
+| Two checkers in one pool generation have the same numeric type/signature slot | importing one checker's retained handle into the other's lease fails in debug and release builds, despite matching pool generation and in-range slot | `wrong_owner_rejected` |
+| Returned type, signature, symbol and immutable type list outlive a lease | retaining the result keeps the exact owner and dependencies alive; releasing or replacing the pool slot does not rebind the result; access reacquires that owner's permit; final result/cache drops release storage without cycles | `checker_result_retention` |
+| Checker-created AST node retained with a signature or type | a synthetic signature declaration and a synthetic expression keep their checker AST/type dependencies; imports by another checker fail; dropping the checker context alone cannot free retained result storage | `checker_ast_retention` |
+| Callback reentry changes or retires a checker | resumption reacquires the original owner's permit and revalidates exact identity and generation before using scoped values; same-numbered foreign slots and retired handles fail explicitly in release builds | `release_boundaries` |
+| Retired generation with live results and registries | leases, retained results and registry lookups fail at their next operation boundary; storage remains valid while retained; counters return to baseline only after all leases, caches and external roots drop | `shared_pool_panic_retirement`, `stale_and_recycled_ids_rejected` |
+| Arena counter boundaries | symbol/node encodings preserve identity and metadata owner kind across `2³¹−1` and `2³¹`; allocation at the full `u32` exhaustion boundary fails before wrap or reuse; zero-slot ids are rejected | `id_exhaustion` |
+
+Criterion ids refer to `status/experiments.toml`; the ownership note's table covers the remaining E3 criteria, and `miri` and `address_sanitizer` run every scenario in both tables.
 
 ## 4. Choices deliberately left to measurement
 
