@@ -1,0 +1,1 @@
+measured at microsoft/TypeScript 1f70213d49 on 2026-09-05 with go version go1.27.1 darwin/arm64

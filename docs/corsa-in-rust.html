@@ -1,0 +1,767 @@
+<title>Corsa in Rust</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --ink: #1a2029;
+    --ink-2: #4b5665;
+    --ink-3: #7b8592;
+    --line: #d7dde6;
+    --line-2: #e8ecf1;
+    --accent: #245fa6;
+    --accent-soft: #e3edf9;
+    --go: #0b7285;
+    --go-soft: #dff4f7;
+    --rust: #b7410e;
+    --rust-soft: #fbe7dc;
+    --crit: #b42318;
+    --crit-soft: #fde8e6;
+    --warn: #8a5a00;
+    --warn-soft: #fbefd2;
+    --ok: #2f6f3e;
+    --ok-soft: #e1f2e5;
+    --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101418;
+      --surface: #161b21;
+      --surface-2: #1d232b;
+      --ink: #e4e8ee;
+      --ink-2: #a6b0be;
+      --ink-3: #7c8794;
+      --line: #2a323c;
+      --line-2: #222931;
+      --accent: #7ab4f5;
+      --accent-soft: #1b2a3d;
+      --go: #4cc3d9;
+      --go-soft: #12333a;
+      --rust: #e8875a;
+      --rust-soft: #3a2118;
+      --crit: #f08a80;
+      --crit-soft: #3d1d1a;
+      --warn: #e2b93b;
+      --warn-soft: #3a2f12;
+      --ok: #7cc58f;
+      --ok-soft: #1a3322;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101418;
+    --surface: #161b21;
+    --surface-2: #1d232b;
+    --ink: #e4e8ee;
+    --ink-2: #a6b0be;
+    --ink-3: #7c8794;
+    --line: #2a323c;
+    --line-2: #222931;
+    --accent: #7ab4f5;
+    --accent-soft: #1b2a3d;
+    --go: #4cc3d9;
+    --go-soft: #12333a;
+    --rust: #e8875a;
+    --rust-soft: #3a2118;
+    --crit: #f08a80;
+    --crit-soft: #3d1d1a;
+    --warn: #e2b93b;
+    --warn-soft: #3a2f12;
+    --ok: #7cc58f;
+    --ok-soft: #1a3322;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 16.5px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code, pre, .mono { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--surface-2); padding: 0.08em 0.35em; border-radius: 3px; }
+  pre { background: var(--surface-2); padding: 14px 16px; border-radius: 4px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+  h1 { font-size: 42px; letter-spacing: -0.01em; }
+  h2 { font-size: 27px; margin: 0 0 14px; }
+  h3 { font-size: 19px; margin: 26px 0 8px; }
+  h4 { font-size: 16.5px; font-family: var(--sans); font-weight: 600; margin: 18px 0 6px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  li > ul, li > ol { margin-top: 6px; }
+  strong { font-weight: 600; }
+  .eyebrow {
+    font: 500 12px/1.4 var(--sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .muted { color: var(--ink-2); }
+  .small { font-size: 14px; }
+
+  .page { max-width: 1180px; margin: 0 auto; padding: 40px 28px 80px; }
+  header.masthead { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 36px; }
+  header.masthead h1 { margin: 10px 0 14px; }
+  .standfirst { font-size: 19px; line-height: 1.5; max-width: 62ch; color: var(--ink); margin-bottom: 22px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--ink-2); font-size: 14px; }
+  .meta span { white-space: nowrap; }
+
+  .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; }
+  nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+  nav.toc .eyebrow { margin-bottom: 10px; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; border-left: 1px solid var(--line); }
+  nav.toc li { margin: 0; }
+  nav.toc a { display: block; padding: 5px 0 5px 14px; color: var(--ink-2); border-left: 2px solid transparent; margin-left: -1px; line-height: 1.35; }
+  nav.toc a:hover { color: var(--ink); text-decoration: none; border-left-color: var(--accent); }
+  main { min-width: 0; }
+  main > section { padding-bottom: 36px; margin-bottom: 36px; border-bottom: 1px solid var(--line-2); }
+  main > section:last-child { border-bottom: 0; }
+  .prose { max-width: 70ch; }
+  .prose p, .prose ul, .prose ol { max-width: 70ch; }
+
+  dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; font-size: 15px; max-width: 900px; }
+  dl.facts dt { color: var(--ink-2); font-weight: 500; white-space: nowrap; }
+  dl.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; line-height: 1.45; }
+  .tablewrap { overflow-x: auto; margin: 16px 0 10px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line-2); }
+  th { font-weight: 600; color: var(--ink-2); font-size: 12.5px; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 18px; }
+  th.num { text-align: right; padding-right: 18px; }
+  td code { white-space: nowrap; }
+  tr.total td { border-top: 1px solid var(--line); font-weight: 600; }
+
+  .chip { display: inline-block; font: 500 11.5px/1 var(--sans); letter-spacing: 0.04em; text-transform: uppercase; padding: 4px 7px; border-radius: 3px; white-space: nowrap; vertical-align: middle; }
+  .chip.crit { background: var(--crit-soft); color: var(--crit); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .chip.go { background: var(--go-soft); color: var(--go); }
+  .chip.rust { background: var(--rust-soft); color: var(--rust); }
+  .chip.acc { background: var(--accent-soft); color: var(--accent); }
+
+  .callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 14px 18px; margin: 18px 0; max-width: 78ch; }
+  .callout.rust { border-left-color: var(--rust); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .decisions { display: grid; gap: 14px; }
+  .decision { background: var(--surface); border: 1px solid var(--line-2); border-radius: 4px; padding: 16px 20px 6px; }
+  .decision h3 { margin: 0 0 10px; font-size: 18px; }
+  .decision dl { margin: 0; display: grid; grid-template-columns: 82px 1fr; gap: 6px 14px; font-size: 15px; }
+  .decision dt { color: var(--ink-2); font-weight: 500; font-size: 12.5px; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 3px; }
+  .decision dd { margin: 0 0 8px; }
+
+  .cratemap { display: grid; gap: 8px; margin: 18px 0 8px; }
+  .tier { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line-2); }
+  .tier:first-child { border-top: 0; }
+  .tier .tname { font-size: 13px; color: var(--ink-2); padding-top: 4px; line-height: 1.35; }
+  .tier .tname b { display: block; color: var(--ink); font-weight: 600; }
+  .crates { display: flex; flex-wrap: wrap; gap: 6px; }
+  .crate { font: 500 12.5px/1 var(--mono); padding: 6px 8px; border-radius: 3px; background: var(--surface-2); border-left: 3px solid var(--ink-3); white-space: nowrap; }
+  .crate.p0 { border-left-color: var(--rust); }
+  .crate.p1 { border-left-color: var(--accent); }
+  .crate.p2 { border-left-color: var(--crit); }
+  .crate.p3 { border-left-color: var(--warn); }
+  .crate.p4 { border-left-color: var(--ok); }
+  .crate.p5 { border-left-color: var(--go); }
+  .crate.p6 { border-left-color: var(--ink); }
+  .crate.gen { border-top: 1px dashed var(--line); border-right: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--ink-2); margin: 8px 0 0; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--ink-3); }
+  .legend .l0::before { background: var(--rust); }
+  .legend .l1::before { background: var(--accent); }
+  .legend .l2::before { background: var(--crit); }
+  .legend .l3::before { background: var(--warn); }
+  .legend .l4::before { background: var(--ok); }
+  .legend .l5::before { background: var(--go); }
+  .legend .l6::before { background: var(--ink); }
+
+  .tlwrap { overflow-x: auto; margin: 18px 0 6px; padding-bottom: 6px; }
+  .timeline { display: grid; grid-template-columns: 180px repeat(30, minmax(20px, 1fr)); row-gap: 7px; align-items: center; min-width: 800px; }
+  .tl-head { grid-row: 1; font: 500 11.5px/1 var(--mono); color: var(--ink-3); text-align: left; padding-bottom: 6px; border-bottom: 1px solid var(--line); height: 20px; }
+  .tl-head.tick { border-left: 1px solid var(--line-2); padding-left: 4px; }
+  .tl-label { font-size: 13.5px; line-height: 1.3; padding-right: 12px; }
+  .tl-label b { display: block; font-weight: 600; }
+  .tl-label span { color: var(--ink-2); font-size: 12.5px; }
+  .tl-bar { height: 28px; border-radius: 3px; display: flex; align-items: center; padding: 0 7px; font: 500 11.5px/1 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); background: var(--surface-2); border-left: 3px solid var(--ink-3); }
+  .tl-bar.p0 { border-left-color: var(--rust); background: var(--rust-soft); }
+  .tl-bar.p1 { border-left-color: var(--accent); background: var(--accent-soft); }
+  .tl-bar.p2 { border-left-color: var(--crit); background: var(--crit-soft); }
+  .tl-bar.p3 { border-left-color: var(--warn); background: var(--warn-soft); }
+  .tl-bar.p4 { border-left-color: var(--ok); background: var(--ok-soft); }
+  .tl-bar.p5 { border-left-color: var(--go); background: var(--go-soft); }
+  .tl-bar.p6 { border-left-color: var(--ink); background: var(--surface-2); }
+  .tl-bar.p7 { border-left-color: var(--ink-3); background: var(--surface-2); }
+  .tl-mark { font: 500 11.5px/1.3 var(--sans); color: var(--ink-2); border-left: 2px solid var(--ink-2); padding-left: 6px; height: 28px; display: flex; align-items: center; }
+
+  .phase { margin-top: 26px; }
+  .phase .eyebrow { margin-bottom: 4px; }
+  .phase h3 { margin-top: 0; }
+  .phase dl { display: grid; grid-template-columns: 76px 1fr; gap: 6px 14px; margin: 8px 0 0; font-size: 15px; max-width: 80ch; }
+  .phase dt { color: var(--ink-2); font-weight: 500; font-size: 12.5px; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 3px; }
+  .phase dd { margin: 0 0 6px; }
+
+  ol.steps { counter-reset: step; list-style: none; padding: 0; max-width: 78ch; }
+  ol.steps li { counter-increment: step; display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-2); margin: 0; }
+  ol.steps li::before { content: counter(step); font: 500 14px/1 var(--mono); color: var(--accent); padding-top: 4px; }
+
+  footer.colophon { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink-2); max-width: 80ch; }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; gap: 24px; }
+    nav.toc { position: static; }
+    nav.toc ol { border-left: 0; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+    nav.toc a { padding: 4px 0; border-left: 0; }
+    h1 { font-size: 34px; }
+    .tier { grid-template-columns: 1fr; gap: 6px; }
+    .decision dl, .phase dl { grid-template-columns: 1fr; }
+    dl.facts { grid-template-columns: 1fr; gap: 2px 0; }
+    dl.facts dt { margin-top: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <div class="eyebrow">Engineering plan &middot; Draft 1 &middot; 5 September 2026 &middot; microsoft/TypeScript at 1f70213d49</div>
+    <h1>Corsa in Rust</h1>
+    <p class="standfirst">A phased plan to replace the Go implementation of the TypeScript 7 compiler and language server (the <code>tsc/</code> module, codename Corsa) with a Rust implementation that ships as a drop-in <code>tsc</code> binary: the same 48,075 baseline files, the same LSP and JS-API wire protocols, the same npm and VS Code distribution.</p>
+    <dl class="facts">
+      <dt>Source to replace</dt><dd>317,820 lines of Go across 82 packages, of which 47,442 are generated; 5,082 Go files; no cgo, twelve files of <code>unsafe</code> confined to file watching and paths</dd>
+      <dt>Tests to satisfy</dt><dd>12,721 compiler and conformance cases producing 48,075 baselines; 4,356 fourslash tests (761,930 lines of Go); tsc, build, watch, project, LSP and JS-API suites; 342 MB of test data</dd>
+      <dt>Wire contracts to keep</dt><dd>LSP 3.17 over stdio; the <code>--api</code> protocol (msgpack framing, binary AST encoder version 8, 144 methods); the content-mapper plugin RPC</dd>
+      <dt>Upstream to track</dt><dd>113 to 237 commits per month during 2026, about fifteen regular contributors, roughly a quarter of commits agent-authored</dd>
+      <dt>Central estimate</dt><dd>30 months with a team of ten, about 25 engineer-years; go/no-go decision after a ten-week spike, not now</dd>
+    </dl>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <div class="eyebrow">Contents</div>
+      <ol>
+        <li><a href="#short">The short version</a></li>
+        <li><a href="#why">Why do it at all</a></li>
+        <li><a href="#inventory">What is in the repository</a></li>
+        <li><a href="#hard">What makes this hard</a></li>
+        <li><a href="#goals">Goals and exit criteria</a></li>
+        <li><a href="#decisions">Architecture decisions</a></li>
+        <li><a href="#contracts">Compatibility contracts</a></li>
+        <li><a href="#strategy">Strategy and crate map</a></li>
+        <li><a href="#phases">Phases and timeline</a></li>
+        <li><a href="#risks">Risk register</a></li>
+        <li><a href="#keep">Deliberately not rewritten</a></li>
+        <li><a href="#alternatives">Alternatives considered</a></li>
+        <li><a href="#open">Open questions</a></li>
+        <li><a href="#first30">First thirty days</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="short" class="prose">
+        <h2>The short version</h2>
+        <ol>
+          <li><strong>This is a rewrite in the hard third and a port in the easy two thirds.</strong> The Go code is a near line-for-line translation of the original TypeScript source kept alive by a garbage collector: nodes, symbols, types and the checker form cyclic, lazily mutated pointer graphs, and the checker keys dozens of caches by pointer identity. Rust cannot express that shape. The checker's data layer and the project system's snapshots must be re-architected onto arenas and integer ids while their control flow is preserved line by line. Scanner, parser, binder, printer, transformers, module resolution, the command line and the formatter port mostly mechanically once the AST design exists.</li>
+          <li><strong>The TypeScript team evaluated Rust for this codebase in 2024 and chose Go for exactly that reason.</strong> Their reasoning still holds. The plan's job is to bound the cost and to make the decision on evidence from a spike rather than on conviction.</li>
+          <li><strong>The test corpus makes it tractable.</strong> The inputs and baselines are language-agnostic text, and three harness seams (the binary AST encoding, LSP over stdio, and the JS-API test suite that spawns the binary) let the Go binary act as an oracle for the Rust one from the first week.</li>
+          <li><strong>The critical path is the checker</strong> (60,703 lines, one 32,523-line file, 2,885 functions, a struct with about 320 fields), followed by the language service (41,500 lines) and the project system (12,300 lines). Emit, the command line and the API server run as parallel workstreams.</li>
+          <li><strong>Evaluation order is part of the contract.</strong> Union constituents are sorted by type id, so the order in which the checker creates types is visible in every <code>.types</code> baseline, in hover text and in declaration emit. A Rust checker that creates types in a different order is wrong even when its answers are right.</li>
+          <li><strong>Estimate: 30 months with ten engineers.</strong> Twenty-four if the spike shows velocity close to the Go port's; thirty-six or more if it does not. The Go port took 23 months (30 September 2024 to 19 August 2026) with the TypeScript team doing a one-to-one translation with heavy AI assistance. Treat that as the floor.</li>
+          <li><strong>Without the TypeScript team's sponsorship this is a fork of a 300,000-line moving target.</strong> The precedent is <code>stc</code>, an earlier Rust port of the checker abandoned in 2023. Step one is the decision memo and sponsorship, not the first crate.</li>
+        </ol>
+      </section>
+
+      <section id="why" class="prose">
+        <h2>Why do it at all</h2>
+        <p>Corsa already captured the large win of leaving JavaScript. Rust competes with Go, not with the old compiler, so the case has to rest on things Go cannot give this project.</p>
+        <ul>
+          <li><strong>In-process embedding.</strong> The Rust tools that now dominate the JavaScript toolchain (oxc, rolldown, rspack, turbopack, biome, deno) can link a Rust checker directly instead of driving the <code>--api</code> server over a socket. Today anything that wants in-process access must itself be written in Go, which is why the typescript-eslint native linter is a Go program.</li>
+          <li><strong>WebAssembly.</strong> A <code>wasm32</code> build of the compiler for the playground, browsers and hosts that cannot spawn native processes. Go's WebAssembly output is large and slow, so Corsa has no such story and the JS API requires a native binary.</li>
+          <li><strong>Memory and tail latency.</strong> Arena-owned type universes free wholesale, there is no collector headroom (Go's collector by default lets the heap grow to twice the live set between collections), and no collection pauses inside editor requests. Expect 30 to 50 percent lower peak memory. CPU gains of 1.2 to 2 times are plausible from data layout but not guaranteed; the spike measures them.</li>
+          <li><strong>Compile-time concurrency rules.</strong> "Never mix types from different checkers" and "requests run on immutable snapshots" are comments and race-detector CI jobs today. With <code>Send</code> and <code>Sync</code> they become facts the compiler enforces.</li>
+          <li><strong>Portability without cgo tricks.</strong> Corsa reaches FSEvents on macOS through a hand-rolled, cgo-free foreign function layer. Rust reaches system APIs natively on every target.</li>
+        </ul>
+        <p>What it does not buy: correctness, features, or speed over TypeScript 6. Those are already delivered, and every month spent here is a month not spent on them.</p>
+      </section>
+
+      <section id="inventory">
+        <h2>What is in the repository</h2>
+        <div class="prose">
+          <p>Non-test Go lines per area, measured on this commit. Generated code is counted separately because it is regenerated from a schema rather than rewritten.</p>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Area</th><th>Go packages</th><th class="num">Lines</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Type checker</td><td><code>checker</code></td><td class="num">60,703</td><td><code>checker.go</code> alone is 32,523 lines; <code>relater.go</code> 5,044; <code>flow.go</code> 2,761; node builder 3,705. 2,885 functions.</td></tr>
+              <tr><td>Language service</td><td><code>ls</code>, <code>ls/autoimport</code>, <code>ls/lsutil</code>, <code>ls/change</code>, <code>ls/lsconv</code></td><td class="num">41,536</td><td>Completions 6,900 lines, string completions 2,247, find-all-references 2,774, auto-import registry 5,400.</td></tr>
+              <tr><td>Emit</td><td><code>printer</code>, <code>transformers/*</code>, <code>sourcemap</code></td><td class="num">37,163</td><td>ES transforms 11,251 (class fields 3,618, decorators 2,751); declaration transform 4,212; TS, module and JSX transforms 7,813.</td></tr>
+              <tr><td>AST</td><td><code>ast</code></td><td class="num">21,219</td><td>10,058 lines generated from <code>tools/scripts/tsc/ast.json</code>; utilities 4,631; pointer-based nodes with parent links and per-kind arenas.</td></tr>
+              <tr><td>Program, options, resolution</td><td><code>compiler</code>, <code>tsoptions</code>, <code>module</code>, <code>modulespecifiers</code>, <code>packagejson</code>, <code>outputpaths</code></td><td class="num">19,236</td><td>Program construction, checker pool (FENNEL partitioning), about 160 compiler options, node and bundler module resolution.</td></tr>
+              <tr><td>LSP protocol types</td><td><code>lsp/lsproto</code></td><td class="num">18,325</td><td>17,566 lines generated from the LSP 3.17 metamodel by <code>_generate/generate.mts</code>.</td></tr>
+              <tr><td>Syntax</td><td><code>parser</code>, <code>scanner</code>, <code>binder</code></td><td class="num">17,002</td><td>Includes the JSDoc reparser that rewrites JSDoc into synthetic TypeScript nodes; positions are UTF-8 byte offsets.</td></tr>
+              <tr><td>Command line, build, watch</td><td><code>execute/*</code>, <code>fswatch</code>, <code>diagnosticwriter</code></td><td class="num">14,656</td><td><code>tsc</code>, <code>-b</code> orchestrator, incremental <code>.tsbuildinfo</code>, native watchers for FSEvents, inotify, fanotify, kqueue and Windows.</td></tr>
+              <tr><td>Project system</td><td><code>project</code>, <code>project/ata</code>, <code>project/dirty</code>, <code>project/logging</code></td><td class="num">12,309</td><td>Immutable, reference-counted snapshots built copy-on-write; automatic type acquisition spawns npm.</td></tr>
+              <tr><td>JS API server</td><td><code>api</code>, <code>api/encoder</code>, <code>ipc</code>, <code>jsonrpc</code></td><td class="num">12,168</td><td>144 methods, msgpack framing, binary source-file encoder (protocol 8), unix sockets and named pipes, callback file system.</td></tr>
+              <tr><td>Diagnostics</td><td><code>diagnostics</code></td><td class="num">9,658</td><td>8,854 generated from 2,135 messages plus 85 extra; 13 embedded gzipped locales.</td></tr>
+              <tr><td>Formatter</td><td><code>format</code></td><td class="num">4,259</td><td>Rule-based formatter with its own baselines.</td></tr>
+              <tr><td>LSP server</td><td><code>lsp</code>, <code>lsp/lspwatcher</code></td><td class="num">3,734</td><td>Request queue with cancellation, progress, watcher registration, API-over-LSP connection, stack sanitizer.</td></tr>
+              <tr><td>Content mappers</td><td><code>contentmapper</code>, <code>spanmap</code></td><td class="num">2,795</td><td>Child-process plugins (for example <code>.vue</code>) that produce virtual TypeScript over JSON-RPC.</td></tr>
+              <tr><td>Utilities and hosts</td><td><code>core</code>, <code>collections</code>, <code>stringutil</code>, <code>tspath</code>, <code>jsnum</code>, <code>vfs/*</code>, <code>glob</code>, <code>semver</code>, <code>json</code>, <code>locale</code>, <code>bundled</code>, <code>astnav</code>, <code>evaluator</code>, <code>pseudochecker</code>, <code>transpile</code>, <code>tracing</code>, <code>pprof</code>, others</td><td class="num">&asymp; 26,000</td><td>Unicode 15.1 identifier tables (3,496 generated lines), JavaScript number semantics, virtual file systems, 108 embedded <code>lib.*.d.ts</code> files.</td></tr>
+              <tr><td>Test harnesses (Go, not counted above)</td><td><code>fourslash</code>, <code>testrunner</code>, <code>testutil/*</code>, <code>execute/tsctests</code></td><td class="num">&asymp; 17,000</td><td>Compiler runner with directive parser and baseline diffing, fourslash LSP client, fake system with clock for tsc tests, project test utilities.</td></tr>
+              <tr class="total"><td>Total non-test Go</td><td>82 packages</td><td class="num">317,820</td><td>47,442 generated; about 270,000 hand-written.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="prose">
+          <p>Alongside the Go module: <code>packages/typescript</code>, the npm package and JS API client (53,200 lines of TypeScript, 12,863 generated), <code>packages/vscode-typescript</code> (4,184 lines), the hereby build file, generators, and the Azure release pipelines with macOS and Windows signing. None of that is rewritten.</p>
+        </div>
+      </section>
+
+      <section id="hard" class="prose">
+        <h2>What makes this hard</h2>
+        <h3>The Go code is a port, and Rust cannot be ported to</h3>
+        <p>Every load-bearing structure in Corsa is a pointer graph with cycles and late mutation. <code>ast.Node</code> carries a <code>Parent</code> pointer and an interface-typed payload; the binder writes symbols and flow nodes into nodes after parsing; <code>ast.Symbol</code> points at its declarations, members, parent and export symbol; <code>checker.Type</code> points back at its checker and symbol. The checker itself is a 320-field struct whose caches are maps keyed by <code>*ast.Node</code>, <code>*ast.Symbol</code> and <code>*Type</code>, plus 26 <code>core.LinkStore</code> side tables keyed by pointer, plus function-valued fields that swap behavior at runtime. Go's collector frees the whole tangle when the checker is dropped.</p>
+        <p>None of that survives the borrow checker unchanged. The data layer becomes arenas and ids (which Corsa already half-uses through <code>core.Arena</code> and <code>LinkStore</code>), and every function that today mutates through a pointer while holding other pointers must be rewritten to work with ids. The control flow can and must stay the same; the plumbing cannot.</p>
+
+        <h3>Observable evaluation order</h3>
+        <p><code>getUnionType</code> orders constituents through <code>compareTypeIds</code>, and type ids are handed out in creation order. The compiler runner has a dedicated <code>union ordering</code> sub-test, and 6,674 <code>.types</code> baselines, every hover, every emitted <code>.d.ts</code> and every quick-info string print unions in that order. A "cleaner" Rust checker that resolves a type a little earlier or later than Go produces thousands of baseline diffs that are individually harmless and collectively unreviewable. The plan treats creation order as a contract and builds tooling to diff it.</p>
+
+        <h3>Deep recursion on fixed stacks</h3>
+        <p>Go stacks grow on demand up to 1 GB, and Corsa never had to think about recursion depth beyond TypeScript's own instantiation limits. Rust threads have fixed stacks and a stack overflow aborts the process. Long binary-expression chains, deeply nested JSX and recursive conditional types will find this on day one unless the design reserves large stacks and guards the deepest paths.</p>
+
+        <h3>The target moves</h3>
+        <p>The Go tree received between 113 and 237 commits a month this year from about fifteen regular contributors, with roughly a quarter of commits authored by coding agents. A rewrite that takes two and a half years must absorb roughly 4,000 upstream commits while it is being written. That is a process problem as much as a technical one, and it is why the Rust code should keep Go's file, function and variable names wherever possible: upstream diffs must be transplantable.</p>
+
+        <h3>Calibration</h3>
+        <p>The Go port's first commit landed on 30 September 2024. The repository switched to the Go-only layout on 19 August 2026, after 2,546 commits to <code>tsc/</code>. That was a one-to-one translation by the people who wrote the original, with the original test suite, and with heavy agent assistance. A Rust rewrite has the same suite and can use the same assistance, but it pays for the re-architecture and for two years of tracking. Twenty-three months is therefore the floor for the estimate, not a comparable.</p>
+      </section>
+
+      <section id="goals" class="prose">
+        <h2>Goals and exit criteria</h2>
+        <h3>Goals</h3>
+        <ul>
+          <li>A single <code>tsc</code> binary that replaces the Go one in <code>built/local</code>, the npm platform packages and the VSIX without changes to <code>packages/typescript</code> or the extension.</li>
+          <li>Identical baselines across all suites, with intentional differences recorded in a reviewed allow-list the way <code>testdata/submoduleAccepted.txt</code> records Corsa's accepted divergences from TypeScript 6.</li>
+          <li>Wire compatibility for LSP, the API protocol and the content-mapper protocol, verified by running the existing clients and test suites unchanged.</li>
+          <li>Performance at or above Go on the TypeScript-benchmarking scenarios (vscode, self-compiler, mui-docs, xstate, bluesky) at 2, 4 and 8 checkers, with at most 70 percent of Go's peak memory.</li>
+          <li>Upstream parity maintained throughout, with a ledger that maps every Go file to its Rust counterpart and the last synchronized commit.</li>
+        </ul>
+        <h3>Non-goals</h3>
+        <ul>
+          <li>Changing TypeScript semantics, diagnostics text, emit or the differences documented in <code>tsc/CHANGES.md</code>. The Rust compiler targets Corsa, not TypeScript 6.</li>
+          <li>Rewriting the JS API client, the VS Code extension, the build file, the release pipelines or the test data.</li>
+          <li>Adopting a third-party AST or parser. The AST shape is pinned by <code>ast.json</code>, the binary encoder and the generated TypeScript AST package.</li>
+          <li>New features during the rewrite. Rust follows Go until the checker gate; after it, features land Rust-first only by explicit decision.</li>
+        </ul>
+        <h3>Exit criteria for cut-over</h3>
+        <ul>
+          <li>100 percent of compiler, conformance, transpile, config, tsc, build and watch baselines, modulo the allow-list.</li>
+          <li>At least 99.5 percent of fourslash tests, with the remainder triaged and listed.</li>
+          <li>The <code>packages/typescript</code> sync and async suites, the project and LSP suites and the replay corpus pass against the Rust binary.</li>
+          <li>Benchmark and memory targets met on every scenario for four consecutive weekly runs.</li>
+          <li>Four weeks of dogfood in <code>typescript@next</code> and the nightly extension behind an implementation switch, with no open P1 crash.</li>
+        </ul>
+      </section>
+
+      <section id="decisions">
+        <h2>Architecture decisions</h2>
+        <div class="prose"><p>Each decision names what it replaces. The through-line is that Corsa's runtime model is kept wherever it is observable, and only the memory model changes.</p></div>
+        <div class="decisions">
+          <div class="decision">
+            <h3>1. AST: index-based, generated from <code>ast.json</code></h3>
+            <dl>
+              <dt>Decision</dt><dd>One arena per source file. <code>NodeId(u32)</code> into a dense header table (kind, flags, pos, end, parent, payload index) with per-kind payload tables, all emitted by a new <code>generate-rust-ast.ts</code> backend next to the existing Go, TypeScript and encoder generators so four artifacts stay in sync from one schema. Children are node ids and node-list ranges. Positions stay UTF-8 byte offsets.</dd>
+              <dt>Because</dt><dd>Parent links, lazily attached symbols and flow nodes, and sharing files across programs and snapshots are all trivial with ids. The API encoder (protocol 8) is already an index-based layout with parent and next offsets, so encoding becomes a linear copy.</dd>
+              <dt>Instead of</dt><dd><code>Rc&lt;RefCell&lt;Node&gt;&gt;</code> graphs (slow, unergonomic); bump-arena references in the oxc style, <code>&amp;'a Node&lt;'a&gt;</code>, which are excellent for parse and transform but push a lifetime into the checker, the language service and long-lived snapshots; adopting oxc's AST outright, whose shape does not match <code>ast.json</code>.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>2. Symbols, types and signatures: checker-owned arenas</h3>
+            <dl>
+              <dt>Decision</dt><dd><code>SymbolId</code>, <code>TypeId</code> and <code>SignatureId</code> as <code>u32</code> indices. Binder symbols live in a program-wide arena shared read-only by every checker; transient symbols the checker creates live in a per-checker arena, distinguished by a high bit. Every <code>map[*ast.Node]*Type</code> and every <code>LinkStore</code> becomes a side table keyed by <code>(FileId, NodeId)</code> or by id. The <code>TypeData</code> and <code>nodeData</code> interfaces become enums with per-variant payload tables.</dd>
+              <dt>Because</dt><dd>This is the memory model Corsa already uses through <code>core.Arena</code> and <code>LinkStore</code>, minus the pointers. Dropping a checker frees its whole type universe, which is what the checker pool relies on. The translation of pointer-keyed maps to id-keyed maps is mechanical.</dd>
+              <dt>Instead of</dt><dd><code>Arc&lt;Type&gt;</code> graphs (cycles leak, an atomic on every access); a single global arena (breaks the per-checker universes the pool needs and the "never mix types across checkers" rule).</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>3. Mutation inside the checker</h3>
+            <dl>
+              <dt>Decision</dt><dd>The checker is a single-threaded state machine that takes <code>&amp;mut self</code> and never holds a borrow into its arenas across a call: accessors copy small values out, scalar lazily-resolved fields use <code>Cell</code>, collections are addressed by id. <code>isRelatedTo</code>, instantiation, inference and control-flow analysis keep Corsa's structure and its order of side effects to the line.</dd>
+              <dt>Because</dt><dd>Creation order is observable (decision 5). A rewrite that changes when a type is created fails thousands of <code>.types</code> baselines in ways that take days to diagnose.</dd>
+              <dt>Instead of</dt><dd><code>RefCell</code> on every table (runtime borrow panics inside 32,000 lines of recursion); splitting the checker into pure passes, which does not match TypeScript's demand-driven semantics.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>4. Concurrency: keep Corsa's model exactly</h3>
+            <dl>
+              <dt>Decision</dt><dd>Parse and bind in parallel with scoped threads. Partition files across checkers with the same FENNEL heuristic and the same tuned constants from <code>compiler/checkerpool.go</code>; one checker per thread, <code>Send</code> but not <code>Sync</code>. Emit per file in parallel. The language server serves requests on <code>Arc&lt;Snapshot&gt;</code> values built copy-on-write, with <code>project/dirty</code>'s boxes becoming persistent maps. Cancellation is a token polled wherever Corsa polls its context.</dd>
+              <dt>Because</dt><dd>These behaviors have baselines and a race-mode CI job, and the partitioning constants were swept on real projects. There is nothing to gain from a different model before parity.</dd>
+              <dt>Instead of</dt><dd>A query-based incremental architecture in the rust-analyzer style. Attractive later; incompatible with landing a drop-in replacement.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>5. Evaluation order is a contract</h3>
+            <dl>
+              <dt>Decision</dt><dd>Preserve the order in which types, symbols and signatures are created. Add a creation-trace mode to both binaries that emits the sequence of (kind, symbol, alias) per test, and a diff tool over it, so an ordering regression is located in minutes rather than by reading baselines.</dd>
+              <dt>Because</dt><dd><code>compareTypeIds</code> at <code>checker.go:26994</code>, the <code>union ordering</code> sub-test in the compiler runner, and every <code>.types</code>, hover and <code>.d.ts</code> baseline.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>6. Deep recursion</h3>
+            <dl>
+              <dt>Decision</dt><dd>Run parsing, checking and emit on threads created with large reserved stacks (256 MB to 1 GB; reservation is virtual and committed lazily on every supported platform), and add growth guards in the deepest recursive paths.</dd>
+              <dt>Because</dt><dd>Go grows stacks on demand up to 1 GB by default (<code>core.ApplyDebugStackLimit</code> only lowers it for debugging). A fixed 8 MB stack would introduce a new crash class that Corsa never had.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>7. Panics and errors</h3>
+            <dl>
+              <dt>Decision</dt><dd>Invariants stay <code>panic!</code> and <code>debug_assert!</code> (Corsa has about 600 panic sites and twelve recovers). Each LSP request, API call and test step runs under <code>catch_unwind</code> with the same stack sanitizing as <code>lsp/stack_sanitizer.go</code>. Locks are <code>parking_lot</code> (no poisoning) and are never held across checker calls. I/O and configuration failures are <code>Result</code>.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>8. Strings, numbers, Unicode and collation</h3>
+            <dl>
+              <dt>Decision</dt><dd>UTF-8 everywhere, which is already Corsa's position model. Intern identifiers program-wide as <code>Atom(u32)</code>, keeping observable iteration orders of symbol tables. Port <code>jsnum</code> (JavaScript number formatting and parsing) with a shortest-round-trip printer and golden tests against V8. Regenerate identifier tables from the same Unicode 15.1 data the scanner uses today. Match the <code>x/text</code> collation used by organize-imports with <code>icu_collator</code> pinned to the same rules.</dd>
+              <dt>Because</dt><dd>Each of these is exercised by baselines; drift shows up as thousands of spurious diffs.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>9. Host seams</h3>
+            <dl>
+              <dt>Decision</dt><dd>Object-safe, <code>Send + Sync</code> traits with the same shapes as <code>vfs.FS</code>, <code>compiler.CompilerHost</code>, the tsc <code>System</code> with its fake clock, <code>checker.Program</code> and the content-mapper host.</dd>
+              <dt>Because</dt><dd>Every harness injects through these seams. Keeping them identical makes the harness ports mechanical and lets one test corpus drive both implementations.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>10. Generated code stays single-source</h3>
+            <dl>
+              <dt>Decision</dt><dd>Add Rust backends to the existing generators: <code>ast.json</code> to AST, visitor, factory and encoder; <code>diagnosticMessages.json</code> to <code>diagnostics.rs</code>, checked in and CI-verified as today; the LSP metamodel to a serde <code>lsproto</code> from the existing <code>generate.mts</code>. Replace <code>tools/gen-proto</code>, which reads Go types through <code>go/types</code>, with a declarative <code>api.json</code> that emits both the Rust dispatcher and <code>proto.generated.ts</code>. Move the enum tables that <code>generate:enums</code> scrapes from Go source into the schema files so Go, Rust and TypeScript read one source. Embed libs with <code>include_str!</code> behind a <code>noembed</code> feature mirroring the Go build tag; keep the 13 locale files gzipped and inflate on demand.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>11. Crate layout mirrors the Go package graph</h3>
+            <dl>
+              <dt>Decision</dt><dd>A Cargo workspace under <code>rust/</code> in this repository, one crate per Go package where the boundary carries meaning, tiny leaves merged into <code>ts_core</code>. Test-only packages become test crates. See the crate map below.</dd>
+              <dt>Because</dt><dd>Cargo compiles and caches crates independently; a monolithic crate makes the 60,000-line checker the compile-time bottleneck of every change. Staying in this repository keeps 342 MB of test data shared and lets generator, test and implementation changes land in one pull request.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>12. Toolchain and lints</h3>
+            <dl>
+              <dt>Decision</dt><dd>Stable Rust, minimum supported version one behind current stable. <code>clippy</code> at pedantic minus an allow-list; the custom Go linters (<code>forbidparentaccess</code>, <code>checkchildren</code>, <code>bitclear</code>, <code>emptycase</code>, <code>shadow</code>, <code>unexportedapi</code>) re-implemented as dylint lints. <code>rustfmt</code> through the existing dprint configuration. <code>cargo nextest</code> for the suites, <code>mold</code> or <code>lld</code> plus <code>sccache</code> in CI. <code>#![forbid(unsafe_code)]</code> everywhere except the same leaf crates where Corsa uses <code>unsafe</code> today (file watching, paths, platform FFI). Release profile: <code>panic = "unwind"</code> (required by decision 7), fat LTO, one codegen unit, mimalloc.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>13. Distribution and targets</h3>
+            <dl>
+              <dt>Decision</dt><dd>Keep the npm layout (<code>typescript</code> plus <code>@typescript/typescript-&lt;os&gt;-&lt;arch&gt;</code> with <code>lib/tsc</code>) and the VSIX pipeline. The signing steps (quill and machotool for macOS hardened runtime, the Windows certificate) operate on Mach-O and PE files and do not care what produced them. Cross-compile the seven primary targets in CI with cargo-zigbuild or cross, musl for Alpine.</dd>
+              <dt>Open</dt><dd>The thirteen best-effort targets map unevenly onto Rust's support tiers: illumos, riscv64, s390x, ppc64, loongarch64, Android arm64 and FreeBSD x64 have prebuilt standard libraries; NetBSD and OpenBSD arm64, OpenBSD x64, FreeBSD arm64 and mips64el do not. Go builds all twenty from one host. The supported matrix is a Phase 0 decision, not an accident of what happens to compile.</dd>
+            </dl>
+          </div>
+          <div class="decision">
+            <h3>14. Dependency policy</h3>
+            <dl>
+              <dt>Decision</dt><dd>Few, vetted crates, each recorded with the reason it exists. <code>cargo-deny</code> enforces license compatibility with the repository's Apache-2.0 license and the existing <code>NOTICE.txt</code> process, bans duplicate versions and known advisories; <code>cargo-vet</code> records an audit for every crate; <code>Cargo.lock</code> is committed; no build script touches the network; the minimum supported Rust version is checked in CI. The expected direct dependencies mirror the roles of Corsa's twelve Go modules: scoped threads or rayon, parking_lot, mimalloc, serde with a JSON crate matched to the Go JSON v2 usage, an msgpack crate, an xxh3 implementation that produces the same hashes the API encoder header carries today, a patience diff for baselines, flate2 for the locale files, icu_collator, stacker, and the platform crates for file watching and named pipes.</dd>
+              <dt>Because</dt><dd>The Go module builds without cgo, without Node and with twelve direct dependencies, and CI proves it. A Rust tree that pulls in hundreds of transitive crates would be a regression in auditability that the TypeScript team would rightly refuse.</dd>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section id="contracts">
+        <h2>Compatibility contracts</h2>
+        <div class="prose"><p>What must hold at cut-over, what pins it, and whether the existing verification can be reused as-is, bridged to the Rust binary, or must be ported.</p></div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Contract</th><th>Pinned by</th><th>Verified with</th><th>Reuse</th></tr></thead>
+            <tbody>
+              <tr><td>Type-check results: <code>.errors.txt</code>, <code>.types</code>, <code>.symbols</code></td><td>12,721 cases; 45,447 baseline files under <code>compiler</code> and <code>conformance</code>; <code>union ordering</code> and parent-pointer sub-tests</td><td>Ported compiler runner; Go binary as oracle; creation-trace diff</td><td><span class="chip ok">Data as-is</span> <span class="chip acc">Runner ported</span></td></tr>
+              <tr><td>Emit: <code>.js</code>, <code>.map</code>, <code>.d.ts</code>, source-map records</td><td>Same corpus; 41 transpile baselines</td><td>Runner sub-tests</td><td><span class="chip ok">Data as-is</span></td></tr>
+              <tr><td>Command line: <code>tsc</code>, <code>--watch</code>, <code>-b</code>, <code>--incremental</code>, pretty output, locales</td><td>517 baselines across <code>tsc</code>, <code>tscWatch</code>, <code>tsbuild</code>, <code>tsbuildWatch</code>; <code>.tsbuildinfo</code> JSON</td><td>Ported <code>tsctests</code> harness with fake system and clock</td><td><span class="chip ok">Data as-is</span> <span class="chip acc">Harness ported</span></td></tr>
+              <tr><td>Configuration parsing</td><td>309 baselines under <code>config</code> and <code>tsoptions</code></td><td>Ported unit tests</td><td><span class="chip ok">Data as-is</span></td></tr>
+              <tr><td>Language server over LSP 3.17</td><td>4,356 fourslash tests; 1,749 fourslash baselines; project and LSP suites; replay corpus</td><td>First: Go fourslash suite bridged to an out-of-process Rust server. Later: suite regenerated in Rust from the original fourslash sources</td><td><span class="chip warn">Bridge, then regenerate</span></td></tr>
+              <tr><td>JS API: msgpack framing, encoder protocol 8, 144 methods, snapshots, batches, callback FS</td><td><code>packages/typescript</code> sync and async suites and benchmarks; <code>api</code> baselines; <code>proto.generated.ts</code></td><td>The suites spawn whichever binary <code>getExePath</code> resolves</td><td><span class="chip ok">Unchanged</span></td></tr>
+              <tr><td>Content-mapper plugins</td><td>JSON-RPC child-process protocol; <code>spanmap</code> fidelity; 15 contentmapper baselines</td><td>Ported <code>contentmappertest</code></td><td><span class="chip acc">Harness ported</span></td></tr>
+              <tr><td>Diagnostic text and localization</td><td>2,135 + 85 messages; 13 locales</td><td>Baselines; message-format unit tests</td><td><span class="chip ok">Regenerated</span></td></tr>
+              <tr><td>Semantics relative to TypeScript 6</td><td><code>tsc/CHANGES.md</code></td><td>The corpus; Strada divergences are not "fixed"</td><td><span class="chip ok">Spec as-is</span></td></tr>
+              <tr><td>Small semantics: Unicode 15.1 identifiers, JS number formatting, collation, paths, case sensitivity, symlinks</td><td>Go unit tests: <code>jsnum</code> 1,347 lines, <code>tspath</code> 1,258, <code>vfsmatch</code> 2,171, <code>symlinks</code>, <code>semver</code> 1,106</td><td>Ported unit tests plus differential fuzzing against the Go binary</td><td><span class="chip acc">Tests ported</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="strategy">
+        <h2>Strategy and crate map</h2>
+        <div class="prose">
+          <p>Strangler fig, with the Go binary as the oracle. Go keeps shipping; Rust grows bottom-up in the dependency order of the Go packages, and nothing moves up a tier until the tier below has parity.</p>
+          <ul>
+            <li><strong>Same repository, non-blocking CI at first.</strong> The workspace lives under <code>rust/</code>; hereby gets <code>rust:build</code>, <code>rust:test</code> and <code>rust:lint</code> tasks. Rust CI does not block Go pull requests until the checker gate.</li>
+            <li><strong>Every crate lands with its tests.</strong> The Go unit tests for the package are ported, and where output is observable a differential test runs both binaries.</li>
+            <li><strong>Three oracle seams from week one.</strong> Parser parity: encode every test input and lib file with both binaries' API encoders and compare bytes. Editor parity: the Go fourslash client talks JSON-RPC over pipes to an in-process server; a bridge that spawns <code>tsc --lsp</code>, materializes the virtual file system to a temporary directory and rewrites roots gives a live pass rate against 4,356 tests without translating one. API parity: the TypeScript test suite already spawns the binary.</li>
+            <li><strong>A port ledger.</strong> <code>rust/PORTS.toml</code> maps each Go file to its Rust module and the last synchronized Go commit; a bot comments on upstream pull requests that touch a ported file. This is the same discipline the Go port used against TypeScript 6, with <code>submoduleAccepted.txt</code> as the allow-list.</li>
+            <li><strong>Agent-assisted translation with a hard oracle.</strong> The mechanical tiers are good candidates for agent-driven translation, exactly as the Go port used. The rule is that nothing merges without its baselines, and the checker's data-layer redesign is human-led. Disclosure follows <code>CONTRIBUTING.md</code>.</li>
+            <li><strong>Flag-gated cut-over.</strong> The npm package and the extension select the implementation through an environment variable during dogfood; the switch flips when the exit criteria hold for four consecutive weeks. The Go module stays one release for rollback and is deleted after two.</li>
+          </ul>
+        </div>
+        <h3>Crate map, leaves first</h3>
+        <div class="prose"><p>Tiers follow the topological order of the 82 Go packages. Color marks the phase in which a crate reaches parity; dashed outlines mark generated crates.</p></div>
+        <div class="cratemap">
+          <div class="tier">
+            <div class="tname"><b>Tier 0 &middot; leaves</b>no compiler knowledge</div>
+            <div class="crates">
+              <span class="crate p1">ts_core</span><span class="crate p1">ts_collections</span><span class="crate p1">ts_tspath</span><span class="crate p1">ts_stringutil</span><span class="crate p1">ts_jsnum</span><span class="crate p1">ts_json</span><span class="crate p1">ts_locale</span><span class="crate p1">ts_glob</span><span class="crate p1">ts_semver</span><span class="crate p1">ts_packagejson</span><span class="crate p1">ts_vfs</span><span class="crate p1">ts_vfs_os</span><span class="crate p1">ts_vfs_match</span><span class="crate p1 gen">ts_diagnostics</span><span class="crate p1 gen">ts_bundled</span><span class="crate p4">ts_fswatch</span><span class="crate p4">ts_nativepath</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Tier 1 &middot; syntax</b>source text to bound trees</div>
+            <div class="crates">
+              <span class="crate p0 gen">ts_ast</span><span class="crate p0">ts_scanner</span><span class="crate p0">ts_parser</span><span class="crate p1">ts_binder</span><span class="crate p1">ts_astnav</span><span class="crate p1">ts_evaluator</span><span class="crate p0 gen">ts_encoder</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Tier 2 &middot; semantics</b>resolution, types, output trees</div>
+            <div class="crates">
+              <span class="crate p1">ts_module</span><span class="crate p1">ts_tsoptions</span><span class="crate p2">ts_modulespecifiers</span><span class="crate p3">ts_pseudochecker</span><span class="crate p3">ts_sourcemap</span><span class="crate p3">ts_printer</span><span class="crate p3">ts_transformers</span><span class="crate p3">ts_declarations</span><span class="crate p2">ts_checker</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Tier 3 &middot; programs</b>compile, build, watch</div>
+            <div class="crates">
+              <span class="crate p4">ts_compiler</span><span class="crate p3">ts_outputpaths</span><span class="crate p3">ts_transpile</span><span class="crate p4">ts_incremental</span><span class="crate p4">ts_build</span><span class="crate p4">ts_execute</span><span class="crate p4">ts_diagnosticwriter</span><span class="crate p4">ts_tracing</span><span class="crate p4">ts_pprof</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Tier 4 &middot; editor</b>language service and projects</div>
+            <div class="crates">
+              <span class="crate p5">ts_format</span><span class="crate p5">ts_ls</span><span class="crate p5">ts_autoimport</span><span class="crate p5 gen">ts_lsproto</span><span class="crate p5">ts_project</span><span class="crate p5">ts_ata</span><span class="crate p5">ts_contentmapper</span><span class="crate p5">ts_spanmap</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Tier 5 &middot; servers</b>processes and protocols</div>
+            <div class="crates">
+              <span class="crate p5">ts_lsp</span><span class="crate p6">ts_ipc</span><span class="crate p6">ts_jsonrpc</span><span class="crate p6">ts_api</span><span class="crate p4">tsc (bin)</span>
+            </div>
+          </div>
+          <div class="tier">
+            <div class="tname"><b>Test crates</b>harnesses, not shipped</div>
+            <div class="crates">
+              <span class="crate p1">ts_testutil</span><span class="crate p1">ts_testrunner</span><span class="crate p4">ts_tsctests</span><span class="crate p5">ts_fourslash</span><span class="crate p5">ts_projecttest</span>
+            </div>
+          </div>
+        </div>
+        <div class="legend"><span class="l0">Phase 0 spike</span><span class="l1">Phase 1 foundations</span><span class="l2">Phase 2 checker</span><span class="l3">Phase 3 emit</span><span class="l4">Phase 4 programs</span><span class="l5">Phase 5 editor</span><span class="l6">Phase 6 API</span></div>
+      </section>
+
+      <section id="phases">
+        <h2>Phases and timeline</h2>
+        <div class="prose"><p>Thirty months, ten engineers. Bars show when a phase is staffed; phases overlap because the workstreams are independent above the checker. The decision point at the end of month three is the only place the plan can be stopped cheaply.</p></div>
+        <div class="tlwrap">
+          <div class="timeline" role="img" aria-label="Gantt chart: Phase 0 months 1 to 3, Phase 1 months 2 to 6, Phase 2 months 4 to 18, Phase 3 months 7 to 13, Phase 4 months 10 to 16, Phase 5 months 12 to 24, Phase 6 months 18 to 23, Phase 7 months 22 to 30, go/no-go at month 3, cut-over window months 28 to 30">
+            <div class="tl-head" style="grid-column:1">Month</div>
+            <div class="tl-head tick" style="grid-column:2">1</div>
+            <div class="tl-head tick" style="grid-column:7">6</div>
+            <div class="tl-head tick" style="grid-column:13">12</div>
+            <div class="tl-head tick" style="grid-column:19">18</div>
+            <div class="tl-head tick" style="grid-column:25">24</div>
+            <div class="tl-head tick" style="grid-column:31">30</div>
+
+            <div class="tl-label" style="grid-row:2; grid-column:1"><b>0 &middot; Spike and decision</b><span>4 engineers</span></div>
+            <div class="tl-bar p0" style="grid-row:2; grid-column:2 / 5">spike</div>
+            <div class="tl-mark" style="grid-row:2; grid-column:5 / 9">go / no-go</div>
+
+            <div class="tl-label" style="grid-row:3; grid-column:1"><b>1 &middot; Foundations</b><span>5 engineers</span></div>
+            <div class="tl-bar p1" style="grid-row:3; grid-column:3 / 8">foundations</div>
+
+            <div class="tl-label" style="grid-row:4; grid-column:1"><b>2 &middot; Type checker</b><span>4 engineers &middot; critical path</span></div>
+            <div class="tl-bar p2" style="grid-row:4; grid-column:5 / 20">checker, critical path</div>
+
+            <div class="tl-label" style="grid-row:5; grid-column:1"><b>3 &middot; Emit</b><span>2 engineers</span></div>
+            <div class="tl-bar p3" style="grid-row:5; grid-column:8 / 15">emit pipeline</div>
+
+            <div class="tl-label" style="grid-row:6; grid-column:1"><b>4 &middot; Programs and CLI</b><span>2 engineers</span></div>
+            <div class="tl-bar p4" style="grid-row:6; grid-column:11 / 18">programs and CLI</div>
+
+            <div class="tl-label" style="grid-row:7; grid-column:1"><b>5 &middot; Editor</b><span>4 engineers</span></div>
+            <div class="tl-bar p5" style="grid-row:7; grid-column:13 / 26">language service &middot; projects &middot; LSP</div>
+
+            <div class="tl-label" style="grid-row:8; grid-column:1"><b>6 &middot; JS API server</b><span>2 engineers</span></div>
+            <div class="tl-bar p6" style="grid-row:8; grid-column:19 / 25">API server</div>
+
+            <div class="tl-label" style="grid-row:9; grid-column:1"><b>7 &middot; Hardening and cut-over</b><span>whole team</span></div>
+            <div class="tl-bar p7" style="grid-row:9; grid-column:23 / 32">hardening &middot; cut-over</div>
+            <div class="tl-mark" style="grid-row:10; grid-column:29 / 32">cut-over window</div>
+          </div>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 0 &middot; Months 1 to 3 &middot; 4 engineers</div>
+          <h3>Spike and decision</h3>
+          <dl>
+            <dt>Scope</dt><dd>Workspace skeleton with CI, lint and format. Rust AST generated from <code>ast.json</code>; scanner, parser and JSDoc reparser; the API encoder. A parser-parity harness that encodes all 12,721 test inputs and 108 lib files with both binaries and compares bytes. A checker vertical slice on the decision 2 and 3 data model: literal, object, union, intersection, array and tuple types; <code>getTypeOfSymbol</code>; assignability through <code>isRelatedTo</code>; a subset of narrowing; <code>typeToString</code>. Run it on a curated 800 conformance cases and compare <code>.types</code> line by line. A performance probe on parse and bind of the VS Code repository against Go. Measure verified lines per engineer-day.</dd>
+            <dt>Gate</dt><dd>At least 99.9 percent encoder-identical parses; the slice matches its subset including union order; measured velocity supports a schedule of at most 36 months; the memory, WebAssembly and embedding benefits are confirmed with numbers. Otherwise stop, having spent about one engineer-year.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 1 &middot; Months 2 to 6 &middot; 5 engineers</div>
+          <h3>Foundations</h3>
+          <dl>
+            <dt>Scope</dt><dd><code>core</code>, <code>collections</code>, <code>tspath</code>, <code>stringutil</code> with regenerated Unicode tables, <code>jsnum</code>, <code>json</code>, <code>locale</code>, <code>glob</code>, <code>semver</code>, <code>packagejson</code>, the <code>vfs</code> family including <code>vfstest</code>, generated <code>diagnostics</code>, <code>bundled</code>, the complete <code>ast</code>, <code>scanner</code>, <code>parser</code>, <code>binder</code>, <code>astnav</code>, <code>evaluator</code>, <code>module</code> resolution and <code>tsoptions</code>. Harness: baseline diffing with a patience diff, the test-case directive parser, the compiler runner limited to parse and bind sub-tests and syntactic <code>.errors.txt</code>. CI matrix on Linux, macOS and Windows; generator drift checks like today's <code>generate</code> job.</dd>
+            <dt>Gate</dt><dd>All 12,721 cases parse identically; binder output matches through a debug dump of symbol tables and flow graphs produced by both implementations; the 309 config and options baselines pass.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 2 &middot; Months 4 to 18 &middot; 4 engineers &middot; critical path</div>
+          <h3>Type checker</h3>
+          <dl>
+            <dt>Scope</dt><dd>In an order where each step unlocks a slice of baselines: symbol resolution, declared and inferred types, literal, enum, tuple and array types; the relater (assignable, subtype, strict subtype, comparable, identity) and variance; signatures, overloads, inference and contextual typing; control flow and narrowing from <code>flow.go</code>; mapped, conditional, template-literal and indexed-access types with instantiation, mappers and depth limits; classes, interfaces, enums, namespaces, late binding, declaration merging and the JavaScript semantics in <code>CHANGES.md</code>; JSX; grammar checks and all 2,220 diagnostics; the node builder behind <code>typeToString</code>, <code>typeToTypeNode</code> and hover; the emit resolver and the services surface in <code>services.go</code> and <code>symbolaccessibility.go</code>; the checker pool, parallel checking, cancellation and <code>--generateTrace</code>.</dd>
+            <dt>Tooling</dt><dd>A burn-down harness that runs both binaries per case, aligns <code>.types</code>, <code>.symbols</code> and <code>.errors.txt</code>, buckets differences by diagnostic code and checker area, and publishes a pass-rate dashboard per area. The creation-trace diff from decision 5.</dd>
+            <dt>Gate</dt><dd>100 percent of compiler and conformance <code>.errors.txt</code>, <code>.types</code> and <code>.symbols</code> baselines with a reviewed allow-list; <code>union ordering</code> and <code>source file parent pointers</code> sub-tests green; Rust CI becomes blocking for Go pull requests that touch ported files.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 3 &middot; Months 7 to 13 &middot; 2 engineers</div>
+          <h3>Emit</h3>
+          <dl>
+            <dt>Scope</dt><dd><code>printer</code>, <code>sourcemap</code>, the TypeScript, ES, module, JSX and inliner transforms, the declaration transform (which depends on the emit resolver and <code>pseudochecker</code>), <code>outputpaths</code> and <code>transpile</code>; the <code>.js</code>, <code>.map</code> and <code>.d.ts</code> sub-tests and the transpile runner. Starts once the parser and binder are stable and finishes only after the emit resolver exists.</dd>
+            <dt>Gate</dt><dd>100 percent of <code>.js</code>, <code>.map</code>, <code>.d.ts</code> and source-map-record baselines and the 41 transpile baselines.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 4 &middot; Months 10 to 16 &middot; 2 engineers</div>
+          <h3>Programs, command line, build and watch</h3>
+          <dl>
+            <dt>Scope</dt><dd><code>compiler</code> (program, file loader, project references, checker pool, emit orchestration); <code>execute/tsc</code> with pretty diagnostics, colors and locales; the <code>-b</code> orchestrator; <code>incremental</code>, reading and writing Corsa's <code>.tsbuildinfo</code> so both binaries can share build state during transition; the watch manager and <code>fswatch</code>, porting the native FSEvents, inotify, fanotify, kqueue and Windows backends rather than substituting a generic crate, because their behaviors are baselined; <code>diagnosticwriter</code>, <code>tracing</code>, <code>pprof</code>; the <code>tsctests</code> harness with its fake system and clock.</dd>
+            <dt>Gate</dt><dd>All 517 tsc, watch, build and build-watch baselines; the CI smoke test compiles the fixture project single- and multi-threaded; a ThreadSanitizer build mirrors today's race-mode job; the <code>--singleThreaded</code> and concurrent-test-programs configurations both pass.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 5 &middot; Months 12 to 24 &middot; 4 engineers</div>
+          <h3>Language service, project system, LSP server</h3>
+          <dl>
+            <dt>Scope</dt><dd>Language service in order of fourslash weight: completions including string completions and the auto-import registry; hover; the definition family; references, highlights, rename and file rename; signature help; diagnostics; code actions and fixes; organize imports; inlay hints; call hierarchy; code lens; folding; selection ranges; semantic tokens; linked editing; document and workspace symbols; JSDoc snippets; <code>format</code>. Project system: snapshots, config-file registry, inferred projects, cross-project references, automatic type acquisition, overlay file system, parse cache, the service-side checker pool, background work and logging. Server: JSON-RPC framing, the request queue with cancellation, progress, client and native watchers, the API-over-LSP connection, the stack sanitizer.</dd>
+            <dt>Testing</dt><dd>First bridge the Go fourslash suite to an out-of-process Rust server to get a live pass rate against all 4,356 tests. Then regenerate the suite in Rust from the original fourslash sources, the way the Go tests were generated, rather than translating Go to Rust. Replay files from the LSP replay corpus run against both servers.</dd>
+            <dt>Gate</dt><dd>At least 99.5 percent fourslash with a triaged allow-list; project and LSP suites; replay corpus; no request-latency regression against Go on the benchmarking editor scenarios.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 6 &middot; Months 18 to 23 &middot; 2 engineers</div>
+          <h3>JS API server</h3>
+          <dl>
+            <dt>Scope</dt><dd><code>ipc</code> with unix sockets, Windows named pipes and both sync and async connections; msgpack framing; the generated encoder at protocol 8; the 144 methods with snapshot, temporary-snapshot, batch, pagination and disposal semantics; the callback file system; the schema-driven <code>proto.generated.ts</code> and enum generation for the TypeScript package.</dd>
+            <dt>Gate</dt><dd>The <code>packages/typescript</code> sync and async suites and benchmarks pass unchanged against the Rust binary; <code>api</code> baselines.</dd>
+          </dl>
+        </div>
+
+        <div class="phase prose">
+          <div class="eyebrow">Phase 7 &middot; Months 22 to 30 &middot; whole team</div>
+          <h3>Hardening, performance, cut-over</h3>
+          <dl>
+            <dt>Scope</dt><dd>The TypeScript-benchmarking scenarios at 2, 4 and 8 checkers; allocation and layout tuning; fuzzing of scanner, parser and formatter, differential against the Go binary; the crash replay corpus; the cross-compile matrix, signing and a binary-size budget; dogfood in <code>typescript@next</code> and the nightly extension behind the implementation switch.</dd>
+            <dt>Gate</dt><dd>Every exit criterion in the goals section holds for four consecutive weeks. Then the switch flips, the Go module stays one release for rollback and is deleted after two.</dd>
+          </dl>
+        </div>
+
+        <div class="prose">
+          <h3>Team</h3>
+          <p>Ten engineers: one lead and architect; three on the checker; three on the language service, project system and server; one on emit and the compiler driver; one on infrastructure, generators and release; one rotating between performance, fuzzing and upstream synchronization. Each area has a named reviewer from the TypeScript team who owns the semantics, because the people who know why a line exists are not the people writing the Rust.</p>
+        </div>
+      </section>
+
+      <section id="risks">
+        <h2>Risk register</h2>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Risk</th><th>Evidence in the repository</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1 <span class="chip crit">High</span></td><td>The checker cannot be made to fit the borrow checker without changing behavior</td><td>320-field <code>Checker</code>, 26 pointer-keyed link stores, function-valued fields, mutation anywhere through <code>*Checker</code>; the reason Go was chosen</td><td>Decisions 2, 3 and 5; the Phase 0 slice on 800 cases before committing; structure-preserving translation; creation-trace diffing</td></tr>
+              <tr><td class="num">2 <span class="chip crit">High</span></td><td>Upstream outruns the port</td><td>113 to 237 commits a month; about 4,000 commits over the plan's life</td><td>Port ledger and bot; Go names kept in Rust; freeze windows before gates; sponsorship so the two trees have one owner</td></tr>
+              <tr><td class="num">3 <span class="chip crit">High</span></td><td>Two implementations to fix for two years</td><td>Every checker bug fixed in Go must be re-fixed in Rust until cut-over</td><td>Rust follows Go strictly until the checker gate; after it, ported-file CI blocks Go changes without a Rust counterpart</td></tr>
+              <tr><td class="num">4 <span class="chip warn">Medium</span></td><td>Performance does not justify the cost</td><td>Corsa already took the large win; Go's checker pool and arenas are tuned</td><td>Phase 0 perf probe with kill criteria; memory and embedding as the primary case, CPU as upside</td></tr>
+              <tr><td class="num">5 <span class="chip warn">Medium</span></td><td>Stack overflow as a new crash class</td><td>Go stacks grow to 1 GB; Corsa has no depth guards beyond TypeScript's own limits</td><td>Decision 6: large reserved stacks and growth guards; fuzz deep nesting</td></tr>
+              <tr><td class="num">6 <span class="chip warn">Medium</span></td><td>Editor parity stalls on the long tail</td><td>4,356 fourslash tests, 41,500 lines of service code, many features with few tests each</td><td>Bridge the Go suite early for a live pass rate; regenerate tests from fourslash sources; allow-list with owners</td></tr>
+              <tr><td class="num">7 <span class="chip warn">Medium</span></td><td>Small-semantics drift</td><td>JS number formatting, Unicode 15.1 tables, <code>x/text</code> collation, path and symlink rules each have baselines</td><td>Decision 8; port the Go unit tests first; differential fuzzing</td></tr>
+              <tr><td class="num">8 <span class="chip warn">Medium</span></td><td>Platform matrix shrinks</td><td>Twenty release targets; several are Rust tier 3</td><td>Decide the matrix in Phase 0; best-effort targets built by the community from source</td></tr>
+              <tr><td class="num">9 <span class="chip ok">Low</span></td><td>Compile times slow the team</td><td>60,000-line checker crate; generic-heavy code</td><td>Crate split per decision 11; sccache; lld or mold; a compile-time budget in CI</td></tr>
+              <tr><td class="num">10 <span class="chip ok">Low</span></td><td>Generator rewrite breaks the TypeScript package</td><td><code>gen-proto</code> reads Go types; <code>generate:enums</code> scrapes Go source</td><td>Decision 10; the package's own tests cover the generated surface</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="keep" class="prose">
+        <h2>Deliberately not rewritten</h2>
+        <ul>
+          <li><strong>Test data and baselines</strong> under <code>tsc/testdata</code>: 342 MB of language-agnostic inputs and expected outputs, reused byte for byte.</li>
+          <li><strong><code>packages/typescript</code></strong>, the npm package and JS API client. Only its generated files are regenerated from the new schema.</li>
+          <li><strong><code>packages/vscode-typescript</code></strong> and the nightly variant; they spawn whatever <code>tsc --lsp</code> is on disk.</li>
+          <li><strong>The hereby build file</strong>, extended with <code>rust:*</code> tasks; the dprint configuration; the CI workflows, extended with a Rust matrix.</li>
+          <li><strong>Generators and schemas</strong>: <code>ast.json</code> and <code>tools/scripts/tsc/*</code>, the LSP metamodel generator, <code>diagnosticMessages.json</code>, the 108 lib files, the 13 locale files. Each gains a Rust backend rather than a replacement.</li>
+          <li><strong>Release pipelines and signing</strong>: the Azure pipelines, <code>tools/cmd/machotool</code>, quill, the platform-package layout and <code>getExePath</code>.</li>
+          <li><strong><code>CHANGES.md</code></strong> as the specification of Corsa's intentional divergences from TypeScript 6.</li>
+        </ul>
+      </section>
+
+      <section id="alternatives" class="prose">
+        <h2>Alternatives considered</h2>
+        <ul>
+          <li><strong>Do not rewrite; invest the same budget in Go.</strong> Profile-guided optimization, arena tuning, a WebAssembly build of the Go compiler despite its size, and a C-ABI shim for embedding. This is the baseline the decision memo must beat, and it should be costed honestly alongside this plan.</li>
+          <li><strong>Hybrid: Rust only for scanner, parser and emit behind an FFI.</strong> The parser is not the bottleneck, the FFI boundary would cross on every node access, and two toolchains would ship in one binary. Rejected.</li>
+          <li><strong>Adopt an existing Rust AST and parser</strong> such as oxc's. The AST shape is pinned by <code>ast.json</code>, the binary encoder and the generated TypeScript AST package, and thousands of checker and service code paths are written against it. Borrow the allocator and layout ideas; do not adopt the types. Rejected as a dependency.</li>
+          <li><strong>Rewrite from the TypeScript 6 source rather than from Go.</strong> The Go tree is the current semantics, the baselines are Corsa's, and the Go port already answered every question about JavaScript-specific idioms. Rejected.</li>
+          <li><strong>A query-based incremental architecture</strong> in the rust-analyzer style. The right long-term shape for an editor service, and incompatible with landing a drop-in replacement on a moving target. Deferred until after cut-over.</li>
+        </ul>
+      </section>
+
+      <section id="open" class="prose">
+        <h2>Open questions</h2>
+        <p>The plan is complete at the level of a decision memo and an engineering roadmap. These items are deliberately left open because each depends on a decision or a measurement that has not happened yet.</p>
+        <ol>
+          <li><strong>Sponsorship and ownership.</strong> Who owns the Rust tree and the port ledger, and whether the TypeScript team commits a named reviewer per area. Without an answer the plan recommends not starting.</li>
+          <li><strong>The supported platform matrix.</strong> Which of the thirteen best-effort targets are kept, dropped, or handed to community builds. A Phase 0 decision.</li>
+          <li><strong>Cost in currency and the costed do-nothing alternative.</strong> This plan sizes effort in engineer-years; the decision memo must price it against investing the same budget in the Go implementation.</li>
+          <li><strong>The spike's pass criteria in numbers.</strong> The curated 800-case subset, the velocity threshold in verified lines per engineer-day, and the memory and CPU figures that turn the spike into a go decision.</li>
+          <li><strong>Performance budgets per benchmark scenario.</strong> Set after the Phase 0 probe, not before it.</li>
+          <li><strong>WebAssembly as a deliverable.</strong> Whether the <code>wasm32</code> build is part of Phase 7 or the first post-cut-over project.</li>
+          <li><strong>Allow-list governance.</strong> Who may approve an intentional baseline difference and how it is reviewed, mirroring the process that produced <code>submoduleAccepted.txt</code>.</li>
+          <li><strong>A public Rust API for embedding.</strong> The in-process embedding benefit needs a stable crate API. That design is deferred until after cut-over so it does not compete with parity.</li>
+        </ol>
+      </section>
+
+      <section id="first30" class="prose">
+        <h2>First thirty days</h2>
+        <ol class="steps">
+          <li>Write the decision memo: this plan, the costed do-nothing alternative, and the benefit case with the numbers the spike will confirm. Secure sponsorship from the TypeScript team; without it, stop here.</li>
+          <li>Stand up <code>rust/</code> with the workspace skeleton, CI on three platforms, clippy, rustfmt through dprint, and hereby tasks. Rust CI non-blocking.</li>
+          <li>Add the Rust backend to <code>tools/scripts/tsc/generate.ts</code> and emit the AST, visitor, factory and encoder from <code>ast.json</code>; add the <code>diagnostics.rs</code> generator from <code>diagnosticMessages.json</code>.</li>
+          <li>Build the parser-parity harness: encode every test input and lib file with the Go binary's API encoder, keep the bytes as fixtures, and make the Rust scanner and parser converge on them.</li>
+          <li>Start the checker slice with two senior engineers on the arena and id model from decisions 2 and 3, targeting the curated 800-case subset and identical <code>.types</code> output.</li>
+          <li>Add the out-of-process transport to the Go fourslash harness so it can target any <code>tsc --lsp</code> binary. Small, and it is the instrument the whole editor phase is measured with.</li>
+          <li>Define the allow-list process for intentional baseline differences, mirroring <code>submoduleAccepted.txt</code>, and the port ledger format.</li>
+          <li>Run the first performance probe (parse and bind of the VS Code repository) and publish the numbers, good or bad.</li>
+        </ol>
+      </section>
+
+      <footer class="colophon">
+        Numbers were measured on commit 1f70213d49 of microsoft/TypeScript (5 September 2026), excluding <code>testdata</code>, <code>node_modules</code> and test files unless stated. Package dependency order was derived from import statements and matches the Go module's build order. Timeline and staffing are estimates to be revised after the Phase 0 spike.
+      </footer>
+    </main>
+  </div>
+</div>
