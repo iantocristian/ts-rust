@@ -76,7 +76,7 @@ id = "concurrent_lazy_storage"
 metric = "run.e3.concurrent_lazy_storage"
 op = "=="
 threshold = true
-unit = "concurrent first-use JSDoc and token requests preserve file ownership"
+unit = "same-lock cache lookup/publication, miss recheck and page growth preserve initialized nodes, supplied token parents and file ownership under concurrent first use"
 
 [[E3.criteria]]
 id = "mapper_bundle_disposal"
@@ -90,14 +90,42 @@ id = "builder_cache_retention"
 metric = "run.e3.builder_cache_retention"
 op = "=="
 threshold = true
-unit = "live cache entries and returned handles retain builder arenas until released"
+unit = "cache, persistent emit-table keys/values and returned-handle dependencies retain builder generations; cloning A into B preserves original links after A's cache entry drops"
+
+[[E3.criteria]]
+id = "checker_result_retention"
+metric = "run.e3.checker_result_retention"
+op = "=="
+threshold = true
+unit = "retained types, signatures, symbols and lists preserve exact checker identity and storage after lease release or idle-slot replacement, without self-owning cycles"
+
+[[E3.criteria]]
+id = "checker_ast_retention"
+metric = "run.e3.checker_ast_retention"
+op = "=="
+threshold = true
+unit = "checker synthetic expressions and signature declarations retain exact-checker type, AST and file/bundle dependencies across builder release"
+
+[[E3.criteria]]
+id = "api_scratch_disposal"
+metric = "run.e3.api_scratch_disposal"
+op = "=="
+threshold = true
+unit = "repeated API printing and insertion formatting match Go and release request scratch without synthetic handles or session arena growth"
+
+[[E3.criteria]]
+id = "id_exhaustion"
+metric = "run.e3.id_exhaustion"
+op = "=="
+threshold = true
+unit = "node/symbol identity survives the 31-bit boundary; arena and slot allocation reject exhaustion before u32 wrap, reuse or zero-slot publication"
 
 [[E3.criteria]]
 id = "wrong_owner_rejected"
 metric = "run.e3.wrong_owner_rejected"
 op = "=="
 threshold = true
-unit = "every wrong-file and wrong-checker handle is explicitly rejected"
+unit = "every wrong-file and wrong-checker handle is rejected, including equal numeric slots in two active checkers of one pool generation"
 
 [[E3.criteria]]
 id = "stale_and_recycled_ids_rejected"
@@ -111,21 +139,21 @@ id = "shared_pool_panic_retirement"
 metric = "run.e3.shared_pool_panic_retirement"
 op = "=="
 threshold = true
-unit = "panic through one snapshot retires the shared pool generation in every dependent snapshot, project, lease and registry"
+unit = "panic through one snapshot retires the shared pool in all dependent snapshots, projects, leases, retained results and registries; forced publication interleavings commit no retired success or handles and preserve lock order"
 
 [[E3.criteria]]
 id = "owners_return_to_baseline"
 metric = "run.e3.live_owner_delta"
 op = "=="
 threshold = 0
-unit = "maximum absolute live-owner count deviation from the pre-scenario baseline, across all final owner/lease drops"
+unit = "maximum absolute live-owner count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops"
 
 [[E3.criteria]]
 id = "allocations_return_to_baseline"
 metric = "run.e3.live_allocation_delta"
 op = "=="
 threshold = 0
-unit = "maximum absolute live-allocation count deviation from the pre-scenario baseline, across all final owner/lease drops"
+unit = "maximum absolute live-allocation count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops"
 
 [[E3.criteria]]
 id = "miri"
@@ -150,7 +178,7 @@ unit = "release builds reject stale/wrong-owner cache, cross-arena and reentrant
 
 [E4]
 title = "Strings"
-nature = "Measured over corpus literals plus lone-surrogate, malformed-byte and BOM fixtures, including invalid bytes inside and outside strings and comments"
+nature = "Measured over corpus literals and the text design note's helper/printer, byte-slice, BOM, malformed-byte, surrogate, partial-position and line-map fixtures"
 
 [[E4.criteria]]
 id = "source_decoding"
@@ -171,21 +199,35 @@ id = "token_literal_bytes"
 metric = "run.e4.token_literal_bytes"
 op = "=="
 threshold = true
-unit = "token bytes, literal values and literal types match Go without lossy repair"
+unit = "token bytes, literal values and literal types match Go, including explicit upstream transformations without added lossy repair"
+
+[[E4.criteria]]
+id = "helper_printer_semantics"
+metric = "run.e4.helper_printer_semantics"
+op = "=="
+threshold = true
+unit = "case mapping and truncation preserve Go's replacements/fragments; original-source and regenerated literal paths reproduce its distinct copy/escape behavior"
+
+[[E4.criteria]]
+id = "slice_validity"
+metric = "run.e4.slice_validity"
+op = "=="
+threshold = true
+unit = "byte slices of UTF-8/WTF-8 strings remain representable and are reclassified when endpoints split a sequence; str views require valid slice boundaries"
 
 [[E4.criteria]]
 id = "utf8_positions"
 metric = "run.e4.utf8_positions"
 op = "=="
 threshold = true
-unit = "byte offsets and UTF-8 wire positions match Go"
+unit = "byte offsets, UTF-8 wire positions and distinct ECMAScript/LSP line maps match Go, including U+2028/U+2029 and range handling"
 
 [[E4.criteria]]
 id = "utf16_positions"
 metric = "run.e4.utf16_positions"
 op = "=="
 threshold = true
-unit = "UTF-16 wire positions match Go"
+unit = "API/LSP/scanner UTF-16 conversions match Go separately, including astral offset 1 to bytes 1/0/4, sentinel counting, partial byte prefixes and clamp/panic behavior"
 
 [[E4.criteria]]
 id = "encoder_success_error"
