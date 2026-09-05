@@ -1,15 +1,16 @@
 # ADR 0006: Node ownership: arenas, lazy file storage, bundles and checked identities
 
-Status: Proposed (2026-09-05)
+Status: Accepted (2026-09-05)
+Design note: [docs/design/ownership.md](../design/ownership.md), reviewed and accepted by the owner on 2026-09-05
 Plan: section 6, decision 1
 
 ## Context
 
-Corsa's AST is a pointer graph with parent links and late mutation. Nodes have several owners: source files, transforms (with original-node side maps), the checker's node builder (with a release protocol), the API session, and scratch factories. Binding does not end file-owned allocation: `SourceFile.resolveJSDoc` and `GetOrCreateToken` allocate and cache nodes on demand under locks, and content mappers link a canonical file and its supplemental files in both directions. Rust needs these rules stated.
+Corsa's AST is a pointer graph with parent links and late mutation. Nodes have several owners: source files, the checker's own AST factory, transforms and node builders with persistent emit metadata, and operation-scoped scratch factories including API printing and formatting. Binding does not end file-owned allocation: `SourceFile.resolveJSDoc` and `GetOrCreateToken` allocate and cache nodes on demand under locks, and content mappers link a canonical file and its supplemental files in both directions. Rust needs these rules stated.
 
 ## Decision
 
-A file owner retains the immutable parsed and bound core plus synchronized append-only storage for lazy JSDoc and language-service tokens; lazy nodes are published only after initialization, keep stable ids, and live until the file owner is released. A content-mapper bundle owns its canonical and supplemental files together, with cyclic links inside the bundle as non-owning ids. Transform, checker-builder and API-session owners retain their synthetic arenas; options and formatter scratch factories use the same scoped ownership. A node id identifies an arena generation and slot, resolved through a live owner; the compact representation is 64 bits, with packing, overflow and registry protocol fixed in the design note before generation. Logical links (parent, original, bundle) may be cyclic; owning references between owners must be acyclic, with mutually dependent files grouped under one bundle owner. Transform and builder owners retain the file or bundle owners they reference; a builder arena is released only after every cache entry and returned handle retaining it is released. Generated accessors hide the node layout, which is chosen by measurement (section 13, item 6).
+A file owner retains the immutable parsed and bound core plus synchronized append-only storage for lazy JSDoc and language-service tokens; lazy nodes are published only after initialization, keep stable ids, and live until the file owner is released. A content-mapper bundle owns its canonical and supplemental files together, with cyclic links inside the bundle as non-owning ids. Checker, transform and builder owners retain their synthetic arenas; options, formatting and API print/format factories use operation-scoped scratch storage. A node id identifies an arena generation and slot, resolved through a live owner; the compact representation is 64 bits, with packing, overflow and registry protocol fixed in the design note before generation. Logical links (parent, original, bundle) may be cyclic; owning references between owners must be acyclic, with mutually dependent files grouped under one bundle owner. Checker, transform and builder owners retain the file or bundle owners they reference; builder caches, persistent emit side tables and returned handles retain all required arena dependencies until the final root drops. Generated accessors hide the node layout, which is chosen by measurement (section 13, item 6).
 
 ## Consequences
 
@@ -19,7 +20,7 @@ Checked resolution is the default in release builds. Repeated owner/generation c
 
 A lease retaining storage does not establish that its generation is still active. The design note specifies how retirement stops new operations, how existing leases observe it, and how stale results are prevented from being published. Returning from a callback that can retire or replace the owner must preserve the active-scope proof or revalidate before resuming; ordinary recursion within an uninterrupted valid scope need not repeat checks.
 
-E3 must reject wrong-owner, stale, recycled and retired-generation handles in release mode, including cache imports, cross-arena links and callback reentry, alongside debug and sanitizer checks. This ADR remains Proposed until the owner has reviewed the design note and its Go evidence; these are required checks, not completed verification.
+E3 must reject wrong-owner, stale, recycled and retired-generation handles in release mode, including cache imports, cross-arena links and callback reentry, alongside debug and sanitizer checks. Accepted on 2026-09-05 after the owner reviewed the design note and its Go evidence; the E3 and E4 assertions remain required verification, not completed verification.
 
 ## Evidence
 
@@ -30,3 +31,5 @@ E3 must reject wrong-owner, stale, recycled and retired-generation handles in re
 Draft 2 introduced four arena kinds; draft 3.2 added lazy file storage, bundle ownership and generation-checked identities after the third review.
 
 The tracking-scaffold review qualified release check elision with a validated ownership-scope proof and separated retained storage from active-generation validity.
+
+The design-note correction pass specifies one read/write synchronization domain for lazy publication, the checker's separate AST arena, builder emit-table retention roots and operation-scoped API formatting storage. Retirement serializes with registry insertion and response commitment. Node and symbol ids use full 32-bit arena and slot fields; owner kind is resolver metadata. These refinements preserve the accepted ownership contract; their E3 assertions remain pending implementation.

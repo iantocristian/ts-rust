@@ -9,7 +9,7 @@ Corsa has about 600 panic sites and recovers at request boundaries; after a reco
 
 ## Decision
 
-Invariants stay `panic!` and `debug_assert!`; every LSP request, API call and test step has a `catch_unwind` boundary with stack sanitizing; I/O and configuration failures are `Result`; locks are `parking_lot`, and absence of poisoning is not evidence of valid state. A caught checker panic retires the checker and pool generation before the checker can be acquired again, and every snapshot, project, in-flight lease and API registry referencing that generation observes the retirement. Registries validate generation before resolving handles, so old registries cannot attach to a replacement checker with reused sequential ids; retired storage stays owned until leases drain; if mutated shared state cannot be isolated, the affected session is retired. Generation metadata stays server-side; wire shapes and handle syntax are unchanged, and invalidated requests return the existing protocol error form.
+Invariants stay `panic!` and `debug_assert!`; every LSP request, API call and test step has a `catch_unwind` boundary with stack sanitizing; I/O and configuration failures are `Result`; locks are `parking_lot`, and absence of poisoning is not evidence of valid state. A caught checker panic retires the checker and pool generation before the checker can be acquired again, and every snapshot, project, in-flight lease and API registry referencing that generation observes the retirement. Registries validate generation before resolving handles, so old registries cannot attach to a replacement checker with reused sequential ids; retired storage stays owned until all leases, retained results and registry roots release it; if mutated shared state cannot be isolated, the affected session is retired. Generation metadata stays server-side; wire shapes and handle syntax are unchanged, and invalidated requests return the existing protocol error form.
 
 ## Consequences
 
@@ -22,3 +22,5 @@ Rebuilding a checker is a full initialization; only disposal is cheap. E3 inject
 ## Amendments
 
 Draft 3.1 evicted only the panicking checker; draft 3.2 extended invalidation to the pool generation and all referencing registries after the third review.
+
+The ownership design note makes publication ordering explicit: a shared generation gate serializes retirement with registry insertion, shared-result publication and success-response commitment. Uncommitted results of retired operations are discarded even when their storage remains live. Retained handles and registry roots can outlive leases, so disposal waits for those roots too; retirement invalidates them immediately at operation boundaries.

@@ -1,6 +1,7 @@
 # ADR 0007: Symbol ownership: file-owned binding, checker-local merges, checker-owned types
 
-Status: Proposed (2026-09-05)
+Status: Accepted (2026-09-05)
+Design note: [docs/design/symbols.md](../design/symbols.md), reviewed and accepted by the owner on 2026-09-05
 Plan: section 6, decision 2
 
 ## Context
@@ -15,7 +16,7 @@ ADR 0006's validated ownership-scope contract governs any release check elision.
 
 ## Consequences
 
-Dropping a checker frees its type universe; dropping a program never touches a shared file. Draft 2's program-level overlay for merged symbols is withdrawn because it would break isolation between parallel checkers. Required E3 verification covers two programs sharing one bound file; disposal of one while the other keeps checking; an edit while an old snapshot answers requests; two checkers merging declarations over shared files; and wrong-checker, stale, recycled and retired-generation lookups failing explicitly in release mode, including through caches and callback reentry. Proven check-elision paths retain debug assertions; sanitizers supplement the identity assertions. This ADR remains Proposed until the owner has reviewed the design note.
+The final checker-owner reference releases its type universe, including synthetic AST storage; retained results can outlive a pool lease. Dropping a program does not dispose a file still retained elsewhere. Draft 2's program-level overlay for merged symbols is withdrawn because it would break isolation between parallel checkers. Required E3 verification covers two programs sharing one bound file; disposal of one while the other keeps checking; an edit while an old snapshot answers requests; two checkers merging declarations over shared files; and wrong-checker, stale, recycled and retired-generation lookups failing explicitly in release mode, including through caches and callback reentry. Proven check-elision paths retain debug assertions; sanitizers supplement the identity assertions. Accepted on 2026-09-05 after the owner reviewed the design note and its Go evidence; the E3 and E4 assertions remain required verification, not completed verification.
 
 ## Evidence
 
@@ -26,3 +27,5 @@ Dropping a checker frees its type universe; dropping a program never touches a s
 Draft 3.2 moved merged symbols from a program overlay to checker-local ownership after the third review.
 
 The tracking-scaffold review applied ADR 0006's conditional check-elision and active-generation requirements to symbol, type and signature handles.
+
+The design-note correction pass defines retained results carrying exact checker identity, pool generation and an owning root, with release-build validation before entering an operation. Private local slots cannot escape into service results or external caches alone. Checker identity is distinct from a pool generation; symbol owner kind comes from arena metadata so the full 32-bit arena counter fits. Checker-created AST nodes share the checker's storage lifetime, and internal caches do not retain their own enclosing checker through an owning cycle.

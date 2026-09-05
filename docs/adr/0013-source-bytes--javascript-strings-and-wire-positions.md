@@ -1,6 +1,7 @@
 # ADR 0013: Source bytes, JavaScript strings and wire positions
 
-Status: Proposed (2026-09-05)
+Status: Accepted (2026-09-05)
+Design note: [docs/design/text.md](../design/text.md), reviewed and accepted by the owner on 2026-09-05
 Plan: section 6, decision 8
 
 ## Context
@@ -13,7 +14,7 @@ Corsa's filesystem decoder removes BOMs and decodes UTF-16 but otherwise preserv
 
 ## Consequences
 
-All text output that must be byte-identical to baselines goes through byte writers, not `String`. E4 pins scanner, literal and encoder success or error behavior for valid, WTF-8 and malformed input. This ADR becomes Accepted when the owner has reviewed the design note.
+All text output that must be byte-identical to baselines goes through byte writers after the corresponding upstream formatting and escaping operations. Byte-backed storage does not bypass Go's explicit replacements or printer escapes. E4 pins scanner, literal, helper, printer and encoder behavior for valid, WTF-8 and malformed input, plus the separate API/LSP/scanner position and line-map rules. Accepted on 2026-09-05 after the owner reviewed the design note and its Go evidence; the E3 and E4 assertions remain required verification, not completed verification.
 
 ## Evidence
 
@@ -22,3 +23,5 @@ All text output that must be byte-identical to baselines goes through byte write
 ## Amendments
 
 Draft 1 said UTF-8 everywhere; draft 2 added WTF-8 values; draft 3.1 removed ICU collation; draft 3.2 added byte-backed source text after the third review.
+
+The design-note correction pass preserves helper-specific replacement/truncation and original-source versus regenerated-literal printing. Converted offsets can cut valid UTF-8 sequences, so slices remain byte-backed and require their own validity classification. E4 records partial-character rounding, clamping and the separate ECMAScript/LSP line maps as well as malformed-byte and surrogate counting.

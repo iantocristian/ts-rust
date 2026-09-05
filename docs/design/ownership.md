@@ -1,0 +1,116 @@
+# Design note: node ownership
+
+Backs ADR 0006. Status: reviewed and accepted by the owner on 2026-09-05. Every upstream claim below cites the pinned checkout (`upstream/`, commit `1f70213d49`); paths are relative to `tsc/internal`.
+
+## 1. What Corsa does
+
+Corsa's nodes are Go pointers kept alive by the collector. The facts a Rust design has to reproduce:
+
+1. **Files are parsed into per-kind arenas and bound once.** `ast.NodeFactory` allocates every node kind from a `core.Arena[T]` (`ast/ast_generated.go`, the `NodeFactory` struct); arenas grow by size class and never free individual nodes. `SourceFile.BindOnce` binds under a `sync.Once` and sets `isBound` (`ast/ast.go:2895`).
+2. **Allocation into a file continues after binding, under locks.** `SourceFile.resolveJSDoc` parses JSDoc on first request and caches it in `jsdocCache` under `jsdocMu` (`ast/ast.go:2745`). `SourceFile.GetOrCreateToken` creates token nodes on demand, keyed by `(parent, range)`, under `tokenCacheMu`, from a per-file `tokenFactory` created lazily (`ast/ast.go:2904`, `createToken`). It panics if a cached token's kind disagrees and refuses parents flagged `NodeFlagsReparsed`. Other packages attach lazily computed data through `SourceFile.data` under `dataMu` (`ast/ast.go:2461`).
+3. **Bound files are shared.** The project system's parse cache binds on entry and hands the same file to every program and snapshot that acquires it while its reference count is positive (`project/parsecache.go:74`, `project/refcountcache.go`: `Acquire`, `Ref`, `Deref`). Snapshots themselves are reference-counted (`project/snapshot.go:33`, `Ref`, `TryRef`, `Deref`), and `Project.Clone` shares the program and checker pool between snapshots (`project/project.go:291`).
+4. **Content-mapped files form a bundle with links in both directions.** The canonical file's `ContentMapperSourceFileInfo` lists `SupplementalSourceFiles`; each supplemental file's info points back through `CanonicalSourceFile` (`ast/ast.go:2618`, `contentmapper/transform.go:97`). The mapped parse cache treats the set as one reference-counted entry (`project/parsecache.go`, `ContentMappedParseCache`: "one reference owns the canonical file and all supplemental files as a bundle").
+5. **Synthetic nodes have several distinct factories and retention roots.** The checker has its own `ast.NodeFactory` (`checker/checker.go:673`): `createSyntheticExpression` embeds a checker type in a node (`30466`), and `newCallSignature` retains a synthetic declaration in a signature (`30869`). Transforms and the separate node builder use `printer.NodeFactory`; their `EmitContext` records `original`, `emitNodes`, `autoGenerate`, `textSource`, `assignedName` and `classThis` as pointer-keyed maps (`printer/emitcontext.go:17`). The node builder's `ReleaseArenas` resets its allocation factory, while the builder and emit context survive (`checker/nodebuilder.go:288`). Cloning a cached type node records original-node links into earlier allocations (`checker/nodebuilderimpl.go:3237`, `printer/emitcontext.go:75`, `454`), so those maps also retain nodes. API printing and insertion formatting return text, without registering synthetic-node handles (`api/session.go:2888`, `3043` to `3090`); their factories are request scratch, as are options and formatter factories (`tsoptions/tsconfigparsing.go:1006`, `format/span.go:238`).
+6. **Identity on the wire is not the pointer.** The API's node handle is `index.kind.path`, where `index` is the node's position in the encoder's per-file node table (`api/session.go:107`, `encoder.GetNodeIndexTable`). `ast.GetNodeId` and `ast.GetSymbolId` assign process-global counters lazily (`ast/utilities.go:18`) and are used as map keys and symbol handles.
+
+## 2. Contract
+
+### 2.1 Owners
+
+| Owner | Holds | Created by | Released when |
+|---|---|---|---|
+| `FileOwner` | the file's core arena (parsed nodes), the bind result (ADR 0007), the lazy arena (JSDoc, tokens), the lazy caches, the position map, the source text | parse, in the parse cache or by a compiler host | the last `Arc<FileOwner>` drops: parse-cache entry at zero references, no program, snapshot, emit context, builder or session retaining it |
+| `BundleOwner` | `Arc<FileOwner>` for the canonical file and each supplemental file | the mapped parse cache | its last `Arc` drops; the cache holds one reference for the bundle, as upstream does |
+| `TransformOwner` | a synthetic-node arena, the emit side tables (`original`, emit nodes, generated names, text sources, class-this, assigned names), and the `Arc<FileSet>` of the program being emitted | each emit context | the emit context ends |
+| `CheckerOwner` | checker-local symbols, types, signatures, a separate checker AST arena, the builder context, and the file/bundle set; one exclusive operation permit protects checker mutation | each checker instance, with exact checker identity and pool-generation state | the pool and all leases, retained results and registry roots release it; retirement invalidates operations before storage disposal |
+| `BuilderOwner` | the node builder's active allocation arena, persistent caches and emit side tables, and retained generation sets for their keys and values | the checker or other caller of a node builder | the context drops; individual generation storage can be released earlier only after every cache, side-table, dependency and returned-handle root releases it |
+| `ScratchOwner` | short-lived nodes and synthetic source files for options, formatting, and API print/format requests | the caller or request | the caller returns its text/result and releases the scratch context |
+
+Owning references form a directed acyclic graph. A snapshot retains programs and pools; a pool retains checker owners; checker, builder and transform contexts retain the file/bundle sets they use. A file owner never retains a checker or builder. References into a mapped file retain its `BundleOwner` when sibling links remain reachable; a standalone file `Arc` is not sufficient for those links. Checker AST-to-type and signature-to-AST links are non-owning ids inside the same `CheckerOwner`.
+
+Builder caches and emit side tables are outer retention roots for their node arenas. Cross-generation dependencies are retained from those roots or from an explicit returned-handle retention set, not by making mutable arenas `Arc`-retain one another. A retention set includes the transitive arena dependencies of its nodes and required emit metadata; logical cycles are grouped under that outer owner. It cannot retain its own enclosing owner. Internal checker caches therefore use local ids, while an escaped result that needs checker data retains the enclosing `CheckerOwner` externally (ADR 0007). Parent, original-node and canonical/supplemental links may be cyclic because they are ids, not owning references. Nothing retains scratch storage after its operation returns.
+
+### 2.2 Ids
+
+A `NodeId` is 64 bits: the high 32 bits are an `ArenaId`, the low 32 bits a slot. Rules:
+
+- `ArenaId` comes from one process-global atomic counter and is **never reused**. Every node or symbol arena created in the process, file core, lazy, checker, transform, builder generation or scratch, takes the next value. A stale id therefore cannot alias a newer arena, and "generation" for node storage in ADR 0006 is the arena id itself: no separate generation field, no ABA window. Checker identity and active pool generation are separate from this storage identity (ADR 0007).
+- Arena 0 and slot 0 are reserved. `NodeId` wraps `NonZeroU64` with private constructors; `Option<NodeId>` represents absence without another word. Reserving numeric values alone would not give an ordinary `u64` newtype a Rust niche.
+- Slots are never reused within an arena; arenas are append-only.
+- Exhaustion: allocating beyond `u32::MAX` nonzero arena ids aborts with a diagnostic **before** the counter can wrap or publish a reused id. The checked atomic allocation path applies the same full 32-bit limit to node and symbol arenas; owner kind is resolver metadata, not a stolen arena bit. Slot allocation beyond `u32::MAX` similarly fails before truncation or reuse. E3 exercises the boundaries with an injected counter rather than relying on an assumed editor-session lifetime.
+- Ids never keep storage alive. Anything that stores an id for later must also retain the owner: caches retain the `Arc`, snapshots retain programs, API registries retain snapshot data.
+
+The intended header and payload layout is the subject of section 13, item 6 of the plan and is not fixed here; generated accessors hide it, and this note only fixes the id and its semantics.
+
+### 2.3 Resolution and the validated scope
+
+Resolution always goes through an object that holds `Arc` references to arenas: a `Program`'s file set, an `EmitContext`, a `NodeBuilder`, a `Snapshot`'s data, an API registry. Such an object is a **validated scope**: it can only map an `ArenaId` to an arena it holds, so an id from an arena it does not hold is rejected, not aliased.
+
+Two access paths exist, and the difference is the whole of the check-elision rule in ADR 0006:
+
+- **Scoped access.** A raw `NodeId` is first checked against the current arena and its published slot bounds in release builds. That check can mint a private local handle with a fresh invariant arena-scope brand; it cannot be constructed by callers, used with another arena, or escape its scope. Repeated access through this validated local handle may elide owner checks while retaining bounds safety and debug assertions. The scope holds the owner, storage cannot be replaced and slots cannot be reused during it. An ordinary copied `NodeId` does not carry this proof and still takes checked resolution. Checker-owned nodes additionally require the exact checker's operation permit and the retirement rules below.
+- **Imported access.** An id whose arena is not the current one, ids read from caches, ids arriving through callbacks or reentrant paths, and ids from API handles resolve through `scope.import(id) -> Result<NodeRef, StaleId>`, which looks the arena up in the scope's owner table. Absent arena means the owner is not retained here: rejected. This is the path the E3 stale, recycled and wrong-owner cases exercise in release builds.
+
+The checker resolver combines the program's file/bundle arena table with its own AST arena and the builder generations retained in the current operation. Entries include arena kind and, for checker storage, exact checker identity and pool generation. A file-only scope cannot resolve a checker-created declaration. The common raw-id path compares the current arena before indexing; cross-arena lookup cost is measured in E2, E5 and E6 before further elision.
+
+### 2.4 Lazy storage
+
+A `FileOwner` has two arenas: the core arena, immutable after binding and readable without locks, and a lazy arena for nodes created after binding. The lazy arena uses fixed, separately allocated 256-node pages whose node addresses never move. One `RwLock<LazyState>` protects both caches, the page directory, allocation counters and publication: readers take its read guard; a miss drops that guard, takes the **same lock's write guard**, and rechecks before allocating. The writer initializes the complete node graph, then publishes the slots and cache entry before unlocking. There is no separate append mutex that bypasses cache readers.
+
+Resolving a published slot reads the directory and publication bounds under this lock and ties the resulting node reference to a retained file owner. Stable pages can then outlive the guard; the arena implementation must prove that later initialization of unused slots never creates an overlapping mutable reference to an already published node or page. Published nodes are immutable, and directory growth cannot invalidate node addresses. The narrow arena implementation and concurrent first-use paths require the E3 soundness checks before use. Lazy nodes keep their ids for the owner's lifetime. Tokens use the supplied `parent` node from the `(parent, range)` key (`ast/ast.go:2929`); kind mismatches and reparsed parents retain upstream's checks.
+
+Reparsed JSDoc clones (`ReparsedClones` in upstream's `SourceFile`) are created by the parser and belong to the core arena; they are not lazy.
+
+### 2.5 Bundles
+
+A content-mapped file and its supplemental files are parsed together and owned together. The canonical file's info stores the supplemental `FileId`s; each supplemental stores the canonical `FileId`; both directions are ids, not references, and the `BundleOwner` holds the `Arc`s. Programs, snapshots and escaped file handles retain the bundle as one unit. Their ownership/resolution set includes every bundle member; this does not add files to the program's observable source-file list or change upstream's checking and emit selection.
+
+### 2.6 Synthetic nodes and retention
+
+A transform allocates into its `TransformOwner`; its nodes may reference file nodes, so the owner retains the program's file set for its lifetime. The `original` link and every emit side table are keyed by `NodeId` in the transform owner, replacing upstream's pointer-keyed maps one for one.
+
+The checker's own AST factory allocates in `CheckerOwner`, independently of the node builder. Synthetic expression type links and synthetic signature declarations resolve within that exact checker, with file parents resolved through its retained file/bundle set. These nodes survive a node-builder `release`; they are disposed with their checker storage after all retaining roots drop.
+
+The node builder allocates into its current `Arc<BuilderArena>`. `release`, corresponding to `ReleaseArenas`, rotates the allocation generation and drops only the factory's reference to the old one. Caches and persistent emit side tables retain the arenas needed by both their node keys and node-valued fields. If a cached node in A is cloned into B, B's `original` metadata still requires A even after the original cache entry is removed. The outer builder context or an escaped handle's retention set keeps those dependencies alive without arena-to-arena owning cycles. Updating or removing a root updates its dependency retention under the exclusive builder operation. A generation is reclaimable only after the final active-factory, cache, side-table, dependency and returned-handle root drops. Whole-arena retention can keep more nodes alive than Go's collector; E3 checks correct reclamation and E5/E6 measure the cost, rather than claiming identical object lifetimes.
+
+The API's `handlePrintNode` and `handleFormatNodeForInsertion` decode/print synthetic trees in request scratch storage and return text. Formatting's synthetic source file is also scratch. Neither path registers a synthetic `NodeHandle`, and repeated calls must not accumulate their arenas in session storage. Existing snapshot registries retain the real file/checker owners needed by registered handles; session lifetime is not a reason to retain temporary formatting trees.
+
+### 2.7 Disposal, retirement and leases
+
+Disposal is reference counting; there is no explicit free. A file's storage goes away when its last owner reference drops. Because ids never retain storage and arena ids are never reused, a dropped arena's ids fail `import` everywhere and cannot be resolved by scoped access, because no scope can hold an `Arc` to a dropped arena.
+
+Retirement is distinct from disposal. A pool generation can be retired while leases, retained results or registries keep its checker storage alive. Each operation carries exact checker identity and its pool-generation token. Lease acquisition, handle resolution and callback/reentry resumption validate both, including permanent retirement of the captured generation; an old registry never rebinds to a replacement checker. The exclusive checker permit prevents concurrent mutation of that checker, while other slots may continue running and can retire the pool.
+
+A shared generation gate serializes retirement with result commitment. Computation and response serialization happen outside the gate. Before inserting handles, publishing shared results or committing a success response to the server-owned output queue, the operation acquires the gate, rechecks its checker/generation and commits atomically with respect to retirement. Registry and publication paths take the generation gate before their own locks; they must not call user code or perform blocking transport I/O while holding it. Retirement closes the old generation under the same gate before a replacement can supply new leases. A result committed before that point is ordered before retirement; an uncommitted result from the retired generation is discarded and the request uses the existing error form. A separate generation read followed by an unguarded publication is insufficient.
+
+No path waits for a checker permit while holding the generation gate or a registry lock. A registry lookup clones its retained handle under the gate and registry lock, releases both, acquires that exact checker's permit, then revalidates under the gate before accessing checker data. Publication can therefore hold the permit before acquiring the gate without a reverse-order wait. A queue commitment under the gate must be nonblocking; capacity is reserved beforehand or failure leaves the result uncommitted.
+
+An uninterrupted computation may finish using retained storage after another slot retires its generation, but it cannot publish success. Local recursion therefore need not poll on every node access. Returning from a callback revalidates before resuming, and final commitment always revalidates under the gate. This is the stronger retirement policy selected by ADR 0012, not a claim about Go's recovery behavior. Storage is released only when the pool, all leases and every retained-handle/registry root have released it.
+
+## 3. Wire handles
+
+The API's `NodeHandle` stays `index.kind.path`. The index is the node's position in the encoder's per-file node table, computed by walking the tree in the encoder's order (`api/encoder/encoder.go`, protocol 8). Rust computes the same table from the same walk, so handles do not depend on arena slot order, and a file arena's slots may be laid out however the generator chooses. Symbol and type handles are ADR 0007's concern.
+
+## 4. What E3 asserts for this note
+
+| Scenario | Assertion |
+|---|---|
+| Two programs share one bound file | both resolve the file's nodes through their own scopes; dropping one program does not affect the other; the file's owner count returns to the parse cache's single reference |
+| Edit while an old snapshot answers requests | the old snapshot keeps resolving ids of the old arena; the new snapshot resolves the new arena; ids of one arena imported into the other scope are rejected |
+| Concurrent first-use JSDoc and token requests, including page growth | read/write paths use the same lock; cache misses recheck; one published allocation per key; readers see initialized nodes and retain valid references across directory growth; kinds and supplied parents agree; semantic assertions plus sanitizer checks |
+| A mapper with three supplemental files, owners released in every order | the bundle's storage is freed only after the last of its holders drops; canonical/supplemental ids remain resolvable while any holder lives |
+| Checker AST factory | a synthetic expression resolves its checker type and file parent; a signature resolves its synthetic declaration after builder `release`; a different checker rejects the typed links; retained results preserve storage until their final drop |
+| Builder cache and emit-table retention | clone cached A into B, remove A's cache entry and rotate allocation; B's original links still resolve A; generation ids differ; storage is reclaimed only after all cache, side-table, dependent-handle and factory roots drop |
+| Repeated API printing and insertion formatting | outputs match Go; each request releases its scratch arenas after returning text; no synthetic handles are registered and session arena counts do not grow |
+| Wrong owner, stale, recycled and retired ids in release builds | `import` rejects an id of an arena the scope does not hold; a dropped arena's ids fail everywhere; a retired generation's lease fails at the next boundary while its storage is still held |
+| Parallel retirement versus publication | pause one slot before commitment, panic in another slot sharing the pool across two snapshots, then resume; no retired success or registry insertion commits; also exercise commitment-before-retirement ordering and callback reentry |
+| Node/symbol arena and slot exhaustion | allocate at injected `u32::MAX` boundaries; reject further allocation before wrap/truncation; owner metadata stays distinct across the full 32-bit arena range |
+| Owner and allocation counters | after every scenario's final drop, live owner and live allocation counts equal the pre-scenario baseline |
+
+## 5. Choices deliberately left to measurement
+
+The node header and payload layout (plan section 13, item 6); whether the per-program `ArenaId` table is a hash map or a sorted vector; and whether cross-file accesses in the checker are frequent enough to justify caching the last resolved arena. None of these change the contract above.
+
+## 6. Evidence index
+
+`ast/ast.go` lines 180 (`Node`), 2446 (`SourceFile`), 2618 (`ContentMapperSourceFileInfo`), 2745 (`resolveJSDoc`), 2895 (`BindOnce`), 2904 (`GetOrCreateToken`), `createToken`; `ast/ast_generated.go:20` (`NodeFactory` arenas); `ast/utilities.go:18` (`GetNodeId`, `GetSymbolId`); `ast/deepclone.go:9`; `printer/factory.go:20`; `printer/emitcontext.go` 17, 75, 454; `checker/checker.go` 673, 30466, 30869; `checker/nodebuilder.go:288`; `checker/nodebuilderimpl.go:3227`; `contentmapper/transform.go:97`; `project/parsecache.go:74`; `project/refcountcache.go`; `project/snapshot.go:33`; `project/project.go:291`; `project/checkerpool.go` 22, 102; `api/session.go` 107, 2888, 3043 to 3090; `api/encoder/encoder.go` (protocol 8 header and node layout).
