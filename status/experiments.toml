@@ -46,6 +46,20 @@ op = "=="
 threshold = true
 unit = "comparator consistency and residual ID-sensitive fixtures pass"
 
+[[E2.criteria]]
+id = "frozen_subset"
+metric = "run.e2.frozen_subset"
+op = "=="
+threshold = true
+unit = "the checked-in subset rule, manifest, options and exclusions match the committed denominator; no skipped cases (PLAN.md, section 13, item 16)"
+
+[[E2.criteria]]
+id = "divergences_approved"
+metric = "run.e2.divergences_approved"
+op = "=="
+threshold = true
+unit = "every baseline difference the comparison accepts is covered by an owner-approved entry in data/divergences.toml (ADR 0004)"
+
 [E3]
 title = "Ownership"
 nature = "Measured in the ownership harness; repeated through real servers in Phases 5/6. RSS is reported, not required to fall after each drop"

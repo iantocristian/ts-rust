@@ -84,7 +84,7 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. Only the actual workspace and oracle bootstrap producers are currently registered. Add E1–E8 producers when their implementations exist. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 
@@ -127,7 +127,7 @@ The design notes behind ADRs 0006, 0007 and 0013 name the E3/E4 criterion ids ea
 
 Sprint checks use `<metric> <op> <value>`, with numeric comparisons, boolean equality and ADR/implementation states. Missing metrics cannot pass; malformed definitions, unknown fields and duplicate sprint/item IDs are errors. Required items default to `required = true`. They need nonempty `done_when` checks and block completion until every check passes. Only explicitly optional items may remain informational.
 
-S01 checks the reviewed contracts, provenance, registered upstream pin, actual workspace build, oracle build and version smoke. Merely having inventory entries cannot complete it. ADR acceptance is a reviewed human decision; changing an `Accepted` label is not a substitute for the required design note and review.
+S01 checks the reviewed contracts, provenance, registered upstream pin, actual workspace build, oracle build and version smoke. Merely having inventory entries cannot complete it. S02 to S12 are the Phase 0 implementation plan; [sprints/README.md](../sprints/README.md) gives their order, the producers each registers and the conventions they follow. ADR acceptance is a reviewed human decision; changing an `Accepted` label is not a substitute for the required design note and review.
 
 ## Commands, publication and history
 
@@ -142,7 +142,7 @@ cargo xtask status --record    # append only a distinct source/evidence snapshot
 
 If a sandbox cannot write Go's system cache, use a writable workspace cache for the oracle command: `GOCACHE="$PWD/target/go-build" cargo xtask run oracle`. This changes the cache location, not the required build and smoke checks.
 
-CI automation and nightly publication are **planned, not installed**. A future workflow should validate schemas/provenance, run producers and publish derived reports with their raw artifacts. It must not require unfinished sprints to pass on every development change. Source-branch bot commits are not needed to publish a dashboard.
+A status workflow is installed at `.github/workflows/status.yml`: on push, pull request, manual dispatch and nightly it validates schemas and provenance, checks that the committed views match the committed evidence (ignoring only the generation date), reruns the registered producers on macOS and Linux runners, checks S01 and publishes the regenerated views and raw evidence as workflow artifacts. It requires only the finished sprint and never an unfinished one. No run of it is recorded in this repository, and nothing is committed back; evidence in the repository is captured and reviewed locally. Source-branch bot commits are not needed to publish a dashboard.
 
 History records pin, repository context and underlying artifacts. Re-rendering the same context and evidence adds no new point. A policy or documentation edit can create a distinct history snapshot while reusing the same current run artifacts; it is not a new measurement. The chart separates upstream pins and legacy history from the current series. A publication date is not a measurement date: nightly publication of old results cannot satisfy the four consecutive weekly measurement runs required for cutover. That future gate must inspect distinct run artifacts and their execution timestamps against the approved workload matrix.
 

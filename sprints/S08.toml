@@ -1,0 +1,67 @@
+# Phase 0, sprint 8. Producer to register: e2 (cases = the frozen subset; inputs include
+# data/divergences.toml so an allow-list change reruns the comparison).
+#   run.e2.types_parity, run.e2.errors_parity, run.e2.comparators, run.e2.frozen_subset, run.e2.divergences_approved
+#   run.e2.type_to_string_parity   typeToString output on the subset matches the oracle
+#   run.e2.recursion_fixtures      deep-recursion and reentrancy fixtures pass with reserved stacks and growth guards
+#   run.e5.type_footprint_ratio    joins the e5 producer
+id = "S08"
+title = "Checker slice, printer and node builder"
+goal = "The frozen checker slice (literal, object, union, intersection, array and tuple types; getTypeOfSymbol; isRelatedTo; narrowing; typeToString through printer and node-builder slices; the comparators ported line by line) reproduces the .types and .errors.txt baselines on the subset, with declaration-merging, recursion and reentrancy fixtures and the per-type footprint measured."
+exit = [
+  "sprint.S07.done == 1",
+  "exp.E2.pass == 1",
+  "exp.E3.independent_checker_merges.pass == 1",
+  "exp.E5.pass == 1",
+  "run.e2.type_to_string_parity == 1",
+  "run.e2.recursion_fixtures == true",
+  "run.clippy.clean == true",
+]
+
+[[item]]
+id = "S08-1"
+title = "Checker-owned symbols, types and signatures with &mut self mutation (ADRs 0007 and 0008); checker-local declaration merges over shared files"
+kind = "task"
+required = true
+done_when = ["exp.E3.independent_checker_merges.pass == 1"]
+
+[[item]]
+id = "S08-2"
+title = "Type construction, relations and narrowing for the slice; .types and .errors.txt parity on the subset"
+kind = "task"
+required = true
+done_when = ["exp.E2.types_parity.pass == 1", "exp.E2.errors_parity.pass == 1"]
+
+[[item]]
+id = "S08-3"
+title = "Comparators ported line by line (ADR 0010); the union-ordering sub-test; the residual id-sensitive fixtures"
+kind = "task"
+required = true
+done_when = ["exp.E2.comparators.pass == 1"]
+
+[[item]]
+id = "S08-4"
+title = "Printer and node-builder slices for typeToString"
+kind = "task"
+required = true
+done_when = ["run.e2.type_to_string_parity == 1"]
+
+[[item]]
+id = "S08-5"
+title = "Deep recursion (ADR 0011) and reentrancy fixtures: reserved stacks, growth guards and the pushTypeResolution guard"
+kind = "task"
+required = true
+done_when = ["run.e2.recursion_fixtures == true"]
+
+[[item]]
+id = "S08-6"
+title = "Baseline divergence allow-list (ADR 0004, data/divergences.toml): every difference the comparison accepts has an owner-approved entry"
+kind = "task"
+required = true
+done_when = ["exp.E2.divergences_approved.pass == 1"]
+
+[[item]]
+id = "S08-7"
+title = "Per-type footprint on the subset, Rust against Go"
+kind = "task"
+required = true
+done_when = ["exp.E5.type_footprint.pass == 1"]

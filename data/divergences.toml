@@ -1,0 +1,20 @@
+# Baseline divergence allow-list (ADR 0004). The owner approves every entry.
+#
+# An E2 case whose output differs from the Corsa baseline passes only when the
+# difference is covered by an entry here. The e2 producer declares this file as
+# an input, so a change here invalidates its evidence and the comparison reruns.
+# Approving an entry never edits a baseline: baselines stay the pinned upstream's.
+#
+# Entry shape:
+#
+# [[divergence]]
+# id = "D001"
+# title = "one line"
+# scope = ["conformance/types/union/unionTypeMembers.ts"]   # baseline cases or globs
+# kind = "ordering"                                          # ordering | message | position | emit | other
+# rationale = "why the Rust output differs and why that is acceptable"
+# approved_by = "owner"
+# approved_on = "2026-09-05"
+# upstream_pin = "1f70213d4922b434345f639b441681e470c7cfc1"
+
+divergence = []

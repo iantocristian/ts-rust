@@ -1,0 +1,53 @@
+# Phase 0, sprint 6. Producers to register: e1 (cases = the frozen corpus manifest; the runner
+# derives run.e1.parity), and the encoder metrics of e4.
+#   run.e1.parity              encoder-identical cases / frozen eligible cases
+#   run.e1.frozen_denominator  manifest, options and lib list match the committed denominator; no skipped cases
+# The oracle side encodes each case and lib file with the pinned Go encoder at protocol 8.
+id = "S06"
+title = "Parser, JSDoc, AST runtime and encoder"
+goal = "ts_parser, the ts_ast runtime and ts_encoder at protocol 8 parse and encode the frozen corpus and the lib files identically to the Go oracle; E1 and E4 pass."
+exit = [
+  "sprint.S03.done == 1",
+  "sprint.S05.done == 1",
+  "exp.E1.pass == 1",
+  "exp.E4.pass == 1",
+  "functions.package[internal/parser].ratio >= 0.9",
+  "functions.package[internal/api/encoder].ratio >= 0.9",
+  "functions.package[internal/ast].ratio >= 0.5",
+  "run.clippy.clean == true",
+]
+
+[[item]]
+id = "S06-1"
+title = "Frozen corpus manifest: the 12,721 cases and 108 lib files with their options and exclusions, checked in as the e1 case manifest and declared inputs"
+kind = "task"
+required = true
+done_when = ["exp.E1.frozen_denominator.pass == 1"]
+
+[[item]]
+id = "S06-2"
+title = "Parser, JSDoc parser and reparser over the generated AST, with test-directive handling and parse options"
+kind = "task"
+required = true
+done_when = ["exp.E1.encoder_parity.pass == 1"]
+
+[[item]]
+id = "S06-3"
+title = "ts_ast runtime: node data and flags, the utilities the parser needs, visitor, deep clone, precedence and subtree facts"
+kind = "task"
+required = true
+done_when = ["exp.E1.encoder_parity.pass == 1", "functions.package[internal/ast].ratio >= 0.5"]
+
+[[item]]
+id = "S06-4"
+title = "Encoder at protocol 8 with the string table and UTF-16 positions; the oracle encoder dump built from the pin"
+kind = "task"
+required = true
+done_when = ["exp.E4.encoder_success_error.pass == 1", "exp.E4.encoder_output_bytes.pass == 1"]
+
+[[item]]
+id = "S06-5"
+title = "Function-level traceability for the parser and encoder packages"
+kind = "task"
+required = true
+done_when = ["functions.package[internal/parser].ratio >= 0.9", "functions.package[internal/api/encoder].ratio >= 0.9"]

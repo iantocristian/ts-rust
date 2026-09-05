@@ -22,8 +22,10 @@ One decision per file, numbered. `Status` is `Proposed`, `Accepted`, `Amended` o
 | [0016](0016-toolchain-and-lints.md) | Toolchain and lints | Accepted |
 | [0017](0017-dependency-policy.md) | Dependency policy | Accepted |
 | [0018](0018-tracking--evidence-driven-ledger--function-traceability--adr.md) | Tracking: evidence-driven ledger, function traceability, ADRs and a dashboard | Accepted |
+| [0019](0019-test-host-protocol-and-transport-contract-tests.md) | Test-host protocol and transport contract tests | Proposed |
+| [0020](0020-phase-0-gate-decision.md) | Phase 0 gate decision | Proposed |
 
-The three contracts (0006, 0007, 0013) were accepted by the owner on 2026-09-05 after review of their design notes: [ownership](../design/ownership.md), [symbols](../design/symbols.md) and [text](../design/text.md). Each note cites the pinned upstream code it reproduces and lists what E3 or E4 asserts.
+The three contracts (0006, 0007, 0013) were accepted by the owner on 2026-09-05 after review of their design notes: [ownership](../design/ownership.md), [symbols](../design/symbols.md) and [text](../design/text.md). Each note cites the pinned upstream code it reproduces and lists what E3 or E4 asserts. ADRs 0019 and 0020 are Proposed placeholders that sprints S11 and S12 name; they are written and accepted at those sprints.
 
 ## Proposed, not yet written
 

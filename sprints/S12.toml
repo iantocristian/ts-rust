@@ -1,0 +1,48 @@
+# Phase 0 gate (PLAN.md, section 9): E1 to E4 pass; E5 to E8 meet their thresholds for the parts
+# they measure, with the extrapolations written down as extrapolations; otherwise stop.
+# The owner records the decision in ADR 0020.
+id = "S12"
+title = "Phase 0 gate"
+goal = "Every experiment passes on current evidence, the extrapolations, workload limits, full checking/emit acceptance matrix and Phase 7 performance budgets are written down, and the owner records the go/no-go decision."
+exit = [
+  "sprint.S02.done == 1",
+  "sprint.S03.done == 1",
+  "sprint.S04.done == 1",
+  "sprint.S05.done == 1",
+  "sprint.S06.done == 1",
+  "sprint.S07.done == 1",
+  "sprint.S08.done == 1",
+  "sprint.S09.done == 1",
+  "sprint.S10.done == 1",
+  "exp.E1.pass == 1",
+  "exp.E2.pass == 1",
+  "exp.E3.pass == 1",
+  "exp.E4.pass == 1",
+  "exp.E5.pass == 1",
+  "exp.E6.pass == 1",
+  "exp.E7.pass == 1",
+  "exp.E8.pass == 1",
+  "adr.0020.status == Accepted",
+]
+
+[[item]]
+id = "S12-1"
+title = "Every gate experiment passes on current evidence"
+kind = "task"
+required = true
+done_when = ["exp.E1.pass == 1", "exp.E2.pass == 1", "exp.E3.pass == 1", "exp.E4.pass == 1", "exp.E5.pass == 1", "exp.E6.pass == 1", "exp.E7.pass == 1", "exp.E8.pass == 1"]
+
+[[item]]
+id = "S12-2"
+title = "Every Phase 0 implementation sprint is done"
+kind = "task"
+required = true
+done_when = ["sprint.S02.done == 1", "sprint.S03.done == 1", "sprint.S04.done == 1", "sprint.S05.done == 1", "sprint.S06.done == 1", "sprint.S07.done == 1", "sprint.S08.done == 1", "sprint.S09.done == 1", "sprint.S10.done == 1"]
+
+[[item]]
+id = "S12-3"
+title = "Gate decision as ADR 0020: extrapolations and workload limits for E5 to E8, the full checking/emit acceptance matrix, the Phase 7 performance budgets, and go or no-go"
+kind = "adr"
+ref = "0020"
+required = true
+done_when = ["adr.0020.status == Accepted"]
