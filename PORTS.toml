@@ -1,0 +1,5968 @@
+# Port ledger: one entry per non-test Go file of the pinned upstream tsc module.
+# Regenerate with scripts/ledger-init.py; statuses and rust paths are preserved.
+# status: planned | in-progress | ported | verified | out-of-scope
+# kind: source | generated | harness | out-of-scope
+pin = "1f70213d49"
+
+[[file]]
+go = "tsc/cmd/tsc/api.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 82
+
+[[file]]
+go = "tsc/cmd/tsc/enablevtprocessing_windows.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 22
+
+[[file]]
+go = "tsc/cmd/tsc/isprocessalive_other.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 9
+
+[[file]]
+go = "tsc/cmd/tsc/isprocessalive_unix.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 25
+
+[[file]]
+go = "tsc/cmd/tsc/isprocessalive_windows.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 26
+
+[[file]]
+go = "tsc/cmd/tsc/lsp.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 115
+
+[[file]]
+go = "tsc/cmd/tsc/main.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/cmd/tsc/sys.go"
+package = "cmd/tsc"
+crate = "tsc"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 138
+
+[[file]]
+go = "tsc/internal/api/callbackfs.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 242
+
+[[file]]
+go = "tsc/internal/api/encoder/decoder.go"
+package = "internal/api/encoder"
+crate = "ts_encoder"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 381
+
+[[file]]
+go = "tsc/internal/api/encoder/decoder_generated.go"
+package = "internal/api/encoder"
+crate = "ts_encoder"
+phase = 0
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1141
+
+[[file]]
+go = "tsc/internal/api/encoder/encoder.go"
+package = "internal/api/encoder"
+crate = "ts_encoder"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 935
+
+[[file]]
+go = "tsc/internal/api/encoder/encoder_generated.go"
+package = "internal/api/encoder"
+crate = "ts_encoder"
+phase = 0
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 707
+
+[[file]]
+go = "tsc/internal/api/encoder/stringtable.go"
+package = "internal/api/encoder"
+crate = "ts_encoder"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 68
+
+[[file]]
+go = "tsc/internal/api/enum_values_generated.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 1008
+
+[[file]]
+go = "tsc/internal/api/proto.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1682
+
+[[file]]
+go = "tsc/internal/api/protocol_msgpack.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 281
+
+[[file]]
+go = "tsc/internal/api/server.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 131
+
+[[file]]
+go = "tsc/internal/api/session.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 4303
+
+[[file]]
+go = "tsc/internal/api/stringer_generated.go"
+package = "internal/api"
+crate = "ts_api"
+phase = 6
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 30
+
+[[file]]
+go = "tsc/internal/ast/ast.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 3189
+
+[[file]]
+go = "tsc/internal/ast/ast_generated.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 10058
+
+[[file]]
+go = "tsc/internal/ast/checkflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 39
+
+[[file]]
+go = "tsc/internal/ast/deepclone.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 86
+
+[[file]]
+go = "tsc/internal/ast/diagnostic.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 527
+
+[[file]]
+go = "tsc/internal/ast/flow.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 75
+
+[[file]]
+go = "tsc/internal/ast/functionflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 37
+
+[[file]]
+go = "tsc/internal/ast/ids.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6
+
+[[file]]
+go = "tsc/internal/ast/kind_generated.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 463
+
+[[file]]
+go = "tsc/internal/ast/kind_stringer_generated.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 375
+
+[[file]]
+go = "tsc/internal/ast/modifierflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/ast/nodeflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 73
+
+[[file]]
+go = "tsc/internal/ast/parseoptions.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 149
+
+[[file]]
+go = "tsc/internal/ast/positionmap.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 111
+
+[[file]]
+go = "tsc/internal/ast/precedence.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 717
+
+[[file]]
+go = "tsc/internal/ast/subtreefacts.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 133
+
+[[file]]
+go = "tsc/internal/ast/symbol.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 103
+
+[[file]]
+go = "tsc/internal/ast/symbolflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 83
+
+[[file]]
+go = "tsc/internal/ast/tokenflags.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/ast/utilities.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 4631
+
+[[file]]
+go = "tsc/internal/ast/visitor.go"
+package = "internal/ast"
+crate = "ts_ast"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 278
+
+[[file]]
+go = "tsc/internal/astnav/tokens.go"
+package = "internal/astnav"
+crate = "ts_astnav"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 793
+
+[[file]]
+go = "tsc/internal/binder/binder.go"
+package = "internal/binder"
+crate = "ts_binder"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2802
+
+[[file]]
+go = "tsc/internal/binder/nameresolver.go"
+package = "internal/binder"
+crate = "ts_binder"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 506
+
+[[file]]
+go = "tsc/internal/binder/referenceresolver.go"
+package = "internal/binder"
+crate = "ts_binder"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 262
+
+[[file]]
+go = "tsc/internal/bundled/bundled.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/bundled/embed.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 224
+
+[[file]]
+go = "tsc/internal/bundled/embed_generated.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 452
+
+[[file]]
+go = "tsc/internal/bundled/generate.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 135
+
+[[file]]
+go = "tsc/internal/bundled/libs_generated.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 116
+
+[[file]]
+go = "tsc/internal/bundled/noembed.go"
+package = "internal/bundled"
+crate = "ts_bundled"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 48
+
+[[file]]
+go = "tsc/internal/checker/checker.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 32523
+
+[[file]]
+go = "tsc/internal/checker/emitresolver.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1323
+
+[[file]]
+go = "tsc/internal/checker/exports.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 388
+
+[[file]]
+go = "tsc/internal/checker/flow.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2761
+
+[[file]]
+go = "tsc/internal/checker/grammarchecks.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2230
+
+[[file]]
+go = "tsc/internal/checker/inference.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1684
+
+[[file]]
+go = "tsc/internal/checker/jsdoc.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 100
+
+[[file]]
+go = "tsc/internal/checker/jsx.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1488
+
+[[file]]
+go = "tsc/internal/checker/links.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 50
+
+[[file]]
+go = "tsc/internal/checker/mapper.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 326
+
+[[file]]
+go = "tsc/internal/checker/nodebuilder.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 302
+
+[[file]]
+go = "tsc/internal/checker/nodebuilder_hover.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 605
+
+[[file]]
+go = "tsc/internal/checker/nodebuilderimpl.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 3705
+
+[[file]]
+go = "tsc/internal/checker/nodebuilderscopes.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 251
+
+[[file]]
+go = "tsc/internal/checker/nodecopy.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 900
+
+[[file]]
+go = "tsc/internal/checker/printer.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 356
+
+[[file]]
+go = "tsc/internal/checker/pseudotypenodebuilder.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 765
+
+[[file]]
+go = "tsc/internal/checker/relater.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 5044
+
+[[file]]
+go = "tsc/internal/checker/services.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1151
+
+[[file]]
+go = "tsc/internal/checker/stringer_generated.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 25
+
+[[file]]
+go = "tsc/internal/checker/symbolaccessibility.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 876
+
+[[file]]
+go = "tsc/internal/checker/symboltracker.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 129
+
+[[file]]
+go = "tsc/internal/checker/tracer.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 366
+
+[[file]]
+go = "tsc/internal/checker/types.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1473
+
+[[file]]
+go = "tsc/internal/checker/utilities.go"
+package = "internal/checker"
+crate = "ts_checker"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1882
+
+[[file]]
+go = "tsc/internal/collections/cow.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 76
+
+[[file]]
+go = "tsc/internal/collections/multimap.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 75
+
+[[file]]
+go = "tsc/internal/collections/ordered_map.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 316
+
+[[file]]
+go = "tsc/internal/collections/ordered_set.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 54
+
+[[file]]
+go = "tsc/internal/collections/set.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 144
+
+[[file]]
+go = "tsc/internal/collections/syncmap.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 98
+
+[[file]]
+go = "tsc/internal/collections/syncset.go"
+package = "internal/collections"
+crate = "ts_collections"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 77
+
+[[file]]
+go = "tsc/internal/compiler/checkerpool.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 491
+
+[[file]]
+go = "tsc/internal/compiler/emitHost.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 143
+
+[[file]]
+go = "tsc/internal/compiler/emitter.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 576
+
+[[file]]
+go = "tsc/internal/compiler/fileInclude.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 325
+
+[[file]]
+go = "tsc/internal/compiler/fileloader.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1083
+
+[[file]]
+go = "tsc/internal/compiler/filesparser.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 598
+
+[[file]]
+go = "tsc/internal/compiler/host.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 122
+
+[[file]]
+go = "tsc/internal/compiler/includeprocessor.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 184
+
+[[file]]
+go = "tsc/internal/compiler/pkg.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2
+
+[[file]]
+go = "tsc/internal/compiler/processingDiagnostic.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 135
+
+[[file]]
+go = "tsc/internal/compiler/program.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2398
+
+[[file]]
+go = "tsc/internal/compiler/projectreferencedtsfakinghost.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 232
+
+[[file]]
+go = "tsc/internal/compiler/projectreferencefilemapper.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 192
+
+[[file]]
+go = "tsc/internal/compiler/projectreferenceparser.go"
+package = "internal/compiler"
+crate = "ts_compiler"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 115
+
+[[file]]
+go = "tsc/internal/contentmapper/contentmapper.go"
+package = "internal/contentmapper"
+crate = "ts_contentmapper"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 155
+
+[[file]]
+go = "tsc/internal/contentmapper/host.go"
+package = "internal/contentmapper"
+crate = "ts_contentmapper"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 315
+
+[[file]]
+go = "tsc/internal/contentmapper/hostimpl.go"
+package = "internal/contentmapper"
+crate = "ts_contentmapper"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1372
+
+[[file]]
+go = "tsc/internal/contentmapper/transform.go"
+package = "internal/contentmapper"
+crate = "ts_contentmapper"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 135
+
+[[file]]
+go = "tsc/internal/core/arena.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 66
+
+[[file]]
+go = "tsc/internal/core/bfs.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 206
+
+[[file]]
+go = "tsc/internal/core/binarysearch.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 26
+
+[[file]]
+go = "tsc/internal/core/buildoptions.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 16
+
+[[file]]
+go = "tsc/internal/core/compileroptions.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 557
+
+[[file]]
+go = "tsc/internal/core/context.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 42
+
+[[file]]
+go = "tsc/internal/core/core.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 876
+
+[[file]]
+go = "tsc/internal/core/languagevariant.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 11
+
+[[file]]
+go = "tsc/internal/core/languagevariant_stringer_generated.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 25
+
+[[file]]
+go = "tsc/internal/core/linkstore.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 93
+
+[[file]]
+go = "tsc/internal/core/modulekind_stringer_generated.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/core/nodemodules.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 90
+
+[[file]]
+go = "tsc/internal/core/pattern.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/core/projectreference.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 23
+
+[[file]]
+go = "tsc/internal/core/scriptkind.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 20
+
+[[file]]
+go = "tsc/internal/core/scriptkind_stringer_generated.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 35
+
+[[file]]
+go = "tsc/internal/core/scripttarget_stringer_generated.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 50
+
+[[file]]
+go = "tsc/internal/core/semaphore.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/core/stack.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/core/text.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 82
+
+[[file]]
+go = "tsc/internal/core/textchange.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 30
+
+[[file]]
+go = "tsc/internal/core/tristate.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 71
+
+[[file]]
+go = "tsc/internal/core/tristate_stringer_generated.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 26
+
+[[file]]
+go = "tsc/internal/core/typeacquisition.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 24
+
+[[file]]
+go = "tsc/internal/core/version.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/core/watchoptions.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/core/workgroup.go"
+package = "internal/core"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 123
+
+[[file]]
+go = "tsc/internal/debug/debug.go"
+package = "internal/debug"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 61
+
+[[file]]
+go = "tsc/internal/diagnostics/diagnostics.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 159
+
+[[file]]
+go = "tsc/internal/diagnostics/diagnostics_generated.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 8854
+
+[[file]]
+go = "tsc/internal/diagnostics/generate.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 461
+
+[[file]]
+go = "tsc/internal/diagnostics/generate_deps.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 6
+
+[[file]]
+go = "tsc/internal/diagnostics/loc_generated.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 151
+
+[[file]]
+go = "tsc/internal/diagnostics/stringer_generated.go"
+package = "internal/diagnostics"
+crate = "ts_diagnostics"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 27
+
+[[file]]
+go = "tsc/internal/diagnosticwriter/diagnosticwriter.go"
+package = "internal/diagnosticwriter"
+crate = "ts_diagnosticwriter"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 610
+
+[[file]]
+go = "tsc/internal/evaluator/evaluator.go"
+package = "internal/evaluator"
+crate = "ts_evaluator"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 168
+
+[[file]]
+go = "tsc/internal/execute/build/buildtask.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 922
+
+[[file]]
+go = "tsc/internal/execute/build/compilerHost.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 62
+
+[[file]]
+go = "tsc/internal/execute/build/host.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 131
+
+[[file]]
+go = "tsc/internal/execute/build/orchestrator.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 783
+
+[[file]]
+go = "tsc/internal/execute/build/parseCache.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 44
+
+[[file]]
+go = "tsc/internal/execute/build/uptodatestatus.go"
+package = "internal/execute/build"
+crate = "ts_build"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 133
+
+[[file]]
+go = "tsc/internal/execute/incremental/affectedfileshandler.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 397
+
+[[file]]
+go = "tsc/internal/execute/incremental/buildInfo.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 650
+
+[[file]]
+go = "tsc/internal/execute/incremental/buildinfotosnapshot.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 200
+
+[[file]]
+go = "tsc/internal/execute/incremental/emitfileshandler.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 354
+
+[[file]]
+go = "tsc/internal/execute/incremental/host.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 45
+
+[[file]]
+go = "tsc/internal/execute/incremental/incremental.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 62
+
+[[file]]
+go = "tsc/internal/execute/incremental/program.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 505
+
+[[file]]
+go = "tsc/internal/execute/incremental/programtosnapshot.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 434
+
+[[file]]
+go = "tsc/internal/execute/incremental/referencemap.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/execute/incremental/snapshot.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 446
+
+[[file]]
+go = "tsc/internal/execute/incremental/snapshottobuildinfo.go"
+package = "internal/execute/incremental"
+crate = "ts_incremental"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 390
+
+[[file]]
+go = "tsc/internal/execute/tsc.go"
+package = "internal/execute"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 408
+
+[[file]]
+go = "tsc/internal/execute/tsc/compile.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 115
+
+[[file]]
+go = "tsc/internal/execute/tsc/diagnostics.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 185
+
+[[file]]
+go = "tsc/internal/execute/tsc/emit.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 162
+
+[[file]]
+go = "tsc/internal/execute/tsc/extendedconfigcache.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 45
+
+[[file]]
+go = "tsc/internal/execute/tsc/help.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 426
+
+[[file]]
+go = "tsc/internal/execute/tsc/init.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 215
+
+[[file]]
+go = "tsc/internal/execute/tsc/statistics.go"
+package = "internal/execute/tsc"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 183
+
+[[file]]
+go = "tsc/internal/execute/tsctests/fs.go"
+package = "internal/execute/tsctests"
+crate = "ts_tsctests"
+phase = 4
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 90
+
+[[file]]
+go = "tsc/internal/execute/tsctests/mock_watch_backend.go"
+package = "internal/execute/tsctests"
+crate = "ts_tsctests"
+phase = 4
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 239
+
+[[file]]
+go = "tsc/internal/execute/tsctests/readablebuildinfo.go"
+package = "internal/execute/tsctests"
+crate = "ts_tsctests"
+phase = 4
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 449
+
+[[file]]
+go = "tsc/internal/execute/tsctests/runner.go"
+package = "internal/execute/tsctests"
+crate = "ts_tsctests"
+phase = 4
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 205
+
+[[file]]
+go = "tsc/internal/execute/tsctests/sys.go"
+package = "internal/execute/tsctests"
+crate = "ts_tsctests"
+phase = 4
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 611
+
+[[file]]
+go = "tsc/internal/execute/watcher.go"
+package = "internal/execute"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 693
+
+[[file]]
+go = "tsc/internal/execute/watchmanager/watchbackend.go"
+package = "internal/execute/watchmanager"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 118
+
+[[file]]
+go = "tsc/internal/execute/watchmanager/watchmanager.go"
+package = "internal/execute/watchmanager"
+crate = "ts_execute"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 354
+
+[[file]]
+go = "tsc/internal/format/api.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 189
+
+[[file]]
+go = "tsc/internal/format/context.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 121
+
+[[file]]
+go = "tsc/internal/format/indent.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 821
+
+[[file]]
+go = "tsc/internal/format/rule.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 109
+
+[[file]]
+go = "tsc/internal/format/rulecontext.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 629
+
+[[file]]
+go = "tsc/internal/format/rules.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 450
+
+[[file]]
+go = "tsc/internal/format/rulesmap.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 156
+
+[[file]]
+go = "tsc/internal/format/scanner.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 374
+
+[[file]]
+go = "tsc/internal/format/span.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1262
+
+[[file]]
+go = "tsc/internal/format/util.go"
+package = "internal/format"
+crate = "ts_format"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 148
+
+[[file]]
+go = "tsc/internal/fourslash/baselineutil.go"
+package = "internal/fourslash"
+crate = "ts_fourslash"
+phase = 5
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 801
+
+[[file]]
+go = "tsc/internal/fourslash/fourslash.go"
+package = "internal/fourslash"
+crate = "ts_fourslash"
+phase = 5
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6053
+
+[[file]]
+go = "tsc/internal/fourslash/semantictokens.go"
+package = "internal/fourslash"
+crate = "ts_fourslash"
+phase = 5
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 130
+
+[[file]]
+go = "tsc/internal/fourslash/statebaseline.go"
+package = "internal/fourslash"
+crate = "ts_fourslash"
+phase = 5
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 511
+
+[[file]]
+go = "tsc/internal/fourslash/test_parser.go"
+package = "internal/fourslash"
+crate = "ts_fourslash"
+phase = 5
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 524
+
+[[file]]
+go = "tsc/internal/fswatch/canonicalize_darwin.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 14
+
+[[file]]
+go = "tsc/internal/fswatch/canonicalize_other.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 8
+
+[[file]]
+go = "tsc/internal/fswatch/debounce.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 155
+
+[[file]]
+go = "tsc/internal/fswatch/event.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 271
+
+[[file]]
+go = "tsc/internal/fswatch/fanotify_linux.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 769
+
+[[file]]
+go = "tsc/internal/fswatch/fsevents_darwin.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 640
+
+[[file]]
+go = "tsc/internal/fswatch/fsevents_darwin_ffi.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 553
+
+[[file]]
+go = "tsc/internal/fswatch/inotify_linux.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 427
+
+[[file]]
+go = "tsc/internal/fswatch/kqueue.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 784
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 57
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_dirent_darwin.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 8
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_dirent_fileno.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 8
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_dirent_linux.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 8
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_dirent_noreclen.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 22
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_other.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 7
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_unix.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 145
+
+[[file]]
+go = "tsc/internal/fswatch/walkdir_windows.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 74
+
+[[file]]
+go = "tsc/internal/fswatch/watcher.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1108
+
+[[file]]
+go = "tsc/internal/fswatch/windows.go"
+package = "internal/fswatch"
+crate = "ts_fswatch"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 474
+
+[[file]]
+go = "tsc/internal/glob/glob.go"
+package = "internal/glob"
+crate = "ts_glob"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 349
+
+[[file]]
+go = "tsc/internal/ipc/conn.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 46
+
+[[file]]
+go = "tsc/internal/ipc/conn_async.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 318
+
+[[file]]
+go = "tsc/internal/ipc/conn_sync.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 211
+
+[[file]]
+go = "tsc/internal/ipc/protocol.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 22
+
+[[file]]
+go = "tsc/internal/ipc/protocol_jsonrpc.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 96
+
+[[file]]
+go = "tsc/internal/ipc/timing.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 143
+
+[[file]]
+go = "tsc/internal/ipc/transport.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 95
+
+[[file]]
+go = "tsc/internal/ipc/transport_unix.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 22
+
+[[file]]
+go = "tsc/internal/ipc/transport_windows.go"
+package = "internal/ipc"
+crate = "ts_ipc"
+phase = 6
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 19
+
+[[file]]
+go = "tsc/internal/jsnum/jsnum.go"
+package = "internal/jsnum"
+crate = "ts_jsnum"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 177
+
+[[file]]
+go = "tsc/internal/jsnum/pseudobigint.go"
+package = "internal/jsnum"
+crate = "ts_jsnum"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 66
+
+[[file]]
+go = "tsc/internal/jsnum/string.go"
+package = "internal/jsnum"
+crate = "ts_jsnum"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 341
+
+[[file]]
+go = "tsc/internal/json/json.go"
+package = "internal/json"
+crate = "ts_json"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 100
+
+[[file]]
+go = "tsc/internal/jsonrpc/baseproto.go"
+package = "internal/jsonrpc"
+crate = "ts_jsonrpc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 99
+
+[[file]]
+go = "tsc/internal/jsonrpc/jsonrpc.go"
+package = "internal/jsonrpc"
+crate = "ts_jsonrpc"
+phase = 6
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 188
+
+[[file]]
+go = "tsc/internal/locale/locale.go"
+package = "internal/locale"
+crate = "ts_locale"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 40
+
+[[file]]
+go = "tsc/internal/ls/api.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 44
+
+[[file]]
+go = "tsc/internal/ls/autoimport/aliasresolver.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 241
+
+[[file]]
+go = "tsc/internal/ls/autoimport/export.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 142
+
+[[file]]
+go = "tsc/internal/ls/autoimport/export_stringer_generated.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/ls/autoimport/extract.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 473
+
+[[file]]
+go = "tsc/internal/ls/autoimport/fix.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1335
+
+[[file]]
+go = "tsc/internal/ls/autoimport/import_adder.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 502
+
+[[file]]
+go = "tsc/internal/ls/autoimport/index.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 186
+
+[[file]]
+go = "tsc/internal/ls/autoimport/registry.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1828
+
+[[file]]
+go = "tsc/internal/ls/autoimport/specifiers.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 75
+
+[[file]]
+go = "tsc/internal/ls/autoimport/util.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 323
+
+[[file]]
+go = "tsc/internal/ls/autoimport/view.go"
+package = "internal/ls/autoimport"
+crate = "ts_autoimport"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 262
+
+[[file]]
+go = "tsc/internal/ls/autoinsert.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 106
+
+[[file]]
+go = "tsc/internal/ls/callhierarchy.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1137
+
+[[file]]
+go = "tsc/internal/ls/change/delete.go"
+package = "internal/ls/change"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 262
+
+[[file]]
+go = "tsc/internal/ls/change/tracker.go"
+package = "internal/ls/change"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 827
+
+[[file]]
+go = "tsc/internal/ls/change/trackerimpl.go"
+package = "internal/ls/change"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 488
+
+[[file]]
+go = "tsc/internal/ls/codeactions.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 402
+
+[[file]]
+go = "tsc/internal/ls/codeactions_fixclassincorrectlyimplementsinterface.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 240
+
+[[file]]
+go = "tsc/internal/ls/codeactions_fixmissingtypeannotation.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1420
+
+[[file]]
+go = "tsc/internal/ls/codeactions_importfixes.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 457
+
+[[file]]
+go = "tsc/internal/ls/codeactions_missingmemberfixer.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 514
+
+[[file]]
+go = "tsc/internal/ls/codelens.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 243
+
+[[file]]
+go = "tsc/internal/ls/completions.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6900
+
+[[file]]
+go = "tsc/internal/ls/constants.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6
+
+[[file]]
+go = "tsc/internal/ls/crossproject.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 437
+
+[[file]]
+go = "tsc/internal/ls/definition.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 516
+
+[[file]]
+go = "tsc/internal/ls/diagnostics.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 120
+
+[[file]]
+go = "tsc/internal/ls/displaypartswriter.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 217
+
+[[file]]
+go = "tsc/internal/ls/documenthighlights.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 795
+
+[[file]]
+go = "tsc/internal/ls/file_rename.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 403
+
+[[file]]
+go = "tsc/internal/ls/findallreferences.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2774
+
+[[file]]
+go = "tsc/internal/ls/folding.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 660
+
+[[file]]
+go = "tsc/internal/ls/format.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 302
+
+[[file]]
+go = "tsc/internal/ls/host.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 25
+
+[[file]]
+go = "tsc/internal/ls/hover.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1159
+
+[[file]]
+go = "tsc/internal/ls/hovericon.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 156
+
+[[file]]
+go = "tsc/internal/ls/importTracker.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 767
+
+[[file]]
+go = "tsc/internal/ls/inlay_hints.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 950
+
+[[file]]
+go = "tsc/internal/ls/jsdoc.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 312
+
+[[file]]
+go = "tsc/internal/ls/jsdoc_snippet.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 597
+
+[[file]]
+go = "tsc/internal/ls/languageservice.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 132
+
+[[file]]
+go = "tsc/internal/ls/linkedediting.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 117
+
+[[file]]
+go = "tsc/internal/ls/lsconv/converters.go"
+package = "internal/ls/lsconv"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 637
+
+[[file]]
+go = "tsc/internal/ls/lsconv/linemap.go"
+package = "internal/ls/lsconv"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 71
+
+[[file]]
+go = "tsc/internal/ls/lsutil/asi.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 104
+
+[[file]]
+go = "tsc/internal/ls/lsutil/children.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 130
+
+[[file]]
+go = "tsc/internal/ls/lsutil/completednode.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 196
+
+[[file]]
+go = "tsc/internal/ls/lsutil/formatcodeoptions.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 141
+
+[[file]]
+go = "tsc/internal/ls/lsutil/organizeimports.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 695
+
+[[file]]
+go = "tsc/internal/ls/lsutil/symbol_display.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 438
+
+[[file]]
+go = "tsc/internal/ls/lsutil/userpreferences.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 924
+
+[[file]]
+go = "tsc/internal/ls/lsutil/utilities.go"
+package = "internal/ls/lsutil"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 160
+
+[[file]]
+go = "tsc/internal/ls/organizeimports.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 957
+
+[[file]]
+go = "tsc/internal/ls/rename.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 455
+
+[[file]]
+go = "tsc/internal/ls/selectionranges.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 400
+
+[[file]]
+go = "tsc/internal/ls/semantictokens.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 624
+
+[[file]]
+go = "tsc/internal/ls/signaturehelp.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1440
+
+[[file]]
+go = "tsc/internal/ls/source_map.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 167
+
+[[file]]
+go = "tsc/internal/ls/sourcedefinition.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 731
+
+[[file]]
+go = "tsc/internal/ls/string_completions.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2247
+
+[[file]]
+go = "tsc/internal/ls/symbols.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 723
+
+[[file]]
+go = "tsc/internal/ls/utilities.go"
+package = "internal/ls"
+crate = "ts_ls"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1411
+
+[[file]]
+go = "tsc/internal/lsp/dynamic_queue.go"
+package = "internal/lsp"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 94
+
+[[file]]
+go = "tsc/internal/lsp/logger.go"
+package = "internal/lsp"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 184
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/baseproto.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/jsonrpc.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 130
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/lsp.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 321
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/lsp_generated.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 17566
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/structcodec.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 164
+
+[[file]]
+go = "tsc/internal/lsp/lsproto/util.go"
+package = "internal/lsp/lsproto"
+crate = "ts_lsproto"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 111
+
+[[file]]
+go = "tsc/internal/lsp/lspwatcher/lspwatcher.go"
+package = "internal/lsp/lspwatcher"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 601
+
+[[file]]
+go = "tsc/internal/lsp/progress.go"
+package = "internal/lsp"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 217
+
+[[file]]
+go = "tsc/internal/lsp/server.go"
+package = "internal/lsp"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2542
+
+[[file]]
+go = "tsc/internal/lsp/stack_sanitizer.go"
+package = "internal/lsp"
+crate = "ts_lsp"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 96
+
+[[file]]
+go = "tsc/internal/module/cache.go"
+package = "internal/module"
+crate = "ts_module"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 89
+
+[[file]]
+go = "tsc/internal/module/resolver.go"
+package = "internal/module"
+crate = "ts_module"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2372
+
+[[file]]
+go = "tsc/internal/module/types.go"
+package = "internal/module"
+crate = "ts_module"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 137
+
+[[file]]
+go = "tsc/internal/module/util.go"
+package = "internal/module"
+crate = "ts_module"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 201
+
+[[file]]
+go = "tsc/internal/modulespecifiers/compare.go"
+package = "internal/modulespecifiers"
+crate = "ts_modulespecifiers"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 13
+
+[[file]]
+go = "tsc/internal/modulespecifiers/preferences.go"
+package = "internal/modulespecifiers"
+crate = "ts_modulespecifiers"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 256
+
+[[file]]
+go = "tsc/internal/modulespecifiers/specifiers.go"
+package = "internal/modulespecifiers"
+crate = "ts_modulespecifiers"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1402
+
+[[file]]
+go = "tsc/internal/modulespecifiers/types.go"
+package = "internal/modulespecifiers"
+crate = "ts_modulespecifiers"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 125
+
+[[file]]
+go = "tsc/internal/modulespecifiers/util.go"
+package = "internal/modulespecifiers"
+crate = "ts_modulespecifiers"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 491
+
+[[file]]
+go = "tsc/internal/nativepath/eintr_unix.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 14
+
+[[file]]
+go = "tsc/internal/nativepath/realpath_linux.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 70
+
+[[file]]
+go = "tsc/internal/nativepath/realpath_other.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 9
+
+[[file]]
+go = "tsc/internal/nativepath/realpath_windows.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 100
+
+[[file]]
+go = "tsc/internal/nativepath/symlink_other.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 10
+
+[[file]]
+go = "tsc/internal/nativepath/symlink_windows.go"
+package = "internal/nativepath"
+crate = "ts_nativepath"
+phase = 4
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/nodebuilder/types.go"
+package = "internal/nodebuilder"
+crate = "ts_nodebuilder"
+phase = 2
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 78
+
+[[file]]
+go = "tsc/internal/osutil/os_android.go"
+package = "internal/osutil"
+crate = "ts_core"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 27
+
+[[file]]
+go = "tsc/internal/osutil/os_other.go"
+package = "internal/osutil"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 13
+
+[[file]]
+go = "tsc/internal/osutil/osutil.go"
+package = "internal/osutil"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 11
+
+[[file]]
+go = "tsc/internal/outputpaths/commonsourcedirectory.go"
+package = "internal/outputpaths"
+crate = "ts_outputpaths"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 85
+
+[[file]]
+go = "tsc/internal/outputpaths/outputpaths.go"
+package = "internal/outputpaths"
+crate = "ts_outputpaths"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 229
+
+[[file]]
+go = "tsc/internal/packagejson/cache.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 198
+
+[[file]]
+go = "tsc/internal/packagejson/expected.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 75
+
+[[file]]
+go = "tsc/internal/packagejson/exportsorimports.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 84
+
+[[file]]
+go = "tsc/internal/packagejson/jsonvalue.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 175
+
+[[file]]
+go = "tsc/internal/packagejson/packagejson.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 144
+
+[[file]]
+go = "tsc/internal/packagejson/validated.go"
+package = "internal/packagejson"
+crate = "ts_packagejson"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 8
+
+[[file]]
+go = "tsc/internal/parser/jsdoc.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1355
+
+[[file]]
+go = "tsc/internal/parser/parser.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6854
+
+[[file]]
+go = "tsc/internal/parser/references.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 71
+
+[[file]]
+go = "tsc/internal/parser/reparser.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 752
+
+[[file]]
+go = "tsc/internal/parser/types.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 14
+
+[[file]]
+go = "tsc/internal/parser/utilities.go"
+package = "internal/parser"
+crate = "ts_parser"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 56
+
+[[file]]
+go = "tsc/internal/pprof/pprof.go"
+package = "internal/pprof"
+crate = "ts_pprof"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 169
+
+[[file]]
+go = "tsc/internal/printer/changetrackerwriter.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 250
+
+[[file]]
+go = "tsc/internal/printer/emitcontext.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1067
+
+[[file]]
+go = "tsc/internal/printer/emitflags.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 38
+
+[[file]]
+go = "tsc/internal/printer/emithost.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 23
+
+[[file]]
+go = "tsc/internal/printer/emitresolver.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 127
+
+[[file]]
+go = "tsc/internal/printer/emittextwriter.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 36
+
+[[file]]
+go = "tsc/internal/printer/factory.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1315
+
+[[file]]
+go = "tsc/internal/printer/generatedidentifierflags.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 57
+
+[[file]]
+go = "tsc/internal/printer/helpers.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 558
+
+[[file]]
+go = "tsc/internal/printer/namegenerator.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 405
+
+[[file]]
+go = "tsc/internal/printer/printer.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 6345
+
+[[file]]
+go = "tsc/internal/printer/semicolon_writer.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 143
+
+[[file]]
+go = "tsc/internal/printer/singlelinestringwriter.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 159
+
+[[file]]
+go = "tsc/internal/printer/sourcefilemetadataprovider.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 10
+
+[[file]]
+go = "tsc/internal/printer/syntheticfile.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/printer/textwriter.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 227
+
+[[file]]
+go = "tsc/internal/printer/utilities.go"
+package = "internal/printer"
+crate = "ts_printer"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 936
+
+[[file]]
+go = "tsc/internal/project/api.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 35
+
+[[file]]
+go = "tsc/internal/project/ata/ata.go"
+package = "internal/project/ata"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 500
+
+[[file]]
+go = "tsc/internal/project/ata/discovertypings.go"
+package = "internal/project/ata"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 334
+
+[[file]]
+go = "tsc/internal/project/ata/typesmap.go"
+package = "internal/project/ata"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 505
+
+[[file]]
+go = "tsc/internal/project/ata/validatepackagename.go"
+package = "internal/project/ata"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 98
+
+[[file]]
+go = "tsc/internal/project/autoimport.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 180
+
+[[file]]
+go = "tsc/internal/project/background/queue.go"
+package = "internal/project/background"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/project/checkerpool.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 530
+
+[[file]]
+go = "tsc/internal/project/client.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 27
+
+[[file]]
+go = "tsc/internal/project/compilerhost.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 174
+
+[[file]]
+go = "tsc/internal/project/configfileregistry.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 244
+
+[[file]]
+go = "tsc/internal/project/configfileregistrybuilder.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 823
+
+[[file]]
+go = "tsc/internal/project/dirty/box.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 62
+
+[[file]]
+go = "tsc/internal/project/dirty/cloneablemap.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 9
+
+[[file]]
+go = "tsc/internal/project/dirty/entry.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/project/dirty/interfaces.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 15
+
+[[file]]
+go = "tsc/internal/project/dirty/map.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 169
+
+[[file]]
+go = "tsc/internal/project/dirty/mapbuilder.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 74
+
+[[file]]
+go = "tsc/internal/project/dirty/syncmap.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 362
+
+[[file]]
+go = "tsc/internal/project/dirty/util.go"
+package = "internal/project/dirty"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 18
+
+[[file]]
+go = "tsc/internal/project/extendedconfigcache.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 51
+
+[[file]]
+go = "tsc/internal/project/filechange.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 86
+
+[[file]]
+go = "tsc/internal/project/logging/logcollector.go"
+package = "internal/project/logging"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 34
+
+[[file]]
+go = "tsc/internal/project/logging/logger.go"
+package = "internal/project/logging"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 135
+
+[[file]]
+go = "tsc/internal/project/logging/logtree.go"
+package = "internal/project/logging"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 163
+
+[[file]]
+go = "tsc/internal/project/overlayfs.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 403
+
+[[file]]
+go = "tsc/internal/project/ownercache.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 107
+
+[[file]]
+go = "tsc/internal/project/parsecache.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 96
+
+[[file]]
+go = "tsc/internal/project/programcounter.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 48
+
+[[file]]
+go = "tsc/internal/project/project.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 558
+
+[[file]]
+go = "tsc/internal/project/project_stringer_generated.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 25
+
+[[file]]
+go = "tsc/internal/project/projectcollection.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 359
+
+[[file]]
+go = "tsc/internal/project/projectcollectionbuilder.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1434
+
+[[file]]
+go = "tsc/internal/project/refcountcache.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 137
+
+[[file]]
+go = "tsc/internal/project/session.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2104
+
+[[file]]
+go = "tsc/internal/project/snapshot.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 833
+
+[[file]]
+go = "tsc/internal/project/snapshotfs.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 868
+
+[[file]]
+go = "tsc/internal/project/snapshothost.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 184
+
+[[file]]
+go = "tsc/internal/project/watch.go"
+package = "internal/project"
+crate = "ts_project"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 496
+
+[[file]]
+go = "tsc/internal/pseudochecker/checker.go"
+package = "internal/pseudochecker"
+crate = "ts_pseudochecker"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 21
+
+[[file]]
+go = "tsc/internal/pseudochecker/lookup.go"
+package = "internal/pseudochecker"
+crate = "ts_pseudochecker"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 729
+
+[[file]]
+go = "tsc/internal/pseudochecker/type.go"
+package = "internal/pseudochecker"
+crate = "ts_pseudochecker"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 376
+
+[[file]]
+go = "tsc/internal/repo/paths.go"
+package = "internal/repo"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/scanner/regexp.go"
+package = "internal/scanner"
+crate = "ts_scanner"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1105
+
+[[file]]
+go = "tsc/internal/scanner/scanner.go"
+package = "internal/scanner"
+crate = "ts_scanner"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2917
+
+[[file]]
+go = "tsc/internal/scanner/unicodeproperties.go"
+package = "internal/scanner"
+crate = "ts_scanner"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 162
+
+[[file]]
+go = "tsc/internal/scanner/utilities.go"
+package = "internal/scanner"
+crate = "ts_scanner"
+phase = 0
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 146
+
+[[file]]
+go = "tsc/internal/semver/version.go"
+package = "internal/semver"
+crate = "ts_semver"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 274
+
+[[file]]
+go = "tsc/internal/semver/version_range.go"
+package = "internal/semver"
+crate = "ts_semver"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 438
+
+[[file]]
+go = "tsc/internal/sourcemap/decoder.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 253
+
+[[file]]
+go = "tsc/internal/sourcemap/generator.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 387
+
+[[file]]
+go = "tsc/internal/sourcemap/lineinfo.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 30
+
+[[file]]
+go = "tsc/internal/sourcemap/source.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 9
+
+[[file]]
+go = "tsc/internal/sourcemap/source_mapper.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 313
+
+[[file]]
+go = "tsc/internal/sourcemap/util.go"
+package = "internal/sourcemap"
+crate = "ts_sourcemap"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/spanmap/spanmap.go"
+package = "internal/spanmap"
+crate = "ts_spanmap"
+phase = 5
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 818
+
+[[file]]
+go = "tsc/internal/stringutil/compare.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 128
+
+[[file]]
+go = "tsc/internal/stringutil/generate.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 4
+
+[[file]]
+go = "tsc/internal/stringutil/identifier.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 17
+
+[[file]]
+go = "tsc/internal/stringutil/identifier_parts_generated.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1391
+
+[[file]]
+go = "tsc/internal/stringutil/js_case.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 157
+
+[[file]]
+go = "tsc/internal/stringutil/js_case_generated.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 3496
+
+[[file]]
+go = "tsc/internal/stringutil/util.go"
+package = "internal/stringutil"
+crate = "ts_stringutil"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 371
+
+[[file]]
+go = "tsc/internal/symlinks/knownsymlinks.go"
+package = "internal/symlinks"
+crate = "ts_core"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 134
+
+[[file]]
+go = "tsc/internal/testrunner/compiler_runner.go"
+package = "internal/testrunner"
+crate = "ts_testrunner"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 607
+
+[[file]]
+go = "tsc/internal/testrunner/runner.go"
+package = "internal/testrunner"
+crate = "ts_testrunner"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 14
+
+[[file]]
+go = "tsc/internal/testrunner/test_case_parser.go"
+package = "internal/testrunner"
+crate = "ts_testrunner"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 299
+
+[[file]]
+go = "tsc/internal/testrunner/transpile_runner.go"
+package = "internal/testrunner"
+crate = "ts_testrunner"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 187
+
+[[file]]
+go = "tsc/internal/testutil/autoimporttestutil/fixtures.go"
+package = "internal/testutil/autoimporttestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 610
+
+[[file]]
+go = "tsc/internal/testutil/baseline/baseline.go"
+package = "internal/testutil/baseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 85
+
+[[file]]
+go = "tsc/internal/testutil/baseline/testmain.go"
+package = "internal/testutil/baseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 103
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/component.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 155
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/diagnostic_code_collision.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 41
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/duplicate.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 100
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/duplicate_projection.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 40
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/dynamic_verbatim.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 67
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/editing.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 163
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/failing.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 23
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/hoisting.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 132
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/lisp.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 44
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/manifest.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 22
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/protocol.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 80
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/registry.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 63
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/spawner.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 42
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/supplemental.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 33
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/supplemental_diagnostics.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 42
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/supplemental_globals.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 39
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/supplemental_module.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/synthesizing.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 37
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/transforming.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 274
+
+[[file]]
+go = "tsc/internal/testutil/contentmappertest/verbatim.go"
+package = "internal/testutil/contentmappertest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 52
+
+[[file]]
+go = "tsc/internal/testutil/emittestutil/emittestutil.go"
+package = "internal/testutil/emittestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/testutil/filefixture/filefixture.go"
+package = "internal/testutil/filefixture"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 74
+
+[[file]]
+go = "tsc/internal/testutil/fixtures/benchfixtures.go"
+package = "internal/testutil/fixtures"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 16
+
+[[file]]
+go = "tsc/internal/testutil/fsbaselineutil/differ.go"
+package = "internal/testutil/fsbaselineutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 177
+
+[[file]]
+go = "tsc/internal/testutil/harnessutil/harnessutil.go"
+package = "internal/testutil/harnessutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1273
+
+[[file]]
+go = "tsc/internal/testutil/harnessutil/recorderfs.go"
+package = "internal/testutil/harnessutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 45
+
+[[file]]
+go = "tsc/internal/testutil/harnessutil/sourcemap_recorder.go"
+package = "internal/testutil/harnessutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 364
+
+[[file]]
+go = "tsc/internal/testutil/jstest/node.go"
+package = "internal/testutil/jstest"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 95
+
+[[file]]
+go = "tsc/internal/testutil/lsptestutil/lspclient.go"
+package = "internal/testutil/lsptestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 326
+
+[[file]]
+go = "tsc/internal/testutil/parsetestutil/parsetestutil.go"
+package = "internal/testutil/parsetestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 88
+
+[[file]]
+go = "tsc/internal/testutil/projecttestutil/clientmock_generated.go"
+package = "internal/testutil/projecttestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 644
+
+[[file]]
+go = "tsc/internal/testutil/projecttestutil/npmexecutormock_generated.go"
+package = "internal/testutil/projecttestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 86
+
+[[file]]
+go = "tsc/internal/testutil/projecttestutil/projecttestutil.go"
+package = "internal/testutil/projecttestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 323
+
+[[file]]
+go = "tsc/internal/testutil/race/norace.go"
+package = "internal/testutil/race"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 7
+
+[[file]]
+go = "tsc/internal/testutil/race/race.go"
+package = "internal/testutil/race"
+crate = "ts_testutil"
+phase = 1
+kind = "out-of-scope"
+status = "out-of-scope"
+rust = ""
+pin = "1f70213d49"
+loc = 7
+
+[[file]]
+go = "tsc/internal/testutil/stringtestutil/stringtestutil.go"
+package = "internal/testutil/stringtestutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 51
+
+[[file]]
+go = "tsc/internal/testutil/testutil.go"
+package = "internal/testutil"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 49
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/contentmapper_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 92
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/error_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 276
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/js_emit_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 291
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/module_resolution_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 18
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/sourcemap_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 130
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/sourcemap_record_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 34
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/type_symbol_baseline.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 491
+
+[[file]]
+go = "tsc/internal/testutil/tsbaseline/util.go"
+package = "internal/testutil/tsbaseline"
+crate = "ts_testutil"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 71
+
+[[file]]
+go = "tsc/internal/tracing/tracing.go"
+package = "internal/tracing"
+crate = "ts_tracing"
+phase = 4
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 763
+
+[[file]]
+go = "tsc/internal/transformers/chain.go"
+package = "internal/transformers"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 62
+
+[[file]]
+go = "tsc/internal/transformers/declarations/diagnostics.go"
+package = "internal/transformers/declarations"
+crate = "ts_declarations"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 736
+
+[[file]]
+go = "tsc/internal/transformers/declarations/supplementalreferences.go"
+package = "internal/transformers/declarations"
+crate = "ts_declarations"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 54
+
+[[file]]
+go = "tsc/internal/transformers/declarations/tracker.go"
+package = "internal/transformers/declarations"
+crate = "ts_declarations"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 252
+
+[[file]]
+go = "tsc/internal/transformers/declarations/transform.go"
+package = "internal/transformers/declarations"
+crate = "ts_declarations"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2984
+
+[[file]]
+go = "tsc/internal/transformers/declarations/util.go"
+package = "internal/transformers/declarations"
+crate = "ts_declarations"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 186
+
+[[file]]
+go = "tsc/internal/transformers/destructuring.go"
+package = "internal/transformers"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 510
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/async.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 984
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/classfields.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 3618
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/classthis.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 28
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/definitions.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 43
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/esdecorator.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2751
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/exponentiation.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 90
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/forawait.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 856
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/logicalassignment.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 113
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/namedevaluation.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 537
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/nullishcoalescing.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 49
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/objectrestspread.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 593
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/optionalcatch.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 37
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/optionalchain.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 240
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/taggedtemplate.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 174
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/usestrict.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 50
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/using.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 799
+
+[[file]]
+go = "tsc/internal/transformers/estransforms/utilities.go"
+package = "internal/transformers/estransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 289
+
+[[file]]
+go = "tsc/internal/transformers/inliners/constenum.go"
+package = "internal/transformers/inliners"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 102
+
+[[file]]
+go = "tsc/internal/transformers/jsxtransforms/jsx.go"
+package = "internal/transformers/jsxtransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1209
+
+[[file]]
+go = "tsc/internal/transformers/modifiervisitor.go"
+package = "internal/transformers"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 28
+
+[[file]]
+go = "tsc/internal/transformers/moduletransforms/commonjsmodule.go"
+package = "internal/transformers/moduletransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2162
+
+[[file]]
+go = "tsc/internal/transformers/moduletransforms/esmodule.go"
+package = "internal/transformers/moduletransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 372
+
+[[file]]
+go = "tsc/internal/transformers/moduletransforms/externalmoduleinfo.go"
+package = "internal/transformers/moduletransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 390
+
+[[file]]
+go = "tsc/internal/transformers/moduletransforms/impliedmodule.go"
+package = "internal/transformers/moduletransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/transformers/moduletransforms/utilities.go"
+package = "internal/transformers/moduletransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 118
+
+[[file]]
+go = "tsc/internal/transformers/transformer.go"
+package = "internal/transformers"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 41
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/importelision.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 153
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/legacydecorators.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1038
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/metadata.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 390
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/runtimesyntax.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 995
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/typeeraser.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 393
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/typeserializer.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 511
+
+[[file]]
+go = "tsc/internal/transformers/tstransforms/utilities.go"
+package = "internal/transformers/tstransforms"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/transformers/utilities.go"
+package = "internal/transformers"
+crate = "ts_transformers"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 375
+
+[[file]]
+go = "tsc/internal/transpile/fs.go"
+package = "internal/transpile"
+crate = "ts_transpile"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 44
+
+[[file]]
+go = "tsc/internal/transpile/transpile.go"
+package = "internal/transpile"
+crate = "ts_transpile"
+phase = 3
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 258
+
+[[file]]
+go = "tsc/internal/tsoptions/commandlineoption.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 204
+
+[[file]]
+go = "tsc/internal/tsoptions/commandlineparser.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 411
+
+[[file]]
+go = "tsc/internal/tsoptions/contentmappers.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 53
+
+[[file]]
+go = "tsc/internal/tsoptions/declsbuild.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 69
+
+[[file]]
+go = "tsc/internal/tsoptions/declscompiler.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1272
+
+[[file]]
+go = "tsc/internal/tsoptions/declstypeacquisition.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 29
+
+[[file]]
+go = "tsc/internal/tsoptions/declswatch.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 88
+
+[[file]]
+go = "tsc/internal/tsoptions/diagnostics.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 67
+
+[[file]]
+go = "tsc/internal/tsoptions/enummaps.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 255
+
+[[file]]
+go = "tsc/internal/tsoptions/errors.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 131
+
+[[file]]
+go = "tsc/internal/tsoptions/namemap.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 58
+
+[[file]]
+go = "tsc/internal/tsoptions/parsedbuildcommandline.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 45
+
+[[file]]
+go = "tsc/internal/tsoptions/parsedcommandline.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 494
+
+[[file]]
+go = "tsc/internal/tsoptions/parsedoptions.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 16
+
+[[file]]
+go = "tsc/internal/tsoptions/parsinghelpers.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 738
+
+[[file]]
+go = "tsc/internal/tsoptions/showconfig.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 389
+
+[[file]]
+go = "tsc/internal/tsoptions/tsconfigparsing.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 2103
+
+[[file]]
+go = "tsc/internal/tsoptions/tsoptionstest/parsedcommandline.go"
+package = "internal/tsoptions/tsoptionstest"
+crate = "ts_tsoptions"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 14
+
+[[file]]
+go = "tsc/internal/tsoptions/tsoptionstest/vfsparseconfighost.go"
+package = "internal/tsoptions/tsoptionstest"
+crate = "ts_tsoptions"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 60
+
+[[file]]
+go = "tsc/internal/tsoptions/wildcarddirectories.go"
+package = "internal/tsoptions"
+crate = "ts_tsoptions"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 134
+
+[[file]]
+go = "tsc/internal/tspath/extension.go"
+package = "internal/tspath"
+crate = "ts_tspath"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 208
+
+[[file]]
+go = "tsc/internal/tspath/ignoredpaths.go"
+package = "internal/tspath"
+crate = "ts_tspath"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 18
+
+[[file]]
+go = "tsc/internal/tspath/path.go"
+package = "internal/tspath"
+crate = "ts_tspath"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 1269
+
+[[file]]
+go = "tsc/internal/vfs/cachedvfs/cachedvfs.go"
+package = "internal/vfs/cachedvfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 154
+
+[[file]]
+go = "tsc/internal/vfs/internal/internal.go"
+package = "internal/vfs/internal"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 194
+
+[[file]]
+go = "tsc/internal/vfs/iovfs/iofs.go"
+package = "internal/vfs/iovfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 222
+
+[[file]]
+go = "tsc/internal/vfs/osvfs/os.go"
+package = "internal/vfs/osvfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 243
+
+[[file]]
+go = "tsc/internal/vfs/trackingvfs/trackingvfs.go"
+package = "internal/vfs/trackingvfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 76
+
+[[file]]
+go = "tsc/internal/vfs/vfs.go"
+package = "internal/vfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 88
+
+[[file]]
+go = "tsc/internal/vfs/vfsmatch/stringer_generated.go"
+package = "internal/vfs/vfsmatch"
+crate = "ts_vfs"
+phase = 1
+kind = "generated"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 26
+
+[[file]]
+go = "tsc/internal/vfs/vfsmatch/vfsmatch.go"
+package = "internal/vfs/vfsmatch"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 717
+
+[[file]]
+go = "tsc/internal/vfs/vfsmock/mock_generated.go"
+package = "internal/vfs/vfsmock"
+crate = "ts_vfs"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 580
+
+[[file]]
+go = "tsc/internal/vfs/vfsmock/wrapper.go"
+package = "internal/vfs/vfsmock"
+crate = "ts_vfs"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 21
+
+[[file]]
+go = "tsc/internal/vfs/vfstest/vfstest.go"
+package = "internal/vfs/vfstest"
+crate = "ts_vfs"
+phase = 1
+kind = "harness"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 679
+
+[[file]]
+go = "tsc/internal/vfs/wrapvfs/wrapvfs.go"
+package = "internal/vfs/wrapvfs"
+crate = "ts_vfs"
+phase = 1
+kind = "source"
+status = "planned"
+rust = ""
+pin = "1f70213d49"
+loc = 132
+
