@@ -362,7 +362,7 @@ where
     struct Visitor<V>(std::marker::PhantomData<V>);
     impl<'de, V: Deserialize<'de>> serde::de::Visitor<'de> for Visitor<V> {
         type Value = BTreeMap<String, V>;
-        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             f.write_str("a map with unique keys")
         }
         fn visit_map<A: serde::de::MapAccess<'de>>(

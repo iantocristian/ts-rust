@@ -16,3 +16,32 @@ inputs = ["data/upstream.json", ".gitmodules"]
 sources = ["upstream", "scripts/tracking-bootstrap.py", "xtask/**"]
 target = "host"
 config = "release"
+
+# Check producers (S02). A false metric is a measured failure; a missing tool is a failed run.
+[fmt]
+command = ["python3", "scripts/checks.py", "fmt"]
+inputs = ["rustfmt.toml"]
+sources = ["crates/**", "xtask/**", "Cargo.*", "rust-toolchain*", "rustfmt.toml", "scripts/checks.py"]
+target = "host"
+config = "cargo fmt --all --check"
+
+[clippy]
+command = ["python3", "scripts/checks.py", "clippy"]
+inputs = ["Cargo.toml", "Cargo.lock"]
+sources = ["crates/**", "xtask/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "clippy.toml", "scripts/checks.py"]
+target = "host"
+config = "debug; all targets; -D warnings"
+
+[deny]
+command = ["python3", "scripts/checks.py", "deny"]
+inputs = ["deny.toml", "Cargo.lock"]
+sources = ["crates/**", "xtask/**", "Cargo.*", "deny.toml", "scripts/checks.py"]
+target = "host"
+config = "advisories, licenses, bans, sources"
+
+[selftest]
+command = ["python3", "scripts/checks.py", "selftest"]
+inputs = ["Cargo.toml", "Cargo.lock"]
+sources = ["xtask/**", "scripts/**", "Cargo.*", "rust-toolchain*", "data/**"]
+target = "host"
+config = "debug"

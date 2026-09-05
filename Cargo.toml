@@ -1,4 +1,46 @@
 [workspace]
 resolver = "2"
 members = ["xtask"]
-# Compiler crates are added under crates/ as they are created; see PLAN.md, section 8.
+# Compiler crates are added under crates/ as they are created; see PLAN.md, section 8,
+# and sprints/README.md for the Phase 0 order.
+
+[workspace.package]
+edition = "2021"
+# ADR 0016: one release behind the stable toolchain pinned in rust-toolchain.toml.
+rust-version = "1.96"
+license = "Apache-2.0"
+publish = false
+
+# ADR 0016: forbid unsafe code; the leaf crates that need platform FFI (file watching,
+# native paths) declare their own [lints] table instead of inheriting this one.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+# ADR 0016: clippy at pedantic minus this allow-list. Every allowed lint names its reason.
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+float_cmp = "allow"                # thresholds and recorded metrics compare exact values by design
+cast_precision_loss = "allow"      # counts and byte lengths become f64 for reporting only
+cast_possible_truncation = "allow" # positions and lengths are bounded by the source text and the wire format
+cast_possible_wrap = "allow"       # see cast_possible_truncation
+cast_sign_loss = "allow"           # see cast_possible_truncation
+format_push_string = "allow"       # report builders append formatted lines
+map_unwrap_or = "allow"            # style; ported code keeps upstream's control flow
+too_many_lines = "allow"           # structure-preserving translation keeps upstream's function shapes
+items_after_statements = "allow"   # style
+many_single_char_names = "allow"   # comparators and relaters keep upstream's short names
+similar_names = "allow"            # see many_single_char_names
+module_name_repetitions = "allow"  # crate and module names mirror upstream packages
+missing_errors_doc = "allow"       # internal crates; the host traits document their errors
+missing_panics_doc = "allow"       # invariant panics are policy (ADR 0012), not API
+must_use_candidate = "allow"       # noisy on ported accessors
+doc_markdown = "allow"             # port markers and Go identifiers in doc comments
+struct_excessive_bools = "allow"   # ported option and flag structs
+uninlined_format_args = "allow"    # style
+
+[profile.release]
+# ADR 0012 needs unwinding for the catch_unwind boundaries; ADR 0016 sets fat LTO and one codegen unit.
+panic = "unwind"
+lto = "fat"
+codegen-units = 1

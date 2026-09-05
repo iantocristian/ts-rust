@@ -204,7 +204,9 @@ fn read_adrs(root: &Path) -> Vec<(String, String, String)> {
                 .to_string();
             if name.len() < 5
                 || !name[..4].chars().all(|c| c.is_ascii_digit())
-                || !name.ends_with(".md")
+                || !std::path::Path::new(&name)
+                    .extension()
+                    .is_some_and(|e| e.eq_ignore_ascii_case("md"))
             {
                 continue;
             }
@@ -854,7 +856,7 @@ fn write_status_md(root: &Path, r: &Report) {
         .filter(|f| f.kind == "source" || f.kind == "generated")
         .map(|f| f.phase)
         .collect();
-    phases.sort();
+    phases.sort_unstable();
     phases.dedup();
     for ph in phases {
         s.push_str(&format!(
@@ -891,7 +893,7 @@ fn write_status_md(root: &Path, r: &Report) {
         .filter_map(|k| {
             k.strip_prefix("functions.package[")
                 .and_then(|k| k.split(']').next())
-                .map(|s| s.to_string())
+                .map(ToString::to_string)
         })
         .collect();
     pkgs.sort();
@@ -1138,7 +1140,7 @@ fn write_dashboard(root: &Path, r: &Report) {
         .filter(|f| f.kind == "source" || f.kind == "generated")
         .map(|f| f.phase)
         .collect();
-    phases.sort();
+    phases.sort_unstable();
     phases.dedup();
     for ph in phases {
         let v = num(m, &format!("ledger.phase[{ph}].loc_verified_ratio"));
@@ -1293,14 +1295,14 @@ fn repo_root() -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR");
     Path::new(manifest)
         .parent()
-        .map(|p| p.to_path_buf())
+        .map(std::path::Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."))
 }
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let root = repo_root();
-    match args.first().map(|s| s.as_str()) {
+    match args.first().map(String::as_str) {
         Some("status") => {
             let r = build_report(&root);
             if !r.unknown_markers.is_empty() {

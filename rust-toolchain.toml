@@ -1,0 +1,6 @@
+# ADR 0016: stable Rust, pinned so every evidence record names one compiler.
+# The minimum supported version is one release behind (Cargo.toml, workspace.package.rust-version).
+[toolchain]
+channel = "1.97.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
