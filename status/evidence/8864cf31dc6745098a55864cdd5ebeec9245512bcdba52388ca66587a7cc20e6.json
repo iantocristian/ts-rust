@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "run_id": "e4",
+  "recorded_at": 1788685976,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "d5973e95971a60abb8c79c386a2362e9f4d65069dd1899cc95ca025a52c5e010",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "e15408a3f34a3ba86e7f8c37417c029e3779373ba08843a8fcd5c38f76ff3c12",
+  "inputs": {
+    "docs/design/text.md": "53290725501fdd035c71e6bc9a9f5638191972b712c9f68d167c8ddbae4faa0f"
+  },
+  "command": [
+    "cargo",
+    "run",
+    "--quiet",
+    "-p",
+    "e4_harness",
+    "--bin",
+    "e4-harness"
+  ],
+  "target": "host",
+  "config": "debug; Unicode 15.1 generated casing tables",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\":{\"source_decoding\":true,\"helper_semantics\":true,\"slice_validity\":true,\"utf8_positions\":true,\"utf16_positions\":true}}\n",
+  "stderr": "\nthread 'main' (30857279) panicked at crates/ts_jsstring/src/lib.rs:1005:13:\nBad line number. Line: 99, lineStarts.length: 2.\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread 'main' (30857279) panicked at crates/ts_jsstring/src/lib.rs:1033:5:\nBad UTF-16 character offset. Line: 0, character: 99\n",
+  "stdout_sha256": "3be938592bd6dd5d07e46f9fe15bc0fb1dcfaf6849078f901bcda96d8f0fba05",
+  "stderr_sha256": "865cea8b18ae64240c38ae054446c926519c6c3a61222913a270b17398444b76",
+  "valid_capture": true
+}

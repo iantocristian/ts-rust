@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "run_id": "e3",
+  "recorded_at": 1788686004,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "67b448bc0fede6bfd8c390005b8027ee9c430a0dfda553d5a72f4a649a044b9e",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "90086eee01e0c309a26dadc84e8763aca01168f5b5c2a106ad92c0339a831474",
+  "inputs": {
+    "docs/design/ownership.md": "b44800c7dfccf4fc4e49e4a51e3a99f298836955e8d73b2e41cb236098f03780"
+  },
+  "command": [
+    "python3",
+    "scripts/e3.py"
+  ],
+  "target": "host",
+  "config": "debug and release; nightly Miri; nightly AddressSanitizer",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\":{\"id_exhaustion\":true,\"wrong_owner_rejected\":true,\"stale_and_recycled_ids_rejected\":true,\"concurrent_lazy_storage\":true,\"mapper_bundle_disposal\":true,\"live_owner_delta\":0,\"live_allocation_delta\":0,\"miri\":true,\"address_sanitizer\":true}}\n",
+  "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s\n     Running unittests src/lib.rs (target/debug/deps/e3_harness-40542368a2c9c61f)\n\nrunning 1 test\ntest tests::all_scenarios ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n     Running unittests src/main.rs (target/debug/deps/e3_harness-940e56534c307d87)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests e3_harness\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Compiling ts_arena v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/ts_arena)\n   Compiling e3_harness v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/e3_harness)\n    Finished `release` profile [optimized] target(s) in 11.06s\n     Running unittests src/lib.rs (target/release/deps/e3_harness-d506a2c2b059db09)\n\nrunning 1 test\ntest tests::all_scenarios ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/main.rs (target/release/deps/e3_harness-6626e55b92f3e13d)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests e3_harness\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Compiling ts_arena v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/ts_arena)\n   Compiling e3_harness v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/e3_harness)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.02s\n     Running unittests src/lib.rs (target/miri/aarch64-apple-darwin/debug/build/e3_harness/15f50e697b435f51/out/e3_harness-15f50e697b435f51)\n\nrunning 1 test\ntest tests::all_scenarios ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.28s\n\n     Running unittests src/main.rs (target/miri/aarch64-apple-darwin/debug/build/e3_harness/499f8c8c8263cf75/out/e3_harness-499f8c8c8263cf75)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n   Doc-tests e3_harness\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\nrustc 1.100.0-nightly (f248f4038 2026-09-05)\nbinary: rustc\ncommit-hash: f248f4038796913873f11ca65b1b901e311c8dae\ncommit-date: 2026-09-05\nhost: aarch64-apple-darwin\nrelease: 1.100.0-nightly\nLLVM version: 23.1.1\n   Compiling ts_arena v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/ts_arena)\n   Compiling e3_harness v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/e3_harness)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s\n     Running unittests src/lib.rs (target/aarch64-apple-darwin/debug/build/e3_harness/035b93903b1996c5/out/e3_harness-035b93903b1996c5)\n\nrunning 1 test\ntest tests::all_scenarios ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/main.rs (target/aarch64-apple-darwin/debug/build/e3_harness/b5b0732a374b538a/out/e3_harness-b5b0732a374b538a)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests e3_harness\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n{\"metrics\":{\"id_exhaustion\":true,\"wrong_owner_rejected\":true,\"stale_and_recycled_ids_rejected\":true,\"concurrent_lazy_storage\":true,\"mapper_bundle_disposal\":true,\"live_owner_delta\":0,\"live_allocation_delta\":0}}\n",
+  "stdout_sha256": "b755187a8fce9c5a28a962fce6a0225ddeabea609184cf4d44626080dc07bb5a",
+  "stderr_sha256": "bad180fda0aa080e544ec82bad187e7467f7bc25140faba243fd7806a4406b91",
+  "valid_capture": true
+}

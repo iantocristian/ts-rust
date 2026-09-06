@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "workspace",
+  "recorded_at": 1788686019,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "830c86ca5c14463735cba4b17c66d8a375278659a8302047ba145861bedf3e61",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "7125adc570becdc7573f60a7251592e083fa608a5aaf3ac246b965c55f373e5a",
+  "inputs": {
+    "Cargo.lock": "35767607ea2439e69f6010bb790ce0cccaf3c48c1183112b82bd0ea8d00e02ab",
+    "Cargo.toml": "06a0619a96b7bcf2199b7d4d26602366344986c67fc54516d8d9bca3351cc021"
+  },
+  "command": [
+    "python3",
+    "scripts/tracking-bootstrap.py",
+    "workspace"
+  ],
+  "target": "host",
+  "config": "debug",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"build\": true}}\n",
+  "stderr": "    Checking ts_arena v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/ts_arena)\n    Checking ts_jsstring v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/ts_jsstring)\n    Checking e3_harness v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/e3_harness)\n    Checking e4_harness v0.0.0 (/Users/cristian/git/ts-rust-sol-s04/crates/e4_harness)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s\n",
+  "stdout_sha256": "37e4617d57653056a89a491698ab3b31399dcfdde0e1ff39b61e6770337a4965",
+  "stderr_sha256": "d4fe027df789018f5979ce91d9afc2d110aa41f87574b608c4728eda82d61e55",
+  "valid_capture": true
+}
