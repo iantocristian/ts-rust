@@ -47,3 +47,21 @@ inputs = ["Cargo.toml", "Cargo.lock"]
 sources = ["xtask/**", "scripts/**", "Cargo.*", "rust-toolchain*", "data/**"]
 target = "host"
 config = "debug"
+
+# S04 ownership contract harness. The producer succeeds only after the same
+# scenarios pass normally, under Miri, and under AddressSanitizer.
+[e3]
+command = ["python3", "scripts/e3.py"]
+inputs = ["docs/design/ownership.md"]
+sources = ["crates/ts_arena/**", "crates/e3_harness/**", "scripts/e3.py", "Cargo.*", "rust-toolchain*"]
+target = "host"
+config = "debug and release; nightly Miri; nightly AddressSanitizer"
+
+# S04 text contract leaves. Scanner-, encoder- and printer-integration metrics
+# are added by their later sprint harnesses.
+[e4]
+command = ["cargo", "run", "--quiet", "-p", "e4_harness", "--bin", "e4-harness"]
+inputs = ["docs/design/text.md"]
+sources = ["crates/ts_jsstring/**", "crates/e4_harness/**", "scripts/generate-js-case-data.py", "Cargo.*", "rust-toolchain*"]
+target = "host"
+config = "debug; Unicode 15.1 generated casing tables"
