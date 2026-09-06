@@ -250,7 +250,7 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 | Run | State | Artifact |
 |---|---|---|
 | clippy | current | [result](status/evidence/47afeca9c98f495c916a7ab0309566e9e9b17e661c9e211dac29423006f6f5e8.json) |
-| deny | current | [result](status/evidence/f5e033faf9d6656b91902d1a2f0a3d384f3751f380200e555e1f8362eb8336c1.json) |
+| deny | current | [result](status/evidence/0d8866a240f7ab0f04c0036def2adb62001e16833a7d04ac6e188c9e3aa31fd5.json) |
 | fmt | current | [result](status/evidence/269f236cbf6dbc67494ce58455d951be2588b8d1b8e9cdcf17fafa63b7099484.json) |
 | oracle | current | [result](status/evidence/e6a17d7413f578838c0a5bfe81ea219290b5ade93453c15dcb1bb5c630097412.json) |
 | selftest | current | [result](status/evidence/ef8738e20b815bd650cc32ea55b01853fa60faf451634830a1ed1b73abdc0178.json) |
