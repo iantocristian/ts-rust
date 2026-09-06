@@ -84,7 +84,7 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs, the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`), and the `e3` and `e4` experiment runs (`scripts/experiments.py`): `e3` runs the S04 ownership scenarios in release, debug, Miri and AddressSanitizer builds, and `e4` compares `ts_jsstring` with a Go oracle compiled inside the unmodified pin through a `go build -overlay` (`tools/oracle-e4`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and remaining E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 

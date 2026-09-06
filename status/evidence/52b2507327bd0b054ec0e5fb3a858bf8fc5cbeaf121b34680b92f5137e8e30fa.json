@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "clippy",
+  "recorded_at": 1788685700,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "e57f6c24fd1bc018198896c71fb736a13696c60c11fbe7dca2c77dfab0e71bb5",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "9e96bd69c4514ba0994aad0d4c3ca150eab1e3f549aab0471cedf5dd8d17bce2",
+  "inputs": {
+    "Cargo.lock": "8caf8ea250047cedfc242a865e86523af893a75a3f97563de2867e645aed40ad",
+    "Cargo.toml": "dc113659842548a2d117e017c210fbff99b5de4c76b0b9beee4530af2f06cffd"
+  },
+  "command": [
+    "python3",
+    "scripts/checks.py",
+    "clippy"
+  ],
+  "target": "host",
+  "config": "debug; all targets; -D warnings",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"clean\": true}}\n",
+  "stderr": "clippy 0.1.97 (8bab26f4f6 2026-07-14)\n+ cargo clippy --workspace --all-targets --locked -- -D warnings\n    Checking ts_jsstring v0.1.0 (/Users/cristian/git/ts-rust-fable-51-s04/crates/ts_jsstring)\n    Checking ts_arena v0.1.0 (/Users/cristian/git/ts-rust-fable-51-s04/crates/ts_arena)\n    Checking e3_harness v0.1.0 (/Users/cristian/git/ts-rust-fable-51-s04/crates/e3_harness)\n    Checking e4_harness v0.1.0 (/Users/cristian/git/ts-rust-fable-51-s04/crates/e4_harness)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.42s\n",
+  "stdout_sha256": "1cbfcf47216ecd3003591dc9b4f187162a15b6928eb7916ccdf71e348ae7bbb3",
+  "stderr_sha256": "bb2ea7d01716a41962ac536f67693f9b144a8e1a025488327b4524f3186c6547",
+  "valid_capture": true
+}
