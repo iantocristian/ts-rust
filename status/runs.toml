@@ -47,3 +47,20 @@ inputs = ["Cargo.toml", "Cargo.lock"]
 sources = ["xtask/**", "scripts/**", "Cargo.*", "rust-toolchain*", "data/**"]
 target = "host"
 config = "debug"
+
+# E3 and E4 producers (S04). Both run the production crates; the e4 oracle is a Go
+# program compiled inside the unmodified pin through a build overlay (tools/oracle-e4),
+# so the pinned checkout stays clean and the upstream gitlink is in the source set.
+[e3]
+command = ["python3", "scripts/experiments.py", "e3"]
+inputs = ["Cargo.lock"]
+sources = ["crates/**", "Cargo.*", "rust-toolchain*", "scripts/experiments.py"]
+target = "host"
+config = "release harness; debug tests; Miri and AddressSanitizer test runs on nightly"
+
+[e4]
+command = ["python3", "scripts/experiments.py", "e4"]
+inputs = ["tests/e4/fixtures.json"]
+sources = ["crates/**", "Cargo.*", "rust-toolchain*", "scripts/experiments.py", "scripts/tracking-bootstrap.py", "tools/oracle-e4/**", "upstream"]
+target = "host"
+config = "release harness against the pinned Go oracle"

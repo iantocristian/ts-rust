@@ -1,0 +1,16 @@
+[package]
+name = "e4_harness"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "E4 string and position fixtures from docs/design/text.md compared against the pinned Go oracle"
+
+[lints]
+workspace = true
+
+[dependencies]
+ts_jsstring = { path = "../ts_jsstring", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

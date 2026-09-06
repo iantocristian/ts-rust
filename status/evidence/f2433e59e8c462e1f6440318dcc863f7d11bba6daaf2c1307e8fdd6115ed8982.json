@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "run_id": "e4",
+  "recorded_at": 1788685303,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "24aeb9560062257084b558d2965749bf9033c38513768b6ef4c9f7786efab67b",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "d29b25880811aa980212ab3a4f06b9af9ecec7cc56253ff1d1e2136b20694a70",
+  "inputs": {
+    "tests/e4/fixtures.json": "7d0fcef709bb9319a480ee3c8f0c3d09f28bbe74ce6e5515a8d61d665c26ac4b"
+  },
+  "command": [
+    "python3",
+    "scripts/experiments.py",
+    "e4"
+  ],
+  "target": "host",
+  "config": "release harness against the pinned Go oracle",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"helper_semantics\": true, \"slice_validity\": true, \"source_decoding\": true, \"utf16_positions\": true, \"utf8_positions\": true}}\n",
+  "stderr": "go version go1.27.1 darwin/arm64\ncargo 1.97.1 (c980f4866 2026-06-30)\n+ go run -mod=readonly -overlay=/Users/cristian/git/ts-rust-fable-51-s04/target/e4/overlay.json ./cmd/oracle-e4 /Users/cristian/git/ts-rust-fable-51-s04/tests/e4/fixtures.json\n+ cargo run --release --locked -p e4_harness -- /Users/cristian/git/ts-rust-fable-51-s04/tests/e4/fixtures.json /Users/cristian/git/ts-rust-fable-51-s04/target/e4/oracle.json\n    Finished `release` profile [optimized] target(s) in 0.02s\n     Running `target/release/e4_harness /Users/cristian/git/ts-rust-fable-51-s04/tests/e4/fixtures.json /Users/cristian/git/ts-rust-fable-51-s04/target/e4/oracle.json`\ne4: 6609 comparisons\n",
+  "stdout_sha256": "79189de551b5aa4730056c4b22d3bb96c5fa479aae44610e08889b01805edcd5",
+  "stderr_sha256": "37985201fadc9682ba23ec675927e46cc250fc8fcba1743f2898bc8ff32958ac",
+  "valid_capture": true
+}

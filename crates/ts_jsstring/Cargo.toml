@@ -1,0 +1,13 @@
+[package]
+name = "ts_jsstring"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Source bytes, JavaScript strings (WTF-8) and wire positions: the ADR 0013 contract"
+
+[lints]
+workspace = true
+
+[dependencies]

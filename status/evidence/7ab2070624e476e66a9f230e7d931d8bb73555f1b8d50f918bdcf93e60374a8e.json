@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "deny",
+  "recorded_at": 1788685362,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "031df1340b3d45aae450c3dbf81149b194420b4778158a1683fcbe4002f69365",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "93bdeae76cbb7b878560c5378f8546cc4c2194c7084bbdccb48cfefc25a800a8",
+  "inputs": {
+    "Cargo.lock": "8caf8ea250047cedfc242a865e86523af893a75a3f97563de2867e645aed40ad",
+    "deny.toml": "169a444cb9b24a1b618a73cef7a1ea9f1ba6026351aed27e70a786e13a3ae490"
+  },
+  "command": [
+    "python3",
+    "scripts/checks.py",
+    "deny"
+  ],
+  "target": "host",
+  "config": "advisories, licenses, bans, sources",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"clean\": false}}\n",
+  "stderr": "cargo-deny 0.20.2\n+ cargo deny --locked check\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:30:4\n   │\n30 │   \"0BSD\",\n   │    ━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:24:4\n   │\n24 │   \"Apache-2.0 WITH LLVM-exception\",\n   │    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:26:4\n   │\n26 │   \"BSD-2-Clause\",\n   │    ━━━━━━━━━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:27:4\n   │\n27 │   \"BSD-3-Clause\",\n   │    ━━━━━━━━━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:33:4\n   │\n33 │   \"CC0-1.0\",\n   │    ━━━━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:28:4\n   │\n28 │   \"ISC\",\n   │    ━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:32:4\n   │\n32 │   \"Unicode-DFS-2016\",\n   │    ━━━━━━━━━━━━━━━━ unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/deny.toml:29:4\n   │\n29 │   \"Zlib\",\n   │    ━━━━ unmatched license allowance\n\nerror[wildcard]: found 1 wildcard dependency for crate 'e3_harness'\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/crates/e3_harness/Cargo.toml:14:12\n   │\n14 │ ts_arena = { path = \"../ts_arena\" }\n   │            ━━━━━━━━━━━━━━━━━━━━━━━━ wildcard dependency\n   │\n   ├ e3_harness v0.1.0\n\nerror[wildcard]: found 1 wildcard dependency for crate 'e4_harness'\n   ┌─ /Users/cristian/git/ts-rust-fable-51-s04/crates/e4_harness/Cargo.toml:14:15\n   │\n14 │ ts_jsstring = { path = \"../ts_jsstring\" }\n   │               ━━━━━━━━━━━━━━━━━━━━━━━━━━━ wildcard dependency\n   │\n   ├ e4_harness v0.1.0\n\nadvisories ok, bans FAILED, licenses ok, sources ok\n",
+  "stdout_sha256": "1318826661716f34caf8ce065c4e3ba12281a47295653734f15191232661db21",
+  "stderr_sha256": "b70551ccd09d5eff64c48286d505789187b28a3ff0fa14b9c5dcd5b61ed7e6a4",
+  "valid_capture": true
+}

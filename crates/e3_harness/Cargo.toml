@@ -1,0 +1,15 @@
+[package]
+name = "e3_harness"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "E3 ownership scenarios from docs/design/ownership.md; the e3 producer prints their metrics"
+
+[lints]
+workspace = true
+
+[dependencies]
+ts_arena = { path = "../ts_arena", version = "0.1.0" }
+serde_json = "1"

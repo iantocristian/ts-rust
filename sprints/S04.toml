@@ -1,6 +1,6 @@
-# Phase 0, sprint 4. Producers to register when the harnesses exist: e3, e4 (metrics named in
-# status/experiments.toml). Each producer emits only the metrics its implemented scenarios
-# measure; a missing metric keeps its criterion pending. Runs in parallel with S03.
+# Phase 0, sprint 4. Producers: e3 and e4 (scripts/experiments.py), registered in status/runs.toml.
+# Each emits only the metrics its implemented scenarios measure; a missing metric keeps its
+# criterion pending. Runs in parallel with S03.
 id = "S04"
 title = "Contract leaves: ts_jsstring and ts_arena"
 goal = "The two leaf crates implement the accepted text and ownership contracts, and every design-note fixture that needs no scanner, parser or checker passes in the E3 and E4 harnesses."
