@@ -47,3 +47,21 @@ inputs = ["Cargo.toml", "Cargo.lock"]
 sources = ["xtask/**", "scripts/**", "Cargo.*", "rust-toolchain*", "data/**"]
 target = "host"
 config = "debug"
+
+# Experiment producers. Each emits only the metrics its implemented scenarios
+# measure: a criterion whose metric is absent stays pending, which is how the
+# staged experiments (E4 completes in S08, E3 in S09) avoid claiming coverage
+# they do not have. Their harness contracts are in docs/harnesses.md.
+[e3]
+command = ["python3", "scripts/e3-harness.py"]
+inputs = ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml"]
+sources = ["crates/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "scripts/**"]
+target = "host"
+config = "release scenarios; the same scenarios under Miri and AddressSanitizer on nightly"
+
+[e4]
+command = ["python3", "scripts/e4-harness.py"]
+inputs = ["data/e4-fixtures.json", "data/upstream.json", ".gitmodules"]
+sources = ["crates/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "oracle/**", "upstream", "scripts/**"]
+target = "host"
+config = "release; differential against the Go oracle built from the pinned submodule"

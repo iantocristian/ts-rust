@@ -53,7 +53,7 @@ The script requires a clean checkout, resolves the requested pin to the actual f
 
 The bootstrap checkout is sufficient for inventory generation. S01's oracle gate separately requires a registered, initialized `upstream/` submodule at that same pin, with the canonical Microsoft URL and a clean worktree.
 
-The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01 passes against the current bootstrap evidence. E1–E8 implementation and verification remain pending. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
+The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01, S02 and S04 pass against current evidence. E1–E8 remain pending as whole experiments: S04 settles the E3 and E4 criteria whose production paths exist and emits no metric for the rest. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
 
 ## Function traceability
 
@@ -84,7 +84,7 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs, the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`), and the `e3` and `e4` experiment harnesses (`scripts/e3-harness.py`, `scripts/e4-harness.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and remaining E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit, and [harnesses.md](harnesses.md) records what the registered experiment harnesses actually assert. Numeric and boolean thresholds are defined now so missing implementations remain pending.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 
@@ -123,7 +123,7 @@ unit = "matching checker cases / frozen subset"
 
 E7 requires parser size, parser throughput, checker parity and a portable host. E8 requires Node latency, Rust-consumer parity and lifetime checks. E5 includes the per-type memory threshold. Notes and `nature` explain measurement limits but never supply passing values.
 
-E4 has separate early helper and scanner criteria for S04/S05; encoder criteria gate S06. Its complete literal-type and printer integration requirements remain mandatory in S08. S08 also requires separate checker throughput, allocation and retained-memory measurements and a parity-tested, measured arena-reference relater prototype. The measurement-domain checks in E2 require usable samples; they impose no new performance target.
+E4 has separate early decoding, helper, slice, position and scanner criteria for S04/S05; encoder criteria gate S06. Its complete literal-type and printer integration requirements remain mandatory in S08. S08 also requires separate checker throughput, allocation and retained-memory measurements and a parity-tested, measured arena-reference relater prototype. The measurement-domain checks in E2 require usable samples; they impose no new performance target.
 
 The design notes behind ADRs 0006, 0007 and 0013 name the E3/E4 criterion ids each scenario row covers. Every criterion appears in a scenario row or applies to all rows as a harness-wide check, so a producer case can be traced to a note row and a criterion to its scenarios.
 

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "workspace",
+  "recorded_at": 1788686497,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "9b2ec256e1e3771a493396ae9f360a4ffd3337ddc9b8cd5070ef73932f82c22b",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "7125adc570becdc7573f60a7251592e083fa608a5aaf3ac246b965c55f373e5a",
+  "inputs": {
+    "Cargo.lock": "20cc24f4173197a70bafc6fd4e60d9fae30374b14fd1140166bc71730844a692",
+    "Cargo.toml": "e3f12694d03d45efa23617ab9a5f57db5588c15bb497ea3e11ecc2b72fe19626"
+  },
+  "command": [
+    "python3",
+    "scripts/tracking-bootstrap.py",
+    "workspace"
+  ],
+  "target": "host",
+  "config": "debug",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"build\": true}}\n",
+  "stderr": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s\n",
+  "stdout_sha256": "37e4617d57653056a89a491698ab3b31399dcfdde0e1ff39b61e6770337a4965",
+  "stderr_sha256": "a13905646e2aed93ec6ea9ed6ac91490a4e01f91af0215c3965279a910612149",
+  "valid_capture": true
+}

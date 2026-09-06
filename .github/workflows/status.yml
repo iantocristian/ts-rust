@@ -6,7 +6,9 @@
 # msrv:      compile the locked workspace and all targets on the declared minimum Rust.
 # Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires S01 and the quality checks independently of unfinished sprints.
+# The workflow requires S01, S04 and the quality checks independently of unfinished
+# sprints. The e3 producer needs a nightly toolchain with miri and rust-src for its
+# Miri and AddressSanitizer runs; the e4 producer needs Go and the submodule.
 # Add ubuntu-24.04-arm and an x86_64 macOS
 # runner once their availability for this repository is confirmed (ADR 0002 targets).
 name: status
@@ -78,9 +80,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.27.x"
-          cache-dependency-path: upstream/tsc/go.sum
+          cache-dependency-path: |
+            upstream/tsc/go.sum
+            oracle/go.sum
       - name: Install the pinned toolchain
         run: rustup show active-toolchain || rustup toolchain install
+      - name: Install nightly for the e3 sanitizer and Miri runs
+        run: rustup toolchain install nightly --profile minimal --component miri --component rust-src
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with:
@@ -100,6 +106,10 @@ jobs:
         run: cargo xtask run clippy
       - name: Dependency policy
         run: cargo xtask run deny
+      - name: E4 strings and positions against the pinned oracle
+        run: cargo xtask run e4
+      - name: E3 ownership, including Miri and AddressSanitizer
+        run: cargo xtask run e3
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -113,11 +123,28 @@ jobs:
             'run.fmt.clean == true' \
             'run.clippy.clean == true' \
             'run.deny.clean == true' \
-            'run.selftest.pass == true'
+            'run.selftest.pass == true' \
+            'run.e4.source_decoding == true' \
+            'run.e4.helper_semantics == true' \
+            'run.e4.slice_validity == true' \
+            'run.e4.utf8_positions == true' \
+            'run.e4.utf16_positions == true' \
+            'run.e3.id_exhaustion == true' \
+            'run.e3.wrong_owner_rejected == true' \
+            'run.e3.stale_and_recycled_ids_rejected == true' \
+            'run.e3.concurrent_lazy_storage == true' \
+            'run.e3.mapper_bundle_disposal == true' \
+            'run.e3.live_owner_delta == 0' \
+            'run.e3.live_allocation_delta == 0' \
+            'run.e3.miri == true' \
+            'run.e3.address_sanitizer == true'
       - name: S01 closes on this runner's evidence
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S01
-      - name: Sprint S02 (informational until it closes)
+      - name: S04 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask check S04
+      - name: Sprint S02 (informational; S04 requires it anyway)
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02
         continue-on-error: true

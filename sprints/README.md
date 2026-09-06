@@ -23,7 +23,7 @@ Phases are ordered by dependency, not by time, and so are sprints. Each sprint's
 
 S03 and S04 run in parallel after S02. S09 and S10 run in parallel after S08. S11 runs in parallel with S08 to S10 and does not gate S12.
 
-E4 is staged by the production paths available in each sprint: leaf case/truncation/escape helpers in S04, scanner token and literal-value bytes in S05, encoder paths in S06, and literal-type construction plus original-source/regenerated printing in S08. The early helper and token-value metrics do not complete the final printer and literal-type criteria. E3's early identity tests use production arena/resolver/lease components with minimal owners; they can construct two checker-owner identities before the semantic checker exists.
+E4 is staged by the production paths available in each sprint: source decoding, byte-slice reclassification, the position conversions and the leaf case/truncation/escape helpers in S04, scanner token and literal-value bytes in S05, encoder paths in S06, and literal-type construction plus original-source/regenerated printing in S08. The early helper and token-value metrics do not complete the final printer and literal-type criteria. E3's early identity tests use production arena/resolver/lease components with minimal owners; they can construct two checker-owner identities before the semantic checker exists.
 
 ## Producers
 
@@ -34,8 +34,8 @@ A producer is registered in `status/runs.toml` only when its harness exists; unt
 | `workspace`, `oracle` | yes | | build, smoke |
 | `fmt`, `clippy`, `deny`, `selftest` | yes | | `clean`, `pass` |
 | `gen` | S03 | | `patches_apply`, `ast_schema`, `drift`, `client_identical` |
-| `e3` | from S04, completed in S09 | | every `[E3]` metric in `status/experiments.toml`, added as scenarios land |
-| `e4` | from S04, completed in S08 | | `helper_semantics` in S04, `token_value_bytes` in S05; remaining `[E4]` metrics as their production paths land |
+| `e3` | yes (S04) | | every `[E3]` metric in `status/experiments.toml`, added as scenarios land; S04 emits the id, owner, lazy-storage, bundle and counter metrics plus `miri` and `address_sanitizer` |
+| `e4` | yes (S04) | | `source_decoding`, `helper_semantics`, `slice_validity`, `utf8_positions` and `utf16_positions` in S04, `token_value_bytes` in S05; remaining `[E4]` metrics as their production paths land |
 | `scanner` | S05 | frozen scanner case list | `parity`, `regexp_parity`, `rescan_parity` |
 | `e1` | S06 | frozen corpus manifest | `parity` (derived), `frozen_denominator` |
 | `binder` | S07 | corpus | `parity` |
@@ -47,7 +47,7 @@ A producer is registered in `status/runs.toml` only when its harness exists; unt
 | `e7`, `e8` | S10 | | the E7 and E8 metrics |
 | `testhost` | S11 | transport fixtures | `parity`, `controls` |
 
-Every oracle-side tool (token dump, encoder dump, symbol dump, `GOOS=js` parser) is a Go program built from the unmodified pin in the tooling worktree of S03, so a run's evidence is tied to the same upstream commit as the ledger.
+Every oracle-side tool (token dump, encoder dump, symbol dump, `GOOS=js` parser) is a Go program built from the unmodified pin, so a run's evidence is tied to the same upstream commit as the ledger. The tools that need no carried patch live in `oracle/`, a module whose declared path sits under the pinned module's so it can import its `internal/...` packages while replacing it with the submodule directory; the tools that need the gen-proto patch use the tooling worktree of S03. Producer contracts are in [docs/harnesses.md](../docs/harnesses.md).
 
 The S08 measurements use checked-in workload manifests, query sequences, harnesses and benchmark configuration declared as producer inputs. Record the upstream pin, both implementation revisions, target, build flags, allocator, thread count, warm-up and sampling method with the raw numerator and denominator samples in each evidence artifact. Checker costs cover the fixed checking/query phase separately from parse and bind. Retained bytes are sampled after that phase while the specified checker and result roots remain alive; the workload defines the same logical roots for both implementations. Final-drop disposal remains an E3 check.
 

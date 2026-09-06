@@ -1,6 +1,12 @@
-# Phase 0, sprint 4. Producers to register when the harnesses exist: e3, e4 (metrics named in
-# status/experiments.toml). Each producer emits only the metrics its implemented scenarios
-# measure; a missing metric keeps its criterion pending. Runs in parallel with S03.
+# Phase 0, sprint 4. Producers: e3, e4 (status/runs.toml; contracts in docs/harnesses.md).
+# Each producer emits only the metrics its implemented scenarios measure; a missing metric
+# keeps its criterion pending, so E3 and E4 stay open until S09 and S08. Runs in parallel
+# with S03.
+#   e4  source_decoding, helper_semantics, slice_validity, utf8_positions, utf16_positions
+#       differential against a Go oracle built from the pinned submodule
+#   e3  id_exhaustion, wrong_owner_rejected, stale_and_recycled_ids_rejected,
+#       concurrent_lazy_storage, mapper_bundle_disposal, live_owner_delta,
+#       live_allocation_delta, miri, address_sanitizer
 id = "S04"
 title = "Contract leaves: ts_jsstring and ts_arena"
 goal = "The two leaf crates implement the accepted text and ownership contracts, and every design-note fixture that needs no scanner, parser or checker passes in the E3 and E4 harnesses."

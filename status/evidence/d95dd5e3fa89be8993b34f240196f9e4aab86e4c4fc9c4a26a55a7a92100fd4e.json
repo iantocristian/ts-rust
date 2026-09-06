@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "clippy",
+  "recorded_at": 1788686803,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "c1bd322fd3874e5f1921c4613ffc1465e2c97470eb0517a7ea658ea57eec15f4",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "9e96bd69c4514ba0994aad0d4c3ca150eab1e3f549aab0471cedf5dd8d17bce2",
+  "inputs": {
+    "Cargo.lock": "20cc24f4173197a70bafc6fd4e60d9fae30374b14fd1140166bc71730844a692",
+    "Cargo.toml": "e3f12694d03d45efa23617ab9a5f57db5588c15bb497ea3e11ecc2b72fe19626"
+  },
+  "command": [
+    "python3",
+    "scripts/checks.py",
+    "clippy"
+  ],
+  "target": "host",
+  "config": "debug; all targets; -D warnings",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"clean\": true}}\n",
+  "stderr": "clippy 0.1.97 (8bab26f4f6 2026-07-14)\n+ cargo clippy --workspace --all-targets --locked -- -D warnings\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n",
+  "stdout_sha256": "1cbfcf47216ecd3003591dc9b4f187162a15b6928eb7916ccdf71e348ae7bbb3",
+  "stderr_sha256": "aba42c3c524afcf4ed4fb5296532e28c6d5f2eded374621fb87dabdecc9e68ac",
+  "valid_capture": true
+}
