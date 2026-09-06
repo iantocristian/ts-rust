@@ -121,6 +121,40 @@ done_when = ["run.proof.missing == true"]
     fn report(&self) -> Report {
         build_report(&self.0)
     }
+    fn render_views(&self, report: &Report) {
+        write_status_md(&self.0, report);
+        write_status_json(&self.0, report);
+        write_dashboard(&self.0, report);
+    }
+    fn archive(&self) {
+        assert!(evidence::run(&self.0, "proof", PIN).unwrap());
+        let mut report = self.report();
+        report.generated = "2001-02-03".into();
+        self.write("status/history.jsonl", "");
+        self.render_views(&report);
+    }
+    fn view_bytes(&self) -> BTreeMap<String, Vec<u8>> {
+        [
+            "STATUS.md",
+            "status/status.json",
+            "docs/status.html",
+            "status/unmapped-functions.json",
+            "status/history.jsonl",
+        ]
+        .into_iter()
+        .map(|path| (path.into(), fs::read(self.0.join(path)).unwrap()))
+        .collect()
+    }
+    fn rewrite_artifact(&self, edit: impl FnOnce(&mut serde_json::Value)) {
+        let path = self.report().evidence_artifacts["proof"].clone();
+        let mut value: serde_json::Value =
+            serde_json::from_slice(&fs::read(self.0.join(path)).unwrap()).unwrap();
+        edit(&mut value);
+        let bytes = serde_json::to_vec_pretty(&value).unwrap();
+        let digest = evidence::hash(&bytes);
+        fs::write(self.0.join(format!("status/evidence/{digest}.json")), bytes).unwrap();
+        self.write("status/evidence/proof.latest", &digest);
+    }
 }
 impl Drop for Fixture {
     fn drop(&mut self) {
@@ -355,4 +389,237 @@ fn history_records_policy_state_changes_without_relabeling_old_measurements() {
         entries[1]["evidence_artifacts"]
     );
     assert_ne!(entries[0]["files_verified"], entries[1]["files_verified"]);
+}
+
+#[test]
+fn archived_views_preserve_recorded_date_and_revision_without_writing() {
+    let f = Fixture::new();
+    f.archive();
+    let before = f.view_bytes();
+    let saved: serde_json::Value = serde_json::from_slice(&before["status/status.json"]).unwrap();
+    f.git(&[
+        "-c",
+        "user.name=Tracker Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "commit",
+        "--allow-empty",
+        "--quiet",
+        "-m",
+        "new revision with identical sources",
+    ]);
+    assert_ne!(
+        saved["context"]["revision"].as_str().unwrap(),
+        f.report().context.unwrap().revision
+    );
+    assert_eq!(saved["generated"], "2001-02-03");
+    assert!(check_committed_views(&f.0).is_ok());
+    assert_eq!(f.view_bytes(), before);
+}
+
+#[test]
+fn archived_execution_provenance_cannot_approve_a_live_metric_check() {
+    for changed in ["environment", "host", "toolchain"] {
+        let f = Fixture::new();
+        f.archive();
+        let mut context = f.report().context.unwrap();
+        match changed {
+            "environment" => {
+                context.environment.insert(
+                    "RUSTUP_TOOLCHAIN".into(),
+                    "archived-cross-host-test-toolchain".into(),
+                );
+            }
+            "host" => context.host = "different-host-architecture".into(),
+            "toolchain" => context.toolchain = "different rustc -Vv output".into(),
+            _ => unreachable!(),
+        }
+        f.rewrite_artifact(|record| {
+            record["context"]["environment"] = serde_json::json!(context.environment);
+            record["context"]["host"] = serde_json::json!(context.host);
+            record["host"] = serde_json::json!(context.host);
+            record["context"]["toolchain"] = serde_json::json!(context.toolchain);
+            record["toolchain"] = serde_json::json!(context.toolchain);
+        });
+        let metadata = ViewMetadata {
+            context,
+            generated: "2001-02-03".into(),
+        };
+        let archived = build_report_in_context(&f.0, Some(&metadata));
+        assert_eq!(archived.evidence_states["proof"], "current");
+        f.render_views(&archived);
+        let before = f.view_bytes();
+        assert!(check_committed_views(&f.0).is_ok());
+        assert_eq!(f.view_bytes(), before);
+        let live = f.report();
+        assert!(
+            !checks_pass(&live, &["run.proof.ok == true".into()]),
+            "accepted foreign {changed}"
+        );
+        assert!(!live.metrics.contains_key("run.proof.ok"));
+        if changed != "environment" {
+            assert_eq!(
+                live.evidence_states["proof"],
+                "stale: host or Rust toolchain changed"
+            );
+        }
+    }
+}
+
+#[test]
+fn archived_views_preserve_stale_host_and_toolchain_states() {
+    for changed in ["host", "toolchain"] {
+        let f = Fixture::new();
+        f.archive();
+        let foreign = format!("foreign {changed}");
+        f.rewrite_artifact(|record| {
+            record[changed] = serde_json::json!(foreign);
+            record["context"][changed] = serde_json::json!(foreign);
+        });
+        let report = f.report();
+        assert_eq!(
+            report.evidence_states["proof"],
+            "stale: host or Rust toolchain changed"
+        );
+        f.render_views(&report);
+        let before = f.view_bytes();
+        assert!(check_committed_views(&f.0).is_ok());
+        assert_eq!(f.view_bytes(), before);
+        // Changing saved renderer identity must recompute the evidence state,
+        // rather than preserve the stale state copied from the summary.
+        let mut saved: serde_json::Value =
+            serde_json::from_slice(&before["status/status.json"]).unwrap();
+        saved["context"][changed] = serde_json::json!(foreign);
+        f.write(
+            "status/status.json",
+            &serde_json::to_string_pretty(&saved).unwrap(),
+        );
+        assert!(check_committed_views(&f.0).is_err());
+    }
+}
+
+#[test]
+fn old_artifact_contexts_use_their_explicit_execution_identity() {
+    let f = Fixture::new();
+    f.archive();
+    f.rewrite_artifact(|record| {
+        let context = record["context"].as_object_mut().unwrap();
+        context.remove("host");
+        context.remove("toolchain");
+    });
+    assert!(checks_pass(&f.report(), &["run.proof.ok == true".into()]));
+}
+
+#[test]
+fn committed_views_recompute_metrics_and_verify_the_separate_worklist() {
+    for corrupt_worklist in [false, true] {
+        let f = Fixture::new();
+        f.archive();
+        if corrupt_worklist {
+            f.write("status/unmapped-functions.json", "{}");
+        } else {
+            // Forge all generated views consistently: the checker must replay evidence,
+            // rather than deserialize the saved metrics as its rendering input.
+            let mut forged = f.report();
+            forged.generated = "2001-02-03".into();
+            forged
+                .metrics
+                .insert("run.proof.ok".into(), Metric::Bool(false));
+            forged
+                .metrics
+                .insert("ledger.files_verified".into(), Metric::Num(99.0));
+            f.render_views(&forged);
+        }
+        let before = f.view_bytes();
+        assert!(check_committed_views(&f.0).is_err());
+        assert_eq!(f.view_bytes(), before);
+    }
+}
+
+#[test]
+fn archived_views_reject_changed_sources_specs_inputs_and_provenance() {
+    for changed in ["source", "spec", "input", "provenance"] {
+        let f = Fixture::new();
+        f.archive();
+        match changed {
+            "source" => f.replace(
+                "crates/demo/lib.rs",
+                "pub fn map() {}",
+                "pub fn map() { /* changed */ }",
+            ),
+            "spec" => f.replace(
+                "status/runs.toml",
+                "config = \"test\"",
+                "config = \"release\"",
+            ),
+            "input" => f.replace(
+                "producer.py",
+                "import json",
+                "import json\n# changed declared input",
+            ),
+            "provenance" => f.replace("PORTS.toml", "loc = 10", "loc = 11"),
+            _ => unreachable!(),
+        }
+        let before = f.view_bytes();
+        assert!(
+            check_committed_views(&f.0).is_err(),
+            "accepted {changed} drift"
+        );
+        assert_eq!(f.view_bytes(), before);
+    }
+}
+
+#[test]
+fn archived_views_reject_corrupt_missing_incomplete_and_failed_latest_evidence() {
+    for changed in ["corrupt", "missing", "incomplete", "failed"] {
+        let f = Fixture::new();
+        f.archive();
+        let artifact = f.0.join(&f.report().evidence_artifacts["proof"]);
+        match changed {
+            "corrupt" => fs::write(artifact, "{}").unwrap(),
+            "missing" => fs::remove_file(artifact).unwrap(),
+            "incomplete" => f.write("status/evidence/proof.latest", "incomplete attempt"),
+            "failed" => {
+                f.write("producer.py", "import sys\nsys.exit(1)\n");
+                assert!(!evidence::run(&f.0, "proof", PIN).unwrap());
+            }
+            _ => unreachable!(),
+        }
+        let before = f.view_bytes();
+        assert!(
+            check_committed_views(&f.0).is_err(),
+            "accepted {changed} evidence"
+        );
+        assert!(!checks_pass(&f.report(), &["run.proof.ok == true".into()]));
+        assert_eq!(f.view_bytes(), before);
+    }
+}
+
+#[test]
+fn metric_checks_require_every_requested_check_and_current_valid_evidence() {
+    let f = Fixture::new();
+    let ok = "run.proof.ok == true".to_string();
+    assert!(!checks_pass(&f.report(), std::slice::from_ref(&ok)));
+    assert!(evidence::run(&f.0, "proof", PIN).unwrap());
+    let mut report = f.report();
+    assert!(checks_pass(&report, std::slice::from_ref(&ok)));
+    assert!(!checks_pass(&report, &[]));
+    for check in [
+        "run.proof.checker == true",
+        "run.proof.missing == true",
+        "malformed",
+    ] {
+        assert!(!checks_pass(&report, &[ok.clone(), check.into()]));
+    }
+    report.errors.push("invalid provenance".into());
+    assert!(!checks_pass(&report, std::slice::from_ref(&ok)));
+    report.errors.clear();
+    report.unknown_markers.push("unknown function".into());
+    assert!(!checks_pass(&report, std::slice::from_ref(&ok)));
+    f.replace(
+        "crates/demo/lib.rs",
+        "pub fn map() {}",
+        "pub fn map() { /* stale */ }",
+    );
+    assert!(!checks_pass(&f.report(), &[ok]));
 }

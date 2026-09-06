@@ -18,6 +18,8 @@ target = "host"
 config = "release"
 
 # Check producers (S02). A false metric is a measured failure; a missing tool is a failed run.
+# `cargo xtask run` confirms capture, not the metric's value. CI must also enforce
+# these booleans with `cargo xtask check-metrics`, independently of sprint gates.
 [fmt]
 command = ["python3", "scripts/checks.py", "fmt"]
 inputs = ["rustfmt.toml"]

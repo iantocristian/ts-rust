@@ -84,7 +84,7 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 
@@ -123,7 +123,9 @@ unit = "matching checker cases / frozen subset"
 
 E7 requires parser size, parser throughput, checker parity and a portable host. E8 requires Node latency, Rust-consumer parity and lifetime checks. E5 includes the per-type memory threshold. Notes and `nature` explain measurement limits but never supply passing values.
 
-The design notes behind ADRs 0006, 0007 and 0013 name the E3/E4 criterion ids each scenario row covers, and every criterion appears in at least one row, so a producer case can be traced to a note row and a criterion to its scenarios.
+E4 has separate early helper and scanner criteria for S04/S05; encoder criteria gate S06. Its complete literal-type and printer integration requirements remain mandatory in S08. S08 also requires separate checker throughput, allocation and retained-memory measurements and a parity-tested, measured arena-reference relater prototype. The measurement-domain checks in E2 require usable samples; they impose no new performance target.
+
+The design notes behind ADRs 0006, 0007 and 0013 name the E3/E4 criterion ids each scenario row covers. Every criterion appears in a scenario row or applies to all rows as a harness-wide check, so a producer case can be traced to a note row and a criterion to its scenarios.
 
 Sprint checks use `<metric> <op> <value>`, with numeric comparisons, boolean equality and ADR/implementation states. Missing metrics cannot pass; malformed definitions, unknown fields and duplicate sprint/item IDs are errors. Required items default to `required = true`. They need nonempty `done_when` checks and block completion until every check passes. Only explicitly optional items may remain informational.
 
@@ -136,13 +138,19 @@ cargo xtask validate           # read-only tracking/provenance validation; pendi
 cargo xtask run workspace      # actual locked Cargo workspace build and evidence capture
 cargo xtask run oracle         # checked submodule, Go build and --version evidence
 cargo xtask status             # regenerate summaries, dashboard and the unmapped-function worklist
+cargo xtask status --check-committed # read-only reproduction using the recorded report context
 cargo xtask check S01          # fails unless every required item and exit criterion passes
+cargo xtask check-metrics 'run.fmt.clean == true' # enforce current metrics independently of sprints
 cargo xtask status --record    # append only a distinct source/evidence snapshot
 ```
 
-If a sandbox cannot write Go's system cache, use a writable workspace cache for the oracle command: `GOCACHE="$PWD/target/go-build" cargo xtask run oracle`. This changes the cache location, not the required build and smoke checks.
+If a sandbox cannot write Go's system cache, use a writable workspace cache for the oracle command: `GOCACHE="$PWD/target/go-build" cargo xtask run oracle`. The dependency policy already places cargo-deny's advisory cache under `target/advisory-dbs`. These settings change cache locations, not the required checks.
 
-A status workflow is installed at `.github/workflows/status.yml`: on push, pull request, manual dispatch and nightly it validates schemas and provenance, checks that the committed views match the committed evidence (ignoring only the generation date), reruns the registered producers on macOS and Linux runners, checks S01 and publishes the regenerated views and raw evidence as workflow artifacts. It requires only the finished sprint and never an unfinished one. No run of it is recorded in this repository, and nothing is committed back; evidence in the repository is captured and reviewed locally. Source-branch bot commits are not needed to publish a dashboard.
+`run` captures a producer's report; a successful capture can contain failing metrics. Use `check-metrics` to enforce required results independently of sprint completion. It compares the recorded host, Rust compiler identity and build environment with the current runner, rejects missing or stale evidence and fails if any requested comparison fails.
+
+`status --check-committed` checks the four generated views without writing them: `STATUS.md`, `status/status.json`, `status/unmapped-functions.json` and `docs/status.html`. It preserves only the recorded report context (including the renderer's host, Rust compiler identity and environment) and generation date, then recomputes the report from the current ledger, policy and validated raw evidence. Source digests, upstream pin, run specifications, input hashes and artifact checksums must still match. Each artifact's execution identity is compared with the recorded renderer identity, preserving stale results as stale. This lets Linux reproduce a report captured on macOS, including after a source-identical commit, without claiming the measurements ran on Linux. Live metric and sprint gates always use the current host, compiler and environment.
+
+A status workflow is installed at `.github/workflows/status.yml`: on push, pull request, manual dispatch and nightly it validates schemas and provenance, checks committed views using `--check-committed`, reruns the registered producers on macOS and Linux, and enforces their build, smoke, format, lint, dependency and self-test metrics plus S01. S02 remains informational until complete; its quality checks already gate CI independently. Separate jobs compile the locked workspace and all targets with the declared minimum Rust version, currently 1.96.0, on both operating systems. Regenerated views, including the unmapped-function worklist, and raw evidence are published as workflow artifacts even after a metric gate fails. No run of this workflow is recorded in the repository, and nothing is committed back; evidence in the repository is captured and reviewed locally.
 
 History records pin, repository context and underlying artifacts. Re-rendering the same context and evidence adds no new point. A policy or documentation edit can create a distinct history snapshot while reusing the same current run artifacts; it is not a new measurement. The chart separates upstream pins and legacy history from the current series. A publication date is not a measurement date: nightly publication of old results cannot satisfy the four consecutive weekly measurement runs required for cutover. That future gate must inspect distinct run artifacts and their execution timestamps against the approved workload matrix.
 

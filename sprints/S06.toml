@@ -5,12 +5,13 @@
 # The oracle side encodes each case and lib file with the pinned Go encoder at protocol 8.
 id = "S06"
 title = "Parser, JSDoc, AST runtime and encoder"
-goal = "ts_parser, the ts_ast runtime and ts_encoder at protocol 8 parse and encode the frozen corpus and the lib files identically to the Go oracle; E1 and E4 pass."
+goal = "ts_parser, the ts_ast runtime and ts_encoder at protocol 8 parse and encode the frozen corpus and the lib files identically to the Go oracle; E1 and E4's encoder criteria pass. E4's production literal-type and printer integration completes in S08."
 exit = [
   "sprint.S03.done == 1",
   "sprint.S05.done == 1",
   "exp.E1.pass == 1",
-  "exp.E4.pass == 1",
+  "exp.E4.encoder_success_error.pass == 1",
+  "exp.E4.encoder_output_bytes.pass == 1",
   "functions.package[internal/parser].ratio >= 0.9",
   "functions.package[internal/api/encoder].ratio >= 0.9",
   "functions.package[internal/ast].ratio >= 0.5",

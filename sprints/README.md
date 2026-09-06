@@ -4,7 +4,7 @@ Phase 0 is the spike in [PLAN.md](../PLAN.md), section 9: the three contracts, t
 
 ## Sequence
 
-Phases are ordered by dependency, not by time, and so are sprints. Each sprint's `exit` names the sprints it needs; anything not named can run in parallel.
+Phases are ordered by dependency, not by time, and so are sprints. Each sprint's `exit` names its direct prerequisites. Sprints can run in parallel once their prerequisites are complete.
 
 | Sprint | Title | Needs | Gate inputs it settles |
 |---|---|---|---|
@@ -12,16 +12,18 @@ Phases are ordered by dependency, not by time, and so are sprints. Each sprint's
 | S02 | Toolchain, lints, dependency policy, CI | S01 | fmt, clippy, deny, selftest producers |
 | S03 | Generators from the pinned schemas | S02 | `gen` producer: no drift, client byte-identical |
 | S04 | Contract leaves: `ts_jsstring` and `ts_arena` | S02 | E4 decoding, helpers, slices, positions; E3 ids, lazy storage, bundles, counters |
-| S05 | Scanner | S04 | `scanner` producer; E4 diagnostics and literal bytes |
-| S06 | Parser, JSDoc, AST runtime and encoder | S03, S05 | E1; E4 complete |
+| S05 | Scanner | S03, S04 | `scanner` producer; E4 scanner diagnostics, token bytes and literal values |
+| S06 | Parser, JSDoc, AST runtime and encoder | S03, S05 | E1; E4 encoder success/error and output bytes |
 | S07 | Binder, resolution slice, program host, parse-and-bind benchmark | S06 | `binder`, `program` producers; frozen subset; E5 parse/bind; E6; E3 programs and snapshots |
-| S08 | Checker slice, printer and node builder | S07 | E2; E5 per-type footprint; E3 checker merges |
+| S08 | Checker slice, printer and node builder | S07 | E2 including checker costs and alternative relater comparison; E4 complete; E5 per-type footprint; E3 checker merges |
 | S09 | Ownership and registry harness | S08 | E3 complete, including Miri and AddressSanitizer |
 | S10 | WebAssembly and Rust embedding | S08 | E7, E8 |
 | S11 | Test-host transport prototype | S06 | none; not a gate input |
 | S12 | Phase 0 gate | S02 to S10 | E1 to E8 pass; ADR 0020 records the decision |
 
 S03 and S04 run in parallel after S02. S09 and S10 run in parallel after S08. S11 runs in parallel with S08 to S10 and does not gate S12.
+
+E4 is staged by the production paths available in each sprint: leaf case/truncation/escape helpers in S04, scanner token and literal-value bytes in S05, encoder paths in S06, and literal-type construction plus original-source/regenerated printing in S08. The early helper and token-value metrics do not complete the final printer and literal-type criteria. E3's early identity tests use production arena/resolver/lease components with minimal owners; they can construct two checker-owner identities before the semantic checker exists.
 
 ## Producers
 
@@ -33,17 +35,23 @@ A producer is registered in `status/runs.toml` only when its harness exists; unt
 | `fmt`, `clippy`, `deny`, `selftest` | yes | | `clean`, `pass` |
 | `gen` | S03 | | `patches_apply`, `ast_schema`, `drift`, `client_identical` |
 | `e3` | from S04, completed in S09 | | every `[E3]` metric in `status/experiments.toml`, added as scenarios land |
-| `e4` | from S04, completed in S06 | | every `[E4]` metric |
+| `e4` | from S04, completed in S08 | | `helper_semantics` in S04, `token_value_bytes` in S05; remaining `[E4]` metrics as their production paths land |
 | `scanner` | S05 | frozen scanner case list | `parity`, `regexp_parity`, `rescan_parity` |
 | `e1` | S06 | frozen corpus manifest | `parity` (derived), `frozen_denominator` |
 | `binder` | S07 | corpus | `parity` |
 | `program` | S07 | | `subset_loads` |
 | `e5`, `e6` | S07, `type_footprint_ratio` in S08 | | the ratio metrics; workload pinned in `data/workloads.toml` |
 | `e2` | S07 (`frozen_subset`), completed in S08 | frozen subset | `types_parity`, `errors_parity`, `comparators`, `frozen_subset`, `divergences_approved`, `type_to_string_parity`, `recursion_fixtures` |
+| `checkerbench` | S08 | | `throughput_ratio`, `allocated_bytes_ratio`, `retained_bytes_ratio`: Rust checker slice / pinned Go checker |
+| `relater` | S08 | frozen relater fixture manifest | `parity` (derived), `throughput_ratio`, `allocated_bytes_ratio`, `retained_bytes_ratio`: arena-reference/interior-mutability prototype / id-and-`&mut self` implementation |
 | `e7`, `e8` | S10 | | the E7 and E8 metrics |
 | `testhost` | S11 | transport fixtures | `parity`, `controls` |
 
 Every oracle-side tool (token dump, encoder dump, symbol dump, `GOOS=js` parser) is a Go program built from the unmodified pin in the tooling worktree of S03, so a run's evidence is tied to the same upstream commit as the ledger.
+
+The S08 measurements use checked-in workload manifests, query sequences, harnesses and benchmark configuration declared as producer inputs. Record the upstream pin, both implementation revisions, target, build flags, allocator, thread count, warm-up and sampling method with the raw numerator and denominator samples in each evidence artifact. Checker costs cover the fixed checking/query phase separately from parse and bind. Retained bytes are sampled after that phase while the specified checker and result roots remain alive; the workload defines the same logical roots for both implementations. Final-drop disposal remains an E3 check.
+
+The relater fixture manifest fixes the supported operations and expected observable results from the pinned Go oracle. A case passes only when both implementations match those expectations; the runner derives parity over the entire manifest. Measure the same operations and root set in both implementations, and exercise each implementation's arena access and mutation model. Report the comparison before selecting the fallback or type layout. The E2 numeric gates require actual finite ratios with positive measured baseline denominators: positive throughput and nonnegative allocated/retained-byte ratios establish usable evidence, with no performance target. Missing measurements or unusable denominators keep the criterion pending.
 
 ## Conventions
 

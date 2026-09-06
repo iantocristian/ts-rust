@@ -1,12 +1,13 @@
 # Status workflow (docs/TRACKING.md, "Commands, publication and history").
 #
-# views:     the committed generated views match the committed evidence, and S01 still closes.
-# producers: on macOS (arm64) and Linux (x64) rerun the registered producers, regenerate the
-#            views and publish them with the raw evidence as workflow artifacts. Nothing is
-#            committed back; evidence in the repository is captured and reviewed locally.
+# views:     validate deterministic views of the archived evidence, including the worklist.
+# producers: on macOS and Linux rerun the registered producers, enforce their measured
+#            results and S01, and publish views and raw evidence even when a gate fails.
+# msrv:      compile the locked workspace and all targets on the declared minimum Rust.
+# Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires only S01, the finished sprint. It never requires an unfinished
-# sprint to pass on a development change. Add ubuntu-24.04-arm and an x86_64 macOS
+# The workflow requires S01 and the quality checks independently of unfinished sprints.
+# Add ubuntu-24.04-arm and an x86_64 macOS
 # runner once their availability for this repository is confirmed (ADR 0002 targets).
 name: status
 
@@ -27,8 +28,8 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  # The evidence context records RUSTFLAGS, CARGO_BUILD_TARGET, RUSTC_WRAPPER, GOFLAGS,
-  # GOOS, GOARCH and CGO_ENABLED; leave them unset so committed evidence stays comparable.
+  # Runner-local evidence records the effective build environment. Archived views
+  # are checked using their recorded context, not this runner's environment.
 
 jobs:
   views:
@@ -43,12 +44,25 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Validate provenance and schemas
         run: cargo xtask validate
-      - name: Regenerate the views from committed evidence
-        run: cargo xtask status
-      - name: Committed views match (dates in the generation line are ignored)
-        run: git diff --exit-code -I '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' -- STATUS.md status/status.json docs/status.html
-      - name: S01 still closes on committed evidence
-        run: cargo xtask check S01
+      - name: Check committed views and worklist against archived evidence
+        run: cargo xtask status --check-committed
+
+  msrv:
+    name: Rust 1.96.0 on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the declared minimum toolchain
+        run: rustup toolchain install 1.96.0 --profile minimal
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: msrv-1.96.0
+      - name: Build the locked workspace on the minimum Rust version
+        run: cargo +1.96.0 check --workspace --all-targets --locked
 
   producers:
     name: producers on ${{ matrix.os }}
@@ -72,6 +86,7 @@ jobs:
         with:
           tool: cargo-deny
       - name: Validate provenance and schemas
+        id: validate
         run: cargo xtask validate
       - name: Tracker self-tests
         run: cargo xtask run selftest
@@ -86,18 +101,34 @@ jobs:
       - name: Dependency policy
         run: cargo xtask run deny
       - name: Regenerate views
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
+      - name: Require successful build, smoke and quality results
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          cargo xtask check-metrics \
+            'run.workspace.build == true' \
+            'run.oracle.build == true' \
+            'run.oracle.smoke == true' \
+            'run.fmt.clean == true' \
+            'run.clippy.clean == true' \
+            'run.deny.clean == true' \
+            'run.selftest.pass == true'
       - name: S01 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S01
       - name: Sprint S02 (informational until it closes)
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02
         continue-on-error: true
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         with:
           name: status-${{ matrix.os }}
           path: |
             STATUS.md
             status/status.json
+            status/unmapped-functions.json
             docs/status.html
             status/evidence/
           if-no-files-found: error

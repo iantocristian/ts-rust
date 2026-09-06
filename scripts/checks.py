@@ -6,6 +6,8 @@ prints exactly one JSON object to stdout; all tool output goes to stderr.
 A measured failure (the tool ran and reported problems) is a false metric
 with exit code 0. A missing tool or an interrupted process exits non-zero,
 so the run is recorded as a failed producer rather than as a measurement.
+Consumers must enforce the recorded booleans with `cargo xtask check-metrics`;
+successful capture alone does not mean that a check passed.
 """
 
 import argparse

@@ -19,7 +19,7 @@ There is no compiler implementation yet. The repository contains the plan, upstr
 | [Phase 0 implementation plan](sprints/README.md), `sprints/` | Sprint files S01 to S12 with machine-checked exit criteria; the README gives the order, producers and conventions. |
 | `rust-toolchain.toml`, `rustfmt.toml`, `deny.toml`, `Cargo.toml` lints | Pinned stable toolchain, formatting, dependency policy and the clippy allow-list (ADRs 0016 and 0017); `scripts/checks.py` runs them as producers. |
 | `data/divergences.toml` | Owner-approved baseline divergences (ADR 0004); an input of the E2 producer. |
-| `.github/workflows/status.yml` | Status workflow: provenance, committed-view check, producers on macOS and Linux, S01, artifacts. |
+| `.github/workflows/status.yml` | Status workflow: provenance, archived-view check, live producer metrics and S01 on macOS and Linux, minimum-Rust builds, artifacts including the worklist. |
 | `xtask/` | Local commands for evidence capture, status generation and sprint validation. |
 | `data/import-graph.txt` | Internal import edges of the Go module (`importer imported`), produced by `go list`. 766 edges. |
 | `data/topological-order.txt` | The packages in dependency order, leaves first, produced by `tsort` over the graph. The plan's crate map groups related packages; its dependency slices also use the actual import edges. |
@@ -40,6 +40,8 @@ There is no compiler implementation yet. The repository contains the plan, upstr
 `cargo xtask run <run-id>` executes a reviewed specification from `status/runs.toml` and captures typed metrics with evidence bound to the upstream pin, command, that run's selected sources and declared corpus/configuration inputs. `cargo xtask status` validates that evidence and regenerates the reports; `cargo xtask check <sprint>` enforces sprint exit criteria and required item checks. Source globs default to compiler crates, Cargo manifests/lockfile, `.cargo` configuration, Rust toolchain selectors, `xtask` and scripts. Documentation and policy edits do not invalidate measurements unless that producer explicitly consumes those files; declared inputs and case manifests are always hashed.
 
 The ledger's `status`, `rust` and `verify` fields are editable without regenerating upstream provenance. Threshold, sprint-check and ledger-progress changes reevaluate existing metrics; selected source or run-input changes invalidate affected evidence. Metric-producer contracts define the workload and assertions behind each measurement, so neither function markers nor a successful command alone establishes parity. See [Tracking](docs/TRACKING.md) for version-2 provenance, source selection and the run schema.
+
+`cargo xtask check-metrics 'run.fmt.clean == true'` enforces measured results independently of unfinished sprints. `cargo xtask status --check-committed` verifies all four committed views against validated evidence using the recorded context and date, without rewriting files; live gates still require evidence valid for the current host and environment.
 
 ## Status
 

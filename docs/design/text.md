@@ -76,11 +76,12 @@ The encoder writes the file text once and appends only strings that differ from 
 
 | Fixture | Assertion | E4 criteria |
 |---|---|---|
-| Every string literal in the corpus | literal value bytes, literal types and encoder strings byte-identical to the oracle | `token_literal_bytes`, `encoder_output_bytes` |
-| Lone surrogates in escapes (`"\uD800"`, `"\uDC00"`, split pairs joined by concatenation and template cooking) | sentinel bytes identical; `combine_surrogate_pairs` produces the same code points at the same join points | `token_literal_bytes` |
-| Malformed byte at token start, inside a comment, inside an identifier, inside a raw-copied literal | same diagnostics (`File_appears_to_be_binary` at 0, identifier end, raw bytes preserved) and same token boundaries | `diagnostics`, `token_literal_bytes` |
-| `ToLowerJS` and `ToUpperJS` on sentinel bytes and on malformed byte `FF` | complete sentinels survive; `FF` becomes U+FFFD bytes `EF BF BD`, matching Go | `helper_printer_semantics` |
-| `TruncateByRunes` on `ED A0 80` with maximum length 1; `LowerFirstChar` on sentinel/malformed prefixes | truncation returns raw byte `ED`; helper-specific decoding, replacement and suffix copying match Go | `helper_printer_semantics` |
+| Every string literal in the corpus | literal value bytes, literal types and encoder strings byte-identical to the oracle | `token_value_bytes`, `token_literal_bytes`, `encoder_output_bytes` |
+| Lone surrogates in escapes (`"\uD800"`, `"\uDC00"`, split pairs joined by concatenation and template cooking) | sentinel bytes identical; `combine_surrogate_pairs` produces the same code points at the same join points | `token_value_bytes`, `token_literal_bytes` |
+| Malformed byte at token start, inside a comment, inside an identifier, inside a raw-copied literal | same diagnostics (`File_appears_to_be_binary` at 0, identifier end, raw bytes preserved) and same token boundaries | `diagnostics`, `token_value_bytes`, `token_literal_bytes` |
+| `ToLowerJS` and `ToUpperJS` on sentinel bytes and on malformed byte `FF` | complete sentinels survive; `FF` becomes U+FFFD bytes `EF BF BD`, matching Go | `helper_semantics`, `helper_printer_semantics` |
+| `TruncateByRunes` on `ED A0 80` with maximum length 1; `LowerFirstChar` on sentinel/malformed prefixes | truncation returns raw byte `ED`; helper-specific decoding, replacement and suffix copying match Go | `helper_semantics`, `helper_printer_semantics` |
+| Literal escape helpers on sentinels, malformed bytes and quote/escape flags | escaped bytes match the oracle before integration with the printer | `helper_semantics`, `helper_printer_semantics` |
 | Original-source and synthesized string literals containing sentinels or malformed bytes | eligible source reuse preserves its bytes; regenerated literals apply Go's escapes, including `\uD800` and `\uFFFD`, with matching quote/escape flags | `helper_printer_semantics` |
 | UTF-8 BOM, UTF-16 LE BOM, UTF-16 BE BOM, unpaired surrogate under a UTF-16 BOM | same decoded bytes and offsets, U+FFFD where Go produces it | `source_decoding` |
 | Sentinel bytes in source text | API positions count one unit, LSP positions count three, both matching the oracle | `utf16_positions` |
@@ -90,7 +91,7 @@ The encoder writes the file text once and appends only strings that differ from 
 | Out-of-range lines, characters and absolute positions | preserve each API/LSP/scanner path's clamping, arithmetic or panic behavior, including both `allowEdits` settings | `utf16_positions`, `utf8_positions` |
 | Encoder success and failure | same success or error outcome per file; byte-identical output wherever the oracle encodes | `encoder_success_error`, `encoder_output_bytes` |
 
-Criterion ids refer to `status/experiments.toml`.
+Criterion ids refer to `status/experiments.toml`. S04 gates leaf helpers with `helper_semantics`; S05 gates scanner values and rescans with `token_value_bytes`; S06 gates encoder behavior. S08 completes E4 through production literal-type construction and original-source/regenerated printing, retaining the full `token_literal_bytes` and `helper_printer_semantics` requirements.
 
 ## 4. Choices deliberately left to measurement
 

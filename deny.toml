@@ -12,6 +12,8 @@ targets = [
 all-features = true
 
 [advisories]
+# Keep the advisory cache writable in workspace-restricted environments.
+db-path = "target/advisory-dbs"
 yanked = "deny"
 ignore = []
 

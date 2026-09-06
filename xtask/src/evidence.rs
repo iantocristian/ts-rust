@@ -28,6 +28,26 @@ fn git(root: &Path, args: &[&str]) -> Result<Vec<u8>> {
     }
     Ok(out.stdout)
 }
+fn current_host() -> String {
+    format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH)
+}
+fn current_toolchain() -> Result<String> {
+    let output = Command::new("rustc")
+        .arg("-Vv")
+        .output()
+        .map_err(|e| format!("cannot identify Rust toolchain: {e}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "cannot identify Rust toolchain: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    let toolchain = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
+    if toolchain.trim().is_empty() {
+        return Err("cannot identify Rust toolchain: empty rustc -Vv output".into());
+    }
+    Ok(toolchain)
+}
 pub fn safe_path(path: &str) -> bool {
     !path.is_empty()
         && Path::new(path)
@@ -63,6 +83,12 @@ pub struct Context {
     pub source_sha256: String,
     pub upstream_pin: String,
     pub environment: BTreeMap<String, String>,
+    // Old run artifacts already retain these fields on Record. Saved views now
+    // also need their renderer identity to reproduce stale evidence faithfully.
+    #[serde(default)]
+    pub host: String,
+    #[serde(default)]
+    pub toolchain: String,
 }
 impl Context {
     pub fn same_inputs(&self, other: &Self) -> bool {
@@ -77,6 +103,21 @@ impl Context {
         Self::capture_sources(root, pin, &spec.sources)
     }
     fn capture_sources(root: &Path, pin: &str, sources: &[String]) -> Result<Self> {
+        Self::capture_sources_with_identity(
+            root,
+            pin,
+            sources,
+            &current_host(),
+            &current_toolchain()?,
+        )
+    }
+    fn capture_sources_with_identity(
+        root: &Path,
+        pin: &str,
+        sources: &[String],
+        host: &str,
+        toolchain: &str,
+    ) -> Result<Self> {
         let revision = String::from_utf8(git(root, &["rev-parse", "HEAD"])?)
             .map_err(|e| e.to_string())?
             .trim()
@@ -135,6 +176,8 @@ impl Context {
             source_sha256: hash(&serde_json::to_vec(&entries).unwrap()),
             upstream_pin: pin.into(),
             environment,
+            host: host.into(),
+            toolchain: toolchain.into(),
         })
     }
 }
@@ -468,15 +511,15 @@ pub fn run(root: &Path, id: &str, pin: &str) -> Result<bool> {
         .map_err(|e| e.to_string())?;
     let stdout = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
-    let stable = Context::capture_run(root, pin, spec)?.same_inputs(&before)
+    let after = Context::capture_run(root, pin, spec)?;
+    let stable = after.same_inputs(&before)
+        && after.host == before.host
+        && after.toolchain == before.toolchain
         && input_hashes(root, spec)? == inputs;
     let parsed = report_metrics(root, spec, &stdout);
     let success = output.status.success() && stable && parsed.is_ok();
-    let toolchain = Command::new("rustc")
-        .arg("-Vv")
-        .output()
-        .map(|o| String::from_utf8_lossy(&o.stdout).into_owned())
-        .unwrap_or_else(|e| e.to_string());
+    let host = before.host.clone();
+    let toolchain = before.toolchain.clone();
     let record = Record {
         schema_version: 1,
         run_id: id.into(),
@@ -490,7 +533,7 @@ pub fn run(root: &Path, id: &str, pin: &str) -> Result<bool> {
         command: spec.command.clone(),
         target: spec.target.clone(),
         config: spec.config.clone(),
-        host: format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH),
+        host,
         toolchain,
         exit_code: output.status.code().unwrap_or(-1),
         stdout_sha256: hash(stdout.as_bytes()),
@@ -529,6 +572,24 @@ pub struct Loaded {
     pub artifacts: BTreeMap<String, String>,
 }
 pub fn load(root: &Path, context: &Context) -> Result<Loaded> {
+    load_in_environment(root, context, None)
+}
+
+/// Replay evidence against a committed view's renderer identity, never for live gates.
+pub fn load_archived(root: &Path, context: &Context) -> Result<Loaded> {
+    load_in_environment(root, context, Some(&context.environment))
+}
+
+fn load_in_environment(
+    root: &Path,
+    context: &Context,
+    environment: Option<&BTreeMap<String, String>>,
+) -> Result<Loaded> {
+    // The report captures the host and rustc once. Reuse its selected identity for
+    // every run, including archive replay of a view that recorded stale evidence.
+    if context.host.is_empty() || context.toolchain.trim().is_empty() {
+        return Err("missing report host or Rust toolchain identity".into());
+    }
     let mut loaded = Loaded::default();
     for (id, spec) in specs(root)? {
         let latest = root.join(format!("status/evidence/{id}.latest"));
@@ -552,12 +613,24 @@ pub fn load(root: &Path, context: &Context) -> Result<Loaded> {
                 return Err("record identity/version mismatch".into());
             }
             artifact = Some(path.clone());
-            let current = Context::capture_run(root, &context.upstream_pin, &spec)?;
+            let mut current = Context::capture_sources_with_identity(
+                root,
+                &context.upstream_pin,
+                &spec.sources,
+                &context.host,
+                &context.toolchain,
+            )?;
+            if let Some(environment) = environment {
+                current.environment.clone_from(environment);
+            }
             if !r.context.same_inputs(&current)
                 || r.spec_sha256 != spec_hash(&spec)
                 || r.inputs != input_hashes(root, &spec)?
             {
                 return Err("stale: source, pin, command or inputs changed".into());
+            }
+            if r.host != context.host || r.toolchain != context.toolchain {
+                return Err("stale: host or Rust toolchain changed".into());
             }
             if r.exit_code != 0 || !r.valid_capture {
                 return Err("failed producer/capture".into());
@@ -567,6 +640,8 @@ pub fn load(root: &Path, context: &Context) -> Result<Loaded> {
                 || r.command != spec.command
                 || r.target != spec.target
                 || r.config != spec.config
+                || (!r.context.host.is_empty() && r.context.host != r.host)
+                || (!r.context.toolchain.is_empty() && r.context.toolchain != r.toolchain)
             {
                 return Err("record contents mismatch".into());
             }

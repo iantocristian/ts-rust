@@ -1,4 +1,7 @@
 /target
 
+# Finder metadata, at any depth.
+.DS_Store
+
 __pycache__/
 *.pyc

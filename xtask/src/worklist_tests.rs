@@ -27,6 +27,7 @@ impl Drop for OutputDir {
 
 fn report() -> Report {
     Report {
+        generated: "2026-09-06".into(),
         metrics: BTreeMap::from([
             ("functions.total".into(), Metric::Num(4.0)),
             ("functions.ported".into(), Metric::Num(1.0)),

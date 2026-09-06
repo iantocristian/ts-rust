@@ -35,7 +35,7 @@ done_when = ["run.selftest.pass == true"]
 
 [[item]]
 id = "S02-4"
-title = "Status workflow on macOS and Linux: validate provenance, check the committed views, rerun producers, check S01, publish views and evidence as artifacts (verified on GitHub, not in the ledger)"
+title = "Status workflow on macOS and Linux: validate provenance, check archived views including the worklist, enforce live producer metrics and S01, build with the minimum Rust version, publish views and evidence as artifacts (verified on GitHub, not in the ledger)"
 kind = "task"
 required = false
 done_when = []
