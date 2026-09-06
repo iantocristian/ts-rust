@@ -144,7 +144,7 @@ cargo xtask check-metrics 'run.fmt.clean == true' # enforce current metrics inde
 cargo xtask status --record    # append only a distinct source/evidence snapshot
 ```
 
-If a sandbox cannot write Go's system cache, use a writable workspace cache for the oracle command: `GOCACHE="$PWD/target/go-build" cargo xtask run oracle`. The dependency policy already places cargo-deny's advisory cache under `target/advisory-dbs`. These settings change cache locations, not the required checks.
+If a sandbox cannot write Go's system cache, use a writable workspace cache for the oracle command: `GOCACHE="$PWD/target/go-build" cargo xtask run oracle`. cargo-deny keeps its advisory database at its default location under `$CARGO_HOME`; never point `db-path` inside the repository, because a pruned copy makes cargo-deny reset the enclosing checkout's tracked files. These settings change cache locations, not the required checks.
 
 `run` captures a producer's report; a successful capture can contain failing metrics. Use `check-metrics` to enforce required results independently of sprint completion. It compares the recorded host, Rust compiler identity and build environment with the current runner, rejects missing or stale evidence and fails if any requested comparison fails.
 

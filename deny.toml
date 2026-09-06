@@ -12,8 +12,9 @@ targets = [
 all-features = true
 
 [advisories]
-# Keep the advisory cache writable in workspace-restricted environments.
-db-path = "target/advisory-dbs"
+# The advisory database stays at cargo-deny's default, $CARGO_HOME/advisory-dbs, outside the
+# repository: a git-managed cache inside target/ is pruned by CI caching, after which cargo-deny
+# fails to load it and resets the enclosing repository's tracked files (reproduced 2026-09-06).
 yanked = "deny"
 ignore = []
 
