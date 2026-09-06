@@ -1,4 +1,4 @@
-# Phase 0, sprint 4. Producers to register when the harnesses exist: e3, e4 (metrics named in
+# Phase 0, sprint 4. Registered producers: e3, e4 (metrics named in
 # status/experiments.toml). Each producer emits only the metrics its implemented scenarios
 # measure; a missing metric keeps its criterion pending. Runs in parallel with S03.
 id = "S04"

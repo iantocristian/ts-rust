@@ -1,0 +1,181 @@
+import copy
+import importlib.util
+import json
+import os
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+
+SPEC = importlib.util.spec_from_file_location("s04", Path(__file__).resolve().parents[1] / "s04.py")
+s04 = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(s04)
+
+
+class ComparisonTests(unittest.TestCase):
+    def setUp(self):
+        self.probes = [
+            {"id": f"{criterion}/1", "group": criterion, "criterion": criterion}
+            for criterion in s04.TEXT_CRITERIA
+        ]
+        self.results = [
+            {"id": probe["id"], "panic": False, "value": ["6162", True, 1]}
+            for probe in self.probes
+        ]
+
+    def test_complete_equal_results_pass_each_implemented_criterion(self):
+        report, failures = s04.compare(self.probes, self.results, copy.deepcopy(self.results))
+        self.assertFalse(failures)
+        self.assertTrue(all(report["metrics"][criterion] for criterion in s04.TEXT_CRITERIA))
+        self.assertEqual(report["tests"], {probe["group"]: "pass" for probe in self.probes})
+
+    def test_boolean_and_numeric_result_types_cannot_be_interchanged(self):
+        for original, changed in [(True, 1), (False, 0), (1, 1.0), (0, False)]:
+            with self.subTest(original=original, changed=changed):
+                expected = copy.deepcopy(self.results)
+                actual = copy.deepcopy(self.results)
+                for result in expected:
+                    result["value"] = {"nested": [original]}
+                for result in actual:
+                    result["value"] = {"nested": [changed]}
+                report, failures = s04.compare(self.probes, expected, actual)
+                self.assertEqual(len(failures), len(self.probes))
+                self.assertTrue(all(not report["metrics"][criterion] for criterion in s04.TEXT_CRITERIA))
+
+    def test_missing_extra_reordered_and_duplicate_results_are_rejected(self):
+        bad_inventories = [
+            self.results[:-1],
+            self.results + [self.results[0]],
+            list(reversed(self.results)),
+            [self.results[0]] * len(self.results),
+        ]
+        for bad in bad_inventories:
+            for side in ("oracle", "rust"):
+                with self.subTest(side=side, bad=bad):
+                    with self.assertRaises(ValueError):
+                        s04.compare(self.probes, bad if side == "oracle" else self.results,
+                                    bad if side == "rust" else self.results)
+
+    def test_malformed_result_shapes_are_rejected(self):
+        for invalid in [None, [], "result", {"id": self.results[0]["id"]},
+                        {"id": self.results[0]["id"], "panic": 0, "value": None},
+                        {"id": self.results[0]["id"], "panic": True, "value": 1},
+                        {**self.results[0], "extra": False}]:
+            with self.subTest(invalid=invalid):
+                actual = copy.deepcopy(self.results)
+                actual[0] = invalid
+                with self.assertRaises(ValueError):
+                    s04.compare(self.probes, self.results, actual)
+        with self.assertRaises(ValueError):
+            s04.compare(self.probes, self.results, {})
+
+    def test_nonfinite_and_nonjson_result_values_are_rejected(self):
+        for value in [float("nan"), float("inf"), float("-inf"), (1, 2), {1: "key"}, b"bytes"]:
+            for side in ("oracle", "rust"):
+                with self.subTest(value=value, side=side):
+                    invalid = copy.deepcopy(self.results)
+                    invalid[0]["value"] = {"nested": [value]}
+                    with self.assertRaises(ValueError):
+                        s04.compare(self.probes, invalid if side == "oracle" else self.results,
+                                    invalid if side == "rust" else self.results)
+
+    def test_matching_panics_pass_but_success_is_not_a_panic(self):
+        expected = copy.deepcopy(self.results)
+        expected[0].update(panic=True, value=None)
+        report, failures = s04.compare(self.probes, expected, copy.deepcopy(expected))
+        self.assertTrue(report["metrics"][s04.TEXT_CRITERIA[0]])
+        self.assertFalse(failures)
+        actual = copy.deepcopy(expected)
+        actual[0]["panic"] = False
+        report, failures = s04.compare(self.probes, expected, actual)
+        self.assertFalse(report["metrics"][s04.TEXT_CRITERIA[0]])
+        self.assertEqual(len(failures), 1)
+
+    def test_empty_or_duplicate_probe_inventory_cannot_pass(self):
+        for probes in [[], [self.probes[0]] * 2, [None], [{"id": 1, "group": "g", "criterion": "c"}]]:
+            with self.subTest(probes=probes):
+                with self.assertRaises(ValueError):
+                    s04.compare(probes, [], [])
+
+    def test_missing_criterion_stays_false(self):
+        report, failures = s04.compare(self.probes[:1], self.results[:1], self.results[:1])
+        self.assertFalse(failures)
+        for criterion in s04.TEXT_CRITERIA[1:]:
+            self.assertFalse(report["metrics"][criterion])
+            self.assertEqual(report["metrics"][f"{criterion}_probes"], 0)
+
+    def test_criterion_mixing_and_unsupported_criterion_are_rejected(self):
+        mixed = copy.deepcopy(self.probes)
+        mixed[1]["group"] = mixed[0]["group"]
+        with self.assertRaises(ValueError):
+            s04.compare(mixed, self.results, self.results)
+        unknown = copy.deepcopy(self.probes)
+        unknown[0]["criterion"] = "not_implemented"
+        with self.assertRaises(ValueError):
+            s04.compare(unknown, self.results, self.results)
+
+    def test_one_failed_probe_fails_its_whole_scenario_and_criterion(self):
+        extra = {**self.probes[0], "id": self.probes[0]["id"] + "-extra"}
+        expected = self.results + [{"id": extra["id"], "panic": False, "value": 2}]
+        actual = copy.deepcopy(expected)
+        actual[-1]["value"] = 3
+        report, failures = s04.compare(self.probes + [extra], expected, actual)
+        self.assertEqual(len(failures), 1)
+        self.assertFalse(report["metrics"][extra["criterion"]])
+        self.assertEqual(report["metrics"][extra["criterion"] + "_probes"], 2)
+        self.assertEqual(report["tests"][extra["group"]], "fail")
+
+    def test_json_decoder_rejects_duplicate_keys_and_nonfinite_literals(self):
+        for text in ['{"id":1,"id":2}', '[NaN]', '[Infinity]', '[-Infinity]', '[1e999]']:
+            with self.subTest(text=text):
+                with self.assertRaises(ValueError):
+                    s04.strict_json_loads(text)
+        self.assertEqual(s04.strict_json_loads('[null,true,1,"x"]'), [None, True, 1, "x"])
+
+    def test_e4_executes_cargos_selected_artifact_with_custom_target_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = root / "data/s04/e4-cases.json"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(json.dumps(sorted(probe["group"] for probe in self.probes)))
+            commands = []
+
+            def fake_command(args, **kwargs):
+                commands.append(args)
+                if args[-1] == "--check":
+                    return b""
+                self.assertIsNotNone(kwargs.get("data"))
+                return json.dumps(self.results).encode()
+
+            with patch.object(s04, "ROOT", root), \
+                 patch.object(s04, "verified_upstream", return_value=root / "upstream"), \
+                 patch.object(s04, "text_probes", return_value=self.probes), \
+                 patch.object(s04, "go_environment", return_value={}), \
+                 patch.object(s04, "go_oracle", return_value=root / "oracle"), \
+                 patch.object(s04, "command", side_effect=fake_command), \
+                 patch.dict(os.environ, {"CARGO_TARGET_DIR": str(root / "other-target")}):
+                report = s04.e4()
+            self.assertTrue(report["metrics"][s04.TEXT_CRITERIA[0]])
+            self.assertEqual(commands[0][-1], "--check")
+            self.assertEqual(commands[2][:2], ["cargo", "run"])
+            self.assertNotIn(str(root / "target/release/examples/e4"), commands[2])
+
+    def test_sigma_contexts_cover_range_edges_stride_members_and_holes(self):
+        table = """var unicodeCasedRanges = &unicode.RangeTable{
+    R16: []unicode.Range16{{0x41, 0x45, 2}},
+}
+var unicodeCaseIgnorableRanges = &unicode.RangeTable{
+    R16: []unicode.Range16{{0x27, 0x2E, 7}},
+}
+"""
+        contexts = set(s04.sigma_contexts(table))
+        for char in "@ABCDEF&'(-./":
+            for context in ("AΣ" + char, char + "Σ", "A" + char + "Σ", "AΣ" + char + "B"):
+                self.assertIn(context.encode(), contexts)
+        with self.assertRaises(ValueError):
+            list(s04.sigma_contexts(""))
+
+
+if __name__ == "__main__":
+    unittest.main()

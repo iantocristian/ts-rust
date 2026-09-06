@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "run_id": "clippy",
+  "recorded_at": 1788686382,
+  "context": {
+    "revision": "b9a8530ba42fd509df52a41a912bf03c2bc1d4be",
+    "source_sha256": "517341d760a7d880d3ab3bce883fa0817d6e5eaee138f74d98e0d6524d9674ca",
+    "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+    "environment": {
+      "CARGO_BUILD_TARGET": "",
+      "CARGO_ENCODED_RUSTFLAGS": "",
+      "CGO_ENABLED": "",
+      "GOARCH": "",
+      "GOFLAGS": "",
+      "GOOS": "",
+      "RUSTC_WRAPPER": "",
+      "RUSTFLAGS": "",
+      "RUSTUP_TOOLCHAIN": "1.97.1-aarch64-apple-darwin"
+    },
+    "host": "macos-aarch64",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "spec_sha256": "9e96bd69c4514ba0994aad0d4c3ca150eab1e3f549aab0471cedf5dd8d17bce2",
+  "inputs": {
+    "Cargo.lock": "e1988b73a3a55e5ad6925b3130dd9b44f1ff7935a9b53138966141d23959af02",
+    "Cargo.toml": "c284c2df8195e8b8eb2d83e8106ada7969b831d475fed263f21b9a1c16cb7ec0"
+  },
+  "command": [
+    "python3",
+    "scripts/checks.py",
+    "clippy"
+  ],
+  "target": "host",
+  "config": "debug; all targets; -D warnings",
+  "host": "macos-aarch64",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "exit_code": 0,
+  "stdout": "{\"metrics\": {\"clean\": true}}\n",
+  "stderr": "clippy 0.1.97 (8bab26f4f6 2026-07-14)\n+ cargo clippy --workspace --all-targets --locked -- -D warnings\n    Checking ts_arena v0.1.0 (/Users/cristian/git/ts-rust-astra-s04/crates/ts_arena)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s\n",
+  "stdout_sha256": "1cbfcf47216ecd3003591dc9b4f187162a15b6928eb7916ccdf71e348ae7bbb3",
+  "stderr_sha256": "7d41e53b0853e675219afede7c121340ecffd76207f91aed99439bbff7ab64ea",
+  "valid_capture": true
+}

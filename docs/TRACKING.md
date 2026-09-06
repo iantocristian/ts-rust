@@ -53,7 +53,7 @@ The script requires a clean checkout, resolves the requested pin to the actual f
 
 The bootstrap checkout is sufficient for inventory generation. S01's oracle gate separately requires a registered, initialized `upstream/` submodule at that same pin, with the canonical Microsoft URL and a clean worktree.
 
-The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01 passes against the current bootstrap evidence. E1–E8 implementation and verification remain pending. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
+The canonical submodule is registered at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted. S04 implements the text and ownership leaves, with 47 upstream function mappings and a local E4 run matching 75,997 probes in 400 scenarios. The registered leaf producers cover a subset of E3/E4; full experiment acceptance and later compiler integration remain pending. Inspect current status when changing selected inputs: recorded success is not a permanent waiver of those checks. [S04](S04.md) records the measured scope and reproduction commands.
 
 ## Function traceability
 
@@ -84,7 +84,18 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. Registered producers include the workspace/oracle bootstrap runs, the `fmt`, `clippy`, `deny` and `selftest` checks, and the S04 `e3`/`e4` leaf harnesses. Add the remaining producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+
+The E4 producer compares all probes against a freshly exported pinned Go oracle,
+checks generated casing tables, and emits only its five implemented leaf criteria.
+Its comparison requires complete ordered results and preserves JSON types, byte
+values, string views and panic occurrence. The E3 producer runs the same seven
+ownership scenarios in debug, release, Miri and AddressSanitizer, then exports
+measured disposal deltas and actual instrumentation completion. Its allocation
+counter counts tracked owner objects, core/symbol slabs and lazy pages; global
+allocator calls, payload/cache bookkeeping allocations and RSS are outside that
+measurement. Neither producer supplies the later checker, scanner, encoder or
+whole-printer criteria. See [S04](S04.md) for the complete leaf measurement boundary.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 
@@ -137,9 +148,12 @@ S01 checks the reviewed contracts, provenance, registered upstream pin, actual w
 cargo xtask validate           # read-only tracking/provenance validation; pending work is allowed
 cargo xtask run workspace      # actual locked Cargo workspace build and evidence capture
 cargo xtask run oracle         # checked submodule, Go build and --version evidence
+cargo xtask run e4             # text leaves against the pinned Go oracle
+cargo xtask run e3             # arena scenarios, actual Miri/AddressSanitizer and evidence
 cargo xtask status             # regenerate summaries, dashboard and the unmapped-function worklist
 cargo xtask status --check-committed # read-only reproduction using the recorded report context
 cargo xtask check S01          # fails unless every required item and exit criterion passes
+cargo xtask check S04          # leaf criteria, instrumentation and S02 prerequisites
 cargo xtask check-metrics 'run.fmt.clean == true' # enforce current metrics independently of sprints
 cargo xtask status --record    # append only a distinct source/evidence snapshot
 ```
@@ -150,7 +164,7 @@ If a sandbox cannot write Go's system cache, use a writable workspace cache for 
 
 `status --check-committed` checks the four generated views without writing them: `STATUS.md`, `status/status.json`, `status/unmapped-functions.json` and `docs/status.html`. It preserves only the recorded report context (including the renderer's host, Rust compiler identity and environment) and generation date, then recomputes the report from the current ledger, policy and validated raw evidence. Source digests, upstream pin, run specifications, input hashes and artifact checksums must still match. Each artifact's execution identity is compared with the recorded renderer identity, preserving stale results as stale. This lets Linux reproduce a report captured on macOS, including after a source-identical commit, without claiming the measurements ran on Linux. Live metric and sprint gates always use the current host, compiler and environment.
 
-A status workflow is installed at `.github/workflows/status.yml`: on push, pull request, manual dispatch and nightly it validates schemas and provenance, checks committed views using `--check-committed`, reruns the registered producers on macOS and Linux, and enforces their build, smoke, format, lint, dependency and self-test metrics plus S01. S02 remains informational until complete; its quality checks already gate CI independently. Separate jobs compile the locked workspace and all targets with the declared minimum Rust version, currently 1.96.0, on both operating systems. Regenerated views, including the unmapped-function worklist, and raw evidence are published as workflow artifacts even after a metric gate fails. No run of this workflow is recorded in the repository, and nothing is committed back; evidence in the repository is captured and reviewed locally.
+A status workflow is installed at `.github/workflows/status.yml`: on push, pull request, manual dispatch and nightly it validates schemas and provenance, checks committed views using `--check-committed`, reruns the registered producers on macOS and Linux, and enforces their build, smoke, format, lint, dependency and self-test metrics plus S01 and S04. The S04 gate includes the E3/E4 leaf criteria, actual instrumentation and its S02 prerequisite; the separate S02 reporting step remains informational. Separate jobs compile the locked workspace and all targets with the declared minimum Rust version, currently 1.96.0, on both operating systems. Regenerated views, including the unmapped-function worklist, and raw evidence are published as workflow artifacts even after a metric gate fails. No run of this workflow is recorded in the repository, and nothing is committed back; evidence in the repository is captured and reviewed locally.
 
 History records pin, repository context and underlying artifacts. Re-rendering the same context and evidence adds no new point. A policy or documentation edit can create a distinct history snapshot while reusing the same current run artifacts; it is not a new measurement. The chart separates upstream pins and legacy history from the current series. A publication date is not a measurement date: nightly publication of old results cannot satisfy the four consecutive weekly measurement runs required for cutover. That future gate must inspect distinct run artifacts and their execution timestamps against the approved workload matrix.
 

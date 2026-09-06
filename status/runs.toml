@@ -1,7 +1,7 @@
 # Commands emit one JSON object to stdout: {"metrics": { ... }}.
 # The runner binds successful executions to command, inputs, target, configuration
 # and repository provenance. Failed or stale runs cannot pass gates.
-# Experiment runs e1-e8 are absent until their actual harnesses exist.
+# E3/E4 implement the S04 leaf slice; later experiment metrics remain absent.
 
 [workspace]
 command = ["python3", "scripts/tracking-bootstrap.py", "workspace"]
@@ -47,3 +47,19 @@ inputs = ["Cargo.toml", "Cargo.lock"]
 sources = ["xtask/**", "scripts/**", "Cargo.*", "rust-toolchain*", "data/**"]
 target = "host"
 config = "debug"
+
+[e3]
+command = ["python3", "scripts/s04.py", "e3"]
+inputs = ["data/s04/toolchains.toml", "docs/design/ownership.md", "docs/design/symbols.md", "docs/adr/0012-panics--recovery-and-generation-retirement.md"]
+cases = "data/s04/e3-cases.json"
+sources = ["crates/ts_arena/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_ownership.py"]
+target = "host"
+config = "S04 arena contracts; debug and release; measured final-drop counters; nightly-2026-09-05 Miri default exposed provenance (parking_lot queue pointers) and AddressSanitizer with rebuilt std; native target"
+
+[e4]
+command = ["python3", "scripts/s04.py", "e4"]
+inputs = ["data/s04/corpus.json", "data/s04/toolchains.toml", "data/upstream.json", ".gitmodules", "docs/design/text.md"]
+cases = "data/s04/e4-cases.json"
+sources = ["crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_oracle/**", "scripts/tracking-bootstrap.py", "upstream"]
+target = "host"
+config = "S04 text leaf slice; Go 1.27.1 clean pin with access-only wrappers; deterministic byte/casing/position probes; release Rust; all probes required per frozen scenario"
