@@ -78,28 +78,63 @@ fn snake(name: &str) -> String {
         }
         result.extend(ch.to_lowercase());
     }
-    if matches!(
+    // Raw identifiers cannot spell these keywords; casing has already mapped
+    // `Self` to `self`. A suffix also handles the reserved single underscore.
+    // https://doc.rust-lang.org/reference/identifiers.html#raw-identifiers
+    if matches!(result.as_str(), "_" | "crate" | "self" | "super") {
+        result.push('_');
+    } else if matches!(
         result.as_str(),
-        "type"
-            | "static"
-            | "super"
-            | "self"
-            | "mod"
-            | "ref"
-            | "in"
+        "as" | "async"
             | "await"
-            | "yield"
+            | "break"
+            | "const"
+            | "continue"
+            | "dyn"
+            | "else"
+            | "enum"
+            | "extern"
+            | "false"
+            | "fn"
+            | "for"
+            | "if"
+            | "impl"
+            | "in"
+            | "let"
             | "loop"
             | "match"
-            | "const"
-            | "enum"
-            | "fn"
+            | "mod"
+            | "move"
+            | "mut"
+            | "pub"
+            | "ref"
+            | "return"
+            | "static"
             | "struct"
             | "trait"
+            | "true"
+            | "type"
+            | "unsafe"
             | "use"
-            | "move"
+            | "where"
+            | "while"
+            | "abstract"
+            | "become"
             | "box"
+            | "do"
+            | "final"
+            | "gen"
+            | "macro"
+            | "override"
+            | "priv"
+            | "try"
+            | "typeof"
+            | "unsized"
+            | "virtual"
+            | "yield"
     ) {
+        // All strict/reserved keywords, including the 2024 reservation `gen`.
+        // https://doc.rust-lang.org/reference/keywords.html
         result = format!("r#{result}");
     }
     result
@@ -577,6 +612,67 @@ mod tests {
         assert_eq!(snake("JSDocTypeExpression"), "js_doc_type_expression");
         assert_eq!(snake("Type"), "r#type");
         assert_eq!(snake("EOFToken"), "eof_token");
+    }
+
+    #[test]
+    fn keyword_fields_compile_without_illegal_raw_identifiers() {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+
+        // Strict and reserved keywords from the Rust Reference. Compile the
+        // resulting field identifiers so a mistaken raw spelling fails too.
+        let keywords = [
+            "_", "as", "async", "await", "break", "const", "continue", "crate", "dyn", "else",
+            "enum", "extern", "false", "fn", "for", "if", "impl", "in", "let", "loop", "match",
+            "mod", "move", "mut", "pub", "ref", "return", "self", "Self", "static", "struct",
+            "super", "trait", "true", "type", "unsafe", "use", "where", "while", "abstract",
+            "become", "box", "do", "final", "gen", "macro", "override", "priv", "try", "typeof",
+            "unsized", "virtual", "yield",
+        ];
+        let mut source = String::from("#![allow(dead_code)]\n");
+        for (index, keyword) in keywords.iter().enumerate() {
+            let escaped = snake(keyword);
+            let expected = match *keyword {
+                "_" => "__".into(),
+                "Self" | "self" => "self_".into(),
+                "crate" | "super" => format!("{keyword}_"),
+                other => format!("r#{other}"),
+            };
+            assert_eq!(escaped, expected, "keyword {keyword}");
+            source.push_str(&format!("struct Keyword{index} {{ {escaped}: u8 }}\n"));
+        }
+        for keyword in ["macro_rules", "raw", "safe", "union"] {
+            assert_eq!(snake(keyword), keyword, "weak keywords remain field names");
+        }
+        for keyword in ["Return", "Impl", "Crate", "Super"] {
+            assert_eq!(snake(keyword), snake(&keyword.to_lowercase()));
+        }
+        let mut child = Command::new("rustc")
+            .args([
+                "--edition=2021",
+                "--crate-type=lib",
+                "--emit=metadata",
+                "-o",
+                "-",
+                "-",
+            ])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("Rust toolchain is required for emitter tests");
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(source.as_bytes())
+            .unwrap();
+        let output = child.wait_with_output().unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 
     #[test]

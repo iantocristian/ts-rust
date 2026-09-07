@@ -344,6 +344,16 @@ each make a port worse if pursued without examining the contract. The
 improvement I need is earlier identification of hidden costs and unsupported
 claims, while retaining exact semantic work.
 
+The S03 follow-up review in [PR #8](https://github.com/iantocristian/ts-rust/pull/8)
+exposed further checks I missed. An output-map entry made `ast_schema` a success
+sentinel instead of a separately observable resolver result. Unique staging
+directories prevented reuse but accumulated without a retention limit. Broad
+source globs forced unrelated leaf edits through an expensive generator. For
+future generators, test a failed frontend, a second attempt and an unrelated
+source edit explicitly. Compare CI step durations and actual cache-hit logs
+before attributing an entire slowdown to one tool or cache; a clean independent
+review does not substitute for those observations.
+
 ## Evidence and maintenance
 
 Prepared on 7 September 2026 from a fresh read of these local reports:

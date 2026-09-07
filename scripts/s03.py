@@ -203,6 +203,37 @@ def validate_codecs(root, api, wire):
         raise ValueError("missing ordinary field wire fixture")
 
 
+def export_ast(root, tooling, output, env):
+    """Measure the pinned resolver separately from later generation stages.
+
+    A resolver that executes but fails or produces no normalized tables is an
+    observed schema failure. Missing executables, inaccessible files and invalid
+    JSON remain capture errors; they are not evidence about the resolver.
+    """
+    try:
+        run(["node", root / "tools/s03/ast-export.mts", tooling, output], tooling, env)
+    except RuntimeError as error:
+        print(f"S03 AST schema export failed: {error}", file=sys.stderr)
+        return False
+    try:
+        data = output.read_bytes()
+    except FileNotFoundError:
+        print("S03 AST schema export failed: resolver produced no ast.json", file=sys.stderr)
+        return False
+    if not data.strip():
+        print("S03 AST schema export failed: resolver produced an empty ast.json", file=sys.stderr)
+        return False
+    schema = strict_json_loads(data)
+    if not isinstance(schema, dict) or type(schema.get("version")) is not int or schema["version"] != 1:
+        print("S03 AST schema export failed: unsupported normalized schema version", file=sys.stderr)
+        return False
+    for name in ("kinds", "markers", "kindAliases", "bases", "nodes"):
+        if not isinstance(schema.get(name), list) or not schema[name]:
+            print(f"S03 AST schema export failed: missing or empty normalized {name} table", file=sys.stderr)
+            return False
+    return True
+
+
 def prepare(root, stage, pin):
     stage.mkdir(parents=True, exist_ok=True)
     if any(stage.iterdir()):
@@ -211,7 +242,8 @@ def prepare(root, stage, pin):
     tooling, patches_apply = prepare_worktree(root, pin)
     env = version_environment(root, tooling)
     dependencies(root, tooling, env)
-    run(["node", root / "tools/s03/ast-export.mts", tooling, stage / "ast.json"], tooling, env)
+    if not export_ast(root, tooling, stage / "ast.json", env):
+        return {"patches_apply": patches_apply, "ast_schema": False}
     copy_adapter(root, tooling, "tools/s03/encoder-export.mts", "tools/scripts/tsc/s03-encoder-export.mts")
     run(["node", "tools/scripts/tsc/s03-encoder-export.mts", stage / "encoder-nodes.json"], tooling, env)
     copy_adapter(root, tooling, "tools/s03/diagnostics-export_test.go", "tsc/internal/diagnostics/s03_export_test.go")
@@ -246,7 +278,7 @@ def prepare(root, stage, pin):
     # Decode every export strictly here before serde consumes normalized snapshots.
     for name in ("ast", "diagnostics", "encoder", "api"):
         write_json(stage / f"{name}.json", read_json(stage / f"{name}.json"))
-    return {"patches_apply": patches_apply, "client_identical": client_identical,
+    return {"patches_apply": patches_apply, "ast_schema": True, "client_identical": client_identical,
             "client_files": len(expected), "api_methods": len(api["methods"]),
             "client_generated_files": len(expected) - len(enum_inputs),
             "client_source_files": len(enum_inputs),

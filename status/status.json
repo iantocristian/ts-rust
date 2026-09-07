@@ -16,22 +16,22 @@
       "S04_RUSTUP_HOME": ""
     },
     "host": "macos-aarch64",
-    "revision": "2a041e4f4e5ac9c881c5b643d878db6a74d8a2eb",
-    "source_sha256": "08e268badf9316bbf32d5c7f9a0969b633204b4be3c2ed6abab27264508ea7a2",
+    "revision": "aef8c6c9dc7ba5e580836db3da6a03d5e3b01870",
+    "source_sha256": "3c63f4fb515b76e35218495ad44b9d56ce8dea8783e4e5d9e6bf936b3b1f6a04",
     "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
     "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1"
   },
   "errors": [],
   "evidence_artifacts": {
-    "clippy": "status/evidence/0588ca8760f3e5dd307f8b2dffe8dc608cf10d11510e1faf4da1002dde10bb85.json",
-    "deny": "status/evidence/350b9e44571443624a78d3fd346ed61f937e6e3fdecba1057a90e5bf5dccbe94.json",
-    "e3": "status/evidence/5c6a4d43ee984ed193e18e776ef8035b2d5d6cd29a65bede9dc7c62ee82464fe.json",
-    "e4": "status/evidence/3ecbb3a5749fd26967fe14eac49bf228490b3bd01b94d91e6d7187432c4a5cd8.json",
-    "fmt": "status/evidence/245dcb87d6c4dcb3649411100a33eb77543665ab4c0e7e32ba6967e70458c351.json",
-    "gen": "status/evidence/653e9d1b2ee4f4f76bff06dfeefe003119d9eb1e4918b4e2741efad65de10f25.json",
-    "oracle": "status/evidence/cccda52887e222ca80bf55822b04e67e58bddffe51a6035091cf1df4fe8a257c.json",
-    "selftest": "status/evidence/0d2a128cc6c936516c3ee00cac79a8c0c6a22429c8ad5a45d6ef5bb4d4bd6d9c.json",
-    "workspace": "status/evidence/5cc290110c8dd828897cb2e1e3bdf7355a2419b504962830e2c94a49851acafc.json"
+    "clippy": "status/evidence/c044afc99ad533b22b08adc8a503e550e39ed0248372c428c3baecd78107dc39.json",
+    "deny": "status/evidence/e0dd646bdbc8cd0869a17fe6cd87adeedab862e10cb4a612fe09dd2b873a15ad.json",
+    "e3": "status/evidence/4a79bdfef1801a20258edae4999c9e62352ccdefc3b9d4188ac5220392f88763.json",
+    "e4": "status/evidence/dc31a9ca41debb548f8d1acdacb67a2cd274c1b02486f2d280183d8f9b841015.json",
+    "fmt": "status/evidence/eb58e7f36d371d84238ea8c33c6fb574efb8364bb049c6876082ed54f62a76ba.json",
+    "gen": "status/evidence/85a1dfac22bbab90c9d61439c4c7a69f235ad3003452f9e53e4b79d6a71c687e.json",
+    "oracle": "status/evidence/28fe9623db07b20d52877057a3d7f4a18b28104d0acc3ef1dd0a7e3288dae8bc.json",
+    "selftest": "status/evidence/61bc2c651717dd3ce3f8a53069db003371971edd06d161f19d97302d13dd1d6e.json",
+    "workspace": "status/evidence/71c4edf3e6ca35124318175d0418b35f9f99ff243955c025295832b6dd57cb36.json"
   },
   "evidence_states": {
     "clippy": "current",

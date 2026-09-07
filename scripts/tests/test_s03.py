@@ -286,5 +286,77 @@ class HandwrittenEnumInventoryTests(unittest.TestCase):
             self.inputs()
 
 
+class AstSchemaMeasurementTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.tooling = self.root / "tooling"
+        self.output = self.root / "ast.json"
+        self.schema = {"version": 1, **{name: [{}] for name in ("kinds", "markers", "kindAliases", "bases", "nodes")}}
+
+    def export(self, data):
+        def executed(args, cwd, env):
+            self.assertEqual(args, ["node", self.root / "tools/s03/ast-export.mts", self.tooling, self.output])
+            self.assertEqual(cwd, self.tooling)
+            if data is not None:
+                self.output.write_bytes(data)
+            return b""
+        with patch.object(s03, "run", side_effect=executed):
+            return s03.export_ast(self.root, self.tooling, self.output, {})
+
+    def test_executed_resolver_and_nonempty_normalized_export_are_measured_true(self):
+        self.assertTrue(self.export(json.dumps(self.schema).encode()))
+
+    def test_executed_resolver_failure_is_measured_false_with_diagnostic(self):
+        stderr = io.StringIO()
+        with patch.object(s03, "run", side_effect=RuntimeError("command exited 1: node ast-export.mts")), \
+                patch.object(sys, "stderr", stderr):
+            self.assertFalse(s03.export_ast(self.root, self.tooling, self.output, {}))
+        self.assertIn("S03 AST schema export failed", stderr.getvalue())
+        self.assertIn("command exited 1", stderr.getvalue())
+
+    def test_missing_or_empty_export_is_measured_false(self):
+        for data in (None, b"", b" \n\t"):
+            with self.subTest(data=data):
+                self.assertFalse(self.export(data))
+
+    def test_wrong_version_and_missing_empty_or_wrongly_typed_tables_fail(self):
+        invalid_schemas = [{}, [], {**self.schema, "version": 2}, {**self.schema, "version": True}]
+        for name in ("kinds", "markers", "kindAliases", "bases", "nodes"):
+            for invalid in ([], {}, None):
+                invalid_schemas.append({**self.schema, name: invalid})
+            invalid_schemas.append({key: value for key, value in self.schema.items() if key != name})
+        for schema in invalid_schemas:
+            with self.subTest(schema=schema):
+                self.assertFalse(self.export(json.dumps(schema).encode()))
+
+    def test_missing_node_permissions_and_other_infrastructure_errors_propagate(self):
+        for error in (FileNotFoundError("node missing"), PermissionError("node forbidden"),
+                      subprocess.TimeoutExpired("node", 1)):
+            with self.subTest(error=error), patch.object(s03, "run", side_effect=error):
+                with self.assertRaises(type(error)):
+                    s03.export_ast(self.root, self.tooling, self.output, {})
+
+    def test_invalid_duplicate_key_and_nonfinite_json_are_capture_errors(self):
+        for data in (b"{invalid", b'{"version":1,"version":2}', b'{"version":NaN}'):
+            with self.subTest(data=data):
+                with self.assertRaises(ValueError):
+                    self.export(data)
+
+    def test_measured_schema_failure_skips_unmeasured_downstream_stages(self):
+        with patch.object(s03, "check_upstream"), \
+                patch.object(s03, "prepare_worktree", return_value=(self.tooling, True)), \
+                patch.object(s03, "version_environment", return_value={}), \
+                patch.object(s03, "dependencies"), \
+                patch.object(s03, "export_ast", return_value=False), \
+                patch.object(s03, "copy_adapter") as copy_adapter, \
+                patch.object(s03, "run") as run:
+            report = s03.prepare(self.root, self.root / "stage", PIN)
+        self.assertEqual(report, {"patches_apply": True, "ast_schema": False})
+        copy_adapter.assert_not_called()
+        run.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
