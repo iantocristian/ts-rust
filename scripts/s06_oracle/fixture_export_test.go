@@ -33,7 +33,7 @@ func TestS06FixtureExport(t *testing.T) {
 	result["kind_names"] = kinds
 	result["kind_first"] = -32768
 	result["kind_count"] = int(ast.KindCount)
-	result["wire_constants"] = map[string]int{"version": int(encoder.ProtocolVersion), "header_size": encoder.HeaderSize, "node_size": encoder.NodeSize, "kind_count": int(ast.KindCount), "synthetic_expression": int(ast.KindSyntheticExpression), "syntax_list": int(ast.KindSyntaxList), "jsdoc_type_literal": int(ast.KindJSDocTypeLiteral), "comma_token": int(ast.KindCommaToken)}
+	result["wire_constants"] = map[string]int{"version": int(encoder.ProtocolVersion), "header_size": encoder.HeaderSize, "node_size": encoder.NodeSize, "kind_count": int(ast.KindCount), "synthetic_expression": int(ast.KindSyntheticExpression), "syntax_list": int(ast.KindSyntaxList), "jsdoc_type_literal": int(ast.KindJSDocTypeLiteral), "comma_token": int(ast.KindCommaToken), "type_alias_declaration": int(ast.KindTypeAliasDeclaration), "js_type_alias_declaration": int(ast.KindJSTypeAliasDeclaration), "import_declaration": int(ast.KindImportDeclaration), "js_import_declaration": int(ast.KindJSImportDeclaration)}
 	fuzzDir := filepath.Join("..", "parser", "testdata", "fuzz", "FuzzParser")
 	entries, err := os.ReadDir(fuzzDir)
 	if err != nil {

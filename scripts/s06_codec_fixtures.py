@@ -6,6 +6,7 @@ LITERAL_KINDS = (
 )
 CODEC_SCENARIOS = tuple('literal/'+kind for kind in LITERAL_KINDS) + (
     'synthetic-expression', 'raw-kind', 'source-strings', 'source-metadata', 'source-empty-span', 'msgpack-boundaries',
+    'parsed-js/typedef', 'parsed-js/import',
 )
 CODEC_STAGES = ['encode', 'decode', 'decoded_tree', 'reencode']
 
@@ -18,6 +19,12 @@ def document(pin):
                 'New factory; construct '+scenario[8:]+' with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.',
                 'JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier("name") child. JsxText containsOnlyTriviaWhiteSpaces=true.',
                 'Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil).',
+            ]
+        elif scenario.startswith('parsed-js/'):
+            source = '/** @typedef {number} Foo */ const x=0;' if scenario == 'parsed-js/typedef' else '/** @import {Foo} from "bar" */ const x=0;'
+            steps=[
+                'ParseSourceFile with fileName=path=/s06/codec.js, ScriptKind=JS, jsx=false, force=false and exact source '+repr(source)+'.',
+                'EncodeSourceFile with the production JSDoc provider; DecodeNodes; walk public ForEachChild; EncodeSourceFile(decoded). Each runtime independently parses and encodes its own source before decoding.',
             ]
         elif scenario=='synthetic-expression':
             steps=['NewToken(KindSyntheticExpression), then EncodeNode(root,nil); kind dispatch reaches the explicit codec panic before payload inspection. No checker-owned constructor is credited.']

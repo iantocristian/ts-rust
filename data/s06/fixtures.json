@@ -1752,6 +1752,71 @@
       "provenance": "pinned protocol-8 raw wire boundary",
       "request": {
         "entrypoint": "nodes",
+        "id": "decode/shared-payload-kind/type_alias_declaration",
+        "op": "decode",
+        "primary": null,
+        "version": 1,
+        "wire_hex": "0000000800000000000000000000000000000000000000002c0000002c0000002c0000002c0000002c000000000000000000000000000000000000000000000000000000000000000a010000000000000000000000000000000000000000000000000000"
+      },
+      "request_sha256": "751964ccdbef26d9df68ae960ca4907e3565e5c70fa71a5b76fac1b09fb031cd"
+    },
+    {
+      "group": "decoder",
+      "provenance": "pinned protocol-8 raw wire boundary",
+      "request": {
+        "entrypoint": "nodes",
+        "id": "decode/shared-payload-kind/js_type_alias_declaration",
+        "op": "decode",
+        "primary": null,
+        "version": 1,
+        "wire_hex": "0000000800000000000000000000000000000000000000002c0000002c0000002c0000002c0000002c0000000000000000000000000000000000000000000000000000000000000059010000000000000000000000000000000000000000000000000000"
+      },
+      "request_sha256": "9c842aa9d2713e3038c9040911c873d6df4044d56153eb55a8176aaf80b25d62"
+    },
+    {
+      "group": "decoder",
+      "provenance": "pinned protocol-8 raw wire boundary",
+      "request": {
+        "entrypoint": "nodes",
+        "id": "decode/shared-payload-kind/import_declaration",
+        "op": "decode",
+        "primary": null,
+        "version": 1,
+        "wire_hex": "0000000800000000000000000000000000000000000000002c0000002c0000002c0000002c0000002c0000000000000000000000000000000000000000000000000000000000000011010000000000000000000000000000000000000000000000000000"
+      },
+      "request_sha256": "3be2ad04d98ba008aba97df46b56152d29473b7995093c517b61323520c8f1f8"
+    },
+    {
+      "group": "decoder",
+      "provenance": "pinned protocol-8 raw wire boundary",
+      "request": {
+        "entrypoint": "nodes",
+        "id": "decode/shared-payload-kind/js_import_declaration",
+        "op": "decode",
+        "primary": null,
+        "version": 1,
+        "wire_hex": "0000000800000000000000000000000000000000000000002c0000002c0000002c0000002c0000002c000000000000000000000000000000000000000000000000000000000000005a010000000000000000000000000000000000000000000000000000"
+      },
+      "request_sha256": "5c752b0a2407acd0009405b63b3d503f169b7c7a8c6e9aebaadf68c59a3e7ab8"
+    },
+    {
+      "group": "decoder",
+      "provenance": "pinned protocol-8 raw wire boundary",
+      "request": {
+        "entrypoint": "nodes",
+        "id": "decode/position-high-bits",
+        "op": "decode",
+        "primary": null,
+        "version": 1,
+        "wire_hex": "0000000800000000000000000000000000000000000000002c0000002c0000002c0000002c0000002c000000000000000000000000000000000000000000000000000000000000000000000000000080ffffffff00000000000000000000000000000000"
+      },
+      "request_sha256": "4eb09b52dda7ef04203c170e7b7564c1b05801637951763eeec4427806262a84"
+    },
+    {
+      "group": "decoder",
+      "provenance": "pinned protocol-8 raw wire boundary",
+      "request": {
+        "entrypoint": "nodes",
         "id": "decode/reserved-data-tag",
         "op": "decode",
         "primary": null,
@@ -2150,6 +2215,32 @@
       },
       "request_sha256": "004c1e4da085550038e2e58fdefdffcc61541bf5aafc39310295b19d06c3bb5a",
       "steps_sha256": "264a7739a4a17d1959e61184e39622eb24c01eeb4048c4aa9bfc40f412217020"
+    },
+    {
+      "group": "codec",
+      "provenance": "data/s06/codec-fixtures.json",
+      "request": {
+        "id": "codec/parsed-js/typedef",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/typedef",
+        "version": 1
+      },
+      "request_sha256": "7dfa10a43a65a1d3c297b3fa7529015b547493275c26a7f1e0678ecb63f90572",
+      "steps_sha256": "935e93c5fb30931b541c77b2bb5b20568ab9dd08695a732f23f6276b664d2133"
+    },
+    {
+      "group": "codec",
+      "provenance": "data/s06/codec-fixtures.json",
+      "request": {
+        "id": "codec/parsed-js/import",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/import",
+        "version": 1
+      },
+      "request_sha256": "893b6406f22cd2128a2a9580faf218328f890fb0d452b37a110bcc8632bc7f76",
+      "steps_sha256": "a751561e0c914acd79beb6c67bfc096706f8ee963e227c07a79f17202c0b1270"
     }
   ],
   "pin": "1f70213d4922b434345f639b441681e470c7cfc1",

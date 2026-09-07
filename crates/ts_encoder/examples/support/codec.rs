@@ -32,6 +32,8 @@ pub fn scenario(name: &str) -> bool {
             | "source-metadata"
             | "source-empty-span"
             | "msgpack-boundaries"
+            | "parsed-js/typedef"
+            | "parsed-js/import"
     )
 }
 fn string(text: &[u8]) -> JsString {
@@ -270,6 +272,31 @@ pub fn execute(s: &Session, r: &Value) {
     if !s.stage("encode", || {
         let mut f = AstBuilder::new(SourceText::default(), &ts_arena::Counters::new());
         let name = r["scenario"].as_str().expect("validated codec");
+        if let Some(syntax) = name.strip_prefix("parsed-js/") {
+            let text = match syntax {
+                "typedef" => b"/** @typedef {number} Foo */ const x=0;".as_slice(),
+                "import" => b"/** @import {Foo} from \"bar\" */ const x=0;".as_slice(),
+                _ => unreachable!("validated parsed-JS scenario"),
+            };
+            let parsed = ts_parser::parse_source_file(
+                SourceText::from_loaded_bytes(text),
+                ScriptKind::JS,
+                SourceFileParseOptions {
+                    file_name: string(b"/s06/codec.js"),
+                    path: string(b"/s06/codec.js"),
+                    ..Default::default()
+                },
+            );
+            encoded = ts_encoder::encode_source_file(
+                parsed.view(),
+                parsed.root(),
+                &mut ts_parser::ParserJsDocProvider::default(),
+            )
+            .map_err(|e| e.to_string())?
+            .bytes;
+            bytes(s, "encode", &encoded);
+            return Ok(());
+        }
         let (root, sf) = if let Some(name) = name.strip_prefix("literal/") {
             let root = literal(&mut f, name);
             f.node_mut(root).unwrap().set_range(TextRange::new(-1, 2));

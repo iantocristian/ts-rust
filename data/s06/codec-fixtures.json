@@ -423,6 +423,44 @@
         "AmbientModuleNames array length=65536, empty strings except first eight: ASCII x repeated lengths 0,31,32,255,256,65535,65536,1. This crosses fixed/str8/str16/str32 and array16/array32 boundaries.",
         "ReferencedFiles array length=16: positions use [0,127,128,255,256,65535,65536,-1] cyclically, end=pos; resolutionMode same, preserve alternates. Filename lengths reuse first eight ambient names. TypeReferenceDirectives uses first15 references, LibReferenceDirectives is empty."
       ]
+    },
+    {
+      "request": {
+        "id": "codec/parsed-js/typedef",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/typedef",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "ParseSourceFile with fileName=path=/s06/codec.js, ScriptKind=JS, jsx=false, force=false and exact source '/** @typedef {number} Foo */ const x=0;'.",
+        "EncodeSourceFile with the production JSDoc provider; DecodeNodes; walk public ForEachChild; EncodeSourceFile(decoded). Each runtime independently parses and encodes its own source before decoding."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/parsed-js/import",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/import",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "ParseSourceFile with fileName=path=/s06/codec.js, ScriptKind=JS, jsx=false, force=false and exact source '/** @import {Foo} from \"bar\" */ const x=0;'.",
+        "EncodeSourceFile with the production JSDoc provider; DecodeNodes; walk public ForEachChild; EncodeSourceFile(decoded). Each runtime independently parses and encodes its own source before decoding."
+      ]
     }
   ],
   "pin": "1f70213d4922b434345f639b441681e470c7cfc1",

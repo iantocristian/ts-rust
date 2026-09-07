@@ -53,7 +53,9 @@ pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;
 pub use runtime_id::runtime_node_id;
 pub use source_file::*;
-pub use storage::{AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile};
+pub use storage::{
+    AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile, RetainedNode,
+};
 pub use subtree_facts::{is_left_hand_side_expression_kind, subtree_flags, SubtreeFacts};
 pub use subtree_generated::SubtreeContext;
 pub use tokens::{token_flags, CommentDirective, CommentDirectiveKind, TokenFlags};

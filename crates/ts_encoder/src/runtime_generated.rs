@@ -4938,6 +4938,14 @@ impl Decoder<'_> {
                             self.list_at(Self::next_if(child_indices, &mut cursor, data as u8, 2));
                         let r#type =
                             self.node_at(Self::next_if(child_indices, &mut cursor, data as u8, 3));
+                        if kind == SyntaxKind::JSTypeAliasDeclaration {
+                            return Ok(self.factory.new_js_type_alias_declaration(
+                                modifiers,
+                                name,
+                                type_parameters,
+                                r#type,
+                            ));
+                        }
                         Ok(self.factory.new_type_alias_declaration(
                             modifiers,
                             name,
@@ -4992,6 +5000,14 @@ impl Decoder<'_> {
                             self.node_at(Self::next_if(child_indices, &mut cursor, data as u8, 2));
                         let attributes =
                             self.node_at(Self::next_if(child_indices, &mut cursor, data as u8, 3));
+                        if kind == SyntaxKind::JSImportDeclaration {
+                            return Ok(self.factory.new_js_import_declaration(
+                                modifiers,
+                                import_clause,
+                                module_specifier,
+                                attributes,
+                            ));
+                        }
                         Ok(self.factory.new_import_declaration(
                             modifiers,
                             import_clause,

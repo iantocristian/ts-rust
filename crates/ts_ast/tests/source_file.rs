@@ -111,7 +111,7 @@ fn logical_source_files_keep_their_own_text_and_position_maps() {
     );
     let retained = file.retain_node(second).unwrap();
     drop(file);
-    let retained_file = ts_ast::AstFile::from_storage(retained.owner().clone()).unwrap();
+    let retained_file = retained.file();
     assert_eq!(
         retained_file
             .view()

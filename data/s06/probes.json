@@ -50,15 +50,15 @@
   "supplemental": {
     "groups": {
       "ast_runtime": 56,
-      "codec": 21,
-      "decoder": 20,
+      "codec": 23,
+      "decoder": 25,
       "depth": 10,
       "encoder": 6,
       "parser_regression": 15
     },
     "kind_stringer_observations": 65536,
-    "requests": 128,
-    "sha256": "5abeae579994aee46e737f1b032074da33d706e055b48f5d68200b064c5aa15f"
+    "requests": 135,
+    "sha256": "d5f8e22ec08a7d430ee6019d62bc5ec8e22a68b1fa5651e10eb04c93a20f6b1d"
   },
   "version": 1
 }

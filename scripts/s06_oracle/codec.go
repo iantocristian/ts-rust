@@ -6,6 +6,7 @@ import (
 	"github.com/microsoft/TypeScript/tsc/internal/api/encoder"
 	"github.com/microsoft/TypeScript/tsc/internal/ast"
 	"github.com/microsoft/TypeScript/tsc/internal/core"
+	"github.com/microsoft/TypeScript/tsc/internal/parser"
 	"github.com/microsoft/TypeScript/tsc/internal/spanmap"
 	"github.com/microsoft/TypeScript/tsc/internal/tspath"
 	"github.com/zeebo/xxh3"
@@ -21,7 +22,7 @@ func codecScenario(name string) bool {
 		}
 	}
 	switch name {
-	case "synthetic-expression", "raw-kind", "source-strings", "source-metadata", "source-empty-span", "msgpack-boundaries":
+	case "synthetic-expression", "raw-kind", "source-strings", "source-metadata", "source-empty-span", "msgpack-boundaries", "parsed-js/typedef", "parsed-js/import":
 		return true
 	}
 	return false
@@ -135,6 +136,13 @@ func executeCodec(s *session, r request) {
 		var root *ast.Node
 		var sf *ast.SourceFile
 		switch {
+		case strings.HasPrefix(name, "parsed-js/"):
+			text := "/** @typedef {number} Foo */ const x=0;"
+			if name == "parsed-js/import" {
+				text = "/** @import {Foo} from \"bar\" */ const x=0;"
+			}
+			sf = parser.ParseSourceFile(ast.SourceFileParseOptions{FileName: "/s06/codec.js", Path: "/s06/codec.js"}, text, core.ScriptKindJS)
+			root = sf.AsNode()
 		case strings.HasPrefix(name, "literal/"):
 			root = codecLiteral(f, name[8:])
 			root.Loc = core.NewTextRange(-1, 2)

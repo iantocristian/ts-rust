@@ -167,7 +167,7 @@ impl AstBuilder {
 /// let mut builder = AstBuilder::new(ts_jsstring::SourceText::from_loaded_bytes(&b""[..]), &ts_arena::Counters::new());
 /// let root = builder.new_token(SyntaxKind::Unknown.into());
 /// let published = builder.complete(root).unwrap().publish_unbound();
-/// published.storage().node_mut(root).unwrap().set_flags(1);
+/// published.node_mut(root).unwrap().set_flags(1);
 /// ```
 #[derive(Debug)]
 pub struct ParsedFile {
@@ -234,6 +234,22 @@ impl AstBundle {
 
 /// An explicitly retained file or mapped bundle. Nodes, list backing and the file
 /// frame remain below this storage root, including after a node escapes its scope.
+/// Raw arena writers cannot bypass AST validation after publication.
+///
+/// ```compile_fail
+/// fn raw_storage(file: &ts_ast::AstFile) {
+///     let _: &ts_arena::StorageHandle<ts_ast::Node> = file.storage();
+/// }
+/// ```
+///
+/// Generic arena storage has no AST graph-validation guarantee and cannot be
+/// adopted as a published AST file.
+///
+/// ```compile_fail
+/// fn unchecked_adoption(storage: ts_arena::StorageHandle<ts_ast::Node>) {
+///     let _ = ts_ast::AstFile::from_storage(storage);
+/// }
+/// ```
 #[derive(Clone, Debug)]
 pub struct AstFile(pub(crate) StorageHandle<Node>);
 impl AstFile {
@@ -243,19 +259,41 @@ impl AstFile {
     pub fn root(&self) -> Option<NodeId> {
         self.view().file_info().root
     }
-    pub fn retain_node(&self, id: NodeId) -> Result<ts_arena::RetainedRecord<Node>, Error> {
-        self.0.resolved_node(id).map(ts_arena::RecordRef::retain)
+    pub fn retain_node(&self, id: NodeId) -> Result<RetainedNode, Error> {
+        self.0
+            .resolved_node(id)
+            .map(|node| RetainedNode(node.retain()))
     }
-    pub fn storage(&self) -> &StorageHandle<Node> {
+    /// Follow a mapped-file or imported-file identity within this retention root.
+    pub fn file(&self, id: ts_arena::FileId) -> Option<Self> {
+        self.0.file(id).map(Self)
+    }
+}
+
+/// An escaped AST node retaining its complete file/bundle and dependencies.
+/// The private arena handle cannot expose unchecked lazy publication.
+///
+/// ```compile_fail
+/// fn raw_owner(node: &ts_ast::RetainedNode) {
+///     let _ = node.owner();
+/// }
+/// ```
+#[derive(Clone, Debug)]
+pub struct RetainedNode(ts_arena::RetainedRecord<Node>);
+impl RetainedNode {
+    pub fn id(&self) -> NodeId {
+        self.0.id()
+    }
+    /// Explicitly retain the file through which this node was resolved, including
+    /// its mapped siblings and imported dependencies.
+    pub fn file(&self) -> AstFile {
+        AstFile(self.0.owner().clone())
+    }
+}
+impl std::ops::Deref for RetainedNode {
+    type Target = Node;
+    fn deref(&self) -> &Node {
         &self.0
-    }
-    pub fn from_storage(storage: StorageHandle<Node>) -> Result<Self, Error> {
-        let view = AstView(storage.view());
-        let frame = view.0.metadata().ok_or(Error::InvalidGraph)?;
-        if !matches!(&*view.0.aux(frame)?, AstStorageData::File(_)) {
-            return Err(Error::InvalidGraph);
-        }
-        Ok(Self(storage))
     }
 }
 

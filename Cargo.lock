@@ -369,6 +369,7 @@ dependencies = [
  "ts_ast",
  "ts_core",
  "ts_jsstring",
+ "ts_parser",
 ]
 
 [[package]]

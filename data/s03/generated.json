@@ -10,7 +10,7 @@
     "crates/ts_ast/src/visitors_generated.rs": "4f70f5ece61d42eb092a0a336c217f5141c90799e9905487046f1bed752718b6",
     "crates/ts_diagnostics/src/generated.rs": "f3370a8cf9b3626c7a6d91e6c581b7f26e5f6ed3f1d93b82043436032e524d9d",
     "crates/ts_encoder/src/generated.rs": "9f48a3153523794208f7aa19da142fc84adbe9fbf70bbcb4e046963424224215",
-    "crates/ts_encoder/src/runtime_generated.rs": "b135b07a5e905f1d1d1f6a17268214617f79731b4454c8b141f39617f4682c6b",
+    "crates/ts_encoder/src/runtime_generated.rs": "9aa054cb64d86196258d3ad2656ef29ff0aed56c42345daa6c86fe099b25f92f",
     "data/s03/schema/api-wire-fixtures.json": "34404b1cbdcde0b062312caf787382be75900cd9e1ebcb1d6f3f17155629a25e",
     "data/s03/schema/api.json": "e8013352d179176a85ff67686ecd4d69c897ff297dfe2eab4f995f28c63fa178",
     "data/s03/schema/ast.json": "708bbf4ab122895b9181c42cc3db28b8e965540d45e05004b7b9df5df0b4d47e",

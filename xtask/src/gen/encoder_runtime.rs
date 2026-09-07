@@ -338,6 +338,18 @@ pub(super) fn emit(
                     defaults(field)?
                 });
             }
+            // Alias kinds share a payload, but Go constructs their distinct
+            // runtime kinds instead of the payload's default kind.
+            for alias in array(ast_node, "kindAliases")? {
+                let alias = alias.as_str().ok_or("encoder malformed factory alias")?;
+                if kinds.contains(&alias) {
+                    out.push_str(&format!(
+                        "if kind == SyntaxKind::{alias} {{ return Ok(self.factory.new_{}({})); }}\n",
+                        snake(alias),
+                        params.join(",")
+                    ));
+                }
+            }
             out.push_str(&format!(
                 "Ok(self.factory.new_{}({}))}},\n",
                 snake(&node.name),

@@ -298,7 +298,7 @@ fn storage_retained_node_keeps_list_text_frame_and_source_alive() {
     let file = build.complete(root).unwrap().publish_unbound();
     let escaped = file.retain_node(child).unwrap();
     drop(file);
-    let owner = AstFile::from_storage(escaped.owner().clone()).unwrap();
+    let owner = escaped.file();
     assert_eq!(owner.view().file_info().root, Some(root));
     assert_eq!(owner.view().source().as_bytes(), b"x\n\xf0\x9f\x98\x80");
     assert_eq!(
@@ -562,8 +562,8 @@ fn storage_retained_mapped_node_keeps_both_files_auxiliary_data_and_metadata() {
     let retained = supplemental.retain_node(supplemental_root).unwrap();
     drop(supplemental);
     drop(group);
-    let sibling = AstFile::from_storage(retained.owner().file(canonical_id).unwrap()).unwrap();
-    let source = AstFile::from_storage(retained.owner().clone()).unwrap();
+    let source = retained.file();
+    let sibling = source.file(canonical_id).unwrap();
     assert_eq!(sibling.root(), Some(canonical_root));
     assert_eq!(
         sibling.view().text_slice(canonical_text).unwrap()[0].as_bytes(),
@@ -649,7 +649,7 @@ fn storage_group_validation_admits_only_the_consumed_sibling_owners() {
     let retained = file.retain_node(first_root).unwrap();
     drop(file);
     drop(bundle);
-    let file = AstFile::from_storage(retained.owner().clone()).unwrap();
+    let file = retained.file();
     assert_eq!(
         file.view().for_node_owner(child).unwrap().file_info().root,
         Some(second_root)
@@ -676,6 +676,21 @@ fn storage_lazy_validation_rejects_foreign_edges_added_after_node_creation() {
         file.view().node(rejected.unwrap()),
         Err(Error::InvalidSlot)
     ));
+    let result = file.view().jsdoc(root, |transaction| {
+        let doc = transaction.new_parenthesized_expression(None);
+        rejected = Some(doc);
+        let NodeData::ParenthesizedExpression(data) = transaction.node_mut(doc)?.data_mut() else {
+            unreachable!("constructed parenthesized expression");
+        };
+        data.expression = Some(foreign_node);
+        Ok(vec![doc])
+    });
+    assert!(matches!(result, Err(Error::WrongOwner)));
+    assert!(matches!(
+        file.view().node(rejected.unwrap()),
+        Err(Error::InvalidSlot)
+    ));
+    assert!(file.view().eager_jsdoc(root).unwrap().is_none());
 }
 
 #[test]
@@ -752,7 +767,7 @@ fn storage_explicit_import_retains_transitive_bundles_and_rejects_bare_ids() {
     drop(group);
     drop(importer);
     drop(outer);
-    let outer = AstFile::from_storage(retained.owner().clone()).unwrap();
+    let outer = retained.file();
     assert_eq!(
         &*outer.view().node_slice(edges).unwrap(),
         &[Some(first_root), Some(second_root)]

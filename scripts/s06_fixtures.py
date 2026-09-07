@@ -96,9 +96,9 @@ def fixture_documents(native, pin, factory):
     if (constants["version"], constants["header_size"], constants["node_size"]) != (8, 44, 28):
         raise ValueError("protocol-8 wire constants changed")
 
-    def wire(kind, data=0, children=False):
+    def wire(kind, data=0, children=False, pos=0, end=0):
         words = [8 << 24, 0, 0, 0, 0, 0, 44, 44, 44, 44, 44] + [0]*7
-        words += [kind, 0, 0, 0, 0, data, 0]
+        words += [kind, pos, end, 0, 0, data, 0]
         if children:
             words += [constants["comma_token"], 0, 0, 0, 1, 0, 0]
         return struct.pack("<"+"I"*len(words), *words)
@@ -111,6 +111,11 @@ def fixture_documents(native, pin, factory):
         decode(f"short-header/{length}", b"\0"*length)
     for kind in (0, 351, 0xffff, 0x10000, 0x10001, 0x8000, 0xffffffff):
         decode(f"raw-kind/{kind:08x}", wire(kind))
+    for name in ("type_alias_declaration", "js_type_alias_declaration", "import_declaration", "js_import_declaration"):
+        decode("shared-payload-kind/"+name, wire(constants[name]))
+    # Decode widens the wire words before NewTextRange narrows its stored i32
+    # fields; the actual observed positions are (-2147483648, -1).
+    decode("position-high-bits", wire(0, pos=0x80000000, end=0xffffffff))
     decode("reserved-data-tag", wire(0, 0xc0000000))
     decode("nil-root/source-file", wire(0xffffffff), "source_file", paired_request="decode/raw-kind/ffffffff")
     decode("synthetic-expression", wire(constants["synthetic_expression"]))
