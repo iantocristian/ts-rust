@@ -130,7 +130,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999"]
+verify = ["run.e1.parity >= 0.999", "run.e1.decoder_parity == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "00853925877c0c8dc2e2de0773eb6586689373784ce262e151c90c87676d1698"
 loc = 381
@@ -143,7 +143,7 @@ phase = 0
 kind = "generated"
 status = "in-progress"
 rust = ["crates/ts_encoder/src/generated.rs"]
-verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999", "run.e1.decoder_parity == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "13d3e8cfb0359cc5f727bb18d87857ca776ba005dd08a1a406a3f8541d34ef0d"
 loc = 1141
@@ -156,7 +156,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e4.encoder_output_bytes == true", "run.e4.encoder_success_error == true", "run.e1.parity >= 0.999"]
+verify = ["run.e1.encoder_output_bytes == true", "run.e1.encoder_success_error == true", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e29cdff08715379d241f7bbb23c6e3126d172c00d5a0e36df2e1431b63ca92ad"
 loc = 935
@@ -169,7 +169,7 @@ phase = 0
 kind = "generated"
 status = "in-progress"
 rust = ["crates/ts_encoder/src/generated.rs"]
-verify = ["run.gen.drift == false", "run.e4.encoder_output_bytes == true"]
+verify = ["run.gen.drift == false", "run.e1.encoder_output_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "30debe2294133a12e47ddd5c247cf6b5494ddfa211ea32a1933be4cbdd82b644"
 loc = 707
@@ -182,7 +182,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e4.encoder_output_bytes == true", "run.e4.token_literal_bytes == true"]
+verify = ["run.e1.encoder_output_bytes == true", "run.e4.token_literal_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "b0c88c7d3404caf12b5bb0a2103c19835cc9b664c5842633c07754032c7e5faf"
 loc = 68
@@ -273,7 +273,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999", "run.e3.concurrent_lazy_storage == true", "run.e3.mapper_bundle_disposal == true"]
+verify = ["run.e1.parity >= 0.999", "run.e3.concurrent_lazy_storage == true", "run.e3.mapper_bundle_disposal == true", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "587805f5903d27e855ae68b4712f1d7b5652c8d57b46809aace802862a74f36b"
 loc = 3189
@@ -286,7 +286,7 @@ phase = 0
 kind = "generated"
 status = "in-progress"
 rust = ["crates/ts_ast/src/data_generated.rs", "crates/ts_ast/src/accessors_generated.rs", "crates/ts_ast/src/visitors_generated.rs"]
-verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "3f230a3441c80d0fcef442a29a47890712fe9866ad74dac10e77dc7ce41c1967"
 loc = 10058
@@ -312,7 +312,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e3.builder_cache_retention == true"]
+verify = ["run.e3.builder_cache_retention == true", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "7100eff959ac01d9cb285e832b3fe50cf19669bc68dc820ab14ad782be6d628f"
 loc = 86
@@ -430,7 +430,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "d9046ecd6fec852b543614c3b7e277b2dfd91804e739a624d9d2ce2397c7ec4f"
 loc = 149
@@ -456,7 +456,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999", "run.e2.type_to_string_parity == 1"]
+verify = ["run.e1.parity >= 0.999", "run.e2.type_to_string_parity == 1", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "94a5f9f3e4ce8ac9dc0c46d9253ffe4def40e90618ec226f4209b2e9d436aa7a"
 loc = 717
@@ -469,7 +469,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999"]
+verify = ["run.e1.parity >= 0.999", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "76dabb52846aea3686afc3d70b5f8daacf4de625f977187f2bb1c1adddaef911"
 loc = 133
@@ -521,7 +521,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999", "run.binder.parity == 1"]
+verify = ["run.e1.parity >= 0.999", "run.binder.parity == 1", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "92efcd7eadfb9d348c30dd60a671f9481fa14ab3510a201e63ee72bf363b8a80"
 loc = 4631
@@ -534,7 +534,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
-verify = ["run.e1.parity >= 0.999"]
+verify = ["run.e1.parity >= 0.999", "run.e1.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "6754fe0df4e97fd31fe665408b14cb1a30c542f71ecec5b3f29288da4f2a3795"
 loc = 278

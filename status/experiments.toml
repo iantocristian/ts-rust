@@ -294,14 +294,14 @@ unit = "API/LSP/scanner UTF-16 conversions match Go separately, including astral
 
 [[E4.criteria]]
 id = "encoder_success_error"
-metric = "run.e4.encoder_success_error"
+metric = "run.e1.encoder_success_error"
 op = "=="
 threshold = true
 unit = "encoder success/error outcomes match Go, including malformed bytes"
 
 [[E4.criteria]]
 id = "encoder_output_bytes"
-metric = "run.e4.encoder_output_bytes"
+metric = "run.e1.encoder_output_bytes"
 op = "=="
 threshold = true
 unit = "byte-identical encoder output wherever Go encodes successfully"

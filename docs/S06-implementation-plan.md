@@ -2,9 +2,10 @@
 
 Planning branch: `codex/s06-parser-plan`, based on PR #9 at `6491399`.
 Upstream authority: `1f70213d4922b434345f639b441681e470c7cfc1`.
-This PR proposes implementation and verification work; it does not implement S06,
-register producers, change gates or claim new parity. The review record below
-records source findings and corrections to the draft.
+This document defines implementation and verification work. Implementation began
+after the plan review; completion is measured by the checkpoints below, not by
+the presence of this document. The review records distinguish source findings,
+proposed decisions and measured implementation results.
 
 ## 1. Acceptance, scope and source inventory
 
@@ -61,6 +62,10 @@ Create `ts_parser`; extend `ts_ast`, `ts_encoder`, `ts_arena`, the narrow core/p
 slice and the authoritative S03 Rust emitters. Add `ts_spanmap` only for the
 protocol-8 data/serialization operations and explicit metadata fixtures needed
 here. Do not build the later compiler host or general API server to run E1.
+PR #9 remains the stacked dependency at `6491399`. The buffered-diagnostic,
+retained-value and spelling-helper APIs below are scanner follow-ups in S06;
+the parser must consume their verified interfaces rather than redefine S05's
+accepted callback, checkpoint or byte contracts.
 
 Proposed private modules follow invariants rather than copying one very large
 Go file:
@@ -104,6 +109,11 @@ Resolve these seams before porting grammar bodies.
 small metadata interface in `ts_arena` so its storage can hold the AST's concrete
 record with typed kind, flags, range and parent ID. Keep the current generic
 arena node as the S04 adapter. The storage crate must not depend on `ts_ast`.
+The runtime header uses an open signed `NodeKind(i16)`: Go factories accept
+unknown kinds and even known kind/payload mismatches. Keep the scanner's closed
+`SyntaxKind` separately. Node.ForEachChild dispatches by kind, whereas Clone,
+VisitEachChild, Name and subtree facts dispatch through the payload interface;
+do not turn every operation into the same generated kind switch.
 Heavy payloads remain split/boxed as appropriate; this is not the later measured
 node/type layout decision.
 
@@ -129,6 +139,18 @@ only its FileHandle alive. Parent/child/original/list links stay non-owning IDs.
 Diagnostics and source-file cross-references also use non-owning identity under
 that root; a diagnostic must not retain its own containing file in a cycle.
 Foreign-owner and unpublished list/node imports are checked in release builds.
+Validate every stored reference, including fields intentionally omitted from
+ForEachChild. Mutable construction can introduce invalid edges after factory
+allocation, so completion and shared publication validate again. These scans
+are an explicit O(nodes + auxiliary storage + metadata references) boundary
+cost, separate from ordinary borrowed lookup. Mapped publication validates the
+whole consumed group before creating its shared root.
+
+A factory can contain several SourceFile nodes with distinct text and metadata.
+Keep source-file services keyed by SourceFile identity, with lazy position maps
+and encoder caches below that owner. Cloning copies only the fields named by
+SourceFile.copyFrom after OnCreate; diagnostics, counts, hash and caches start
+fresh. Storage ownership alone is not a source-file identity.
 
 **Parse completion is not shared publication.** The accepted contract freezes
 core storage after binding. Return an exclusively owned `ParsedFile` backed by
@@ -428,10 +450,12 @@ return success, an error or a recognized panic. Any timeout during required
 capture invalidates that capture; it is never an expected matching error or a
 row to drop. Known cyclic sibling links belong to a separate named Rust ingress
 test for finite checked rejection, explicitly proposed defensive behavior where
-Go does not terminate. Record that boundary disposition in the implementation's
-S06/ADR documentation before coding it. The external watchdog cannot manufacture
-a Go DecodeError, and this exception must not broaden rejection of terminating
-Go-accepted wire forms.
+Go does not terminate. Any intentional compatibility exception follows ADR 0004:
+record its exact scope and rationale in `data/divergences.toml`, with the owner's
+approval on record before accepting it. Documentation or an ADR alone cannot
+approve an exception. Until that disposition exists, an external watchdog reports
+an operation timeout; it cannot manufacture a Go/Rust DecodeError or a passing
+parity row. This must not broaden rejection of terminating Go-accepted wire forms.
 
 ## 9. Frozen corpus, options and oracle
 
@@ -473,11 +497,33 @@ An empty configuration expansion means one default configuration, not zero
 executions. A Go preprocessing fatal/error/panic invalidates preflight rather
 than importing the compiler runner's skip policy.
 
+The first preflight found a precise legacy exception to configuration expansion:
+seven retained physical cases specify `module=none`, which the pinned option
+map rejects even though `ModuleKindNone` still exists. Keep the raw setting and
+the rejected helper outcome. For exactly the seven paths recorded in
+`data/s06/corpus.json`, expand the remaining valid settings through the unchanged
+helper, then use the real error-bearing `ParseCommandLine` result to obtain the
+parser-only options, retaining diagnostic 6046. This input projection was chosen
+before any Rust parse results. It is neither a claim of compiler-option parity
+nor an E2 baseline exception. An eighth path or a changed raw value fails
+preflight; the producer tests both rejection paths.
+
 Initial read-only inspection expanded all physical cases into 17,264 virtual
 units / 7,528,194 bytes before option expansion: 14,746 TS, 1,360 JS, 641 JSON,
 472 TSX, 16 JSX and 29 Unknown-kind assets. There are 2,078 multiunit cases,
-25 cases with symlinks and 50 explicit working directories. These are planning
-observations, not a frozen E1 manifest or parity results.
+25 cases with symlinks and 50 explicit working directories. The implementation
+freeze reproduced those totals from two clean Go exports. Its 15,206 option
+variants produce 22,343 primary parser requests: 22,075 virtual-file loads,
+160 direct initial-config parses and 108 embedded libraries. The frozen request
+digest is `30e50b547b79c676de2870b08ce1b48f2d810b95badda54f205945af1bb450a1`.
+These are corpus observations, not Rust parity results.
+An independent manifest audit must assert those pre-option-expansion extracted
+totals (17,264 units and 7,528,194 bytes), their ScriptKind breakdown and the
+12,829 primary rows. Keep this check distinct from merely rerunning the same
+bridge. Review the complete manifest diff, inspect named multiunit/config/BOM/
+symlink/ancillary examples against pinned sources, and compare each recorded
+loading hash stage. A discrepancy requires an explained source-derived change
+to the planning expectation; it must not silently reset the expected totals.
 
 Freeze the 108 libraries from the exact bundled LibNames list, one whole-file TS
 request each at `bundled:///libs/<name>`, with false/false declaration module
@@ -651,6 +697,11 @@ independent request on that worker; queue/worker failure is a distinct operation
 failure, not a parser diagnostic or compatible encoder error. Use the same
 worker boundary for synchronous AST/codec passes; a lazy transaction follows
 the before-lock dispatch rule in section 3.
+Growth guards (or equivalent order-preserving iterative traversal) provide the
+required protection on unbounded paths; the reserved stack is the default
+execution container. A test passing solely because its stack is large is
+insufficient. Forced-growth tests start on modest stacks and observe actual
+guard entry/growth, independently of the default worker stress run.
 
 Add S05-style production growth guards to every unbounded parser cycle, not
 only parseExpression/parseType. A conservative source/callback graph identified
@@ -709,6 +760,28 @@ establish the separate WebAssembly strategy or future full-compiler depth gates.
    Inspect measured CI step durations and cache restoration before attributing
    cost or optimizing the evidence scope. Report complete results and limits.
 
+Each checkpoint has an independently reviewable artifact and an explicit exit.
+The ownership foundation is reviewed and its real-payload E3 results are current
+before grammar consumes that API. Corpus preparation and generator source
+analysis can proceed independently; neither may choose inputs from Rust results.
+
+| Checkpoint | Exit evidence |
+| --- | --- |
+| 1: scope and corpus | Exact function scope and request manifests reviewed; independent count/hash-stage audit passes; each selected Go preflight outcome classified |
+| 2: ownership | Documented Send/lifetime signatures compile; release imports, retained lists/text and eager/lazy publication witnesses pass; E3 passes on production storage with real AST/list payloads |
+| 3: AST generation/runtime | Authoritative generator drift is clean; real factory/update/visitor/clone/subtree observations pass; exact implemented-ID audit meets its declared scope |
+| 4: scanner/parser boundary | Buffered and callback observations agree; retained source/cooked values survive advancement; raw parser-text loading and worker panic recovery pass; S05 evidence remains current |
+| 5: grammar/JSDoc | Every in-scope grammar path has its reviewed mapping; frozen recovery, speculation, JSX/JSDoc and metadata fixtures match Go with the stated diagnostic qualification |
+| 6: codec/integrated corpus | All 12,829 primary rows captured without skips; exact encoder and supplemental decoder/runtime suites pass; cyclic timeouts cannot masquerade as parity |
+| 7: adversarial review | Valid review findings resolved; injected wrong stage/class, missing/duplicate request and partial metric fail the intended consumer |
+| 8: local acceptance | Required debug/release, generation, lint, policy, MSRV and instrumented runs pass; S01–S06 pass from current evidence while later incomplete scopes remain incomplete |
+| 9: native acceptance | All four native targets execute the required contracts; raw artifacts and effective toolchains are available; any unavailable target remains explicitly unverified |
+
+Tracker acceptance must also be concrete before parity is recorded: route the
+two encoder metrics, require decoder/runtime/depth results and execute the
+non-closure regressions while those producers are still absent. No absent
+metric is a pass, and no registry placeholder stands in for the later harness.
+
 ## 13. Review record
 
 Reviewed on 7 September 2026 against the pinned source, the current S03–S05
@@ -754,3 +827,21 @@ cyclic-input boundary decision, and execute the proposed parity/instrumentation
 suites. No manifest, metric, mapping, dependency approval or four-target result
 is implied by this plan. The 20-method recursion list remains a starting audit,
 and planning probes are not committed sprint evidence.
+
+### PR review follow-up
+
+Verified the [external plan review](https://github.com/iantocristian/ts-rust/pull/10#issuecomment-5574904712)
+against the repository on 7 September 2026. The source-fidelity checks agree with
+the preceding review. The missing per-checkpoint exits, independent manifest
+audit, explicit recursion primary and named divergence procedure are valid
+planning gaps and are corrected above. The dependency on the open #9 and its
+scanner follow-up seams are now explicit.
+
+The ownership change is a substantial prerequisite with its own review and E3
+exit; grammar must not build on an unverified storage design. S06 remains the
+existing sprint scope, with bounded review artifacts rather than an assumption
+that one aggregate parity run validates every component. The review's claim
+that decoder.go has an empty `verify` is incorrect: it currently requires
+`run.e1.parity >= 0.999`. The actual gap is the missing decoder-specific result,
+which the acceptance changes address. No divergence approval is inferred from
+the review or from a request to proceed with implementation.
