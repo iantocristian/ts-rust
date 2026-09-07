@@ -2,11 +2,11 @@
 #
 # views:     validate deterministic views of the archived evidence, including the worklist.
 # producers: on macOS and Linux rerun the registered producers, enforce their measured
-#            results and S01, and publish views and raw evidence even when a gate fails.
+#            results and S01/S04, and publish views and raw evidence even when a gate fails.
 # msrv:      compile the locked workspace and all targets on the declared minimum Rust.
 # Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires S01 and the quality checks independently of unfinished sprints.
+# The workflow requires S01/S04 and the quality checks independently of unfinished sprints.
 # The matrices cover the four ADR 0002 targets: macos-15 (arm64), macos-15-intel (x86_64),
 # ubuntu-24.04 (x86_64) and ubuntu-24.04-arm (arm64).
 name: status
@@ -48,7 +48,7 @@ jobs:
         run: cargo xtask status --check-committed
 
   msrv:
-    name: Rust 1.96.0 on ${{ matrix.os }}
+    name: declared minimum Rust on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -56,13 +56,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - name: Read and validate toolchain pins
+        id: pins
+        run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"
       - name: Install the declared minimum toolchain
-        run: rustup toolchain install 1.96.0 --profile minimal
+        run: rustup toolchain install "${{ steps.pins.outputs.msrv }}" --profile minimal
       - uses: Swatinem/rust-cache@v2
         with:
-          key: msrv-1.96.0
+          key: msrv-${{ steps.pins.outputs.msrv }}
       - name: Build the locked workspace on the minimum Rust version
-        run: cargo +1.96.0 check --workspace --all-targets --locked
+        run: cargo +${{ steps.pins.outputs.msrv }} check --workspace --all-targets --all-features --locked
 
   producers:
     name: producers on ${{ matrix.os }}
@@ -75,31 +78,63 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: true
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.27.x"
-          cache-dependency-path: upstream/tsc/go.sum
       - name: Install the pinned toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-deny
+      - name: Read and validate toolchain pins
+        id: pins
+        run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"
       - name: Validate provenance and schemas
         id: validate
+        if: ${{ !cancelled() }}
         run: cargo xtask validate
+      - uses: actions/setup-go@v6
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          go-version: ${{ steps.pins.outputs.go }}
+          cache-dependency-path: upstream/tsc/go.sum
+      - uses: taiki-e/install-action@v2
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          tool: cargo-deny
+      - name: Restore reusable instrumentation and oracle caches
+        uses: actions/cache@v4
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          key: s04-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.nightly }}-${{ hashFiles('Cargo.lock', 'data/s04/toolchains.toml') }}
+          path: |
+            ~/.rustup/toolchains/${{ steps.pins.outputs.nightly }}-*
+            ~/.rustup/update-hashes/${{ steps.pins.outputs.nightly }}-*
+            ${{ steps.pins.outputs.cache }}
+      - name: Install S04 instrumentation toolchain
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          rustup toolchain install "${{ steps.pins.outputs.nightly }}" \
+            --profile minimal --component miri --component rust-src --no-self-update
       - name: Tracker self-tests
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run selftest
       - name: Workspace build
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run workspace
       - name: Oracle build and version smoke
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run oracle
       - name: Formatting
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run fmt
       - name: Clippy
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run clippy
       - name: Dependency policy
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run deny
+      - name: Arena ownership, Miri and AddressSanitizer
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run e3
+      - name: Text leaves against the pinned Go oracle
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run e4
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -113,10 +148,27 @@ jobs:
             'run.fmt.clean == true' \
             'run.clippy.clean == true' \
             'run.deny.clean == true' \
-            'run.selftest.pass == true'
+            'run.selftest.pass == true' \
+            'run.e4.source_decoding == true' \
+            'run.e4.helper_semantics == true' \
+            'run.e4.slice_validity == true' \
+            'run.e4.utf8_positions == true' \
+            'run.e4.utf16_positions == true' \
+            'run.e3.id_exhaustion == true' \
+            'run.e3.wrong_owner_rejected == true' \
+            'run.e3.stale_and_recycled_ids_rejected == true' \
+            'run.e3.concurrent_lazy_storage == true' \
+            'run.e3.mapper_bundle_disposal == true' \
+            'run.e3.live_owner_delta == 0' \
+            'run.e3.live_allocation_delta == 0' \
+            'run.e3.miri == true' \
+            'run.e3.address_sanitizer == true'
       - name: S01 closes on this runner's evidence
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S01
+      - name: S04 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask check S04
       - name: Sprint S02 (informational until it closes)
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02

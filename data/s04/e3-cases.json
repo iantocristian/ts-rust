@@ -1,0 +1,9 @@
+[
+  "allocations_return_to_baseline",
+  "concurrent_lazy_storage",
+  "id_exhaustion",
+  "mapper_bundle_disposal",
+  "owners_return_to_baseline",
+  "stale_and_recycled_ids_rejected",
+  "wrong_owner_rejected"
+]

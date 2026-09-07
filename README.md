@@ -2,7 +2,7 @@
 
 The Rust rewrite of the TypeScript 7 native compiler and language server (the Go module under `tsc/` in microsoft/TypeScript, codename Corsa). Upstream is consumed as a pinned dependency; this repository is the workspace.
 
-There is no compiler implementation yet. The repository contains the plan, upstream measurements and a tracking scaffold: a Cargo `xtask`, a file ledger, a function inventory, ADRs and generated status reports. Mapped functions and implementation labels are reported separately from verified parity.
+The first contract leaves are implemented: `ts_jsstring` preserves source/string bytes and Go position semantics; `ts_arena` provides checked identities, immutable file storage, lazy publication and bundle retention. The compiler pipeline remains to be built. The [S04 synthesis plan](docs/S04-synthesis-plan.md) records the implementation choices; [S04 documentation](docs/S04.md) describes the supported APIs and verification. Mapped functions and implementation labels are reported separately from verified parity.
 
 ## Layout
 
@@ -11,6 +11,7 @@ There is no compiler implementation yet. The repository contains the plan, upstr
 | [PLAN.md](PLAN.md) | The canonical plan. Update the HTML mirror when it changes. |
 | [Plan page](docs/corsa-in-rust.html) | The designed HTML mirror. An earlier version was published as a private page at https://claude.ai/code/artifact/6c72abf7-0d30-43fe-a7a8-6457828dcce8; that external copy is not automatically synchronized. |
 | [Tracking](docs/TRACKING.md) | Ledger, function-mapping, evidence, experiment and sprint-check contracts. |
+| [Codex/Astra Rust working guide](docs/CODEX-RUST-GUIDELINES.md) | Personal coding and review lessons from the original S04 implementation and synthesis. |
 | [Current status](STATUS.md), [dashboard](docs/status.html) | Generated reports; evidence validity and parity are separate from implementation and mapping counts. |
 | [Unmapped functions](status/unmapped-functions.json) | Complete function worklist linked from the compact JSON status summary. |
 | [Architecture decisions](docs/adr/README.md) | Accepted ADRs 0001 to 0018 and the Proposed placeholders 0019 (test-host protocol) and 0020 (Phase 0 gate). |
@@ -19,7 +20,8 @@ There is no compiler implementation yet. The repository contains the plan, upstr
 | [Phase 0 implementation plan](sprints/README.md), `sprints/` | Sprint files S01 to S12 with machine-checked exit criteria; the README gives the order, producers and conventions. |
 | `rust-toolchain.toml`, `rustfmt.toml`, `deny.toml`, `Cargo.toml` lints | Pinned stable toolchain, formatting, dependency policy and the clippy allow-list (ADRs 0016 and 0017); `scripts/checks.py` runs them as producers. |
 | `data/divergences.toml` | Owner-approved baseline divergences (ADR 0004); an input of the E2 producer. |
-| `.github/workflows/status.yml` | Status workflow: provenance, archived-view check, live producer metrics and S01 on macOS and Linux, minimum-Rust builds, artifacts including the worklist. |
+| `.github/workflows/status.yml` | Status workflow: provenance, archived-view check, live producer metrics and S01/S04 on the four macOS/Linux targets, minimum-Rust builds, artifacts including the worklist. |
+| `crates/ts_jsstring/`, `crates/ts_arena/` | Text and ownership contract leaves; see [S04](docs/S04.md). |
 | `xtask/` | Local commands for evidence capture, status generation and sprint validation. |
 | `data/import-graph.txt` | Internal import edges of the Go module (`importer imported`), produced by `go list`. 766 edges. |
 | `data/topological-order.txt` | The packages in dependency order, leaves first, produced by `tsort` over the graph. The plan's crate map groups related packages; its dependency slices also use the actual import edges. |
@@ -45,7 +47,7 @@ The ledger's `status`, `rust` and `verify` fields are editable without regenerat
 
 ## Status
 
-Draft 3.2, 5 September 2026, measured against microsoft/TypeScript commit `1f70213d49`. The canonical `upstream/` submodule is registered, initialized and clean at `1f70213d4922b434345f639b441681e470c7cfc1`; the actual Go oracle build and `--version` smoke test have passing execution evidence. ADRs 0006, 0007 and 0013 and the [ownership](docs/design/ownership.md), [symbols](docs/design/symbols.md) and [text](docs/design/text.md) design notes are accepted; S01 passes against the current bootstrap evidence. E1–E8 implementation and verification remain pending; their sprints are the [Phase 0 implementation plan](sprints/README.md). A status workflow is installed under `.github/workflows/`; no run of it is recorded here. Bootstrap success does not establish Rust compiler parity or complete function coverage.
+Draft 3.2, 5 September 2026, measured against microsoft/TypeScript commit `1f70213d49`. The canonical `upstream/` submodule is registered, initialized and clean at `1f70213d4922b434345f639b441681e470c7cfc1`; the actual Go oracle build and `--version` smoke test have passing execution evidence. ADRs 0006, 0007 and 0013 and the [ownership](docs/design/ownership.md), [symbols](docs/design/symbols.md) and [text](docs/design/text.md) design notes are accepted; S01 passes against the current bootstrap evidence. The S04 leaf portions of E3 and E4 have executable producers; full E1–E8 verification remains pending; their sprints are the [Phase 0 implementation plan](sprints/README.md). A status workflow is installed under `.github/workflows/`; no run of it is recorded here. Bootstrap success does not establish Rust compiler parity or complete function coverage.
 
 Native targets are macOS arm64/x64 and Linux x64/arm64 (glibc). The plan specifies file/lazy/bundle ownership, checker-local merges, generation-aware invalidation and raw-byte handling. Repeated identity checks may be elided only within a proven ownership scope, with release-mode rejection required at every unproven boundary. The spike tests bounded memory, WebAssembly and embedding prototypes; full compiler WebAssembly and Rust-consumer acceptance are required before cut-over. The owner approves baseline divergences, and work is sequenced by dependency slices and parity gates rather than a calendar.
 

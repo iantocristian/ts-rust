@@ -39,7 +39,7 @@ def fmt(root):
 
 def clippy(root):
     require(["cargo", "clippy", "--version"], root)
-    command = ["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"]
+    command = ["cargo", "clippy", "--workspace", "--all-targets", "--all-features", "--locked", "--", "-D", "warnings"]
     return {"clean": run(command, root) == 0}
 
 

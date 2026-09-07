@@ -42,4 +42,5 @@ id = "S09-5"
 title = "Every scenario under Miri and AddressSanitizer; owner and allocation counters return to baseline after each final drop"
 kind = "task"
 required = true
-done_when = ["exp.E3.miri.pass == 1", "exp.E3.address_sanitizer.pass == 1", "exp.E3.owners_return_to_baseline.pass == 1", "exp.E3.allocations_return_to_baseline.pass == 1"]
+# S04 instruments only its leaf scenarios; full E3 coverage is required here.
+done_when = ["exp.E3.pass == 1", "exp.E3.miri.pass == 1", "exp.E3.address_sanitizer.pass == 1", "exp.E3.owners_return_to_baseline.pass == 1", "exp.E3.allocations_return_to_baseline.pass == 1"]

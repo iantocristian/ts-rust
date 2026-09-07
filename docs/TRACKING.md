@@ -53,7 +53,7 @@ The script requires a clean checkout, resolves the requested pin to the actual f
 
 The bootstrap checkout is sufficient for inventory generation. S01's oracle gate separately requires a registered, initialized `upstream/` submodule at that same pin, with the canonical Microsoft URL and a clean worktree.
 
-The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01 passes against the current bootstrap evidence. E1–E8 implementation and verification remain pending. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
+The canonical submodule is now registered and initialized at `1f70213d4922b434345f639b441681e470c7cfc1`, and the actual oracle build and `--version` smoke test have passing run evidence. ADRs 0006, 0007 and 0013 and their design notes are accepted; S01 passes against the current bootstrap evidence. The S04 leaf portions of E3 and E4 have executable producers; full E1–E8 verification remains pending. Inspect current status when changing selected inputs: recorded bootstrap success is not a permanent waiver of those checks or proof of Rust compiler parity.
 
 ## Function traceability
 
@@ -84,7 +84,7 @@ target = "aarch64-apple-darwin"
 config = "release; frozen scanner corpus"
 ```
 
-This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs and the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`). Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and E1–E8 producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
+This is an example; the scanner harness does not exist yet. The registered producers are the workspace and oracle bootstrap runs, the `fmt`, `clippy`, `deny` and `selftest` check runs (`scripts/checks.py`), and the S04 `e3`/`e4` leaf runs. The [S04 producer contracts](S04.md) specify frozen coverage, measured counters and actual instrumented execution. Add the `gen`, `scanner`, `binder`, `program`, `testhost`, `checkerbench`, `relater` and remaining experiment producers when their implementations exist; [sprints/README.md](../sprints/README.md) names each one with the metrics it must emit. Numeric and boolean thresholds are defined now so missing implementations remain pending.
 
 Run a producer with `cargo xtask run scanner`. The command executes directly, without a shell, in the repository root. It must write exactly one JSON object to stdout; logs go to stderr:
 
