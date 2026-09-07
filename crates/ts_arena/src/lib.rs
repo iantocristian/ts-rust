@@ -15,16 +15,18 @@ mod refs;
 mod scope;
 mod scratch;
 
-pub use bundle::{BundleOwner, FileHandle};
+pub use bundle::{StorageBundle, StorageHandle};
 pub use counters::{Counters, Counts};
 pub use error::Error;
-pub use file::{FileBuilder, FileOwner};
-pub use ids::{ArenaId, FileId, NodeId, SymbolId};
-pub use lazy::{LazyTransaction, TokenKey};
+pub use file::{StorageBuilder, StorageOwner, StorageView};
+pub use ids::{ArenaId, AuxId, FileId, NodeId, SymbolId};
+pub use lazy::{StorageTransaction, TokenKey};
 pub use lease::{CheckerIdentity, CheckerLease, Generation};
-pub use node::Node;
-pub use refs::{NodeListRef, NodeRef, RetainedNode, RetainedSymbol, SymbolRef};
-pub use scope::{LocalArena, LocalNode, Scope};
+pub use node::{Node, NodeRecord};
+pub use refs::{
+    CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead, StorageSymbolRef,
+};
+pub use scope::{LocalNode, StorageLocalArena, StorageScope};
 pub use scratch::ScratchOwner;
 
 #[cfg(any(test, feature = "harness"))]
@@ -32,3 +34,18 @@ pub mod scenarios;
 
 #[cfg(test)]
 mod tests;
+
+// Compatibility adapters for the S04 payload API. Runtime owners store their
+// concrete record directly through StorageBuilder/StorageHandle.
+pub type FileBuilder<N, S = ()> = StorageBuilder<Node<N>, S>;
+pub type FileOwner<N, S = ()> = StorageOwner<Node<N>, S>;
+pub type FileHandle<N, S = ()> = StorageHandle<Node<N>, S>;
+pub type BundleOwner<N, S = ()> = StorageBundle<Node<N>, S>;
+pub type NodeRef<'a, N, S = ()> = RecordRef<'a, Node<N>, S>;
+pub type RetainedNode<N, S = ()> = RetainedRecord<Node<N>, S>;
+pub type SymbolRef<'a, N, S> = StorageSymbolRef<'a, Node<N>, S>;
+pub type RetainedSymbol<N, S> = RetainedStorageSymbol<Node<N>, S>;
+pub type NodeListRef<N, S = ()> = CachedNodes<Node<N>, S>;
+pub type LazyTransaction<'a, N> = StorageTransaction<'a, Node<N>>;
+pub type Scope<N, S = ()> = StorageScope<Node<N>, S>;
+pub type LocalArena<'brand, 'owner, N> = StorageLocalArena<'brand, 'owner, Node<N>>;

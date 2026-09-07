@@ -1,5 +1,6 @@
 //! Pinned frontends export facts; these Rust emitters own Rust syntax only.
 mod ast;
+mod ast_runtime;
 mod diagnostics;
 mod encoder;
 
@@ -77,12 +78,24 @@ fn outputs(root: &Path, stage: &Path, pin: &str) -> Result<BTreeMap<PathBuf, Vec
     let mut files = BTreeMap::new();
     for name in SCHEMAS {
         let value = read_json(&stage.join(format!("{name}.json")))?;
-        let rust = match *name {
+        let mut rust = match *name {
             "ast" => ast::emit(&value, pin)?,
             "diagnostics" => diagnostics::emit(&value, pin)?,
             "encoder" => encoder::emit(&value, pin)?,
             _ => BTreeMap::new(),
         };
+        if *name == "ast" {
+            let runtime = ast_runtime::emit(&value, pin)?;
+            rust.extend(runtime.files);
+            files.insert(
+                PathBuf::from("data/s06/generated-ast-scope.json"),
+                json_bytes(&runtime.scope)?,
+            );
+        }
+        if *name == "encoder" {
+            let ast_schema = read_json(&stage.join("ast.json"))?;
+            rust.extend(encoder::emit_runtime(&ast_schema, &value, pin)?);
+        }
         for (path, source) in rust {
             if files
                 .insert(path.clone(), format_rust(root, &source, &edition)?)
@@ -122,7 +135,8 @@ fn managed(path: &Path) -> bool {
         return false;
     }
     let text = path.to_string_lossy();
-    (text.starts_with("data/s03/schema/") && text.ends_with(".json"))
+    text == "data/s06/generated-ast-scope.json"
+        || (text.starts_with("data/s03/schema/") && text.ends_with(".json"))
         || (["ts_ast", "ts_diagnostics", "ts_encoder"]
             .iter()
             .any(|krate| text.starts_with(&format!("crates/{krate}/src/")))
@@ -181,6 +195,7 @@ fn existing_paths(root: &Path) -> Result<Vec<PathBuf>, String> {
     let mut paths = Vec::new();
     for directory in [
         "data/s03/schema",
+        "data/s06",
         "crates/ts_ast/src",
         "crates/ts_diagnostics/src",
         "crates/ts_encoder/src",

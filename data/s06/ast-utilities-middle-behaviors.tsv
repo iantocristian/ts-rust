@@ -1,0 +1,26 @@
+nullable	0	0	0	0
+modifiers/0
+modifiers/1	94	137	89	86	124	122	123	127	125	164	148	128	133	102	147
+modifiers/2	124	127	148	133
+modifiers/nil	15	1
+modifiers/empty	1	1
+literal/0	0	0	0
+literal/1	0	1	1
+literal/2	0	1	1
+jsx/filter	0	2	4
+jsx/identity	1	1	0	0	1
+jsx/empty	1	0	0	0
+label/statement	1	1	0
+label/jump	1	0	1
+access/property	1	0	1	1	1	1
+access/element	1	1
+access/qualified	1	1
+call/require	1	1	0	1	1	1	1
+call/nonliteral	0	1
+call/super	1	0
+const/assertion	1	1	0
+const/arguments	0	0
+jsdoc/identity	1	1	0	1	0	0
+jsdoc/multiple	0	0
+positions/extreme	-4294967295	4294967295
+positions/search	0	2	-1	-1

@@ -163,3 +163,91 @@ fn abandoning_a_checkpoint_during_unwind_requires_discarding_the_scanner() {
     assert!(message.contains("checkpoints must be consumed in LIFO order"));
     drop(scanner);
 }
+
+#[test]
+fn buffered_delivery_matches_callbacks_and_survives_rewind() {
+    let text = b"'unterminated\n 0x '\\u{110000}'";
+    let observed = Arc::new(Mutex::new(Vec::new()));
+    let destination = Arc::clone(&observed);
+    let mut callback = Scanner::new();
+    callback.set_text(text);
+    callback.set_on_error(Some(Box::new(move |error| {
+        destination.lock().unwrap().push(error);
+    })));
+    let mut buffered = Scanner::new();
+    buffered.set_text(text);
+    buffered.buffer_diagnostics();
+    let saved_callback = callback.mark();
+    let saved_buffered = buffered.mark();
+    assert_eq!(callback.scan(), buffered.scan());
+    callback.rewind(saved_callback);
+    buffered.rewind(saved_buffered);
+    // Emitted diagnostics remain outside both checkpoint modes.
+    assert_eq!(
+        buffered.drain_diagnostics().collect::<Vec<_>>(),
+        *observed.lock().unwrap()
+    );
+    observed.lock().unwrap().clear();
+    loop {
+        let token = callback.scan();
+        assert_eq!(token, buffered.scan());
+        assert_eq!(
+            buffered.drain_diagnostics().collect::<Vec<_>>(),
+            *observed.lock().unwrap()
+        );
+        observed.lock().unwrap().clear();
+        if token == SyntaxKind::EndOfFile {
+            break;
+        }
+    }
+    buffered.reset();
+    buffered.set_text(b"'unterminated");
+    buffered.scan();
+    assert_eq!(buffered.drain_diagnostics().count(), 0);
+}
+
+#[test]
+fn retained_values_share_source_and_cooked_bytes_across_advancement() {
+    use ts_jsstring::SourceText;
+    let source = SourceText::from_loaded_bytes(&b"first '\\u0061' # .5"[..]);
+    let mut scanner = Scanner::new();
+    scanner.set_text(source.as_bytes());
+    scanner.scan();
+    let identifier = scanner.retain_token_value();
+    let source_pointer = identifier.as_bytes().as_ptr();
+    scanner.scan();
+    let cooked = scanner.retain_token_value();
+    let cooked_pointer = cooked.as_bytes().as_ptr();
+    scanner.scan();
+    let hash = scanner.retain_token_value();
+    scanner.scan();
+    let fraction = scanner.retain_token_value();
+    scanner.set_text(b"unrelated");
+    scanner.scan();
+    drop(scanner);
+    let identifier = identifier.into_js_string(&source).unwrap();
+    let cooked = cooked.into_js_string(&source).unwrap();
+    assert_eq!(identifier.as_bytes(), b"first");
+    assert_eq!(identifier.as_bytes().as_ptr(), source_pointer);
+    assert_eq!(cooked.as_bytes(), b"a");
+    assert_eq!(cooked.as_bytes().as_ptr(), cooked_pointer);
+    assert_eq!(hash.into_js_string(&source).unwrap().as_bytes(), b"#");
+    assert_eq!(fraction.into_js_string(&source).unwrap().as_bytes(), b"0.5");
+    drop(source);
+    assert_eq!(identifier.as_bytes(), b"first");
+    assert_eq!(cooked.as_bytes(), b"a");
+}
+
+#[test]
+fn a_retained_source_slice_does_not_import_an_equal_foreign_allocation() {
+    use ts_jsstring::SourceText;
+    let first = SourceText::from_loaded_bytes(&b"name"[..]);
+    let second = SourceText::from_loaded_bytes(&b"name"[..]);
+    let mut scanner = Scanner::new();
+    scanner.set_text(first.as_bytes());
+    scanner.scan();
+    assert!(scanner
+        .retain_token_value()
+        .into_js_string(&second)
+        .is_none());
+}

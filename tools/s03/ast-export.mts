@@ -36,6 +36,7 @@ function member(member: any): any {
         child: member.isChild(),
         visit: member.visit ?? null,
         bitmask: member.bitmask ?? null,
+        declaredType: normalizedType(member.declaredType),
     };
 }
 
@@ -55,8 +56,13 @@ function storageFields(node: any): any[] {
     return [...fields.values()];
 }
 
+function baseTypes(node: any): string[] {
+    return [...new Set(node.extends.flatMap((base: any) => [base.name, ...baseTypes(base)]))] as string[];
+}
+
 const normalized = {
     version: 1,
+    runtimeVersion: 1,
     kinds: api.kindElements().filter((element: any) => element.name)
         .map((element: any, value: number) => ({ name: element.name, value })),
     markers: api.kindMarkers().map((marker: any) => ({ name: marker.name, value: api.resolveKindMarkerValue(marker.name) })),
@@ -64,12 +70,26 @@ const normalized = {
         name: alias.name,
         kinds: api.expandKindAliasMembers(alias.name).map((kind: any) => kind.name),
     })),
+    kindGuards: api.kindGuards().map((guard: any) => ({
+        alias: guard.aliasName,
+        form: guard.type,
+        first: guard.first ?? null,
+        last: guard.last ?? null,
+        kinds: api.expandKindAliasMembers(guard.aliasName).map((kind: any) => kind.name),
+    })),
     bases: api.bases().map((base: any) => ({ name: base.name, extends: base.extendsKeys, fields: base.fields.map(member) })),
     nodes: api.nodes().map((node: any) => ({
         name: node.name,
         kinds: node.allKinds().map((kind: any) => kind.name),
         handWritten: node.handWritten,
         handWrittenVisitor: node.handWrittenVisitor,
+        syntaxKindName: node.syntaxKindName,
+        kindAliases: node.kindAliases,
+        kindType: normalizedType(node.kindType),
+        kindTypes: node.kindTypes().map((kind: any) => kind.name),
+        multiKind: node.isMultiKind(),
+        generateSubtreeFacts: node.generateSubtreeFacts,
+        baseTypes: baseTypes(node),
         extends: node.extendsKeys,
         members: node.members.map(member),
         fields: storageFields(node),

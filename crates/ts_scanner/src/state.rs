@@ -4,6 +4,7 @@ use std::sync::Arc;
 use ts_ast::{token_flags as flags, CommentDirective, SyntaxKind, TokenFlags};
 use ts_core::{LanguageVariant, ScriptTarget, TextRange};
 use ts_diagnostics::Message;
+use ts_jsstring::{JsString, SourceText};
 
 /// A scanner diagnostic argument retains the Go value's type and raw bytes.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -49,17 +50,50 @@ pub struct ScannerDiagnostic {
 
 pub type ErrorCallback<'src> = Box<dyn FnMut(ScannerDiagnostic) + Send + 'src>;
 
+enum ErrorSink<'src> {
+    Ignore,
+    Callback(ErrorCallback<'src>),
+    Buffered(Vec<ScannerDiagnostic>),
+}
+
+/// Retains cooked storage across scanner advancement. Source views still borrow
+/// their original text; retaining the source owner is the caller's responsibility.
 #[derive(Clone, Debug)]
-pub(crate) enum TokenValue<'src> {
+pub enum TokenValue<'src> {
     Borrowed(&'src [u8]),
     Cooked(Arc<[u8]>),
+    Static(&'static [u8]),
 }
 
 impl TokenValue<'_> {
-    pub(crate) fn as_bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         match self {
-            Self::Borrowed(bytes) => bytes,
+            Self::Borrowed(bytes) | Self::Static(bytes) => bytes,
             Self::Cooked(bytes) => bytes,
+        }
+    }
+
+    /// Transfer cooked storage or retain a slice of its actual source allocation.
+    /// Returns None for a nonempty borrowed value from another source. The byte
+    /// range is reclassified by JsString without repair. Source/cooked bytes are
+    /// shared; scanner-supplied static constants receive their own small storage.
+    pub fn into_js_string(self, source: &SourceText) -> Option<JsString> {
+        match self {
+            Self::Cooked(bytes) => Some(JsString::from_bytes(bytes)),
+            Self::Static(bytes) => Some(JsString::from_bytes(bytes)),
+            Self::Borrowed(bytes) => {
+                if bytes.is_empty() {
+                    return source.slice(0..0);
+                }
+                // Addresses select a checked range in the retained owner; no
+                // pointer is reconstructed or dereferenced from an integer.
+                let start = bytes
+                    .as_ptr()
+                    .addr()
+                    .checked_sub(source.as_bytes().as_ptr().addr())?;
+                let end = start.checked_add(bytes.len())?;
+                source.slice(start..end)
+            }
         }
     }
 }
@@ -144,7 +178,7 @@ pub struct Scanner<'src> {
     pub(crate) language_variant: LanguageVariant,
     pub(crate) script_target: ScriptTarget,
     pub(crate) skip_trivia: bool,
-    on_error: Option<ErrorCallback<'src>>,
+    error_sink: ErrorSink<'src>,
     pub(crate) number_cache: HashMap<TokenValue<'src>, TokenValue<'src>>,
     pub(crate) hex_number_cache: HashMap<TokenValue<'src>, TokenValue<'src>>,
     pub(crate) hex_digit_cache: HashMap<TokenValue<'src>, TokenValue<'src>>,
@@ -195,7 +229,7 @@ fn default_scanner<'src>() -> Scanner<'src> {
         language_variant: LanguageVariant::STANDARD,
         script_target: ScriptTarget::NONE,
         skip_trivia: true,
-        on_error: None,
+        error_sink: ErrorSink::Ignore,
         number_cache: HashMap::new(),
         hex_number_cache: HashMap::new(),
         hex_digit_cache: HashMap::new(),
@@ -297,6 +331,10 @@ impl<'src> Scanner<'src> {
     pub fn token_value(&self) -> &[u8] {
         self.state.token_value.as_bytes()
     }
+    /// Explicitly preserve the value before advancing or replacing scanner text.
+    pub fn retain_token_value(&self) -> TokenValue<'src> {
+        self.state.token_value.clone()
+    }
     /// port: tsc/internal/scanner/scanner.go:Scanner.TokenRange
     pub fn token_range(&self) -> TextRange {
         TextRange::new(self.state.token_start, self.state.pos)
@@ -389,7 +427,22 @@ impl<'src> Scanner<'src> {
     }
     /// port: tsc/internal/scanner/scanner.go:Scanner.SetOnError
     pub fn set_on_error(&mut self, callback: Option<ErrorCallback<'src>>) {
-        self.on_error = callback;
+        self.error_sink = callback.map_or(ErrorSink::Ignore, ErrorSink::Callback);
+    }
+    /// Select buffered delivery for parser integration. Replacing the sink drops
+    /// any pending diagnostics; the parser drains after every scanner operation.
+    /// A valid-input buffer reserves no allocation. Reset restores ignored errors.
+    pub fn buffer_diagnostics(&mut self) {
+        self.error_sink = ErrorSink::Buffered(Vec::new());
+    }
+
+    /// Drain in emission order. Diagnostics are not restored by a checkpoint.
+    pub fn drain_diagnostics(&mut self) -> impl Iterator<Item = ScannerDiagnostic> + '_ {
+        let drained = match &mut self.error_sink {
+            ErrorSink::Buffered(errors) => Some(errors.drain(..)),
+            ErrorSink::Ignore | ErrorSink::Callback(_) => None,
+        };
+        drained.into_iter().flatten()
     }
     /// port: tsc/internal/scanner/scanner.go:Scanner.SetLanguageVariant
     pub fn set_language_variant(&mut self, variant: LanguageVariant) {
@@ -419,13 +472,16 @@ impl<'src> Scanner<'src> {
         length: i64,
         args: Vec<DiagnosticArgument>,
     ) {
-        if let Some(callback) = &mut self.on_error {
-            callback(ScannerDiagnostic {
-                message,
-                start,
-                length,
-                args,
-            });
+        let diagnostic = ScannerDiagnostic {
+            message,
+            start,
+            length,
+            args,
+        };
+        match &mut self.error_sink {
+            ErrorSink::Callback(callback) => callback(diagnostic),
+            ErrorSink::Buffered(errors) => errors.push(diagnostic),
+            ErrorSink::Ignore => {}
         }
     }
 

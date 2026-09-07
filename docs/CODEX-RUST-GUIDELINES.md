@@ -360,6 +360,20 @@ the cache. The first clean run passed; the restored run could not read its
 origin. Keep non-Cargo repository state outside Cargo's cleanup domain and test
 generation after target cleanup as well as from a clean checkout.
 
+S06 review exposed two further assumptions to challenge. I counted generated
+Go functions toward thresholds that the tracker has always restricted to
+handwritten source. Read the actual metric collector before calculating scope;
+keep generated provenance and source coverage separate. Broad parser parity
+also did not establish utility behavior on constructed graphs and unusual kinds,
+so those families now have independently regenerated Go observations.
+
+For Go slices, test nil, allocated empty, nil elements and copied backing
+separately. Copying a slice header can require shared mutable backing during
+construction; cloning a Rust vector changes that behavior. For caches reached
+through imported owners, validate stored IDs against the cache owner's retained
+graph. The caller's broader lookup context is not sufficient proof that the
+cached result will remain live after that caller disappears.
+
 ## Evidence and maintenance
 
 Prepared on 7 September 2026 from a fresh read of these local reports:

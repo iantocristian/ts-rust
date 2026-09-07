@@ -1,0 +1,64 @@
+{
+  "legacy_projection": {
+    "cases": 7,
+    "native_diagnostic": 6046,
+    "option_variants": 13,
+    "parser_requests": 23,
+    "policy": "legacy-module-none-parser-input-v1"
+  },
+  "max_request_bytes": 4699282,
+  "option_projection": {
+    "base_options": "pinned initial tsconfig parsing, without Program/project-reference loading or mapper execution",
+    "direct_fields": [
+      "target",
+      "module",
+      "moduledetection",
+      "moduleresolution",
+      "jsx",
+      "usecasesensitivefilenames"
+    ],
+    "other_settings": "retained verbatim; currentdirectory supplies the virtual cwd, filename/directives supply units; other compiler/emit/checker settings do not enter the direct parser API"
+  },
+  "option_variants": 15206,
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "planning_totals": {
+    "explicit_cwd_cases": 50,
+    "extracted_bytes": 7528194,
+    "extracted_units": 17264,
+    "libraries": 108,
+    "library_bytes": 3785075,
+    "multiunit_cases": 2078,
+    "physical_cases": 12721,
+    "primary_rows": 12829,
+    "script_kinds": {
+      "0": 29,
+      "1": 1360,
+      "2": 16,
+      "3": 14746,
+      "4": 472,
+      "6": 641
+    },
+    "symlink_cases": 25
+  },
+  "primary_requests": 22343,
+  "request_sha256": "30e50b547b79c676de2870b08ce1b48f2d810b95badda54f205945af1bb450a1",
+  "routes": {
+    "initial_config_direct": 160,
+    "virtual_file": 22075
+  },
+  "scope": "direct parser inputs; no compiler skips, content mapper execution, project loading or Rust option-validation claim",
+  "supplemental": {
+    "groups": {
+      "ast_runtime": 56,
+      "codec": 21,
+      "decoder": 20,
+      "depth": 10,
+      "encoder": 6,
+      "parser_regression": 15
+    },
+    "kind_stringer_observations": 65536,
+    "requests": 128,
+    "sha256": "5abeae579994aee46e737f1b032074da33d706e055b48f5d68200b064c5aa15f"
+  },
+  "version": 1
+}

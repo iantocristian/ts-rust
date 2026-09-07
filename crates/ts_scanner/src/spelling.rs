@@ -44,7 +44,7 @@ pub fn equal_fold(mut left: &[u8], mut right: &[u8]) -> bool {
 }
 
 /// port: tsc/internal/core/core.go:GetSpellingSuggestionForStrings
-pub(crate) fn get_spelling_suggestion_for_strings<'candidate>(
+pub fn get_spelling_suggestion_for_strings<'candidate>(
     name: &[u8],
     candidates: impl IntoIterator<Item = &'candidate [u8]>,
 ) -> Option<&'candidate [u8]> {

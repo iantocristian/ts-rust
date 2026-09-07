@@ -361,6 +361,7 @@ def e4():
     payload = json.dumps(probes, separators=(",", ":")).encode()
     env = go_environment()
     command([sys.executable, str(ROOT / "crates/ts_jsstring/tools/generate_case_tables.py"), "--check"], env=env)
+    command([sys.executable, str(ROOT / "crates/ts_jsstring/tools/generate_go_quote.py"), "--check"], env=env)
     expected_bytes = command([str(go_oracle(upstream, env))], data=payload, env=env)
     sys.stderr.buffer.write(command(["cargo", "test", "--package", "ts_jsstring", "--all-targets", "--locked"]))
     # Let Cargo select and run the artifact it just built, including when the

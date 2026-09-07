@@ -12,8 +12,11 @@ pub mod source_text;
 pub mod wtf8;
 
 mod case_tables;
+mod go_print_generated;
+mod go_quote;
 
 pub use escape::{LiteralEscapeFlags, QuoteChar};
+pub use go_quote::go_quote;
 pub use jsstring::{JsString, Validity};
 pub use line_map::LspLineMap;
 pub use lsp::{LspPosition, PositionEncoding};

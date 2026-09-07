@@ -20,12 +20,14 @@ comments and protocol diagrams must be checked against executable code.
 | S06-2 parser/JSDoc/reparser | Real `ts_parser` over the current scanner and owning AST; grouped case results compare protocol-8 output against the clean Go pin |
 | S06-3 AST runtime | Construction, list identity, parents, visitors, updates/clones, precedence, subtree facts and SourceFile services; independent runtime observations beyond encoded bytes |
 | S06-4 encoder | SourceFile and fragment encoding, string/structured data, position conversion and node-index tables; exact Go success/error outcomes and successful bytes |
-| S06-5 traceability | At least 463/514 parser, 68/75 encoder-package and 1,114/2,227 AST functions mapped to real implementations |
+| S06-5 traceability | At least 463/514 parser, 61/67 encoder-package and 420/839 AST source functions mapped to real implementations. Generated functions have separate provenance and earn no source-function coverage. |
 
-The package called `internal/api/encoder` includes the decoder. Encoding alone
-covers 43/75 functions and cannot meet its 90% gate. Include the decoder runtime
-and its generated dispatch in S06; target all 75 functions, with any eventual
-omission justified by exact ID rather than an unimplemented wrapper.
+The package called `internal/api/encoder` includes the decoder. Encoding and its
+string table cover 38/67 handwritten functions and cannot meet the 90% gate.
+Include all 29 handwritten decoder functions and the eight generated
+encoder/decoder dispatch functions in S06. Generated dispatch earns no credit in
+the 67-function denominator; any omission must be justified by exact ID rather
+than an unimplemented wrapper.
 
 | Package/file | Inventoried functions |
 | --- | ---: |
@@ -119,8 +121,10 @@ node/type layout decision.
 
 **Lists are objects as well as edges.** Replace runtime `NodeListRange` use with
 owner-qualified list identity resolving to a header and immutable edge range.
-The header carries its location, modifier data where applicable and an explicit
-parser-missing state. Preserve absent, present-empty and missing lists, distinct
+The header carries its location and modifier data where applicable. Parser
+missingness follows a private empty backing-slice sentinel, as upstream does;
+replacing the slice changes missingness and cloning a header preserves it.
+Preserve absent, present-empty and missing lists, distinct
 empty-list identities, and raw slices separately. Go's `core.Same` compares raw
 slice length/backing identity, except all zero-length slices compare equal;
 element equality is not a replacement. A cloned list gets a new header while
@@ -148,7 +152,16 @@ whole consumed group before creating its shared root.
 
 A factory can contain several SourceFile nodes with distinct text and metadata.
 Keep source-file services keyed by SourceFile identity, with lazy position maps
-and encoder caches below that owner. Cloning copies only the fields named by
+and encoder caches below that owner. JSDoc entries use both logical SourceFile
+and parent identity, including when cloned SourceFiles share their children.
+Storage-level parent-only caches cannot represent this boundary. Copied metadata
+arrays have owner-qualified backing; exclusive mutation of an existing element
+is visible through cloned headers, while header replacement is independent.
+Text and parse options are construction-only, so a cached position map cannot
+become stale through later text replacement. Cache installation validates against
+the logical source's own retention root, including its mapped bundle and retained
+imports, never an importing caller's broader lookup context. Cloning copies only
+the fields named by
 SourceFile.copyFrom after OnCreate; diagnostics, counts, hash and caches start
 fresh. Storage ownership alone is not a source-file identity.
 
@@ -276,9 +289,11 @@ provide 1,194 candidate implementations, before handwritten runtime work.
 Exclude SyntheticExpression's New, Update, VisitEachChild and Clone until its
 checker type link has real ownership; 1,190 candidates remain. Its codec
 rejection still needs coverage and does not justify a fake type-bearing factory.
-Freeze an exact function-ID scope/omission list before adding markers and count
-only implemented behavior. This is a credible route to 1,114, not permission to
-generate successful stubs.
+Freeze an exact function-ID scope/omission list before adding provenance labels.
+Generated Go methods use `upstream:` labels and do not contribute to the
+tracker's handwritten source-function denominator. Source-kind AST utilities
+and accessors must independently meet 420/839; generated runtime behavior still
+requires authoritative regeneration and differential tests.
 
 Runtime visitors must express deletion, SyntaxList flattening, hook ordering,
 identity-preserving updates and single-result lifting assertions; the current
@@ -448,14 +463,14 @@ must fail this classifier.
 Preflight every required decoder fixture through Go before freezing it: it must
 return success, an error or a recognized panic. Any timeout during required
 capture invalidates that capture; it is never an expected matching error or a
-row to drop. Known cyclic sibling links belong to a separate named Rust ingress
-test for finite checked rejection, explicitly proposed defensive behavior where
-Go does not terminate. Any intentional compatibility exception follows ADR 0004:
-record its exact scope and rationale in `data/divergences.toml`, with the owner's
-approval on record before accepting it. Documentation or an ADR alone cannot
-approve an exception. Until that disposition exists, an external watchdog reports
-an operation timeout; it cannot manufacture a Go/Rust DecodeError or a passing
-parity row. This must not broaden rejection of terminating Go-accepted wire forms.
+row to drop. Known cyclic sibling links have a separate frozen subprocess
+watchdog. The production decoder preserves Go's sibling traversal, including
+nontermination for this malformed cycle. Each adapter must emit a valid begin
+frame before the watchdog starts; an early exit, returned value or malformed
+stream cannot count as the observed timeout. This measurement contributes no
+primary or returned-decoder parity rows. The proposed finite Rust rejection was
+not adopted, so this behavior needs no divergence entry. Any later intentional
+compatibility exception still requires the owner's explicit ADR 0004 approval.
 
 ## 9. Frozen corpus, options and oracle
 
@@ -620,6 +635,7 @@ Use one e1 producer with derived per-case rows and measured supplemental results
 | `run.e1.encoder_output_bytes` | Every successful Go encoding has matching Rust bytes, with no missing corresponding output; E4's encoder byte criterion |
 | `run.e1.decoder_parity` | All frozen decoder fixtures match Go success/error/recognized-panic outcomes and decoded observations; add an explicit S06 gate and both decoder ledger consumers |
 | `run.e1.ast_runtime` | Exact factory/list/visitor/clone/JSDoc/metadata observations in the frozen nonempty runtime suite; require in S06 and relevant AST runtime ledger entries |
+| `run.e1.ast_utilities` | Exact named utility/accessor test inventory, rebuilt Rust tests and independently regenerated Go expectations; source-function coverage has its own behavioral gate |
 | `run.e1.depth` | The named production entry points complete their frozen stress cases and unwind tests; require in S06, without claiming later full-pipeline recursion coverage |
 
 Emit each supplemental result as a boolean with companion request/observation
@@ -671,7 +687,7 @@ before implementation rather than treating one representative as full coverage:
 | `codec-sourcefile-structured` | Endian/tag-width drift, nil/empty SpanMap, supplied hash ordering and post-traversal patch offsets |
 | `decode-open-wire` | Kind narrowing/KindCount, reserved tags, nil root and lossy ranges/metadata treated as canonical roundtrip semantics |
 | `decode-generated-list-panic` | SyntaxList/JSDocTypeLiteral children silently repaired or a different Rust panic accepted |
-| `decode-cyclic-ingress` | Nontermination mislabeled Go error parity; separately test the explicit finite Rust boundary |
+| `decode-cyclic-watchdog` | Preserve the source loop; separately measure both live subprocesses at the frozen deadline, with no returned-error or primary parity credit |
 | `keyword-split-nondeterminism` | Unordered diagnostic arguments silently normalized or counted as exact diagnostic bytes |
 | `producer-rejected-capture` | Duplicate/reordered/missing request, wrong panic class, one failed stage, timeout or partial metrics recorded as success |
 
@@ -793,7 +809,7 @@ and acceptance changes. This is plan review, not validation of an implementation
 
 | Finding | Disposition in this plan |
 | --- | --- |
-| Encoding alone cannot meet the encoder-package coverage threshold | Include 32 decoder functions alongside 43 encoder/string-table functions; require separate decoder observations |
+| Encoding alone cannot meet the encoder-package coverage threshold | Include 29 handwritten decoder functions alongside 38 handwritten encoder/string-table functions; the eight generated functions have separate provenance; require separate decoder observations |
 | Existing AST and arena headers duplicate authority; list ranges lose Go identity | One AST header through an arena-defined interface; owned list headers and shared node/text slices with nil/empty/missing distinctions |
 | Encoder-triggered JSDoc needs lazy storage before shared publication | ParsedFile owns that storage from construction; publication transfers its cache/IDs; whole-owner worker operations preserve the exclusive lifecycle |
 | Dispatching lazy parsing after taking its lock can deadlock or move thread-bound state | Dispatch before lookup/transaction; run directly on the existing worker; retain the transaction and reentry guard on one thread |
@@ -803,7 +819,7 @@ and acceptance changes. This is plan review, not validation of an implementation
 | Deferred JSDoc was described too narrowly as TypeScript-only | Distinguish JS/JSX from every other kind and keep JSON context-flag checks separate |
 | String table and decoder formatting were misdescribed in the draft | No deduplication; word-offset indexes; signed Kind narrowing in both error layers; exact mixed-endian structured layouts |
 | Valid encoded nodes are not always Go-decodable | Freeze SyntaxList/JSDocTypeLiteral bounds panics, nil-root paired entry points and lossy decode observations; no assumed canonical roundtrip |
-| Cyclic wire inputs can make Go nonterminate | Timeout invalidates required capture; a separate finite Rust ingress rejection is an explicit proposed boundary disposition |
+| Cyclic wire inputs can make Go nonterminate | Timeout invalidates required capture; the separate watchdog measures preserved Go/Rust nontermination, with no parity-row contribution |
 | Corpus count and compiler skips could silently change E1 | 12,721 physical cases plus 108 bundled libraries; all eligible units/configurations determine each row; retain ancillary assets and reasons |
 | File decoding is not the parser-text boundary | Preserve physical and virtual loader stages, direct tsconfig text and embedded-library bytes; add a no-decode SourceText constructor for final parser text |
 | Exact diagnostic arguments are not deterministic upstream | Two keyword-split witnesses varied over fresh processes while their encoder buffers stayed identical; qualify diagnostics without weakening encoder bytes |
@@ -822,7 +838,7 @@ The most consequential source anchors are the pinned
 and [embedded library loader](https://github.com/microsoft/TypeScript/blob/1f70213d4922b434345f639b441681e470c7cfc1/tsc/internal/bundled/embed.go).
 
 Implementation still must freeze the concrete requests and resource limits,
-prove the ownership prototype's Send/lifetime/publication signatures, record the
+prove the ownership prototype's Send/lifetime/publication signatures, document the
 cyclic-input boundary decision, and execute the proposed parity/instrumentation
 suites. No manifest, metric, mapping, dependency approval or four-target result
 is implied by this plan. The 20-method recursion list remains a starting audit,
@@ -831,8 +847,13 @@ and planning probes are not committed sprint evidence.
 ### PR review follow-up
 
 Verified the [external plan review](https://github.com/iantocristian/ts-rust/pull/10#issuecomment-5574904712)
-against the repository on 7 September 2026. The source-fidelity checks agree with
-the preceding review. The missing per-checkpoint exits, independent manifest
+against the repository on 7 September 2026. The source-behavior checks agree with
+the preceding review. The inventory totals quoted by both reviews count all Go
+file kinds; treating those totals as tracker denominators was incorrect. The
+tracker has always excluded generated Go functions. Implementation validation
+exposed this mistake: acceptance is 463/514 parser, 61/67 encoder and 420/839 AST
+source functions, with generated provenance tracked separately. The existing
+ratios and tracker policy are unchanged. The missing per-checkpoint exits, independent manifest
 audit, explicit recursion primary and named divergence procedure are valid
 planning gaps and are corrected above. The dependency on the open #9 and its
 scanner follow-up seams are now explicit.
@@ -845,3 +866,29 @@ that decoder.go has an empty `verify` is incorrect: it currently requires
 `run.e1.parity >= 0.999`. The actual gap is the missing decoder-specific result,
 which the acceptance changes address. No divergence approval is inferred from
 the review or from a request to proceed with implementation.
+
+### Implementation review corrections
+
+The implementation review added independent checks for the following source
+contracts before recording final acceptance:
+
+- SourceFile OnCreate sees constructor metadata; copyFrom reads the original
+  after that hook and before OnUpdate/OnClone. Copied metadata shares owner-backed
+  slice headers without copying every vector twice.
+- Cache ownership follows the source's canonical file/bundle root even when
+  accessed through a broader importer. A foreign result remains a retryable Rust
+  ownership error; a Go initializer panic completes sync.Once with its nil value.
+- Go node comparison IDs are assigned lazily, separately from checked storage
+  capabilities. The pinned Go pdqsort and binary-search midpoint order are
+  observable for repeated JSDoc node identities; comparison traces test both.
+- FullSignature is omitted from protocol properties but still traversed by the
+  Go visitor for seven function-like payloads. Generated traversal follows that
+  source-member inventory, not the wire property mask.
+- The strict protocol rejects invented returned-error outcomes from operations
+  such as ParseSourceFile that have no such return contract. Absolute request
+  deadlines bound both record trickles and buffered output.
+- Generated Go provenance earns no handwritten source coverage. Required source
+  utility families have independent open-kind, graph, flag and failure witnesses.
+
+See [the implementation record](S06.md) for the final public boundaries, measured
+commands, corpus scope and remaining later-sprint work.

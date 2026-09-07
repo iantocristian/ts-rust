@@ -1,16 +1,17 @@
+use crate::NodeRecord;
 use crate::{
-    arena::Arena, ArenaId, Error, FileHandle, Node, NodeId, NodeRef, RetainedNode, SymbolId,
-    SymbolRef,
+    arena::Arena, ArenaId, Error, NodeId, RecordRef, RetainedRecord, StorageHandle,
+    StorageSymbolRef, SymbolId,
 };
 use std::{collections::BTreeMap, marker::PhantomData};
 
 /// An owning membership table. Raw imports check owner and published slot in release.
-pub struct Scope<N, S = ()> {
-    nodes: BTreeMap<ArenaId, FileHandle<N, S>>,
-    symbols: BTreeMap<ArenaId, FileHandle<N, S>>,
+pub struct StorageScope<N: NodeRecord, S = ()> {
+    nodes: BTreeMap<ArenaId, StorageHandle<N, S>>,
+    symbols: BTreeMap<ArenaId, StorageHandle<N, S>>,
 }
 
-impl<N, S> Default for Scope<N, S> {
+impl<N: NodeRecord, S> Default for StorageScope<N, S> {
     fn default() -> Self {
         Self {
             nodes: BTreeMap::new(),
@@ -19,14 +20,14 @@ impl<N, S> Default for Scope<N, S> {
     }
 }
 
-impl<N, S> Scope<N, S> {
+impl<N: NodeRecord, S> StorageScope<N, S> {
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Retaining a mapped member admits every sibling to the resolution set.
     /// This table does not define a program's observable source-file list.
-    pub fn insert(&mut self, file: FileHandle<N, S>) {
+    pub fn insert(&mut self, file: StorageHandle<N, S>) {
         for member in file.into_members() {
             self.nodes.insert(member.core.id, member.clone());
             self.nodes.insert(member.lazy_arena(), member.clone());
@@ -34,18 +35,18 @@ impl<N, S> Scope<N, S> {
         }
     }
 
-    pub fn import(&self, id: NodeId) -> Result<NodeRef<'_, N, S>, Error> {
+    pub fn import(&self, id: NodeId) -> Result<RecordRef<'_, N, S>, Error> {
         self.nodes
             .get(&id.arena())
             .ok_or(Error::WrongOwner)?
             .node(id)
     }
 
-    pub fn import_retained(&self, id: NodeId) -> Result<RetainedNode<N, S>, Error> {
-        self.import(id).map(NodeRef::retain)
+    pub fn import_retained(&self, id: NodeId) -> Result<RetainedRecord<N, S>, Error> {
+        self.import(id).map(RecordRef::retain)
     }
 
-    pub fn import_symbol(&self, id: SymbolId) -> Result<SymbolRef<'_, N, S>, Error> {
+    pub fn import_symbol(&self, id: SymbolId) -> Result<StorageSymbolRef<'_, N, S>, Error> {
         self.symbols
             .get(&id.arena())
             .ok_or(Error::WrongOwner)?
@@ -56,23 +57,23 @@ impl<N, S> Scope<N, S> {
     /// local handles that cannot escape or be used with a different arena.
     ///
     /// ```compile_fail
-    /// use ts_arena::{Counters, FileBuilder, Node, Scope};
+    /// use ts_arena::{Counters, StorageBuilder, Node, StorageScope};
     /// let counters = Counters::new();
-    /// let mut builder = FileBuilder::<u32>::new(std::sync::Arc::from(&b"x"[..]), &counters);
+    /// let mut builder = StorageBuilder::<Node<u32>>::new(std::sync::Arc::from(&b"x"[..]), &counters);
     /// let id = builder.push(Node::new(1, 7));
-    /// let mut scope = Scope::new();
+    /// let mut scope = StorageScope::new();
     /// scope.insert(builder.finish());
     /// let escaped = scope.with_core_arena(id.arena(), |local| local.check(id).unwrap());
     /// ```
     ///
     /// ```compile_fail
-    /// use ts_arena::{Counters, FileBuilder, Node, Scope};
+    /// use ts_arena::{Counters, StorageBuilder, Node, StorageScope};
     /// let counters = Counters::new();
-    /// let mut first = FileBuilder::<u32>::new(std::sync::Arc::from(&b"x"[..]), &counters);
-    /// let mut second = FileBuilder::<u32>::new(std::sync::Arc::from(&b"y"[..]), &counters);
+    /// let mut first = StorageBuilder::<Node<u32>>::new(std::sync::Arc::from(&b"x"[..]), &counters);
+    /// let mut second = StorageBuilder::<Node<u32>>::new(std::sync::Arc::from(&b"y"[..]), &counters);
     /// let first_id = first.push(Node::new(1, 7));
     /// let second_id = second.push(Node::new(1, 8));
-    /// let mut scope = Scope::new();
+    /// let mut scope = StorageScope::new();
     /// scope.insert(first.finish()); scope.insert(second.finish());
     /// scope.with_core_arena(first_id.arena(), |first| {
     ///     let local = first.check(first_id).unwrap();
@@ -82,13 +83,13 @@ impl<N, S> Scope<N, S> {
     pub fn with_core_arena<R>(
         &self,
         arena: ArenaId,
-        operation: impl for<'brand> FnOnce(LocalArena<'brand, '_, N>) -> R,
+        operation: impl for<'brand> FnOnce(StorageLocalArena<'brand, '_, N>) -> R,
     ) -> Result<R, Error> {
         let file = self.nodes.get(&arena).ok_or(Error::WrongOwner)?;
         if file.core.id != arena {
             return Err(Error::WrongOwner);
         }
-        Ok(operation(LocalArena {
+        Ok(operation(StorageLocalArena {
             arena: &file.core,
             brand: PhantomData,
         }))
@@ -98,8 +99,8 @@ impl<N, S> Scope<N, S> {
 type Brand<'brand> = PhantomData<fn(&'brand ()) -> &'brand ()>;
 
 /// One immutable core arena, with an invariant brand private to this callback.
-pub struct LocalArena<'brand, 'owner, N> {
-    arena: &'owner Arena<Node<N>>,
+pub struct StorageLocalArena<'brand, 'owner, N: NodeRecord> {
+    arena: &'owner Arena<N>,
     brand: Brand<'brand>,
 }
 
@@ -110,7 +111,7 @@ pub struct LocalNode<'brand> {
     brand: Brand<'brand>,
 }
 
-impl<'brand, 'owner, N> LocalArena<'brand, 'owner, N> {
+impl<'brand, 'owner, N: NodeRecord> StorageLocalArena<'brand, 'owner, N> {
     pub fn check(&self, id: NodeId) -> Result<LocalNode<'brand>, Error> {
         self.arena.get(id.arena(), id.slot())?;
         Ok(LocalNode {
@@ -120,7 +121,7 @@ impl<'brand, 'owner, N> LocalArena<'brand, 'owner, N> {
     }
 
     /// Repeated reads elide owner validation and retain safe bounds checks.
-    pub fn get(&self, local: LocalNode<'brand>) -> &'owner Node<N> {
+    pub fn get(&self, local: LocalNode<'brand>) -> &'owner N {
         self.arena
             .get_slot(local.slot)
             .expect("branded slot was validated")

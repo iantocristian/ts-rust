@@ -1,7 +1,8 @@
 use crate::{
+    arena::Arena,
     counters::Track,
     ids::{allocate_slot, next_arena},
-    ArenaId, Counters, Error, Node, NodeId,
+    ArenaId, AuxId, Counters, Error, NodeId, NodeRecord,
 };
 use std::{
     cell::RefCell,
@@ -11,12 +12,9 @@ use std::{
 };
 
 const PAGE_SIZE: usize = 256;
-
 thread_local! {
-    // File identities are process-unique, including across different payload types.
     static ACTIVE_INITIALIZERS: RefCell<Vec<ArenaId>> = const { RefCell::new(Vec::new()) };
 }
-
 fn assert_not_initializing(id: ArenaId) {
     ACTIVE_INITIALIZERS.with(|active| {
         assert!(
@@ -25,10 +23,7 @@ fn assert_not_initializing(id: ArenaId) {
         );
     });
 }
-
-/// Cleared before the surrounding catch boundary unlocks or resumes a panic.
 struct InitializerGuard(ArenaId);
-
 impl InitializerGuard {
     fn enter(id: ArenaId) -> Self {
         assert_not_initializing(id);
@@ -36,7 +31,6 @@ impl InitializerGuard {
         Self(id)
     }
 }
-
 impl Drop for InitializerGuard {
     fn drop(&mut self) {
         ACTIVE_INITIALIZERS.with(|active| {
@@ -46,18 +40,16 @@ impl Drop for InitializerGuard {
     }
 }
 
-struct Page<N> {
-    slots: [OnceLock<Node<N>>; PAGE_SIZE],
+struct Page<T> {
+    slots: [OnceLock<T>; PAGE_SIZE],
     _allocation: Track,
 }
-
-/// Page ownership alone stays private; exported references also retain or borrow a file.
-pub(crate) struct LazyNode<N> {
-    page: Arc<Page<N>>,
+/// Kept private: an exported read also borrows or retains its complete owner.
+pub(crate) struct LazyRecord<T> {
+    page: Arc<Page<T>>,
     offset: usize,
 }
-
-impl<N> Clone for LazyNode<N> {
+impl<T> Clone for LazyRecord<T> {
     fn clone(&self) -> Self {
         Self {
             page: self.page.clone(),
@@ -65,23 +57,28 @@ impl<N> Clone for LazyNode<N> {
         }
     }
 }
-
-impl<N> LazyNode<N> {
-    pub(crate) fn get(&self) -> &Node<N> {
+impl<T> LazyRecord<T> {
+    pub(crate) fn get(&self) -> &T {
         self.page.slots[self.offset]
             .get()
-            .expect("published lazy node")
+            .expect("published lazy record")
     }
 }
-
-struct Pages<N> {
+struct Pages<T> {
     id: ArenaId,
     reserved: usize,
-    directory: Vec<Arc<Page<N>>>,
+    directory: Vec<Arc<Page<T>>>,
     counters: Counters,
 }
-
-impl<N> Pages<N> {
+impl<T> Pages<T> {
+    fn new(counters: &Counters) -> Self {
+        Self {
+            id: next_arena(),
+            reserved: 0,
+            directory: Vec::new(),
+            counters: counters.clone(),
+        }
+    }
     fn reserve(&mut self) -> u32 {
         let slot = allocate_slot(self.reserved);
         if self.reserved / PAGE_SIZE == self.directory.len() {
@@ -93,170 +90,266 @@ impl<N> Pages<N> {
         self.reserved += 1;
         slot
     }
-
-    fn initialize(&self, slot: u32, node: Node<N>) {
+    fn initialize(&self, slot: u32, value: T) {
         let index = slot as usize - 1;
-        // Only the unused slot is initialized: published readers never overlap
-        // a mutable borrow of either their node or its entire page.
+        // Initialize only the unused slot; never mutably borrow a published page.
         assert!(
             self.directory[index / PAGE_SIZE].slots[index % PAGE_SIZE]
-                .set(node)
+                .set(value)
                 .is_ok(),
             "lazy slots are initialized once"
         );
     }
-
-    fn get(&self, slot: u32) -> Result<LazyNode<N>, Error> {
+    fn get_borrowed(&self, slot: u32) -> Result<&T, Error> {
         let index = slot.checked_sub(1).ok_or(Error::InvalidSlot)? as usize;
         if index >= self.reserved {
             return Err(Error::InvalidSlot);
         }
-        let page = &self.directory[index / PAGE_SIZE];
-        if page.slots[index % PAGE_SIZE].get().is_none() {
-            return Err(Error::InvalidSlot);
-        }
-        Ok(LazyNode {
-            page: page.clone(),
+        self.directory[index / PAGE_SIZE].slots[index % PAGE_SIZE]
+            .get()
+            .ok_or(Error::InvalidSlot)
+    }
+    fn get(&self, slot: u32) -> Result<LazyRecord<T>, Error> {
+        self.get_borrowed(slot)?;
+        let index = slot as usize - 1;
+        Ok(LazyRecord {
+            page: self.directory[index / PAGE_SIZE].clone(),
             offset: index % PAGE_SIZE,
         })
     }
 }
-
-/// Private staging for one graph. Minted ids are burned even on error or unwind.
-/// Metadata/payload edges are ids; callers construct their graph through those ids.
-pub struct LazyTransaction<'a, N> {
-    pages: &'a mut Pages<N>,
+struct Staging<'a, T> {
+    pages: &'a mut Pages<T>,
     base: usize,
-    pending: Vec<Node<N>>,
+    pending: Vec<T>,
 }
-
-impl<N> LazyTransaction<'_, N> {
-    pub fn push(&mut self, node: Node<N>) -> NodeId {
-        let slot = self.pages.reserve();
-        self.pending.push(node);
-        NodeId::new(self.pages.id, slot)
-    }
-
-    pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node<N>, Error> {
-        if id.arena() != self.pages.id {
-            return Err(Error::WrongOwner);
+impl<'a, T> Staging<'a, T> {
+    fn new(pages: &'a mut Pages<T>) -> Self {
+        Self {
+            base: pages.reserved,
+            pages,
+            pending: Vec::new(),
         }
-        let index = (id.slot() as usize)
+    }
+    fn push(&mut self, value: T) -> u32 {
+        let slot = self.pages.reserve();
+        self.pending.push(value);
+        slot
+    }
+    fn index(&self, slot: u32) -> Result<usize, Error> {
+        (slot as usize)
             .checked_sub(self.base + 1)
-            .ok_or(Error::InvalidSlot)?;
+            .filter(|&i| i < self.pending.len())
+            .ok_or(Error::InvalidSlot)
+    }
+    fn get(&self, slot: u32) -> Result<&T, Error> {
+        if slot as usize <= self.base {
+            self.pages.get_borrowed(slot)
+        } else {
+            self.pending
+                .get(self.index(slot)?)
+                .ok_or(Error::InvalidSlot)
+        }
+    }
+    fn get_mut(&mut self, slot: u32) -> Result<&mut T, Error> {
+        let index = self.index(slot)?;
         self.pending.get_mut(index).ok_or(Error::InvalidSlot)
     }
+    fn publish(self) {
+        for (index, value) in self.pending.into_iter().enumerate() {
+            self.pages.initialize((self.base + index + 1) as u32, value);
+        }
+    }
+}
 
+/// Node and auxiliary staging share the cache's single publication lock. Reads
+/// resolve core, already published and staged records without taking that lock again.
+/// Error and unwind burn both sets of identities and discard all pending values.
+pub struct StorageTransaction<'a, N: NodeRecord> {
+    nodes: Staging<'a, N>,
+    auxiliary: Staging<'a, N::Aux>,
+    core: &'a Arena<N>,
+    core_auxiliary: &'a Arena<N::Aux>,
+}
+impl<N: NodeRecord> StorageTransaction<'_, N> {
+    pub fn staged_nodes(&self) -> impl Iterator<Item = &N> {
+        self.nodes.pending.iter()
+    }
+    pub fn staged_aux(&self) -> impl Iterator<Item = &N::Aux> {
+        self.auxiliary.pending.iter()
+    }
+    pub fn push(&mut self, node: N) -> NodeId {
+        NodeId::new(self.nodes.pages.id, self.nodes.push(node))
+    }
+    pub fn push_aux(&mut self, value: N::Aux) -> AuxId {
+        AuxId::new(self.auxiliary.pages.id, self.auxiliary.push(value))
+    }
+    pub fn node(&self, id: NodeId) -> Result<&N, Error> {
+        if id.arena() == self.core.id {
+            return self.core.get_slot(id.slot());
+        }
+        if id.arena() != self.nodes.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        self.nodes.get(id.slot())
+    }
+    pub fn aux(&self, id: AuxId) -> Result<&N::Aux, Error> {
+        if id.arena() == self.core_auxiliary.id {
+            return self.core_auxiliary.get_slot(id.slot());
+        }
+        if id.arena() != self.auxiliary.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        self.auxiliary.get(id.slot())
+    }
+    pub fn node_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
+        if id.arena() != self.nodes.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        self.nodes.get_mut(id.slot())
+    }
+    pub fn aux_mut(&mut self, id: AuxId) -> Result<&mut N::Aux, Error> {
+        if id.arena() != self.auxiliary.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        self.auxiliary.get_mut(id.slot())
+    }
     fn publish(self, roots: &[NodeId]) -> Result<(), Error> {
-        if roots.iter().any(|id| {
-            id.arena() != self.pages.id
-                || id.slot() as usize <= self.base
-                || id.slot() as usize > self.base + self.pending.len()
-        }) {
-            return Err(Error::InvalidGraph);
+        for id in roots {
+            if id.arena() != self.nodes.pages.id || self.nodes.index(id.slot()).is_err() {
+                return Err(Error::InvalidGraph);
+            }
         }
-        for (index, node) in self.pending.into_iter().enumerate() {
-            self.pages.initialize((self.base + index + 1) as u32, node);
-        }
+        // No user callbacks or fallible operations after this publication point.
+        self.auxiliary.publish();
+        self.nodes.publish();
         Ok(())
     }
 }
 
-/// The supplied parent and source range identify a token; kind is checked separately.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TokenKey {
     pub parent: NodeId,
     pub start: usize,
     pub end: usize,
 }
-
 #[derive(Clone, Copy)]
 struct CachedToken {
     id: NodeId,
     kind: u32,
 }
-
-struct LazyState<N> {
+struct LazyState<N: NodeRecord> {
     pages: Pages<N>,
-    jsdoc: BTreeMap<NodeId, Arc<[NodeId]>>,
+    auxiliary: Pages<N::Aux>,
+    // None is the S04 file cache. Concrete ASTs can distinguish several logical
+    // source files housed in the same storage owner without adding another lock.
+    jsdoc: BTreeMap<(Option<NodeId>, NodeId), Arc<[NodeId]>>,
     tokens: BTreeMap<TokenKey, CachedToken>,
 }
-
-/// Directory, reservations, publication and both caches share exactly one lock.
-pub(crate) struct LazyArena<N> {
+/// Node/auxiliary directories, reservations, publication and caches use one lock.
+pub(crate) struct LazyArena<N: NodeRecord> {
     id: ArenaId,
+    auxiliary_id: ArenaId,
     state: RwLock<LazyState<N>>,
 }
-
-impl<N> LazyArena<N> {
+impl<N: NodeRecord> LazyArena<N> {
     pub(crate) fn new(counters: &Counters) -> Self {
-        let id = next_arena();
+        let pages = Pages::new(counters);
+        let auxiliary = Pages::new(counters);
         Self {
-            id,
+            id: pages.id,
+            auxiliary_id: auxiliary.id,
             state: RwLock::new(LazyState {
-                pages: Pages {
-                    id,
-                    reserved: 0,
-                    directory: Vec::new(),
-                    counters: counters.clone(),
-                },
+                pages,
+                auxiliary,
                 jsdoc: BTreeMap::new(),
                 tokens: BTreeMap::new(),
             }),
         }
     }
-
     pub(crate) fn id(&self) -> ArenaId {
         self.id
     }
-
+    pub(crate) fn auxiliary_id(&self) -> ArenaId {
+        self.auxiliary_id
+    }
     fn read(&self) -> RwLockReadGuard<'_, LazyState<N>> {
         assert_not_initializing(self.id);
         self.state
             .read()
             .expect("lazy publication lock is not poisoned")
     }
-
     fn write(&self) -> RwLockWriteGuard<'_, LazyState<N>> {
         assert_not_initializing(self.id);
         self.state
             .write()
             .expect("lazy publication lock is not poisoned")
     }
-
-    pub(crate) fn node(&self, id: NodeId) -> Result<LazyNode<N>, Error> {
+    pub(crate) fn node(&self, id: NodeId) -> Result<LazyRecord<N>, Error> {
         if id.arena() != self.id {
             return Err(Error::WrongOwner);
         }
         self.read().pages.get(id.slot())
     }
-
+    pub(crate) fn aux(&self, id: AuxId) -> Result<LazyRecord<N::Aux>, Error> {
+        if id.arena() != self.auxiliary_id {
+            return Err(Error::WrongOwner);
+        }
+        self.read().auxiliary.get(id.slot())
+    }
+    pub(crate) fn eager_jsdoc(
+        &self,
+        source: Option<NodeId>,
+        parent: NodeId,
+    ) -> Option<Arc<[NodeId]>> {
+        self.read().jsdoc.get(&(source, parent)).cloned()
+    }
+    pub(crate) fn seed_jsdoc(
+        &mut self,
+        source: Option<NodeId>,
+        parent: NodeId,
+        roots: Arc<[NodeId]>,
+    ) -> Result<(), Error> {
+        let state = self
+            .state
+            .get_mut()
+            .expect("lazy publication lock is not poisoned");
+        if state.jsdoc.contains_key(&(source, parent)) {
+            return Err(Error::InvalidGraph);
+        }
+        state.jsdoc.insert((source, parent), roots);
+        Ok(())
+    }
     pub(crate) fn jsdoc(
         &self,
+        source: Option<NodeId>,
         parent: NodeId,
-        initialize: impl FnOnce(&mut LazyTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
+        core: &Arena<N>,
+        core_auxiliary: &Arena<N::Aux>,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<Arc<[NodeId]>, Error> {
-        if let Some(ids) = self.read().jsdoc.get(&parent) {
+        if let Some(ids) = self.read().jsdoc.get(&(source, parent)) {
             return Ok(ids.clone());
         }
         let mut state = self.write();
-        if let Some(ids) = state.jsdoc.get(&parent) {
+        if let Some(ids) = state.jsdoc.get(&(source, parent)) {
             return Ok(ids.clone());
         }
-        // Catch before dropping the guard so a caller's panic cannot poison
-        // valid existing storage. The transaction drops pending payloads and
-        // preserves reserved tombstones; the panic resumes only after unlock.
         let result = catch_unwind(AssertUnwindSafe(|| {
             let _initializer = InitializerGuard::enter(self.id);
-            let mut transaction = LazyTransaction {
-                base: state.pages.reserved,
-                pages: &mut state.pages,
-                pending: Vec::new(),
+            let LazyState {
+                pages, auxiliary, ..
+            } = &mut *state;
+            let mut transaction = StorageTransaction {
+                nodes: Staging::new(pages),
+                auxiliary: Staging::new(auxiliary),
+                core,
+                core_auxiliary,
             };
             let roots = initialize(&mut transaction)?;
             transaction.publish(&roots)?;
             let roots: Arc<[NodeId]> = roots.into();
-            state.jsdoc.insert(parent, roots.clone());
+            state.jsdoc.insert((source, parent), roots.clone());
             Ok(roots)
         }));
         drop(state);
@@ -265,7 +358,6 @@ impl<N> LazyArena<N> {
             Err(panic) => resume_unwind(panic),
         }
     }
-
     fn cached_token(
         state: &LazyState<N>,
         key: TokenKey,
@@ -286,7 +378,6 @@ impl<N> LazyArena<N> {
             })
             .transpose()
     }
-
     pub(crate) fn token(
         &self,
         key: TokenKey,
@@ -310,17 +401,23 @@ impl<N> LazyArena<N> {
         }
         let result = catch_unwind(AssertUnwindSafe(|| {
             let _initializer = InitializerGuard::enter(self.id);
-            let mut node = Node::new(kind, initialize());
-            node.parent = Some(key.parent);
+            let mut node = initialize();
+            if node.storage_kind() != kind {
+                return Err(Error::TokenKindMismatch {
+                    cached: node.storage_kind(),
+                    requested: kind,
+                });
+            }
+            node.set_storage_parent(Some(key.parent));
             let slot = state.pages.reserve();
             state.pages.initialize(slot, node);
             let id = NodeId::new(self.id, slot);
             state.tokens.insert(key, CachedToken { id, kind });
-            id
+            Ok(id)
         }));
         drop(state);
         match result {
-            Ok(id) => Ok(id),
+            Ok(result) => result,
             Err(panic) => resume_unwind(panic),
         }
     }

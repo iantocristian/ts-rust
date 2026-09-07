@@ -1,21 +1,71 @@
-//! Schema-generated syntax shapes. Runtime parsing and list storage arrive in S06.
+//! Schema-generated syntax shapes with exclusive construction and owning storage.
 //!
 //! Child identities do not retain their owner. The generated visitors enumerate
 //! node and list edges; an owning tree supplies list resolution and recursion.
 
 mod accessors_generated;
+mod clone;
 mod data_generated;
+mod diagnostic;
+mod factory;
+mod factory_generated;
+mod jsdoc;
 mod kinds_generated;
+mod lists;
+pub mod modifier_flags;
+mod node_accessors;
+pub mod node_flags;
+mod node_index;
+mod node_index_sort;
+mod node_kind;
+mod node_text;
+mod precedence;
+mod runtime_generated;
+mod runtime_id;
+mod source_cache;
+mod source_file;
+mod storage;
+mod subtree_facts;
+mod subtree_generated;
 mod tokens;
+mod transform_generated;
+mod visitor;
 mod visitors_generated;
 
+pub use clone::{
+    clone_node, deep_clone_node, deep_clone_reparse, deep_clone_reparse_modifiers,
+    set_parent_in_children,
+};
 pub use data_generated::*;
+pub use diagnostic::Diagnostic;
+pub use factory::{BorrowedFactory, Factory, FactoryHooks};
+pub use factory_generated::FactoryMethods;
+pub use jsdoc::{EagerJsDocProvider, JsDocProvider};
 pub use kinds_generated::SyntaxKind;
+pub use lists::{
+    AstStorageData, FileInfo, JSDocRoots, NodeList, NodeListId, NodeListRead, NodeSlice,
+    NodeSliceRead, TextSlice, TextSliceRead,
+};
+pub use node_index::NodeIndexCache;
+pub use node_kind::NodeKind;
+pub use node_text::NodeText;
+pub use precedence::{get_binary_operator_precedence, operator_precedence};
+pub use runtime_generated::*;
+pub use runtime_id::runtime_node_id;
+pub use source_file::*;
+pub use storage::{AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile};
+pub use subtree_facts::{is_left_hand_side_expression_kind, subtree_flags, SubtreeFacts};
+pub use subtree_generated::SubtreeContext;
 pub use tokens::{token_flags, CommentDirective, CommentDirectiveKind, TokenFlags};
+pub use transform_generated::{VisitContext, VisitorMethods};
 pub use ts_arena::{ArenaId, NodeId};
 pub use ts_jsstring::JsString;
+pub use visitor::{
+    modifier_to_flag, ListVisit, NodeVisit, NodeVisitor, NodeVisitorHooks, RuntimeFactory,
+};
 
 use std::ops::ControlFlow;
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 /// A descriptor into one owner's child-id table, not an ownership proof.
 ///
@@ -48,13 +98,16 @@ impl NodeListRange {
 }
 
 /// Source positions are signed byte offsets, including upstream's synthetic -1.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct Node {
-    kind: SyntaxKind,
+    kind: NodeKind,
+    parent: Option<NodeId>,
     flags: u32,
     pos: i32,
     end: i32,
     data: NodeData,
+    subtree_facts: AtomicU32,
+    runtime_id: AtomicU64,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -81,15 +134,56 @@ impl Node {
             });
         }
         Ok(Self {
-            kind,
+            kind: kind.into(),
+            parent: None,
             flags: 0,
             pos,
             end,
             data,
+            subtree_facts: AtomicU32::new(0),
+            runtime_id: AtomicU64::new(0),
         })
     }
-    pub fn kind(&self) -> SyntaxKind {
+    pub fn kind(&self) -> NodeKind {
         self.kind
+    }
+    /// Factory construction preserves Go's open kind/data pairing. Kind-specific
+    /// accessors or codecs may reject a mismatched payload later.
+    pub fn from_factory_parts(kind: NodeKind, data: NodeData) -> Self {
+        Self {
+            kind,
+            parent: None,
+            flags: 0,
+            pos: -1,
+            end: -1,
+            data,
+            subtree_facts: AtomicU32::new(0),
+            runtime_id: AtomicU64::new(0),
+        }
+    }
+    /// The cache exists before publication and survives same-node mutation.
+    /// Only the subtree implementation interprets the source Computed bit.
+    pub(crate) fn cached_subtree_facts(&self) -> u32 {
+        self.subtree_facts.load(Ordering::SeqCst)
+    }
+    pub(crate) fn store_subtree_facts(&self, facts: u32) {
+        self.subtree_facts.store(facts, Ordering::SeqCst);
+    }
+    pub fn parent(&self) -> Option<NodeId> {
+        self.parent
+    }
+    pub fn set_parent(&mut self, parent: Option<NodeId>) {
+        self.parent = parent;
+    }
+    pub fn set_range(&mut self, range: ts_core::TextRange) {
+        self.pos = range.pos() as i32;
+        self.end = range.end() as i32;
+    }
+    pub fn range(&self) -> ts_core::TextRange {
+        ts_core::TextRange::new(i64::from(self.pos), i64::from(self.end))
+    }
+    pub fn data_mut(&mut self) -> &mut NodeData {
+        &mut self.data
     }
     pub fn flags(&self) -> u32 {
         self.flags
@@ -107,21 +201,23 @@ impl Node {
         &self.data
     }
     pub fn for_each_child(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {
-        self.data.for_each_child(visitor)
+        self.for_each_child_generated(visitor)
     }
 }
 
 /// List callbacks preserve list boundaries and empty-vs-absent distinctions.
 pub trait ChildVisitor {
     fn visit_node(&mut self, node: NodeId) -> ControlFlow<()>;
-    fn visit_list(&mut self, nodes: NodeListRange) -> ControlFlow<()>;
+    fn visit_list(&mut self, nodes: NodeListId) -> ControlFlow<()>;
+    fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()>;
 }
 
 /// Maps immediate child edges into a new payload without mutating the input.
 /// Allocation, recursion and retaining replacement owners are caller concerns.
 pub trait ChildMapper {
     fn map_node(&mut self, node: NodeId, role: ChildRole) -> NodeId;
-    fn map_list(&mut self, nodes: NodeListRange, role: ChildRole) -> NodeListRange;
+    fn map_list(&mut self, nodes: NodeListId, role: ChildRole) -> NodeListId;
+    fn map_node_slice(&mut self, nodes: NodeSlice, role: ChildRole) -> NodeSlice;
 }
 
 /// Pinned factory-visitor dispatch. These roles select different transformation
@@ -150,4 +246,72 @@ pub struct DeferredField {
 }
 
 #[cfg(test)]
+mod storage_tests;
+#[cfg(test)]
 mod tests;
+
+impl ts_arena::NodeRecord for Node {
+    type Aux = AstStorageData;
+    fn storage_kind(&self) -> u32 {
+        u32::from(self.kind.raw() as u16)
+    }
+    fn storage_parent(&self) -> Option<NodeId> {
+        self.parent
+    }
+    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
+        self.parent = parent;
+    }
+    fn storage_reparsed(&self) -> bool {
+        // Pinned NodeFlagsReparsed; no second reparsed bit is stored.
+        self.flags & node_flags::REPARSED != 0
+    }
+}
+
+impl SourceFileData {
+    pub fn for_each_child(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {
+        if let Some(statements) = self.statements {
+            visitor.visit_list(statements)?;
+        }
+        if let Some(token) = self.end_of_file_token {
+            visitor.visit_node(token)?;
+        }
+        ControlFlow::Continue(())
+    }
+}
+
+// Structural Rust copying is not the Go factory Clone operation: it preserves
+// stored fields and starts a fresh cache. Generated factory clones implement
+// the source hook/count/parent behavior separately.
+impl Clone for Node {
+    fn clone(&self) -> Self {
+        Self {
+            kind: self.kind,
+            parent: self.parent,
+            flags: self.flags,
+            pos: self.pos,
+            end: self.end,
+            data: self.data.clone(),
+            subtree_facts: AtomicU32::new(0),
+            runtime_id: AtomicU64::new(0),
+        }
+    }
+}
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind
+            && self.parent == other.parent
+            && self.flags == other.flags
+            && self.pos == other.pos
+            && self.end == other.end
+            && self.data == other.data
+    }
+}
+impl Eq for Node {}
+
+mod metadata;
+pub use metadata::*;
+
+pub mod utilities;
+pub mod utilities_tail;
+
+pub mod utilities_middle;

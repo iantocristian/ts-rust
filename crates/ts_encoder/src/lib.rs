@@ -1,11 +1,27 @@
-//! Pinned binary-layout metadata for the source-file encoder.
-//!
-//! These tables describe the protocol and its generated field layouts. They do
-//! not implement serialization or the inventoried custom codecs; those are S06.
+//! Pinned protocol-8 serialization, decoding and generated layout metadata.
+//! Node indexing uses the source file's owned cache and an explicit JSDoc provider.
 
 use ts_ast::SyntaxKind;
 
+// port: tsc/internal/api/encoder/encoder.go:init#1
+const _: () = assert!(
+    (SyntaxKind::LastUnaryOperator as u16) <= 0x3f,
+    "unary operator exceeds six-bit common data"
+);
+
+mod decoder;
+mod encode;
 mod generated;
+mod runtime_generated;
+mod string_table;
+mod structured;
+mod walk;
+
+pub use decoder::{decode_nodes, decode_source_file, DecodeError, DecodedTree};
+pub use encode::{
+    build_node_index_table, encode_node, encode_optional_node, encode_source_file,
+    get_node_index_table, source_file_hash, Encoded,
+};
 
 pub use generated::*;
 

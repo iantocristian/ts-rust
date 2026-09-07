@@ -30,8 +30,18 @@ def suite_output():
     return (tests + "\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;\n").encode()
 
 
+def ast_suite_output(root):
+    cases = ownership.s06_ownership.load_cases(root)
+    rows = "\n".join(f"test {name} ... ok" for name in cases)
+    return (f"running {len(cases)} tests\n" + rows +
+            f"\ntest result: ok. {len(cases)} passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s\n").encode()
+
+
 def fixture(root):
     (root / "data/s04").mkdir(parents=True)
+    (root / "data/s06").mkdir(parents=True)
+    inventory = SOURCE.parent.parent / "data/s06/ownership-cases.json"
+    (root / "data/s06/ownership-cases.json").write_bytes(inventory.read_bytes())
     (root / "data/s04/e3-cases.json").write_text(json.dumps(sorted(ownership.SCENARIOS)))
     (root / "data/s04/toolchains.toml").write_text(
         'nightly = "nightly-2026-09-05"\ngo = "go1.27.1"\nmsrv = "1.96.0"\n')
@@ -47,6 +57,8 @@ def successful_invoke(root, args, env=None):
         return json.dumps(measured_report()).encode()
     if "setup" in args:
         return b""
+    if "ts_ast" in args:
+        return ast_suite_output(root)
     return suite_output()
 
 
@@ -119,7 +131,7 @@ class OwnershipProducerTests(unittest.TestCase):
             fixture(root)
             with patch.object(ownership, "invoke", invoke), patch.dict(ownership.os.environ, {"CARGO_ENCODED_RUSTFLAGS": ""}):
                 report = ownership.run(root)
-        asan = [(args, env) for args, env in calls if "-Zbuild-std" in args]
+        asan = [(args, env) for args, env in calls if "-Zbuild-std" in args and "ts_arena" in args]
         self.assertEqual(len(asan), 1)
         args, env = asan[0]
         self.assertNotIn("CARGO_ENCODED_RUSTFLAGS", env)
@@ -252,7 +264,7 @@ class OwnershipProducerTests(unittest.TestCase):
             fixture(root)
             with patch.object(ownership, "invoke", invoke):
                 ownership.run(root)
-        runs = [(args, env) for args, env in calls if "miri" in args and "test" in args]
+        runs = [(args, env) for args, env in calls if "miri" in args and "test" in args and "ts_arena" in args]
         docs = [args for args, _ in calls if "--doc" in args]
         self.assertEqual(docs, [["cargo", "test", "--package", "ts_arena", "--doc", "--locked"]])
         self.assertEqual(len(runs), 1)

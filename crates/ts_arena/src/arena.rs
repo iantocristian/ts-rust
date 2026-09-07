@@ -43,6 +43,10 @@ impl<T> Arena<T> {
         self.values.get(index).ok_or(Error::InvalidSlot)
     }
 
+    pub(crate) fn values(&self) -> impl Iterator<Item = &T> {
+        self.values.iter()
+    }
+
     pub(crate) fn get_mut(&mut self, arena: ArenaId, slot: u32) -> Result<&mut T, Error> {
         if arena != self.id {
             return Err(Error::WrongOwner);

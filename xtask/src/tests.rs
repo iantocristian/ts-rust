@@ -374,6 +374,16 @@ fn encoder_capture_routes_only_encoder_criteria_and_does_not_verify_decoder() {
     measured["decoder_parity"] = true.into();
     assert_eq!(
         num(&capture(&measured).metrics, "ledger.files_verified"),
+        0.0
+    );
+    measured["decoder_watchdog"] = false.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
+        0.0
+    );
+    measured["decoder_watchdog"] = true.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
         1.0
     );
 }
@@ -404,8 +414,12 @@ fn s06_requires_each_supplemental_result_even_when_primary_evidence_passes() {
     assert!(passes(&sprint.exit, &metrics));
     for (metric, item_id) in [
         ("run.e1.depth", "S06-2"),
+        ("run.e1.parser_regressions", "S06-2"),
         ("run.e1.ast_runtime", "S06-3"),
+        ("run.e1.ast_utilities", "S06-3"),
+        ("run.e3.ast_runtime", "S06-3"),
         ("run.e1.decoder_parity", "S06-4"),
+        ("run.e1.decoder_watchdog", "S06-4"),
     ] {
         let item = sprint.item.iter().find(|item| item.id == item_id).unwrap();
         metrics.remove(metric);

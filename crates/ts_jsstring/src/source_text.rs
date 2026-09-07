@@ -5,11 +5,17 @@ use std::sync::Arc;
 
 use crate::jsstring::{JsString, Validity};
 
-/// A file's immutable bytes after Go's BOM decoding, including raw malformed UTF-8.
+/// Immutable parser text, including raw malformed UTF-8.
 #[derive(Clone, Debug, Default)]
 pub struct SourceText(JsString);
 
 impl SourceText {
+    /// Already loaded text supplied directly to the Go parser. No BOM decoding.
+    /// Use `from_bytes` at a physical/virtual file-loader boundary instead.
+    pub fn from_loaded_bytes(bytes: impl Into<Arc<[u8]>>) -> Self {
+        Self(JsString::from_bytes(bytes))
+    }
+
     /// port: tsc/internal/vfs/internal/internal.go:decodeBytes
     pub fn from_bytes(bytes: impl Into<Arc<[u8]>>) -> Self {
         let bytes = bytes.into();
@@ -64,4 +70,31 @@ fn decode_utf16(bytes: &[u8], little_endian: bool) -> Vec<u8> {
         .map(|rune| rune.unwrap_or(char::REPLACEMENT_CHARACTER))
         .collect::<String>()
         .into_bytes()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SourceText;
+
+    #[test]
+    fn parser_text_does_not_repeat_file_loading() {
+        let double_bom = b"\xef\xbb\xbf\xef\xbb\xbfx";
+        let loaded = SourceText::from_bytes(double_bom.as_slice());
+        assert_eq!(loaded.as_bytes(), b"\xef\xbb\xbfx");
+        let parser_text = SourceText::from_loaded_bytes(loaded.as_bytes());
+        assert_eq!(parser_text.as_bytes(), loaded.as_bytes());
+        assert_eq!(SourceText::from_bytes(loaded.as_bytes()).as_bytes(), b"x");
+
+        for raw in [b"\xff\xfe\0\xd8\xff".as_slice(), b"\xfe\xff\xd8\0\xff"] {
+            assert_eq!(SourceText::from_loaded_bytes(raw).as_bytes(), raw);
+            assert_eq!(
+                SourceText::from_bytes(raw).as_bytes(),
+                "\u{fffd}".as_bytes()
+            );
+        }
+        assert_eq!(
+            SourceText::from_loaded_bytes(&b"\xffx"[..]).as_bytes(),
+            b"\xffx"
+        );
+    }
 }
