@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "scope": "Pinned handwritten enum declaration/runtime pairs, absent from Herebyfile.mjs enumDefs. Both files are source inputs, not generated outputs; preserve their checked-in bytes.",
+  "enums": [
+    {
+      "name": "CharacterCodes",
+      "file": "characterCodes.enum.ts"
+    },
+    {
+      "name": "CommentDirectiveType",
+      "file": "commentDirectiveType.enum.ts"
+    },
+    {
+      "name": "LanguageVariant",
+      "file": "languageVariant.enum.ts"
+    },
+    {
+      "name": "RegularExpressionFlags",
+      "file": "regularExpressionFlags.enum.ts"
+    },
+    {
+      "name": "ScriptTarget",
+      "file": "scriptTarget.enum.ts"
+    }
+  ],
+  "knownSourceDiscrepancy": "CharacterCodes.ogham is 5760 in characterCodes.enum.ts and 5765 in characterCodes.ts. These authored sources already disagree at the pin; S03 does not change that baseline or claim to regenerate them."
+}

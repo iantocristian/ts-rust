@@ -33,7 +33,7 @@ A producer is registered in `status/runs.toml` only when its harness exists; unt
 |---|---|---|---|
 | `workspace`, `oracle` | yes | | build, smoke |
 | `fmt`, `clippy`, `deny`, `selftest` | yes | | `clean`, `pass` |
-| `gen` | S03 | | `patches_apply`, `ast_schema`, `drift`, `client_identical` |
+| `gen` | yes | | `patches_apply`, `ast_schema`, `drift`, `client_identical` |
 | `e3` | yes; extended through S09 | `data/s04/e3-cases.json` | S04 ids, lazy storage, bundles, live counters, Miri and ASan; later E3 metrics as scenarios land |
 | `e4` | yes; extended through S08 | `data/s04/e4-cases.json` plus frozen probe inventory | S04 decoding, helpers, slice validity and positions; later E4 metrics as production paths land |
 | `scanner` | S05 | frozen scanner case list | `parity`, `regexp_parity`, `rescan_parity` |
@@ -47,7 +47,9 @@ A producer is registered in `status/runs.toml` only when its harness exists; unt
 | `e7`, `e8` | S10 | | the E7 and E8 metrics |
 | `testhost` | S11 | transport fixtures | `parity`, `controls` |
 
-Every oracle-side tool is built from the ledger's upstream pin. S04 exports a clean copy into a temporary directory and adds access wrappers for private Go helpers; it never writes to the canonical submodule. Later tools (token/encoder/symbol dumps and the `GOOS=js` parser) use the S03 tooling worktree. See [S04](../docs/S04.md) for reproduction and limits.
+Every oracle-side tool is built from the ledger's upstream pin. S03 applies its carried extractor patches in an independent tooling worktree, runs the pinned resolvers and checks exported-contract TypeScript and enums against the untouched client. `cargo xtask gen` writes generated artifacts; `cargo xtask gen --check` checks drift; `cargo xtask run gen` records the producer's observations. Node/npm pins come from upstream's package and its lockfile, and generation installs dependencies only in the disposable checkout. See [S03](../docs/S03.md) for reproduction, generated surfaces and runtime limits.
+
+S04 exports a clean copy into a temporary directory and adds access wrappers for private Go helpers; it never writes to the canonical submodule. Later tools (token/encoder/symbol dumps and the `GOOS=js` parser) use the S03 tooling worktree. See [S04](../docs/S04.md) for reproduction and limits.
 
 The S08 measurements use checked-in workload manifests, query sequences, harnesses and benchmark configuration declared as producer inputs. Record the upstream pin, both implementation revisions, target, build flags, allocator, thread count, warm-up and sampling method with the raw numerator and denominator samples in each evidence artifact. Checker costs cover the fixed checking/query phase separately from parse and bind. Retained bytes are sampled after that phase while the specified checker and result roots remain alive; the workload defines the same logical roots for both implementations. Final-drop disposal remains an E3 check.
 

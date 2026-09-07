@@ -1,4 +1,4 @@
-# Phase 0, sprint 3. Producer to register when the tooling exists: gen
+# Phase 0, sprint 3. Producer: gen (cargo xtask gen --verify)
 #   run.gen.patches_apply     the carried patches apply to a clean tooling worktree at the pin
 #   run.gen.ast_schema        the pinned schema.ts resolver exports normalized ast.json through the adapter
 #   run.gen.drift             regenerating every generated Rust file changes nothing (false means no drift)

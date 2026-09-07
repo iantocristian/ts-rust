@@ -141,8 +141,8 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "generated"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_encoder/src/generated.rs"]
 verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "13d3e8cfb0359cc5f727bb18d87857ca776ba005dd08a1a406a3f8541d34ef0d"
@@ -167,8 +167,8 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "generated"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_encoder/src/generated.rs"]
 verify = ["run.gen.drift == false", "run.e4.encoder_output_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "30debe2294133a12e47ddd5c247cf6b5494ddfa211ea32a1933be4cbdd82b644"
@@ -284,8 +284,8 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "generated"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_ast/src/data_generated.rs", "crates/ts_ast/src/accessors_generated.rs", "crates/ts_ast/src/visitors_generated.rs"]
 verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "3f230a3441c80d0fcef442a29a47890712fe9866ad74dac10e77dc7ce41c1967"
@@ -375,8 +375,8 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "generated"
-status = "planned"
-rust = []
+status = "ported"
+rust = ["crates/ts_ast/src/kinds_generated.rs"]
 verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e4ad34d87478a6ed4693fb4b984e807ffd1ea75c3990756fc2e07ae52cab34eb"
@@ -1701,9 +1701,9 @@ package = "internal/diagnostics"
 crate = "ts_diagnostics"
 phase = 1
 kind = "generated"
-status = "planned"
-rust = []
-verify = []
+status = "ported"
+rust = ["crates/ts_diagnostics/src/generated.rs"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "a7a61cff1876f6f899c5f75b7dbed8010586cd58e63d2cbce2ceceac3e9e4f17"
 loc = 8854

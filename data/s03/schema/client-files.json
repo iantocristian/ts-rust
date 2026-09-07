@@ -1,0 +1,351 @@
+{
+  "files": [
+    {
+      "path": "packages/typescript/src/api/proto.generated.ts",
+      "role": "generated",
+      "sha256": "aa105b1659259a6e42a7c1cfe6def7bd45f8cd7ef8e5b632eaa19d03b2620c46"
+    },
+    {
+      "path": "packages/typescript/src/enums/characterCodes.enum.ts",
+      "role": "source",
+      "sha256": "92537fcd6768a0d5170c2a9709dc6e3efe8db5e663095f668a64ffd418e964a8"
+    },
+    {
+      "path": "packages/typescript/src/enums/characterCodes.ts",
+      "role": "source",
+      "sha256": "62f358384de62049e69afd605b87895e8648db401aee07e489a4a84f6d494866"
+    },
+    {
+      "path": "packages/typescript/src/enums/checkFlags.enum.ts",
+      "role": "generated",
+      "sha256": "ffdb7c3f42ea92acd93b5ce2ab14e73cb031bb568b44fd7b97f69cfbcef01910"
+    },
+    {
+      "path": "packages/typescript/src/enums/checkFlags.ts",
+      "role": "generated",
+      "sha256": "db4c7dec85f62acc54c7fa64ae7708a64cd665458d8b1535a079eda9a81ccd11"
+    },
+    {
+      "path": "packages/typescript/src/enums/commentDirectiveType.enum.ts",
+      "role": "source",
+      "sha256": "4ee84ad2f31b65a81f92f75196277b4c1a9ec2a427c9c517ee5f1d1b6e763a31"
+    },
+    {
+      "path": "packages/typescript/src/enums/commentDirectiveType.ts",
+      "role": "source",
+      "sha256": "53134e922aa614c6672a4d6cd8db21a87cd35149f974c30b92f05ea99bf3b50c"
+    },
+    {
+      "path": "packages/typescript/src/enums/completionItemKind.enum.ts",
+      "role": "generated",
+      "sha256": "d158f8c0826b1c68b31577e8a23a41f96753ab974474d0218174a01be376abb9"
+    },
+    {
+      "path": "packages/typescript/src/enums/completionItemKind.ts",
+      "role": "generated",
+      "sha256": "bdb4e079f0f86d4dd14df5028a9702282c82e4dd924bab15fde43d7e84bb901c"
+    },
+    {
+      "path": "packages/typescript/src/enums/diagnosticCategory.enum.ts",
+      "role": "generated",
+      "sha256": "62986c304423ca08bd1ca5fea6241fef46611168f2ef3408cd2affc297c834b3"
+    },
+    {
+      "path": "packages/typescript/src/enums/diagnosticCategory.ts",
+      "role": "generated",
+      "sha256": "2f7ecd6028692d8fa2d3c017c13c6d59c4cee743d698dccaca61437816423aa9"
+    },
+    {
+      "path": "packages/typescript/src/enums/diagnosticDirectivePolicy.enum.ts",
+      "role": "generated",
+      "sha256": "577dcbb24d4dcd43db75581a774a958b44ad76fdb92edf42cd61384f0077f123"
+    },
+    {
+      "path": "packages/typescript/src/enums/diagnosticDirectivePolicy.ts",
+      "role": "generated",
+      "sha256": "22fb2bde7421ba61a47e3369ba422fbdae57a8380e1c24b8db1aff3adf4d17ee"
+    },
+    {
+      "path": "packages/typescript/src/enums/elementFlags.enum.ts",
+      "role": "generated",
+      "sha256": "1f2b53fdd7732500556ee166f1ce9ee38c57a58fd9559951912abf4f190301f4"
+    },
+    {
+      "path": "packages/typescript/src/enums/elementFlags.ts",
+      "role": "generated",
+      "sha256": "a2cdb54511cd35f0f66604b487ef6e916f9f51c12104836b1c0d25b5d6a67be2"
+    },
+    {
+      "path": "packages/typescript/src/enums/emitOnly.enum.ts",
+      "role": "generated",
+      "sha256": "0779fa2af5c50ef0282a65c3e9c7ae955a29777d778c758998249e1fb718d640"
+    },
+    {
+      "path": "packages/typescript/src/enums/emitOnly.ts",
+      "role": "generated",
+      "sha256": "25d53cdead6e229357e7c1d98a9e39a01f48fbb217511e205d7e5dad2f6f1ee6"
+    },
+    {
+      "path": "packages/typescript/src/enums/internalSymbolName.enum.ts",
+      "role": "generated",
+      "sha256": "278ffe4331d52bbeea11d3be8449ffdab4c77e300f4144177b737855d80663a2"
+    },
+    {
+      "path": "packages/typescript/src/enums/internalSymbolName.ts",
+      "role": "generated",
+      "sha256": "3aacd47594bbedc656f2ad5c270675fae554ec204a6c5b5b790d3c6e3d8d38a3"
+    },
+    {
+      "path": "packages/typescript/src/enums/jsxEmit.enum.ts",
+      "role": "generated",
+      "sha256": "025364cae8619d3f0f5855b66dba78cadfc29acaf898ac1abb426ef3fc1d45c9"
+    },
+    {
+      "path": "packages/typescript/src/enums/jsxEmit.ts",
+      "role": "generated",
+      "sha256": "d37b566dc996f5e1cf3050f8ec717019e5990c6a6b9079a2624d8ed668f66cc9"
+    },
+    {
+      "path": "packages/typescript/src/enums/languageVariant.enum.ts",
+      "role": "source",
+      "sha256": "4a8b25d95b2cf8a5f05e046fb5dfee8d9133261f089b9f6720c354daf18c11da"
+    },
+    {
+      "path": "packages/typescript/src/enums/languageVariant.ts",
+      "role": "source",
+      "sha256": "e1ca0af8cb40b5c681b85d390444a3b9cdffcbba6149d3f579e755bf33e07d66"
+    },
+    {
+      "path": "packages/typescript/src/enums/modifierFlags.enum.ts",
+      "role": "generated",
+      "sha256": "477e48bbb392a83492be6ed7403cf3fbf9df9e8ed29ab4f19be8f7f845b2681a"
+    },
+    {
+      "path": "packages/typescript/src/enums/modifierFlags.ts",
+      "role": "generated",
+      "sha256": "321c85f9b0e4a254b3680c7f0122c65f04900b992f9a718172ec3ab248810dea"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleDetectionKind.enum.ts",
+      "role": "generated",
+      "sha256": "92a9daa0fa47413ac463085015c455f0c9d31d94e032007b14cec892bc8e22cf"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleDetectionKind.ts",
+      "role": "generated",
+      "sha256": "8a6310e0d7348c4b0d8b20d4f408f9bbdb3fd5e1deddc6a5a4c2723bda5e480e"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleKind.enum.ts",
+      "role": "generated",
+      "sha256": "f31aefafb4b364ce81b0699f53f5f9f71d32521748a170140d3447e320df94b8"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleKind.ts",
+      "role": "generated",
+      "sha256": "74bdf615ba4a7b29b6d13fa3ed2aecbcd6a0d799b1e38e07289e48e927b18852"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleResolutionKind.enum.ts",
+      "role": "generated",
+      "sha256": "2e4acb12840ce915b21ac36cca05a757aed8f4d56fcdd3a01c36f6b17c8814c0"
+    },
+    {
+      "path": "packages/typescript/src/enums/moduleResolutionKind.ts",
+      "role": "generated",
+      "sha256": "1b1d624936725fa1ffb781995df9ed94fbadc5af2fbc249e0f40d677dca8faa1"
+    },
+    {
+      "path": "packages/typescript/src/enums/newLineKind.enum.ts",
+      "role": "generated",
+      "sha256": "f0807912b26a48d480f350f1941df33198924c8e55f922427569f176d7784c6f"
+    },
+    {
+      "path": "packages/typescript/src/enums/newLineKind.ts",
+      "role": "generated",
+      "sha256": "75070ba6f8ec5792051053788554dee7a7e804d8ed48c34888999ed199cc0e00"
+    },
+    {
+      "path": "packages/typescript/src/enums/nodeBuilderFlags.enum.ts",
+      "role": "generated",
+      "sha256": "a588456311a694d2f7a98717475ad42af9cf4539eff47a7f7d535eff74aff5ea"
+    },
+    {
+      "path": "packages/typescript/src/enums/nodeBuilderFlags.ts",
+      "role": "generated",
+      "sha256": "69716a83a77dc076bc1d95fc84ca26c7e4be72450cdf74f5781af0be929908e7"
+    },
+    {
+      "path": "packages/typescript/src/enums/nodeFlags.enum.ts",
+      "role": "generated",
+      "sha256": "9c73824c93c52ee73f905c09e6107f2994392cd257f366f9e33233b87145671f"
+    },
+    {
+      "path": "packages/typescript/src/enums/nodeFlags.ts",
+      "role": "generated",
+      "sha256": "c4f5eaa07a668eb20f14a5ac49b3322233be8ace53e116157ffd387c64e62b7d"
+    },
+    {
+      "path": "packages/typescript/src/enums/objectFlags.enum.ts",
+      "role": "generated",
+      "sha256": "5339d1e74aa53d79a2467780d19b126b3f9207d66866a1552b70ec600d3ae3aa"
+    },
+    {
+      "path": "packages/typescript/src/enums/objectFlags.ts",
+      "role": "generated",
+      "sha256": "c1d4fbc1726750075bbc132fdc69fc0f6596f3ce4307f8ee709feeae0092d778"
+    },
+    {
+      "path": "packages/typescript/src/enums/outerExpressionKinds.enum.ts",
+      "role": "generated",
+      "sha256": "3ecb8f539301f4a6b08faa9ccb0a63c593bebc856c5ac4fb616e4d19239c8fb0"
+    },
+    {
+      "path": "packages/typescript/src/enums/outerExpressionKinds.ts",
+      "role": "generated",
+      "sha256": "97196f678813655bca75f5c4805673ccd518b76f6ab128d344d7fb1939252a37"
+    },
+    {
+      "path": "packages/typescript/src/enums/regularExpressionFlags.enum.ts",
+      "role": "source",
+      "sha256": "aad1982dba7c95fb02f8dce1465ba6290bb7aaa61653e8fc6ed858e6bd344473"
+    },
+    {
+      "path": "packages/typescript/src/enums/regularExpressionFlags.ts",
+      "role": "source",
+      "sha256": "d9dba1f40faa9417e0870f0b135d0c79a2b53f3609ee98e031ead43d7ac95aca"
+    },
+    {
+      "path": "packages/typescript/src/enums/scriptKind.enum.ts",
+      "role": "generated",
+      "sha256": "6b106dc5ce86cb79b81e97b4697fe73831d075e0b855aac58c8356a02e66390b"
+    },
+    {
+      "path": "packages/typescript/src/enums/scriptKind.ts",
+      "role": "generated",
+      "sha256": "e4f6698d1a56d9b344a5635ae1721425b35a0b3d01dafdedb766705334f4d763"
+    },
+    {
+      "path": "packages/typescript/src/enums/scriptTarget.enum.ts",
+      "role": "source",
+      "sha256": "c66e442f188c6e7d16054df034679d72e487f787bfefb8116486870a6b3872ae"
+    },
+    {
+      "path": "packages/typescript/src/enums/scriptTarget.ts",
+      "role": "source",
+      "sha256": "5822415d8ea0570ad60aa962bada76bdac28342d5bc3bfad1f54a19b32881937"
+    },
+    {
+      "path": "packages/typescript/src/enums/signatureFlags.enum.ts",
+      "role": "generated",
+      "sha256": "8f41fb58a0244dbbe7d3d5b01f259112ba092fef53dabaddc44d2c8bb793cdc4"
+    },
+    {
+      "path": "packages/typescript/src/enums/signatureFlags.ts",
+      "role": "generated",
+      "sha256": "1769503fa987b5c9ba8b7c39b2d7488a5b629d1457ff821b8bf79ce2d9a9744d"
+    },
+    {
+      "path": "packages/typescript/src/enums/signatureKind.enum.ts",
+      "role": "generated",
+      "sha256": "cb63e25c7ec1ae322c4f46504dbaaa8f5d9c7729d1bc373a86a5aec1481c70cb"
+    },
+    {
+      "path": "packages/typescript/src/enums/signatureKind.ts",
+      "role": "generated",
+      "sha256": "43452a49353330df97aade1576af7f33aab4798bedf69ea944c45eb8594f2676"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapFeature.enum.ts",
+      "role": "generated",
+      "sha256": "ca1bc5d88c79008428361d8071167f783ded4aedaa0c2775bbd4a102ea96e192"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapFeature.ts",
+      "role": "generated",
+      "sha256": "082e3737db84ce01f4425f93ebc13492c6bce631598f629bd29c257b14db74fc"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapFidelity.enum.ts",
+      "role": "generated",
+      "sha256": "84ba14271773db4e828d399fb485fe0fa03de328cc0c4a06314984a1370cec66"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapFidelity.ts",
+      "role": "generated",
+      "sha256": "f441c513eb759ab4ed8a8e0baa829444885af79776184b6c32821bf29c9b7365"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapKind.enum.ts",
+      "role": "generated",
+      "sha256": "49a0129e9262744a5714f4d249b99c7787566baae156d8930d2839553ad89e75"
+    },
+    {
+      "path": "packages/typescript/src/enums/spanMapKind.ts",
+      "role": "generated",
+      "sha256": "398329e6380de0ace3f842e8f1ae547cc9a789c715fe6815008db72826b19ab2"
+    },
+    {
+      "path": "packages/typescript/src/enums/symbolFlags.enum.ts",
+      "role": "generated",
+      "sha256": "da42ba0eafa3d284a5c0b0b4d74fa1c68571627bb02439a65c7969f6c974c711"
+    },
+    {
+      "path": "packages/typescript/src/enums/symbolFlags.ts",
+      "role": "generated",
+      "sha256": "3e0dbc9824861d6259ab9f0403f101f11e157811776d2f0b9eded2be0902c812"
+    },
+    {
+      "path": "packages/typescript/src/enums/syntaxKind.enum.ts",
+      "role": "generated",
+      "sha256": "ca1b5e6f90946016230344ee84702768a04c327998edf08c415f455577f71c39"
+    },
+    {
+      "path": "packages/typescript/src/enums/syntaxKind.ts",
+      "role": "generated",
+      "sha256": "e8861944e3b18c6ac9fec00d8519ceeec68ddc4433a890f45012ee0ad5b1a1bd"
+    },
+    {
+      "path": "packages/typescript/src/enums/tokenFlags.enum.ts",
+      "role": "generated",
+      "sha256": "344efa8cf8263750ddcb56c13c875922098810a29120c90db538663c555d5acd"
+    },
+    {
+      "path": "packages/typescript/src/enums/tokenFlags.ts",
+      "role": "generated",
+      "sha256": "6ae24285219cb7962b937b1d55cb7f3571bd6dbe50802e464c396fb375723e6b"
+    },
+    {
+      "path": "packages/typescript/src/enums/typeFlags.enum.ts",
+      "role": "generated",
+      "sha256": "35c2c47eb01f20db9177fe213e2858dd19a4c3607c39c91a950a45f769bc16bd"
+    },
+    {
+      "path": "packages/typescript/src/enums/typeFlags.ts",
+      "role": "generated",
+      "sha256": "bb5096429f29ef3f3f69958c22e64f9efb77850460792718e9d782ea65c33c81"
+    },
+    {
+      "path": "packages/typescript/src/enums/typeFormatFlags.enum.ts",
+      "role": "generated",
+      "sha256": "d98a05374411ff4145d9fd1a002a08d900b294d3a8ecaf559676551f10484193"
+    },
+    {
+      "path": "packages/typescript/src/enums/typeFormatFlags.ts",
+      "role": "generated",
+      "sha256": "9d80fee706af68f46fef42c2de3c0fd0d85890c5e831ee6cf4e4f24ac1fef7c0"
+    },
+    {
+      "path": "packages/typescript/src/enums/typePredicateKind.enum.ts",
+      "role": "generated",
+      "sha256": "2681a2250e0b3b08cc3346bf6c5ed3b967b8f6d7aa99d962f2f8942e32372e44"
+    },
+    {
+      "path": "packages/typescript/src/enums/typePredicateKind.ts",
+      "role": "generated",
+      "sha256": "97724395626057a22739c9763d70ddda784b7d68777f4f80b0c3230d3f0498ac"
+    }
+  ],
+  "upstreamPin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "version": 1
+}

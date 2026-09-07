@@ -295,6 +295,68 @@ fn source_globs_track_additions_deletions_and_selected_dependencies() {
 }
 
 #[test]
+fn generation_evidence_tracks_generator_inputs_but_not_unconsumed_leaf_bodies() {
+    let f = Fixture::new();
+    let mut registered: BTreeMap<String, RunSpec> =
+        toml::from_str(include_str!("../../status/runs.toml")).unwrap();
+    let generator = registered.remove("gen").unwrap();
+    // Exercise the real source/input declaration with the tiny fixture producer;
+    // frontend execution is independent of whether evidence becomes stale.
+    let mut spec = f.spec();
+    spec.sources = generator.sources;
+    spec.inputs = generator.inputs;
+    f.set_spec(&spec);
+    for input in &spec.inputs {
+        let path = f.0.join(input);
+        if !path.exists() {
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            f.write(input, "original input");
+        }
+    }
+    let leaf_bodies = [
+        "crates/ts_arena/src/arena.rs",
+        "crates/ts_jsstring/src/jsstring.rs",
+    ];
+    let consumed = [
+        "crates/ts_ast/src/data_generated.rs",
+        "crates/ts_diagnostics/src/generated.rs",
+        "crates/ts_encoder/src/generated.rs",
+        "crates/ts_arena/Cargo.toml",
+        "crates/ts_jsstring/Cargo.toml",
+        "xtask/src/gen/ast.rs",
+        "tools/s03/ast-export.mts",
+        "scripts/s03.py",
+        "scripts/s04_common.py",
+        "scripts/s04_runtime.py",
+        "data/s03/schema/ast.json",
+        "data/s03/generated.json",
+        "data/s03/api-special-codecs.json",
+        "data/s04/toolchains.toml",
+        "Cargo.toml",
+        "Cargo.lock",
+        ".cargo/config.toml",
+        "rust-toolchain.toml",
+        "rustfmt.toml",
+        "upstream",
+    ];
+    for path in leaf_bodies.into_iter().chain(consumed) {
+        fs::create_dir_all(f.0.join(path).parent().unwrap()).unwrap();
+        f.write(path, "original input");
+    }
+    f.success();
+    for path in leaf_bodies {
+        f.write(path, "unconsumed implementation changed");
+        assert_eq!(f.loaded().states["probe"], "current", "{path}");
+    }
+    for path in consumed {
+        f.write(path, "consumed input changed");
+        f.rejected();
+        f.write(path, "original input");
+        assert_eq!(f.loaded().states["probe"], "current", "{path}");
+    }
+}
+
+#[test]
 fn default_source_set_ignores_docs_but_includes_build_configuration() {
     let f = Fixture::new();
     let mut spec = f.spec();

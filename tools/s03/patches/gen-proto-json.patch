@@ -1,0 +1,406 @@
+--- a/tools/gen-proto/main.go
++++ b/tools/gen-proto/main.go
+@@ -23,11 +23,15 @@
+ }
+ 
+ func run() int {
+-	if len(os.Args) != 3 {
+-		fmt.Fprintln(os.Stderr, "Usage: gen-proto <input path>.go <output path>.ts")
++	if len(os.Args) != 3 && len(os.Args) != 4 {
++		fmt.Fprintln(os.Stderr, "Usage: gen-proto <input path>.go <output path>.ts [<export path>.json]")
+ 		return 1
+ 	}
+-	if err := generate(os.Args[1], os.Args[2]); err != nil {
++	jsonOutput := ""
++	if len(os.Args) == 4 {
++		jsonOutput = os.Args[3]
++	}
++	if err := generateWithExport(os.Args[1], os.Args[2], jsonOutput); err != nil {
+ 		fmt.Fprintln(os.Stderr, err)
+ 		return 1
+ 	}
+@@ -36,6 +40,7 @@
+ 
+ type methodInfo struct {
+ 	name           string
++	constantName   string
+ 	params         types.Type
+ 	result         types.Type
+ 	paramsText     string
+@@ -44,6 +49,10 @@
+ }
+ 
+ func generate(inputPath string, outputPath string) error {
++	return generateWithExport(inputPath, outputPath, "")
++}
++
++func generateWithExport(inputPath string, outputPath string, jsonOutput string) error {
+ 	absInput, err := filepath.Abs(inputPath)
+ 	if err != nil {
+ 		return err
+@@ -144,6 +153,9 @@
+ 	if err := os.WriteFile(absOutput, data, 0o644); err != nil {
+ 		return fmt.Errorf("write output: %w", err)
+ 	}
++	if jsonOutput != "" {
++		return renderer.exportJSON(methods, jsonOutput)
++	}
+ 	return nil
+ }
+ 
+@@ -176,7 +188,7 @@
+ 				if !ok || constantObject.Val().Kind() != constant.String {
+ 					return nil, nil, fmt.Errorf("%s is not a string method constant", name.Name)
+ 				}
+-				method := &methodInfo{name: constant.StringVal(constantObject.Val())}
++				method := &methodInfo{name: constant.StringVal(constantObject.Val()), constantName: name.Name}
+ 				methods = append(methods, method)
+ 				methodObjects[obj] = method
+ 			}
+@@ -353,11 +365,15 @@
+ 	docs               map[types.Object]string
+ 	packages           map[string]*packages.Package
+ 	documentIdentifier *types.TypeName
++	exportTypes        map[*types.Named]string
++	exportDeclarations []string
++	exportAliases      []aliasExport
+ }
+ 
+ func newTypeRenderer(apiPackage *packages.Package) *typeRenderer {
+ 	r := &typeRenderer{
+ 		apiPackagePath: apiPackage.PkgPath,
++		exportTypes:    make(map[*types.Named]string),
+ 		seen:           make(map[*types.TypeName]bool),
+ 		names:          make(map[string]*types.TypeName),
+ 		imports:        make(map[string][]string),
+@@ -483,6 +499,12 @@
+ }
+ 
+ func (r *typeRenderer) namedType(named *types.Named) string {
++	result := r.renderNamedType(named)
++	r.exportTypes[named] = result
++	return result
++}
++
++func (r *typeRenderer) renderNamedType(named *types.Named) string {
+ 	obj := named.Obj()
+ 	if obj.Name() == "error" && obj.Pkg() == nil {
+ 		return "string"
+@@ -595,11 +617,14 @@
+ 	var out bytes.Buffer
+ 	if strings.Contains(strings.Join(r.referencedNames(), ","), "DocumentIdentifier") {
+ 		writeDoc(&out, "", r.docs[r.documentIdentifier])
+-		out.WriteString("export type DocumentIdentifier = string | { uri: string; };\n\n")
++		alias := aliasExport{Name: "DocumentIdentifier", TypeScript: "string | { uri: string; }", Doc: renderedDoc("", r.docs[r.documentIdentifier])}
++		r.exportAliases = append(r.exportAliases, alias)
++		fmt.Fprintf(&out, "export type %s = %s;\n\n", alias.Name, alias.TypeScript)
+ 	}
+ 	for len(r.queued) > 0 {
+ 		named := r.queued[0]
+ 		r.queued = r.queued[1:]
++		r.exportDeclarations = append(r.exportDeclarations, qualifiedType(named))
+ 		structType := named.Underlying().(*types.Struct)
+ 		isParams := strings.HasSuffix(named.Obj().Name(), "Params")
+ 		writeDoc(&out, "", r.docs[named.Obj()])
+--- /dev/null
++++ b/tools/gen-proto/json_export.go
+@@ -0,0 +1,200 @@
++package main
++
++// This adapter observes gen-proto's resolved methods and type renderer. It does
++// not reinterpret dispatch, annotations, tags, or the renderer's special cases.
++import (
++	"bytes"
++	"encoding/json"
++	"fmt"
++	"go/types"
++	"os"
++	"path/filepath"
++	"slices"
++	"sort"
++	"strings"
++)
++
++type wireType struct {
++	TypeScript string     `json:"typescript"`
++	Go         *typeShape `json:"go,omitempty"`
++}
++
++// Named references stop recursion. Their resolved client surface is exported
++// separately; private server fields must never pull the compiler graph into it.
++type typeShape struct {
++	Kind    string     `json:"kind"`
++	Name    string     `json:"name,omitempty"`
++	Element *typeShape `json:"element,omitempty"`
++	Key     *typeShape `json:"key,omitempty"`
++	Length  *int64     `json:"length,omitempty"`
++}
++
++type methodExport struct {
++	Constant       string   `json:"constant"`
++	ID             string   `json:"id"`
++	Params         wireType `json:"params"`
++	Result         wireType `json:"result"`
++	ResultNullable bool     `json:"resultNullable"`
++}
++
++type fieldExport struct {
++	GoName        string     `json:"goName"`
++	JSONName      string     `json:"jsonName"`
++	Go            *typeShape `json:"go"`
++	TypeScript    string     `json:"typescript,omitempty"`
++	Doc           string     `json:"typescriptDoc"`
++	Tag           string     `json:"tag"`
++	ClientVisible bool       `json:"clientVisible"`
++	Optional      bool       `json:"optional"`
++	NonNil        bool       `json:"nonnil"`
++	Deprecated    bool       `json:"deprecated"`
++	Internal      bool       `json:"internal"`
++}
++
++type namedExport struct {
++	ID           string        `json:"id"`
++	TypeScript   string        `json:"typescript"`
++	Kind         string        `json:"kind"`
++	Doc          string        `json:"typescriptDoc"`
++	Fields       []fieldExport `json:"fields,omitempty"`
++	Underlying   *typeShape    `json:"underlying,omitempty"`
++	CodecMethods []string      `json:"codecMethods,omitempty"`
++}
++
++type aliasExport struct {
++	Name       string `json:"name"`
++	TypeScript string `json:"typescript"`
++	Doc        string `json:"typescriptDoc"`
++}
++
++func renderedDoc(indent, doc string) string {
++	var out bytes.Buffer
++	writeDoc(&out, indent, doc)
++	return out.String()
++}
++
++type importExport struct {
++	Path  string   `json:"path"`
++	Names []string `json:"names"`
++}
++
++type apiExport struct {
++	SchemaVersion    int            `json:"schemaVersion"`
++	Generator        string         `json:"generator"`
++	Methods          []methodExport `json:"methods"`
++	Types            []namedExport  `json:"types"`
++	Imports          []importExport `json:"imports"`
++	SpecialMappings  []namedExport  `json:"specialMappings"`
++	DeclarationOrder []string       `json:"declarationOrder"`
++	Aliases          []aliasExport  `json:"aliases"`
++}
++
++func qualifiedType(t types.Type) string {
++	return types.TypeString(t, func(pkg *types.Package) string { return pkg.Path() })
++}
++
++func shape(t types.Type) *typeShape {
++	if t == nil {
++		return nil
++	}
++	t = types.Unalias(t)
++	switch t := t.(type) {
++	case *types.Named:
++		return &typeShape{Kind: "named", Name: qualifiedType(t)}
++	case *types.Basic:
++		return &typeShape{Kind: "basic", Name: t.Name()}
++	case *types.Pointer:
++		return &typeShape{Kind: "pointer", Element: shape(t.Elem())}
++	case *types.Slice:
++		return &typeShape{Kind: "slice", Element: shape(t.Elem())}
++	case *types.Array:
++		length := t.Len()
++		return &typeShape{Kind: "array", Element: shape(t.Elem()), Length: &length}
++	case *types.Map:
++		return &typeShape{Kind: "map", Key: shape(t.Key()), Element: shape(t.Elem())}
++	case *types.Interface:
++		return &typeShape{Kind: "interface", Name: qualifiedType(t)}
++	default:
++		return &typeShape{Kind: "opaque", Name: qualifiedType(t)}
++	}
++}
++
++func codecMethods(named *types.Named) []string {
++	var methods []string
++	methodSet := types.NewMethodSet(types.NewPointer(named))
++	for i := range methodSet.Len() {
++		name := methodSet.At(i).Obj().Name()
++		if slices.Contains([]string{"MarshalJSON", "MarshalJSONTo", "UnmarshalJSON", "UnmarshalJSONFrom", "MarshalText", "UnmarshalText"}, name) {
++			methods = append(methods, name)
++		}
++	}
++	sort.Strings(methods)
++	return methods
++}
++
++func (r *typeRenderer) exportJSON(methods []*methodInfo, outputPath string) error {
++	out := apiExport{SchemaVersion: 1, Generator: "tools/gen-proto", Imports: []importExport{}, SpecialMappings: []namedExport{}, DeclarationOrder: r.exportDeclarations, Aliases: r.exportAliases}
++	for _, method := range methods {
++		params, result := method.paramsText, method.resultText
++		if params == "" {
++			params = r.requestType(method.params)
++		}
++		if result == "" {
++			result = r.resultType(method.result, method.resultNullable)
++		}
++		out.Methods = append(out.Methods, methodExport{method.constantName, method.name, wireType{params, shape(method.params)}, wireType{result, shape(method.result)}, method.resultNullable})
++	}
++	// declarations() has already visited every visible field. Snapshot before
++	// inspecting fields so map iteration cannot affect export order.
++	namedTypes := make([]*types.Named, 0, len(r.exportTypes))
++	for named := range r.exportTypes {
++		namedTypes = append(namedTypes, named)
++	}
++	sort.Slice(namedTypes, func(i, j int) bool { return qualifiedType(namedTypes[i]) < qualifiedType(namedTypes[j]) })
++	for _, named := range namedTypes {
++		wire := r.exportTypes[named]
++		item := namedExport{ID: qualifiedType(named), TypeScript: wire, Kind: "mapping", CodecMethods: codecMethods(named), Doc: renderedDoc("", r.docs[named.Obj()])}
++		if st, ok := named.Underlying().(*types.Struct); ok && r.names[wire] == named.Obj() {
++			item.Kind = "dto"
++			for i := range st.NumFields() {
++				name, include, optional, nonnil, deprecated, internal := jsonField(st, i)
++				visible := include && !deprecated && !internal
++				fieldType := ""
++				if visible {
++					fieldType = r.typeString(st.Field(i).Type(), !optional && !nonnil)
++					if strings.HasSuffix(named.Obj().Name(), "Params") && isArrayType(st.Field(i).Type()) {
++						fieldType = "readonly " + fieldType
++					}
++				}
++				item.Fields = append(item.Fields, fieldExport{st.Field(i).Name(), name, shape(st.Field(i).Type()), fieldType, renderedDoc("    ", r.docs[st.Field(i)]), st.Tag(i), visible, optional, nonnil, deprecated, internal})
++			}
++		} else if basic, ok := named.Underlying().(*types.Basic); ok && basicType(basic) == wire {
++			item.Kind = "scalar"
++			item.Underlying = shape(basic)
++		}
++		out.Types = append(out.Types, item)
++		if item.Kind == "mapping" || len(item.CodecMethods) != 0 {
++			// Deliberately include custom codecs on ordinary-looking DTOs, such as
++			// BatchRequestsResponse. Tags alone do not define their serializer.
++			out.SpecialMappings = append(out.SpecialMappings, namedExport{ID: item.ID, TypeScript: item.TypeScript, Kind: item.Kind, CodecMethods: item.CodecMethods})
++		}
++	}
++	for path, names := range r.imports {
++		out.Imports = append(out.Imports, importExport{path, slices.Clone(names)})
++	}
++	sort.Slice(out.Imports, func(i, j int) bool { return out.Imports[i].Path < out.Imports[j].Path })
++	for i := range out.Imports {
++		sort.Strings(out.Imports[i].Names)
++	}
++	data, err := json.MarshalIndent(out, "", "  ")
++	if err != nil {
++		return fmt.Errorf("encode API export: %w", err)
++	}
++	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
++		return err
++	}
++	if err := os.WriteFile(outputPath, append(data, '\n'), 0o644); err != nil {
++		return fmt.Errorf("write API export: %w", err)
++	}
++	return nil
++}
+--- /dev/null
++++ b/tools/gen-proto/json_export_test.go
+@@ -0,0 +1,96 @@
++package main
++
++import (
++	"bytes"
++	"encoding/json"
++	"os"
++	"path/filepath"
++	"testing"
++)
++
++func TestJSONExportPreservesRendererContract(t *testing.T) {
++	input := filepath.Join("..", "..", "tsc", "internal", "api", "proto.go")
++	dir := t.TempDir()
++	plain, exported, contract := filepath.Join(dir, "plain.ts"), filepath.Join(dir, "exported.ts"), filepath.Join(dir, "api.json")
++	if err := generate(input, plain); err != nil {
++		t.Fatal(err)
++	}
++	if err := generateWithExport(input, exported, contract); err != nil {
++		t.Fatal(err)
++	}
++	first, err := os.ReadFile(plain)
++	if err != nil {
++		t.Fatal(err)
++	}
++	second, err := os.ReadFile(exported)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !bytes.Equal(first, second) {
++		t.Fatal("enabling JSON export changed TypeScript output")
++	}
++	data, err := os.ReadFile(contract)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var api apiExport
++	if err := json.Unmarshal(data, &api); err != nil {
++		t.Fatal(err)
++	}
++	methods := make(map[string]methodExport)
++	for _, method := range api.Methods {
++		if _, duplicate := methods[method.ID]; duplicate {
++			t.Fatalf("duplicate method %s", method.ID)
++		}
++		methods[method.ID] = method
++	}
++	if method := methods["release"]; method.Constant != "MethodRelease" || method.Result.TypeScript != "void" {
++		t.Fatalf("release acknowledgement leaked into export: %+v", method)
++	}
++	if method := methods["getSourceFile"]; method.Result.TypeScript != "SourceFileResponse | null" || !method.ResultNullable {
++		t.Fatalf("result override or nullable annotation lost: %+v", method)
++	}
++	const apiPath = "github.com/microsoft/TypeScript/tsc/internal/api."
++	typeByID := make(map[string]namedExport)
++	for _, item := range api.Types {
++		typeByID[item.ID] = item
++	}
++	var foundOpenProjects bool
++	for _, field := range typeByID[apiPath+"UpdateSnapshotParams"].Fields {
++		if field.JSONName == "openProjects" {
++			foundOpenProjects = field.Optional && field.ClientVisible && field.TypeScript == "readonly DocumentIdentifier[]" && field.Tag == `json:"openProjects,omitempty"`
++		}
++	}
++	if !foundOpenProjects {
++		t.Fatal("request array omission/readonly metadata missing")
++	}
++	var foundNonNil bool
++	for _, field := range typeByID[apiPath+"BatchRequestsResponse"].Fields {
++		if field.JSONName == "responses" {
++			foundNonNil = field.NonNil && !field.Optional && field.TypeScript == "BatchResponse[]"
++		}
++	}
++	if !foundNonNil {
++		t.Fatal("nonnil response array metadata missing")
++	}
++	specials := make(map[string]namedExport)
++	for _, item := range api.SpecialMappings {
++		specials[item.ID] = item
++	}
++	if len(specials[apiPath+"DocumentIdentifier"].CodecMethods) == 0 || len(specials[apiPath+"BatchRequestsResponse"].CodecMethods) == 0 {
++		t.Fatal("custom serializer inventory incomplete")
++	}
++	if specials["github.com/microsoft/TypeScript/tsc/internal/core.Tristate"].TypeScript != "boolean" {
++		t.Fatal("special tristate mapping lost")
++	}
++	if err := generateWithExport(input, exported, contract); err != nil {
++		t.Fatal(err)
++	}
++	repeated, err := os.ReadFile(contract)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !bytes.Equal(data, repeated) {
++		t.Fatal("JSON export is not deterministic")
++	}
++}
