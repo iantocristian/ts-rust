@@ -354,6 +354,12 @@ source edit explicitly. Compare CI step durations and actual cache-hit logs
 before attributing an entire slowdown to one tool or cache; a clean independent
 review does not substitute for those observations.
 
+The next CI run exposed a concrete cache lifecycle failure: `rust-cache` kept
+the tooling directory under `target/` but removed its Git files before saving
+the cache. The first clean run passed; the restored run could not read its
+origin. Keep non-Cargo repository state outside Cargo's cleanup domain and test
+generation after target cleanup as well as from a clean checkout.
+
 ## Evidence and maintenance
 
 Prepared on 7 September 2026 from a fresh read of these local reports:

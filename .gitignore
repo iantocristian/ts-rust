@@ -1,4 +1,5 @@
 /target
+/.s03-tooling/
 
 # Finder metadata, at any depth.
 .DS_Store

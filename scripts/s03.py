@@ -73,16 +73,27 @@ def check_upstream(root, pin):
     if actual != pin or gitlink[:3] != ["160000", "commit", pin]:
         raise ValueError("canonical upstream HEAD, parent gitlink and ledger pin must agree")
     if run(["git", "status", "--porcelain", "--untracked-files=all"], upstream).strip():
-        raise ValueError("canonical upstream must be clean; tooling edits belong only in target/s03-tooling")
+        raise ValueError("canonical upstream must be clean; tooling edits belong only in .s03-tooling/pin")
 
 
 def prepare_worktree(root, pin):
-    bare = root / "target/s03-tooling.git"
-    tooling = root / "target/s03-tooling/pin"
+    # rust-cache prunes arbitrary files from Cargo's target directory. Git
+    # metadata and a reusable checkout must stay outside that managed tree.
+    # Old target/s03-tooling* remnants are deliberately neither read nor deleted.
+    state = root / ".s03-tooling"
+    bare = state / "upstream.git"
+    tooling = state / "pin"
+    for path in (state, bare, tooling):
+        if path.is_symlink():
+            raise ValueError(f"refusing symlinked tooling path: {path}")
+    state.mkdir(exist_ok=True)
     if not bare.exists():
         run(["git", "clone", "--bare", "--shared", root / "upstream", bare], root)
     # Verify ownership before resetting anything, including after a previous run.
-    origin = run(["git", "--git-dir", bare, "config", "--get", "remote.origin.url"], root).decode().strip()
+    try:
+        origin = run(["git", "--git-dir", bare, "config", "--get", "remote.origin.url"], root).decode().strip()
+    except RuntimeError as error:
+        raise ValueError(f"refusing incomplete tooling repository: {bare}; inspect its Git metadata before retrying") from error
     if Path(origin).resolve() != (root / "upstream").resolve():
         raise ValueError(f"refusing unrelated tooling repository: {bare}")
     if not tooling.exists():

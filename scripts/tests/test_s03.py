@@ -238,6 +238,113 @@ class ProvenanceAndRuntimeTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), "")
 
 
+class ToolingWorktreeTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.upstream = self.root / "upstream"
+        (self.upstream / "tools").mkdir(parents=True)
+        (self.upstream / "tools/input.txt").write_text("original\n")
+        (self.upstream / ".gitignore").write_text("node_modules/\n")
+        self.git("init", "-q", cwd=self.upstream)
+        self.git("add", ".", cwd=self.upstream)
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                 "-c", "commit.gpgsign=false", "commit", "-qm", "fixture", cwd=self.upstream)
+        self.pin = self.git("rev-parse", "HEAD", cwd=self.upstream).strip()
+        patch_dir = self.root / "tools/s03/patches"
+        patch_dir.mkdir(parents=True)
+        (patch_dir / "example.patch").write_text(
+            "diff --git a/tools/input.txt b/tools/input.txt\n"
+            "--- a/tools/input.txt\n+++ b/tools/input.txt\n"
+            "@@ -1 +1 @@\n-original\n+patched\n"
+        )
+
+    def git(self, *args, cwd=None):
+        result = subprocess.run(["git", *map(str, args)], cwd=cwd or self.root,
+                                check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.stdout.decode()
+
+    def test_cold_and_warm_runs_survive_target_pruning_and_ignore_legacy_remnants(self):
+        legacy = self.root / "target/s03-tooling.git"
+        legacy_worktree = self.root / "target/s03-tooling/pin"
+        (legacy / "refs/heads").mkdir(parents=True)
+        legacy_worktree.mkdir(parents=True)
+        (legacy / "keep").write_text("legacy cache remnant")
+        (legacy_worktree / "keep").write_text("legacy worktree remnant")
+
+        tooling, applied = s03.prepare_worktree(self.root, self.pin)
+        self.assertTrue(applied)
+        self.assertEqual(tooling, self.root / ".s03-tooling/pin")
+        self.assertEqual((tooling / "tools/input.txt").read_text(), "patched\n")
+        self.assertEqual((self.upstream / "tools/input.txt").read_text(), "original\n")
+        self.assertEqual((legacy / "keep").read_text(), "legacy cache remnant")
+        self.assertEqual((legacy_worktree / "keep").read_text(), "legacy worktree remnant")
+
+        bare = self.root / ".s03-tooling/upstream.git"
+        git_config = (bare / "config").read_bytes()
+        (tooling / "node_modules").mkdir()
+        (tooling / "node_modules/cache-stamp").write_text("cached dependencies")
+        (tooling / "tools/input.txt").write_text("dirty tooling file\n")
+        (tooling / "leftover.txt").write_text("remove before regeneration")
+        # rust-cache recursively removes ordinary files while leaving directories
+        # under target/. Model that failure mode, not just an empty cold checkout.
+        for path in (self.root / "target").rglob("*"):
+            if path.is_file():
+                path.unlink()
+        self.assertTrue(legacy.is_dir())
+        self.assertEqual((bare / "config").read_bytes(), git_config)
+
+        with patch.object(s03, "run", wraps=s03.run) as commands:
+            repeated, applied = s03.prepare_worktree(self.root, self.pin)
+        self.assertEqual(repeated, tooling)
+        self.assertTrue(applied)
+        self.assertFalse(any(call.args[0][:2] == ["git", "clone"] for call in commands.call_args_list))
+        self.assertEqual((tooling / "tools/input.txt").read_text(), "patched\n")
+        self.assertFalse((tooling / "leftover.txt").exists())
+        self.assertEqual((tooling / "node_modules/cache-stamp").read_text(), "cached dependencies")
+        self.assertEqual((self.upstream / "tools/input.txt").read_text(), "original\n")
+
+    def test_incomplete_reserved_repository_is_diagnosed_without_deleting_it(self):
+        bare = self.root / ".s03-tooling/upstream.git"
+        bare.mkdir(parents=True)
+        (bare / "keep").write_text("do not reconstruct unknown contents")
+        with self.assertRaisesRegex(ValueError, "refusing incomplete tooling repository"):
+            s03.prepare_worktree(self.root, self.pin)
+        self.assertEqual((bare / "keep").read_text(), "do not reconstruct unknown contents")
+
+    def test_unrelated_origin_and_worktree_are_rejected_before_reset(self):
+        tooling, _ = s03.prepare_worktree(self.root, self.pin)
+        bare = self.root / ".s03-tooling/upstream.git"
+        self.git("--git-dir", bare, "config", "remote.origin.url", self.root / "unrelated")
+        (tooling / "tools/input.txt").write_text("protect unrelated work\n")
+        with self.assertRaisesRegex(ValueError, "refusing unrelated tooling repository"):
+            s03.prepare_worktree(self.root, self.pin)
+        self.assertEqual((tooling / "tools/input.txt").read_text(), "protect unrelated work\n")
+        self.git("--git-dir", bare, "config", "remote.origin.url", self.upstream)
+        # Even an expected origin cannot authorize resetting a checkout attached
+        # to another repository. Keep its .git pointer and content intact.
+        pointer = tooling / ".git"
+        pointer.write_text(f"gitdir: {self.upstream / '.git'}\n")
+        with self.assertRaisesRegex(ValueError, "refusing unrelated worktree"):
+            s03.prepare_worktree(self.root, self.pin)
+        self.assertEqual((tooling / "tools/input.txt").read_text(), "protect unrelated work\n")
+
+    def test_reserved_paths_cannot_redirect_into_other_directories(self):
+        outside = self.root / "outside"
+        outside.mkdir()
+        (outside / "keep").write_text("unrelated files")
+        state = self.root / ".s03-tooling"
+        for redirected in (state, state / "upstream.git", state / "pin"):
+            with self.subTest(path=redirected):
+                redirected.parent.mkdir(exist_ok=True)
+                redirected.symlink_to(outside, target_is_directory=True)
+                with self.assertRaisesRegex(ValueError, "refusing symlinked tooling path"):
+                    s03.prepare_worktree(self.root, self.pin)
+                self.assertEqual((outside / "keep").read_text(), "unrelated files")
+                redirected.unlink()
+
+
 class HandwrittenEnumInventoryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
