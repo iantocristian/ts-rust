@@ -1,0 +1,186 @@
+//! The pinned Go suggestion distance and simple-fold comparison.
+
+use ts_jsstring::{helpers::to_lower_go, wtf8::decode_utf8};
+
+use crate::tables_generated::SIMPLE_FOLD;
+
+fn runes(mut bytes: &[u8]) -> Vec<i32> {
+    let mut result = Vec::with_capacity(bytes.len());
+    while !bytes.is_empty() {
+        let (rune, width) = decode_utf8(bytes);
+        result.push(rune);
+        bytes = &bytes[width..];
+    }
+    result
+}
+
+fn simple_fold(rune: i32) -> i32 {
+    SIMPLE_FOLD
+        .binary_search_by_key(&(rune as u32), |row| row.0)
+        .map_or(rune, |index| SIMPLE_FOLD[index].1 as i32)
+}
+
+/// Go `strings.EqualFold`, using the pinned toolchain's simple-fold cycles.
+/// Malformed bytes each decode to RuneError; equality does not repair the input.
+pub fn equal_fold(mut left: &[u8], mut right: &[u8]) -> bool {
+    while !left.is_empty() && !right.is_empty() {
+        let (a, width_a) = decode_utf8(left);
+        let (b, width_b) = decode_utf8(right);
+        left = &left[width_a..];
+        right = &right[width_b..];
+        if a == b {
+            continue;
+        }
+        let (small, large) = if a < b { (a, b) } else { (b, a) };
+        let mut folded = simple_fold(small);
+        while folded != small && folded < large {
+            folded = simple_fold(folded);
+        }
+        if folded != large {
+            return false;
+        }
+    }
+    left.is_empty() && right.is_empty()
+}
+
+/// port: tsc/internal/core/core.go:GetSpellingSuggestionForStrings
+pub(crate) fn get_spelling_suggestion_for_strings<'candidate>(
+    name: &[u8],
+    candidates: impl IntoIterator<Item = &'candidate [u8]>,
+) -> Option<&'candidate [u8]> {
+    let name_runes = runes(name);
+    let name_lower = runes(&to_lower_go(name));
+    let maximum_length_difference = 2.max((name_runes.len() as f64 * 0.34) as usize);
+    let mut best_distance = (name_runes.len() as f64 * 0.4).floor() + 0.9;
+    let mut best_candidate: Option<&[u8]> = None;
+    let mut buffers = DistanceBuffers::default();
+    for candidate in candidates {
+        // The source deliberately compares candidate BYTES with input RUNES.
+        if candidate.is_empty()
+            || candidate.len().abs_diff(name_runes.len()) > maximum_length_difference
+            || candidate == name
+            || (candidate.len() < 3 && !equal_fold(candidate, name))
+        {
+            continue;
+        }
+        let distance = levenshtein_with_max(
+            &mut buffers,
+            &name_runes,
+            &runes(candidate),
+            &name_lower,
+            &runes(&to_lower_go(candidate)),
+            best_distance,
+        );
+        if distance < 0.0 {
+            continue;
+        }
+        assert!(
+            distance <= best_distance,
+            "Debug failure. False expression."
+        );
+        if distance < best_distance {
+            best_distance = distance;
+            best_candidate = Some(candidate);
+        } else if best_candidate.is_none_or(|best| candidate < best) {
+            best_candidate = Some(candidate);
+        }
+    }
+    best_candidate
+}
+
+#[derive(Default)]
+struct DistanceBuffers {
+    previous: Vec<f64>,
+    current: Vec<f64>,
+}
+
+/// port: tsc/internal/core/core.go:levenshteinWithMax
+fn levenshtein_with_max(
+    buffers: &mut DistanceBuffers,
+    left: &[i32],
+    right: &[i32],
+    left_lower: &[i32],
+    right_lower: &[i32],
+    max_value: f64,
+) -> f64 {
+    buffers.previous.resize(right.len() + 1, 0.0);
+    buffers.current.resize(right.len() + 1, 0.0);
+    let big = max_value + 0.01;
+    for (index, value) in buffers.previous.iter_mut().enumerate() {
+        *value = index as f64;
+    }
+    for i in 1..=left.len() {
+        let min_j = ((i as f64 - max_value).ceil() as i64).max(1) as usize;
+        let max_j = ((max_value + i as f64).floor() as usize).min(right.len());
+        let mut column_min = i as f64;
+        buffers.current[0] = column_min;
+        for j in 1..min_j {
+            buffers.current[j] = big;
+        }
+        for j in min_j..=max_j {
+            let substitution = buffers.previous[j - 1]
+                + if left_lower[i - 1] == right_lower[j - 1] {
+                    0.1
+                } else {
+                    2.0
+                };
+            let distance = if left[i - 1] == right[j - 1] {
+                buffers.previous[j - 1]
+            } else {
+                (buffers.previous[j] + 1.0).min((buffers.current[j - 1] + 1.0).min(substitution))
+            };
+            buffers.current[j] = distance;
+            column_min = column_min.min(distance);
+        }
+        for j in max_j + 1..=right.len() {
+            buffers.current[j] = big;
+        }
+        if column_min > max_value {
+            return -1.0;
+        }
+        std::mem::swap(&mut buffers.previous, &mut buffers.current);
+    }
+    let result = buffers.previous[right.len()];
+    if result > max_value {
+        -1.0
+    } else {
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{equal_fold, get_spelling_suggestion_for_strings};
+
+    type SuggestionCase<'a> = (&'a [u8], &'a [&'a [u8]], Option<&'a [u8]>);
+
+    #[test]
+    fn pinned_go_suggestion_discriminators() {
+        // Independently observed through core.GetSpellingSuggestionForStrings.
+        let cases: &[SuggestionCase<'_>] = &[
+            (b"Scrpt", &[b"Script"], Some(b"Script")),
+            (b"sc", &[b"SC"], Some(b"SC")),
+            ("İ".as_bytes(), &[b"i"], None),
+            ("\u{212a}".as_bytes(), &[b"k"], Some(b"k")),
+            ("ſ".as_bytes(), &[b"s"], None),
+            ("𐐀xxx".as_bytes(), &["𐐨xxx".as_bytes()], None),
+            (b"abcde", &[b"abYde", b"abXde"], Some(b"abXde")),
+            (&[0xff], &[&[0xfe]], Some(&[0xfe])),
+        ];
+        for &(name, candidates, expected) in cases {
+            assert_eq!(
+                get_spelling_suggestion_for_strings(name, candidates.iter().copied()),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn simple_fold_is_distinct_from_lowercase_and_keeps_raw_inputs() {
+        assert!(!equal_fold(b"i", "İ".as_bytes()));
+        assert!(equal_fold(b"k", "\u{212a}".as_bytes()));
+        assert!(equal_fold(b"s", "ſ".as_bytes()));
+        assert!(equal_fold(&[0xff], &[0xfe]));
+        assert!(!equal_fold(&[0xff], &[0xfe, 0xfd]));
+    }
+}

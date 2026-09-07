@@ -127,7 +127,7 @@ Port the Go grammar before calling a Rust float parser: signs, radix prefixes,
 whitespace, exponent fragments, leading zeros, invalid digits, negative zero,
 overflow and underflow remain distinct.
 
-Use an audited shortest-round-trip decimal formatter rather than Rust Display
+Use a shortest-round-trip decimal formatter with reviewed API semantics rather than Rust Display
 as a substitute for JavaScript number text. The proposed dependency is
 [`ryu-js`](https://github.com/boa-dev/ryu-js); the proposed arbitrary-precision
 conversion is [`num-bigint`](https://github.com/rust-num/num-bigint), whose

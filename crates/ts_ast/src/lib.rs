@@ -6,10 +6,12 @@
 mod accessors_generated;
 mod data_generated;
 mod kinds_generated;
+mod tokens;
 mod visitors_generated;
 
 pub use data_generated::*;
 pub use kinds_generated::SyntaxKind;
+pub use tokens::{token_flags, CommentDirective, CommentDirectiveKind, TokenFlags};
 pub use ts_arena::{ArenaId, NodeId};
 pub use ts_jsstring::JsString;
 

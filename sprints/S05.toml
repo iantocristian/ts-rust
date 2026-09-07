@@ -3,7 +3,8 @@
 #   run.scanner.parity         identical token streams per file: kinds, positions, flags, value bytes, diagnostics
 #   run.scanner.regexp_parity  regular-expression scanning matches the oracle over the regexp fixtures
 #   run.scanner.rescan_parity  reScan entry points and JSDoc scanning modes match the oracle
-# The oracle side is a Go token-dump tool built from the pin in the tooling worktree (S03).
+# The oracle is a Go token-dump tool built from a clean export of the pin, without
+# the carried S03 extractor patches. See docs/S05-protocol.md.
 id = "S05"
 title = "Scanner"
 goal = "ts_scanner reproduces the Go scanner over source bytes: tokens, literal values and flags, diagnostics, regular-expression scanning, Unicode identifier tables and the rescanning modes the parser and language service use."
@@ -13,6 +14,7 @@ exit = [
   "run.scanner.parity == 1",
   "run.scanner.regexp_parity == 1",
   "run.scanner.rescan_parity == 1",
+  "run.scanner.table_current == true",
   "exp.E4.diagnostics.pass == 1",
   "exp.E4.token_value_bytes.pass == 1",
   "functions.package[internal/scanner].ratio >= 0.9",
@@ -38,7 +40,7 @@ id = "S05-3"
 title = "Regular-expression scanning (regexp.go) and the Unicode property tables"
 kind = "task"
 required = true
-done_when = ["run.scanner.regexp_parity == 1"]
+done_when = ["run.scanner.regexp_parity == 1", "run.scanner.table_current == true"]
 
 [[item]]
 id = "S05-4"

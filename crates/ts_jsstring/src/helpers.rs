@@ -132,13 +132,33 @@ pub fn lower_first_char(bytes: &[u8]) -> Vec<u8> {
     if width == 0 {
         return bytes.to_vec();
     }
-    let rune = SIMPLE_LOWER
-        .binary_search_by_key(&rune, |row| row.0)
-        .map_or(rune, |index| SIMPLE_LOWER[index].1);
     let mut result = Vec::with_capacity(bytes.len() + 2);
-    append_rune(&mut result, rune);
+    append_rune(&mut result, simple_lower(rune));
     result.extend_from_slice(&bytes[width..]);
     result
+}
+
+/// Go strings.ToLower semantics for spelling suggestions, using the pinned
+/// toolchain's simple mappings rather than JavaScript full case conversion.
+/// Malformed UTF-8 is decoded as width-one replacement runes, as Go does.
+pub fn to_lower_go(bytes: &[u8]) -> Vec<u8> {
+    if bytes.is_ascii() {
+        return bytes.to_ascii_lowercase();
+    }
+    let mut result = Vec::with_capacity(bytes.len());
+    let mut offset = 0;
+    while offset < bytes.len() {
+        let (rune, width) = decode_utf8(&bytes[offset..]);
+        append_rune(&mut result, simple_lower(rune));
+        offset += width;
+    }
+    result
+}
+
+fn simple_lower(rune: i32) -> i32 {
+    SIMPLE_LOWER
+        .binary_search_by_key(&rune, |row| row.0)
+        .map_or(rune, |index| SIMPLE_LOWER[index].1)
 }
 
 /// port: tsc/internal/stringutil/util.go:TruncateByRunes
