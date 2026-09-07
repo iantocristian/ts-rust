@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["xtask", "crates/ts_jsstring", "crates/ts_arena"]
+members = ["xtask", "crates/ts_jsstring", "crates/ts_arena", "crates/ts_ast", "crates/ts_diagnostics", "crates/ts_encoder"]
 # Compiler crates are added under crates/ as they are created; see PLAN.md, section 8,
 # and sprints/README.md for the Phase 0 order.
 

@@ -4,6 +4,7 @@
 //! status/status.json and docs/status.html, and with --record appends to status/history.jsonl.
 
 mod evidence;
+mod gen;
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -1412,6 +1413,11 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let root = repo_root();
     match args.first().map(String::as_str) {
+        Some("gen") => match gen::run(&root, &args[1..], &read_ledger(&root).pin) {
+            Ok(true) => ExitCode::SUCCESS,
+            Ok(false) => ExitCode::from(1),
+            Err(error) => die(&error),
+        },
         Some("status") => {
             if args.iter().any(|arg| arg == "--check-committed") {
                 if args.len() != 2 {
@@ -1553,7 +1559,7 @@ fn main() -> ExitCode {
             }
         }
         _ => {
-            eprintln!("usage: cargo xtask status [--record | --check-committed] | validate | run <run-id> | check <sprint-id> | check-metrics '<metric> <op> <value>' ...");
+            eprintln!("usage: cargo xtask status [--record | --check-committed] | gen [--check | --verify] | validate | run <run-id> | check <sprint-id> | check-metrics '<metric> <op> <value>' ...");
             ExitCode::from(2)
         }
     }

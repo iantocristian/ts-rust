@@ -2,11 +2,11 @@
 #
 # views:     validate deterministic views of the archived evidence, including the worklist.
 # producers: on macOS and Linux rerun the registered producers, enforce their measured
-#            results and S01/S04, and publish views and raw evidence even when a gate fails.
+#            results and S01/S03/S04, and publish views and raw evidence even when a gate fails.
 # msrv:      compile the locked workspace and all targets on the declared minimum Rust.
 # Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires S01/S04 and the quality checks independently of unfinished sprints.
+# The workflow requires S01/S03/S04 and quality checks independently of unfinished sprints.
 # The matrices cover the four ADR 0002 targets: macos-15 (arm64), macos-15-intel (x86_64),
 # ubuntu-24.04 (x86_64) and ubuntu-24.04-arm (arm64).
 name: status
@@ -92,7 +92,33 @@ jobs:
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         with:
           go-version: ${{ steps.pins.outputs.go }}
-          cache-dependency-path: upstream/tsc/go.sum
+          cache-dependency-path: |
+            upstream/tsc/go.sum
+            upstream/tools/go.sum
+      - name: Read generator toolchain pins from the upstream package
+        id: generator_pins
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          package = json.loads(Path("upstream/package.json").read_text())
+          pins = package["volta"]
+          assert package["packageManager"].split("+")[0] == "npm@" + pins["npm"]
+          print("node=" + pins["node"])
+          print("npm=" + pins["npm"])
+          PY
+      - name: Install the pinned generator Node.js and restore npm cache
+        id: generator_node
+        uses: actions/setup-node@v7
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' && steps.generator_pins.outcome == 'success' }}
+        with:
+          node-version: ${{ steps.generator_pins.outputs.node }}
+          cache: npm
+          cache-dependency-path: upstream/package-lock.json
+      - name: Install the pinned generator npm
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' && steps.generator_node.outcome == 'success' }}
+        run: npm install --global "npm@${{ steps.generator_pins.outputs.npm }}" --ignore-scripts --no-audit --no-fund
       - uses: taiki-e/install-action@v2
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         with:
@@ -117,6 +143,9 @@ jobs:
       - name: Workspace build
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run workspace
+      - name: Generated crate contracts
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo test -p ts_ast -p ts_diagnostics -p ts_encoder --all-targets --all-features --locked
       - name: Oracle build and version smoke
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run oracle
@@ -135,6 +164,9 @@ jobs:
       - name: Text leaves against the pinned Go oracle
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run e4
+      - name: Regeneration drift and original client byte parity
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run gen
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -149,6 +181,10 @@ jobs:
             'run.clippy.clean == true' \
             'run.deny.clean == true' \
             'run.selftest.pass == true' \
+            'run.gen.patches_apply == true' \
+            'run.gen.ast_schema == true' \
+            'run.gen.drift == false' \
+            'run.gen.client_identical == true' \
             'run.e4.source_decoding == true' \
             'run.e4.helper_semantics == true' \
             'run.e4.slice_validity == true' \
@@ -169,6 +205,9 @@ jobs:
       - name: S04 closes on this runner's evidence
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S04
+      - name: S03 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask check S03
       - name: Sprint S02 (informational until it closes)
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02

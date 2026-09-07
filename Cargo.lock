@@ -238,6 +238,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_ast"
+version = "0.1.0"
+dependencies = [
+ "ts_arena",
+ "ts_jsstring",
+]
+
+[[package]]
+name = "ts_diagnostics"
+version = "0.1.0"
+
+[[package]]
+name = "ts_encoder"
+version = "0.1.0"
+dependencies = [
+ "ts_ast",
+]
+
+[[package]]
 name = "ts_jsstring"
 version = "0.1.0"
 dependencies = [

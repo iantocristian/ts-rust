@@ -1,0 +1,4967 @@
+{
+  "constants": {
+    "HeaderOffsetExtendedData": 32,
+    "HeaderOffsetHashHi0": 12,
+    "HeaderOffsetHashHi1": 16,
+    "HeaderOffsetHashLo0": 4,
+    "HeaderOffsetHashLo1": 8,
+    "HeaderOffsetMetadata": 0,
+    "HeaderOffsetNodes": 40,
+    "HeaderOffsetParseOptions": 20,
+    "HeaderOffsetStringData": 28,
+    "HeaderOffsetStringOffsets": 24,
+    "HeaderOffsetStructuredData": 36,
+    "HeaderSize": 44,
+    "NodeDataChildMask": 255,
+    "NodeDataStringIndexMask": 16777215,
+    "NodeDataTypeChildren": 0,
+    "NodeDataTypeExtendedData": 2147483648,
+    "NodeDataTypeMask": 3221225472,
+    "NodeDataTypeString": 1073741824,
+    "NodeOffsetData": 20,
+    "NodeOffsetEnd": 8,
+    "NodeOffsetFlags": 24,
+    "NodeOffsetKind": 0,
+    "NodeOffsetNext": 12,
+    "NodeOffsetParent": 16,
+    "NodeOffsetPos": 4,
+    "NodeSize": 28,
+    "ProtocolVersion": 8,
+    "SyntaxKindNodeList": 4294967295
+  },
+  "nodes": [
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Unknown",
+        "EndOfFile",
+        "SingleLineCommentTrivia",
+        "MultiLineCommentTrivia",
+        "NewLineTrivia",
+        "WhitespaceTrivia",
+        "ConflictMarkerTrivia",
+        "NonTextFileMarkerTrivia",
+        "NumericLiteral",
+        "BigIntLiteral",
+        "StringLiteral",
+        "JsxText",
+        "JsxTextAllWhiteSpaces",
+        "RegularExpressionLiteral",
+        "NoSubstitutionTemplateLiteral",
+        "TemplateHead",
+        "TemplateMiddle",
+        "TemplateTail",
+        "OpenBraceToken",
+        "CloseBraceToken",
+        "OpenParenToken",
+        "CloseParenToken",
+        "OpenBracketToken",
+        "CloseBracketToken",
+        "DotToken",
+        "DotDotDotToken",
+        "SemicolonToken",
+        "CommaToken",
+        "QuestionDotToken",
+        "LessThanToken",
+        "LessThanSlashToken",
+        "GreaterThanToken",
+        "LessThanEqualsToken",
+        "GreaterThanEqualsToken",
+        "EqualsEqualsToken",
+        "ExclamationEqualsToken",
+        "EqualsEqualsEqualsToken",
+        "ExclamationEqualsEqualsToken",
+        "EqualsGreaterThanToken",
+        "PlusToken",
+        "MinusToken",
+        "AsteriskToken",
+        "AsteriskAsteriskToken",
+        "SlashToken",
+        "PercentToken",
+        "PlusPlusToken",
+        "MinusMinusToken",
+        "LessThanLessThanToken",
+        "GreaterThanGreaterThanToken",
+        "GreaterThanGreaterThanGreaterThanToken",
+        "AmpersandToken",
+        "BarToken",
+        "CaretToken",
+        "ExclamationToken",
+        "TildeToken",
+        "AmpersandAmpersandToken",
+        "BarBarToken",
+        "QuestionToken",
+        "ColonToken",
+        "AtToken",
+        "QuestionQuestionToken",
+        "BacktickToken",
+        "HashToken",
+        "EqualsToken",
+        "PlusEqualsToken",
+        "MinusEqualsToken",
+        "AsteriskEqualsToken",
+        "AsteriskAsteriskEqualsToken",
+        "SlashEqualsToken",
+        "PercentEqualsToken",
+        "LessThanLessThanEqualsToken",
+        "GreaterThanGreaterThanEqualsToken",
+        "GreaterThanGreaterThanGreaterThanEqualsToken",
+        "AmpersandEqualsToken",
+        "BarEqualsToken",
+        "BarBarEqualsToken",
+        "AmpersandAmpersandEqualsToken",
+        "QuestionQuestionEqualsToken",
+        "CaretEqualsToken",
+        "Identifier",
+        "PrivateIdentifier",
+        "JSDocCommentTextToken",
+        "BreakKeyword",
+        "CaseKeyword",
+        "CatchKeyword",
+        "ClassKeyword",
+        "ConstKeyword",
+        "ContinueKeyword",
+        "DebuggerKeyword",
+        "DefaultKeyword",
+        "DeleteKeyword",
+        "DoKeyword",
+        "ElseKeyword",
+        "EnumKeyword",
+        "ExportKeyword",
+        "ExtendsKeyword",
+        "FalseKeyword",
+        "FinallyKeyword",
+        "ForKeyword",
+        "FunctionKeyword",
+        "IfKeyword",
+        "ImportKeyword",
+        "InKeyword",
+        "InstanceOfKeyword",
+        "NewKeyword",
+        "NullKeyword",
+        "ReturnKeyword",
+        "SuperKeyword",
+        "SwitchKeyword",
+        "ThisKeyword",
+        "ThrowKeyword",
+        "TrueKeyword",
+        "TryKeyword",
+        "TypeOfKeyword",
+        "VarKeyword",
+        "VoidKeyword",
+        "WhileKeyword",
+        "WithKeyword",
+        "ImplementsKeyword",
+        "InterfaceKeyword",
+        "LetKeyword",
+        "PackageKeyword",
+        "PrivateKeyword",
+        "ProtectedKeyword",
+        "PublicKeyword",
+        "StaticKeyword",
+        "YieldKeyword",
+        "AbstractKeyword",
+        "AccessorKeyword",
+        "AsKeyword",
+        "AssertsKeyword",
+        "AssertKeyword",
+        "AnyKeyword",
+        "AsyncKeyword",
+        "AwaitKeyword",
+        "BooleanKeyword",
+        "ConstructorKeyword",
+        "DeclareKeyword",
+        "GetKeyword",
+        "ImmediateKeyword",
+        "InferKeyword",
+        "IntrinsicKeyword",
+        "IsKeyword",
+        "KeyOfKeyword",
+        "ModuleKeyword",
+        "NamespaceKeyword",
+        "NeverKeyword",
+        "OutKeyword",
+        "ReadonlyKeyword",
+        "RequireKeyword",
+        "NumberKeyword",
+        "ObjectKeyword",
+        "SatisfiesKeyword",
+        "SetKeyword",
+        "StringKeyword",
+        "SymbolKeyword",
+        "TypeKeyword",
+        "UndefinedKeyword",
+        "UniqueKeyword",
+        "UnknownKeyword",
+        "UsingKeyword",
+        "FromKeyword",
+        "GlobalKeyword",
+        "BigIntKeyword",
+        "OverrideKeyword",
+        "OfKeyword",
+        "DeferKeyword"
+      ],
+      "name": "Token",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Identifier"
+      ],
+      "name": "Identifier",
+      "textMember": "text"
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PrivateIdentifier"
+      ],
+      "name": "PrivateIdentifier",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "left",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "right",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "QualifiedName"
+      ],
+      "name": "QualifiedName",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ComputedPropertyName"
+      ],
+      "name": "ComputedPropertyName",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Decorator"
+      ],
+      "name": "Decorator",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "EmptyStatement"
+      ],
+      "name": "EmptyStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "thenStatement",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "elseStatement",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "IfStatement"
+      ],
+      "name": "IfStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "DoStatement"
+      ],
+      "name": "DoStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "WhileStatement"
+      ],
+      "name": "WhileStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "condition",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "incrementor",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ForStatement"
+      ],
+      "name": "ForStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "awaitModifier",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ForInStatement",
+        "ForOfStatement"
+      ],
+      "name": "ForInOrOfStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "label",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "BreakStatement"
+      ],
+      "name": "BreakStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "label",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ContinueStatement"
+      ],
+      "name": "ContinueStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ReturnStatement"
+      ],
+      "name": "ReturnStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "WithStatement"
+      ],
+      "name": "WithStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "caseBlock",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SwitchStatement"
+      ],
+      "name": "SwitchStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "clauses",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "CaseBlock"
+      ],
+      "name": "CaseBlock",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "statements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "CaseClause",
+        "DefaultClause"
+      ],
+      "name": "CaseOrDefaultClause",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ThrowStatement"
+      ],
+      "name": "ThrowStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tryBlock",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "catchClause",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "finallyBlock",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TryStatement"
+      ],
+      "name": "TryStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "variableDeclaration",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "block",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "CatchClause"
+      ],
+      "name": "CatchClause",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "DebuggerStatement"
+      ],
+      "name": "DebuggerStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "label",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "statement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "LabeledStatement"
+      ],
+      "name": "LabeledStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExpressionStatement"
+      ],
+      "name": "ExpressionStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "statements",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "multiLine",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Block"
+      ],
+      "name": "Block",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "declarationList",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "VariableStatement"
+      ],
+      "name": "VariableStatement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "exclamationToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "VariableDeclaration"
+      ],
+      "name": "VariableDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "declarations",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "VariableDeclarationList"
+      ],
+      "name": "VariableDeclarationList",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "elements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ObjectBindingPattern",
+        "ArrayBindingPattern"
+      ],
+      "name": "BindingPattern",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "dotDotDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Parameter"
+      ],
+      "name": "ParameterDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "dotDotDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "propertyName",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "BindingElement"
+      ],
+      "name": "BindingElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "MissingDeclaration"
+      ],
+      "name": "MissingDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "asteriskToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "FunctionDeclaration"
+      ],
+      "name": "FunctionDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "heritageClauses",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ClassDeclaration"
+      ],
+      "name": "ClassDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "heritageClauses",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ClassExpression"
+      ],
+      "name": "ClassExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "types",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [
+            "ExtendsKeyword",
+            "ImplementsKeyword"
+          ],
+          "name": "token",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "HeritageClause"
+      ],
+      "name": "HeritageClause",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "heritageClauses",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "InterfaceDeclaration"
+      ],
+      "name": "InterfaceDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeAliasDeclaration",
+        "JSTypeAliasDeclaration"
+      ],
+      "name": "TypeAliasDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "EnumMember"
+      ],
+      "name": "EnumMember",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "EnumDeclaration"
+      ],
+      "name": "EnumDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "statements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ModuleBlock"
+      ],
+      "name": "ModuleBlock",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NotEmittedStatement"
+      ],
+      "name": "NotEmittedStatement",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NotEmittedTypeElement"
+      ],
+      "name": "NotEmittedTypeElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "importClause",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "moduleSpecifier",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportDeclaration",
+        "JSImportDeclaration"
+      ],
+      "name": "ImportDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExternalModuleReference"
+      ],
+      "name": "ExternalModuleReference",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamespaceImport"
+      ],
+      "name": "NamespaceImport",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "elements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamedImports"
+      ],
+      "name": "NamedImports",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isExportEquals",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExportAssignment"
+      ],
+      "name": "ExportAssignment",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamespaceExportDeclaration"
+      ],
+      "name": "NamespaceExportDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamespaceExport"
+      ],
+      "name": "NamespaceExport",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "elements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamedExports"
+      ],
+      "name": "NamedExports",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "propertyName",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isTypeOnly",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExportSpecifier"
+      ],
+      "name": "ExportSpecifier",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "CallSignature"
+      ],
+      "name": "CallSignatureDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ConstructSignature"
+      ],
+      "name": "ConstructSignatureDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "Constructor"
+      ],
+      "name": "ConstructorDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "GetAccessor"
+      ],
+      "name": "GetAccessorDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SetAccessor"
+      ],
+      "name": "SetAccessorDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "IndexSignature"
+      ],
+      "name": "IndexSignatureDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "MethodSignature"
+      ],
+      "name": "MethodSignatureDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "asteriskToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "MethodDeclaration"
+      ],
+      "name": "MethodDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PropertySignature"
+      ],
+      "name": "PropertySignatureDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PropertyDeclaration"
+      ],
+      "name": "PropertyDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SemicolonClassElement"
+      ],
+      "name": "SemicolonClassElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ClassStaticBlockDeclaration"
+      ],
+      "name": "ClassStaticBlockDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "OmittedExpression"
+      ],
+      "name": "OmittedExpression",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NullKeyword",
+        "TrueKeyword",
+        "FalseKeyword",
+        "ThisKeyword",
+        "SuperKeyword",
+        "ImportKeyword"
+      ],
+      "name": "KeywordExpression",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "StringLiteral"
+      ],
+      "name": "StringLiteral",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "NumericLiteral"
+      ],
+      "name": "NumericLiteral",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "BigIntLiteral"
+      ],
+      "name": "BigIntLiteral",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "RegularExpressionLiteral"
+      ],
+      "name": "RegularExpressionLiteral",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "NoSubstitutionTemplateLiteral"
+      ],
+      "name": "NoSubstitutionTemplateLiteral",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "left",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "operatorToken",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "right",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "BinaryExpression"
+      ],
+      "name": "BinaryExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "operand",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 3,
+          "kinds": [
+            "PlusToken",
+            "MinusToken",
+            "TildeToken",
+            "ExclamationToken",
+            "PlusPlusToken",
+            "MinusMinusToken"
+          ],
+          "name": "operator",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PrefixUnaryExpression"
+      ],
+      "name": "PrefixUnaryExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "operand",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [
+            "PlusPlusToken",
+            "MinusMinusToken"
+          ],
+          "name": "operator",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PostfixUnaryExpression"
+      ],
+      "name": "PostfixUnaryExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "asteriskToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "YieldExpression"
+      ],
+      "name": "YieldExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "equalsGreaterThanToken",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ArrowFunction"
+      ],
+      "name": "ArrowFunction",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "asteriskToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "FunctionExpression"
+      ],
+      "name": "FunctionExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "AsExpression"
+      ],
+      "name": "AsExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SatisfiesExpression"
+      ],
+      "name": "SatisfiesExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "condition",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionToken",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "whenTrue",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "colonToken",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "whenFalse",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ConditionalExpression"
+      ],
+      "name": "ConditionalExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PropertyAccessExpression"
+      ],
+      "name": "PropertyAccessExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "argumentExpression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ElementAccessExpression"
+      ],
+      "name": "ElementAccessExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionDotToken",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "arguments",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "CallExpression"
+      ],
+      "name": "CallExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "arguments",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NewExpression"
+      ],
+      "name": "NewExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [
+            "ImportKeyword",
+            "NewKeyword"
+          ],
+          "name": "keywordToken",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "MetaProperty"
+      ],
+      "name": "MetaProperty",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NonNullExpression"
+      ],
+      "name": "NonNullExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SpreadElement"
+      ],
+      "name": "SpreadElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "head",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "templateSpans",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TemplateExpression"
+      ],
+      "name": "TemplateExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "literal",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TemplateSpan"
+      ],
+      "name": "TemplateSpan",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tag",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionDotToken",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "template",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TaggedTemplateExpression"
+      ],
+      "name": "TaggedTemplateExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ParenthesizedExpression"
+      ],
+      "name": "ParenthesizedExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "elements",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "multiLine",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ArrayLiteralExpression"
+      ],
+      "name": "ArrayLiteralExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "properties",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "multiLine",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ObjectLiteralExpression"
+      ],
+      "name": "ObjectLiteralExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SpreadAssignment"
+      ],
+      "name": "SpreadAssignment",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PropertyAssignment"
+      ],
+      "name": "PropertyAssignment",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "postfixToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "equalsToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "objectAssignmentInitializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ShorthandPropertyAssignment"
+      ],
+      "name": "ShorthandPropertyAssignment",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "DeleteExpression"
+      ],
+      "name": "DeleteExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeOfExpression"
+      ],
+      "name": "TypeOfExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "VoidExpression"
+      ],
+      "name": "VoidExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "AwaitExpression"
+      ],
+      "name": "AwaitExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeAssertionExpression"
+      ],
+      "name": "TypeAssertion",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "AnyKeyword",
+        "BigIntKeyword",
+        "BooleanKeyword",
+        "IntrinsicKeyword",
+        "NeverKeyword",
+        "NumberKeyword",
+        "ObjectKeyword",
+        "StringKeyword",
+        "SymbolKeyword",
+        "UndefinedKeyword",
+        "UnknownKeyword",
+        "VoidKeyword"
+      ],
+      "name": "KeywordTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "types",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "UnionType"
+      ],
+      "name": "UnionTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "types",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "IntersectionType"
+      ],
+      "name": "IntersectionTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "checkType",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "extendsType",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "trueType",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "falseType",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ConditionalType"
+      ],
+      "name": "ConditionalTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 2,
+          "kinds": [
+            "KeyOfKeyword",
+            "ReadonlyKeyword",
+            "UniqueKeyword"
+          ],
+          "name": "operator",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeOperator"
+      ],
+      "name": "TypeOperatorNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "typeParameter",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "InferType"
+      ],
+      "name": "InferTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "elementType",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ArrayType"
+      ],
+      "name": "ArrayTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "objectType",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "indexType",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "IndexedAccessType"
+      ],
+      "name": "IndexedAccessTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "typeName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeReference"
+      ],
+      "name": "TypeReferenceNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExpressionWithTypeArguments"
+      ],
+      "name": "ExpressionWithTypeArguments",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "literal",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "LiteralType"
+      ],
+      "name": "LiteralTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ThisType"
+      ],
+      "name": "ThisTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "assertsModifier",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "parameterName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypePredicate"
+      ],
+      "name": "TypePredicateNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "value",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportAttribute"
+      ],
+      "name": "ImportAttribute",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "attributes",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "multiLine",
+          "optional": false
+        },
+        {
+          "bitPosition": 1,
+          "bitWidth": 1,
+          "kinds": [
+            "WithKeyword",
+            "AssertKeyword"
+          ],
+          "name": "token",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportAttributes"
+      ],
+      "name": "ImportAttributes",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "exprName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeQuery"
+      ],
+      "name": "TypeQueryNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "readonlyToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "typeParameter",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "nameType",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "questionToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "MappedType"
+      ],
+      "name": "MappedTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "members",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeLiteral"
+      ],
+      "name": "TypeLiteralNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "elements",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TupleType"
+      ],
+      "name": "TupleTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "dotDotDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "questionToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "NamedTupleMember"
+      ],
+      "name": "NamedTupleMember",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "OptionalType"
+      ],
+      "name": "OptionalTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "RestType"
+      ],
+      "name": "RestTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ParenthesizedType"
+      ],
+      "name": "ParenthesizedTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "FunctionType"
+      ],
+      "name": "FunctionTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ConstructorType"
+      ],
+      "name": "ConstructorTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "TemplateHead"
+      ],
+      "name": "TemplateHead",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "TemplateMiddle"
+      ],
+      "name": "TemplateMiddle",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "TemplateTail"
+      ],
+      "name": "TemplateTail",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "head",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "templateSpans",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TemplateLiteralType"
+      ],
+      "name": "TemplateLiteralTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "literal",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TemplateLiteralTypeSpan"
+      ],
+      "name": "TemplateLiteralTypeSpan",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tupleNameSource",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": true,
+      "kinds": [
+        "SyntheticExpression"
+      ],
+      "name": "SyntheticExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "PartiallyEmittedExpression"
+      ],
+      "name": "PartiallyEmittedExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "openingElement",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "children",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "closingElement",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxElement"
+      ],
+      "name": "JsxElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "properties",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxAttributes"
+      ],
+      "name": "JsxAttributes",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "namespace",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxNamespacedName"
+      ],
+      "name": "JsxNamespacedName",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxOpeningElement"
+      ],
+      "name": "JsxOpeningElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxSelfClosingElement"
+      ],
+      "name": "JsxSelfClosingElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "openingFragment",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "children",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "closingFragment",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxFragment"
+      ],
+      "name": "JsxFragment",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxOpeningFragment"
+      ],
+      "name": "JsxOpeningFragment",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxClosingFragment"
+      ],
+      "name": "JsxClosingFragment",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "initializer",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxAttribute"
+      ],
+      "name": "JsxAttribute",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxSpreadAttribute"
+      ],
+      "name": "JsxSpreadAttribute",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxClosingElement"
+      ],
+      "name": "JsxClosingElement",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "dotDotDotToken",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxExpression"
+      ],
+      "name": "JsxExpression",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "containsOnlyTriviaWhiteSpaces",
+          "optional": false
+        }
+      ],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JsxText"
+      ],
+      "name": "JsxText",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "rawNodeList",
+          "name": "children",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SyntaxList"
+      ],
+      "name": "SyntaxList",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "tags",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDoc"
+      ],
+      "name": "JSDoc",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocTypeExpression"
+      ],
+      "name": "JSDocTypeExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocNonNullableType"
+      ],
+      "name": "JSDocNonNullableType",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocNullableType"
+      ],
+      "name": "JSDocNullableType",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocAllType"
+      ],
+      "name": "JSDocAllType",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocVariadicType"
+      ],
+      "name": "JSDocVariadicType",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocOptionalType"
+      ],
+      "name": "JSDocOptionalType",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocTypeTag"
+      ],
+      "name": "JSDocTypeTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocUnknownTag"
+      ],
+      "name": "JSDocUnknownTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "constraint",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocTemplateTag"
+      ],
+      "name": "JSDocTemplateTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocReturnTag"
+      ],
+      "name": "JSDocReturnTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocPublicTag"
+      ],
+      "name": "JSDocPublicTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocPrivateTag"
+      ],
+      "name": "JSDocPrivateTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocProtectedTag"
+      ],
+      "name": "JSDocProtectedTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocReadonlyTag"
+      ],
+      "name": "JSDocReadonlyTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocOverrideTag"
+      ],
+      "name": "JSDocOverrideTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocDeprecatedTag"
+      ],
+      "name": "JSDocDeprecatedTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "nameExpression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocSeeTag"
+      ],
+      "name": "JSDocSeeTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "className",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocImplementsTag"
+      ],
+      "name": "JSDocImplementsTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "className",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocAugmentsTag"
+      ],
+      "name": "JSDocAugmentsTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocSatisfiesTag"
+      ],
+      "name": "JSDocSatisfiesTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocThrowsTag"
+      ],
+      "name": "JSDocThrowsTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocThisTag"
+      ],
+      "name": "JSDocThisTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "importClause",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "moduleSpecifier",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocImportTag"
+      ],
+      "name": "JSDocImportTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocCallbackTag"
+      ],
+      "name": "JSDocCallbackTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": false
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocOverloadTag"
+      ],
+      "name": "JSDocOverloadTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocTypedefTag"
+      ],
+      "name": "JSDocTypedefTag",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "typeParameters",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "parameters",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "type",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocSignature"
+      ],
+      "name": "JSDocSignature",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocNameReference"
+      ],
+      "name": "JSDocNameReference",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "nodeList",
+          "name": "statements",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "endOfFileToken",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "extended",
+      "handWritten": true,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SourceFile"
+      ],
+      "name": "SourceFile",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "body",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [
+            "ModuleKeyword",
+            "NamespaceKeyword"
+          ],
+          "name": "keyword",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ModuleDeclaration"
+      ],
+      "name": "ModuleDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "moduleReference",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isTypeOnly",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportEqualsDeclaration"
+      ],
+      "name": "ImportEqualsDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "exportClause",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "moduleSpecifier",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isTypeOnly",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ExportDeclaration"
+      ],
+      "name": "ExportDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "argument",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "attributes",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "qualifier",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "typeArguments",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isTypeOf",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportType"
+      ],
+      "name": "ImportTypeNode",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "namedBindings",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 2,
+          "kinds": [
+            "TypeKeyword",
+            "DeferKeyword"
+          ],
+          "name": "phaseModifier",
+          "optional": true
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportClause"
+      ],
+      "name": "ImportClause",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "propertyName",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isTypeOnly",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "ImportSpecifier"
+      ],
+      "name": "ImportSpecifier",
+      "textMember": null
+    },
+    {
+      "children": [],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocText"
+      ],
+      "name": "JSDocText",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocLink"
+      ],
+      "name": "JSDocLink",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocLinkPlain"
+      ],
+      "name": "JSDocLinkPlain",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "string",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocLinkCode"
+      ],
+      "name": "JSDocLinkCode",
+      "textMember": "text"
+    },
+    {
+      "children": [
+        {
+          "childType": "modifierList",
+          "name": "modifiers",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "constraint",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": true
+        },
+        {
+          "childType": "node",
+          "name": "defaultType",
+          "optional": true
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "TypeParameter"
+      ],
+      "name": "TypeParameterDeclaration",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "expression",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "thisArg",
+          "optional": false
+        }
+      ],
+      "commonData": [],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "SyntheticReferenceExpression"
+      ],
+      "name": "SyntheticReferenceExpression",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "rawNodeList",
+          "name": "jsdocPropertyTags",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isArrayType",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocTypeLiteral"
+      ],
+      "name": "JSDocTypeLiteral",
+      "textMember": null
+    },
+    {
+      "children": [
+        {
+          "childType": "node",
+          "name": "tagName",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "name",
+          "optional": false
+        },
+        {
+          "childType": "node",
+          "name": "typeExpression",
+          "optional": true
+        },
+        {
+          "childType": "nodeList",
+          "name": "comment",
+          "optional": true
+        }
+      ],
+      "commonData": [
+        {
+          "bitPosition": 0,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isBracketed",
+          "optional": false
+        },
+        {
+          "bitPosition": 1,
+          "bitWidth": 1,
+          "kinds": [],
+          "name": "isNameFirst",
+          "optional": false
+        }
+      ],
+      "dataType": "children",
+      "handWritten": false,
+      "handWrittenCommonData": false,
+      "kinds": [
+        "JSDocParameterTag",
+        "JSDocPropertyTag"
+      ],
+      "name": "JSDocParameterOrPropertyTag",
+      "textMember": null
+    }
+  ],
+  "version": 1
+}

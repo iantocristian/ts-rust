@@ -1,0 +1,18 @@
+{
+  "files": {
+    "crates/ts_ast/src/accessors_generated.rs": "98bfb5f86c2e85f82da3e54e07fddef8cf7abcb4ac9240c7cd74d583d4be7d85",
+    "crates/ts_ast/src/data_generated.rs": "5dc3b6de2d886a4c61fd83f07f9dd9170528652b81569cee9264e154e411a6a0",
+    "crates/ts_ast/src/kinds_generated.rs": "27e069088d17d050437ed1e588fb9a8df49c92a856de3f08d37ec1f225c79816",
+    "crates/ts_ast/src/visitors_generated.rs": "a8ed21677d3467ab77b72884ed3e9c98d55f6076d81bb3af3bcaf0928e8c073f",
+    "crates/ts_diagnostics/src/generated.rs": "f3370a8cf9b3626c7a6d91e6c581b7f26e5f6ed3f1d93b82043436032e524d9d",
+    "crates/ts_encoder/src/generated.rs": "39b0b02cd95f36c4abc152114f758748738512300fbfa87c6eff00f7362b0444",
+    "data/s03/schema/api-wire-fixtures.json": "34404b1cbdcde0b062312caf787382be75900cd9e1ebcb1d6f3f17155629a25e",
+    "data/s03/schema/api.json": "e8013352d179176a85ff67686ecd4d69c897ff297dfe2eab4f995f28c63fa178",
+    "data/s03/schema/ast.json": "b77cdf7733cfaae0bafe8ee555de97a7f492c01f63770072642271e5519f3d49",
+    "data/s03/schema/client-files.json": "bd32a491be2615ec152421143cd24b9679756606e7f092542ca0dd08efc150f8",
+    "data/s03/schema/diagnostics.json": "44c02ab4c2f83a4d33813de1c1ccd845ef412c150a48867c803a75f861e1ba3d",
+    "data/s03/schema/encoder.json": "b7dc9c3613aa183f3f21ec8320ec0bb1bf31d0872163120b4c1b16d81705febb"
+  },
+  "upstreamPin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "version": 1
+}

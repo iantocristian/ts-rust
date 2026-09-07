@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "scope": "Inventory for the pinned gen-proto export. Fixtures are representative Go observations; Rust API codec implementations and complete wire parity belong to the API sprint.",
+  "mappings": [
+    {
+      "goType": "encoding/json/jsontext.Value",
+      "adapter": "raw_json",
+      "source": "tsc/internal/json/json.go",
+      "fixtureIds": [
+        "raw-json-object",
+        "raw-json-invalid"
+      ],
+      "contract": "Preserve raw JSON semantics and invalid-input errors; no structural Rust DTO can replace this value. Error witnesses retain structured semantic/syntax context and exact underlying causes; intentionally variable top-level wording stays in captured stderr."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/api.BatchRequestsResponse",
+      "adapter": "batch_responses",
+      "source": "tsc/internal/api/proto.go",
+      "fixtureIds": [
+        "batch-empty-responses",
+        "batch-continuation"
+      ],
+      "contract": "Custom MarshalJSONTo emits an empty responses array and conditionally emits the continuation token. Private pre-encoded response path remains an API-runtime fixture obligation."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/api.DocumentIdentifier",
+      "adapter": "document_identifier",
+      "source": "tsc/internal/api/proto.go",
+      "fixtureIds": [
+        "document-identifier-0",
+        "document-identifier-1",
+        "document-identifier-2",
+        "document-identifier-3",
+        "document-identifier-4"
+      ],
+      "contract": "Input union accepts a filename string or URI object. Fixture errors retain the pinned decoder's concrete Go type, structured location and exact underlying application reason."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/api.ImportAdderActionKind",
+      "adapter": "string_literal_union",
+      "source": "tsc/internal/api/proto.go",
+      "fixtureIds": [
+        "literal-import-adder"
+      ],
+      "contract": "Literal spellings are derived from typed constants by the pinned extractor."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/api.Method",
+      "adapter": "method_string_union",
+      "source": "tsc/internal/api/proto.go",
+      "fixtureIds": [
+        "literal-method"
+      ],
+      "contract": "Method identifiers are strings from Go constants; JSON export includes exact constant names and wire IDs."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]",
+      "adapter": "ordered_map",
+      "source": "tsc/internal/collections/ordered_map.go",
+      "fixtureIds": [
+        "ordered-map-insertion-order"
+      ],
+      "contract": "Insertion order and nil slice values belong to the custom codec."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.JsxEmit",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-jsx-emit"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.ModuleDetectionKind",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-module-detection"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.ModuleKind",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-module-kind"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.ModuleResolutionKind",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-module-resolution"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.NewLineKind",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-newline"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.ScriptTarget",
+      "adapter": "imported_numeric_enum",
+      "source": "tsc/internal/core/compileroptions.go",
+      "fixtureIds": [
+        "enum-script-target"
+      ],
+      "contract": "Numeric values come from the pinned enum extractor, with the original client enum files checked byte for byte."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/core.Tristate",
+      "adapter": "tristate",
+      "source": "tsc/internal/core/tristate.go",
+      "fixtureIds": [
+        "tristate-unknown",
+        "tristate-true",
+        "tristate-false",
+        "tristate-decode-true",
+        "tristate-decode-false",
+        "tristate-decode-null",
+        "tristate-decode-42"
+      ],
+      "contract": "Rendered boolean is not a complete codec: TSUnknown marshals to null and nonboolean input decodes to unknown."
+    },
+    {
+      "goType": "github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue",
+      "adapter": "package_json_value",
+      "source": "tsc/internal/packagejson/jsonvalue.go",
+      "fixtureIds": [
+        "package-json-kind-0",
+        "package-json-kind-1",
+        "package-json-kind-2",
+        "package-json-kind-3",
+        "package-json-kind-4",
+        "package-json-kind-5"
+      ],
+      "contract": "The renderer exposes unknown; the source decoder preserves distinct JSON value kinds. Nested value equality is deferred to API runtime tests."
+    }
+  ],
+  "ordinaryFieldFixtures": [
+    "ordinary-empty-options",
+    "ordinary-empty-slices",
+    "ordinary-required-zero-id",
+    "ordinary-max-uint64-id",
+    "ordinary-null-interface"
+  ],
+  "ordinaryFieldContract": "Use exported Go shapes, original serialization tags, optional/nonnil flags, nullable result metadata and client visibility. TypeScript number spelling does not authorize lossy Rust f64 storage for integral IDs. These witnesses preserve zero/max IDs, empty omission and null; tags such as nonnil document upstream construction obligations and are not independently enforced by Go JSON."
+}

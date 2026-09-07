@@ -2,7 +2,7 @@
 
 The Rust rewrite of the TypeScript 7 native compiler and language server (the Go module under `tsc/` in microsoft/TypeScript, codename Corsa). Upstream is consumed as a pinned dependency; this repository is the workspace.
 
-The first contract leaves are implemented: `ts_jsstring` preserves source/string bytes and Go position semantics; `ts_arena` provides checked identities, immutable file storage, lazy publication and bundle retention. The compiler pipeline remains to be built. The [S04 synthesis plan](docs/S04-synthesis-plan.md) records the implementation choices; [S04 documentation](docs/S04.md) describes the supported APIs and verification. Mapped functions and implementation labels are reported separately from verified parity.
+The first contract leaves are implemented: `ts_jsstring` preserves source/string bytes and Go position semantics; `ts_arena` provides checked identities, immutable file storage, lazy publication and bundle retention. S03 adds pinned schema generation for `ts_ast`, `ts_diagnostics` and `ts_encoder`, with drift checks and byte-identical TypeScript client regeneration; see [S03](docs/S03.md). The compiler pipeline remains to be built. The [S04 synthesis plan](docs/S04-synthesis-plan.md) records the implementation choices; [S04 documentation](docs/S04.md) describes the supported APIs and verification. Mapped functions and implementation labels are reported separately from verified parity.
 
 ## Layout
 

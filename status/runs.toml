@@ -63,3 +63,10 @@ cases = "data/s04/e4-cases.json"
 sources = ["crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_common.py", "scripts/s04_runtime.py", "scripts/s04_oracle/**", "scripts/tracking-bootstrap.py", "upstream"]
 target = "host"
 config = "S04 text leaf slice; manifest-pinned local Go toolchain and clean source pin with access-only wrappers; deterministic byte/casing/position probes; release Rust; frozen request digest and scenario counts; classified panics and exact prescribed payloads; all probes required per scenario"
+
+[gen]
+command = ["cargo", "xtask", "gen", "--verify"]
+inputs = ["data/s04/toolchains.toml", "data/s03/api-special-codecs.json", "data/upstream.json", ".gitmodules", "rustfmt.toml"]
+sources = ["crates/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s03.py", "scripts/s04_common.py", "scripts/s04_runtime.py", "tools/s03/**", "data/s03/**", "upstream"]
+target = "host"
+config = "S03 pinned schema/extractor adapters in independent tooling worktree; Rust emitters; exhaustive managed output inventory; JSON-derived TypeScript and clean regenerated enum outputs compared byte-for-byte to pinned client; native Go wire observations, not Rust API runtime parity; exact upstream Node/npm and shared local Go pin"

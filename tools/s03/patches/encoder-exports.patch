@@ -1,0 +1,9 @@
+--- a/tools/scripts/tsc/generate-encoder.ts
++++ b/tools/scripts/tsc/generate-encoder.ts
+@@ -2068,3 +2068,6 @@
+ if (process.argv[1] === fileURLToPath(import.meta.url)) {
+     main();
+ }
++
++// Access-only S03 adapter exports; the pinned analysis stays unchanged.
++export { analyzeNode, childType, getAutoEncodedLayout, unionKindValues };
