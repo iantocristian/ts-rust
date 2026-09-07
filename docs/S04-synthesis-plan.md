@@ -86,7 +86,13 @@ types without inventing their future layout or a parallel toy compiler.
 
 - [x] Inspect reports and four implementations; establish the synthesis design.
 - [x] Create the new branch and record this plan.
-- [ ] Implement modular text and ownership leaves.
-- [ ] Integrate and strengthen oracle, instrumentation and CI.
-- [ ] Review APIs and regressions; run all acceptance checks.
-- [ ] Capture fresh evidence, regenerate views and document actual results.
+- [x] Implement modular text and ownership leaves.
+- [x] Integrate and strengthen oracle, instrumentation and CI.
+- [x] Review APIs and regressions; run all acceptance checks.
+- [x] Capture fresh evidence, regenerate views and document actual results.
+
+Completed on 7 September 2026: all 14 S04 exit checks and 7 required items pass
+on `aarch64-apple-darwin`. The differential oracle matches 76,001 probes in 401
+scenarios. Strict-provenance Miri, ASan, brand doctests, workspace tests, Clippy,
+dependency policy, tracker validation and the Rust 1.96 build pass. See
+[S04 results and reproduction](S04.md) for evidence links and scope limits.

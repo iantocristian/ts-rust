@@ -1,0 +1,4 @@
+# Instrumentation uses a separate pinned nightly; compiler crates build on stable/MSRV.
+nightly = "nightly-2026-09-05"
+go = "go1.27.1"
+msrv = "1.96.0"

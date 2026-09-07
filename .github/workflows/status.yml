@@ -2,11 +2,11 @@
 #
 # views:     validate deterministic views of the archived evidence, including the worklist.
 # producers: on macOS and Linux rerun the registered producers, enforce their measured
-#            results and S01, and publish views and raw evidence even when a gate fails.
+#            results and S01/S04, and publish views and raw evidence even when a gate fails.
 # msrv:      compile the locked workspace and all targets on the declared minimum Rust.
 # Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires S01 and the quality checks independently of unfinished sprints.
+# The workflow requires S01/S04 and the quality checks independently of unfinished sprints.
 # The matrices cover the four ADR 0002 targets: macos-15 (arm64), macos-15-intel (x86_64),
 # ubuntu-24.04 (x86_64) and ubuntu-24.04-arm (arm64).
 name: status
@@ -62,7 +62,7 @@ jobs:
         with:
           key: msrv-1.96.0
       - name: Build the locked workspace on the minimum Rust version
-        run: cargo +1.96.0 check --workspace --all-targets --locked
+        run: cargo +1.96.0 check --workspace --all-targets --all-features --locked
 
   producers:
     name: producers on ${{ matrix.os }}
@@ -77,7 +77,7 @@ jobs:
           submodules: true
       - uses: actions/setup-go@v6
         with:
-          go-version: "1.27.x"
+          go-version: "1.27.1"
           cache-dependency-path: upstream/tsc/go.sum
       - name: Install the pinned toolchain
         run: rustup show active-toolchain || rustup toolchain install
@@ -85,6 +85,10 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-deny
+      - name: Install S04 instrumentation toolchain
+        run: |
+          RUSTUP_HOME="$PWD/target/s04-rustup" rustup toolchain install nightly-2026-09-05 \
+            --profile minimal --component miri --component rust-src --no-self-update
       - name: Validate provenance and schemas
         id: validate
         run: cargo xtask validate
@@ -100,6 +104,10 @@ jobs:
         run: cargo xtask run clippy
       - name: Dependency policy
         run: cargo xtask run deny
+      - name: Arena ownership, Miri and AddressSanitizer
+        run: cargo xtask run e3
+      - name: Text leaves against the pinned Go oracle
+        run: cargo xtask run e4
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -113,10 +121,27 @@ jobs:
             'run.fmt.clean == true' \
             'run.clippy.clean == true' \
             'run.deny.clean == true' \
-            'run.selftest.pass == true'
+            'run.selftest.pass == true' \
+            'run.e4.source_decoding == true' \
+            'run.e4.helper_semantics == true' \
+            'run.e4.slice_validity == true' \
+            'run.e4.utf8_positions == true' \
+            'run.e4.utf16_positions == true' \
+            'run.e3.id_exhaustion == true' \
+            'run.e3.wrong_owner_rejected == true' \
+            'run.e3.stale_and_recycled_ids_rejected == true' \
+            'run.e3.concurrent_lazy_storage == true' \
+            'run.e3.mapper_bundle_disposal == true' \
+            'run.e3.live_owner_delta == 0' \
+            'run.e3.live_allocation_delta == 0' \
+            'run.e3.miri == true' \
+            'run.e3.address_sanitizer == true'
       - name: S01 closes on this runner's evidence
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S01
+      - name: S04 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask check S04
       - name: Sprint S02 (informational until it closes)
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02
