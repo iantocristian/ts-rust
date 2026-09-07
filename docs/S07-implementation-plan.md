@@ -86,43 +86,49 @@ links, local/export symbols and tables, flags, CommonJS indicators, flow links,
 source symbol counts and diagnostics. Inventory every assignment in the Go
 binder before freezing the Rust storage shape.
 
-The compiler path moves `ParsedFile` into a shareable file binding cell. That
-cell owns the exclusive parsed construction, a once-initialized completion and
-a synchronization guard for the one winning initializer. Its public bind entry
-accepts shared access: concurrent callers wait for the same result instead of
-requiring each caller to own or clone the parsed tree. The winner takes private
-construction, binds it on the production worker, validates the complete result
-and publishes the immutable AST and `BindResult` together. IDs allocated during
-parsing remain unchanged. The cell may be dropped once callers retain the bound
-file; no back-reference from the bound result retains the cell.
+Parsed AST cores and mapped-bundle membership are published before binding.
+Each logical SourceFile owns its own `OnceLock<BindCompletion>` under the
+canonical file/bundle retention root. Binding receives shared file access;
+only the winning closure constructs that file's result, while competing callers
+for the same file wait. Binding one mapped sibling must not initialize another,
+surface its diagnostics, or consume its once state. A sibling failure leaves
+healthy siblings independently bindable. No group-wide bind initializer or
+failure state is introduced.
 
-Use `OnceLock::get_or_init` for this single-publication mechanism as required by
-the accepted symbols design. The prototype must establish where the file-owned
-cell lives across construction and publication; a separate program-local
-binding cache is unacceptable. `BindResult` and the symbol arena are owned by
-the same canonical file/bundle root. A wrapper may express the lifecycle, but
-must not leave an independently owned parse tree or bind result outside that
-root after publication.
+The winner reads the immutable parsed core and records writes in a private,
+file-owned `BindBuilder`. This produces the accepted immutable `BindResult` plus
+typed overlays for every binder-visible Node/SourceFile field that Go mutates.
+The completed result is installed atomically in that file's binding cell.
+There is no clone of the whole parsed graph and no mutation through a published
+raw Node reference. Sparse staged node records may share immutable payload/list/
+text backing; field-specific side tables hold symbol, local and flow links.
+The prototype must audit every binder write and ensure all bound reads resolve
+the corresponding overlay, including flags, parent/container links, source
+metadata and diagnostics. A helper that bypasses the bound view and reads a
+stale parsed field is a correctness defect, not an allowed representation detail.
 
-`publish_unbound` remains the explicit parser-tool path from S06. A shared
-unbound AST is not silently mutated in place or automatically copied in order
-to bind it. Compiler/parse-cache entry points must create the binding cell while
-exclusive construction still exists. Expose this distinction in Rust types and
-compile-fail documentation. Test the shared bind entry itself, not just a
-consuming `bind(ParsedFile)` convenience function.
+Provide explicit parsed and bound views. Operations that require binding first
+acquire the completed bound view; previously borrowed parsed views do not claim
+to show binding state. NodeIds remain the same identities across these views.
+Retained node/symbol access resolves through the applicable view and file owner,
+rather than caching a raw prebind location for a later bound read. Integrate and
+test encoder/helper/visitor reads of bound fields before porting binder algorithms.
+Public bound queries cannot accept an unbound view accidentally.
 
-For mapped files, one group binding cell owns all pending `ParsedFile` members
-and their canonical ordering. Per-member handles retain that group plus an
-index. The first bind request for any sibling initializes every member exactly
-once, validates all cross-member references and publishes one `AstBundle`.
-No member can escape as an independently published file before group completion.
-A member failure prevents group publication and leaves a terminal failed group;
-unpublished sibling staging is dropped, its reserved identities are never reused,
-and subsequent sibling requests cannot restart it. Test concurrent first requests
-through different siblings, a failure after an earlier sibling has completed its
-private bind, and final release through a retained sibling symbol. This is the
-Rust ownership publication unit, not a claim that Go binds all mapped files in
-one call.
+`publish_unbound` remains the S06 parser-tool path. It does not certify binding;
+its file-owned cell can subsequently initialize a bind result without reopening
+mutable core access. The cell remains inside the file owner after publication;
+only private initializer staging is dropped on completion. Published file handles
+retain their canonical file or mapped bundle, and mapped member handles retain
+that bundle plus an index. There is no owning back-reference from the bind
+result to its own file/cell. This same root owns parsed storage, lazy AST storage,
+symbols, flows, overlays and diagnostics until the final retained result drops.
+
+Freeze per-member bind traces for a mapped bundle: bind A only (B stays unbound),
+bind B later, concurrent first requests for A and B, and a B panic followed by
+successful A queries and first binding of a third healthy member. Compare each
+member's initializer count, bound state and diagnostic timing with Go. Verify
+sibling retention and final disposal independently of initialization timing.
 
 No user-supplied initializer receives raw generic storage authority. Retained
 AST/symbol handles expose checked concrete reads and explicit retention; they
@@ -141,8 +147,8 @@ The immutable result contains, or resolves through its file owner:
   must match Go.
 - Slot-indexed declaration/local/export symbol maps, locals maps, container
   chains, flow/return/end/fallthrough links and all binder-written node/source
-  flags. Move writes into the private core before publication when they belong
-  to the Node contract; use side tables for fields the accepted design replaces.
+  flags. Resolve Node-contract writes through typed bound overlays and use side tables
+  for fields the accepted design replaces; do not mutate the parsed core.
 - Source symbol count, bind diagnostics and deferred-expando state required by
   later queries. Temporary worklists disappear after completion.
 
@@ -168,13 +174,20 @@ Go's `BindOnce` consumes its `sync.Once` after a panic but sets `isBound` only o
 success. A bare Rust `OnceLock` retry would differ. Catch the initializer unwind
 inside the one-time completion closure, discard unpublished staging and publish
 a terminal failed completion, then resume the original unwind outside the
-closure. Subsequent accesses must not rerun the initializer, expose a partial
-bound tree or report `is_bound = true`. Rust can report the typed failed-file
-state at its ownership boundary; the Go probe compares call count and bound
-state rather than inventing a source returned-error value.
+closure. Subsequent accesses must not rerun the initializer, expose a partial bound
+result or report `is_bound = true`. The initiating caller resumes the original
+panic on its own thread after the worker returns its Send unwind payload;
+contending waiters and later callers receive a typed terminal `BindFailed`
+ownership error. This asymmetry is intentional and tested for both direct worker
+entry and dispatch from another thread. Go comparisons cover initializer count,
+bound state and initial panic outcome; the extra Rust failed-file result is not
+invented as a Go returned error. Parsed storage remains readable after failure,
+but no caller can obtain a successful bound view for that failed file.
 
 Detect same-thread initialization reentry before waiting; ordinary contention
-waits. Dispatch to a worker before acquiring the binding guard. Initializers
+waits. Reuse S04's thread-local initialization-guard mechanism, extended with a
+binding/lazy operation discriminator so legitimate bind-to-JSDoc nesting remains
+possible while reentering the same binding cell is diagnosed. Dispatch to a worker before acquiring the binding guard. Initializers
 must not wait for work that needs the same binding cell. Test panic cleanup,
 retry prevention, reentry diagnostics and two racing first callers. Do not claim
 checker generation retirement from a failed binder; that remains a separate
@@ -220,7 +233,18 @@ from the existing authoritative S06 input expansion. Use the same 12,829 primary
 physical/library IDs and 22,343 primary parser requests unless independent Go
 preflight exposes a necessary, reviewed binding-specific representation change.
 A source panic is an observed outcome, not grounds to remove a case. Every
-required variant must match for its physical row to pass.
+required variant must match for its physical row to pass. The gate is explicitly
+`run.binder.parity == 1`: a parse-divergent row fails S07 even if a future S06
+capture could pass E1's 0.999 threshold. No E1 allowance transfers to binding.
+The current S06 base has exact 1.0 primary parity.
+
+All 22,343 primary requests are parser-entry inputs: 22,075 virtual-file requests,
+160 initial-tsconfig requests and 108 library requests. Reuse their bytes,
+loading route, script kind and parse options, then call BindSourceFile after a
+successful parse. None of S06's supplemental encode/decode action requests enters
+this binder denominator. Matching parse-terminal panics retain their rows with
+bind-not-reached recorded; independently freeze reached-bind counts and require
+every Go-reached bind to execute in Rust.
 
 The clean pinned Go adapter parses, binds and dumps actual results. Rust calls
 production APIs. Dump:
@@ -238,9 +262,16 @@ production APIs. Dump:
 Use cycle-safe canonical IDs derived from a declared traversal of roots and
 ordered edge labels, not allocation addresses or global runtime IDs. For map
 edges, canonicalize by raw key bytes in the dump only. Preserve edge multiplicity,
-list order and graph aliasing. If upstream map order changes diagnostics, retain
-raw outcomes and identify the exact source ambiguity; do not sort production
-operations or grant a blanket diagnostic exemption.
+list order and graph aliasing. Diagnostic scoring is exact by default: a different order, argument or outcome
+fails the row. Before freezing, an ambiguity may receive a named request/stage/
+field qualification only after repeated independent Go processes demonstrate
+its bounded alternatives. Record those observations and the exact deterministic
+Rust alternative in `data/s07/diagnostic-ambiguities.json`. Such a row passes only
+if both runtimes satisfy that named policy and all remaining fields/graphs match
+exactly; it remains in the denominator. Preserve raw outcomes, exactness bits
+and qualification counts. Unknown ambiguity fails closed and cannot expand the
+policy automatically. Do not sort production operations or grant a blanket
+exemption.
 
 Strict records include request ID, stage, sequence and terminal outcome. Reject
 missing/duplicate/extra/reordered records, unknown stages, non-finite metrics and
@@ -287,10 +318,14 @@ input whose recovered tree otherwise fits; do not exclude it for diagnostics.
 The classifier records actual required dependency operations, including operations
 introduced through declarations and libraries. Library dependency features are
 an explicit future checker obligation, not silently erased from the inventory.
-At checkpoint B, map each library-induced operation (including generic
-instantiation and conditional types reached through library declarations) to
-S08's planned checker scope. An obligation with no implementation scope blocks
-the subset freeze; source-case exclusions cannot disguise it.
+Checkpoint B creates `data/s07/checker-obligations.json`: each library-induced
+operation (including generic instantiation and conditional types reached through
+library declarations) names its input witness, pinned source anchors, owning
+future sprint S08, required checker capability and expected E2/E7/E8 consumer.
+This is the concrete S08 dependency-scope artifact produced by S07. It records
+planned obligations, not checker implementation or passing evidence. Completeness
+of this inventory blocks the freeze; implementation of its S08 entries does not.
+Source-case exclusions cannot disguise library obligations.
 Freeze every qualifying case and all qualifying effective variants; a feature
 exclusion applies at the documented physical/variant boundary and records why.
 Do not cap counts or shrink eligibility after observing Rust failures.
@@ -327,6 +362,17 @@ Implement object-safe `Send + Sync` host traits matching the relevant source
 seams. In-memory file entries contain immutable byte owners, canonical and
 original paths, directory entries and declared symlink/case behavior. Host methods
 return typed missing/unsupported outcomes; no hidden disk/network fallback.
+
+The initial source-only package inventory is 178 core functions (22 files),
+196 tsoptions (18), 88 tspath (3), 105 module (4), zero function bodies in the
+vfs interface file, 28 bundled functions (2), and 340 compiler functions (14).
+These are audit denominators, not a commitment to complete every package in S07.
+Checkpoint B records the exact required function-ID closure and its exclusions
+in `data/s07/dependency-functions.json`. Each touched ledger file stays
+`in-progress` unless every function in that file is implemented; `ported` and
+its nonempty verifier set require a complete real file scope. Untouched files
+remain planned. No new package-ratio gate is inferred, and interface-only files
+receive API/host tests rather than invented function credit.
 
 Freeze `data/s07/operations.json` mapping required host/config/resolver/program
 operations to source functions, supported inputs, observations and exclusions.
@@ -429,7 +475,7 @@ binder-observable graph representation from section 5 over this exact VS Code
 workload before accepting any performance result. Hash the canonical graph
 records with a cryptographic digest, preserve counts and first differences, and
 require every file digest/outcome to agree. This is a separate required
-`run.binder.workload_parity` gate; counters alone cannot satisfy it.
+`run.bindworkload.parity == 1` gate; counters alone cannot satisfy it.
 
 Run that graph validation in separate processes. Measured RSS children do no
 postphase graph dump or hashing allocation: after retaining the results they
@@ -477,10 +523,24 @@ contract, resolve and record a measurement mechanism before producing ratios;
 never silently use a proxy or weaken the gate.
 
 Use one reusable bounded worker pool for a whole batch with exactly one or eight
-workers. Each Rust worker enters the reserved-stack/growth-guard environment once;
-per-file `on_parser_worker` must not create additional threads. Go uses the same
-worker count with GOMAXPROCS fixed accordingly. Record available CPUs; a host with
-fewer than eight schedulable CPUs cannot certify the eight-thread gate.
+workers. Both adapters use N persistent workers consuming a bounded queue of
+file requests; Go uses N goroutines, not a hidden parallel compiler loader. Each Rust worker enters the reserved-stack/growth-guard environment once;
+per-file `on_parser_worker` must not create additional threads. Go uses GOMAXPROCS=N, and the record states explicitly that this caps Go GC and
+runtime work as well as binder goroutines. This measures each implementation
+within the named Go processor budget, not equal GC scheduling costs; Rust's
+mimalloc has its own documented runtime behavior. Record effective worker count,
+GOMAXPROCS, GOGC and runtime thread/capacity observations alongside results.
+
+The initial evidence-of-record host is this local macOS arm64 workstation,
+observed before implementation with 18 physical/logical CPUs and 64 GiB RAM.
+Record capacity again at capture, reject fewer than eight available CPUs, and
+run without concurrent builds/other benchmark sessions. Local captures are
+reviewed ledger evidence. Ordinary four-target CI runs correctness/ownership and
+archived-view checks; only a designated capacity-qualified measurement runner
+runs the full performance-dependent S07 gate. Do not fail or certify eight-worker
+performance by pretending an underprovisioned hosted runner is this host. Other
+native performance targets remain explicitly unmeasured until their own qualified
+captures exist.
 
 ### 10.2 Raw samples and statistics
 
@@ -488,15 +548,31 @@ Freeze the configuration before sampling: one unrecorded process warm-up per
 runtime, then seven fresh-process samples per runtime/mode, alternating Go/Rust
 order. Each process parses/binds the full frozen workload once and retains the
 same logical roots. The median is the fixed aggregation rule; retain all samples,
-not just the fastest or passing subset. A process failure, mismatched workload
+not just the fastest or passing subset.
+
+Report median absolute deviation divided by the median (relative MAD) for each
+runtime/mode. For timing, compute a fixed-seed 10,000-resample bootstrap 95%
+interval for the ratio of medians, retaining the seed and algorithm version.
+If the interval spans 1.0 or either relative MAD exceeds 5%, add one batch of
+seven samples per side, up to 21 total; keep every sample. A remaining ambiguous
+interval or excessive dispersion is measured uncertainty, not success.
+`run.e6.stable` is required by S07 in addition to the unchanged median ratio
+gates; it requires relative MAD <=5% on each side and an upper 95% timing-ratio
+bound <=1.0 for both modes. Clear regressions may stop after the initial seven
+samples and retain false gates. Do not repeat complete captures until random
+noise produces a pass. A process failure, mismatched workload
 count or invalid numeric sample invalidates that capture. A valid slow/high-memory
 sample remains a measured failure.
 
 Preload source bytes/options identically before the phase boundary. Report
 preload size and process startup separately. Start wall time and allocation
 snapshots at a barrier immediately before parse+bind; stop when all bound roots
-are retained and workers have completed. Result serialization is outside the
-phase. Preserve Go's pinned normal GC behavior (GOGC=100, no imposed memory limit)
+are retained and workers have completed. The same uninstrumented child supplies phase wall time and lifetime peak RSS;
+result serialization is outside wall time but its bounded cost remains in RSS.
+Workload graph validation uses this same uninstrumented binary in an explicit
+reporting mode in separate processes, with no change to its parse/bind/pool code.
+The allocation driver is a distinct instrumented build with recorded feature and
+source fingerprints and its own correctness smoke check. Preserve Go's pinned normal GC behavior (GOGC=100, no imposed memory limit)
 and report effective values; do not disable GC to make Rust look smaller.
 
 Measure allocation passes with Go runtime.MemStats.TotalAlloc deltas and Rust
@@ -569,7 +645,8 @@ Inspect metric truth and freshness after capture, not just command exit status.
 
 | Producer | Declared input groups | Measured output and consumer |
 | --- | --- | --- |
-| binder | Binder/AST/scanner/core/owner implementation closure, clean upstream pin, exact corpus/supplemental manifests, VS Code pin/options/file manifest and benchmark adapters | Derived corpus parity; required graph, resolver, depth and separate full-workload graph parity; S07-1/6 and source-file ledger |
+| binder | Binder/AST/scanner/core/owner implementation closure, clean upstream pin, exact corpus and supplemental manifests | Derived corpus parity; graph/resolver/depth gates; S07-1/6 and source-file ledger |
+| bindworkload | Production parse/bind and benchmark-driver closure, VS Code pin/options/file manifest, clean upstream pin and strict graph protocol | Separate exact full-workload parity required before E5/E6; no corpus-row contribution |
 | program | VFS/options/module/bundled/compiler closure, subset rule/manifest/options/operations and pinned libs | Complete load/resolve parity and `subset_loads`; S07-2 |
 | e2 | Independent subset classifier, clean oracle preprocessing, frozen rule/manifest/baseline and operation identities | Only `frozen_subset` in S07; S07-3 and future E2 consumers |
 | e3 | Existing real runtime closure plus binder/program owners and exact added scenario inventory | Actual shared-bound-file and retained-edit outcomes in all required modes; S07-5 |
@@ -577,7 +654,7 @@ Inspect metric truth and freshness after capture, not just command exit status.
 
 Audit every existing consumer before adding a metric. Add regressions for absent,
 false, partial, stale and wrong-workload evidence; a seven-scenario S04 capture
-must still not close full E3 or S09. The binder workload-parity capture must match the VS Code workload/options
+must still not close full E3 or S09. The separate `bindworkload` capture must match the VS Code workload/options
 fingerprints and the corresponding production driver/source fingerprints used
 by E5/E6; a parity result for an earlier workload or implementation is not a
 performance prerequisite. A subset-manifest success cannot close full
@@ -597,7 +674,7 @@ status/status.json, the unmapped-function worklist and docs/status.html.
 | A | Fresh S06 review, valid fixes and source/API baseline | PR #10 pushed, affected evidence current; concrete review disposition recorded |
 | B | Dependency inventory, frozen subset proposal, VS Code pin and measurement preflight | Independent Go-derived manifests/counts, named operation closure; allocator/counter/worker prototype verified |
 | C | File binding cell, Symbol/Flow storage, publication and failure state machine | Real concurrent bind-once prototype, stable IDs, import/retention and panic tests; Miri/ASan on actual payloads |
-| D | Binder traversal/declarations/flow plus missing helper families | Frozen binder graph/diagnostic parity over full corpus, exact failure records; no unimplemented grammar branches |
+| D | Binder traversal/declarations/flow plus missing helper families | Frozen binder graph/diagnostic parity over full corpus, exact failure records; no unimplemented grammar branches; an informational early parse+bind layout/allocation measurement precedes interface polish |
 | E | Name/reference resolvers | Independent callback and lookup traces, all 195 source functions audited |
 | F | VFS/options/module/bundled/program and immutable snapshots | Every subset variant loads with Go-equivalent file/order/options/diagnostics; both E3 program scenarios pass |
 | G | Full VS Code benchmark and optimization | Usable frozen samples, ratios meet existing gates; final source layout retains semantic parity |
@@ -619,9 +696,12 @@ the new PR. Wait for its completed review, verify each finding and amend the
 plan where valid before starting S07 code.
 
 The structural choices needing prototype validation are the file-owned binding
-cell's placement across mutable construction/publication, exact symbol/flow
-storage sizes, the source-derived subset counts/operation closure, and allocator
-instrumentation preflight. Each has a concrete checkpoint above. None permits
+cell and per-file mapped initialization, exact symbol/flow storage sizes, the
+complete binder-write-to-overlay/side-table mapping, lock nesting and the shared
+reentry guard, source-derived subset counts/operation closure and future checker
+obligations, and allocator instrumentation preflight. Diagnostic scoring is
+fixed above; any concrete named ambiguity still needs independent observations
+before policy freeze. Each has a concrete checkpoint above. None permits
 invented success metrics or a silent change to an accepted contract.
 
 After Claude's review, append a disposition table linking its comment and
@@ -637,10 +717,44 @@ the author checked them and applied these corrections before Claude's review.
 | --- | --- |
 | E5 had no rule combining one/eight-worker memory results | Both per-mode median ratios are retained; each scalar gate is their maximum |
 | Postphase graph hashing could inflate lifetime RSS | Complete workload graph parity runs separately; measured children emit only bounded scalar reports |
-| Mapped siblings could publish through separate binding cells | One group cell owns all pending members; concurrent sibling initialization and partial failure have explicit tests |
+| Mapped siblings could lose their shared retention root | The initial group-initialization proposal was superseded by Claude finding 2: retain one bundle while initializing each member independently |
 | Feature families did not form a total subset rule | Complete syntax/directive classification is required before freeze; unclassified input is an error and library obligations must map to S08 |
-| Workload counts were not a concrete correctness gate | Exact full-workload graph parity is a separate required binder metric |
+| Workload counts were not a concrete correctness gate | Exact full-workload graph parity is a separate required `bindworkload` producer |
 | Workload parity could stay current after benchmark inputs changed | Its source/input declaration includes the VS Code pin, options, manifest and adapters; fingerprints must agree with E5/E6 |
 
-Claude review is pending. No S07 runtime implementation or measured S07 success
-is implied by this plan.
+Claude's completed review and the dispositions below supersede the original
+pending-review status. No S07 runtime implementation or measured success is
+implied by plan acceptance.
+
+### Claude Fable 5.1 review disposition
+
+The original S06 review conversation was resumed as session
+`99dbdfb6-0388-4124-b52f-ff5cd7c851b2`, explicitly configured with
+`claude-fable-5-1` and high effort. The completed
+[plan-only review](https://github.com/iantocristian/ts-rust/pull/11#issuecomment-5576522620)
+used no subagents or implementation/source review. The author verified the
+findings against this plan and the governing sprint definitions before editing.
+
+| Review item | Disposition |
+| --- | --- |
+| 1: Exact binder threshold / E1 allowance | Clarified `parity == 1`; parse-divergent rows fail S07 and no E1 allowance transfers |
+| 2: Group binding changes observable behavior | Accepted; replaced group initialization with per-file once cells and immutable bound overlays under one retained bundle; sibling timing/failure traces are required |
+| 3: Undefined S08 scope blocks subset freeze | Accepted; S07 creates a concrete checker-obligation inventory owned by S08; implementation remains deferred |
+| 4: Panic versus waiter outcome | Accepted; initiator resumes original panic on its calling thread, waiters/later callers receive terminal typed failure; both routes are tested |
+| 5: Diagnostic nondeterminism scoring | Accepted; exact by default, only independently demonstrated named bounded qualifications can pass, with raw data and denominator retained |
+| 6: Measurement host | Accepted; designated local 18-CPU/64-GiB macOS arm64 host, capacity rechecked per capture; ordinary CI does not certify unavailable performance |
+| 7: Noise rule | Accepted; fixed relative-MAD/bootstrap policy, bounded additional samples, separate required timing-stability gate |
+| 8: Go concurrency / GC budget | Accepted; N bounded-queue goroutines and GOMAXPROCS=N explicitly include Go runtime/GC scheduling in the recorded budget |
+| 9: Corpus and workload evidence coupling | Accepted; separate `bindworkload` producer and inputs |
+| 10: Retention lifetime | Accepted; file-owned binding cells remain with the canonical file/bundle root; only private staging is discarded |
+| 11: Unresolved decisions inventory | Completed for field overlays, lock nesting/reentry and concrete ambiguity observations |
+| 12: Dependency slice size/ledger treatment | Added source-only package counts, required-ID closure artifact and truthful partial-file ledger states |
+| 13: S06 request carry-over | Specified parser-entry categories and excluded supplemental codec actions; bind-reached counts are frozen separately |
+| 14: Measurement pairing/builds | Same uninstrumented child provides wall time/RSS; same binary reporting mode validates workload graphs separately; allocation build is distinct and identified |
+| 15: Early measurement checkpoint | Added informational vertical-slice measurement to checkpoint D |
+| 16: Reentry mechanism | Reuse S04 guard mechanism with binding/lazy domain keys |
+
+No divergence approval is inferred from the request to proceed. The mapped-file
+proposal was corrected to preserve per-file initialization, rather than approved
+as a new observable behavior. Implementation may now begin at checkpoint B/C;
+measured acceptance still requires every stated gate.
