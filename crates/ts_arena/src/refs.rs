@@ -215,7 +215,8 @@ impl<N, S> FileHandle<N, S> {
     }
 
     /// Runs the winning initializer under this file's lazy write lock. The callback
-    /// must not reenter lazy APIs on this file. Failure burns every provisional id.
+    /// panics on same-thread reentry to this file's lazy APIs. The callback must not
+    /// wait for another thread to use those APIs. Failure burns every provisional id.
     pub fn jsdoc(
         &self,
         parent: NodeId,
@@ -230,7 +231,8 @@ impl<N, S> FileHandle<N, S> {
     }
 
     /// Source-token access with upstream invariant panics. The initializer must
-    /// not reenter this file's lazy APIs. A cache hit never calls it.
+    /// not wait for another thread to use this file's lazy APIs; same-thread reentry
+    /// panics before locking. A cache hit never calls the initializer.
     pub fn token(
         &self,
         key: TokenKey,

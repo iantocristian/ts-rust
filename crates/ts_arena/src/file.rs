@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use ts_jsstring::{PositionMap, SourceText};
 
 use crate::{
@@ -67,7 +67,7 @@ impl<N, S> FileBuilder<N, S> {
         FileOwner {
             core: self.core,
             symbols: self.symbols,
-            position_map: PositionMap::new(self.source.as_bytes()),
+            position_map: OnceLock::new(),
             source: self.source,
             canonical,
             supplemental,
@@ -84,7 +84,7 @@ pub struct FileOwner<N, S = ()> {
     pub(crate) symbols: Arena<S>,
     pub(crate) lazy: LazyArena<N>,
     source: SourceText,
-    position_map: PositionMap,
+    position_map: OnceLock<PositionMap>,
     canonical: Option<FileId>,
     supplemental: Vec<FileId>,
     _owner: Track,
@@ -119,12 +119,49 @@ impl<N, S> FileOwner<N, S> {
         &self.source
     }
     pub fn position_map(&self) -> &PositionMap {
-        &self.position_map
+        self.position_map
+            .get_or_init(|| PositionMap::new(self.source.as_bytes()))
     }
     pub fn canonical(&self) -> Option<FileId> {
         self.canonical
     }
     pub fn supplemental(&self) -> &[FileId] {
         &self.supplemental
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Barrier;
+
+    #[test]
+    fn position_map_is_initialized_on_demand_and_shared_between_threads() {
+        let file =
+            FileBuilder::<()>::new(Arc::from("\u{1f600}x".as_bytes()), &Counters::new()).finish();
+        assert!(file.position_map.get().is_none());
+        assert_eq!(file.source(), "\u{1f600}x".as_bytes());
+        assert!(file.position_map.get().is_none());
+        let barrier = Barrier::new(4);
+        std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..4)
+                .map(|_| {
+                    scope.spawn(|| {
+                        barrier.wait();
+                        file.position_map()
+                    })
+                })
+                .collect();
+            let maps: Vec<_> = handles
+                .into_iter()
+                .map(|thread| thread.join().unwrap())
+                .collect();
+            assert!(maps.windows(2).all(|pair| std::ptr::eq(pair[0], pair[1])));
+            assert_eq!(maps[0].utf8_to_utf16(4), 2);
+        });
+        assert!(std::ptr::eq(
+            file.position_map.get().unwrap(),
+            file.position_map()
+        ));
     }
 }

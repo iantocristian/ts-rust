@@ -117,29 +117,12 @@ func sourceFile(text string) *ast.SourceFile {
 	).AsSourceFile()
 }
 
-func validity(text string) string {
-	if utf8.ValidString(text) {
-		return "Utf8"
-	}
-	for len(text) > 0 {
-		ch, size := stringutil.DecodeJSStringRune(text)
-		if ch == utf8.RuneError && size == 1 {
-			return "Raw"
-		}
-		text = text[size:]
-	}
-	return "Wtf8"
-}
-
 func evaluate(c Case) (r Result) {
 	r.ID = c.ID
 	defer func() {
 		if payload := recover(); payload != nil {
 			r.Panic = true
-			r.Value = nil
-			if c.PanicMessage {
-				r.Value = fmt.Sprint(payload)
-			}
+			r.Value = fmt.Sprint(payload)
 		}
 	}()
 	text := string(c.decoded)
@@ -156,7 +139,7 @@ func evaluate(c Case) (r Result) {
 			break
 		}
 		s := text[c.A:c.B]
-		r.Value = []any{bytesResult(s), validity(s), strView(s)}
+		r.Value = []any{bytesResult(s), strView(s)}
 	case "lower":
 		r.Value = bytesResult(stringutil.ToLowerJS(text))
 	case "upper":

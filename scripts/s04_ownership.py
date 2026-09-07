@@ -1,7 +1,7 @@
 """Run the same arena scenarios in release, debug, Miri and AddressSanitizer.
 
 Only the seven implemented S04 ownership scenarios become evidence. Instrumented
-runs use a separately pinned nightly, native target and workspace-local caches.
+runs use a separately pinned nightly, native target and reusable user caches.
 No synthetic success or skipped-test count can satisfy an instrumentation gate.
 """
 
@@ -9,9 +9,10 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import sys
-import tomllib
+
+from s04_common import command, strict_json_loads
+from s04_runtime import cache_home, load_toolchains
 
 
 SCENARIOS = (
@@ -21,29 +22,8 @@ SCENARIOS = (
 )
 
 
-def strict_json_loads(data):
-    def unique_object(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError(f"duplicate ownership JSON key: {key}")
-            result[key] = value
-        return result
-
-    def invalid_constant(value):
-        raise ValueError(f"non-finite ownership JSON number: {value}")
-
-    return json.loads(data, object_pairs_hook=unique_object, parse_constant=invalid_constant)
-
-
 def invoke(root, args, env=None):
-    print("+ " + " ".join(args), file=sys.stderr)
-    result = subprocess.run(args, cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sys.stderr.buffer.write(result.stderr)
-    if result.returncode:
-        sys.stderr.buffer.write(result.stdout)
-        raise RuntimeError(f"ownership command exited {result.returncode}: {args}")
-    return result.stdout
+    return command(args, cwd=root, env=env)
 
 
 def validate_test_output(output):
@@ -61,23 +41,34 @@ def validate_measurements(report):
     if not isinstance(report, dict) or set(report) != {"metrics", "tests"}:
         raise ValueError("invalid ownership report envelope")
     tests = report["tests"]
-    if not isinstance(tests, list) or sorted(test["id"] for test in tests) != sorted(SCENARIOS):
+    if (not isinstance(tests, list)
+            or any(not isinstance(test, dict) or not isinstance(test.get("id"), str) for test in tests)
+            or sorted(test["id"] for test in tests) != sorted(SCENARIOS)):
         raise ValueError("ownership report must contain exactly the frozen scenarios")
-    if any(set(test) != {"id", "result"} or test["result"] != "pass" for test in tests):
-        raise ValueError("ownership scenario failed or was skipped")
+    for test in tests:
+        if test.get("result") == "pass" and set(test) == {"id", "result"}:
+            continue
+        if (test.get("result") != "fail" or set(test) != {"id", "result", "error"}
+                or not isinstance(test["error"], str)):
+            raise ValueError("ownership scenario must report pass or fail with its panic diagnostic")
+        print(f"ownership scenario {test['id']} failed: {test['error']}", file=sys.stderr)
+    outcomes = {test["id"]: test["result"] for test in tests}
+    failed = "fail" in outcomes.values()
     metrics = report["metrics"]
-    expected_metrics = set(SCENARIOS[:5]) | {"live_owner_delta", "live_allocation_delta"}
+    expected_metrics = set(SCENARIOS[:5])
+    if not failed:
+        expected_metrics |= {"live_owner_delta", "live_allocation_delta"}
     if not isinstance(metrics, dict) or set(metrics) != expected_metrics:
         raise ValueError("native example may emit only the measured S04 metrics")
     for scenario in SCENARIOS[:5]:
-        if metrics.get(scenario) is not True:
-            raise ValueError(f"missing or failed ownership measurement {scenario}")
+        if metrics.get(scenario) is not (outcomes[scenario] == "pass"):
+            raise ValueError(f"ownership measurement disagrees with scenario {scenario}")
     for metric in ("live_owner_delta", "live_allocation_delta"):
+        if metric not in metrics and failed:
+            continue
         value = metrics.get(metric)
         if type(value) is not int or value < 0:
             raise ValueError(f"missing or invalid measured counter {metric}")
-    if "miri" in metrics or "address_sanitizer" in metrics:
-        raise ValueError("native example cannot assert instrumentation completion")
     return report
 
 
@@ -97,8 +88,10 @@ def instrumentation_environment(base, root):
             r"CARGO_TARGET_.+_(RUSTFLAGS|RUNNER)", key
         ):
             env.pop(key)
-    env.update(RUSTUP_HOME=str(root / "target/s04-rustup"),
-               CARGO_HOME=str(root / "target/s04-cargo-home"))
+    # Cargo registry mirrors/offline configuration and installed Rustup toolchains
+    # belong to the caller. An explicit override supports isolated installations.
+    if env.get("S04_RUSTUP_HOME"):
+        env["RUSTUP_HOME"] = str(Path(env["S04_RUSTUP_HOME"]).expanduser().resolve())
     return env
 
 
@@ -109,38 +102,55 @@ def run(root):
         raise ValueError("ownership case manifest drift")
     base = os.environ.copy()
     base["CARGO_TERM_COLOR"] = "never"
+    report = validate_measurements(strict_json_loads(invoke(root, [
+        "cargo", "run", "--quiet", "--package", "ts_arena", "--example", "e3",
+        "--features", "harness", "--release", "--locked",
+    ], base)))
+    # Publish named native failures even when later tools would fail too. There
+    # is no valid instrumentation claim until every required native scenario ran.
+    if any(test["result"] == "fail" for test in report["tests"]):
+        report["tests"] = {test["id"]: test["result"] for test in report["tests"]}
+        return report
     tests = ["test", "--package", "ts_arena", "--lib", "--locked"]
     tail = ["--", "--test-threads=1"]
     validate_test_output(invoke(root, ["cargo", *tests, *tail], base))
     validate_test_output(invoke(root, ["cargo", *tests, "--release", *tail], base))
     sys.stderr.buffer.write(invoke(root, ["cargo", "test", "--package", "ts_arena", "--doc", "--locked"], base))
-    report = validate_measurements(strict_json_loads(invoke(root, [
-        "cargo", "run", "--quiet", "--package", "ts_arena", "--example", "e3",
-        "--features", "harness", "--release", "--locked",
-    ], base)))
-    toolchains = tomllib.loads((root / "data/s04/toolchains.toml").read_text())
-    nightly = toolchains["nightly"]
-    if not re.fullmatch(r"nightly-\d{4}-\d{2}-\d{2}", nightly):
-        raise ValueError("ownership instrumentation requires a dated nightly")
+    nightly = load_toolchains(root)["nightly"]
     native = invoke(root, ["rustc", "-Vv"], base).decode()
     print(native, file=sys.stderr)
     host = next(line.removeprefix("host: ") for line in native.splitlines() if line.startswith("host: "))
     instrument = instrumentation_environment(base, root)
     print(invoke(root, ["rustup", "run", nightly, "rustc", "-Vv"], instrument).decode(), file=sys.stderr)
+    components = invoke(root, ["rustup", "component", "list", "--toolchain", nightly, "--installed"], instrument).decode()
+    if not any(line.startswith("miri-") for line in components.splitlines()) or not any(
+            line.startswith("rust-src") for line in components.splitlines()):
+        raise RuntimeError(f"{nightly} requires installed miri and rust-src components; "
+                           f"run rustup component add --toolchain {nightly} miri rust-src")
     # The production std::sync locks support Miri's strict provenance checks.
-    miri = {**instrument, "MIRI_SYSROOT": str(root / "target/s04-miri-sysroot"),
+    miri = {**instrument, "MIRI_SYSROOT": str(cache_home(root, instrument) / "miri" / nightly / host),
             "CARGO_TARGET_DIR": str(root / "target/s04-miri"),
             "MIRIFLAGS": "-Zmiri-strict-provenance", "RUSTFLAGS": ""}
-    invoke(root, ["cargo", f"+{nightly}", "miri", "setup", "--target", host], miri)
-    validate_test_output(invoke(root, ["cargo", f"+{nightly}", "miri", *tests, "--target", host, *tail], miri))
-    report["metrics"]["miri"] = True
+    try:
+        invoke(root, ["cargo", f"+{nightly}", "miri", "setup", "--target", host], miri)
+        validate_test_output(invoke(root, ["cargo", f"+{nightly}", "miri", *tests, "--target", host, *tail], miri))
+    except (RuntimeError, ValueError) as error:
+        print(f"Miri ownership suite failed: {error}", file=sys.stderr)
+        report["metrics"]["miri"] = False
+    else:
+        report["metrics"]["miri"] = True
     asan = {**instrument, "CARGO_TARGET_DIR": str(root / "target/s04-asan"),
             "RUSTFLAGS": "-Zsanitizer=address",
             # macOS ASan does not support LeakSanitizer. Miri and measured
             # ownership counters still require all roots/allocations to drop.
             "ASAN_OPTIONS": "detect_leaks=0" if "apple" in host else "detect_leaks=1"}
-    validate_test_output(invoke(root, ["cargo", f"+{nightly}", *tests, "-Zbuild-std", "--target", host, *tail], asan))
-    report["metrics"]["address_sanitizer"] = True
+    try:
+        validate_test_output(invoke(root, ["cargo", f"+{nightly}", *tests, "-Zbuild-std", "--target", host, *tail], asan))
+    except (RuntimeError, ValueError) as error:
+        print(f"AddressSanitizer ownership suite failed: {error}", file=sys.stderr)
+        report["metrics"]["address_sanitizer"] = False
+    else:
+        report["metrics"]["address_sanitizer"] = True
     # The native example's row inventory has already been checked for duplicate
     # IDs. The evidence runner requires its public id -> outcome map schema.
     report["tests"] = {test["id"]: test["result"] for test in report["tests"]}

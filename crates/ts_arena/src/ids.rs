@@ -7,7 +7,7 @@ static NEXT_ARENA: AtomicU64 = AtomicU64::new(1);
 
 pub(crate) fn checked_arena(counter: &AtomicU64) -> Result<ArenaId, Error> {
     counter
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
             if next == 0 || next > u64::from(u32::MAX) {
                 None
             } else {

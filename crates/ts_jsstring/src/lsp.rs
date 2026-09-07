@@ -66,15 +66,8 @@ pub fn lsp_position_to_line_and_character(
     encoding: PositionEncoding,
 ) -> LspPosition {
     let position = position.min(text.len() as i32).max(0);
-    let insertion = line_map
-        .line_starts
-        .partition_point(|&start| start < position);
-    let mut line = insertion as isize;
-    if line_map.line_starts.get(insertion) != Some(&position) {
-        line -= 1;
-    }
-    line = line.min(line_map.line_starts.len() as isize - 1).max(0);
-    let start = line_map.line_starts[line as usize];
+    let line = line_map.compute_index_of_line_start(position);
+    let start = line_map.line_starts[line];
     let character = if line_map.ascii_only || encoding == PositionEncoding::Utf8 {
         position.wrapping_sub(start)
     } else {

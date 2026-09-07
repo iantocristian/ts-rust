@@ -48,7 +48,7 @@ jobs:
         run: cargo xtask status --check-committed
 
   msrv:
-    name: Rust 1.96.0 on ${{ matrix.os }}
+    name: declared minimum Rust on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -56,13 +56,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - name: Read and validate toolchain pins
+        id: pins
+        run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"
       - name: Install the declared minimum toolchain
-        run: rustup toolchain install 1.96.0 --profile minimal
+        run: rustup toolchain install "${{ steps.pins.outputs.msrv }}" --profile minimal
       - uses: Swatinem/rust-cache@v2
         with:
-          key: msrv-1.96.0
+          key: msrv-${{ steps.pins.outputs.msrv }}
       - name: Build the locked workspace on the minimum Rust version
-        run: cargo +1.96.0 check --workspace --all-targets --all-features --locked
+        run: cargo +${{ steps.pins.outputs.msrv }} check --workspace --all-targets --all-features --locked
 
   producers:
     name: producers on ${{ matrix.os }}
@@ -75,38 +78,62 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: true
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.27.1"
-          cache-dependency-path: upstream/tsc/go.sum
       - name: Install the pinned toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-deny
-      - name: Install S04 instrumentation toolchain
-        run: |
-          RUSTUP_HOME="$PWD/target/s04-rustup" rustup toolchain install nightly-2026-09-05 \
-            --profile minimal --component miri --component rust-src --no-self-update
+      - name: Read and validate toolchain pins
+        id: pins
+        run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"
       - name: Validate provenance and schemas
         id: validate
+        if: ${{ !cancelled() }}
         run: cargo xtask validate
+      - uses: actions/setup-go@v6
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          go-version: ${{ steps.pins.outputs.go }}
+          cache-dependency-path: upstream/tsc/go.sum
+      - uses: taiki-e/install-action@v2
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          tool: cargo-deny
+      - name: Restore reusable instrumentation and oracle caches
+        uses: actions/cache@v4
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        with:
+          key: s04-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.nightly }}-${{ hashFiles('Cargo.lock', 'data/s04/toolchains.toml') }}
+          path: |
+            ~/.rustup/toolchains/${{ steps.pins.outputs.nightly }}-*
+            ~/.rustup/update-hashes/${{ steps.pins.outputs.nightly }}-*
+            ${{ steps.pins.outputs.cache }}
+      - name: Install S04 instrumentation toolchain
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          rustup toolchain install "${{ steps.pins.outputs.nightly }}" \
+            --profile minimal --component miri --component rust-src --no-self-update
       - name: Tracker self-tests
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run selftest
       - name: Workspace build
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run workspace
       - name: Oracle build and version smoke
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run oracle
       - name: Formatting
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run fmt
       - name: Clippy
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run clippy
       - name: Dependency policy
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run deny
       - name: Arena ownership, Miri and AddressSanitizer
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run e3
       - name: Text leaves against the pinned Go oracle
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run e4
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}

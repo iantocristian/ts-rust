@@ -249,14 +249,14 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 
 | Run | State | Artifact |
 |---|---|---|
-| clippy | current | [result](status/evidence/2312c42052283de0023ae873b46e9373077595a0c45e2db452ff0a71bb39cf3f.json) |
-| deny | current | [result](status/evidence/dc0696db6eb017d9c4e3e2a1622d9e67d511c512c531caa0e86701394df6f57a.json) |
-| e3 | current | [result](status/evidence/0951265053e926f040afcb0d78793b5a8a30e534e9400830184d451b1598b7c8.json) |
-| e4 | current | [result](status/evidence/f766020366cd795f4a7c0cc38cd78acf2d0682c64838a7e92e972368657322e4.json) |
-| fmt | current | [result](status/evidence/005878898c4c82b310e1be451aff615be5008ea01aa09a43f78d905152e115c9.json) |
-| oracle | current | [result](status/evidence/edd4e7bd9836bdf537530939bd195be546c09902e9b6e87677c4f6580fca22fc.json) |
-| selftest | current | [result](status/evidence/29e5c4ca6cffcb1c8abe083c21a7f15638546a8ae17c4d992ba05dcd50691a14.json) |
-| workspace | current | [result](status/evidence/c388eaf278b9c438396e21a4ee0cbf1c4e9cf47857b21ca60b65eff9a58b6196.json) |
+| clippy | current | [result](status/evidence/3c43a8c5f24e77699a5138a2b42bd67331fb5063dc8e8b3c70c463c2fc314357.json) |
+| deny | current | [result](status/evidence/d6f8f1e1d06d35da796abfd35546c5444225c5f351546356662ef83bcbde5c21.json) |
+| e3 | current | [result](status/evidence/760a4e983cb46f49a4cd2cfb4fba2fde16cc6d7620e67310dc5ab01214064d21.json) |
+| e4 | current | [result](status/evidence/14a783fa8ba2b57b933104dfb97145c6d8d2db5d457172aeb3901513a926fb60.json) |
+| fmt | current | [result](status/evidence/17c6aa7750a0bd76a8aae2d72876e8664e8a00902e2b0af40bcc64e01cea45b2.json) |
+| oracle | current | [result](status/evidence/0f4a60137cb4f5ecaf07921b2e35e648190cf589dccdfbbfafcff132e288b7f0.json) |
+| selftest | current | [result](status/evidence/4dcb06ff333d1532f691839fba091bb34731082e2ef784d082396a3ede01a8e7.json) |
+| workspace | current | [result](status/evidence/a586ca51430b51fe4454a472065a551038f3bbcee9c14961bad8d80a58e1ed58.json) |
 
 ## Sprints
 
@@ -475,7 +475,7 @@ Items:
 - [ ] S09-2 Builder caches and persistent emit side tables retain every arena dependency across generations
 - [ ] S09-3 Request-scoped scratch for API printing and insertion formatting
 - [ ] S09-4 Checker pool, snapshots and API registry under the generation gate (ADR 0012); panic retirement; forced retirement-versus-publication interleavings
-- [x] S09-5 Every scenario under Miri and AddressSanitizer; owner and allocation counters return to baseline after each final drop
+- [ ] S09-5 Every scenario under Miri and AddressSanitizer; owner and allocation counters return to baseline after each final drop
 
 ### S10 WebAssembly and Rust embedding (open)
 

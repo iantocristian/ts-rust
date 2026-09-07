@@ -518,20 +518,24 @@ pub fn allocations_return_to_baseline() -> Measurement {
     observation.finish()
 }
 
+pub type Scenario = (&'static str, fn() -> Measurement);
+
+pub const ALL: [Scenario; 7] = [
+    ("id_exhaustion", id_exhaustion),
+    ("wrong_owner_rejected", wrong_owner_rejected),
+    (
+        "stale_and_recycled_ids_rejected",
+        stale_and_recycled_ids_rejected,
+    ),
+    ("concurrent_lazy_storage", concurrent_lazy_storage),
+    ("mapper_bundle_disposal", mapper_bundle_disposal),
+    ("owners_return_to_baseline", owners_return_to_baseline),
+    (
+        "allocations_return_to_baseline",
+        allocations_return_to_baseline,
+    ),
+];
+
 pub fn run_all() -> [(&'static str, Measurement); 7] {
-    [
-        ("id_exhaustion", id_exhaustion()),
-        ("wrong_owner_rejected", wrong_owner_rejected()),
-        (
-            "stale_and_recycled_ids_rejected",
-            stale_and_recycled_ids_rejected(),
-        ),
-        ("concurrent_lazy_storage", concurrent_lazy_storage()),
-        ("mapper_bundle_disposal", mapper_bundle_disposal()),
-        ("owners_return_to_baseline", owners_return_to_baseline()),
-        (
-            "allocations_return_to_baseline",
-            allocations_return_to_baseline(),
-        ),
-    ]
+    ALL.map(|(id, scenario)| (id, scenario()))
 }

@@ -52,14 +52,14 @@ config = "debug"
 command = ["python3", "scripts/s04.py", "e3"]
 inputs = ["data/s04/toolchains.toml", "docs/design/ownership.md", "docs/design/symbols.md", "docs/adr/0012-panics--recovery-and-generation-retirement.md"]
 cases = "data/s04/e3-cases.json"
-sources = ["crates/ts_arena/**", "crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_ownership.py"]
+sources = ["crates/ts_arena/**", "crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_ownership.py", "scripts/s04_common.py", "scripts/s04_runtime.py"]
 target = "host"
-config = "S04 arena contracts; debug and release; measured final-drop counters; nightly-2026-09-05 Miri strict provenance with production std::sync locks and AddressSanitizer with rebuilt std; native target"
+config = "S04 arena contracts; debug and release; measured per-scenario outcomes and final-drop counters; manifest-pinned nightly Miri strict provenance with production std::sync locks and AddressSanitizer with rebuilt std; native target; caller Cargo/Rustup configuration retained, optional S04_RUSTUP_HOME override"
 
 [e4]
 command = ["python3", "scripts/s04.py", "e4"]
 inputs = ["data/s04/corpus.json", "data/s04/e4-probes.json", "data/s04/toolchains.toml", "data/upstream.json", ".gitmodules", "docs/design/text.md"]
 cases = "data/s04/e4-cases.json"
-sources = ["crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_oracle/**", "scripts/tracking-bootstrap.py", "upstream"]
+sources = ["crates/ts_jsstring/**", "Cargo.*", ".cargo/**", "rust-toolchain*", "xtask/**", "scripts/s04.py", "scripts/s04_common.py", "scripts/s04_runtime.py", "scripts/s04_oracle/**", "scripts/tracking-bootstrap.py", "upstream"]
 target = "host"
-config = "S04 text leaf slice; Go 1.27.1 clean pin with access-only wrappers; deterministic byte/casing/position probes; release Rust; frozen request digest and scenario counts; exact contract panic payloads; all probes required per scenario"
+config = "S04 text leaf slice; manifest-pinned local Go toolchain and clean source pin with access-only wrappers; deterministic byte/casing/position probes; release Rust; frozen request digest and scenario counts; classified panics and exact prescribed payloads; all probes required per scenario"

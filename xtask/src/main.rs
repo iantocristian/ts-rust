@@ -1540,6 +1540,12 @@ fn main() -> ExitCode {
                     if s.done && r.errors.is_empty() && r.unknown_markers.is_empty() {
                         ExitCode::SUCCESS
                     } else {
+                        if num(&r.metrics, "upstream.ready") == 0.0 {
+                            eprintln!(
+                                "xtask: upstream is not ready; run `git submodule update --init upstream`, then verify it is clean at pin {}",
+                                r.ledger_pin
+                            );
+                        }
                         ExitCode::from(1)
                     }
                 }

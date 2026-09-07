@@ -8,10 +8,11 @@ import os
 import pathlib
 import re
 import subprocess
+import tomllib
 
 CRATE = pathlib.Path(__file__).resolve().parents[1]
 REPO = CRATE.parents[1]
-GO_VERSION = "go1.27.1"
+GO_VERSION = tomllib.loads((REPO / "data/s04/toolchains.toml").read_text())["go"]
 
 
 def command(*args, **kwargs):
@@ -32,7 +33,6 @@ def generate():
     path = upstream / "tsc/internal/stringutil/js_case_generated.go"
     source = path.read_text()
     env = dict(os.environ, GOTOOLCHAIN="local", GO111MODULE="off")
-    env.setdefault("GOCACHE", str(REPO / "target/go-build"))
     simple = json.loads(command("go", "run", str(CRATE / "tools/simple_lower.go"), env=env))
     if simple["go"] != GO_VERSION:
         raise ValueError(f"expected oracle toolchain {GO_VERSION}, got {simple['go']}")

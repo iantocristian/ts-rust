@@ -8,7 +8,8 @@ future AST and binder crates; `Node<T>` adds only storage metadata.
 
 `FileBuilder` owns mutable core nodes and symbols. Finishing consumes the builder
 and publishes an immutable `FileOwner`, with decoded `SourceText` and its
-`PositionMap`. Core reads take no lock and perform no reference-count increment.
+`PositionMap`, initialized on its first request and shared by subsequent readers.
+Core reads take no lock and perform no reference-count increment.
 `Scope::import` and `FileHandle::node` return checked, borrowed `NodeRef`s. Use
 `retain_node`, `import_retained` or `NodeRef::retain` when a result must outlive its
 scope. Symbol access follows the same borrow/explicit-retention distinction.
@@ -45,8 +46,11 @@ slot is permanently reserved. Errors, invalid roots and initializer unwinds
 leave unresolvable tombstones, never reusable ids. Initializer panics are caught
 while the write guard remains held, then resumed after unlocking, so valid
 existing storage remains usable without ignoring a poisoned lock. Token
-initializers use the same unwind boundary. Callbacks must not reenter lazy APIs
-on the same file while that write lock is held.
+initializers use the same unwind boundary. A thread-local guard detects callback
+reentry into the same file's lazy APIs and panics before locking; the unwind
+boundary preserves retry behavior. Other threads still wait for publication.
+Callbacks must not wait for another thread to use the same file's lazy APIs,
+including indirect wait cycles involving another file.
 
 JSDoc cache entries share immutable `Arc<[NodeId]>` lists, including empty
 results. The token cache uses `(parent, range)` keys, checks cached kinds and

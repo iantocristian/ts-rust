@@ -4,9 +4,12 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import sys
 import unittest
 from unittest.mock import patch
 
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 SPEC = importlib.util.spec_from_file_location("s04", Path(__file__).resolve().parents[1] / "s04.py")
 s04 = importlib.util.module_from_spec(SPEC)
@@ -82,15 +85,70 @@ class ComparisonTests(unittest.TestCase):
 
     def test_matching_panics_pass_but_success_is_not_a_panic(self):
         expected = copy.deepcopy(self.results)
-        expected[0].update(panic=True, value=None)
-        report, failures = s04.compare(self.probes, expected, copy.deepcopy(expected))
+        expected[0].update(panic=True, value="runtime error: index out of range [-1]")
+        actual = copy.deepcopy(expected)
+        actual[0]["value"] = "index out of bounds: the len is 2 but the index is 18446744073709551615"
+        report, failures = s04.compare(self.probes, expected, actual)
         self.assertTrue(report["metrics"][s04.TEXT_CRITERIA[0]])
         self.assertFalse(failures)
-        actual = copy.deepcopy(expected)
         actual[0]["panic"] = False
         report, failures = s04.compare(self.probes, expected, actual)
         self.assertFalse(report["metrics"][s04.TEXT_CRITERIA[0]])
         self.assertEqual(len(failures), 1)
+
+    def test_bounds_cannot_match_assertion_overflow_or_unknown_panic(self):
+        expected = copy.deepcopy(self.results)
+        expected[0].update(panic=True, value="runtime error: slice bounds out of range [:9] with length 2")
+        actual = copy.deepcopy(expected)
+        for reason, kind in [
+            ("assertion failed: offset <= len", "assertion"),
+            ("attempt to add with overflow", "overflow"),
+            ("unexpected slice bounds failure", "other"),
+            ("non-string Rust panic payload", "other"),
+        ]:
+            with self.subTest(reason=reason):
+                actual[0]["value"] = reason
+                report, failures = s04.compare(self.probes, expected, actual)
+                self.assertFalse(report["metrics"][self.probes[0]["criterion"]])
+                self.assertEqual(len(failures), 1)
+                self.assertEqual(failures[0]["panic_classes"], {"oracle": "bounds", "rust": kind})
+                self.assertEqual(failures[0]["actual"]["value"], reason)
+
+    def test_unknown_panics_never_pass_even_with_identical_payloads(self):
+        for reason in ("unexpected panic", "assertion failed: invariant", "attempt to add with overflow"):
+            with self.subTest(reason=reason):
+                expected = copy.deepcopy(self.results)
+                expected[0].update(panic=True, value=reason)
+                report, failures = s04.compare(self.probes, expected, copy.deepcopy(expected))
+                self.assertEqual(len(failures), 1)
+                self.assertFalse(report["metrics"][self.probes[0]["criterion"]])
+
+    def test_contract_class_and_payload_are_checked_for_every_panic(self):
+        expected = copy.deepcopy(self.results)
+        expected[0].update(panic=True, value="Bad line number. Line: -1, lineStarts.length: 2.")
+        actual = copy.deepcopy(expected)
+        for message in ("Bad line number. Line: 2, lineStarts.length: 2.",
+                        "Bad UTF-16 character offset. Line: 0, character: 9."):
+            actual[0]["value"] = message
+            _, failures = s04.compare(self.probes, expected, actual)
+            self.assertEqual(len(failures), 1)
+
+    def test_runtime_bounds_normalization_is_narrow(self):
+        for message, runtime in [
+            ("runtime error: index out of range [-1]", "oracle"),
+            ("runtime error: index out of range [8] with length 2", "oracle"),
+            ("runtime error: slice bounds out of range [:8] with length 2", "oracle"),
+            ("runtime error: slice bounds out of range [-1:]", "oracle"),
+            ("runtime error: slice bounds out of range [9:2]", "oracle"),
+            ("index out of bounds: the len is 2 but the index is 8", "rust"),
+            ("range end index 8 out of range for slice of length 2", "rust"),
+            ("range start index 8 out of range for slice of length 2", "rust"),
+            ("slice index starts at 9 but ends at 2", "rust"),
+        ]:
+            with self.subTest(message=message):
+                self.assertEqual(s04.panic_class(message, runtime), "bounds")
+                self.assertEqual(s04.panic_class("assertion failed: " + message, runtime), "assertion")
+                self.assertEqual(s04.panic_class(message + ": unexpected suffix", runtime), "other")
 
     def test_empty_or_duplicate_probe_inventory_cannot_pass(self):
         for probes in [[], [self.probes[0]] * 2, [None], [{"id": 1, "group": "g", "criterion": "c"}]]:
@@ -212,6 +270,45 @@ var unicodeCaseIgnorableRanges = &unicode.RangeTable{
             actual[0]["value"] = value
             with self.assertRaisesRegex(ValueError, "panic message"):
                 s04.compare(probes, expected, actual)
+
+
+class OracleEnvironmentTests(unittest.TestCase):
+    def test_verified_go_cannot_auto_select_a_different_toolchain(self):
+        with patch.dict(os.environ, {"GOTOOLCHAIN": "auto", "GOFLAGS": "-tags=changed",
+                                     "GOOS": "other", "GOCACHE": "/custom/go-cache"}), \
+             patch.object(s04, "command", return_value=b"go version go1.27.1 darwin/arm64\n") as command:
+            env = s04.go_environment()
+        self.assertEqual(env["GOTOOLCHAIN"], "local")
+        self.assertEqual(command.call_args.kwargs["env"]["GOTOOLCHAIN"], "local")
+        self.assertEqual(env["GOCACHE"], "/custom/go-cache")
+        self.assertEqual(env["GOFLAGS"], "")
+        self.assertNotIn("GOOS", env)
+
+    def test_wrong_go_version_is_rejected_before_oracle_build(self):
+        with patch.object(s04, "command", return_value=b"go version go1.28.0 darwin/arm64\n"):
+            with self.assertRaisesRegex(ValueError, "oracle requires go1.27.1"):
+                s04.go_environment()
+
+    def test_git_export_failure_is_reported_before_tar_decoding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "data").mkdir()
+            (root / "data/upstream.json").write_text('{"pin":"missing"}')
+            with patch.object(s04, "ROOT", root), \
+                 patch.object(s04, "command", side_effect=RuntimeError("command exited 128: git archive")), \
+                 patch.object(s04.tarfile, "open") as open_tar:
+                with self.assertRaisesRegex(RuntimeError, "command exited 128"):
+                    s04.go_oracle(root / "upstream", {})
+                open_tar.assert_not_called()
+
+    def test_invalid_git_archive_has_a_contextual_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "data").mkdir()
+            (root / "data/upstream.json").write_text('{"pin":"bad-archive"}')
+            with patch.object(s04, "ROOT", root), patch.object(s04, "command", return_value=b"bad tar"):
+                with self.assertRaisesRegex(RuntimeError, "cannot unpack pinned Go source"):
+                    s04.go_oracle(root / "upstream", {})
 
 
 if __name__ == "__main__":

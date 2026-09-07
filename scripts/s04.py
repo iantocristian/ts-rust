@@ -3,14 +3,15 @@
 
 The Go oracle is rebuilt from a clean exported pin plus small access wrappers in
 scripts/s04_oracle. The upstream submodule itself is never modified. E4 compares
-every frozen probe, including prescribed panic messages, then aggregates only the
-five implemented criteria. E3 covers arena contracts only.
+every frozen probe, classifies every panic and checks explicit contract messages,
+then aggregates only the five implemented criteria. E3 covers arena contracts only.
 """
 
 import argparse
 from collections import Counter, defaultdict
 import hashlib
 import importlib.util
+import io
 import json
 import math
 import os
@@ -24,33 +25,14 @@ import tarfile
 import tempfile
 import tomllib
 
+from s04_common import command as captured_command, strict_json_loads
+from s04_runtime import cache_home
+
 
 ROOT = Path(__file__).resolve().parent.parent
 TEXT_CRITERIA = (
     "source_decoding", "helper_semantics", "slice_validity", "utf8_positions", "utf16_positions"
 )
-
-
-def strict_json_loads(data):
-    def reject_constant(value):
-        raise ValueError(f"non-finite JSON number {value}")
-
-    def unique_object(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError(f"duplicate JSON object key {key}")
-            result[key] = value
-        return result
-
-    def finite_float(text):
-        value = float(text)
-        if not math.isfinite(value):
-            raise ValueError(f"non-finite JSON number {text}")
-        return value
-
-    return json.loads(data, parse_constant=reject_constant, parse_float=finite_float,
-                      object_pairs_hook=unique_object)
 
 
 def validate_json_value(value):
@@ -105,18 +87,8 @@ def validate_probe_inventory(probes, frozen):
         raise ValueError("E4 probe inventory drift; review and regenerate with --write-manifest")
 
 
-def command(args, *, cwd=ROOT, env=None, data=None):
-    print("+ " + " ".join(map(str, args)), file=sys.stderr)
-    result = subprocess.run(args, cwd=cwd, env=env, input=data, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, check=False)
-    if result.stderr:
-        sys.stderr.buffer.write(result.stderr)
-        sys.stderr.flush()
-    if result.returncode:
-        if result.stdout:
-            sys.stderr.buffer.write(result.stdout)
-        raise RuntimeError(f"command exited {result.returncode}: {args}")
-    return result.stdout
+def command(args, *, cwd=None, env=None, data=None):
+    return captured_command(args, cwd=ROOT if cwd is None else cwd, env=env, data=data)
 
 
 def verified_upstream():
@@ -130,7 +102,8 @@ def go_environment():
     env = os.environ.copy()
     for key in ("GOOS", "GOARCH", "GOARM", "GOARM64", "GOAMD64", "GO386", "GOMIPS", "GOMIPS64", "GOPPC64", "GORISCV64"):
         env.pop(key, None)
-    env.update(CGO_ENABLED="0", GOWORK="off", GOFLAGS="", GOCACHE=str(ROOT / "target/go-build"))
+    env.update(CGO_ENABLED="0", GOWORK="off", GOFLAGS="", GOTOOLCHAIN="local")
+    env.setdefault("GOCACHE", str(cache_home(ROOT, env) / "go-build"))
     wanted = tomllib.loads((ROOT / "data/s04/toolchains.toml").read_text())["go"]
     version = command(["go", "version"], env=env).decode().strip()
     if version.split()[2] != wanted:
@@ -146,14 +119,16 @@ def go_oracle(upstream, env):
     destination.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="export-", dir=destination) as temporary:
         checkout = Path(temporary)
-        archive = subprocess.Popen(["git", "archive", pin, "tsc"], cwd=upstream, stdout=subprocess.PIPE)
+        # Export production internals (including embedded resources) and module
+        # metadata, omitting the large tsc/testdata tree. Check git before reading
+        # its archive so a bad pin reports the command failure, not a tar traceback.
+        archive = command(["git", "archive", pin, "tsc/go.mod", "tsc/go.sum", "tsc/internal"],
+                          cwd=upstream)
         try:
-            with tarfile.open(fileobj=archive.stdout, mode="r|") as stream:
+            with tarfile.open(fileobj=io.BytesIO(archive)) as stream:
                 stream.extractall(checkout, filter="data")
-        finally:
-            archive.stdout.close()
-        if archive.wait():
-            raise RuntimeError("cannot export pinned Go source")
+        except tarfile.TarError as error:
+            raise RuntimeError(f"cannot unpack pinned Go source: {error}") from error
         bridges = {
             "decode_bridge.go": "internal/vfs/internal/s04_bridge.go",
             "printer_bridge.go": "internal/printer/s04_bridge.go",
@@ -166,9 +141,9 @@ def go_oracle(upstream, env):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / "scripts/s04_oracle" / source, target)
         executable = destination / "oracle"
-        sys.stderr.buffer.write(command(["go", "test", "-mod=readonly", "./internal/vfs/s04oracle"],
+        sys.stderr.buffer.write(command(["go", "test", "-trimpath", "-mod=readonly", "./internal/vfs/s04oracle"],
                                         cwd=checkout / "tsc", env=env))
-        command(["go", "build", "-mod=readonly", "-o", str(executable), "./internal/vfs/s04oracle"],
+        command(["go", "build", "-trimpath", "-mod=readonly", "-o", str(executable), "./internal/vfs/s04oracle"],
                 cwd=checkout / "tsc", env=env)
     print(f"Go oracle executable sha256={hashlib.sha256(executable.read_bytes()).hexdigest()}", file=sys.stderr)
     return executable
@@ -271,11 +246,56 @@ def text_probes(upstream):
             add("helpers/all-bytes", "helper_semantics", op, bytes([byte]))
     for code in [-1, 0, 1, 0x7F, 0x80, 0x7FF, 0x800, 0xD7FF, *range(0xD800, 0xE000), 0xE000, 0xFFFF, 0x10000, 0x10FFFF, 0x110000, 2**31 - 1]:
         add("helpers/rune-encoding", "helper_semantics", "encode", a=code)
-    # Explicit contract panics have stable payloads; runtime bounds panics do not.
+    # Retain the original four message probes in the frozen request inventory.
+    # Every contract panic now compares its payload, not just these four probes.
     for line in [-1, 2, -(2**63), 2**63 - 1]:
         add("utf16/bad-line-message", "utf16_positions", "scanner_to_position",
             b"a\nb", a=line, panic_message=True)
     return probes
+
+
+def panic_class(message, runtime):
+    """Recognize specific runtime diagnostics, never arbitrary matching panics.
+
+    Go signed bounds and Rust usize bounds have different numeric payloads, so
+    those runtime errors compare by class. Explicit upstream contracts retain
+    their exact payload. Unknown/assertion/overflow panics cannot satisfy a probe.
+    """
+    if re.fullmatch(r"Bad line number\. Line: -?\d+, lineStarts\.length: \d+\.", message):
+        return "bad_line"
+    if re.fullmatch(r"Bad UTF-16 character offset\. Line: -?\d+, character: -?\d+\.", message):
+        return "bad_character"
+    bounds = {
+        "oracle": (
+            r"runtime error: index out of range \[-?\d+\](?: with length \d+)?",
+            r"runtime error: slice bounds out of range \[(?:-?\d*)?(?::-?\d*){1,2}\](?: with (?:length|capacity) \d+)?",
+        ),
+        "rust": (
+            r"index out of bounds: the len is \d+ but the index is \d+",
+            r"range (?:start|end) index \d+ out of range for slice of length \d+",
+            r"slice index starts at \d+ but ends at \d+",
+        ),
+    }
+    if any(re.fullmatch(pattern, message) for pattern in bounds[runtime]):
+        return "bounds"
+    if re.fullmatch(r"attempt to (?:add|subtract|multiply|divide|negate|shift left|shift right) with overflow", message) \
+            or message == "runtime error: integer overflow":
+        return "overflow"
+    if message.startswith(("assertion failed:", "assertion `", "Assertion failed")):
+        return "assertion"
+    return "other"
+
+
+def same_result(probe, expected, actual):
+    if not expected["panic"] or not actual["panic"]:
+        return same_json_value(expected, actual)
+    expected_class = panic_class(expected["value"], "oracle")
+    actual_class = panic_class(actual["value"], "rust")
+    if expected_class != actual_class or expected_class not in {"bounds", "bad_line", "bad_character"}:
+        return False
+    if expected_class == "bounds" and not probe.get("panic_message", False):
+        return True
+    return expected["value"] == actual["value"]
 
 
 def compare(probes, oracle, rust):
@@ -299,11 +319,8 @@ def compare(probes, oracle, rust):
             if set(result) != {"id", "panic", "value"} or type(result["panic"]) is not bool:
                 raise ValueError(f"invalid {label} result shape")
             if result["panic"]:
-                if probe.get("panic_message", False):
-                    if type(result["value"]) is not str or not result["value"]:
-                        raise ValueError(f"invalid {label} panic message")
-                elif result["value"] is not None:
-                    raise ValueError(f"invalid {label} panic result")
+                if type(result["value"]) is not str or not result["value"]:
+                    raise ValueError(f"invalid {label} panic message")
             validate_json_value(result["value"])
     groups = {}
     failures = []
@@ -316,9 +333,15 @@ def compare(probes, oracle, rust):
             raise ValueError("a scenario cannot mix criteria")
         entry = groups.setdefault(group, {"criterion": criterion, "pass": True, "probes": 0})
         entry["probes"] += 1
-        if not same_json_value(expected, actual):
+        if not same_result(probe, expected, actual):
             entry["pass"] = False
-            failures.append({"probe": probe, "expected": expected, "actual": actual})
+            failure = {"probe": probe, "expected": expected, "actual": actual}
+            if expected["panic"] or actual["panic"]:
+                failure["panic_classes"] = {
+                    label: panic_class(result["value"], label) if result["panic"] else None
+                    for label, result in (("oracle", expected), ("rust", actual))
+                }
+            failures.append(failure)
     metrics = {}
     for criterion in TEXT_CRITERIA:
         selected = [g for g in groups.values() if g["criterion"] == criterion]
@@ -350,6 +373,8 @@ def e4():
     for label, results in (("oracle", expected), ("rust", actual)):
         digest = hashlib.sha256(json.dumps(results, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         print(f"{label}: {len(results)} probes; output sha256={digest}", file=sys.stderr)
+        panics = Counter(panic_class(result["value"], label) for result in results if result["panic"])
+        print(f"{label} panic classes: {json.dumps(dict(sorted(panics.items())))}", file=sys.stderr)
     if failures:
         target = ROOT / "target/s04-e4-failures.json"
         target.write_text(json.dumps(failures, indent=2) + "\n")

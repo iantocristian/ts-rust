@@ -207,6 +207,60 @@ fn complete_evidence_is_required_for_verification_and_experiments() {
     assert!(evidence::run(&f.0, "proof", PIN).unwrap());
     assert_eq!(num(&f.report().metrics, "exp.E7.pass"), 1.0);
 }
+
+#[test]
+fn s04_instrumentation_does_not_complete_s09_all_scenarios_item() {
+    let f = Fixture::new();
+    f.write("sprints/S09.toml", include_str!("../../sprints/S09.toml"));
+    f.write(
+        "status/experiments.toml",
+        include_str!("../../status/experiments.toml"),
+    );
+    f.replace("status/runs.toml", "[proof]", "[e3]");
+    let mut measured = serde_json::json!({
+        "miri": true, "address_sanitizer": true,
+        "live_owner_delta": 0, "live_allocation_delta": 0,
+        "id_exhaustion": true, "wrong_owner_rejected": true,
+        "stale_and_recycled_ids_rejected": true,
+        "concurrent_lazy_storage": true, "mapper_bundle_disposal": true
+    });
+    let capture = |metrics: &serde_json::Value| {
+        f.write(
+            "producer.py",
+            &format!(
+                "print({:?})\n",
+                serde_json::json!({"metrics": metrics}).to_string()
+            ),
+        );
+        assert!(evidence::run(&f.0, "e3", PIN).unwrap());
+        f.report()
+    };
+    let item_result = |report: &Report| {
+        report
+            .sprints
+            .iter()
+            .find(|s| s.id == "S09")
+            .unwrap()
+            .items
+            .iter()
+            .find(|(id, _, _)| id == "S09-5")
+            .unwrap()
+            .2
+    };
+    let partial = capture(&measured);
+    assert!(partial.errors.is_empty(), "{:?}", partial.errors);
+    assert_eq!(num(&partial.metrics, "exp.E3.miri.pass"), 1.0);
+    assert_eq!(num(&partial.metrics, "exp.E3.pass"), 0.0);
+    assert_ne!(item_result(&partial), Some(true));
+
+    for criterion in &read_experiments(&f.0)["E3"].criteria {
+        assert_eq!(criterion.op, "==");
+        measured[criterion.metric.strip_prefix("run.e3.").unwrap()] = criterion.threshold.clone();
+    }
+    let complete = capture(&measured);
+    assert_eq!(num(&complete.metrics, "exp.E3.pass"), 1.0);
+    assert_eq!(item_result(&complete), Some(true));
+}
 #[test]
 fn stale_sync_pin_and_missing_verification_checks_do_not_pass() {
     let f = Fixture::new();

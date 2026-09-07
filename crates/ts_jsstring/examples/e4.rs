@@ -53,6 +53,7 @@ struct Probe {
     b: i64,
     flag: bool,
     #[serde(default)]
+    #[allow(dead_code)] // Retained in the frozen wire schema; every payload is now compared.
     panic_message: bool,
 }
 
@@ -150,7 +151,6 @@ fn evaluate(case: &Probe, bytes: &[u8]) -> Value {
                 .map_or(Value::Null, |slice| {
                     json!([
                         hex(slice.as_bytes()),
-                        format!("{:?}", slice.validity()),
                         slice.as_str().map(|text| hex(text.as_bytes()))
                     ])
                 })
@@ -165,7 +165,6 @@ fn evaluate(case: &Probe, bytes: &[u8]) -> Value {
                 .map_or(Value::Null, |slice| {
                     json!([
                         hex(slice.as_bytes()),
-                        format!("{:?}", slice.validity()),
                         slice.as_str().map(|text| hex(text.as_bytes()))
                     ])
                 })
@@ -267,8 +266,8 @@ fn main() {
         eprintln!("{error}");
         std::process::exit(1);
     });
-    // Panics are observable upstream outcomes for out-of-range positions. Compare
-    // their occurrence without flooding the producer log with expected backtraces.
+    // Every panic payload is retained in JSON for classification and mismatch
+    // diagnostics. Suppress only the redundant hook output and backtraces.
     std::panic::set_hook(Box::new(|_| {}));
     let results: Vec<Value> = validated
         .iter()
@@ -276,16 +275,12 @@ fn main() {
             |(case, bytes)| match std::panic::catch_unwind(|| evaluate(case, bytes)) {
                 Ok(value) => json!({"id":case.id, "panic":false, "value":value}),
                 Err(payload) => {
-                    let value = if case.panic_message {
-                        let message = payload
-                            .downcast_ref::<String>()
-                            .map(String::as_str)
-                            .or_else(|| payload.downcast_ref::<&str>().copied())
-                            .expect("panic_message probe requires a string panic payload");
-                        json!(message)
-                    } else {
-                        Value::Null
-                    };
+                    let message = payload
+                        .downcast_ref::<String>()
+                        .map(String::as_str)
+                        .or_else(|| payload.downcast_ref::<&str>().copied())
+                        .unwrap_or("non-string Rust panic payload");
+                    let value = json!(message);
                     json!({"id":case.id, "panic":true, "value":value})
                 }
             },

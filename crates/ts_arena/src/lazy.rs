@@ -4,12 +4,47 @@ use crate::{
     ArenaId, Counters, Error, Node, NodeId,
 };
 use std::{
+    cell::RefCell,
     collections::BTreeMap,
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::{Arc, OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
 const PAGE_SIZE: usize = 256;
+
+thread_local! {
+    // File identities are process-unique, including across different payload types.
+    static ACTIVE_INITIALIZERS: RefCell<Vec<ArenaId>> = const { RefCell::new(Vec::new()) };
+}
+
+fn assert_not_initializing(id: ArenaId) {
+    ACTIVE_INITIALIZERS.with(|active| {
+        assert!(
+            !active.borrow().contains(&id),
+            "ts_arena: lazy initializer reentered its file's lazy storage"
+        );
+    });
+}
+
+/// Cleared before the surrounding catch boundary unlocks or resumes a panic.
+struct InitializerGuard(ArenaId);
+
+impl InitializerGuard {
+    fn enter(id: ArenaId) -> Self {
+        assert_not_initializing(id);
+        ACTIVE_INITIALIZERS.with(|active| active.borrow_mut().push(id));
+        Self(id)
+    }
+}
+
+impl Drop for InitializerGuard {
+    fn drop(&mut self) {
+        ACTIVE_INITIALIZERS.with(|active| {
+            let popped = active.borrow_mut().pop();
+            debug_assert_eq!(popped, Some(self.0));
+        });
+    }
+}
 
 struct Page<N> {
     slots: [OnceLock<Node<N>>; PAGE_SIZE],
@@ -176,12 +211,14 @@ impl<N> LazyArena<N> {
     }
 
     fn read(&self) -> RwLockReadGuard<'_, LazyState<N>> {
+        assert_not_initializing(self.id);
         self.state
             .read()
             .expect("lazy publication lock is not poisoned")
     }
 
     fn write(&self) -> RwLockWriteGuard<'_, LazyState<N>> {
+        assert_not_initializing(self.id);
         self.state
             .write()
             .expect("lazy publication lock is not poisoned")
@@ -210,6 +247,7 @@ impl<N> LazyArena<N> {
         // valid existing storage. The transaction drops pending payloads and
         // preserves reserved tombstones; the panic resumes only after unlock.
         let result = catch_unwind(AssertUnwindSafe(|| {
+            let _initializer = InitializerGuard::enter(self.id);
             let mut transaction = LazyTransaction {
                 base: state.pages.reserved,
                 pages: &mut state.pages,
@@ -271,6 +309,7 @@ impl<N> LazyArena<N> {
             return Err(Error::InvalidTokenRange);
         }
         let result = catch_unwind(AssertUnwindSafe(|| {
+            let _initializer = InitializerGuard::enter(self.id);
             let mut node = Node::new(kind, initialize());
             node.parent = Some(key.parent);
             let slot = state.pages.reserve();

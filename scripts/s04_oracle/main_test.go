@@ -43,7 +43,7 @@ func TestContractPanicMessage(t *testing.T) {
 	}
 	probe.PanicMessage = false
 	result = evaluate(probe)
-	if !result.Panic || result.Value != nil {
-		t.Fatalf("ordinary panic must retain the occurrence-only schema: %+v", result)
+	if !result.Panic || result.Value != "Bad line number. Line: -1, lineStarts.length: 2." {
+		t.Fatalf("ordinary panics must retain their diagnostic payload: %+v", result)
 	}
 }

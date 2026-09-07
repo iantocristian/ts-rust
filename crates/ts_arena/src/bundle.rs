@@ -38,7 +38,7 @@ impl<N, S> BundleOwner<N, S> {
         self.files.len()
     }
     pub fn is_empty(&self) -> bool {
-        false
+        self.files.is_empty()
     }
 
     pub fn file(self: &Arc<Self>, index: usize) -> Option<FileHandle<N, S>> {
