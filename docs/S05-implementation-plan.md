@@ -73,9 +73,17 @@ punctuation token. Numeric conversion caches are scanner-owned, lazily allocated
 and cleared on `Reset`, with retained allocation capacity where practical.
 No lock belongs on the normal scanner path.
 
-Positions use signed 64-bit Go-int semantics at the public boundary; checked
-slice conversions occur at access sites. `ResetPos` rejects a negative position
-with the Go contract message but permits positions beyond the end. Distinguish
+Scanner cursors, getters/resetters and diagnostic positions use `i64` for the
+supported 64-bit Go `int` domain. Existing S04 position helpers retain their
+`isize` APIs and `i32` line-start storage; `isize` has the same width on all four
+supported targets. AST positions and `TextRange` storage remain `i32`, matching
+Go's `core.TextPos`. `TokenRange` explicitly narrows through `TextRange::new`,
+as Go's `core.NewTextRange` does; this does not clamp the scanner cursor.
+The fixed-width scanner API makes its declared Go integer domain explicit
+instead of tying it to Rust pointer width; 32-bit targets need a separate review.
+Keep these conversions explicit at the later S06 integration boundary.
+Checked slice conversions occur at access sites. `ResetPos` rejects a negative
+position with the Go contract message but permits positions beyond the end. Distinguish
 that operation from a later accessor's bounds panic. Token flags retain their
 upstream bit operations; combined escape masks tested with `!= 0` mean any bit,
 not an all-bits `contains` operation.
@@ -127,8 +135,19 @@ Port the Go grammar before calling a Rust float parser: signs, radix prefixes,
 whitespace, exponent fragments, leading zeros, invalid digits, negative zero,
 overflow and underflow remain distinct.
 
-Use a shortest-round-trip decimal formatter with reviewed API semantics rather than Rust Display
-as a substitute for JavaScript number text. The proposed dependency is
+The formatting authority is the pinned `jsnum.Number.String`, including its
+NaN/infinity and safe-integer fast paths (the latter formats negative zero as
+`0`). Other values go through `internal/json.Marshal`, which delegates to
+`github.com/go-json-experiment/json` at
+`v0.0.0-20260623181947-01eb4420fa68`. Its `internal/jsonwire.AppendFloat`
+selects exponential form for nonzero absolute values below `1e-6` or at least
+`1e21`, calls `strconv.AppendFloat` with precision `-1`, then removes a leading
+zero from a negative exponent. The thresholds belong to that pinned JSON
+dependency; `Number.String` does not call plain `strconv` float formatting.
+The oracle calls `Number.String` itself, not a modeled ECMAScript formatter.
+
+Use a shortest-round-trip decimal formatter with reviewed API semantics to
+reproduce that authority. The proposed dependency is
 [`ryu-js`](https://github.com/boa-dev/ryu-js); the proposed arbitrary-precision
 conversion is [`num-bigint`](https://github.com/rust-num/num-bigint), whose
 float conversion implements ties-to-even. These supply concrete capabilities:
@@ -143,6 +162,12 @@ default decimal branch preserves opaque trimmed bytes, while its recognized
 second-byte radix branch panics on invalid base-0 input. Probe both directly.
 Number-string whitespace uses its own pinned `unicode.Zs` set: U+0085 and U+200B
 must not become numeric whitespace just because the scanner skips them.
+
+Rejected alternative: vendoring a Ryu port inside `ts_jsnum` would make this
+repository maintain and audit the formatter fork without adding a required
+capability over pinned `ryu-js`; the Go differential oracle remains necessary
+with either choice. Likewise, hand-written arbitrary-precision conversion
+would add rounding and large-integer invariants already supplied by `num-bigint`.
 
 Tests include safe-integer edges, halfway rounding, subnormals, infinity,
 negative zero, exponent thresholds at 1e-6/1e21, huge radix literals and seeded
@@ -173,8 +198,15 @@ Export pinned `unicode.SimpleFold` cycles with the effective Go version and
 compare against real EqualFold calls, including malformed bytes. Lowercase
 equality would incorrectly match `i` and `İ`; retain that regexp discriminator.
 
-The table generator records the upstream pin, named input hashes and complete
-output inventory. Table drift is checked by the scanner producer. Do not modify
+The separate generator is `scripts/s05_tables.py`, exposed through
+`python3 scripts/s05.py tables` for verification and
+`python3 scripts/s05.py tables --write-manifest` for deliberate regeneration.
+It writes `data/s05/tables.json`, `data/s05/tables-manifest.json` and
+`crates/ts_scanner/src/tables_generated.rs`. The manifest records the upstream
+pin, named input/output hashes, effective Go version and Unicode authorities;
+the generator reads the shared Go pin and workspace rustfmt edition.
+`cargo xtask run scanner` verifies drift through the same code. This is not part
+of `cargo xtask gen`. Do not modify
 canonical `upstream/`, depend on live Unicode downloads during verification, or
 expand the S03 generation gate to unrelated scanner implementation bodies.
 
@@ -211,12 +243,26 @@ The implementation must include independently observed cases for:
     character in one mode. A blanket per-parser-step progress assertion or a raw
     byte copy would change behavior.
 
+The frozen state counterexamples have named action traces in
+`data/s05/fixtures.json` (action indices are zero-based):
+
+| Contract | Frozen trace and independently observed Go result |
+| --- | --- |
+| Punctuation and EOF retain previous values | `lexical/punctuation/1`: `?.` at bytes 32..34 retains `0.1`; EOF at byte 43 has empty token text and retains `#` |
+| JSDoc EOF retains the prior token start/text/value | `rescan/jsdoc/tokens`: action 18 scans `\u0041` at 26..32 with value `A`; EOF actions 19..23 retain start 26 and the text/value while full-start becomes 32 |
+| Reset beyond EOF succeeds independently of later getters | `state/positions`: action 1 resets to 4 in `abc`, action 2 observes end 4; `state/bounds-token-text` separately observes the later getter's bounds panic |
+
 Regexp validation borrows the scanner state and restores temporary end/start/
 flags as upstream does. Use production safe `stacker::maybe_grow` wrappers at
 `scan_disjunction` and `scan_class_set_expression`, with every recursive call
 going through the wrapper before entering the inner body. Start with named
 64 KiB red-zone / 1 MiB segment constants. `stacker` 0.1.25 (MIT/Apache-2.0,
 MSRV 1.63) stays on the calling thread and supports borrowed mutable closures.
+This introduces the workspace's first native build dependency: `stacker` pulls
+in `psm`, whose build script compiles C/assembly through `cc`. All four native
+CI targets (macOS arm64/x64 and Linux arm64/x64) must compile this locked closure
+and execute the production growth/unwind tests in both debug and release.
+Dependency-policy and MSRV compilation alone are insufficient.
 Validate the frame margin in debug and release on all four native CI targets.
 Deep valid/malformed groups, lookarounds, nested v sets and mixed groups/sets
 must exceed one segment from a modest 256 KiB starting stack. Test sink unwind
@@ -357,3 +403,18 @@ all metric consumers. The following findings are accepted and resolved above:
 No review blocker remains unresolved. Verification results, any discovered
 contract refinements and final limitations will be recorded in `docs/S05.md`;
 new parity mismatches must be investigated against the pin, not waived.
+
+### Fable follow-up on the initial plan, 7 September 2026
+
+The review found missing precision in the position-width rationale, native
+dependency obligation, rejected formatter alternative, formatting authority, generator commands and
+named state traces. Those are now explicit above. The existing frozen traces
+were replayed against Go; no runtime or corpus change was needed.
+
+| E4 routing consumer | Reviewed disposition |
+| --- | --- |
+| `status/experiments.toml`: diagnostics and token-value criteria | Consume only `run.scanner.diagnostics` / `run.scanner.token_value_bytes`; units explicitly describe scanner observations |
+| `PORTS.toml`: scanner, regexp and token flags | Consume the scanner metrics; partial scanner files remain `in-progress` |
+| `PORTS.toml`: `ast/diagnostic.go` | Keeps absent future `run.e4.diagnostics` together with E1; scanner callbacks cannot verify it |
+| Other E4 criteria and later sprint consumers | Literal types, printing and encoding remain unmeasured; full E4, full E3 and S09 stay incomplete |
+| `xtask/src/tests.rs`: `scanner_evidence_does_not_complete_e4_or_ast_diagnostic_integration` | Reads the actual policy/ledger and proves passing scanner metrics plus E1 cannot close full E4 or AST diagnostic integration |
