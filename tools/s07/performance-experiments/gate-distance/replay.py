@@ -16,12 +16,31 @@ INPUTS = {
     "original-control-manifest": "c8e5dd18abb62a9cdd3c3af47051cc933c7744995a9a7029ac20a53bf8ea6363",
     "a0b-screen-report": "0f70cf1705dc7006695d5622bd00356b3912ab29aedc051f57ef6e1e18fe513f",
     "cp1-screen-report": "66b6547a29aafaddbbc01cc834ee7460a79126dcb0dba133d5e6606b144cfc6b",
+    "cp1-list-copy-screen-report": "8ccc065b2c33b45ddfed83ca3b678c7d0c87d927f017aaf7e6026ab7680f4f10",
 }
 VARIANTS = {
     "A0-b": ("a0b-screen-report", "c8e5dd18abb62a9cdd3c3af47051cc933c7744995a9a7029ac20a53bf8ea6363",
              "124956f668540814b95e6f677bdeae98bb2cad4f7586d3cb87f869e5c5af118f"),
     "CP1": ("cp1-screen-report", "124956f668540814b95e6f677bdeae98bb2cad4f7586d3cb87f869e5c5af118f",
             "3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931"),
+    "CP1-list-copy": ("cp1-list-copy-screen-report", "3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931",
+                      "b03b64ebf3faed4bb2245fa7b76db4289c3a1e510e796e86337c0782fb5f3578"),
+}
+# Explicit recorded production decisions. This arithmetic helper cannot promote
+# a candidate from historical Go distances or screen eligibility alone.
+DISPOSITIONS = {
+    "A0-b": {"decision": "accepted", "promoted": True,
+             "source": "../results/2026-09-08/a0b-README.md"},
+    "CP1": {"decision": "accepted", "promoted": True,
+            "source": "../results/2026-09-08-cp1/README.md"},
+    "CP1-list-copy": {"decision": "rejected", "promoted": False,
+                      "source": "../../../../docs/S07-bis-list-copy.md",
+                      "reason": "Neither worker mode demonstrates the predeclared 5% median pipeline win."},
+}
+SCREEN_OUTCOMES = {
+    "A0-b": ("eligible_for_review", True),
+    "CP1": ("eligible_for_review", True),
+    "CP1-list-copy": ("no_demonstrated_win", False),
 }
 
 
@@ -86,11 +105,17 @@ def calculate(original, screens):
                 "checkpoint is incomplete or has a different sample count")
         require(screen["manifest_sha256"] == {"control": control, "candidate": candidate},
                 "checkpoint control/candidate identities changed")
+        status, win = SCREEN_OUTCOMES[label]
+        require(screen["screening_status"] == status
+                and screen["targeted_pipeline_win"] is win
+                and screen["nonregression_conditions_met"] is True,
+                "checkpoint screening outcome differs from recorded disposition context")
         require(set(screen["modes"]) == set(WORKERS), "checkpoint omitted a worker mode")
         workers = {}
         for worker, mode in screen["modes"].items():
             require(set(mode) == set(DOMAINS), "checkpoint omitted a measurement domain")
             metrics = {}
+            control_metrics = {}
             for domain, row in mode.items():
                 require(type(row["samples_per_variant"]) is int and row["samples_per_variant"] == 7,
                         "checkpoint changed repetition count")
@@ -102,15 +127,20 @@ def calculate(original, screens):
                         positive_integer(value)
                     require(median(values) == row[role + "_median"], "checkpoint median differs from recorded values")
                 metrics[domain] = distance(row["candidate_median"], original["summaries"][worker][domain]["go_median"], domain)
+                control_metrics[domain] = distance(row["control_median"], original["summaries"][worker][domain]["go_median"], domain)
             wall = mode["wall_time_ns"]
             workers[worker] = {"historical_distance": metrics,
+                "historical_distance_role": "candidate",
+                "same_screen_control_historical_distance": control_metrics,
                 "same_screen_rust_control_wall_ns": wall["control_median"],
                 "same_screen_wall_median_ratio": wall["ratio"],
                 "same_screen_timing_bootstrap_upper_95_ratio": wall["bootstrap"]["upper"],
                 "timing_bootstrap_upper_95_against_historical_go": None}
         result[label] = {"source_report": VARIANTS[label][0], "source_manifests": screen["manifest_sha256"],
+                         "production_disposition": dict(DISPOSITIONS[label]),
+                         "screening_status": screen["screening_status"],
                          "workers": workers}
-    return {"version": 1, "diagnostic_only": True, "source_report_sha256": INPUTS,
+    return {"version": 2, "diagnostic_only": True, "source_report_sha256": INPUTS,
         "units": {"wall_time_ns": "nanoseconds", "allocated_bytes": "requested bytes", "peak_rss_bytes": "lifetime peak RSS bytes"},
         "scope": "Arithmetic between retained checkpoint medians and older Go medians; no fresh cross-runtime sample or acceptance claim",
         "fresh_go_acceptance_measured": False, "native_child_executed": False,
@@ -121,6 +151,8 @@ def calculate(original, screens):
         "limitations": ["Older Go denominators contextualize distance; fresh Go captures determine final acceptance.",
             "Same-screen bootstrap bounds compare Rust candidates with Rust controls, not with Go.",
             "Separate Rust screen percentages are not compounded into a measured cumulative improvement.",
+            "Production dispositions are recorded review decisions; a distance row does not imply promotion.",
+            "A later screen's Rust control and candidate medians cannot attribute changes since an earlier capture.",
             "No current phase profile attributes the remaining wall gap to binding, parsing or orchestration.",
             "Live requested bytes, allocation traffic and lifetime RSS are distinct domains; live storage is not a gate denominator."]}
 

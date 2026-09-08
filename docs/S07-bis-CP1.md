@@ -68,7 +68,10 @@ restricted core/binding writer and a compatible AST read facade. That is not
 required to remove per-element resolution: copying up to 16 IDs onto the stack
 lets each backing borrow end before recursion. The follow-up
 [list-copy experiment](S07-bis-list-copy.md) tests this bounded alternative;
-its stack and copy cost must pass a separate full-pipeline screen. A longer
+its stack and copy cost must pass a separate full-pipeline screen. That screen
+now records a small 0.83% / 0.19% wall-median benefit without memory savings,
+below its predeclared 5% win. The standalone shortcut is rejected; the general
+borrowed facade and compact page-list work remain separate. A longer
 `AstView` lifetime would not establish this capability.
 
 An exclusive full-node borrow also cannot survive mutation of that node. Keep

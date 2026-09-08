@@ -40,7 +40,9 @@ those tested chunk policies remain rejected as replacements for pages. The separ
 reads and more with explicitly charged cached slices. Its bounded production
 node-lookup candidate passes a full-pipeline screen and becomes the next control;
 this does not promote production list storage or implement the general borrowed
-facade. Carry pages into the next representative node-access slice and resolve
+facade. The subsequent [stack-copy trial](S07-bis-list-copy.md) passes parity and
+non-regression checks but misses the predeclared 5% win (0.83% / 0.19% wall median
+reductions, no meaningful memory change); reject that standalone shortcut. Carry pages into the next representative node-access slice and resolve
 lists once where the actual caller can retain that proof; do not require pages
 to match a raw boxed-slice microbenchmark before integration. Finish the
 whole-owner accounting (including name
@@ -530,10 +532,10 @@ production optimization. Preserve both recorded list captures as controls. The
 bounded [CP1 implementation record](S07-bis-CP1.md) fixes the access comparison,
 charges cached slice metadata, and separately tests a checked exclusive-core
 node lookup. It requires a measured pipeline win for that leaf shortcut; the
-infrastructure exception below does not apply to it. The next bounded
-[list-copy candidate](S07-bis-list-copy.md) resolves lists once per stack chunk
-without waiting for a persistent disjoint borrow. It has the same independent
-full-pipeline win requirement.
+infrastructure exception below does not apply to it. The bounded
+[list-copy candidate](S07-bis-list-copy.md) tested resolution once per stack chunk
+without waiting for a persistent disjoint borrow. It missed the same independent
+full-pipeline win requirement and is rejected; its complete evidence is retained.
 
 Drive the compact-node CPU comparison with a separately captured
 [actual workload access trace](S07-bis-access-trace.md), including operation order,
