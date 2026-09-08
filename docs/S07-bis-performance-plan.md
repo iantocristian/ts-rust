@@ -658,8 +658,8 @@ gate, not these diagnostic phase timers.
 Implement a small diagnostic runner under the checkpoint-0 tools directory,
 reusing existing build/input/protocol validation. It may compare isolated
 checkouts/build artifacts; it must not infer an executable from a guessed path
-or rebuild concurrently with timing. Commands for this new runner will be
-documented when implemented; it does not exist yet.
+or rebuild concurrently with timing. The implemented commands and immutable artifact workflow are documented in
+[the runner README](../tools/s07/performance-experiments/README.md).
 
 Existing build helpers copy executables into shared cache destinations. After
 each variant build, immediately copy its normal/allocation executable and

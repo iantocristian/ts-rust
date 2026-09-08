@@ -368,3 +368,101 @@ fn committed_lazy_records_select_compatibility_and_remain_retained() {
     drop(retained);
     assert_eq!(counters.snapshot(), baseline);
 }
+
+#[test]
+fn unrestricted_parent_and_payload_edits_still_require_core_validation() {
+    for before_binding in [false, true] {
+        for parent_edge in [false, true] {
+            let counters = Counters::new();
+            let baseline = counters.snapshot();
+            let foreign = parse(b"foreign;", ScriptKind::TS, &counters);
+            let foreign_root = foreign.root();
+            let foreign_counts = counters.snapshot();
+            let mut parsed = parse(b"local;", ScriptKind::TS, &counters);
+            let root = parsed.root();
+            let statement = first_statement(parsed.view(), root);
+            let corrupt = |node: &mut ts_ast::Node| {
+                if parent_edge {
+                    node.set_parent(Some(foreign_root));
+                } else {
+                    let ts_ast::NodeData::ExpressionStatement(data) = node.data_mut() else {
+                        panic!("fixture statement must have an expression payload")
+                    };
+                    data.expression = Some(foreign_root);
+                }
+            };
+            if before_binding {
+                corrupt(parsed.builder_mut().node_mut(statement).unwrap());
+            }
+            let outcome = ts_parser::on_parser_worker(|| {
+                parsed.bind_and_publish(|builder| {
+                    if !before_binding {
+                        corrupt(builder.node_mut(statement)?);
+                    }
+                    // A subsequent narrow write cannot restore a proof dirtied
+                    // either before binding or through BindBuilder::node_mut.
+                    builder.set_node_flags(root, node_flags::UNREACHABLE)?;
+                    Ok(())
+                })
+            });
+            assert!(
+                matches!(outcome, Err(BindError::Storage(Error::WrongOwner))),
+                "before_binding={before_binding}, parent_edge={parent_edge}"
+            );
+            assert_eq!(counters.snapshot(), foreign_counts);
+            drop(foreign);
+            assert_eq!(counters.snapshot(), baseline);
+        }
+    }
+}
+
+#[test]
+fn preserved_core_proof_does_not_skip_binding_result_validation() {
+    for invalid in ["indicator", "symbol", "flow", "diagnostic"] {
+        let counters = Counters::new();
+        let baseline = counters.snapshot();
+        let foreign =
+            crate::bind_parsed_file(parse(b"let foreign = 1;", ScriptKind::TS, &counters)).unwrap();
+        let foreign_root = foreign.source();
+        let foreign_symbol = foreign.view().result().symbols().iter().next().unwrap().0;
+        let foreign_counts = counters.snapshot();
+        let parsed = parse(b"let local = 1;", ScriptKind::TS, &counters);
+        let root = parsed.root();
+        let outcome = ts_parser::on_parser_worker(|| {
+            parsed.bind_and_publish(|builder| {
+                crate::initialize_binding(builder);
+                builder.set_node_flags(root, node_flags::UNREACHABLE)?;
+                match invalid {
+                    "indicator" => builder.set_common_js_module_indicator(Some(foreign_root)),
+                    "symbol" => builder.binding_mut(root)?.symbol = Some(foreign_symbol),
+                    "flow" => {
+                        builder.flows_mut().push(ts_ast::FlowNode::new_ex(
+                            ts_ast::flow_flags::ASSIGNMENT,
+                            Some(ts_ast::FlowData::Ast(foreign_root)),
+                            None,
+                        ));
+                    }
+                    "diagnostic" => builder.diagnostics_mut().push(ts_ast::Diagnostic::new(
+                        Some(foreign_root),
+                        ts_core::TextRange::new(0, 1),
+                        ts_diagnostics::Identifier_expected,
+                        vec![],
+                    )),
+                    _ => unreachable!(),
+                }
+                Ok(())
+            })
+        });
+        assert!(
+            matches!(outcome, Err(BindError::Storage(Error::WrongOwner))),
+            "{invalid}"
+        );
+        assert_eq!(
+            counters.snapshot(),
+            foreign_counts,
+            "{invalid}: failed result dropped"
+        );
+        drop(foreign);
+        assert_eq!(counters.snapshot(), baseline);
+    }
+}

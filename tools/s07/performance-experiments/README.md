@@ -50,6 +50,9 @@ normal candidate before timing. This reuses the original graph comparison and
 first-mismatch witness machinery for all files at both worker counts. The extra
 `--binding-paths` invocation is untimed and confirms exactly how many files used
 exclusive binding or fallback; its loaded-byte digest must match the workload.
+The Go and Rust graph streams run concurrently with a maximum of two children;
+binding-path probes follow them. Timing screens remain serial. Graph reports
+record the runner/helper hashes and reject helper drift during capture.
 
 ```sh
 python3 tools/s07/performance-experiments/runner.py graphs \

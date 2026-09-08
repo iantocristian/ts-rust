@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Immutable S07-bis control/candidate diagnostics; never emit tracker metrics."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import fcntl
 import json
 import os
@@ -264,7 +265,8 @@ def tool_fingerprint():
     files = {str(TOOLS / name): digest(TOOLS / name) for name in names}
     files.update({str(ROOT / "scripts" / name): digest(ROOT / "scripts" / name) for name in
                   ("s04_common.py", "s07_benchmark.py", "s07_benchmark_child.py", "s07_benchmark_graph.py",
-                   "s07_benchmark_inputs.py", "s07_benchmark_measure.py", "s07_benchmark_stats.py")})
+                   "s07_benchmark_inputs.py", "s07_benchmark_measure.py", "s07_benchmark_stats.py",
+                   "s06_process.py", "s06_protocol.py", "s07_binder.py")})
     return files
 
 
@@ -309,6 +311,7 @@ def graphs(control, candidate, control_sha, candidate_sha, output):
     """Run the existing complete graph protocol with immutable executables."""
     from s07_benchmark_graph import read_reports, compare_rows, capture_first_witness
     from s06_protocol import canonical
+    tools = tool_fingerprint()
     baseline = validate_bundle(control, control_sha)
     variant = validate_bundle(candidate, candidate_sha)
     if variant.get("control_manifest_sha256") != control_sha:
@@ -324,14 +327,18 @@ def graphs(control, candidate, control_sha, candidate_sha, output):
     go = control / baseline["artifacts"]["go"]["path"], env
     rust = candidate / variant["artifacts"]["normal"]["path"], env
     output.mkdir(parents=True, exist_ok=False)
-    write_json(output / "report.json", {"version": 1, "diagnostic_only": True, "status": "in_progress"})
+    write_json(output / "report.json", {"version": 1, "diagnostic_only": True,
+                                       "status": "in_progress", "tool_fingerprint": tools})
     runs, paths = [], []
     try:
         for workers in (1, 8):
             directory = output / ("workers-" + str(workers))
-            # These are untimed correctness captures, not screen samples.
-            oracle_rows = read_reports(*go, inputs, requests, workers, directory, "oracle")
-            rust_rows = read_reports(*rust, inputs, requests, workers, directory, "rust")
+            # At most two independent, untimed graph children. Keep timing
+            # screens serial; parallel capture here changes no measured sample.
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                jobs = [pool.submit(read_reports, *binary, inputs, requests, workers, directory, runtime)
+                        for runtime, binary in (("oracle", go), ("rust", rust))]
+                oracle_rows, rust_rows = [job.result() for job in jobs]
             run = compare_rows(oracle_rows, rust_rows, recipes, frozen, workers, directory)
             run["first_mismatch_witness"] = capture_first_witness(run, (("oracle", go), ("rust", rust)),
                                                                 inputs, (oracle_rows, rust_rows), directory)
@@ -346,6 +353,8 @@ def graphs(control, candidate, control_sha, candidate_sha, output):
         validate_bundle(control, control_sha)
         validate_bundle(candidate, candidate_sha)
         validate_inputs(candidate, variant["expected_work"])
+        if tool_fingerprint() != tools:
+            raise ValueError("graph capture helpers changed during capture")
         binaries = {"oracle": baseline["artifacts"]["go"]["sha256"], "rust": variant["artifacts"]["normal"]["sha256"]}
         report = {"version": 1, "kind": "full_graph_diagnostic", "diagnostic_only": True,
                   "diagnostic_subset": False, "source_stable": True, "files": len(recipes),
@@ -355,11 +364,13 @@ def graphs(control, candidate, control_sha, candidate_sha, output):
                   "workload_sha256": frozen["workload_sha256"], "source_fingerprint": variant["source_fingerprint"],
                   "source_fingerprint_after": variant["source_fingerprint"], "binary_sha256": binaries,
                   "binary_sha256_after": binaries, "runs": runs, "binding_paths": paths,
+                  "tool_fingerprint": tools,
                   "provenance_scope": "immutable build snapshots; current checkout may differ"}
         write_json(output / "report.json", report)
         return report
     except BaseException as error:
-        write_json(output / "report.json", {"version": 1, "diagnostic_only": True, "status": "failed", "error": str(error)})
+        write_json(output / "report.json", {"version": 1, "diagnostic_only": True, "status": "failed",
+                                           "error": str(error), "tool_fingerprint": tools})
         raise
 
 

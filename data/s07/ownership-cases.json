@@ -1,22 +1,51 @@
 {
   "common": {
-    "cases": [
-      "bind_tests::binding_concurrent_first_use_publishes_once_and_keeps_stable_symbol_ids",
-      "bind_tests::binding_imported_initializer_cannot_borrow_the_importers_wider_retention",
-      "bind_tests::binding_mapped_members_initialize_independently_and_retained_symbols_keep_the_bundle",
-      "bind_tests::binding_one_logical_source_cannot_stage_a_siblings_headers_in_the_same_arena",
-      "bind_tests::binding_panic_is_terminal_and_preserves_the_initiators_payload",
-      "bind_tests::binding_publishes_staged_headers_symbols_and_source_metadata_without_changing_parsed_views",
-      "bind_tests::binding_reentry_is_diagnosed_and_does_not_block_ordinary_lazy_nesting",
-      "bind_tests::binding_rejects_foreign_symbol_flow_and_ast_edges_before_publication",
-      "bind_tests::bound_mapped_reads_and_retention_select_the_target_sources_completed_overlay",
-      "bind_tests::bound_same_arena_sources_route_independently_and_reject_ambiguous_retention",
-      "bind_tests::factory_copies_select_each_retained_logical_sources_completed_binding",
-      "bind_tests::flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows"
-    ],
-    "exact": false,
-    "filter": "bind_tests::",
-    "package": "ts_ast"
+    "binding_publication": {
+      "cases": [
+        "bind_tests::binding_concurrent_first_use_publishes_once_and_keeps_stable_symbol_ids",
+        "bind_tests::binding_imported_initializer_cannot_borrow_the_importers_wider_retention",
+        "bind_tests::binding_mapped_members_initialize_independently_and_retained_symbols_keep_the_bundle",
+        "bind_tests::binding_one_logical_source_cannot_stage_a_siblings_headers_in_the_same_arena",
+        "bind_tests::binding_panic_is_terminal_and_preserves_the_initiators_payload",
+        "bind_tests::binding_publishes_staged_headers_symbols_and_source_metadata_without_changing_parsed_views",
+        "bind_tests::binding_reentry_is_diagnosed_and_does_not_block_ordinary_lazy_nesting",
+        "bind_tests::binding_rejects_foreign_symbol_flow_and_ast_edges_before_publication",
+        "bind_tests::bound_mapped_reads_and_retention_select_the_target_sources_completed_overlay",
+        "bind_tests::bound_same_arena_sources_route_independently_and_reject_ambiguous_retention",
+        "bind_tests::factory_copies_select_each_retained_logical_sources_completed_binding",
+        "bind_tests::flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows"
+      ],
+      "exact": false,
+      "filter": "bind_tests::",
+      "package": "ts_ast"
+    },
+    "core_validation_proof": {
+      "cases": [
+        "storage::validation_proof_tests::narrow_flag_writes_do_not_restore_a_dirty_core_proof",
+        "storage::validation_proof_tests::narrow_flag_writes_preserve_the_completed_core_proof",
+        "storage::validation_proof_tests::narrow_flag_writes_reject_foreign_owners_without_changing_the_proof"
+      ],
+      "exact": false,
+      "filter": "storage::validation_proof_tests::",
+      "package": "ts_ast"
+    },
+    "exclusive_binding": {
+      "cases": [
+        "exclusive_tests::committed_lazy_records_select_compatibility_and_remain_retained",
+        "exclusive_tests::completed_nodes_and_symbols_retain_storage_and_preassigned_identity",
+        "exclusive_tests::consuming_and_published_entries_have_identical_complete_graphs",
+        "exclusive_tests::consuming_initializer_error_and_panic_drop_partial_binding",
+        "exclusive_tests::fragment_binding_returns_invalid_graph_and_drops_storage",
+        "exclusive_tests::imported_owner_selects_compatibility_before_binding",
+        "exclusive_tests::mapper_metadata_selects_compatibility",
+        "exclusive_tests::preserved_core_proof_does_not_skip_binding_result_validation",
+        "exclusive_tests::same_arena_sources_select_compatibility_and_reject_sibling_writes",
+        "exclusive_tests::unrestricted_parent_and_payload_edits_still_require_core_validation"
+      ],
+      "exact": false,
+      "filter": "exclusive_tests::",
+      "package": "ts_binder"
+    }
   },
   "groups": {
     "retained_snapshot_edit": {
@@ -36,5 +65,5 @@
       "package": "ts_compiler"
     }
   },
-  "version": 1
+  "version": 2
 }

@@ -57,3 +57,48 @@ validation now precedes candidate selection.
 
 Results and the promotion decision will be recorded after semantic and measurement
 captures finish. No performance result is implied by compilation or unit tests.
+
+## Predeclared follow-up: A0-b narrow flag mutation
+
+The initial A0 binary remains frozen at commit `58db8c2`. A0-b adds a narrow
+`BindBuilder::set_node_flags` API: only this edge-free write preserves the parsed
+validation proof. Public unrestricted `node_mut` still calls `builder_mut` and
+invalidates the proof before yielding access. Preexisting dirtiness is never reset.
+Final binding-result validation remains mandatory. Installing its validated result
+in the source's `OnceLock` does not require unrestricted source metadata mutation.
+
+Hypothesis: removing the redundant post-bind core scan reduces complete-pipeline
+wall time while preserving the same bound graphs and all owner checks. This
+variant is declared before seeing the initial A0 timing result. It will have its
+own immutable build, full graph check and fixed screen. The original A0 outcomes
+will remain available, including a failure or regression.
+
+A separate phase probe compares published and consuming binding on one source
+revision, grouping binding and publication in the same elapsed interval. Its
+numbers explain the change; only the normal binaries determine the pipeline
+screen. The proof tests cover fresh and previously dirty parses, foreign narrow
+writes, invalid parent/payload mutations and invalid binding metadata.
+
+## Initial A0 result
+
+Both worker modes matched all 13,094 frozen Go graphs and used direct binding for
+every file. The fixed screen retained eight warmups and all 56 observations;
+replay validation passed. Compared with the separately frozen original control:
+
+| Metric | One worker | Eight workers |
+| --- | ---: | ---: |
+| Wall median, candidate / control | 1.01159 | 1.00612 |
+| Timing bootstrap upper 95% ratio | 1.03507 | 1.05067 |
+| Requested-allocation median ratio | 0.98183 | 0.98183 |
+| Lifetime peak-RSS median ratio | 0.98733 | 0.98741 |
+
+The observed allocation reduction is 85.93 MB and the one-worker RSS reduction
+57.85 MB. There is no demonstrated wall-time win, and both timing upper bounds
+exceed the 1.02 non-regression guard. **Do not promote this initial candidate.**
+The already-declared A0-b revision is the next experiment; these samples will
+not be extended or selectively replaced. Field maps remain in both candidates,
+so neither claims the large savings from future inline binding fields.
+
+Local capture: `target/s07-bis/a0-screen`; graph capture:
+`target/s07-bis/a0-graphs`. Candidate manifest SHA-256:
+`ee3399a930061772ca08d912d8bb1f3283169ef467066c7880f1df6d79fdde94`.

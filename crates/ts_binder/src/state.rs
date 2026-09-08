@@ -146,9 +146,8 @@ impl<'build, 'ast> Binder<'build, 'ast> {
     pub fn set_flags(&mut self, node: NodeId, flags: u32) {
         if self.n(node).flags() != flags {
             self.builder
-                .node_mut(node)
-                .expect("binder writes its own file")
-                .set_flags(flags);
+                .set_node_flags(node, flags)
+                .expect("binder writes its own file");
         }
     }
     pub fn text(&self, node: NodeId) -> JsString {

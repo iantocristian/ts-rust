@@ -4,7 +4,7 @@ use crate::flow::{FlowId, FlowLists, FlowNodes};
 use crate::node_map::NodeMap;
 use crate::symbols::{DeclarationLists, Symbol, SymbolTableId, SymbolTables};
 use crate::{
-    AstBuilder, AstFile, AstView, Diagnostic, Node, NodeId, NodeRead, ParsedFile, SourceFileRead,
+    AstFile, AstView, Diagnostic, Node, NodeId, NodeRead, ParsedFile, SourceFileRead,
 };
 use std::{
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
@@ -254,7 +254,7 @@ pub struct BindBuilder<'a> {
 }
 enum BindStorage<'a> {
     Published(AstView<'a>),
-    Exclusive(&'a mut AstBuilder),
+    Exclusive(&'a mut ParsedFile),
 }
 impl BindBuilder<'_> {
     /// Borrow syntax only until the next binder mutation. On the consuming path,
@@ -279,7 +279,7 @@ impl BindBuilder<'_> {
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
         let parsed = match &mut self.storage {
-            BindStorage::Exclusive(builder) => return builder.node_mut(id),
+            BindStorage::Exclusive(parsed) => return parsed.builder_mut().node_mut(id),
             BindStorage::Published(parsed) => *parsed,
         };
         // The immutable backend still preserves the original parsed headers.
@@ -297,6 +297,17 @@ impl BindBuilder<'_> {
         }
     }
 
+    /// Header flags contain no graph edges. The exclusive backend can preserve
+    /// its parse validation proof while unrestricted `node_mut` still dirties it.
+    pub fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
+        match &mut self.storage {
+            BindStorage::Exclusive(parsed) => parsed.set_node_flags(id, flags),
+            BindStorage::Published(_) => {
+                self.node_mut(id)?.set_flags(flags);
+                Ok(())
+            }
+        }
+    }
     pub fn binding(&self, id: NodeId) -> Result<Option<NodeBinding>, Error> {
         self.parsed_view().node(id)?;
         Ok(self.result.node_binding(id))
@@ -392,7 +403,7 @@ impl BindBuilder<'_> {
     }
     fn validate_write_owner(&self, id: NodeId) -> Result<(), Error> {
         if let BindStorage::Exclusive(builder) = &self.storage {
-            builder.storage.core_node(id)?;
+            builder.core_node(id)?;
             return Ok(());
         }
         let owner = self.parsed_view().for_node_owner(id)?;
@@ -789,15 +800,16 @@ impl ParsedFile {
         result.direct_nodes = true;
         let result = {
             let mut binding = BindBuilder {
-                storage: BindStorage::Exclusive(self.builder_mut()),
+                storage: BindStorage::Exclusive(&mut self),
                 result,
             };
             initialize(&mut binding)?;
             binding.validate()?;
             binding.result
         };
-        self.builder_mut()
-            .source_file_mut(source)?
+        self.view()
+            .source_file(source)?
+            .state_ref()
             .binding
             .0
             .set(Ok(result))

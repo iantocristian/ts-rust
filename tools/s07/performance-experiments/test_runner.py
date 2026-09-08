@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -297,6 +298,61 @@ class RunnerTests(unittest.TestCase):
         runner.write_json(path, report)
         with self.assertRaisesRegex(ValueError, "graph binaries"):
             runner.validate_graph_report(path, control, candidate, control_sha, candidate_sha)
+
+    def test_graph_streams_run_as_a_bounded_pair_and_record_helpers(self):
+        control, control_sha, _ = self.bundle()
+        candidate, candidate_sha, _ = self.bundle("candidate", "candidate", control_sha)
+        frozen = json.loads((runner.ROOT / "data/s07/bindworkload-probes.json").read_text())
+        gate = threading.Barrier(2, timeout=2)
+        lock = threading.Lock()
+        active = 0
+        peak = 0
+
+        def read(binary, env, inputs, requests, workers, directory, runtime):
+            nonlocal active, peak
+            directory.mkdir(parents=True, exist_ok=True)
+            with lock:
+                active += 1
+                peak = max(peak, active)
+            try:
+                # Sequential reads fail here, without launching real children.
+                gate.wait()
+                return [runtime]
+            finally:
+                with lock:
+                    active -= 1
+
+        def compare(oracle, rust, recipes, observations, workers, directory):
+            self.assertEqual((oracle, rust), (["oracle"], ["rust"]))
+            return {"parity": 1}
+
+        def binding_paths(argv, **kwargs):
+            self.assertEqual(active, 0)
+            self.assertEqual(argv[-1], "--binding-paths")
+            observation = {"version": 1, "workers": int(argv[2]), "files": 13094,
+                           "bound_in_place_files": 13094, "fallback_files": 0,
+                           "loaded_input_sha256": EXPECTED["loaded_input_sha256"]}
+            return runner.subprocess.CompletedProcess(argv, 0, json.dumps(observation).encode(), b"")
+
+        helpers = {"runner.py": "a" * 64}
+        with patch.object(runner, "validate_inputs"), \
+                patch.object(runner, "requests_from_frozen", return_value=([], frozen["requests"])), \
+                patch.object(runner, "native_environment", return_value={}), \
+                patch.object(runner, "tool_fingerprint", return_value=helpers), \
+                patch("s07_benchmark_graph.read_reports", side_effect=read), \
+                patch("s07_benchmark_graph.compare_rows", side_effect=compare), \
+                patch("s07_benchmark_graph.capture_first_witness", return_value=None), \
+                patch.object(runner.subprocess, "run", side_effect=binding_paths):
+            report = runner.graphs(control, candidate, control_sha, candidate_sha, self.root / "graphs")
+            with patch.object(runner, "tool_fingerprint", side_effect=[helpers, {"runner.py": "b" * 64}]):
+                with self.assertRaisesRegex(ValueError, "helpers changed"):
+                    runner.graphs(control, candidate, control_sha, candidate_sha, self.root / "drifting-graphs")
+            failed = json.loads((self.root / "drifting-graphs/report.json").read_text())
+            self.assertEqual(failed["status"], "failed")
+            self.assertEqual(failed["tool_fingerprint"], helpers)
+        self.assertEqual(peak, 2)
+        self.assertEqual(len(report["runs"]), 2)
+        self.assertEqual(report["tool_fingerprint"], helpers)
 
 
 if __name__ == "__main__":

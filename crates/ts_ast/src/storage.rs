@@ -181,6 +181,14 @@ impl ParsedFile {
     pub(crate) fn exclusive_core_only(&self) -> bool {
         self.builder.hooks.is_none() && self.builder.storage.is_core_only()
     }
+    pub(crate) fn core_node(&self, id: NodeId) -> Result<&Node, Error> {
+        self.builder.storage.core_node(id)
+    }
+    pub(crate) fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
+        self.builder.node_mut(id)?.set_flags(flags);
+        // Do not restore a proof invalidated by an earlier unrestricted edit.
+        Ok(())
+    }
     pub fn view(&self) -> AstView<'_> {
         self.builder.view()
     }
@@ -705,4 +713,72 @@ fn validate_data(
     text: impl FnMut(TextSlice) -> Result<(), Error>,
 ) -> Result<(), Error> {
     data.validate_references(node, list, raw, text)
+}
+
+#[cfg(test)]
+mod validation_proof_tests {
+    use super::*;
+    use crate::{node_flags, FactoryMethods, SyntaxKind};
+
+    fn parsed(counters: &Counters) -> (ParsedFile, NodeId) {
+        let mut builder = AstBuilder::new(SourceText::default(), counters);
+        let root = builder.new_token(SyntaxKind::Unknown.into());
+        (builder.complete(root).unwrap(), root)
+    }
+
+    #[test]
+    fn narrow_flag_writes_preserve_the_completed_core_proof() {
+        let counters = Counters::new();
+        let baseline = counters.snapshot();
+        let (mut parsed, root) = parsed(&counters);
+        assert!(parsed.validated);
+        parsed
+            .set_node_flags(root, node_flags::UNREACHABLE)
+            .unwrap();
+        assert!(parsed.validated);
+        assert_eq!(
+            parsed.view().node(root).unwrap().flags(),
+            node_flags::UNREACHABLE
+        );
+        let file = parsed.try_publish_unbound().unwrap();
+        assert_eq!(
+            file.view().node(root).unwrap().flags(),
+            node_flags::UNREACHABLE
+        );
+        drop(file);
+        assert_eq!(counters.snapshot(), baseline);
+    }
+
+    #[test]
+    fn narrow_flag_writes_do_not_restore_a_dirty_core_proof() {
+        let counters = Counters::new();
+        let (mut parsed, root) = parsed(&counters);
+        // Even a valid unrestricted mutation conservatively invalidates the
+        // proof. A later narrow write must never turn that false back to true.
+        parsed
+            .builder_mut()
+            .node_mut(root)
+            .unwrap()
+            .set_flags(node_flags::AMBIENT);
+        assert!(!parsed.validated);
+        parsed
+            .set_node_flags(root, node_flags::UNREACHABLE)
+            .unwrap();
+        assert!(!parsed.validated);
+        assert!(parsed.try_publish_unbound().is_ok());
+    }
+
+    #[test]
+    fn narrow_flag_writes_reject_foreign_owners_without_changing_the_proof() {
+        let counters = Counters::new();
+        let (mut local, root) = parsed(&counters);
+        let (foreign, foreign_root) = parsed(&counters);
+        assert_eq!(
+            local.set_node_flags(foreign_root, node_flags::UNREACHABLE),
+            Err(Error::WrongOwner)
+        );
+        assert!(local.validated);
+        assert_eq!(local.view().node(root).unwrap().flags(), 0);
+        assert_eq!(foreign.view().node(foreign_root).unwrap().flags(), 0);
+    }
 }
