@@ -222,3 +222,56 @@ storage and hot-access costs. The existing eight-/16-row word policies remain
 recorded candidates, not the selected production representation. Category misses
 require an explicit whole-budget tradeoff; final CPU, allocation and RSS gates
 remain unchanged. No Rust implementation or capture was changed by this review.
+
+## 7. Pilot review: mixed rows, chunks, list traffic and proof boundaries
+
+Claude's next review accepts the existing independent shape tag and full ordinal,
+and adds useful pilot candidates. Three focused independent audits checked
+compiled layouts, source contracts and the archived allocation evidence. The
+[additive diagnostics](../tools/s07/performance-experiments/layout-followups/README.md)
+record the arithmetic and reproduction commands. A0-b remains the control;
+no production layout or new timing result is selected by this amendment.
+
+| Claim or proposal | Verified result and decision |
+| --- | --- |
+| Four-byte tagged identifier text saves about 26 MB and needs only a small exception pool | The Rust physical count gives 27.171 MB of used-row savings. Keep the candidate, but pool occupancy and total cost are unmeasured. A low-bit tag leaves 31-bit length/index domains and requires checked full-range escapes. `(offset, len)` alone retains no backing for cooked, synthetic or foreign text |
+| Mixed rows keep one inline atomic facts field and ordinary payload loads | Accepted and modeled now. Non-composite rows need no atomic; composite plain-word count excludes the existing facts word. Used payload bytes remain 298.696 MB, but splitting classes produces 23 classes / 177,234 active file-class pairs instead of 15 / 137,282 |
+| Equal mixed-row widths imply a small directory delta | The compiled and replayed model prices it: matched eight-/16-row policies use 835.907 / 849.147 MB, adding 5.022 / 9.106 MB and 102,963 / 85,913 allocation calls. These are modeled storage totals, not CPU results |
+| All-atomic fields cannot be merged or retained in registers | Too absolute. LLVM permits some Monotonic CSE/DSE and other special cases; private access can use `get_mut`. Keep ordinary-field access in the matrix and compare actual generated code and traversal CPU |
+| Typed pages should not lose because they exceed the provisional 880 MB category | Accepted; already corrected in section 6. Whole-owner storage and generator/accessor complexity decide the tradeoff. Suggested symbol/flow widths remain conditional headroom until all replacement allocations are priced |
+| Chunk carving belongs in the allocation-policy matrix | Accepted as a bounded experiment. Safe encoded backing or separate typed arenas are candidates; arbitrary heterogeneous typed references cannot simply be carved from raw bytes under the current safe-Rust contract |
+| The modeled page calls are 15–20 times today's allocation count and add 0.1–0.2 s | Unsupported comparison and timing forecast. The proposed counts include stores/directories while the denominator omits 3,149,779 existing payload-box calls. Current allocator samples are not marginal per-call latency. Compare the complete replaced regions and measure the implementation |
+| 8.25 source bytes/node gives an initial per-file chunk size | It is a global ratio, not a bound. The file-weighted 5th/95th percentiles are 5.895/31.469 bytes/node; that predictor oversizes node count by more than twofold in 1,635 files. Add minimum/cap/growth policies and charge actual slack |
+| List edges belong in the vertical slice | Accepted, including nested parameter/argument construction. A shared append-only edge arena needs a strategy for nested-list interleaving and observable slice/backing identity |
+| Vec-to-box lists are the largest identifiable parse-request source | Not established. The combined compaction/auxiliary scope requests 178.788 MB and excludes initial Vec construction; core-node allocation requests 1,692.598 MB. Neither the unclassified parse remainder nor the 464 MB freed/superseded total is measured list traffic |
+| Narrow binding setters should preserve the parse proof | Accepted, with a separate binding-graph proof. Symbol/table/flow IDs and `next_container` still need correct owner/bounds validation; storage relocation does not delete that obligation |
+| Pilot exits should be CPU-only because bytes are already known | Rejected. CPU and accessor complexity decide among viable layouts, but actual allocation, calls, initialization, live/RSS, parity and ownership remain required. The byte model is incomplete |
+| Runtime IDs have no parse/bind consumers after removing exclusive node copies | False: module-instance-state caching and ambient-module naming still request runtime node IDs. Measure occupancy rather than pricing it as zero |
+| No TypeScript JSDoc materialization means foreign parents are negligible | Deferred TypeScript JSDoc supports the current endpoint fast path, not removal of later materialization or imported/foreign-owner behavior. Endpoint occupancy and lifetime API obligations are different questions |
+| The 257 MB residual is mostly disappearing map controls and Vec/Arc headers | Unproved. The residual is after Arc-header estimates; inline fields, known backing capacity and page directories are already counted. Reconcile remaining bucket/control and other storage, then remeasure the redesigned owner; neither write it off nor impose it as a permanent fixed cost |
+
+The identifier contract also includes observations before a parser range exists:
+[factory hooks](../crates/ts_ast/src/factory.rs) can see new nodes before
+[parser finishing](../crates/ts_parser/src/state.rs) assigns the final range.
+[Range mutation](../crates/ts_ast/src/lib.rs) is independent of
+[observable text](../crates/ts_ast/src/node_text.rs). Unicode escapes, JSX names,
+arbitrary factory identifiers, reparsed clones, foreign owners, synthetic
+positions and subsequent range edits therefore remain explicit fallback tests.
+
+The runtime-ID counterexample is a live path through
+[module binding](../crates/ts_binder/src/modules.rs) into
+[`module_instance_state_cached`](../crates/ts_ast/src/binder_helpers.rs), with
+another consumer in [ambient-module declarations](../crates/ts_binder/src/declarations.rs).
+This establishes nonzero-capable consumers, not their workload frequency.
+The [binding-result validator](../crates/ts_ast/src/bind_result.rs) separately
+checks symbol/table/flow references, next-container links and result graphs;
+narrow inline setters must preserve those obligations while avoiding another
+whole syntax scan.
+
+Decision: add mixed rows, bounded chunks and actual list construction to the
+pilot, and require narrow binding setters from its first implementation. Retain
+ordinary typed pages and the whole-owner comparison. Model/census gaps are
+explicit work items, not assumed savings. The additive diagnostic passes seven
+Python tests and two compiled Rust tests; the source-density report replays
+archived metadata with workload/hash checks. These additions change no compiler
+behavior, gate thresholds, historical capture or promoted timing result.

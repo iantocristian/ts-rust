@@ -7,6 +7,9 @@ the complete owner budget is modeled. The
 [subsequent budget review](../../../../docs/S07-bis-plan-review.md#6-layout-budget-review-after-a0)
 keeps typed pages in the comparison and adds tighter identifier text as a
 separate candidate. The recorded matrix and its arithmetic are unchanged.
+The [additive pilot review](../layout-followups/README.md) subsequently adds
+mixed scalar/atomic rows and tests the source-density premise for chunk sizing;
+it preserves this historical matrix and does not select a production layout.
 
 The frozen original A0 executable supplied an **untimed** census of all 13,094
 files, with every completed root retained. All files used consuming binding;

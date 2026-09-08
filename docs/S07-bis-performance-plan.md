@@ -226,6 +226,25 @@ A header-held payload ordinal, or a charged
 slot directory, maps the stable public node identity to its concrete payload.
 Do not change identity when a physical page or directory grows.
 
+The candidate matrix includes ordinary typed pages, scalar word rows with
+separately indexed facts, all-atomic word rows, and mixed rows with one inline
+atomic facts word only on composite shapes. In a mixed composite row, its
+plain-word count excludes the facts word already charged in the payload.
+Non-composite rows carry no atomic field. Compare actual class occupancy,
+capacity, directories and allocation calls, not only equal used-row widths;
+the [additive mixed-row model](../tools/s07/performance-experiments/layout-followups/README.md)
+records this distinction.
+
+Also model a bounded chunk allocation policy. Safe homogeneous encoded backing
+or separately typed arenas must preserve the selected accessor contract; do not
+assume arbitrary typed references can be carved from raw byte storage. Charge
+chunk descriptors, locators, alignment/tails, initialization, full-range escapes
+and partial-construction/drop behavior. A source-sized first chunk needs minimum
+and maximum bounds; the global bytes/node ratio is not a per-file prediction.
+Obtain allocation order for exact packing/locality claims or label volume and
+padding bounds as such. Compare complete replaced allocation regions, including
+the existing payload boxes, before assigning an allocator CPU penalty.
+
 Model the compact-parent, approximately 24-byte header first. It requires a
 checked full-range escape mechanism;
 include a separate payload-shape tag as well as the open syntax kind. Measure
@@ -260,6 +279,11 @@ owner-held runtime-identity storage, including the cost of initialization and
 lookup; preserve lazy process-global assignment, clone identity, overlay
 identity and concurrent queries. Reject a hot locking side table that trades a
 small field saving for a larger CPU regression.
+Measure actual identity occupancy and calls: module-instance-state caching and
+ambient-module naming still request runtime node IDs during binding. Removal of
+`copy_for_binding` from the exclusive path did not remove these consumers.
+Likewise, deferred TypeScript JSDoc at the parse/bind endpoint does not remove
+the published owner's later lazy-materialization and foreign-parent contracts.
 
 ### 4.4 A budget that includes replacements
 
@@ -306,6 +330,13 @@ derivation or pool handle must preserve arbitrary factory text, decoded names,
 range mutation, synthetic positions, cloned/imported text and the full public
 domains. Price the fallback pool, handles, conversion work and page changes;
 do not treat all identifier text as an immutable suffix of its current range.
+The proposed low-bit tag leaves 31 bits for either raw length or pool index;
+define checked overflow/escape behavior without narrowing the public domains.
+A pool entry's `(offset, len)` needs an identified, retained backing for decoded,
+synthetic and foreign text. Factory hooks can observe text before the final
+parser range exists. Count each fallback case before assuming the pool is small;
+the current physical identifier count permits a 27,171,044-byte used-row saving,
+before any pool, backing, capacity or access costs.
 
 Hash bucket/control allocations, Arc headers and temporary indexes must be
 included, not hidden outside the model. Unique source backing is charged once
@@ -515,10 +546,23 @@ has no measured path to both CPU gates.
    share the payload locator with its binding indexes and remove any provisional
    all-node index. Keep one syntax representation with the required binding
    backends, rather than two copies of the parser or binder algorithm.
+   Give inline binding fields narrow typed setters from the start. Symbol,
+   locals and flow writes may preserve the syntax-edge proof, but introduce
+   binding-graph references whose owner/bounds validation must remain proved.
+   `next_container` also carries a syntax-node reference. Do not expose raw
+   payload mutation as proof-preserving or discard final binding-graph checks
+   merely because their fields have moved out of maps.
 2. Port common tokens/identifiers/edge payloads as a vertical slice, including
    parser construction, mutation, publication, binding and encoding. Include
-   TokenData with identifier/unknown kinds to test the independent shape tag. Measure
-   actual end-to-end costs before extending the pattern to every shape.
+   TokenData with identifier/unknown kinds to test the independent shape tag,
+   and parameter/argument list edges with recursively nested list construction.
+   Compare direct owner-local `u32` edge storage with the current backing path,
+   charging staging, segmentation, reservation or completion compaction needed
+   to preserve contiguous/shared slices and distinct identities. An append-only
+   global edge buffer alone does not solve nested-list interleaving. Attribute
+   initial Vec construction separately from list completion and auxiliary growth.
+   Preserve nil/allocated-empty/missing states, locations and modifiers in this
+   pilot. Measure actual end-to-end costs before extending it to every shape.
 3. Migrate the remaining concrete shapes and auxiliary/list storage. Preserve
    backing identity, nil versus allocated-empty lists, parent updates, cycles,
    shared children and clone/update behavior. Do not compact mutable lists by
@@ -535,7 +579,13 @@ has no measured path to both CPU gates.
 
 Exit: full AST/parser/binder/encoder parity and ownership, a new complete census,
 and a measured candidate whose live storage and request traffic can fit the total
-budget. Apply the bind/parse milestones below before continuing. Implement list
+budget. For the vertical slice, compare hot flag reads, child enumeration and
+representative binder traversal against A0-b, alongside generated-accessor
+complexity and actual requests, allocation calls, initialization, live bytes
+and RSS. CPU is the principal unresolved selection question, not the sole exit
+criterion: the model leaves real owner storage unpriced. Do not promote on a
+microbenchmark or modeled byte count alone.
+Apply the bind/parse milestones below before continuing. Implement list
 construction and capacity changes needed to satisfy CP0's traffic model here;
 do not defer a known structural allocation miss to CP6.
 Do not continue polishing a node representation that makes the memory target
