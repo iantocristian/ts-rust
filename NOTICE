@@ -10,3 +10,8 @@ upstream/tsc/LICENSE and upstream/NOTICE.txt.
 
 Third-party attribution notices from the upstream NOTICE.txt that pertain to
 a ported component are copied below as that component is ported.
+
+The node-index sorter in crates/ts_ast/src/node_index_sort.rs derives from
+Go 1.27.1's slices sorting implementation.
+Copyright 2022 The Go Authors. All rights reserved.
+Licensed under the BSD 3-Clause License; see licenses/GO-BSD-3-Clause.txt.

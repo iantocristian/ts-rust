@@ -3,6 +3,111 @@
 //! This dependency slice does not implement compiler options or the remaining
 //! core algorithms. Integer newtypes retain Go's open numeric value domain.
 
+pub mod path;
+
+/// Pinned `core.ScriptKind`; reserved and unknown integers remain representable.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub struct ScriptKind(pub i32);
+
+impl ScriptKind {
+    pub const UNKNOWN: Self = Self(0);
+    pub const JS: Self = Self(1);
+    pub const JSX: Self = Self(2);
+    pub const TS: Self = Self(3);
+    pub const TSX: Self = Self(4);
+    pub const JSON: Self = Self(6);
+
+    /// port: tsc/internal/core/core.go:GetScriptKindFromFileName
+    pub fn from_file_name(file_name: &[u8]) -> Self {
+        let Some(dot) = file_name.iter().rposition(|&byte| byte == b'.') else {
+            return Self::UNKNOWN;
+        };
+        // Every recognized suffix is ASCII. Unicode lowercase cannot make a
+        // non-ASCII code point equal to any of these ASCII suffix characters.
+        let extension = &file_name[dot..];
+        for (suffix, kind) in [
+            (b".js".as_slice(), Self::JS),
+            (b".cjs", Self::JS),
+            (b".mjs", Self::JS),
+            (b".jsx", Self::JSX),
+            (b".ts", Self::TS),
+            (b".cts", Self::TS),
+            (b".mts", Self::TS),
+            (b".tsx", Self::TSX),
+            (b".json", Self::JSON),
+        ] {
+            if extension.eq_ignore_ascii_case(suffix) {
+                return kind;
+            }
+        }
+        Self::UNKNOWN
+    }
+
+    /// port: tsc/internal/core/core.go:EnsureScriptKindFromFileName
+    pub fn ensure_from_file_name(file_name: &[u8]) -> Self {
+        let kind = Self::from_file_name(file_name);
+        if kind == Self::UNKNOWN {
+            Self::TS
+        } else {
+            kind
+        }
+    }
+
+    /// port: tsc/internal/core/core.go:GetDefaultExtensionForScriptKind
+    pub fn default_extension(self) -> &'static [u8] {
+        match self {
+            Self::JS => b".js",
+            Self::JSX => b".jsx",
+            Self::TSX => b".tsx",
+            Self::JSON => b".json",
+            _ => b".ts",
+        }
+    }
+}
+
+/// Pinned byte-valued `core.Tristate`, including unknown external values.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub struct Tristate(pub u8);
+
+impl Tristate {
+    pub const UNKNOWN: Self = Self(0);
+    pub const FALSE: Self = Self(1);
+    pub const TRUE: Self = Self(2);
+    pub fn is_true(self) -> bool {
+        self == Self::TRUE
+    }
+    pub fn is_false(self) -> bool {
+        self == Self::FALSE
+    }
+    pub fn is_unknown(self) -> bool {
+        self == Self::UNKNOWN
+    }
+    pub fn is_true_or_unknown(self) -> bool {
+        self.is_true() || self.is_unknown()
+    }
+    pub fn is_false_or_unknown(self) -> bool {
+        self.is_false() || self.is_unknown()
+    }
+    #[must_use]
+    pub fn default_if_unknown(self, value: Self) -> Self {
+        if self.is_unknown() {
+            value
+        } else {
+            self
+        }
+    }
+}
+
+impl From<bool> for Tristate {
+    fn from(value: bool) -> Self {
+        if value {
+            Self::TRUE
+        } else {
+            Self::FALSE
+        }
+    }
+}
+
 /// Pinned `core.ScriptTarget` values, including None and JSON.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScriptTarget(pub i32);

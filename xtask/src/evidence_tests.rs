@@ -331,6 +331,7 @@ fn generation_evidence_tracks_generator_inputs_but_not_unconsumed_leaf_bodies() 
         "data/s03/schema/ast.json",
         "data/s03/generated.json",
         "data/s03/api-special-codecs.json",
+        "data/s06/generated-ast-scope.json",
         "data/s04/toolchains.toml",
         "Cargo.toml",
         "Cargo.lock",

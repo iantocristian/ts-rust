@@ -344,8 +344,10 @@ dependencies = [
 name = "ts_ast"
 version = "0.1.0"
 dependencies = [
+ "stacker",
  "ts_arena",
  "ts_core",
+ "ts_diagnostics",
  "ts_jsstring",
 ]
 
@@ -361,7 +363,13 @@ version = "0.1.0"
 name = "ts_encoder"
 version = "0.1.0"
 dependencies = [
+ "serde",
+ "serde_json",
+ "ts_arena",
  "ts_ast",
+ "ts_core",
+ "ts_jsstring",
+ "ts_parser",
 ]
 
 [[package]]
@@ -380,6 +388,23 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "ts_parser"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "stacker",
+ "ts_arena",
+ "ts_ast",
+ "ts_core",
+ "ts_diagnostics",
+ "ts_encoder",
+ "ts_jsnum",
+ "ts_jsstring",
+ "ts_scanner",
 ]
 
 [[package]]

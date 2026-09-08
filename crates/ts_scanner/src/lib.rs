@@ -21,7 +21,8 @@ pub use identifier::{
     is_identifier_part_ex, is_identifier_start, is_valid_identifier, string_to_token,
     token_to_string,
 };
-pub use spelling::equal_fold;
+pub use spelling::{equal_fold, get_spelling_suggestion_for_strings};
+pub use state::TokenValue as RetainedTokenValue;
 pub use state::{Checkpoint, DiagnosticArgument, ErrorCallback, Scanner, ScannerDiagnostic};
 pub use trivia::{
     could_start_trivia, get_leading_comment_ranges, get_shebang, get_trailing_comment_ranges,
@@ -33,3 +34,5 @@ pub use utilities::{
 };
 
 pub(crate) use state::{escape_flags, IdentifierVariant, TokenValue};
+
+pub use utilities::is_white_space_like;

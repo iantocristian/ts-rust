@@ -1,0 +1,82 @@
+{
+  "behavior_outcomes": [
+    "ok",
+    "error",
+    "panic"
+  ],
+  "chunk_max_bytes": 65536,
+  "decode_stages": [
+    "decode",
+    "decoded_tree"
+  ],
+  "definitions": "scripts/s06_protocol.py is the executable strict request schema",
+  "frame_fields": {
+    "begin": "version id tag op",
+    "end": "version id tag observations stages",
+    "observation": "version id tag seq stage kind value",
+    "stage": "version id tag stage outcome message_hex"
+  },
+  "framing": "one begin record, ordered stage observations, one end with completed-stage count; panic or returned error ends the request at its actual stage",
+  "identity_fields": {
+    "node_index_after": "before_reused encoded_reused",
+    "node_index_before": "independent_order_equal cache_reused"
+  },
+  "invalid_capture": [
+    "malformed/duplicate/unknown fields",
+    "wrong identity/order/count",
+    "truncated record",
+    "timeout",
+    "oversized record",
+    "unexpected child exit"
+  ],
+  "observation_fields": {
+    "absent_lookup": "index",
+    "bytes": "length",
+    "chunk": "offset hex",
+    "diagnostic": "collection index code category pos end key_hex text_hex args_hex",
+    "factory": "label ints bools strings",
+    "kind": "raw name",
+    "node": "index node",
+    "path": "encoded_root_length normalized_hex declaration_file",
+    "root": "node",
+    "source_file": "kind pos end flags node_count text_count identifier_count script_kind language_variant declaration_file hash",
+    "table": "length",
+    "tree_node": "index kind pos end flags children"
+  },
+  "other_stages": {
+    "codec": [
+      "encode",
+      "decode",
+      "decoded_tree",
+      "reencode"
+    ],
+    "factory": [
+      "factory"
+    ],
+    "kind_names": [
+      "kind_names"
+    ],
+    "path": [
+      "path"
+    ]
+  },
+  "parse_stages": [
+    "parse",
+    "node_index_before",
+    "encode_source_file",
+    "node_index_after"
+  ],
+  "primary_rows": 12829,
+  "request_max_bytes": 16777216,
+  "response_max_bytes": 1048576,
+  "returned_error_stages": [
+    "decode",
+    "encode_source_file",
+    "encode",
+    "reencode"
+  ],
+  "script_kind": "signed i32; zero is an observed parser panic, unknown nonzero values remain valid requests",
+  "source_contract": "source_hex contains finalized parser bytes; never decode at parser adapter entry",
+  "supplemental_rows_contributed": 0,
+  "version": 1
+}

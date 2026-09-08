@@ -216,11 +216,15 @@ class ComparisonTests(unittest.TestCase):
                  patch.dict(os.environ, {"CARGO_TARGET_DIR": str(root / "other-target")}):
                 report = s04.e4()
             self.assertTrue(report["metrics"][s04.TEXT_CRITERIA[0]])
-            self.assertEqual(commands[0][-1], "--check")
-            self.assertEqual(commands[2][:2], ["cargo", "test"])
-            self.assertIn("--all-targets", commands[2])
-            self.assertEqual(commands[3][:2], ["cargo", "run"])
-            self.assertNotIn(str(root / "target/release/examples/e4"), commands[3])
+            checks = [args for args in commands if args[-1] == "--check"]
+            self.assertEqual([Path(args[1]).name for args in checks],
+                             ["generate_case_tables.py", "generate_go_quote.py"])
+            cargo = [args for args in commands if args[0] == "cargo"]
+            self.assertEqual(len(cargo), 2)
+            self.assertEqual(cargo[0][:2], ["cargo", "test"])
+            self.assertIn("--all-targets", cargo[0])
+            self.assertEqual(cargo[1][:2], ["cargo", "run"])
+            self.assertNotIn(str(root / "target/release/examples/e4"), cargo[1])
 
     def test_sigma_contexts_cover_range_edges_stride_members_and_holes(self):
         table = """var unicodeCasedRanges = &unicode.RangeTable{

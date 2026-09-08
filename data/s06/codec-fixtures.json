@@ -1,0 +1,468 @@
+{
+  "cases": [
+    {
+      "request": {
+        "id": "codec/literal/StringLiteral",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/StringLiteral",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct StringLiteral with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/NumericLiteral",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/NumericLiteral",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct NumericLiteral with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/BigIntLiteral",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/BigIntLiteral",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct BigIntLiteral with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/RegularExpressionLiteral",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/RegularExpressionLiteral",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct RegularExpressionLiteral with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/NoSubstitutionTemplateLiteral",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/NoSubstitutionTemplateLiteral",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct NoSubstitutionTemplateLiteral with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/TemplateHead",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/TemplateHead",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct TemplateHead with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/TemplateMiddle",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/TemplateMiddle",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct TemplateMiddle with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/TemplateTail",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/TemplateTail",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct TemplateTail with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/Identifier",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/Identifier",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct Identifier with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/PrivateIdentifier",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/PrivateIdentifier",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct PrivateIdentifier with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/JsxText",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/JsxText",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct JsxText with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/JSDocText",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/JSDocText",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct JSDocText with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/JSDocLink",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/JSDocLink",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct JSDocLink with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/JSDocLinkPlain",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/JSDocLinkPlain",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct JSDocLinkPlain with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/literal/JSDocLinkCode",
+        "op": "codec",
+        "primary": null,
+        "scenario": "literal/JSDocLinkCode",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; construct JSDocLinkCode with text hex 61f09f9880eda080ff, rawText hex 7261775c6e5c7544383030 where applicable, flags=-1 where applicable.",
+        "JSDoc text is the three raw string pieces 61, empty, f09f9880eda080ff. JSDocLink kinds have Identifier(\"name\") child. JsxText containsOnlyTriviaWhiteSpaces=true.",
+        "Set root loc=(-1,2), flags=2779096485. EncodeNode(root,nil). DecodeNodes returned bytes; walk public ForEachChild; EncodeNode(decoded,nil)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/synthetic-expression",
+        "op": "codec",
+        "primary": null,
+        "scenario": "synthetic-expression",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "NewToken(KindSyntheticExpression), then EncodeNode(root,nil); kind dispatch reaches the explicit codec panic before payload inspection. No checker-owned constructor is credited."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/raw-kind",
+        "op": "codec",
+        "primary": null,
+        "scenario": "raw-kind",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "NewToken(Kind(-1)), loc=(-1,2147483647), flags=4294967295; EncodeNode(root,nil), DecodeNodes, child walk and reencode if returned."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/source-strings",
+        "op": "codec",
+        "primary": null,
+        "scenario": "source-strings",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; SourceFile text hex 27f09f988027206120610a, filename=/s06/codec.ts, path=/s06/codec.ts; jsx=true, force=true. Statements: StringLiteral(emoji,flags=1024) loc=(0,6); Identifier(a) loc=(7,8); distinct Identifier(a) loc=(9,10); EOF loc=(11,11). List loc=(0,10); source loc=(0,11).",
+        "SourceFile node/text counts use factory counters, scriptKind=3, languageVariant=1, hash hi=0123456789abcdef/lo=fedcba9876543210. EncodeSourceFile; DecodeNodes; public child walk; EncodeSourceFile(decoded)."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/source-metadata",
+        "op": "codec",
+        "primary": null,
+        "scenario": "source-metadata",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; SourceFile text hex 27f09f988027206120610a, filename=/s06/codec.ts, path=/s06/codec.ts; jsx=true, force=true. Statements: StringLiteral(emoji,flags=1024) loc=(0,6); Identifier(a) loc=(7,8); distinct Identifier(a) loc=(9,10); EOF loc=(11,11). List loc=(0,10); source loc=(0,11).",
+        "SourceFile node/text counts use factory counters, scriptKind=3, languageVariant=1, hash hi=0123456789abcdef/lo=fedcba9876543210. EncodeSourceFile; DecodeNodes; public child walk; EncodeSourceFile(decoded).",
+        "ModuleAugmentations=[first identifier, separately allocated missing Identifier, nil]; imports=[string literal, separately allocated missing StringLiteral, nil]; ExternalModuleIndicator=source itself. Nil metadata entries intentionally encode zero indices. Ambient names=[empty,repeat,repeat,raw ff].",
+        "ReferencedFiles=[loc(1,5),fileName raw ff,resolutionMode=-1,preserve=true]; TypeReferenceDirectives=[loc(-1,128),fileName=types,resolutionMode=99,preserve=false]; LibReferenceDirectives=[loc(0,11),fileName=lib,resolutionMode=0,preserve=true].",
+        "ContentMapper=mapper, virtualFileName=/s06/codec.virtual.ts, originalText hex 58f09f9880590a. Supplemental files /s06/one.ts and /s06/two.ts; canonical=/s06/canonical.ts; all are separately allocated empty SourceFiles.",
+        "Diagnostic directives: original(1,5),virtual(1,5),policy=1,unusedCode=-1; original(-1,128),virtual(-1,256),policy=255,unusedCode=65536. Unused text/source fields are populated but omitted by wire codec.",
+        "SpanMap segments supplied reversed then Go New sorts: virtual(7,10),original(5,6),kind=2,features=0; virtual(1,5),original(1,5),kind=0,features=1048575. Rust freezes the resulting sorted records, without claiming spanmap algorithms."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/source-empty-span",
+        "op": "codec",
+        "primary": null,
+        "scenario": "source-empty-span",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; SourceFile text hex 27f09f988027206120610a, filename=/s06/codec.ts, path=/s06/codec.ts; jsx=true, force=true. Statements: StringLiteral(emoji,flags=1024) loc=(0,6); Identifier(a) loc=(7,8); distinct Identifier(a) loc=(9,10); EOF loc=(11,11). List loc=(0,10); source loc=(0,11).",
+        "SourceFile node/text counts use factory counters, scriptKind=3, languageVariant=1, hash hi=0123456789abcdef/lo=fedcba9876543210. EncodeSourceFile; DecodeNodes; public child walk; EncodeSourceFile(decoded).",
+        "ModuleAugmentations=[first identifier, separately allocated missing Identifier, nil]; imports=[string literal, separately allocated missing StringLiteral, nil]; ExternalModuleIndicator=source itself. Nil metadata entries intentionally encode zero indices. Ambient names=[empty,repeat,repeat,raw ff].",
+        "ReferencedFiles=[loc(1,5),fileName raw ff,resolutionMode=-1,preserve=true]; TypeReferenceDirectives=[loc(-1,128),fileName=types,resolutionMode=99,preserve=false]; LibReferenceDirectives=[loc(0,11),fileName=lib,resolutionMode=0,preserve=true].",
+        "ContentMapper=mapper, virtualFileName=/s06/codec.virtual.ts, originalText hex 58f09f9880590a. Supplemental files /s06/one.ts and /s06/two.ts; canonical=/s06/canonical.ts; all are separately allocated empty SourceFiles.",
+        "Diagnostic directives: original(1,5),virtual(1,5),policy=1,unusedCode=-1; original(-1,128),virtual(-1,256),policy=255,unusedCode=65536. Unused text/source fields are populated but omitted by wire codec.",
+        "SpanMap allocated empty, distinct from nil."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/msgpack-boundaries",
+        "op": "codec",
+        "primary": null,
+        "scenario": "msgpack-boundaries",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "New factory; SourceFile text hex 27f09f988027206120610a, filename=/s06/codec.ts, path=/s06/codec.ts; jsx=true, force=true. Statements: StringLiteral(emoji,flags=1024) loc=(0,6); Identifier(a) loc=(7,8); distinct Identifier(a) loc=(9,10); EOF loc=(11,11). List loc=(0,10); source loc=(0,11).",
+        "SourceFile node/text counts use factory counters, scriptKind=3, languageVariant=1, hash hi=0123456789abcdef/lo=fedcba9876543210. EncodeSourceFile; DecodeNodes; public child walk; EncodeSourceFile(decoded).",
+        "AmbientModuleNames array length=65536, empty strings except first eight: ASCII x repeated lengths 0,31,32,255,256,65535,65536,1. This crosses fixed/str8/str16/str32 and array16/array32 boundaries.",
+        "ReferencedFiles array length=16: positions use [0,127,128,255,256,65535,65536,-1] cyclically, end=pos; resolutionMode same, preserve alternates. Filename lengths reuse first eight ambient names. TypeReferenceDirectives uses first15 references, LibReferenceDirectives is empty."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/parsed-js/typedef",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/typedef",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "ParseSourceFile with fileName=path=/s06/codec.js, ScriptKind=JS, jsx=false, force=false and exact source '/** @typedef {number} Foo */ const x=0;'.",
+        "EncodeSourceFile with the production JSDoc provider; DecodeNodes; walk public ForEachChild; EncodeSourceFile(decoded). Each runtime independently parses and encodes its own source before decoding."
+      ]
+    },
+    {
+      "request": {
+        "id": "codec/parsed-js/import",
+        "op": "codec",
+        "primary": null,
+        "scenario": "parsed-js/import",
+        "version": 1
+      },
+      "stages": [
+        "encode",
+        "decode",
+        "decoded_tree",
+        "reencode"
+      ],
+      "steps": [
+        "ParseSourceFile with fileName=path=/s06/codec.js, ScriptKind=JS, jsx=false, force=false and exact source '/** @import {Foo} from \"bar\" */ const x=0;'.",
+        "EncodeSourceFile with the production JSDoc provider; DecodeNodes; walk public ForEachChild; EncodeSourceFile(decoded). Each runtime independently parses and encodes its own source before decoding."
+      ]
+    }
+  ],
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "version": 1
+}

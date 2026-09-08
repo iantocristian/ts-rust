@@ -1,27 +1,31 @@
-use crate::{counters::Track, FileBuilder, FileId, FileOwner};
+use crate::NodeRecord;
+use crate::{counters::Track, FileId, StorageBuilder, StorageOwner};
 use std::{ops::Deref, sync::Arc};
 
 /// One retention root owns every file in a content-mapped parse result.
-pub struct BundleOwner<N, S = ()> {
-    files: Vec<Arc<FileOwner<N, S>>>,
+pub struct StorageBundle<N: NodeRecord, S = ()> {
+    files: Vec<Arc<StorageOwner<N, S>>>,
     _owner: Track,
 }
 
-impl<N, S> std::fmt::Debug for BundleOwner<N, S> {
+impl<N: NodeRecord, S> std::fmt::Debug for StorageBundle<N, S> {
     fn fmt(&self, output: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         output
-            .debug_struct("BundleOwner")
+            .debug_struct("StorageBundle")
             .field("files", &self.files)
             .finish_non_exhaustive()
     }
 }
 
-impl<N, S> BundleOwner<N, S> {
+impl<N: NodeRecord, S> StorageBundle<N, S> {
     /// Consumes builders so a mapped member never escapes as a standalone owner.
-    pub fn new(canonical: FileBuilder<N, S>, supplemental: Vec<FileBuilder<N, S>>) -> Arc<Self> {
+    pub fn new(
+        canonical: StorageBuilder<N, S>,
+        supplemental: Vec<StorageBuilder<N, S>>,
+    ) -> Arc<Self> {
         let counters = canonical.counters.clone();
         let canonical_id = canonical.id();
-        let ids = supplemental.iter().map(FileBuilder::id).collect();
+        let ids = supplemental.iter().map(StorageBuilder::id).collect();
         let mut files = vec![Arc::new(canonical.publish(None, ids))];
         files.extend(
             supplemental
@@ -41,34 +45,34 @@ impl<N, S> BundleOwner<N, S> {
         self.files.is_empty()
     }
 
-    pub fn file(self: &Arc<Self>, index: usize) -> Option<FileHandle<N, S>> {
-        (index < self.files.len()).then(|| FileHandle {
+    pub fn file(self: &Arc<Self>, index: usize) -> Option<StorageHandle<N, S>> {
+        (index < self.files.len()).then(|| StorageHandle {
             root: Root::Bundle(self.clone(), index),
         })
     }
 }
 
-pub(crate) enum Root<N, S> {
-    File(Arc<FileOwner<N, S>>),
-    Bundle(Arc<BundleOwner<N, S>>, usize),
+pub(crate) enum Root<N: NodeRecord, S> {
+    File(Arc<StorageOwner<N, S>>),
+    Bundle(Arc<StorageBundle<N, S>>, usize),
 }
 
 /// An owning file reference. Every mapped handle keeps all sibling files alive.
-pub struct FileHandle<N, S = ()> {
+pub struct StorageHandle<N: NodeRecord, S = ()> {
     pub(crate) root: Root<N, S>,
 }
 
-impl<N, S> std::fmt::Debug for FileHandle<N, S> {
+impl<N: NodeRecord, S> std::fmt::Debug for StorageHandle<N, S> {
     fn fmt(&self, output: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         output
-            .debug_struct("FileHandle")
+            .debug_struct("StorageHandle")
             .field("id", &self.id())
             .field("bundled", &matches!(self.root, Root::Bundle(..)))
             .finish()
     }
 }
 
-impl<N, S> Clone for FileHandle<N, S> {
+impl<N: NodeRecord, S> Clone for StorageHandle<N, S> {
     fn clone(&self) -> Self {
         Self {
             root: match &self.root {
@@ -79,8 +83,8 @@ impl<N, S> Clone for FileHandle<N, S> {
     }
 }
 
-impl<N, S> Deref for FileHandle<N, S> {
-    type Target = FileOwner<N, S>;
+impl<N: NodeRecord, S> Deref for StorageHandle<N, S> {
+    type Target = StorageOwner<N, S>;
     fn deref(&self) -> &Self::Target {
         match &self.root {
             Root::File(file) => file,
@@ -89,16 +93,87 @@ impl<N, S> Deref for FileHandle<N, S> {
     }
 }
 
-impl<N, S> FileHandle<N, S> {
+impl<N: NodeRecord, S> StorageHandle<N, S> {
+    pub(crate) fn owner_retention(
+        &self,
+        arena: crate::ArenaId,
+    ) -> Option<crate::StorageView<'_, N, S>> {
+        let contains = |owner: &&StorageOwner<N, S>| {
+            owner.core.id == arena
+                || owner.lazy_arena() == arena
+                || owner.auxiliary_arena() == arena
+                || owner.lazy_auxiliary_arena() == arena
+        };
+        match &self.root {
+            Root::File(owner) => {
+                if contains(&&**owner) {
+                    self.view().for_arena(arena).ok()
+                } else {
+                    owner.imported_view(arena)
+                }
+            }
+            Root::Bundle(bundle, _) => {
+                if bundle
+                    .files
+                    .iter()
+                    .map(|owner| &**owner)
+                    .any(|owner| contains(&owner))
+                {
+                    self.view().for_arena(arena).ok()
+                } else {
+                    bundle
+                        .files
+                        .iter()
+                        .find_map(|owner| owner.imported_view(arena))
+                }
+            }
+        }
+    }
+    pub fn view(&self) -> crate::StorageView<'_, N, S> {
+        crate::StorageView::retained(self)
+    }
+
+    pub(crate) fn retained_owner(&self, arena: crate::ArenaId) -> Option<&StorageOwner<N, S>> {
+        let contains = |owner: &&StorageOwner<N, S>| {
+            owner.core.id == arena
+                || owner.lazy_arena() == arena
+                || owner.auxiliary_arena() == arena
+                || owner.lazy_auxiliary_arena() == arena
+        };
+        match &self.root {
+            Root::File(owner) => Some(&**owner)
+                .filter(contains)
+                .or_else(|| owner.imported_owner(arena)),
+            Root::Bundle(bundle, _) => bundle
+                .files
+                .iter()
+                .map(|file| &**file)
+                .find(contains)
+                .or_else(|| {
+                    bundle
+                        .files
+                        .iter()
+                        .find_map(|owner| owner.imported_owner(arena))
+                }),
+        }
+    }
     /// Follow a mapper link through its complete retention group.
     pub fn file(&self, id: FileId) -> Option<Self> {
         match &self.root {
-            Root::File(file) => (file.id() == id).then(|| self.clone()),
+            Root::File(file) => (file.id() == id)
+                .then(|| self.clone())
+                .or_else(|| file.imported_file(id)),
             Root::Bundle(bundle, _) => bundle
                 .files
                 .iter()
                 .position(|file| file.id() == id)
-                .and_then(|index| bundle.file(index)),
+                .and_then(|index| bundle.file(index))
+                .or_else(|| {
+                    bundle
+                        .files
+                        .iter()
+                        .find_map(|owner| owner.imported_file(id))
+                }),
         }
     }
 

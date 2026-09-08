@@ -2,11 +2,11 @@
 #
 # views:     validate deterministic views of the archived evidence, including the worklist.
 # producers: on macOS and Linux rerun the registered producers, enforce their measured
-#            results and S01/S03/S04/S05, and publish views and raw evidence even when a gate fails.
+#            results and S01/S03/S04/S05/S06, and publish views and raw evidence even when a gate fails.
 # msrv:      compile the locked workspace and all targets on the declared minimum Rust.
 # Nothing is committed back; evidence in the repository is captured and reviewed locally.
 #
-# The workflow requires S01/S03/S04/S05 and quality checks independently of unfinished sprints.
+# The workflow requires S01/S03/S04/S05/S06 and quality checks independently of unfinished sprints.
 # The matrices cover the four ADR 0002 targets: macos-15 (arm64), macos-15-intel (x86_64),
 # ubuntu-24.04 (x86_64) and ubuntu-24.04-arm (arm64).
 name: status
@@ -145,12 +145,17 @@ jobs:
         run: cargo xtask run workspace
       - name: Generated crate contracts
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
-        run: cargo test -p ts_ast -p ts_diagnostics -p ts_encoder --all-targets --all-features --locked
+        run: cargo test -p ts_diagnostics --all-targets --all-features --locked
       - name: Scanner, numeric and shared-range contracts in debug and release
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: |
           cargo test -p ts_scanner -p ts_jsnum -p ts_core --all-targets --all-features --locked
           cargo test -p ts_scanner -p ts_jsnum -p ts_core --all-targets --all-features --locked --release
+      - name: Parser, AST runtime and codec contracts in debug and release
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          cargo test -p ts_parser -p ts_ast -p ts_encoder --all-targets --all-features --locked
+          cargo test -p ts_parser -p ts_ast -p ts_encoder --all-targets --all-features --locked --release
       - name: Oracle build and version smoke
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run oracle
@@ -175,6 +180,9 @@ jobs:
       - name: Scanner against the pinned Go oracle
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run scanner
+      - name: Parser, runtime and protocol-8 bytes against the pinned Go oracle
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run e1
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -204,6 +212,16 @@ jobs:
             'run.scanner.diagnostics == true' \
             'run.scanner.token_value_bytes == true' \
             'run.scanner.table_current == true' \
+            'run.e1.frozen_denominator == true' \
+            'run.e1.encoder_success_error == true' \
+            'run.e1.encoder_output_bytes == true' \
+            'run.e1.ast_runtime == true' \
+            'run.e1.ast_utilities == true' \
+            'run.e1.decoder_parity == true' \
+            'run.e1.decoder_watchdog == true' \
+            'run.e1.depth == true' \
+            'run.e1.parser_regressions == true' \
+            'run.e3.ast_runtime == true' \
             'run.e3.id_exhaustion == true' \
             'run.e3.wrong_owner_rejected == true' \
             'run.e3.stale_and_recycled_ids_rejected == true' \
@@ -225,6 +243,9 @@ jobs:
       - name: S05 closes on this runner's evidence
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S05
+      - name: S06 closes on this runner's evidence
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask check S06
       - name: Sprint S02 (informational until it closes)
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask check S02
@@ -240,4 +261,5 @@ jobs:
             docs/status.html
             status/evidence/
             target/s05-reports/
+            target/s06-reports/
           if-no-files-found: error

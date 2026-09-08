@@ -51,7 +51,7 @@ impl<'src> Scanner<'src> {
             } else {
                 let (digits, is_octal) = self.scan_digits();
                 if digits.is_empty() {
-                    fixed_part = TokenValue::Borrowed(b"0");
+                    fixed_part = TokenValue::Static(b"0");
                 } else if !is_octal {
                     self.state.token_flags |= flags::CONTAINS_LEADING_ZERO;
                     fixed_part = TokenValue::Borrowed(digits);

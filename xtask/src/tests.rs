@@ -312,6 +312,138 @@ fn s04_instrumentation_does_not_complete_s09_all_scenarios_item() {
     assert_eq!(num(&complete.metrics, "exp.E3.pass"), 1.0);
     assert_eq!(item_result(&complete), Some(true));
 }
+
+#[test]
+fn encoder_capture_routes_only_encoder_criteria_and_does_not_verify_decoder() {
+    let f = Fixture::new();
+    f.write(
+        "status/experiments.toml",
+        include_str!("../../status/experiments.toml"),
+    );
+    let ledger: Ledger = toml::from_str(include_str!("../../PORTS.toml")).unwrap();
+    let decoder = ledger
+        .file
+        .iter()
+        .find(|file| file.go == "tsc/internal/api/encoder/decoder.go")
+        .unwrap();
+    f.replace(
+        "PORTS.toml",
+        "verify = [\"run.proof.ok == true\"]",
+        &format!(
+            "verify = {}",
+            serde_json::to_string(&decoder.verify).unwrap()
+        ),
+    );
+    f.replace("status/runs.toml", "[proof]", "[e1]");
+    let mut measured = serde_json::json!({
+        "parity": 1, "frozen_denominator": true,
+        "encoder_success_error": true, "encoder_output_bytes": true
+    });
+    let capture = |metrics: &serde_json::Value| {
+        f.write(
+            "producer.py",
+            &format!(
+                "print({:?})\n",
+                serde_json::json!({"metrics": metrics}).to_string()
+            ),
+        );
+        assert!(evidence::run(&f.0, "e1", PIN).unwrap());
+        f.report()
+    };
+    f.manifest();
+    let encoded = capture(&measured);
+    assert!(encoded.errors.is_empty(), "{:?}", encoded.errors);
+    assert_eq!(
+        num(&encoded.metrics, "exp.E4.encoder_success_error.pass"),
+        1.0
+    );
+    assert_eq!(
+        num(&encoded.metrics, "exp.E4.encoder_output_bytes.pass"),
+        1.0
+    );
+    assert_eq!(num(&encoded.metrics, "exp.E4.pass"), 0.0);
+    assert_eq!(num(&encoded.metrics, "ledger.files_verified"), 0.0);
+    assert!(!encoded.metrics.contains_key("run.e4.diagnostics"));
+    assert!(!encoded.metrics.contains_key("run.e4.token_literal_bytes"));
+
+    measured["decoder_parity"] = false.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
+        0.0
+    );
+    measured["decoder_parity"] = true.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
+        0.0
+    );
+    measured["decoder_watchdog"] = false.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
+        0.0
+    );
+    measured["decoder_watchdog"] = true.into();
+    assert_eq!(
+        num(&capture(&measured).metrics, "ledger.files_verified"),
+        1.0
+    );
+}
+
+#[test]
+fn s06_requires_each_supplemental_result_even_when_primary_evidence_passes() {
+    let sprint: Sprint = toml::from_str(include_str!("../../sprints/S06.toml")).unwrap();
+    let mut metrics = Metrics::new();
+    // Isolate supplemental acceptance from unrelated prerequisite failures.
+    for check in sprint
+        .exit
+        .iter()
+        .chain(sprint.item.iter().flat_map(|i| &i.done_when))
+    {
+        let fields: Vec<_> = check.split_whitespace().collect();
+        let value = if fields[2] == "true" {
+            Metric::Bool(true)
+        } else {
+            Metric::Num(1.0)
+        };
+        metrics.insert(fields[0].to_owned(), value);
+    }
+    let passes = |checks: &[String], metrics: &Metrics| {
+        checks
+            .iter()
+            .all(|check| eval_check(metrics, check) == Some(true))
+    };
+    assert!(passes(&sprint.exit, &metrics));
+    for (metric, item_id) in [
+        ("run.e1.depth", "S06-2"),
+        ("run.e1.parser_regressions", "S06-2"),
+        ("run.e1.ast_runtime", "S06-3"),
+        ("run.e1.ast_utilities", "S06-3"),
+        ("run.e3.ast_runtime", "S06-3"),
+        ("run.e1.decoder_parity", "S06-4"),
+        ("run.e1.decoder_watchdog", "S06-4"),
+    ] {
+        let item = sprint.item.iter().find(|item| item.id == item_id).unwrap();
+        metrics.remove(metric);
+        assert!(
+            !passes(&sprint.exit, &metrics),
+            "missing {metric} closed S06"
+        );
+        assert!(
+            !passes(&item.done_when, &metrics),
+            "missing {metric} closed {item_id}"
+        );
+        metrics.insert(metric.into(), Metric::Bool(false));
+        assert!(
+            !passes(&sprint.exit, &metrics),
+            "failed {metric} closed S06"
+        );
+        assert!(
+            !passes(&item.done_when, &metrics),
+            "failed {metric} closed {item_id}"
+        );
+        metrics.insert(metric.into(), Metric::Bool(true));
+        assert!(passes(&sprint.exit, &metrics));
+    }
+}
 #[test]
 fn stale_sync_pin_and_missing_verification_checks_do_not_pass() {
     let f = Fixture::new();

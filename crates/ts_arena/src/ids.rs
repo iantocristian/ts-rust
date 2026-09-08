@@ -79,6 +79,7 @@ macro_rules! packed_id {
 }
 packed_id!(NodeId);
 packed_id!(SymbolId);
+packed_id!(AuxId);
 
 pub(crate) fn next_slot(len: usize) -> Result<u32, Error> {
     u32::try_from(len)

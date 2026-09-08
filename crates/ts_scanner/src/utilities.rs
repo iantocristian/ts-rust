@@ -36,7 +36,7 @@ pub(crate) fn is_white_space_single_line(ch: i32) -> bool {
     )
 }
 /// port: tsc/internal/stringutil/util.go:IsWhiteSpaceLike
-pub(crate) fn is_white_space_like(ch: i32) -> bool {
+pub fn is_white_space_like(ch: i32) -> bool {
     is_white_space_single_line(ch) || is_line_break(ch)
 }
 

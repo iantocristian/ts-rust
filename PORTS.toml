@@ -128,9 +128,9 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999"]
+status = "ported"
+rust = ["crates/ts_encoder/src/decoder.rs", "crates/ts_encoder/src/runtime_generated.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.decoder_parity == true", "run.e1.decoder_watchdog == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "00853925877c0c8dc2e2de0773eb6586689373784ce262e151c90c87676d1698"
 loc = 381
@@ -141,9 +141,9 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "generated"
-status = "in-progress"
-rust = ["crates/ts_encoder/src/generated.rs"]
-verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
+status = "ported"
+rust = ["crates/ts_encoder/src/decoder.rs", "crates/ts_encoder/src/generated.rs", "crates/ts_encoder/src/runtime_generated.rs"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999", "run.e1.decoder_parity == true", "run.e1.decoder_watchdog == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "13d3e8cfb0359cc5f727bb18d87857ca776ba005dd08a1a406a3f8541d34ef0d"
 loc = 1141
@@ -154,9 +154,9 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e4.encoder_output_bytes == true", "run.e4.encoder_success_error == true", "run.e1.parity >= 0.999"]
+status = "ported"
+rust = ["crates/ts_ast/src/node_index.rs", "crates/ts_encoder/src/encode.rs", "crates/ts_encoder/src/lib.rs", "crates/ts_encoder/src/runtime_generated.rs", "crates/ts_encoder/src/structured.rs"]
+verify = ["run.e1.encoder_output_bytes == true", "run.e1.encoder_success_error == true", "run.e1.parity >= 0.999"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e29cdff08715379d241f7bbb23c6e3126d172c00d5a0e36df2e1431b63ca92ad"
 loc = 935
@@ -167,9 +167,9 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "generated"
-status = "in-progress"
-rust = ["crates/ts_encoder/src/generated.rs"]
-verify = ["run.gen.drift == false", "run.e4.encoder_output_bytes == true"]
+status = "ported"
+rust = ["crates/ts_encoder/src/encode.rs", "crates/ts_encoder/src/generated.rs", "crates/ts_encoder/src/runtime_generated.rs"]
+verify = ["run.gen.drift == false", "run.e1.encoder_output_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "30debe2294133a12e47ddd5c247cf6b5494ddfa211ea32a1933be4cbdd82b644"
 loc = 707
@@ -180,9 +180,9 @@ package = "internal/api/encoder"
 crate = "ts_encoder"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e4.encoder_output_bytes == true", "run.e4.token_literal_bytes == true"]
+status = "ported"
+rust = ["crates/ts_encoder/src/string_table.rs"]
+verify = ["run.e1.encoder_output_bytes == true", "run.e4.token_literal_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "b0c88c7d3404caf12b5bb0a2103c19835cc9b664c5842633c07754032c7e5faf"
 loc = 68
@@ -271,9 +271,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e3.concurrent_lazy_storage == true", "run.e3.mapper_bundle_disposal == true"]
+status = "in-progress"
+rust = ["crates/ts_ast/src/clone.rs", "crates/ts_ast/src/factory.rs", "crates/ts_ast/src/node_accessors.rs", "crates/ts_ast/src/node_text.rs", "crates/ts_ast/src/source_file.rs", "crates/ts_ast/src/storage.rs", "crates/ts_ast/src/subtree_facts.rs", "crates/ts_ast/src/visitor.rs", "crates/ts_parser/src/lazy_jsdoc.rs", "crates/ts_parser/src/state.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e3.concurrent_lazy_storage == true", "run.e3.mapper_bundle_disposal == true", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "587805f5903d27e855ae68b4712f1d7b5652c8d57b46809aace802862a74f36b"
 loc = 3189
@@ -285,8 +285,8 @@ crate = "ts_ast"
 phase = 0
 kind = "generated"
 status = "in-progress"
-rust = ["crates/ts_ast/src/data_generated.rs", "crates/ts_ast/src/accessors_generated.rs", "crates/ts_ast/src/visitors_generated.rs"]
-verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
+rust = ["crates/ts_ast/src/accessors_generated.rs", "crates/ts_ast/src/data_generated.rs", "crates/ts_ast/src/factory_generated.rs", "crates/ts_ast/src/runtime_generated.rs", "crates/ts_ast/src/subtree_generated.rs", "crates/ts_ast/src/transform_generated.rs", "crates/ts_ast/src/visitors_generated.rs"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "3f230a3441c80d0fcef442a29a47890712fe9866ad74dac10e77dc7ce41c1967"
 loc = 10058
@@ -310,9 +310,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e3.builder_cache_retention == true"]
+status = "ported"
+rust = ["crates/ts_ast/src/clone.rs"]
+verify = ["run.e3.builder_cache_retention == true", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "7100eff959ac01d9cb285e832b3fe50cf19669bc68dc820ab14ad782be6d628f"
 loc = 86
@@ -323,10 +323,10 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_ast/src/diagnostic.rs"]
 # Future AST diagnostic integration: scanner callbacks do not provide this metric.
-verify = ["run.e1.parity >= 0.999", "run.e4.diagnostics == true"]
+verify = ["run.e1.parity >= 0.999", "run.e4.diagnostics == true", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e7a3a521d0991a4880220d8114be20c411ddb9645ae11d4e1673bf1ab9889f38"
 loc = 527
@@ -389,9 +389,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "generated"
-status = "planned"
-rust = []
-verify = ["run.gen.drift == false", "run.e1.parity >= 0.999"]
+status = "in-progress"
+rust = ["crates/ts_ast/src/node_kind.rs"]
+verify = ["run.gen.drift == false", "run.e1.parity >= 0.999", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "c3cdd3cdc865e44c3f6dbb45295556fb6321e5c555c7dfde7c652b2dbefc0a66"
 loc = 375
@@ -428,9 +428,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "in-progress"
+rust = ["crates/ts_parser/src/references.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "d9046ecd6fec852b543614c3b7e277b2dfd91804e739a624d9d2ce2397c7ec4f"
 loc = 149
@@ -454,9 +454,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e2.type_to_string_parity == 1"]
+status = "in-progress"
+rust = ["crates/ts_ast/src/precedence.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e2.type_to_string_parity == 1", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "94a5f9f3e4ce8ac9dc0c46d9253ffe4def40e90618ec226f4209b2e9d436aa7a"
 loc = 717
@@ -467,9 +467,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999"]
+status = "ported"
+rust = ["crates/ts_ast/src/subtree_facts.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "76dabb52846aea3686afc3d70b5f8daacf4de625f977187f2bb1c1adddaef911"
 loc = 133
@@ -519,9 +519,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.binder.parity == 1"]
+status = "in-progress"
+rust = ["crates/ts_ast/src/clone.rs", "crates/ts_ast/src/runtime_id.rs", "crates/ts_ast/src/subtree_facts.rs", "crates/ts_ast/src/utilities.rs", "crates/ts_ast/src/utilities_middle.rs", "crates/ts_ast/src/utilities_tail.rs", "crates/ts_ast/src/visitor.rs", "crates/ts_parser/src/expressions.rs", "crates/ts_parser/src/js_syntax.rs", "crates/ts_parser/src/jsx.rs", "crates/ts_parser/src/predicates.rs", "crates/ts_parser/src/references.rs", "crates/ts_parser/src/reparser.rs", "crates/ts_parser/src/source_text.rs"]
+verify = ["run.e1.parity >= 0.999", "run.binder.parity == 1", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "92efcd7eadfb9d348c30dd60a671f9481fa14ab3510a201e63ee72bf363b8a80"
 loc = 4631
@@ -532,9 +532,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999"]
+status = "ported"
+rust = ["crates/ts_ast/src/visitor.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.ast_runtime == true", "run.e3.ast_runtime == true", "run.e1.ast_utilities == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "6754fe0df4e97fd31fe665408b14cb1a30c542f71ecec5b3f29288da4f2a3795"
 loc = 278
@@ -4211,9 +4211,9 @@ package = "internal/parser"
 crate = "ts_parser"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "in-progress"
+rust = ["crates/ts_parser/src/jsdoc.rs", "crates/ts_parser/src/lazy_jsdoc.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e1.depth == true", "run.e1.parser_regressions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "02d23ecd8435148c3b69634739a75a1a5d9a1fcd5c683dcac131efe97699f51c"
 loc = 1355
@@ -4224,9 +4224,9 @@ package = "internal/parser"
 crate = "ts_parser"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "in-progress"
+rust = ["crates/ts_parser/src/access.rs", "crates/ts_parser/src/ambiguity.rs", "crates/ts_parser/src/bindings.rs", "crates/ts_parser/src/classes.rs", "crates/ts_parser/src/declarations.rs", "crates/ts_parser/src/diagnostics.rs", "crates/ts_parser/src/expressions.rs", "crates/ts_parser/src/identifiers.rs", "crates/ts_parser/src/imports.rs", "crates/ts_parser/src/js_syntax.rs", "crates/ts_parser/src/json.rs", "crates/ts_parser/src/jsx.rs", "crates/ts_parser/src/lists.rs", "crates/ts_parser/src/modifiers.rs", "crates/ts_parser/src/orchestration.rs", "crates/ts_parser/src/pragmas.rs", "crates/ts_parser/src/predicates.rs", "crates/ts_parser/src/primary.rs", "crates/ts_parser/src/signatures.rs", "crates/ts_parser/src/state.rs", "crates/ts_parser/src/statements.rs", "crates/ts_parser/src/tokens.rs", "crates/ts_parser/src/types.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e1.depth == true", "run.e1.parser_regressions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "1837634240986fc8342ce2d8b10212397b31b3c4af208a9bff3ba6cac853ac03"
 loc = 6854
@@ -4237,9 +4237,9 @@ package = "internal/parser"
 crate = "ts_parser"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "ported"
+rust = ["crates/ts_parser/src/references.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e1.depth == true", "run.e1.parser_regressions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "def5d5dc418fa3d9d868828a315ad6e24adfce60683d2cc818746e8a93e507d7"
 loc = 71
@@ -4250,9 +4250,9 @@ package = "internal/parser"
 crate = "ts_parser"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "ported"
+rust = ["crates/ts_parser/src/reparser.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e1.depth == true", "run.e1.parser_regressions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "59f3d5e33405ec35406480413e901787d0f204e7255a172f8e563a7bfefc468a"
 loc = 752
@@ -4276,9 +4276,9 @@ package = "internal/parser"
 crate = "ts_parser"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true"]
+status = "ported"
+rust = ["crates/ts_parser/src/jsdoc.rs", "crates/ts_parser/src/state.rs", "crates/ts_parser/src/tokens.rs"]
+verify = ["run.e1.parity >= 0.999", "run.e1.frozen_denominator == true", "run.e1.ast_runtime == true", "run.e1.depth == true", "run.e1.parser_regressions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "f2b4aed094eb84605ecec2c79a83633656de0937168b43cda462da6bffdd9a46"
 loc = 56

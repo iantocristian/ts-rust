@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "observation": {
+    "kind": "factory",
+    "fields": [
+      "label",
+      "ints",
+      "bools",
+      "strings"
+    ],
+    "nil_identity": 0,
+    "node_identity": "per-scenario allocation index; no global Go node IDs"
+  },
+  "cases": [
+    {
+      "scenario": "hooks-counts-update-clone",
+      "steps": [
+        "Factory with create/update/clone hooks. Create hook assigns allocation IDs, observes header/counts, sets all flags, and recursively creates Unknown once when constructing Identifier(\"x\").",
+        "Set identifier loc=(1,2), flags=3; create QuestionDot token and PropertyAccess(identifier,token,identifier,OptionalChain). Set access loc=(3,9), flags=7. Observe counts and header.",
+        "Update with identical edges; clone access. Update hook observes then changes original loc=(20,21); clone hook observes. Observe identity/locations/counts."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/hooks-counts-update-clone",
+        "primary": null,
+        "op": "factory",
+        "scenario": "hooks-counts-update-clone"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "raw-slice-same",
+      "steps": [
+        "Create Identifier(\"a\"), SyntaxList([a,nil]); update with original backing then copied backing.",
+        "Create SyntaxList(allocated empty); update with nil. Observe returned identity, counts, original nilness."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/raw-slice-same",
+        "primary": null,
+        "op": "factory",
+        "scenario": "raw-slice-same"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "visitor-nil-flatten-disable",
+      "steps": [
+        "Create a,c and SyntaxList([c,nil]); VisitSlice([nil,a,a,c]) with callback replacing a with SyntaxList, disabling Visit on callback3, otherwise identity. Observe calls/result nil indices/changed/nilness.",
+        "VisitSlice(nil) after Visit disabled; observe unchanged nil."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/visitor-nil-flatten-disable",
+        "primary": null,
+        "op": "factory",
+        "scenario": "visitor-nil-flatten-disable"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "visitor-lift-contracts",
+      "steps": [
+        "Identity visitor over SyntaxList([a]); VisitSlice([syntax]) and VisitNode(syntax).",
+        "VisitNode wrappers with zero children, singleton nil, and singleton nested SyntaxList; capture exact panic payload and nil return."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/visitor-lift-contracts",
+        "primary": null,
+        "op": "factory",
+        "scenario": "visitor-lift-contracts"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "visitor-role-hooks",
+      "steps": [
+        "Identity Visit plus VisitNode hook deleting nodes. VisitEmbeddedStatement(token) directly then VisitEachChild(While(expression,token)).",
+        "VisitEachChild(PropertyAccess(expression,token,expression)); observe token hook fallback separately from general node hook."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/visitor-role-hooks",
+        "primary": null,
+        "op": "factory",
+        "scenario": "visitor-role-hooks"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "deep-clone-locations-and-parents",
+      "steps": [
+        "Source factory creates child Identifier loc(1,6), list loc(0,7), Array loc(0,8); destination factory DeepCloneNode; observe identities/all locations/trailing comma/parent.",
+        "Destination DeepCloneReparse(source array); observe retained source positions/parent/REPARSED.",
+        "DeepCloneNode(Array(NewNodeList(nil))) observes distinct empty list header and preserved nil backing."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/deep-clone-locations-and-parents",
+        "primary": null,
+        "op": "factory",
+        "scenario": "deep-clone-locations-and-parents"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "subtree-cache-and-exclusions",
+      "steps": [
+        "ComputedPropertyName(This) facts, mutate expression to Identifier, facts again; Clone and observe fresh facts.",
+        "Await(This) inside FunctionExpression and ArrowFunction, then inside ComputedPropertyName; observe own and propagated scope facts.",
+        "Malformed CallExpression(nil) as erased VariableDeclaration type: observe TS without traversing malformed call, then capture direct call facts panic. Compare the narrow nil-dereference failure class; retain the full panic payload in stderr."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/subtree-cache-and-exclusions",
+        "primary": null,
+        "op": "factory",
+        "scenario": "subtree-cache-and-exclusions"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "token-subtree-and-precedence",
+      "steps": [
+        "For raw kinds -32768,-1, every kind0 through KindCount inclusive,32767: NewToken(raw), SubtreeFacts, GetBinaryOperatorPrecedence. Observe raw/facts/precedence in order."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/token-subtree-and-precedence",
+        "primary": null,
+        "op": "factory",
+        "scenario": "token-subtree-and-precedence"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "source-file-clone-omissions",
+      "steps": [
+        "NewSourceFile(/fixture.ts,text hex78ff,nil,EOF); set loc(0,2),flags7,ScriptKindTS,IdentifierCount3,NodeCount7,TextCount11,Hash(Hi13,Lo17),CheckJsDirective true,ExternalModuleIndicator self,HasLazyJSDoc true.",
+        "Before Clone, set shared EOF HasJSDoc flag and seed only the original source-file cache for EOF with a newly allocated Unknown token. After Clone, observe EagerJSDoc lengths and exact cached-node identity for original versus cloned logical SourceFile.",
+        "Same-edge UpdateSourceFile then Clone. Observe copied and omitted source fields, exact text bytes, path and EOF identity."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/source-file-clone-omissions",
+        "primary": null,
+        "op": "factory",
+        "scenario": "source-file-clone-omissions"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "source-cache-panic-once",
+      "steps": [
+        "NewSourceFile(/cache.ts), NewSourceFileDataKey[*int]; first GetOrComputeSourceFileData increments counter and panics \"source initializer failed\". Capture payload locally.",
+        "Second GetOrComputeSourceFileData would increment and return pointer7; observe nil result and unchanged callcount from Go sync.Once panic semantics."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/source-cache-panic-once",
+        "primary": null,
+        "op": "factory",
+        "scenario": "source-cache-panic-once"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "node-index-nil-after-sort",
+      "steps": [
+        "Allocate Unknown tokens a,b,c without assigning Go semantic node IDs. NodeIndexTable.Nodes=[nil,a,b,a,c,nil].",
+        "Call GetIndex(nil), catch only actual pinned nil-dereference panic and retain raw reason in stderr. Then observe relative GetNodeId ordering (a<b,a<c,b<c) and GetIndex(a),GetIndex(b),GetIndex(c).",
+        "Allocate absent Unknown d after this lookup; GetIndex(d)=actual result. The first nil query must initialize sort before dereferencing its nil argument."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/node-index-nil-after-sort",
+        "primary": null,
+        "op": "factory",
+        "scenario": "node-index-nil-after-sort"
+      },
+      "stages": [
+        "factory"
+      ]
+    },
+    {
+      "scenario": "source-file-hooks",
+      "steps": [
+        "Install SourceFile create/update/clone hooks. Observe phase, ScriptKind, IdentifierCount/NodeCount/TextCount, hash Hi/Lo, diagnostic count, flags/pos/end, factory counts and filename/text hex at each hook.",
+        "On each SourceFile create, observe initialized name/text and zero parser metadata before mutation. Set ScriptKind=JSX, identifierCount=phase*100, nodeCount=phase*10, textCount=phase*20, hash=(phase,phase+1), and one external diagnostic (nil file, zero range, source/message hook, category1, code42). If original exists, change its ScriptKind=phase*2 and IdentifierCount=999.",
+        "NewSourceFile(/hooks.ts, raw source followed by byte ff, nil statements/eof); set original flags7, loc(4,9), ScriptKindJS. Clone original, then create EndOfFile token and UpdateSourceFile(original,nil,eof).",
+        "Observe original, clone and update final metadata. copyFrom sees original mutations made during OnCreate; omitted counts/hash/diagnostics preserve new-node hook assignments. All metadata reads/mutations use real source factory/SourceFile APIs."
+      ],
+      "request": {
+        "version": 1,
+        "id": "factory/source-file-hooks",
+        "primary": null,
+        "op": "factory",
+        "scenario": "source-file-hooks"
+      },
+      "stages": [
+        "factory"
+      ]
+    }
+  ]
+}

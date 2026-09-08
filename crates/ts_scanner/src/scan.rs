@@ -148,7 +148,7 @@ impl Scanner<'_> {
                         let mut digits = self.scan_hex_digits(1, true, true);
                         if digits.as_bytes().is_empty() {
                             self.error(diagnostics::Hexadecimal_digit_expected);
-                            digits = TokenValue::Borrowed(b"0");
+                            digits = TokenValue::Static(b"0");
                         }
                         if let Some(value) = self.hex_number_cache.get(digits.as_bytes()) {
                             self.state.token_value = value.clone();
@@ -245,7 +245,7 @@ impl Scanner<'_> {
                             1,
                             vec![],
                         );
-                        self.state.token_value = TokenValue::Borrowed(b"#");
+                        self.state.token_value = TokenValue::Static(b"#");
                     }
                     return self.take_token(K::PrivateIdentifier, 0);
                 }

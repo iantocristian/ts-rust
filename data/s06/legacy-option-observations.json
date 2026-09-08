@@ -1,0 +1,132 @@
+{
+  "observations": [
+    {
+      "arguments": [
+        "--module",
+        "none"
+      ],
+      "diagnostics": [
+        {
+          "code": 6046,
+          "message": "Argument for '--module' option must be: 'commonjs', 'es6', 'es2015', 'es2020', 'es2022', 'esnext', 'node16', 'node18', 'node20', 'nodenext', 'preserve'."
+        }
+      ],
+      "emit_module": 7,
+      "module": 0,
+      "module_detection": 1,
+      "parse_options": {
+        "/.src/index.d.ts": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.js": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.ts": {
+          "Force": false,
+          "JSX": false
+        }
+      },
+      "target": 0
+    },
+    {
+      "arguments": [
+        "--module",
+        "none",
+        "--target",
+        "es5"
+      ],
+      "diagnostics": [
+        {
+          "code": 6046,
+          "message": "Argument for '--module' option must be: 'commonjs', 'es6', 'es2015', 'es2020', 'es2022', 'esnext', 'node16', 'node18', 'node20', 'nodenext', 'preserve'."
+        }
+      ],
+      "emit_module": 1,
+      "module": 0,
+      "module_detection": 1,
+      "parse_options": {
+        "/.src/index.d.ts": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.js": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.ts": {
+          "Force": false,
+          "JSX": false
+        }
+      },
+      "target": 1
+    },
+    {
+      "arguments": [
+        "--module",
+        "none",
+        "--target",
+        "es2015"
+      ],
+      "diagnostics": [
+        {
+          "code": 6046,
+          "message": "Argument for '--module' option must be: 'commonjs', 'es6', 'es2015', 'es2020', 'es2022', 'esnext', 'node16', 'node18', 'node20', 'nodenext', 'preserve'."
+        }
+      ],
+      "emit_module": 5,
+      "module": 0,
+      "module_detection": 1,
+      "parse_options": {
+        "/.src/index.d.ts": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.js": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.ts": {
+          "Force": false,
+          "JSX": false
+        }
+      },
+      "target": 2
+    },
+    {
+      "arguments": [
+        "--module",
+        "none",
+        "--target",
+        "es2020"
+      ],
+      "diagnostics": [
+        {
+          "code": 6046,
+          "message": "Argument for '--module' option must be: 'commonjs', 'es6', 'es2015', 'es2020', 'es2022', 'esnext', 'node16', 'node18', 'node20', 'nodenext', 'preserve'."
+        }
+      ],
+      "emit_module": 6,
+      "module": 0,
+      "module_detection": 1,
+      "parse_options": {
+        "/.src/index.d.ts": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.js": {
+          "Force": false,
+          "JSX": false
+        },
+        "/.src/index.ts": {
+          "Force": false,
+          "JSX": false
+        }
+      },
+      "target": 7
+    }
+  ],
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "version": 1
+}
