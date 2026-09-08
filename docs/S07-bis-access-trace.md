@@ -2,7 +2,8 @@
 
 Date: 2026-09-08. This replaces the small fixture as the **performance driver**
 of the next node-layout comparison. Small fixtures remain semantic regressions.
-No trace capture or layout timing is claimed by this plan.
+The [first capture results](S07-bis-access-trace-results.md) now establish the
+scoped observation milestone below. Layout timing remains pending.
 
 Implementation boundary for the first recorder: freeze the accepted CP1 bundle
 (`3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931`),
