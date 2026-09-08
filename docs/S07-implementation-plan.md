@@ -1,8 +1,8 @@
 # S07 implementation plan
 
 Prepared 8 September 2026. This plan is stacked on S06 PR #10 and follows
-[S07](../sprints/S07.toml), the [personal working guide](CODEX-RUST-GUIDELINES.md),
-[PLAN §13](../PLAN.md#13-open-questions-and-pending-technical-decisions), and accepted ADRs
+[S07](../sprints/S07.toml), [PLAN §13](../PLAN.md#13-open-questions-and-pending-technical-decisions),
+and accepted ADRs
 [0006](adr/0006-node-ownership--arenas--lazy-file-storage--bundles-and-check.md),
 [0007](adr/0007-symbol-ownership--file-owned-binding--checker-local-merges.md),
 [0009](adr/0009-concurrency-model-kept-from-corsa.md),

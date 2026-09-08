@@ -9,9 +9,8 @@ proposed decisions and measured implementation results.
 
 ## 1. Acceptance, scope and source inventory
 
-Follow [the personal Rust guide](CODEX-RUST-GUIDELINES.md), the accepted
-[ownership](design/ownership.md) and [text](design/text.md) contracts, and ADRs
-0006, 0010–0018. The pinned functions and their callers determine behavior;
+Follow the accepted [ownership](design/ownership.md) and [text](design/text.md)
+contracts and ADRs 0006, 0010–0018. The pinned functions and their callers determine behavior;
 comments and protocol diagrams must be checked against executable code.
 
 | S06 requirement | Deliverable and acceptance |
