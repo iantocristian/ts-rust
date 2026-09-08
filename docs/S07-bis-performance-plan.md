@@ -505,7 +505,11 @@ public-ID resolution with an already resolved owner borrow in a bounded access
 diagnostic. Keep safe bounds checks; validate imported/foreign/stale identities
 at the boundary. Establish which proofs survive real recursive binder calls and
 narrow writes before treating fewer checks in a synthetic sweep as an available
-production optimization. Preserve both recorded list captures as controls.
+production optimization. Preserve both recorded list captures as controls. The
+bounded [CP1 implementation record](S07-bis-CP1.md) fixes the access comparison,
+charges cached slice metadata, and separately tests a checked exclusive-core
+node lookup. It requires a measured pipeline win for that leaf shortcut; the
+infrastructure exception below does not apply to it.
 
 1. Introduce the borrowed facade in `ts_ast::storage`/`node_accessors`; change
    generated accessors and factory mutations at their emitter in
