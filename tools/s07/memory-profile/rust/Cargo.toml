@@ -1,0 +1,37 @@
+[package]
+name = "ts_memory_profile"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.96"
+publish = false
+
+# Diagnostic tool: the production workspace and its acceptance binary stay intact.
+
+[features]
+sites = []
+
+[dependencies]
+cap = { version = "=0.1.2", features = ["stats"] }
+mimalloc = "=0.1.48"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+ts_ast = { path = "../../crates/ts_ast", version = "0.1.0" }
+ts_core = { path = "../../crates/ts_core", version = "0.1.0" }
+ts_jsstring = { path = "../../crates/ts_jsstring", version = "0.1.0" }
+ts_parser = { path = "../../crates/ts_parser", version = "0.1.0" }
+ts_binder = { path = "../../crates/ts_binder", version = "0.1.0" }
+
+[profile.release]
+opt-level = 3
+debug = 2
+debug-assertions = false
+overflow-checks = false
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+strip = "none"
+split-debuginfo = "packed"
+
+[lints.rust]
+unsafe_code = "forbid"

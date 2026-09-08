@@ -99,3 +99,30 @@ nor the sampled `madvise` location is reported as lock waiting or GC by itself.
 Analyzer countertests and an independent real-trace accounting review pass.
 Reproducible targeted exports are archived with provenance; native traces stay
 local. Production code and E5/E6 evidence remain unchanged, and S07-4 stays open.
+
+
+## Comparative memory diagnosis
+
+The [memory report](S07-memory-profile.md) records twelve paired native diagnostic
+runs and six calibrated Rust source-scope runs. All eighteen match the frozen
+work and leave compiler sources and acceptance evidence unchanged. Retained
+censuses, exact runtime counters, Go sampled allocation stacks and OS RSS/VM
+snapshots have separate denominators; Go's parser-allocated binding fields are
+explicitly distinguished from Rust's later side tables.
+
+Independent reviews fixed stale-stage/configuration provenance, permissive
+completion records, missing scope-artifact validation, and a cold macOS mutex
+allocation that contaminated enclosing source scopes. The fixed-request probe
+then matched exact nested and eight-thread counts. The Go observer caches
+reflection field paths after its original inspection cost was measured;
+inspection still runs after retained snapshots and its retirement RSS effects
+remain explicit.
+
+The final accounting review reconciled category totals, 79.24% approximate
+allocation-origin share, map/slot capacities and instrumentation perturbation
+against all captured records. Validation passes 29 Python tests, three Go
+census tests, four Rust census tests and the release allocation-scope probe.
+The archive preserves all 470 raw/provenance/analysis files and exact staged
+patches with hashes. Independent replay reproduces all eighteen run summaries
+and all ninety native Go exports exactly. S07-4 and the existing E5/E6 failures
+remain open.
