@@ -131,7 +131,7 @@ pub struct SourceFileState {
     pub check_js_directive: Option<CheckJsDirective>,
     pub node_count: i64,
     pub text_count: i64,
-    pub common_js_module_indicator: Option<NodeId>,
+    common_js_module_indicator: Option<NodeId>,
     pub external_module_indicator: Option<NodeId>,
     pub diagnostics: Vec<Diagnostic>,
     pub js_diagnostics: Vec<Diagnostic>,
@@ -139,10 +139,16 @@ pub struct SourceFileState {
     pub hash: SourceHash,
     content_mapper_info: Option<ContentMapperSourceFileInfo>,
     position_map: OnceLock<PositionMap>,
+    ecma_line_map: OnceLock<Vec<i32>>,
     node_index: crate::source_cache::SourceNodeIndexCache,
+    pub(crate) binding: crate::bind_result::BindCell,
 }
 
 impl SourceFileState {
+    pub fn common_js_module_indicator(&self) -> Option<NodeId> {
+        self.common_js_module_indicator
+    }
+
     pub fn new(parse_options: SourceFileParseOptions, text: SourceText) -> Self {
         Self {
             parse_options,
@@ -173,7 +179,9 @@ impl SourceFileState {
             hash: SourceHash::default(),
             content_mapper_info: None,
             position_map: OnceLock::new(),
+            ecma_line_map: OnceLock::new(),
             node_index: crate::source_cache::SourceNodeIndexCache::default(),
+            binding: crate::bind_result::BindCell::default(),
         }
     }
 
@@ -189,6 +197,11 @@ impl SourceFileState {
     pub fn position_map(&self) -> &PositionMap {
         self.position_map
             .get_or_init(|| PositionMap::new(self.text.as_bytes()))
+    }
+    /// port: tsc/internal/ast/ast.go:SourceFile.ECMALineMap
+    pub fn ecma_line_map(&self) -> &[i32] {
+        self.ecma_line_map
+            .get_or_init(|| ts_jsstring::line_map::compute_ecma_line_starts(self.text.as_bytes()))
     }
     /// port: tsc/internal/ast/ast.go:SourceFile.ParseOptions
     pub fn parse_options(&self) -> &SourceFileParseOptions {
@@ -444,6 +457,45 @@ impl Deref for SourceFileRead<'_> {
     }
 }
 impl<'a> SourceFileRead<'a> {
+    /// Borrow immutable parse metadata for the complete retained view lifetime.
+    pub fn parse_options(&self) -> &'a SourceFileParseOptions {
+        self.state_ref().parse_options()
+    }
+    /// Borrow the file name without retaining another owner or copying bytes.
+    pub fn file_name(&self) -> &'a [u8] {
+        self.state_ref().parse_options().file_name.as_bytes()
+    }
+    pub(crate) fn state_ref(&self) -> &'a SourceFileState {
+        match self
+            .record
+            .as_borrowed()
+            .expect("source-file states are published core records")
+        {
+            AstStorageData::SourceFiles(files) => &files[&self.node],
+            _ => unreachable!("validated source-file frame"),
+        }
+    }
+    pub fn common_js_module_indicator(&self) -> Option<NodeId> {
+        self.view
+            .1
+            .filter(|result| result.source() == self.node)
+            .map_or(self.state_ref().common_js_module_indicator, |result| {
+                result.common_js_module_indicator
+            })
+    }
+    pub fn bind_diagnostics(&self) -> &[Diagnostic] {
+        self.view
+            .1
+            .filter(|result| result.source() == self.node)
+            .map_or(&[], |result| result.diagnostics())
+    }
+
+    fn factory_copy(&self) -> SourceFileCopy {
+        let mut copy = self.state_ref().factory_copy();
+        copy.common_js_module_indicator = self.common_js_module_indicator();
+        copy
+    }
+
     /// port: tsc/internal/ast/ast.go:SourceFile.OriginalFileName
     pub fn original_file_name(&self) -> Result<OriginalFileName<'a>, Error> {
         let id = self.canonical_source_file().unwrap_or(self.node);
@@ -523,15 +575,27 @@ impl std::fmt::Debug for SourceFileRead<'_> {
 impl<'a> AstView<'a> {
     pub fn source_file(self, node: NodeId) -> Result<SourceFileRead<'a>, Error> {
         let owner = self.for_node_owner(node)?;
-        let owner = AstView(owner.0.owner_retention()?);
+        let owner = AstView(owner.0.owner_retention()?, self.1);
         let map = owner.file_info().source_files.ok_or(Error::InvalidGraph)?;
         let record = owner.0.aux(map)?;
-        match &*record {
-            AstStorageData::SourceFiles(files) if files.contains_key(&node) => Ok(SourceFileRead {
-                record,
-                node,
-                view: owner,
-            }),
+        match record
+            .as_borrowed()
+            .expect("source maps are published core records")
+        {
+            AstStorageData::SourceFiles(files) if files.contains_key(&node) => {
+                let result = self.1.and_then(|active| {
+                    if active.source() == node {
+                        Some(active)
+                    } else {
+                        files[&node].binding.result()
+                    }
+                });
+                Ok(SourceFileRead {
+                    record,
+                    node,
+                    view: AstView(owner.0, result),
+                })
+            }
             _ => Err(Error::InvalidGraph),
         }
     }
@@ -612,7 +676,9 @@ impl AstBuilder {
     /// port: tsc/internal/ast/ast.go:SourceFile.Clone
     pub fn clone_source_file(&mut self, original: NodeId) -> NodeId {
         let (options, text, data) = {
-            let view = self.view();
+            let view = self
+                .factory_view(original)
+                .expect("original source file belongs to factory");
             let node = view
                 .node(original)
                 .expect("original source file belongs to factory");
@@ -630,7 +696,8 @@ impl AstBuilder {
         };
         let updated = self.new_source_file(options, text, data.statements, data.end_of_file_token);
         let state = self
-            .view()
+            .factory_view(original)
+            .expect("original source file belongs to factory")
             .source_file(original)
             .expect("original metadata after OnCreate")
             .factory_copy();
@@ -648,7 +715,9 @@ impl AstBuilder {
         end_of_file_token: Option<NodeId>,
     ) -> NodeId {
         let (options, text) = {
-            let view = self.view();
+            let view = self
+                .factory_view(original)
+                .expect("original source file belongs to factory");
             let node = view
                 .node(original)
                 .expect("original source file belongs to factory");
@@ -665,7 +734,8 @@ impl AstBuilder {
         };
         let updated = self.new_source_file(options, text, statements, end_of_file_token);
         let state = self
-            .view()
+            .factory_view(original)
+            .expect("original source file belongs to factory")
             .source_file(original)
             .expect("original metadata after OnCreate")
             .factory_copy();
@@ -673,5 +743,34 @@ impl AstBuilder {
             .expect("new source metadata")
             .copy_parser_fields(state);
         self.finish_update(updated, original)
+    }
+}
+
+#[cfg(test)]
+mod ecma_line_cache_tests {
+    use super::*;
+
+    #[test]
+    fn cache_is_lazy_stable_and_factory_copies_start_empty() {
+        let text = SourceText::from_loaded_bytes(b"a\r\nb\xe2\x80\xa8\xff".as_slice());
+        let original = SourceFileState::new(SourceFileParseOptions::default(), text.clone());
+        assert!(original.ecma_line_map.get().is_none());
+        assert_eq!(original.ecma_line_map(), &[0, 3, 7]);
+        assert!(std::ptr::eq(
+            original.ecma_line_map(),
+            original.ecma_line_map()
+        ));
+        let mut copy = SourceFileState::new(SourceFileParseOptions::default(), text);
+        copy.copy_parser_fields(original.factory_copy());
+        assert!(copy.ecma_line_map.get().is_none());
+        assert_eq!(copy.ecma_line_map(), original.ecma_line_map());
+        assert!(!std::ptr::eq(
+            copy.ecma_line_map(),
+            original.ecma_line_map()
+        ));
+        let empty = SourceFileState::new(SourceFileParseOptions::default(), SourceText::default());
+        assert!(empty.ecma_line_map.get().is_none());
+        assert_eq!(empty.ecma_line_map(), &[0]);
+        assert!(std::ptr::eq(empty.ecma_line_map(), empty.ecma_line_map()));
     }
 }

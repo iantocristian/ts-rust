@@ -370,8 +370,10 @@ fn record_source_file(
             )
         })
         .collect::<Result<Vec<_>, _>>()?;
-    let supplements =
-        structured::strings(supplemental.iter().map(|file| file.file_name()), structured);
+    let supplements = structured::strings(
+        supplemental.iter().map(ts_ast::SourceFileRead::file_name),
+        structured,
+    );
     let canonical = state
         .canonical_source_file()
         .map(|id| view.source_file(id))

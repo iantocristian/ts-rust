@@ -392,6 +392,10 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn metadata(self) -> Option<AuxId> {
         self.owner.metadata
     }
+    pub fn counters(self) -> &'a Counters {
+        self.owner.core.counters()
+    }
+
     pub fn source(self) -> &'a SourceText {
         self.owner.source_text()
     }

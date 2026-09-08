@@ -72,7 +72,7 @@ impl NodeIndexCache {
                     sorted.push(index as u32);
                 }
             }
-            crate::node_index_sort::sort(&mut sorted, &mut |&left, &right| {
+            ts_core::sort_like_go(&mut sorted, &mut |&left, &right| {
                 let left = self.nodes[left as usize].expect("sorted table excludes nil");
                 let right = self.nodes[right as usize].expect("sorted table excludes nil");
                 let left =

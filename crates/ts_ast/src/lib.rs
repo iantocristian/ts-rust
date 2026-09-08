@@ -4,9 +4,18 @@
 //! node and list edges; an owning tree supplies list resolution and recursion.
 
 mod accessors_generated;
+mod bind_result;
+mod flow;
+pub mod symbol_flags;
+mod symbols;
+pub use flow::*;
+pub use symbols::*;
+mod binder_helpers;
+pub use binder_helpers::*;
 mod clone;
 mod data_generated;
 mod diagnostic;
+mod diagnostic_order;
 mod factory;
 mod factory_generated;
 mod jsdoc;
@@ -16,8 +25,8 @@ pub mod modifier_flags;
 mod node_accessors;
 pub mod node_flags;
 mod node_index;
-mod node_index_sort;
 mod node_kind;
+mod node_map;
 mod node_text;
 mod precedence;
 mod runtime_generated;
@@ -32,12 +41,19 @@ mod transform_generated;
 mod visitor;
 mod visitors_generated;
 
+pub use bind_result::{
+    BindBuilder, BindError, BindResult, BoundFile, BoundView, NodeBinding, PatternAmbientModule,
+    RetainedBoundNode, RetainedSymbol,
+};
 pub use clone::{
     clone_node, deep_clone_node, deep_clone_reparse, deep_clone_reparse_modifiers,
     set_parent_in_children,
 };
 pub use data_generated::*;
 pub use diagnostic::Diagnostic;
+pub use diagnostic_order::{
+    compare_diagnostics, equal_diagnostics, equal_diagnostics_no_related_info,
+};
 pub use factory::{BorrowedFactory, Factory, FactoryHooks};
 pub use factory_generated::FactoryMethods;
 pub use jsdoc::{EagerJsDocProvider, JsDocProvider};
@@ -51,7 +67,7 @@ pub use node_kind::NodeKind;
 pub use node_text::NodeText;
 pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;
-pub use runtime_id::runtime_node_id;
+pub use runtime_id::{existing_runtime_node_id, runtime_node_id};
 pub use source_file::*;
 pub use storage::{
     AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile, RetainedNode,
@@ -145,6 +161,14 @@ impl Node {
             subtree_facts: AtomicU32::new(0),
             runtime_id: AtomicU64::new(0),
         })
+    }
+    pub(crate) fn copy_for_binding(&self) -> Self {
+        let mut copy = self.clone();
+        // Both representations name one logical node. Materialize identity on
+        // the canonical parsed record before copying it into the sparse overlay.
+        copy.runtime_id = AtomicU64::new(runtime_node_id(self));
+        copy.subtree_facts = AtomicU32::new(self.cached_subtree_facts());
+        copy
     }
     pub fn kind(&self) -> NodeKind {
         self.kind
@@ -247,6 +271,8 @@ pub struct DeferredField {
     pub owner: &'static str,
 }
 
+#[cfg(test)]
+mod bind_tests;
 #[cfg(test)]
 mod storage_tests;
 #[cfg(test)]

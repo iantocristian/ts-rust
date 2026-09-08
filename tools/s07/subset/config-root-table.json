@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "source": "actual ParsedCommandLine.Raw top-level keys from the entire pinned corpus",
+  "rows": [
+    {
+      "key": "compileOnSave",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Retain editor emit request metadata; no emit executes in this phase."
+    },
+    {
+      "key": "compilerOptions",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Apply source config options and retain diagnostics."
+    },
+    {
+      "key": "contentMappers",
+      "disposition": "allow",
+      "family": "content_mapper_execution",
+      "reason": "Reject actual configured mapper execution through the explicit value predicate."
+    },
+    {
+      "key": "extends",
+      "disposition": "allow",
+      "family": "config_inheritance",
+      "reason": "Load and merge inherited configs through original source functions."
+    },
+    {
+      "key": "files",
+      "disposition": "allow",
+      "family": "config_file_selection",
+      "reason": "Preserve exact config root order and missing-file diagnostics."
+    },
+    {
+      "key": "include",
+      "disposition": "allow",
+      "family": "config_file_selection",
+      "reason": "Preserve config include matching and ordered root selection."
+    }
+  ]
+}

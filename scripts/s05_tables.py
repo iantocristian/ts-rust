@@ -89,7 +89,6 @@ def render(tables, pin):
         out.append("];")
     integers("IDENTIFIER_START", tables["identifier"]["start"], 3)
     integers("IDENTIFIER_PART", tables["identifier"]["part"], 3)
-    integers("SIMPLE_FOLD", tables["simple_fold"], 2)
     scanner = tables["scanner"]
     mapping("KEYWORDS", scanner["keywords"], True)
     mapping("TOKENS", scanner["tokens"], True)
@@ -102,11 +101,22 @@ def render(tables, pin):
     return command(["rustfmt", "--edition", str(edition)], cwd=ROOT, data=("\n".join(out)+"\n").encode())
 
 
+def render_fold(tables, pin):
+    validate_tables(tables)
+    out = ["// Generated from pinned Go unicode.SimpleFold. Do not edit.",
+           f"// Upstream {pin}; Go Unicode {tables['go_unicode_version']}.",
+           "pub(crate) const SIMPLE_FOLD: &[(u32, u32)] = &["]
+    out.extend(f"({a:_}, {b:_})," for a,b in tables["simple_fold"])
+    out.append("];")
+    edition = tomllib.loads((ROOT / "Cargo.toml").read_text())["workspace"]["package"]["edition"]
+    return command(["rustfmt", "--edition", str(edition)], cwd=ROOT, data=("\n".join(out)+"\n").encode())
+
+
 def update(tables, write=False):
     pin = strict_json_loads((ROOT / "data/upstream.json").read_bytes())["pin"]
     raw = (json.dumps(tables, sort_keys=True, indent=2)+"\n").encode()
     generated = render(tables, pin)
-    outputs = {"data/s05/tables.json": raw, "crates/ts_scanner/src/tables_generated.rs": generated}
+    outputs = {"data/s05/tables.json": raw, "crates/ts_scanner/src/tables_generated.rs": generated, "crates/ts_jsstring/src/go_fold_generated.rs": render_fold(tables, pin)}
     manifest = {"version": 1, "upstream_pin": pin,
                 "go_unicode_version": tables["go_unicode_version"], "identifier_unicode_version": "15.1.0",
                 "inputs": {path: hashlib.sha256((ROOT / "upstream" / path).read_bytes()).hexdigest() for path in INPUTS},

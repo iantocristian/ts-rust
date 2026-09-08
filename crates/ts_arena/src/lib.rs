@@ -8,9 +8,12 @@ mod counters;
 mod error;
 mod file;
 mod ids;
+mod initialization;
 mod lazy;
 mod lease;
 mod node;
+mod node_slots;
+mod owned;
 mod refs;
 mod scope;
 mod scratch;
@@ -20,9 +23,12 @@ pub use counters::{Counters, Counts};
 pub use error::Error;
 pub use file::{StorageBuilder, StorageOwner, StorageView};
 pub use ids::{ArenaId, AuxId, FileId, NodeId, SymbolId};
+pub use initialization::{InitializationDomain, InitializationGuard};
 pub use lazy::{StorageTransaction, TokenKey};
 pub use lease::{CheckerIdentity, CheckerLease, Generation};
 pub use node::{Node, NodeRecord};
+pub use node_slots::NodeSlots;
+pub use owned::{OwnedArena, SymbolArena};
 pub use refs::{
     CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead, StorageSymbolRef,
 };

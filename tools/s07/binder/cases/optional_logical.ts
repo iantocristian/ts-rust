@@ -1,0 +1,1 @@
+let x; a?.[x=1]?.b(); x &&= y; x ||= z; x ??= a?.b; x && (x=2) || f(x); x ? (x=3) : f(x); (assert(x), assert.ok(x)); delete a.b; a.push(x);

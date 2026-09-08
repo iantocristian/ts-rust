@@ -1,0 +1,672 @@
+{
+  "version": 1,
+  "source": "tsc/internal/testutil/harnessutil/harnessutil.go:291",
+  "rows": [
+    {
+      "key": "allowarbitraryextensions",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "allowimportingtsextensions",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "allowjs",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "allowsyntheticdefaultimports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "allowumdglobalaccess",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "allowunreachablecode",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "allowunusedlabels",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "alwaysstrict",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "baseurl",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "capturesuggestions",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "checkjs",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "composite",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "currentdirectory",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "customconditions",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "declaration",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "declarationdir",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "declarationmap",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "deduplicatepackages",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "downleveliteration",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "emitbom",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "emitdeclarationonly",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "emitdecoratormetadata",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "erasablesyntaxonly",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "esmoduleinterop",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "exactoptionalpropertytypes",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "experimentaldecorators",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "filename",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "fullemitpaths",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "ignoredeprecations",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "importhelpers",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "importsnotusedasvalues",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "incremental",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "inlinesourcemap",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "inlinesources",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "isolateddeclarations",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "isolatedmodules",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "jsx",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "jsxfactory",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "jsxfragmentfactory",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "jsximportsource",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "keyofstringsonly",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "lib",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "libreplacement",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "link",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "listfilesonly",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "maproot",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "maxnodemodulejsdepth",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "module",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "moduledetection",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "moduleresolution",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "newline",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "nocheck",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noemit",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "noemithelpers",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "noemitonerror",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "noerrortruncation",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "nofallthroughcasesinswitch",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noimplicitany",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noimplicitoverride",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noimplicitreferences",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "noimplicitreturns",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noimplicitthis",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noimplicitusestrict",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "nolib",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "nopropertyaccessfromindexsignature",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noresolve",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "nostrictgenericchecks",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "notypesandsymbols",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "nouncheckedindexedaccess",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "nouncheckedsideeffectimports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "nounusedlocals",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "nounusedparameters",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "outdir",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "preserveconstenums",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "preservesymlinks",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "preservevalueimports",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "pretty",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "reactnamespace",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "removecomments",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "resolvejsonmodule",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "resolvepackagejsonexports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "resolvepackagejsonimports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "rewriterelativeimportextensions",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "rootdir",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "runexternalcode",
+      "disposition": "allow",
+      "family": "content_mapper_execution",
+      "reason": "Reject variants whose effective runExternalCode is true and which configure content mappers."
+    },
+    {
+      "key": "skipdefaultlibcheck",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "skiplibcheck",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "sourcemap",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "sourceroot",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "stabletypeordering",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "strict",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictbindcallapply",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictbuiltiniteratorreturn",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictfunctiontypes",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictnullchecks",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictpropertyinitialization",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "stripinternal",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "suppressexcesspropertyerrors",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "suppressimplicitanyindexerrors",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Keep native option rejection and its diagnostic; never convert to a successful configuration."
+    },
+    {
+      "key": "suppressoutputpathcheck",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "symlink",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "target",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "traceresolution",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "tsbuildinfofile",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "typeroots",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "types",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "typescriptversion",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "usecasesensitivefilenames",
+      "disposition": "allow",
+      "family": "virtual_host",
+      "reason": "Preserve and inventory the effective virtual host operation."
+    },
+    {
+      "key": "usedefineforclassfields",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "useunknownincatchvariables",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "verbatimmodulesyntax",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    }
+  ]
+}

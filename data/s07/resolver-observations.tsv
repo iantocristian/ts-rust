@@ -1,0 +1,84 @@
+scope/0/3	true
+scope/0/4	true
+scope/0/7	false
+scope/0/9	false
+scope/1/3	true
+scope/1/4	true
+scope/1/7	false
+scope/1/9	false
+scope/2/3	true
+scope/2/4	false
+scope/2/7	false
+scope/2/9	false
+scope/3/3	true
+scope/3/4	true
+scope/3/7	true
+scope/3/9	false
+scope/4/3	false
+scope/4/4	false
+scope/4/7	false
+scope/4/9	false
+scope/5/3	false
+scope/5/4	false
+scope/5/7	false
+scope/5/9	false
+scope/6/3	true
+scope/6/4	true
+scope/6/7	false
+scope/6/9	false
+scope/7/3	false
+scope/7/4	false
+scope/7/7	false
+scope/7/9	false
+scope/8/3	false
+scope/8/4	false
+scope/8/7	false
+scope/8/9	false
+deferred/0	true	true
+deferred/1	false	false
+deferred/2	true	true
+deferred/3	true	true
+deferred/4	true	false
+deferred/5	true	false
+deferred/6	false	false
+deferred/7	true	true
+global/0	false	failed
+global/1	false	lookup:1073741824:false,failed
+global/2	true	lookup:1073741824:false,success
+global/3	true	lookup:1073741824:true,success
+arguments	true	33554436	arguments
+require/nil	true	false
+require/symbol	true	false
+const	true	false
+default	true	true
+static/type	true	2302
+type/container	true	false
+parameter/cache/0	true	get,set:1
+parameter/cache/2	false	get
+parameter/cache/1	true	get
+import/0	true
+import/1	false
+import/2	false
+import/3	true
+import/4	false
+reference/0	2	false	resolved,merged
+reference/1	2	false	resolved,resolve,merged
+reference/2	0	true	resolved,resolve
+reference/3	2	false	resolved,resolve,merged
+element/0		
+element/1		
+element/2	member	
+lexical/0	true	success:false:true
+lexical/1	true	referenced,success:false:true
+export/container/0	false	
+export/container/1	true	
+export/container/2	false	
+export/container/3	false	
+export/container/4	false	
+export/container/5	false	runtime error: invalid memory address or nil pointer dereference
+member/value/0	true	
+member/value/1	true	
+member/value/2	false	runtime error: invalid memory address or nil pointer dereference
+import/hook-nil	true
+reference/fallback	true
+heritage/detached	true	

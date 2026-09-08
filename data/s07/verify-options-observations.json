@@ -1,0 +1,3002 @@
+[
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/00/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/00/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "baseUrl"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/01/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 95,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "baseUrl"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5106,
+            "Category": 3,
+            "Key": "Use_0_instead_5106",
+            "Args": [
+              "\"paths\": {\"*\": [\"./base/*\"]}"
+            ],
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      }
+    ],
+    "id": "options/01/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "outFile"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/02/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 95,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "outFile"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/02/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "target",
+          "ES5"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/03/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 78,
+        "End": 79,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "target",
+          "ES5"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/03/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "AMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/04/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 96,
+        "End": 97,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "AMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 4,
+        "End": 21,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/04/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "UMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/05/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 96,
+        "End": 97,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "UMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 4,
+        "End": 21,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/05/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "System"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/06/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 96,
+        "End": 97,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "System"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 4,
+        "End": 21,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/06/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "Classic"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/07/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 106,
+        "End": 107,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "Classic"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/07/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "alwaysStrict",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/08/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 102,
+        "End": 107,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "alwaysStrict",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/08/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "esModuleInterop",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/09/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 105,
+        "End": 110,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "esModuleInterop",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/09/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "allowSyntheticDefaultImports",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/10/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 118,
+        "End": 123,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "allowSyntheticDefaultImports",
+          "false"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/10/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/11/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 106,
+        "End": 107,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/11/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "downlevelIteration"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/12/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 106,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "downlevelIteration"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/12/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "downlevelIteration"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/13/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 106,
+        "Code": 5102,
+        "Category": 1,
+        "Key": "Option_0_has_been_removed_Please_remove_it_from_your_configuration_5102",
+        "Args": [
+          "downlevelIteration"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/13/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "strictPropertyInitialization",
+          "strictNullChecks"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/14/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 116,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "strictPropertyInitialization",
+          "strictNullChecks"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/14/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "exactOptionalPropertyTypes",
+          "strictNullChecks"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/15/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 114,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "exactOptionalPropertyTypes",
+          "strictNullChecks"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/15/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "allowJs",
+          "isolatedDeclarations"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "isolatedDeclarations",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/16/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 108,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "allowJs",
+          "isolatedDeclarations"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 108,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "isolatedDeclarations",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/16/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "sourceMap",
+          "inlineSourceMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "mapRoot",
+          "inlineSourceMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/17/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 103,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "sourceMap",
+          "inlineSourceMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 103,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "mapRoot",
+          "inlineSourceMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/17/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 6304,
+        "Category": 1,
+        "Key": "Composite_projects_may_not_disable_declaration_emit_6304",
+        "Args": [
+          "declaration",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 6379,
+        "Category": 1,
+        "Key": "Composite_projects_may_not_disable_incremental_compilation_6379",
+        "Args": [
+          "declaration",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/18/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 109,
+        "End": 122,
+        "Code": 6304,
+        "Category": 1,
+        "Key": "Composite_projects_may_not_disable_declaration_emit_6304",
+        "Args": [
+          "declaration",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 109,
+        "End": 122,
+        "Code": 6379,
+        "Category": 1,
+        "Key": "Composite_projects_may_not_disable_incremental_compilation_6379",
+        "Args": [
+          "declaration",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/18/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5074,
+        "Category": 1,
+        "Key": "Option_incremental_is_only_valid_with_a_known_configuration_file_like_tsconfig_json_or_when_tsBuildI_5074",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/19/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 4,
+        "End": 21,
+        "Code": 5074,
+        "Category": 1,
+        "Key": "Option_incremental_is_only_valid_with_a_known_configuration_file_like_tsconfig_json_or_when_tsBuildI_5074",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/19/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5066,
+        "Category": 1,
+        "Key": "Substitutions_for_pattern_0_shouldn_t_be_an_empty_array_5066",
+        "Args": [
+          "*"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5061,
+        "Category": 1,
+        "Key": "Pattern_0_can_have_at_most_one_Asterisk_character_5061",
+        "Args": [
+          "**"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5063,
+        "Category": 1,
+        "Key": "Substitutions_for_pattern_0_should_be_an_array_5063",
+        "Args": [
+          "**"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5090,
+        "Category": 1,
+        "Key": "Non_relative_paths_are_not_allowed_Did_you_forget_a_leading_Slash_5090",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5062,
+        "Category": 1,
+        "Key": "Substitution_0_in_pattern_1_can_have_at_most_one_Asterisk_character_5062",
+        "Args": [
+          "a**",
+          "x"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5090,
+        "Category": 1,
+        "Key": "Non_relative_paths_are_not_allowed_Did_you_forget_a_leading_Slash_5090",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/20/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 126,
+        "End": 128,
+        "Code": 5066,
+        "Category": 1,
+        "Key": "Substitutions_for_pattern_0_shouldn_t_be_an_empty_array_5066",
+        "Args": [
+          "*"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 103,
+        "End": 107,
+        "Code": 5061,
+        "Category": 1,
+        "Key": "Pattern_0_can_have_at_most_one_Asterisk_character_5061",
+        "Args": [
+          "**"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 109,
+        "End": 113,
+        "Code": 5063,
+        "Category": 1,
+        "Key": "Substitutions_for_pattern_0_should_be_an_array_5063",
+        "Args": [
+          "**"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 151,
+        "End": 157,
+        "Code": 5090,
+        "Category": 1,
+        "Key": "Non_relative_paths_are_not_allowed_Did_you_forget_a_leading_Slash_5090",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 167,
+        "End": 172,
+        "Code": 5062,
+        "Category": 1,
+        "Key": "Substitution_0_in_pattern_1_can_have_at_most_one_Asterisk_character_5062",
+        "Args": [
+          "a**",
+          "x"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 167,
+        "End": 172,
+        "Code": 5090,
+        "Category": 1,
+        "Key": "Non_relative_paths_are_not_allowed_Did_you_forget_a_leading_Slash_5090",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/20/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5051,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_either_option_inlineSourceMap_or_option_sourceMap_is_provided_5051",
+        "Args": [
+          "inlineSources",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5051,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_either_option_inlineSourceMap_or_option_sourceMap_is_provided_5051",
+        "Args": [
+          "sourceRoot",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/21/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 101,
+        "Code": 5051,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_either_option_inlineSourceMap_or_option_sourceMap_is_provided_5051",
+        "Args": [
+          "inlineSources",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 113,
+        "End": 125,
+        "Code": 5051,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_either_option_inlineSourceMap_or_option_sourceMap_is_provided_5051",
+        "Args": [
+          "sourceRoot",
+          ""
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/21/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "mapRoot",
+          "sourceMap",
+          "declarationMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/22/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 95,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "mapRoot",
+          "sourceMap",
+          "declarationMap"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/22/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "declarationDir",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/23/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 102,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "declarationDir",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/23/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "declarationMap",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/24/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 102,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "declarationMap",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/24/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "lib",
+          "noLib"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/25/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 29,
+        "End": 36,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "lib",
+          "noLib"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/25/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5091,
+        "Category": 1,
+        "Key": "Option_preserveConstEnums_cannot_be_disabled_when_0_is_enabled_5091",
+        "Args": [
+          "isolatedModules",
+          "preserveConstEnums"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/26/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 103,
+        "Code": 5091,
+        "Category": 1,
+        "Key": "Option_preserveConstEnums_cannot_be_disabled_when_0_is_enabled_5091",
+        "Args": [
+          "isolatedModules",
+          "preserveConstEnums"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/26/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5091,
+        "Category": 1,
+        "Key": "Option_preserveConstEnums_cannot_be_disabled_when_0_is_enabled_5091",
+        "Args": [
+          "verbatimModuleSyntax",
+          "preserveConstEnums"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/27/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 108,
+        "Code": 5091,
+        "Category": 1,
+        "Key": "Option_preserveConstEnums_cannot_be_disabled_when_0_is_enabled_5091",
+        "Args": [
+          "verbatimModuleSyntax",
+          "preserveConstEnums"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/27/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "checkJs",
+          "allowJs"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/28/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 95,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "checkJs",
+          "allowJs"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/28/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "emitDeclarationOnly",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/29/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 107,
+        "Code": 5069,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_or_option_2_5069",
+        "Args": [
+          "emitDeclarationOnly",
+          "declaration",
+          "composite"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/29/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "emitDecoratorMetadata",
+          "experimentalDecorators"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/30/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 109,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "emitDecoratorMetadata",
+          "experimentalDecorators"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/30/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "reactNamespace",
+          "jsxFactory"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxFactory",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5067,
+        "Category": 1,
+        "Key": "Invalid_value_for_jsxFactory_0_is_not_a_valid_identifier_or_qualified_name_5067",
+        "Args": [
+          "A..B"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "reactNamespace",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/31/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 98,
+        "Code": 5053,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_with_option_1_5053",
+        "Args": [
+          "reactNamespace",
+          "jsxFactory"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 98,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxFactory",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 100,
+        "End": 106,
+        "Code": 5067,
+        "Category": 1,
+        "Key": "Invalid_value_for_jsxFactory_0_is_not_a_valid_identifier_or_qualified_name_5067",
+        "Args": [
+          "A..B"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 126,
+        "End": 142,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "reactNamespace",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/31/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5059,
+        "Category": 1,
+        "Key": "Invalid_value_for_reactNamespace_0_is_not_a_valid_identifier_5059",
+        "Args": [
+          "bad-name"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/32/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 104,
+        "End": 114,
+        "Code": 5059,
+        "Category": 1,
+        "Key": "Invalid_value_for_reactNamespace_0_is_not_a_valid_identifier_5059",
+        "Args": [
+          "bad-name"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/32/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "jsxFragmentFactory",
+          "jsxFactory"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxFragmentFactory",
+          "react-jsxdev"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 18035,
+        "Category": 1,
+        "Key": "Invalid_value_for_jsxFragmentFactory_0_is_not_a_valid_identifier_or_qualified_name_18035",
+        "Args": [
+          "A..B"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/33/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 106,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "jsxFragmentFactory",
+          "jsxFactory"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 106,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxFragmentFactory",
+          "react-jsxdev"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 108,
+        "End": 114,
+        "Code": 18035,
+        "Category": 1,
+        "Key": "Invalid_value_for_jsxFragmentFactory_0_is_not_a_valid_identifier_or_qualified_name_18035",
+        "Args": [
+          "A..B"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/33/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "reactNamespace",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/34/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 102,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "reactNamespace",
+          "react-jsx"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/34/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxImportSource",
+          "react"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/35/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 86,
+        "End": 103,
+        "Code": 5089,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_when_option_jsx_is_1_5089",
+        "Args": [
+          "jsxImportSource",
+          "react"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/35/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5096,
+        "Category": 1,
+        "Key": "Option_allowImportingTsExtensions_can_only_be_used_when_one_of_noEmit_emitDeclarationOnly_or_rewrite_5096",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/36/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 117,
+        "End": 121,
+        "Code": 5096,
+        "Category": 1,
+        "Key": "Option_allowImportingTsExtensions_can_only_be_used_when_one_of_noEmit_emitDeclarationOnly_or_rewrite_5096",
+        "Args": null,
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/36/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "Classic"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/37/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 106,
+        "End": 107,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "Classic"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/37/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "AMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/38/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 125,
+        "End": 126,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "module",
+          "AMD"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "/tsconfig.json",
+        "Pos": 106,
+        "End": 109,
+        "Code": 5095,
+        "Category": 1,
+        "Key": "Option_0_can_only_be_used_when_module_is_set_to_preserve_commonjs_or_es2015_or_later_5095",
+        "Args": [
+          "bundler"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/38/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/39/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 125,
+        "End": 126,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/39/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/40/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 125,
+        "End": 126,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/40/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/41/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 125,
+        "End": 126,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/41/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/42/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 125,
+        "End": 126,
+        "Code": 5108,
+        "Category": 1,
+        "Key": "Option_0_1_has_been_removed_Please_remove_it_from_your_configuration_5108",
+        "Args": [
+          "moduleResolution",
+          "node10"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/42/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5110,
+        "Category": 1,
+        "Key": "Option_module_must_be_set_to_0_when_option_moduleResolution_is_set_to_1_5110",
+        "Args": [
+          "Node16",
+          "Node16"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/43/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 96,
+        "End": 97,
+        "Code": 5110,
+        "Category": 1,
+        "Key": "Option_module_must_be_set_to_0_when_option_moduleResolution_is_set_to_1_5110",
+        "Args": [
+          "Node16",
+          "Node16"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/43/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5110,
+        "Category": 1,
+        "Key": "Option_module_must_be_set_to_0_when_option_moduleResolution_is_set_to_1_5110",
+        "Args": [
+          "NodeNext",
+          "NodeNext"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/44/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 96,
+        "End": 97,
+        "Code": 5110,
+        "Category": 1,
+        "Key": "Option_module_must_be_set_to_0_when_option_moduleResolution_is_set_to_1_5110",
+        "Args": [
+          "NodeNext",
+          "NodeNext"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/44/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5011,
+        "Category": 1,
+        "Key": "The_common_source_directory_of_0_is_1_The_rootDir_setting_must_be_explicitly_set_to_this_or_another__5011",
+        "Args": [
+          "tsconfig.json",
+          "./src"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5111,
+            "Category": 3,
+            "Key": "Visit_https_Colon_Slash_Slashaka_ms_Slashts6_for_migration_information_5111",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      }
+    ],
+    "id": "options/45/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 87,
+        "End": 95,
+        "Code": 5011,
+        "Category": 1,
+        "Key": "The_common_source_directory_of_0_is_1_The_rootDir_setting_must_be_explicitly_set_to_this_or_another__5011",
+        "Args": [
+          "tsconfig.json",
+          "./src"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5111,
+            "Category": 3,
+            "Key": "Visit_https_Colon_Slash_Slashaka_ms_Slashts6_for_migration_information_5111",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      }
+    ],
+    "id": "options/45/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/46/command",
+    "includes": [
+      {
+        "args": [
+          "/src/a.ts",
+          "/other"
+        ],
+        "code": 6059,
+        "file": "/src/a.ts"
+      }
+    ]
+  },
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/46/syntax",
+    "includes": [
+      {
+        "args": [
+          "/src/a.ts",
+          "/other"
+        ],
+        "code": 6059,
+        "file": "/src/a.ts"
+      }
+    ]
+  },
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/47/command",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [],
+    "id": "options/47/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.js"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5068,
+            "Category": 1,
+            "Key": "Adding_a_tsconfig_json_file_will_help_organize_projects_that_contain_both_TypeScript_and_JavaScript__5068",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5068,
+            "Category": 1,
+            "Key": "Adding_a_tsconfig_json_file_will_help_organize_projects_that_contain_both_TypeScript_and_JavaScript__5068",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/48/command",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.js"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/48/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.d.ts",
+      "/src/a.d.ts.map",
+      "/src/a.js",
+      "/src/a.js.map"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5068,
+            "Category": 1,
+            "Key": "Adding_a_tsconfig_json_file_will_help_organize_projects_that_contain_both_TypeScript_and_JavaScript__5068",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5068,
+            "Category": 1,
+            "Key": "Adding_a_tsconfig_json_file_will_help_organize_projects_that_contain_both_TypeScript_and_JavaScript__5068",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js.map"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.d.ts"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.d.ts.map"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/49/command",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.d.ts",
+      "/src/a.d.ts.map",
+      "/src/a.js",
+      "/src/a.js.map"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.js.map"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.d.ts"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      },
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5056,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_be_overwritten_by_multiple_input_files_5056",
+        "Args": [
+          "/src/a.d.ts.map"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/49/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.ts"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.ts"
+        ],
+        "Text": "",
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 5068,
+            "Category": 1,
+            "Key": "Adding_a_tsconfig_json_file_will_help_organize_projects_that_contain_both_TypeScript_and_JavaScript__5068",
+            "Args": null,
+            "Text": "",
+            "Chain": null,
+            "Related": null
+          }
+        ],
+        "Related": null
+      }
+    ],
+    "id": "options/50/command",
+    "includes": []
+  },
+  {
+    "blocked": [
+      "/src/a.ts"
+    ],
+    "diagnostics": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5055,
+        "Category": 1,
+        "Key": "Cannot_write_file_0_because_it_would_overwrite_input_file_5055",
+        "Args": [
+          "/src/a.ts"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/50/syntax",
+    "includes": []
+  },
+  {
+    "blocked": [],
+    "diagnostics": [
+      {
+        "File": "/tsconfig.json",
+        "Pos": 20,
+        "End": 38,
+        "Code": 5052,
+        "Category": 1,
+        "Key": "Option_0_cannot_be_specified_without_specifying_option_1_5052",
+        "Args": [
+          "strictPropertyInitialization",
+          "strictNullChecks"
+        ],
+        "Text": "",
+        "Chain": null,
+        "Related": null
+      }
+    ],
+    "id": "options/duplicate-property-order",
+    "includes": []
+  }
+]

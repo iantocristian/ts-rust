@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "source": "actual ParsedCommandLine.Raw compilerOptions from the entire pinned corpus",
+  "rows": [
+    {
+      "key": "allowJs",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "baseUrl",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "charset",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "checkJs",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "composite",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "customConditions",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "declaration",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "declarationDir",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "declarationMap",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "emitDeclarationOnly",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "esModuleInterop",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "ignoreDeprecations",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "importHelpers",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "importsNotUsedAsValues",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "incremental",
+      "disposition": "allow",
+      "family": "configuration",
+      "reason": "Preserve and inventory the effective configuration operation."
+    },
+    {
+      "key": "isolatedModules",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "jsx",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "keyofStringsOnly",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "mapRoot",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "module",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "moduleResolution",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve the source option and inventory its module resolution operation; no result-based eligibility filter.",
+      "key": "moduleSuffixes"
+    },
+    {
+      "key": "noEmit",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "noImplicitAny",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "noImplicitUseStrict",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "noStrictGenericChecks",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "noUnusedLocals",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "out",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "outDir",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve the source option and inventory its module resolution operation; no result-based eligibility filter.",
+      "key": "paths"
+    },
+    {
+      "key": "preserveValueImports",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "resolveJsonModule",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "resolvePackageJsonExports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "resolvePackageJsonImports",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "rootDir",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve the source option and inventory its module resolution operation; no result-based eligibility filter.",
+      "key": "rootDirs"
+    },
+    {
+      "key": "skipLibCheck",
+      "disposition": "allow",
+      "family": "library_loading",
+      "reason": "Preserve and inventory the effective library loading operation."
+    },
+    {
+      "key": "sourceMap",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "sourceRoot",
+      "disposition": "irrelevant",
+      "family": "emit_only_setting",
+      "reason": "Preserve this option; emit is outside this phase. Only the documented exact option/baseline conjunction excludes emitted-output-only variants."
+    },
+    {
+      "key": "stableTypeOrdering",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "strict",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "strictNullChecks",
+      "disposition": "allow",
+      "family": "checker",
+      "reason": "Preserve and inventory the effective checker operation."
+    },
+    {
+      "key": "suppressExcessPropertyErrors",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "suppressImplicitAnyIndexErrors",
+      "disposition": "allow",
+      "family": "unsupported_option_diagnostic",
+      "reason": "Removed config option retained verbatim with native config diagnostic; never converted to a successful option."
+    },
+    {
+      "key": "target",
+      "disposition": "allow",
+      "family": "parser_and_language",
+      "reason": "Preserve and inventory the effective parser and language operation."
+    },
+    {
+      "key": "traceResolution",
+      "disposition": "allow",
+      "family": "baseline_control",
+      "reason": "Preserve baseline/diagnostic controls and use only the documented emitted-output-only predicate."
+    },
+    {
+      "key": "typeRoots",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "types",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    },
+    {
+      "key": "verbatimModuleSyntax",
+      "disposition": "allow",
+      "family": "module_resolution",
+      "reason": "Preserve and inventory the effective module resolution operation."
+    }
+  ]
+}

@@ -181,3 +181,27 @@ pub fn is_declaration_file_name(path: &[u8]) -> bool {
         || base.ends_with(b".d.mts")
         || (base.ends_with(b".ts") && base.windows(3).any(|s| s == b".d."))
 }
+
+/// Remove the first matching pinned compiler suffix, including declaration suffixes.
+/// port: tsc/internal/tspath/extension.go:RemoveFileExtension
+pub fn remove_file_extension(path: &[u8]) -> &[u8] {
+    for suffix in [
+        b".d.ts".as_slice(),
+        b".d.mts",
+        b".d.cts",
+        b".mjs",
+        b".mts",
+        b".cjs",
+        b".cts",
+        b".ts",
+        b".js",
+        b".tsx",
+        b".jsx",
+        b".json",
+    ] {
+        if let Some(path) = path.strip_suffix(suffix) {
+            return path;
+        }
+    }
+    path
+}

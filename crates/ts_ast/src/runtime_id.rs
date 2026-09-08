@@ -1,6 +1,11 @@
 //! Go's lazily assigned comparison identity is distinct from the owner-qualified
 //! NodeId used for checked storage access. It carries no retention capability.
 use crate::Node;
+
+/// Observe a previously assigned source identity without assigning one.
+pub fn existing_runtime_node_id(node: &Node) -> u64 {
+    node.runtime_id.load(std::sync::atomic::Ordering::SeqCst)
+}
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_NODE_ID: AtomicU64 = AtomicU64::new(0);

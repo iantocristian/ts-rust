@@ -211,7 +211,13 @@ impl<F: ParserFactory> Parser<'_, F> {
             .expect("JSDoc token range belongs to source")
     }
     fn jsdoc_text_node(&mut self, comments: &[JsString], pos: i64, end: i64) -> NodeId {
-        let text = self.factory.alloc_text(comments.to_vec());
+        // stringSliceArena.Clone returns nil for an empty input, including the
+        // text node emitted immediately before a leading JSDoc link.
+        let text = if comments.is_empty() {
+            ts_ast::TextSlice::empty()
+        } else {
+            self.factory.alloc_text(comments.to_vec())
+        };
         let node = self.factory.new_js_doc_text(text);
         self.finish_node_with_end(node, pos, end)
     }
@@ -368,7 +374,14 @@ impl<F: ParserFactory> Parser<'_, F> {
         );
         let tags =
             (tags_pos != -1).then(|| self.new_node_list(TextRange::new(tags_pos, tags_end), tags));
-        let comment = self.new_node_list(TextRange::new(start, comments_pos), parts);
+        // Go passes NewSlice(1)[:0] directly, without Arena.Clone's empty-to-nil
+        // conversion used by ordinary parser lists. Keep that visible backing.
+        let parts = self
+            .factory
+            .alloc_nodes(parts.into_iter().map(Some).collect());
+        let comment = self
+            .factory
+            .alloc_list(TextRange::new(start, comments_pos), parts);
         let node = self.factory.new_js_doc(Some(comment), tags);
         self.finish_node_with_end(node, full_start, end)
     }
@@ -603,7 +616,12 @@ impl<F: ParserFactory> Parser<'_, F> {
             text.push(self.jsdoc_token_text());
             self.next_token_jsdoc();
         }
-        let text = self.factory.alloc_text(text);
+        // Go starts with a nil slice and only allocates after a text token.
+        let text = if text.is_empty() {
+            ts_ast::TextSlice::empty()
+        } else {
+            self.factory.alloc_text(text)
+        };
         let node = match kind.as_bytes() {
             b"link" => self.factory.new_js_doc_link(name, text),
             b"linkcode" => self.factory.new_js_doc_link_code(name, text),

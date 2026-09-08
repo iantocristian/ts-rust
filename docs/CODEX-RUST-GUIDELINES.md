@@ -270,6 +270,19 @@ exactly and recognized runtime bounds failures by a narrow class. Unknown,
 assertion and overflow panics must not pass merely because both programs
 panicked. Do not loosen the classifier to make a new mismatch disappear.
 
+Repeated source output can vary even under an exact pin. S07's JSON dependency
+deliberately alternates between two diagnostic prefixes. Establish that behavior
+from the dependency's code and tests before adding a qualification; limit it to
+the demonstrated field and prefix, retain the raw diagnostics, and test that a
+changed message body or unknown prefix still fails. A diagnostic-only field is
+not a reason to silently discard all source-check differences.
+
+Exercise a producer helper through its caller as well as on its own. S07's
+operation inventory and binder-depth captures passed their checks but printed
+progress into the containing producer's JSON channel. The tracker correctly
+rejected both long captures. Reserve stdout for the protocol and test embedded
+calls with captured stdout/stderr before running the complete corpus.
+
 ### Keep claims no broader than the execution
 
 A successful capture is not a passing metric. Inspect the metric gates after
@@ -308,10 +321,30 @@ the archive. Use stable build inputs such as `-trimpath` so temporary paths do
 not cause cold recompilation. Share protocol/subprocess helpers when they
 implement the same contract, and register them as evidence inputs.
 
+A successful Cargo command does not identify the executable to measure. Consume
+Cargo's `compiler-artifact.executable` and check its features/target; a caller's
+`build.target-dir` can otherwise leave an older binary at a guessed path. A
+configuration hash records the configuration but does not establish a claimed
+profile. Enforce or observe the actual optimization, LTO, unwind and codegen
+settings while preserving registry and offline configuration.
+
+Bind each measured child to the bytes and options it actually loaded. Equal
+file, byte, node, symbol and diagnostic counts did not distinguish an S07
+same-size literal edit. Compute the ordered input identity during preload,
+outside the measured phase, and compare it with the independent graph
+obligations. Checking mutable input files only before a batch cannot prove what
+later children executed.
+
 Trace CI from a failed install or producer through the remaining steps.
 Independent captures and artifact publication should remain reachable after
 unrelated failures while their prerequisites still hold. A successful run alone
 does not test that failure path or demonstrate a warm cache hit.
+
+When a crate adds compile-time assets, audit every workspace build job's checkout
+inputs. S07's MSRV check passed locally with an initialized `upstream`, while
+all four CI MSRV targets lacked those embedded library files. Reproduce the job
+from a fresh checkout; an installed compiler and a passing warm workspace check
+do not establish that CI retrieves all required files.
 
 ## My review and delivery routine
 
@@ -337,6 +370,22 @@ does not test that failure path or demonstrate a warm cache hit.
    unmeasured, and which target the evidence covers. Use new commits and normal
    pushes for published branches; do not rewrite remote history without the
    user's specific authorization.
+
+Stage the final file inventory before evidence captures when moving or deleting
+files. The tracker currently hashes an unstaged tracked deletion as `deleted`,
+but omits the path after staging. I missed that distinction during S07: staging
+three moved AST sort files invalidated otherwise unchanged captures. Verify
+current gates again after staging and before committing; source-byte stability
+alone does not establish stability of this tracker's input inventory.
+
+S07 passed its correctness comparisons while allocating 1.63 times Go's bytes
+and taking 1.79/1.93 times its one/eight-worker time. I established a 2.181 GB
+minimum retained representation only after completing the port, against a
+2.035 GB allocation budget. For quantitative acceptance targets, estimate the
+representation budget from representative counts and measure a storage prototype
+early. Include replacement storage in any proposed savings, and use separate
+CPU profiles before attributing time to a suspected cost. Safe ownership and
+semantic parity do not establish acceptable memory use or speed.
 
 Do not use report grades or counts as acceptance criteria. Shorter files,
 fewer casts, fewer `expect`s, more derives, more comments and more probes can

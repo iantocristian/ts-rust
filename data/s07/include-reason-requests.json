@@ -1,0 +1,775 @@
+[
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f7274202f2a73706163652a2f20222e2f646570223b"
+    },
+    "id": "singleton-import",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      },
+      {
+        "Path": "/src/main.ts"
+      },
+      {
+        "Path": ""
+      },
+      {
+        "Path": "/missing.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f646570223b20696d706f727420222e2f646570223b"
+    },
+    "id": "reason-identity",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      },
+      {
+        "Identity": "same",
+        "Path": "/src/dep.ts"
+      },
+      {
+        "Identity": "distinct",
+        "Path": "/src/dep.ts"
+      },
+      {
+        "Path": "/src/dep.ts",
+        "Preferred": 1
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6c657420783d313b",
+      "/src/main.ts": "2f2f2f203c7265666572656e636520706174683d222e2f6465702e747322202f3e0a2f2f2f203c7265666572656e636520706174683d222e2f6465702e747322202f3e0a"
+    },
+    "id": "references",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e63652074797065733d22706b6722202f3e0a",
+      "/src/node_modules/@types/pkg/index.d.ts": "6465636c61726520636f6e737420783a6e756d6265723b",
+      "/src/node_modules/@types/pkg/package.json": "7b226e616d65223a224074797065732f706b67222c2276657273696f6e223a22312e302e30222c227479706573223a22696e6465782e642e7473227d"
+    },
+    "id": "type-reference-package-zero",
+    "options": {
+      "noLib": true,
+      "target": 99,
+      "types": []
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/@types/pkg/index.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b",
+      "/src/node_modules/@types/pkg/index.d.ts": "6465636c61726520636f6e737420783a6e756d6265723b",
+      "/src/node_modules/@types/pkg/package.json": "7b226e616d65223a224074797065732f706b67222c2276657273696f6e223a22312e302e30222c227479706573223a22696e6465782e642e7473227d"
+    },
+    "id": "automatic-type-package",
+    "options": {
+      "noLib": true,
+      "target": 99,
+      "types": [
+        "*"
+      ]
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/@types/pkg/index.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420696e746572666163652054207b7d",
+      "/src/main.ts": "6578706f7274207b7d3b206465636c617265206d6f64756c6520222e2f64657022207b20696e746572666163652054207b7d207d"
+    },
+    "id": "module-augmentation",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "AugmentationFrom": "/src/main.ts",
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6578706f727420636f6e737420783d313b",
+      "/src/node_modules/tslib/index.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/tslib/package.json": "7b226e616d65223a2274736c6962222c2276657273696f6e223a22322e302e30222c227479706573223a22696e6465782e642e7473227d"
+    },
+    "id": "synthetic-helper",
+    "options": {
+      "importHelpers": true,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/tslib/index.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.tsx": "6578706f727420636f6e737420783d3c6469762f3e3b",
+      "/src/node_modules/react/jsx-runtime.d.ts": "6578706f7274207b7d3b"
+    },
+    "id": "synthetic-jsx",
+    "options": {
+      "jsx": 4,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/react/jsx-runtime.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.tsx"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/src/package.json": "7b2274797065223a226d6f64756c65227d"
+    },
+    "id": "format/module",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/src/package.json": "7b2274797065223a22636f6d6d6f6e6a73227d"
+    },
+    "id": "format/commonjs",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/src/package.json": "7b2274797065223a226f74686572227d"
+    },
+    "id": "format/unknown",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/src/package.json": "7b7d"
+    },
+    "id": "format/absent-type",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b",
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b"
+    },
+    "id": "format/missing",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f7274202f2aff2a2f20222e2f646570223b"
+    },
+    "id": "invalid-trivia-bytes",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e6365206c69623d2265733522202f3e0a"
+    },
+    "id": "library-directive",
+    "options": {
+      "lib": [],
+      "noLib": false,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.es5.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/bound/main.ts": "696d706f727420222e2e2f646570223b",
+      "/src/dep.ts": "6578706f7274207b7d3b"
+    },
+    "id": "rootdir-import-location",
+    "options": {
+      "noLib": true,
+      "rootDir": "/src/bound",
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/bound/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b"
+    },
+    "id": "rootdir-root-global",
+    "options": {
+      "noLib": true,
+      "rootDir": "/other",
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/dep.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "composite-import-location",
+    "options": {
+      "composite": true,
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "696d706f7274202261223b20696d706f7274202262223b",
+      "/src/node_modules/a/index.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/a/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c227479706573223a22696e6465782e642e7473227d",
+      "/src/node_modules/b/index.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/b/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c227479706573223a22696e6465782e642e7473227d"
+    },
+    "id": "package-redirect",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/a/index.d.ts"
+      },
+      {
+        "Path": "/src/node_modules/b/index.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b22636f6d70696c65724f7074696f6e73223a207b22746172676574223a2022455335227d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b"
+    },
+    "id": "config/target-scalar",
+    "options": {
+      "noLib": false,
+      "target": 1
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ],
+    "specs": {
+      "BeforeIncludes": [
+        "**/*"
+      ],
+      "Default": true,
+      "Includes": [
+        "**/*"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b22636f6d70696c65724f7074696f6e73223a207b22746172676574223a205b22455335225d7d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b"
+    },
+    "id": "config/target-array",
+    "options": {
+      "noLib": false,
+      "target": 1
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ],
+    "specs": {
+      "BeforeIncludes": [
+        "**/*"
+      ],
+      "Default": true,
+      "Includes": [
+        "**/*"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b22636f6d70696c65724f7074696f6e73223a7b227479706573223a5b22706b67225d7d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b",
+      "/src/node_modules/@types/pkg/index.d.ts": "6465636c61726520636f6e737420783a6e756d6265723b"
+    },
+    "id": "config/types",
+    "options": {
+      "noLib": true,
+      "target": 99,
+      "types": [
+        "pkg"
+      ]
+    },
+    "queries": [
+      {
+        "Path": "/src/node_modules/@types/pkg/index.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ],
+    "specs": {}
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b22636f6d70696c65724f7074696f6e73223a7b226c6962223a5b226c69622e6573352e642e7473225d7d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b"
+    },
+    "id": "config/lib-array",
+    "options": {
+      "lib": [
+        "lib.es5.d.ts"
+      ],
+      "noLib": false,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.es5.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ],
+    "specs": {}
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b"
+    },
+    "id": "default-library",
+    "options": {
+      "noLib": false,
+      "target": 1
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/src",
+    "files": {
+      "/src/main.ts": "6c657420783d313b"
+    },
+    "id": "explicit-library",
+    "options": {
+      "lib": [
+        "lib.es5.d.ts"
+      ],
+      "noLib": false,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "bundled:///libs/lib.es5.d.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b2266696c6573223a205b222e2f6465702e7473225d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "config/files",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ],
+    "specs": {
+      "BeforeFiles": [
+        "./dep.ts"
+      ],
+      "Files": [
+        "/src/dep.ts"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b22696e636c756465223a205b222e2f2a2e7473225d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "config/include",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ],
+    "specs": {
+      "BeforeIncludes": [
+        "./*.ts"
+      ],
+      "Includes": [
+        "/src/*.ts"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b7d",
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "config/default",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ],
+    "specs": {
+      "BeforeIncludes": [
+        "**/*"
+      ],
+      "Default": true,
+      "Includes": [
+        "**/*"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b2266696c6573223a205b22247b636f6e6669674469727d2f6465702e7473225d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "config/substitution",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ],
+    "specs": {
+      "BeforeFiles": [
+        "${configDir}/dep.ts"
+      ],
+      "Files": [
+        "/src/dep.ts"
+      ]
+    }
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/src/tsconfig.json",
+    "config_text": "7b2266696c6573223a205b226f746865722e7473225d2c202266696c6573223a205b222e2f6465702e7473225d7d",
+    "cwd": "/src",
+    "files": {
+      "/src/dep.ts": "6578706f7274207b7d3b",
+      "/src/main.ts": "696d706f727420222e2f646570223b"
+    },
+    "id": "config/duplicate-property",
+    "options": {
+      "noLib": true,
+      "target": 99
+    },
+    "queries": [
+      {
+        "Path": "/src/dep.ts"
+      }
+    ],
+    "roots": [
+      "/src/main.ts",
+      "/src/dep.ts"
+    ],
+    "specs": {
+      "BeforeFiles": [
+        "./dep.ts"
+      ],
+      "Files": [
+        "/src/dep.ts"
+      ]
+    }
+  }
+]

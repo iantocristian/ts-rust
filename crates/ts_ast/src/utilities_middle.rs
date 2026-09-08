@@ -428,7 +428,7 @@ pub fn is_global_source_file(view: AstView<'_>, id: NodeId) -> Result<bool, Erro
         return Ok(false);
     }
     let state = view.source_file(id)?;
-    Ok(state.external_module_indicator.is_none() && state.common_js_module_indicator.is_none())
+    Ok(state.external_module_indicator.is_none() && state.common_js_module_indicator().is_none())
 }
 // port: tsc/internal/ast/utilities.go:GetFirstIdentifier
 pub fn get_first_identifier(view: AstView<'_>, mut id: NodeId) -> Result<NodeId, Error> {

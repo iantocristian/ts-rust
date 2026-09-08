@@ -56,6 +56,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # ts_bundled embeds libraries from the pinned upstream gitlink.
+          submodules: true
       - name: Read and validate toolchain pins
         id: pins
         run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"
@@ -156,6 +159,16 @@ jobs:
         run: |
           cargo test -p ts_parser -p ts_ast -p ts_encoder --all-targets --all-features --locked
           cargo test -p ts_parser -p ts_ast -p ts_encoder --all-targets --all-features --locked --release
+      - name: Binder, program and configuration contracts on this native target
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          cargo test -p ts_binder -p ts_compiler -p ts_tsoptions -p ts_module -p ts_semver -p ts_tspath -p ts_vfs -p ts_bundled --all-targets --all-features --locked
+          cargo test -p ts_binder -p ts_compiler -p ts_tsoptions -p ts_module -p ts_semver -p ts_tspath -p ts_vfs -p ts_bundled --all-targets --all-features --locked --release
+      - name: Native allocator build and original-request accounting
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          cargo run -p ts_bench --example allocation_probe --features allocation --locked
+          cargo run -p ts_bench --example allocation_probe --features allocation --locked --release
       - name: Oracle build and version smoke
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run oracle
@@ -183,6 +196,17 @@ jobs:
       - name: Parser, runtime and protocol-8 bytes against the pinned Go oracle
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask run e1
+      - name: Binder graph parity, helpers, protocol and actual stack growth
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run binder
+      - name: Source-selected S07 denominator and actual library closure
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run e2
+      - name: Config, options and program loading for every frozen variant
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: cargo xtask run program
+      # E5/E6 require the designated >=8-CPU measurement host. Hosted correctness
+      # jobs neither replay local performance evidence as measurements nor claim S07.
       - name: Regenerate views
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: cargo xtask status
@@ -221,6 +245,18 @@ jobs:
             'run.e1.decoder_watchdog == true' \
             'run.e1.depth == true' \
             'run.e1.parser_regressions == true' \
+            'run.binder.parity == 1' \
+            'run.binder.reached_bind == true' \
+            'run.binder.supplemental_parity == 1' \
+            'run.binder.protocol == true' \
+            'run.binder.helpers == true' \
+            'run.binder.resolvers == true' \
+            'run.binder.graph_contracts == true' \
+            'run.binder.depth == true' \
+            'run.program.subset_loads == true' \
+            'run.e2.frozen_subset == true' \
+            'run.e3.shared_bound_file == true' \
+            'run.e3.retained_snapshot_edit == true' \
             'run.e3.ast_runtime == true' \
             'run.e3.id_exhaustion == true' \
             'run.e3.wrong_owner_rejected == true' \
@@ -262,4 +298,7 @@ jobs:
             status/evidence/
             target/s05-reports/
             target/s06-reports/
+            target/s07-binder-reports/
+            target/s07-program-reports/
+            target/s07-subset/review/review-payload.json
           if-no-files-found: error

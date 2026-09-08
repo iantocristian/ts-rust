@@ -3,6 +3,7 @@
 //! Token views borrow their source or cooked storage. Checkpoints are opaque,
 //! consumed in LIFO order, and restore scanner state rather than configuration.
 
+mod binder_helpers;
 mod escape;
 mod identifier;
 mod literal;
@@ -36,3 +37,5 @@ pub use utilities::{
 pub(crate) use state::{escape_flags, IdentifierVariant, TokenValue};
 
 pub use utilities::is_white_space_like;
+
+pub use binder_helpers::*;

@@ -4,6 +4,7 @@
 //! core algorithms. Integer newtypes retain Go's open numeric value domain.
 
 pub mod path;
+pub mod pattern;
 
 /// Pinned `core.ScriptKind`; reserved and unknown integers remain representable.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -178,3 +179,9 @@ impl TextRange {
         self.pos == self.end
     }
 }
+
+pub mod compiler_options;
+pub use compiler_options::*;
+
+mod go_sort;
+pub use go_sort::sort as sort_like_go;

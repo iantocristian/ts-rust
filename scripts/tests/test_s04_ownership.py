@@ -30,18 +30,38 @@ def suite_output():
     return (tests + "\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;\n").encode()
 
 
-def ast_suite_output(root):
-    cases = ownership.s06_ownership.load_cases(root)
+def named_suite_output(cases):
     rows = "\n".join(f"test {name} ... ok" for name in cases)
     return (f"running {len(cases)} tests\n" + rows +
             f"\ntest result: ok. {len(cases)} passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s\n").encode()
 
 
+def ast_suite_output(root):
+    return named_suite_output(ownership.s06_ownership.load_cases(root))
+
+
+def program_manifest():
+    # Minimal independent S07 suites keep these legacy producer tests focused on
+    # their S04/S06 failures without bypassing S07 inventory/output validation.
+    return {
+        "version": 1,
+        "common": {"package": "ts_ast", "filter": "bind_tests::", "exact": False,
+                   "cases": ["bind_tests::publication"]},
+        "groups": {
+            name: {"package": "ts_compiler", "filter": f"ownership_tests::{name}",
+                   "exact": True, "cases": [f"ownership_tests::{name}"]}
+            for name in ownership.s07_ownership.GROUPS
+        },
+    }
+
+
 def fixture(root):
     (root / "data/s04").mkdir(parents=True)
     (root / "data/s06").mkdir(parents=True)
+    (root / "data/s07").mkdir(parents=True)
     inventory = SOURCE.parent.parent / "data/s06/ownership-cases.json"
     (root / "data/s06/ownership-cases.json").write_bytes(inventory.read_bytes())
+    (root / "data/s07/ownership-cases.json").write_text(json.dumps(program_manifest()))
     (root / "data/s04/e3-cases.json").write_text(json.dumps(sorted(ownership.SCENARIOS)))
     (root / "data/s04/toolchains.toml").write_text(
         'nightly = "nightly-2026-09-05"\ngo = "go1.27.1"\nmsrv = "1.96.0"\n')
@@ -57,7 +77,11 @@ def successful_invoke(root, args, env=None):
         return json.dumps(measured_report()).encode()
     if "setup" in args:
         return b""
-    if "ts_ast" in args:
+    manifest = ownership.s07_ownership.load_cases(root)
+    for suite in [manifest["common"], *manifest["groups"].values()]:
+        if suite["package"] in args and suite["filter"] in args:
+            return named_suite_output(suite["cases"])
+    if "ts_ast" in args and "storage_tests::" in args:
         return ast_suite_output(root)
     return suite_output()
 

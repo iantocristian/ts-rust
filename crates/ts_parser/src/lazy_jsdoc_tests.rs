@@ -28,6 +28,58 @@ fn first_statement(file: &ParsedFile) -> NodeId {
 }
 
 #[test]
+fn empty_jsdoc_comment_has_the_pinned_non_nil_backing() {
+    let file = parse(
+        b"/comment.js",
+        b"/** @constructor */ function Box(x) { this.x = x; }",
+        ScriptKind::JS,
+    );
+    let parent = first_statement(&file);
+    let view = file.view();
+    let docs = view
+        .source_eager_jsdoc(file.root(), parent)
+        .unwrap()
+        .unwrap();
+    let doc = view.node(docs[0]).unwrap();
+    let list = view
+        .list(doc.data().as_js_doc().unwrap().comment.unwrap())
+        .unwrap();
+    assert_eq!(list.loc(), ts_core::TextRange::new(0, 4));
+    assert!(!list.nodes().is_nil());
+    assert!(view.node_slice(list.nodes()).unwrap().is_empty());
+}
+
+#[test]
+fn leading_jsdoc_link_preserves_nil_text_slice() {
+    // Pinned conformance/jsdoc/jsdocLinkTag5.ts: the leading JSDocText exists
+    // with range 0..4, while stringSliceArena.Clone gives it a nil text slice.
+    let file = parse(
+        b"/link.ts",
+        b"/** {@link UNRESOLVED_LINK} */\nexport interface A {}",
+        ScriptKind::TS,
+    );
+    let parent = first_statement(&file);
+    let view = file.view();
+    let docs = view
+        .source_eager_jsdoc(file.root(), parent)
+        .unwrap()
+        .unwrap();
+    let doc = view.node(docs[0]).unwrap();
+    let comment = view
+        .list(doc.data().as_js_doc().unwrap().comment.unwrap())
+        .unwrap();
+    let parts = view.node_slice(comment.nodes()).unwrap();
+    let leading = view.node(parts[0].unwrap()).unwrap();
+    assert_eq!(leading.range(), ts_core::TextRange::new(0, 4));
+    let text = leading.data().as_js_doc_text().unwrap().text;
+    assert!(text.is_nil());
+    assert!(view.text_slice(text).unwrap().is_empty());
+    let link = view.node(parts[1].unwrap()).unwrap();
+    assert_eq!(link.kind(), ts_ast::SyntaxKind::JSDocLink);
+    assert!(link.data().as_js_doc_link().unwrap().text.is_nil());
+}
+
+#[test]
 fn lazy_jsdoc_publishes_once_without_changing_source_parse_counts_or_diagnostics() {
     let file = parse(b"/lazy.ts", b"/** Hello */ const x = 1;", ScriptKind::TS);
     let parent = first_statement(&file);

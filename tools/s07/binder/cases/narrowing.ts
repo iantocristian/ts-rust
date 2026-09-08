@@ -1,0 +1,1 @@
+if (typeof x === "string" || x instanceof C && "p" in x) x; if (a()["x"]) x; if (a()[x]) x; if (x === true) x; if (false) x; if (true) y;

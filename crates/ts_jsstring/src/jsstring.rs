@@ -18,9 +18,15 @@ pub enum Validity {
 #[derive(Clone, Debug)]
 pub struct JsString {
     storage: Arc<[u8]>,
-    range: Range<usize>,
-    validity: Validity,
+    start_tag: usize,
+    end_tag: usize,
 }
+
+// A non-zero-sized Rust allocation cannot exceed isize::MAX bytes. Each byte
+// endpoint therefore leaves its high bit free. The two bits hold the three
+// validity states without adding a word to every identifier and symbol name.
+const OFFSET_MASK: usize = isize::MAX as usize;
+const TAG_BIT: usize = !OFFSET_MASK;
 
 impl JsString {
     pub fn from_bytes(bytes: impl Into<Arc<[u8]>>) -> Self {
@@ -31,19 +37,41 @@ impl JsString {
 
     pub(crate) fn from_shared_range(storage: Arc<[u8]>, range: Range<usize>) -> Self {
         let validity = classify(&storage[range.clone()]);
+        Self::from_validated_range(storage, range, validity)
+    }
+
+    fn from_validated_range(storage: Arc<[u8]>, range: Range<usize>, validity: Validity) -> Self {
+        assert!(
+            range.end <= OFFSET_MASK,
+            "byte allocation exceeds Rust's addressable object size"
+        );
         Self {
             storage,
-            range,
-            validity,
+            start_tag: range.start
+                | if validity == Validity::Wtf8 {
+                    TAG_BIT
+                } else {
+                    0
+                },
+            end_tag: range.end
+                | if validity == Validity::Raw {
+                    TAG_BIT
+                } else {
+                    0
+                },
         }
     }
 
+    fn range(&self) -> Range<usize> {
+        self.start_tag & OFFSET_MASK..self.end_tag & OFFSET_MASK
+    }
+
     pub fn as_bytes(&self) -> &[u8] {
-        &self.storage[self.range.clone()]
+        &self.storage[self.range()]
     }
 
     pub fn as_str(&self) -> Option<&str> {
-        if self.validity == Validity::Utf8 {
+        if self.validity() == Validity::Utf8 {
             // Revalidate the safe view; the crate does not need unchecked UTF-8 access.
             std::str::from_utf8(self.as_bytes()).ok()
         } else {
@@ -52,23 +80,30 @@ impl JsString {
     }
 
     pub fn validity(&self) -> Validity {
-        self.validity
+        if self.end_tag & TAG_BIT != 0 {
+            Validity::Raw
+        } else if self.start_tag & TAG_BIT != 0 {
+            Validity::Wtf8
+        } else {
+            Validity::Utf8
+        }
     }
     pub fn len(&self) -> usize {
-        self.range.len()
+        self.range().len()
     }
     pub fn is_empty(&self) -> bool {
-        self.range.is_empty()
+        self.range().is_empty()
     }
 
     /// Bounds are checked in bytes; endpoints need not be character boundaries.
     pub fn slice(&self, range: Range<usize>) -> Option<Self> {
         let bytes = self.as_bytes().get(range.clone())?;
-        Some(Self {
-            storage: Arc::clone(&self.storage),
-            range: self.range.start + range.start..self.range.start + range.end,
-            validity: classify(bytes),
-        })
+        let start = self.range().start;
+        Some(Self::from_validated_range(
+            Arc::clone(&self.storage),
+            start + range.start..start + range.end,
+            classify(bytes),
+        ))
     }
 
     pub fn code_points(&self) -> CodePoints<'_> {
@@ -79,6 +114,13 @@ impl JsString {
 impl Default for JsString {
     fn default() -> Self {
         Self::from_bytes(&[][..])
+    }
+}
+
+// Borrowed hash-map lookup uses the same byte equality and hashing as JsString.
+impl std::borrow::Borrow<[u8]> for JsString {
+    fn borrow(&self) -> &[u8] {
+        self.as_bytes()
     }
 }
 

@@ -1,0 +1,2136 @@
+[
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/00/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039390a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/00/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/01/command",
+    "options": {
+      "baseUrl": "/base",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226261736555726c223a20222f62617365220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/01/syntax",
+    "options": {
+      "baseUrl": "/base",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/02/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "outFile": "/out.js",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226f757446696c65223a20222f6f75742e6a73220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/02/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "outFile": "/out.js",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/03/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "target": 1
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a20310a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/03/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "target": 1
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/04/command",
+    "options": {
+      "module": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/04/syntax",
+    "options": {
+      "module": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/05/command",
+    "options": {
+      "module": 3,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a20330a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/05/syntax",
+    "options": {
+      "module": 3,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/06/command",
+    "options": {
+      "module": 4,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a20340a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/06/syntax",
+    "options": {
+      "module": 4,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/07/command",
+    "options": {
+      "moduleResolution": 1,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c655265736f6c7574696f6e223a20310a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/07/syntax",
+    "options": {
+      "moduleResolution": 1,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/08/command",
+    "options": {
+      "alwaysStrict": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022616c77617973537472696374223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/08/syntax",
+    "options": {
+      "alwaysStrict": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/09/command",
+    "options": {
+      "esModuleInterop": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202265734d6f64756c65496e7465726f70223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/09/syntax",
+    "options": {
+      "esModuleInterop": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/10/command",
+    "options": {
+      "allowSyntheticDefaultImports": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022616c6c6f7753796e74686574696344656661756c74496d706f727473223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/10/syntax",
+    "options": {
+      "allowSyntheticDefaultImports": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/11/command",
+    "options": {
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c655265736f6c7574696f6e223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/11/syntax",
+    "options": {
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/12/command",
+    "options": {
+      "downlevelIteration": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022646f776e6c6576656c497465726174696f6e223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/12/syntax",
+    "options": {
+      "downlevelIteration": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/13/command",
+    "options": {
+      "downlevelIteration": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022646f776e6c6576656c497465726174696f6e223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/13/syntax",
+    "options": {
+      "downlevelIteration": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/14/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "strictNullChecks": false,
+      "strictPropertyInitialization": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202273747269637450726f7065727479496e697469616c697a6174696f6e223a20747275652c0a20202020227374726963744e756c6c436865636b73223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/14/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "strictNullChecks": false,
+      "strictPropertyInitialization": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/15/command",
+    "options": {
+      "exactOptionalPropertyTypes": true,
+      "noEmit": true,
+      "noLib": true,
+      "strictNullChecks": false,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202265786163744f7074696f6e616c50726f70657274795479706573223a20747275652c0a20202020227374726963744e756c6c436865636b73223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/15/syntax",
+    "options": {
+      "exactOptionalPropertyTypes": true,
+      "noEmit": true,
+      "noLib": true,
+      "strictNullChecks": false,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/16/command",
+    "options": {
+      "allowJs": true,
+      "isolatedDeclarations": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202269736f6c617465644465636c61726174696f6e73223a20747275652c0a2020202022616c6c6f774a73223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/16/syntax",
+    "options": {
+      "allowJs": true,
+      "isolatedDeclarations": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/17/command",
+    "options": {
+      "inlineSourceMap": true,
+      "mapRoot": "/map",
+      "noEmit": true,
+      "noLib": true,
+      "sourceMap": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022696e6c696e65536f757263654d6170223a20747275652c0a2020202022736f757263654d6170223a20747275652c0a20202020226d6170526f6f74223a20222f6d6170220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/17/syntax",
+    "options": {
+      "inlineSourceMap": true,
+      "mapRoot": "/map",
+      "noEmit": true,
+      "noLib": true,
+      "sourceMap": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/18/command",
+    "options": {
+      "composite": true,
+      "declaration": false,
+      "incremental": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022636f6d706f73697465223a20747275652c0a20202020226465636c61726174696f6e223a2066616c73652c0a2020202022696e6372656d656e74616c223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/18/syntax",
+    "options": {
+      "composite": true,
+      "declaration": false,
+      "incremental": false,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/19/command",
+    "options": {
+      "incremental": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022696e6372656d656e74616c223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/19/syntax",
+    "options": {
+      "incremental": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/20/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "paths": {
+        "*": [],
+        "**": null,
+        "x": [
+          "bare",
+          "a**",
+          "./x"
+        ]
+      },
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020227061746873223a207b0a202020202020222a2a223a206e756c6c2c0a202020202020222a223a205b5d2c0a2020202020202278223a205b0a20202020202020202262617265222c0a202020202020202022612a2a222c0a2020202020202020222e2f78220a2020202020205d0a202020207d0a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/20/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "paths": {
+        "*": [],
+        "**": null,
+        "x": [
+          "bare",
+          "a**",
+          "./x"
+        ]
+      },
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/21/command",
+    "options": {
+      "inlineSources": true,
+      "noEmit": true,
+      "noLib": true,
+      "sourceRoot": "/source",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022696e6c696e65536f7572636573223a20747275652c0a2020202022736f75726365526f6f74223a20222f736f75726365220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/21/syntax",
+    "options": {
+      "inlineSources": true,
+      "noEmit": true,
+      "noLib": true,
+      "sourceRoot": "/source",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/22/command",
+    "options": {
+      "mapRoot": "/maps",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6170526f6f74223a20222f6d617073220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/22/syntax",
+    "options": {
+      "mapRoot": "/maps",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/23/command",
+    "options": {
+      "declarationDir": "/types",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226465636c61726174696f6e446972223a20222f7479706573220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/23/syntax",
+    "options": {
+      "declarationDir": "/types",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/24/command",
+    "options": {
+      "declarationMap": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226465636c61726174696f6e4d6170223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/24/syntax",
+    "options": {
+      "declarationMap": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/25/command",
+    "options": {
+      "lib": [],
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226c6962223a205b5d0a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/25/syntax",
+    "options": {
+      "lib": [],
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/26/command",
+    "options": {
+      "isolatedModules": true,
+      "noEmit": true,
+      "noLib": true,
+      "preserveConstEnums": false,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202269736f6c617465644d6f64756c6573223a20747275652c0a20202020227072657365727665436f6e7374456e756d73223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/26/syntax",
+    "options": {
+      "isolatedModules": true,
+      "noEmit": true,
+      "noLib": true,
+      "preserveConstEnums": false,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/27/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "preserveConstEnums": false,
+      "target": 99,
+      "verbatimModuleSyntax": true
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022766572626174696d4d6f64756c6553796e746178223a20747275652c0a20202020227072657365727665436f6e7374456e756d73223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/27/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "preserveConstEnums": false,
+      "target": 99,
+      "verbatimModuleSyntax": true
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/28/command",
+    "options": {
+      "allowJs": false,
+      "checkJs": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022636865636b4a73223a20747275652c0a2020202022616c6c6f774a73223a2066616c73650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/28/syntax",
+    "options": {
+      "allowJs": false,
+      "checkJs": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/29/command",
+    "options": {
+      "emitDeclarationOnly": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022656d69744465636c61726174696f6e4f6e6c79223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/29/syntax",
+    "options": {
+      "emitDeclarationOnly": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/30/command",
+    "options": {
+      "emitDecoratorMetadata": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022656d69744465636f7261746f724d65746164617461223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/30/syntax",
+    "options": {
+      "emitDecoratorMetadata": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/31/command",
+    "options": {
+      "jsx": 4,
+      "jsxFactory": "A..B",
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "bad-name",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226a7378466163746f7279223a2022412e2e42222c0a20202020226a7378223a20342c0a202020202272656163744e616d657370616365223a20226261642d6e616d65220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/31/syntax",
+    "options": {
+      "jsx": 4,
+      "jsxFactory": "A..B",
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "bad-name",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/32/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "bad-name",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202272656163744e616d657370616365223a20226261642d6e616d65220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/32/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "bad-name",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/33/command",
+    "options": {
+      "jsx": 5,
+      "jsxFragmentFactory": "A..B",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226a7378467261676d656e74466163746f7279223a2022412e2e42222c0a20202020226a7378223a20350a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/33/syntax",
+    "options": {
+      "jsx": 5,
+      "jsxFragmentFactory": "A..B",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/34/command",
+    "options": {
+      "jsx": 4,
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "A",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a202020202272656163744e616d657370616365223a202241222c0a20202020226a7378223a20340a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/34/syntax",
+    "options": {
+      "jsx": 4,
+      "noEmit": true,
+      "noLib": true,
+      "reactNamespace": "A",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/35/command",
+    "options": {
+      "jsx": 3,
+      "jsxImportSource": "pkg",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226a7378496d706f7274536f75726365223a2022706b67222c0a20202020226a7378223a20330a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/35/syntax",
+    "options": {
+      "jsx": 3,
+      "jsxImportSource": "pkg",
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/36/command",
+    "options": {
+      "allowImportingTsExtensions": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a2066616c73652c0a2020202022746172676574223a2039392c0a2020202022616c6c6f77496d706f7274696e675473457874656e73696f6e73223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/36/syntax",
+    "options": {
+      "allowImportingTsExtensions": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/37/command",
+    "options": {
+      "customConditions": [],
+      "moduleResolution": 1,
+      "noEmit": true,
+      "noLib": true,
+      "resolvePackageJsonExports": true,
+      "resolvePackageJsonImports": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c655265736f6c7574696f6e223a20312c0a20202020227265736f6c76655061636b6167654a736f6e4578706f727473223a20747275652c0a20202020227265736f6c76655061636b6167654a736f6e496d706f727473223a20747275652c0a2020202022637573746f6d436f6e646974696f6e73223a205b5d0a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/37/syntax",
+    "options": {
+      "customConditions": [],
+      "moduleResolution": 1,
+      "noEmit": true,
+      "noLib": true,
+      "resolvePackageJsonExports": true,
+      "resolvePackageJsonImports": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/38/command",
+    "options": {
+      "module": 2,
+      "moduleResolution": 100,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c655265736f6c7574696f6e223a203130302c0a20202020226d6f64756c65223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/38/syntax",
+    "options": {
+      "module": 2,
+      "moduleResolution": 100,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/39/command",
+    "options": {
+      "module": 100,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a203130302c0a20202020226d6f64756c655265736f6c7574696f6e223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/39/syntax",
+    "options": {
+      "module": 100,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/40/command",
+    "options": {
+      "module": 101,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a203130312c0a20202020226d6f64756c655265736f6c7574696f6e223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/40/syntax",
+    "options": {
+      "module": 101,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/41/command",
+    "options": {
+      "module": 102,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a203130322c0a20202020226d6f64756c655265736f6c7574696f6e223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/41/syntax",
+    "options": {
+      "module": 102,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/42/command",
+    "options": {
+      "module": 199,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a203139392c0a20202020226d6f64756c655265736f6c7574696f6e223a20320a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/42/syntax",
+    "options": {
+      "module": 199,
+      "moduleResolution": 2,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/43/command",
+    "options": {
+      "module": 1,
+      "moduleResolution": 3,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a20312c0a20202020226d6f64756c655265736f6c7574696f6e223a20330a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/43/syntax",
+    "options": {
+      "module": 1,
+      "moduleResolution": 3,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/44/command",
+    "options": {
+      "module": 1,
+      "moduleResolution": 99,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a20202020226d6f64756c65223a20312c0a20202020226d6f64756c655265736f6c7574696f6e223a2039390a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/44/syntax",
+    "options": {
+      "module": 1,
+      "moduleResolution": 99,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/45/command",
+    "options": {
+      "configFilePath": "/tsconfig.json",
+      "noEmit": false,
+      "noLib": true,
+      "outDir": "/dist",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a2066616c73652c0a2020202022746172676574223a2039392c0a20202020226f7574446972223a20222f64697374222c0a2020202022636f6e66696746696c6550617468223a20222f7473636f6e6669672e6a736f6e220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/45/syntax",
+    "options": {
+      "configFilePath": "/tsconfig.json",
+      "noEmit": false,
+      "noLib": true,
+      "outDir": "/dist",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/46/command",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "rootDir": "/other",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022726f6f74446972223a20222f6f74686572220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/46/syntax",
+    "options": {
+      "noEmit": true,
+      "noLib": true,
+      "rootDir": "/other",
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/47/command",
+    "options": {
+      "composite": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a20747275652c0a2020202022746172676574223a2039392c0a2020202022636f6d706f73697465223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/47/syntax",
+    "options": {
+      "composite": true,
+      "noEmit": true,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/48/command",
+    "options": {
+      "allowJs": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a2066616c73652c0a2020202022746172676574223a2039392c0a2020202022616c6c6f774a73223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/48/syntax",
+    "options": {
+      "allowJs": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/49/command",
+    "options": {
+      "allowJs": true,
+      "declaration": true,
+      "declarationMap": true,
+      "noEmit": false,
+      "noLib": true,
+      "sourceMap": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a2066616c73652c0a2020202022746172676574223a2039392c0a2020202022616c6c6f774a73223a20747275652c0a2020202022736f757263654d6170223a20747275652c0a20202020226465636c61726174696f6e223a20747275652c0a20202020226465636c61726174696f6e4d6170223a20747275650a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/49/syntax",
+    "options": {
+      "allowJs": true,
+      "declaration": true,
+      "declarationMap": true,
+      "noEmit": false,
+      "noLib": true,
+      "sourceMap": true,
+      "target": 99
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/50/command",
+    "options": {
+      "incremental": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99,
+      "tsBuildInfoFile": "/src/a.ts"
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b0a202022636f6d70696c65724f7074696f6e73223a207b0a20202020226e6f4c6962223a20747275652c0a20202020226e6f456d6974223a2066616c73652c0a2020202022746172676574223a2039392c0a2020202022696e6372656d656e74616c223a20747275652c0a202020202274734275696c64496e666f46696c65223a20222f7372632f612e7473220a20207d0a7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/50/syntax",
+    "options": {
+      "incremental": true,
+      "noEmit": false,
+      "noLib": true,
+      "target": 99,
+      "tsBuildInfoFile": "/src/a.ts"
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  },
+  {
+    "case_sensitive": true,
+    "config_name": "/tsconfig.json",
+    "config_text": "7b22636f6d70696c65724f7074696f6e73223a7b227374726963744e756c6c436865636b73223a66616c73652c2273747269637450726f7065727479496e697469616c697a6174696f6e223a747275652c227374726963744e756c6c436865636b73223a747275657d7d",
+    "cwd": "/",
+    "files": {
+      "/src/a.js": "6c6574206f746865723d323b",
+      "/src/a.ts": "6578706f7274206c65742076616c75653d313b"
+    },
+    "id": "options/duplicate-property-order",
+    "options": {
+      "noLib": true,
+      "strictNullChecks": false,
+      "strictPropertyInitialization": true
+    },
+    "roots": [
+      "/src/a.ts",
+      "/src/a.js"
+    ]
+  }
+]

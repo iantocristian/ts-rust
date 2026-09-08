@@ -1,0 +1,816 @@
+[
+  {
+    "id": "relative-postorder-cycle",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274207b787d2066726f6d20222e2f6465702e6a73223b206578706f727420636f6e7374206d3d783b",
+      "/src/dep.ts": "696d706f727420222e2f6d61696e2e6a73223b206578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "root-reference-order",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e636520706174683d222e2f7265662e747322202f3e0a696d706f727420222e2f646570223b",
+      "/src/ref.ts": "6c657420723d313b",
+      "/src/dep.ts": "6578706f727420636f6e737420643d323b",
+      "/src/second.ts": "6c657420733d333b"
+    },
+    "roots": [
+      "/src/second.ts",
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "relative-package-types",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274207b787d2066726f6d20222e2f706b67223b",
+      "/src/pkg/package.json": "7b227479706573223a222e2f74797065732e642e7473222c226d61696e223a222e2f696e6465782e6a73227d",
+      "/src/pkg/types.d.ts": "6578706f7274206465636c61726520636f6e737420783a6e756d6265723b",
+      "/src/pkg/index.js": "6578706f7274732e783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "node-package-types",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274207b787d2066726f6d2022706b67223b",
+      "/src/node_modules/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c227479706573223a22696e6465782e642e7473227d",
+      "/src/node_modules/pkg/index.d.ts": "6578706f7274206465636c61726520636f6e737420783a6e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "esm-explicit-extensions",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.mts": "696d706f727420222e2f6465702e6a73223b20696d706f727420222e2f6d697373696e67223b",
+      "/src/dep.ts": "6578706f727420636f6e737420643d323b"
+    },
+    "roots": [
+      "/src/main.mts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 199
+    }
+  },
+  {
+    "id": "suffix-order",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/src/dep.native.ts": "6578706f727420636f6e7374206e3d313b",
+      "/src/dep.ts": "6578706f727420636f6e7374206e3d323b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "moduleSuffixes": [
+        ".native",
+        ""
+      ]
+    }
+  },
+  {
+    "id": "no-resolve-metadata",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e636520706174683d227265662e747322202f3e0a696d706f727420222e2f646570223b",
+      "/src/ref.ts": "6c657420723d303b",
+      "/src/dep.ts": "6578706f727420636f6e737420643d323b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "noResolve": true
+    }
+  },
+  {
+    "id": "missing-root",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6c657420783d303b"
+    },
+    "roots": [
+      "/src/absent.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "no-default-lib-is-ignored",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e6365206e6f2d64656661756c742d6c69623d227472756522202f3e0a6c657420783d303b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "target": 1
+    }
+  },
+  {
+    "id": "no-lib-suppresses-default",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e6365206e6f2d64656661756c742d6c69623d227472756522202f3e0a6c657420783d303b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "target": 1
+    }
+  },
+  {
+    "id": "configured-lib-order",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6c657420783d303b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "lib": [
+        "es2015.promise",
+        "es5"
+      ]
+    }
+  },
+  {
+    "id": "physical-bom",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "efbbbf6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "duplicate-and-empty-imports",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f646570223b20696d706f727420222e2f646570223b20696d706f72742022223b",
+      "/src/dep.ts": "6578706f727420636f6e737420643d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "directory-dot-must-not-be-file",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f706b672f2e223b",
+      "/src/pkg.ts": "6578706f727420636f6e7374206261643d313b",
+      "/src/pkg/index.ts": "6578706f727420636f6e737420676f6f643d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "tsx-not-included-without-jsx",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f646570223b",
+      "/src/dep.tsx": "6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "tsx-included-with-jsx",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f6465702e6a7378223b",
+      "/src/dep.tsx": "6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "jsx": 1
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "arbitrary-extension-declaration",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f612e637373223b",
+      "/src/a.d.css.ts": "6578706f7274206465636c61726520636f6e737420783a6e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "allowArbitraryExtensions": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "arbitrary-extension-not-enabled",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f612e637373223b",
+      "/src/a.d.css.ts": "6578706f7274206465636c61726520636f6e737420783a6e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "package-typings-suffix",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b67223b",
+      "/src/node_modules/pkg/package.json": "7b22747970696e6773223a22696e6465782e642e7473227d",
+      "/src/node_modules/pkg/index.native.d.ts": "6578706f7274206465636c61726520636f6e7374206e3a313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "moduleSuffixes": [
+        ".native",
+        ""
+      ]
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "ancestor-attypes-precedes-near-js",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b67223b",
+      "/src/node_modules/pkg/index.js": "6d6f64756c652e6578706f7274733d313b",
+      "/node_modules/@types/pkg/index.d.ts": "6578706f7274206465636c61726520636f6e7374206e3a313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "types": []
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "relative-package-exports-not-consulted",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f706b67223b",
+      "/src/pkg/package.json": "7b226578706f727473223a222e2f6f746865722e6a73222c227479706573223a22696e6465782e642e7473227d",
+      "/src/pkg/index.d.ts": "6578706f7274206465636c61726520636f6e7374206e3a313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "relative-commonjs-require",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742078203d207265717569726528222e2f64657022293b",
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 199
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "dynamic-import-commonjs",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727428222e2f64657022293b",
+      "/src/dep.ts": "6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 1
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "json-module",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420646174612066726f6d20222e2f646174612e6a736f6e223b",
+      "/src/data.json": "7b2278223a317d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "resolveJsonModule": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "package-symlink-realpath",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b67223b",
+      "/store/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a2231222c227479706573223a22696e6465782e642e7473227d",
+      "/store/pkg/index.d.ts": "6578706f7274206465636c61726520636f6e737420783a313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {
+      "/src/node_modules/pkg": "/store/pkg"
+    }
+  },
+  {
+    "id": "package-symlink-preserved",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b67223b",
+      "/store/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a2231222c227479706573223a22696e6465782e642e7473227d",
+      "/store/pkg/index.d.ts": "6578706f7274206465636c61726520636f6e737420783a313b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "preserveSymlinks": true
+    },
+    "symlinks": {
+      "/src/node_modules/pkg": "/store/pkg"
+    }
+  },
+  {
+    "id": "windows-insensitive-paths",
+    "cwd": "C:/src",
+    "case_sensitive": false,
+    "files": {
+      "C:/src/MAIN.ts": "696d706f727420222e2f4465702e6a73223b",
+      "C:/src/dep.ts": "6578706f727420636f6e737420783d313b"
+    },
+    "roots": [
+      "C:/src/MAIN.ts"
+    ],
+    "options": {
+      "noLib": true
+    },
+    "symlinks": {}
+  },
+  {
+    "id": "utf16-bom-physical",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "fffe6500780070006f0072007400200063006f006e0073007400200078003d0031003b00"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "types-nil-does-not-discover",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/@types/visible/index.d.ts": "6465636c6172652076617220616d6269656e743a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "types-wildcard-discovers",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/@types/visible/index.d.ts": "6465636c6172652076617220616d6269656e743a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "id": "types-explicit-missing",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f7274207b7d3b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "types": [
+        "missing"
+      ]
+    }
+  },
+  {
+    "id": "triple-slash-type-missing",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e63652074797065733d226d697373696e6722202f3e0a6578706f7274207b7d3b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "triple-slash-types-primary",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "2f2f2f203c7265666572656e63652074797065733d22706b6722202f3e0a6578706f7274207b7d3b",
+      "/src/node_modules/@types/pkg/index.d.ts": "6465636c6172652076617220703a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "types-custom-root",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f7274207b7d3b",
+      "/src/types/pkg.d.ts": "6465636c6172652076617220703a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "types": [
+        "pkg"
+      ],
+      "typeRoots": [
+        "/src/types"
+      ]
+    }
+  },
+  {
+    "id": "paths-one-star",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022782f666f6f223b",
+      "/src/local/foo.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "paths": {
+        "x/*": [
+          "local/*"
+        ]
+      },
+      "pathsBasePath": "/src"
+    }
+  },
+  {
+    "id": "paths-null-entry",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274202278223b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "paths": {
+        "x": null
+      },
+      "pathsBasePath": "/src"
+    }
+  },
+  {
+    "id": "baseurl-has-no-lookup",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274202278223b",
+      "/src/x.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "baseUrl": "/src"
+    }
+  },
+  {
+    "id": "rootdirs-fallback",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222e2f6465702e6a73223b",
+      "/generated/dep.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "rootDirs": [
+        "/src",
+        "/generated"
+      ]
+    }
+  },
+  {
+    "id": "synthetic-tslib",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f727420636f6e737420783d313b",
+      "/src/node_modules/tslib/index.d.ts": "6578706f7274206465636c61726520636f6e737420783a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "importHelpers": true
+    }
+  },
+  {
+    "id": "synthetic-jsx-runtime",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/react/jsx-runtime.d.ts": "6578706f7274206465636c61726520636f6e737420783a206e756d6265723b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "jsx": 4
+    }
+  },
+  {
+    "id": "package-exports-require",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b672f78223b",
+      "/src/node_modules/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c226578706f727473223a7b222e2f2a223a7b22696d706f7274223a222e2f65736d2f2a2e6a73222c2272657175697265223a222e2f636a732f2a2e6a73227d7d7d",
+      "/src/node_modules/pkg/esm/x.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/pkg/cjs/x.d.ts": "6578706f7274207b7d3b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 199,
+      "moduleResolution": 99
+    }
+  },
+  {
+    "id": "package-exports-bundler-import",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b672f78223b",
+      "/src/node_modules/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c226578706f727473223a7b222e2f2a223a7b22696d706f7274223a222e2f65736d2f2a2e6a73222c2272657175697265223a222e2f636a732f2a2e6a73227d7d7d",
+      "/src/node_modules/pkg/esm/x.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/pkg/cjs/x.d.ts": "6578706f7274207b7d3b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 200,
+      "moduleResolution": 100
+    }
+  },
+  {
+    "id": "package-exports-node-ignores-false",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b672f78223b",
+      "/src/node_modules/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a22312e302e30222c226578706f727473223a7b222e2f2a223a7b22696d706f7274223a222e2f65736d2f2a2e6a73222c2272657175697265223a222e2f636a732f2a2e6a73227d7d7d",
+      "/src/node_modules/pkg/esm/x.d.ts": "6578706f7274207b7d3b",
+      "/src/node_modules/pkg/cjs/x.d.ts": "6578706f7274207b7d3b"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "module": 199,
+      "moduleResolution": 99,
+      "resolvePackageJsonExports": false
+    }
+  },
+  {
+    "id": "package-exports-null-blocks-array",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b67223b",
+      "/src/node_modules/pkg/package.json": "7b226578706f727473223a5b6e756c6c2c222e2f696e6465782e6a73225d7d",
+      "/src/node_modules/pkg/index.d.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "package-imports-target",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f727420222378223b",
+      "/src/package.json": "7b22696d706f727473223a7b222378223a222e2f6465702e6a73227d7d",
+      "/src/dep.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  },
+  {
+    "id": "package-self-output-redirect",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274202273656c66223b",
+      "/src/package.json": "7b226e616d65223a2273656c66222c226578706f727473223a222e2f646973742f6d61696e2e6a73227d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "rootDir": "/src",
+      "outDir": "dist"
+    }
+  },
+  {
+    "id": "package-self-ambiguous-output",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f7274202273656c66223b",
+      "/src/package.json": "7b226e616d65223a2273656c66222c226578706f727473223a222e2f646973742f6d61696e2e6a73227d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true,
+      "outDir": "dist"
+    }
+  },
+  {
+    "id": "package-subpath-file",
+    "cwd": "/src",
+    "case_sensitive": true,
+    "files": {
+      "/src/main.ts": "696d706f72742022706b672f78223b",
+      "/src/node_modules/pkg/package.json": "7b226e616d65223a22706b67222c2276657273696f6e223a2231222c226d61696e223a222e2f6d61696e2e6a73227d",
+      "/src/node_modules/pkg/x.d.ts": "6578706f7274207b7d",
+      "/src/node_modules/pkg/main.d.ts": "6578706f7274207b7d"
+    },
+    "roots": [
+      "/src/main.ts"
+    ],
+    "options": {
+      "noLib": true
+    }
+  }
+]

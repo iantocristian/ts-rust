@@ -61,7 +61,8 @@ class AstOwnershipProducerTests(unittest.TestCase):
             with patch.object(s04_ownership, "invoke", invoke):
                 report = s04_ownership.run(root)
             self.assertEqual(report["metrics"]["ast_runtime_tests"], len(s06_ownership.load_cases(root)))
-        runs = [(args, env) for args, env in calls if "ts_ast" in args]
+        runs = [(args, env) for args, env in calls
+                if "ts_ast" in args and "storage_tests::" in args]
         self.assertEqual(len(runs), 4)
         for args, _ in runs:
             self.assertIn("storage_tests::", args)
@@ -73,13 +74,15 @@ class AstOwnershipProducerTests(unittest.TestCase):
         self.assertEqual(set(report["tests"]), set(s04_ownership.SCENARIOS))
         for mode in ("debug", "release", "miri", "address_sanitizer"):
             self.assertTrue(report["metrics"]["ast_runtime_" + mode])
+            for group in s04_ownership.s07_ownership.GROUPS:
+                self.assertTrue(report["metrics"][group + "_" + mode])
 
     def test_each_mode_failure_is_false_and_does_not_skip_independent_modes(self):
         for failed_mode in ("debug", "release", "miri", "address_sanitizer"):
             for failure in ("missing", "failed", "ignored", "command"):
                 calls = []
                 def invoke(root, args, env=None):
-                    if "ts_ast" not in args:
+                    if "ts_ast" not in args or "storage_tests::" not in args:
                         return successful_invoke(root, args, env)
                     mode = ("miri" if "miri" in args else "address_sanitizer" if "-Zbuild-std" in args
                             else "release" if "--release" in args else "debug")
@@ -102,6 +105,8 @@ class AstOwnershipProducerTests(unittest.TestCase):
                     self.assertFalse(report["metrics"]["ast_runtime"])
                     for mode in calls:
                         self.assertIs(report["metrics"]["ast_runtime_" + mode], mode != failed_mode)
+                        for group in s04_ownership.s07_ownership.GROUPS:
+                            self.assertTrue(report["metrics"][group + "_" + mode])
                     if failed_mode in ("miri", "address_sanitizer"):
                         self.assertFalse(report["metrics"][failed_mode])
                     # Measured leaf outcomes remain separately identifiable.

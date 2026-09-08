@@ -244,19 +244,20 @@ pub(super) fn nullable(field: &Value) -> Result<bool, String> {
 }
 
 pub(super) fn boxed(node: &Value) -> Result<bool, String> {
-    // Provisional representation policy, not a throughput measurement: budget
-    // each field conservatively (including alignment) and cap inline payloads.
-    // The generated crate's layout test verifies this ceiling on actual Rust.
+    // S07's retained workload measures the enum's per-node cost. Keep common
+    // identifiers and up to four graph edges inline; box larger payloads. The
+    // generated crate's layout test verifies the ceiling on actual Rust.
     let mut budget = 0;
     for field in fields(node)? {
         budget += match rust_type(&field["type"])?.as_str() {
-            "JsString" => 48,
-            "NodeListId" => 16,
+            "JsString" => 32,
+            "NodeListId" => 8,
+            "NodeSlice" | "TextSlice" => 16,
             typ if typ.starts_with("Box<[") => 16,
             _ => 8,
         };
     }
-    Ok(budget > 64)
+    Ok(budget > 32)
 }
 
 pub(super) fn children(node: &Value) -> Result<Vec<&Value>, String> {
@@ -500,7 +501,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<BTreeMap<PathBuf, String
         leaf_patterns.join(" | ")
     ));
     visitors.push_str("        }\n        result\n    }\n}\n");
-    data.push_str("// Payloads with a conservative field budget above 64 bytes are boxed.\n// S06 will measure this initial layout; accessors hide the variant storage.\n#[derive(Clone, Debug, PartialEq, Eq)]\npub enum NodeData {\n");
+    data.push_str("// Payloads with a conservative field budget above 32 bytes are boxed.\n// Common identifier/edge payloads stay inline; accessors hide storage.\n#[derive(Clone, Debug, PartialEq, Eq)]\npub enum NodeData {\n");
     for node in nodes {
         let name = string(node, "name")?;
         let typ = if boxed(node)? {

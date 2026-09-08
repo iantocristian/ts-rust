@@ -1,0 +1,40 @@
+{
+  "common": {
+    "cases": [
+      "bind_tests::binding_concurrent_first_use_publishes_once_and_keeps_stable_symbol_ids",
+      "bind_tests::binding_imported_initializer_cannot_borrow_the_importers_wider_retention",
+      "bind_tests::binding_mapped_members_initialize_independently_and_retained_symbols_keep_the_bundle",
+      "bind_tests::binding_one_logical_source_cannot_stage_a_siblings_headers_in_the_same_arena",
+      "bind_tests::binding_panic_is_terminal_and_preserves_the_initiators_payload",
+      "bind_tests::binding_publishes_staged_headers_symbols_and_source_metadata_without_changing_parsed_views",
+      "bind_tests::binding_reentry_is_diagnosed_and_does_not_block_ordinary_lazy_nesting",
+      "bind_tests::binding_rejects_foreign_symbol_flow_and_ast_edges_before_publication",
+      "bind_tests::bound_mapped_reads_and_retention_select_the_target_sources_completed_overlay",
+      "bind_tests::bound_same_arena_sources_route_independently_and_reject_ambiguous_retention",
+      "bind_tests::factory_copies_select_each_retained_logical_sources_completed_binding",
+      "bind_tests::flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows"
+    ],
+    "exact": false,
+    "filter": "bind_tests::",
+    "package": "ts_ast"
+  },
+  "groups": {
+    "retained_snapshot_edit": {
+      "cases": [
+        "ownership_tests::retained_snapshot_edit_answers_concurrently_and_rejects_old_new_id_crossing"
+      ],
+      "exact": true,
+      "filter": "ownership_tests::retained_snapshot_edit_answers_concurrently_and_rejects_old_new_id_crossing",
+      "package": "ts_compiler"
+    },
+    "shared_bound_file": {
+      "cases": [
+        "ownership_tests::shared_bound_file_retains_identity_until_the_final_response_drops"
+      ],
+      "exact": true,
+      "filter": "ownership_tests::shared_bound_file_retains_identity_until_the_final_response_drops",
+      "package": "ts_compiler"
+    }
+  },
+  "version": 1
+}
