@@ -57,6 +57,37 @@ widths, census/model consistency and replay. Independent review found no
 arithmetic error in this additive model. Actual allocation, initialization,
 drop/counter behavior, CPU and RSS remain implementation questions.
 
+## Four-byte text in the page matrix
+
+The [text construction prototype](../storage-pilot/README-text.md) now exercises
+raw suffixes, pooled exceptions, range edits and full tag-domain escapes.
+`text_rows.py` changes only Identifier/PrivateIdentifier text words from eight
+to four bytes in the unchanged physical shape census. It preserves all binding
+fields and recharges actual class occupancy, page slack and directories.
+
+| Existing policy with four-byte identifier text | Modeled retained | Modeled requests |
+| --- | ---: | ---: |
+| All-atomic, eight rows | 803.629 MB | 834.855 MB |
+| Mixed, eight rows | 808.688 MB | 839.484 MB |
+| All-atomic, 16 rows | 812.817 MB | 831.175 MB |
+| Mixed, 16 rows | 821.967 MB | 840.002 MB |
+| Typed pages, four rows | 860.233 MB | 913.820 MB |
+
+The used-payload saving is **27,180,896 bytes**, including 2,463 private
+identifiers. These are fixed existing policies, not a new exhaustive page-size
+search. Owner text metadata, pooling, runtime identities and full-range link
+escapes remain additional. The model does not treat a source-suffix word as a
+canonical symbol-name identity or change byte-semantic table equality.
+
+```sh
+python3 tools/s07/performance-experiments/layout-followups/text_rows.py
+```
+
+The [new owner census](../owner-census/README.md) independently observes zero
+identifier exceptions at the frozen parse/bind endpoint. That makes the ordinary
+representation relevant to this workload; it does not remove the factory,
+foreign-owner or later-mutation fallback tested by the prototype.
+
 ## Source-sized initial chunks
 
 The global ratio is **8.2548 source bytes per physical node**. It is not a

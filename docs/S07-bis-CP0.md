@@ -7,6 +7,19 @@ memory captures, and emits no tracker metrics. Production storage is unchanged.
 
 ## Decision
 
+The [2026-09-08 storage pilot](S07-bis-storage-pilot.md) adds a fresh physical owner
+census, compiled binding/auxiliary components and an implemented four-byte text
+contract. Its additive page projection gives 808.688 MB for mixed eight-row
+pages and 860.233 MB for typed four-row pages. The tables below retain the original
+eight-byte-text model as a historical control. Whole-owner feasibility remains
+open: canonical-name storage, full-domain escapes, temporary traffic and the
+native residual are not fully priced. The first compact-list replay saves
+construction requests but regresses traversal. The separate contiguous-chunk
+trial adds cost without recovering read speed. The next access diagnostic must
+isolate repeated resolution/validation before production integration.
+
+### Initial model decision (historical)
+
 With A0-b retained as the new control, finish the whole-owner budget and the
 four-byte identifier-text representation experiment before selecting typed
 pages or word-class storage. The actual core census prices one all-atomic

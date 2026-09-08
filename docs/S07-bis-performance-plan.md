@@ -26,10 +26,16 @@ if A0 fails its correctness or measured-cost exits.
 The [A0 implementation record](S07-bis-A0.md) records both experiments. Initial
 A0 failed its screen; the predeclared A0-b variant preserves the parse-validation
 proof across narrow flag writes and passes. Keep that exclusive path, with CP2
-still held. Next, finish CP0's whole-owner model, including symbols, flows,
-lists, text and residuals; evaluate a four-byte identifier-text encoding; and
-finish CP1's access contract before selecting a payload storage family or
-beginning the broad generated-storage migration. The
+still held. The [storage pilot](S07-bis-storage-pilot.md) now implements four-byte
+identifier text and compact list construction, records a fresh physical owner
+census, and prices concrete binding/auxiliary records. The first list replay
+reduces construction requests but regresses traversal, so its page-spanning
+representation is not selected. A second capture finds that contiguous chunks
+add cost without recovering checked traversal speed. Next isolate lookup and
+validation costs in already resolved owner borrows, then test representative
+node access. Finish the whole-owner accounting (including name
+interning, escapes and residuals) and CP1's access contract before selecting a
+payload storage family or beginning the broad generated-storage migration. The
 [CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.
 
 Claude's second review identifies a sequencing error in the initial plan. The
@@ -492,6 +498,14 @@ and activate CP2. Otherwise proceed to shared compact layout with inline fields.
 Do not defer this decision to CP7 or predict a calendar duration from file count.
 
 ### Checkpoint 1 — Make field reads cheap and representation-independent
+
+The list pilots show why this must precede broad storage migration: making each
+backing contiguous did not recover checked traversal speed. First compare raw
+public-ID resolution with an already resolved owner borrow in a bounded access
+diagnostic. Keep safe bounds checks; validate imported/foreign/stale identities
+at the boundary. Establish which proofs survive real recursive binder calls and
+narrow writes before treating fewer checks in a synthetic sweep as an available
+production optimization. Preserve both recorded list captures as controls.
 
 1. Introduce the borrowed facade in `ts_ast::storage`/`node_accessors`; change
    generated accessors and factory mutations at their emitter in

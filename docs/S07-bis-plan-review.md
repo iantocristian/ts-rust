@@ -275,3 +275,39 @@ explicit work items, not assumed savings. The additive diagnostic passes seven
 Python tests and two compiled Rust tests; the source-density report replays
 archived metadata with workload/hash checks. These additions change no compiler
 behavior, gate thresholds, historical capture or promoted timing result.
+
+## 8. Implemented storage pilot and first measured list result
+
+The [implementation record](S07-bis-storage-pilot.md) now distinguishes observed
+occupancy, compiled layout projections and measured isolated construction.
+The physical census finds 2,207 assigned node runtime IDs, 117 symbol IDs and no
+source-suffix exceptions among 6,795,224 identifier/private-identifier rows. It
+preserves obsolete physical backings and confirms no lazy nodes were materialized
+at this endpoint. Those observations do not remove later factory, mutation,
+foreign-owner or lazy API obligations.
+
+The four-byte text implementation and list construction API pass their isolated
+debug/release/MSRV/Miri contracts. Independent arithmetic reproduces all five
+new text-page projections against the old controls. A root review of staged
+census accessors and the collector found no substantive observation defect;
+the documented metadata recovery retains the unchanged successful child's bytes.
+The compiled owner model keeps canonical-name interning, packed-flow escapes,
+owner dispatch and the unexplained native residual as explicit obligations.
+
+The first fixed list replay exposes an adverse result: 256-word pages reduce
+construction requests by 64.7% and construction time by 33.9%, while eight-sweep
+traversal is 35.6% slower. Host load also limits timing confidence. No production
+promotion follows. Continue with contiguous typed chunks and checked slice reads,
+preserving this capture and charging the new descriptors and chunk tails. Broad
+generated-storage migration still requires the representative node-access pilot
+and a complete owner/traffic budget; no S07 gate changes or new passing metrics
+are introduced by these diagnostics.
+
+The contiguous-chunk follow-up was implemented and independently reviewed, with
+12 additional debug/release/MSRV/Miri contract tests. Its fixed capture includes
+fresh legacy and page controls. It does not recover traversal speed and adds
+requests/retained bytes relative to pages, so those chunk policies are rejected.
+The next experiment isolates resolution/validation from reads through an already
+resolved owner borrow. Safe bounds checks and checked foreign/stale entry paths
+remain required. The whole-owner model and the actual binder access contract,
+not this microprobe alone, will determine production feasibility.
