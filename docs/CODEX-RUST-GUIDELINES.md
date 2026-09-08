@@ -372,6 +372,15 @@ three moved AST sort files invalidated otherwise unchanged captures. Verify
 current gates again after staging and before committing; source-byte stability
 alone does not establish stability of this tracker's input inventory.
 
+S07 passed its correctness comparisons while allocating 1.63 times Go's bytes
+and taking 1.79/1.93 times its one/eight-worker time. I established a 2.181 GB
+minimum retained representation only after completing the port, against a
+2.035 GB allocation budget. For quantitative acceptance targets, estimate the
+representation budget from representative counts and measure a storage prototype
+early. Include replacement storage in any proposed savings, and use separate
+CPU profiles before attributing time to a suspected cost. Safe ownership and
+semantic parity do not establish acceptable memory use or speed.
+
 Do not use report grades or counts as acceptance criteria. Shorter files,
 fewer casts, fewer `expect`s, more derives, more comments and more probes can
 each make a port worse if pursued without examining the contract. The

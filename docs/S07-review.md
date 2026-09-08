@@ -59,10 +59,12 @@ methods have direct Rust closure equivalents; `getBinder`/`putBinder` use Go
 pooling replaced by scoped Rust construction/drop; three private helpers have
 no callers in the pinned binder package. The shared signed-numeric AST helper
 is implemented. No missing reachable binder behavior was found in this set;
-absence of binder pool reuse remains a measured performance difference.
+absence of binder pool reuse is an implementation difference included in the
+workload measurements, but its contribution has not been isolated.
 
 E3's S07 ownership groups do not complete the entire E3 experiment. The subset
 freeze does not establish checker parity. Benchmark graph parity is required for
 both worker modes before timing/allocation evidence is accepted. A completed
 measurement above a threshold remains a failed gate, even when correctness
-comparisons pass. See [S07 evidence](S07.md) for current results.
+comparisons pass. S07 measures only E5's parse/bind criteria; checker per-type
+footprint remains unmeasured. See [S07 evidence](S07.md) for current results.
