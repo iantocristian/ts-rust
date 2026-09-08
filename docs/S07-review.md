@@ -79,3 +79,23 @@ both worker modes before timing/allocation evidence is accepted. A completed
 measurement above a threshold remains a failed gate, even when correctness
 comparisons pass. S07 measures only E5's parse/bind criteria; checker per-type
 footprint remains unmeasured. See [S07 evidence](S07.md) for current results.
+
+## CPU diagnosis follow-up
+
+The [CPU report](S07-cpu-profile.md) retains twelve profiles and eighteen fresh
+controls on the unchanged compiler/benchmark sources. All thirty invocations
+match the frozen input digest and work counters. AST lookup paths account for
+38.9%/36.4% of sampled Rust binding CPU at one/eight workers; final binding
+validation accounts for 2.6%/2.4%. These are path costs, not promised savings.
+
+Independent review corrected capture provenance and cleanup, preserved control
+binary hashes, separated elapsed worker timers from CPU, and retained unknown
+sample mass. DWARF inline display can hide a physical wrapper name, so Rust
+analysis verifies the executable identity and resolves physical address ranges
+while preserving displayed source metadata. Go analysis keeps unlabelled GC
+and labelled runtime work in its denominator. Neither inclusive callback time
+nor the sampled `madvise` location is reported as lock waiting or GC by itself.
+
+Analyzer countertests and an independent real-trace accounting review pass.
+Reproducible targeted exports are archived with provenance; native traces stay
+local. Production code and E5/E6 evidence remain unchanged, and S07-4 stays open.
