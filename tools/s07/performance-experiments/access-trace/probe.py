@@ -27,6 +27,7 @@ PAYLOAD_LIMIT = 32 * 1024**3
 COMPRESSED_LIMIT = 3 * 1024**3
 TEST_SUPPORT = ('data/s07/ast-helper-observations.tsv', 'data/s07/diagnostic-order-observations.tsv',
                 'data/s06/ast-utilities-middle-kinds.bin', 'data/s06/ast-utilities-middle-behaviors.tsv')
+WORKLOAD_DECLARATIONS = ('data/s07/vscode-parse-options.json', 'data/s07/vscode-files.json')
 
 
 def digest(path):
@@ -55,7 +56,7 @@ def tool_files():
     # direct-import list missed active transitive modules in the first review.
     # This inventory is not a sprint evidence source glob or acceptance metric.
     helpers = [HERE.parent / 'runner.py', *(ROOT / 'scripts').glob('*.py')]
-    return {str(p.relative_to(ROOT)): digest(p) for p in sorted(set(own + helpers + [ROOT / name for name in TEST_SUPPORT]))}
+    return {str(p.relative_to(ROOT)): digest(p) for p in sorted(set(own + helpers + [ROOT / name for name in (*TEST_SUPPORT, *WORKLOAD_DECLARATIONS)]))}
 
 
 def snapshot_tools(output):
@@ -222,7 +223,7 @@ def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limi
     runner.validate_inputs(build_dir, record['expected_work'])
     output.mkdir(parents=True, exist_ok=False)
     before_tools = snapshot_tools(output)
-    inputs = strict_json_loads((build_dir / 'inputs.json').read_bytes())
+    inputs, recipes = runner.requests_from_frozen(build_dir / 'inputs.json')
     indices = list(range(len(inputs)))
     if sizing:
         # A declared diagnostic subset, never described as a workload capture or
@@ -230,7 +231,11 @@ def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limi
         largest = sorted(indices, key=lambda i: (-Path(inputs[i]['local']).stat().st_size, i))[:16]
         indices = sorted(set(indices[:16] + largest))
         inputs = [inputs[i] for i in indices]
+    recipes = [recipes[i] for i in indices]
+    selected_work = {'files': len(inputs), 'loaded_bytes': sum(row['source_bytes'] for row in recipes),
+                     'loaded_input_sha256': runner.loaded_input_digest(recipes)}
     runner.write_json(output / 'inputs.json', inputs)
+    runner.write_json(output / 'recipes.json', recipes)
     free = shutil.disk_usage(output).free
     if free < compressed_limit + 1024**3:
         raise ValueError('insufficient free space for declared compressed cap plus 1GiB reserve')
@@ -271,6 +276,8 @@ def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limi
     if status or failed:
         raise ValueError('trace capture incomplete; receipt and partial stream retained')
     summary = strict_json_loads((output / 'summary.json').read_bytes())
+    if any(summary.get(key) != value for key, value in selected_work.items()):
+        raise ValueError('native loaded inputs differ from the declared selection')
     if not sizing:
         for key, value in record['expected_work'].items():
             if summary.get(key) != value:
@@ -286,8 +293,10 @@ def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limi
     graphs = graph_match(output / 'graphs.ndjson', output / 'control-graphs.ndjson')
     if graphs != len(inputs) or summary['files'] != len(inputs):
         raise ValueError('trace omitted workload inputs')
-    # Recheck actual loaded identity after the child, including sizing subsets.
-    runner.validate_inputs(output, summary)
+    # The shared benchmark validator deliberately requires all13,094 inputs.
+    # Keep that rule intact: revalidate the complete frozen parent, then compare
+    # the native selected digest against the selected recipes derived above.
+    runner.validate_inputs(build_dir, record['expected_work'])
     registries = [build_dir / 'tool-snapshot' / HERE.relative_to(ROOT) / (name + '-registry.json')
                   for name in ('protocol', 'state', 'hooks')]
     trace_report = verify_capture(raw, payload_limit, compressed_limit, registries=registries, expected={
