@@ -270,6 +270,13 @@ exactly and recognized runtime bounds failures by a narrow class. Unknown,
 assertion and overflow panics must not pass merely because both programs
 panicked. Do not loosen the classifier to make a new mismatch disappear.
 
+Repeated source output can vary even under an exact pin. S07's JSON dependency
+deliberately alternates between two diagnostic prefixes. Establish that behavior
+from the dependency's code and tests before adding a qualification; limit it to
+the demonstrated field and prefix, retain the raw diagnostics, and test that a
+changed message body or unknown prefix still fails. A diagnostic-only field is
+not a reason to silently discard all source-check differences.
+
 Exercise a producer helper through its caller as well as on its own. S07's
 operation inventory and binder-depth captures passed their checks but printed
 progress into the containing producer's JSON channel. The tracker correctly

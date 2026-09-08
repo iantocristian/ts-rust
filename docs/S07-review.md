@@ -24,6 +24,7 @@ replace measured parity or the sprint's acceptance thresholds.
 | The binder observer generator used a different Rust edition from the workspace. | Read the edition from the workspace manifest, then verify generated output and ordinary workspace formatting agree. |
 | New local path dependencies omitted the version required by cargo-deny's wildcard policy. | Declare their existing 0.1.0 package version; no dependency or policy exception is added. |
 | Operation-inventory and binder-depth progress contaminated their containing producers' JSON output. | Send progress to stderr and exercise the helpers as embedded calls. The tracker rejected the contaminated E2/binder captures; their artifacts remain archived. Fresh captures are required after correcting the output boundary. |
+| Repeated package-JSON source checks rejected equivalent Go diagnostics. | The pinned JSON dependency deliberately chooses `json: cannot ` or `json: unable to ` per process. Qualify only this prefix in a failed parse's top-level error; preserve every remaining byte and reject changed message bodies, unknown prefixes and source/manifest drift. The helper report retains both raw diagnostic sets, affected paths and hashes. |
 
 Ordinary bound reads and retention also needed to select the target logical
 source's completed overlay. Mapped siblings and sources sharing one arena now

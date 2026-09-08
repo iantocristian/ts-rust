@@ -18,3 +18,17 @@ key order, object classification, and falsiness. The source resolver discards
 Parse's error text, so it is retained for diagnosis but not asserted as a Rust
 public error contract. Syntax errors yield zero fields and remain distinguishable
 from a missing package via `ParsedPackageJson::parseable` and the resolver cache.
+
+The source check qualifies exactly one demonstrated nondeterministic rendering:
+the pinned `go-json-experiment/json` dependency chooses `json: cannot ` or
+`json: unable to ` once per process in `errors.go:errorModalVerb` (lines 322–333).
+Its own `errors_test.go` normalizes this prefix at lines 107–111. We apply the
+same replacement only to the top-level error of a failed parse. The remaining
+message body, fields, object order, and all other serialized bytes stay exact.
+Changed bodies and unknown prefixes still fail; manifest/source drift also fails.
+
+Every check preserves its original Go output under `target/s07-packagejson/`
+using the raw SHA-256 as its filename. `comparison.json` and the program helper
+report retain the qualification, both raw diagnostic sets, affected row paths,
+raw/normalized hashes and the manifest result. Frozen observations use the
+canonical prefix; a default check never rewrites them.

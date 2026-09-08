@@ -17,6 +17,23 @@ CHECKS = [
 ]
 
 
+def packagejson_source_report(output, pin):
+    from s07_packagejson import QUALIFICATION
+    observed = strict_json_loads(output)
+    exact_keys(observed, ('schema', 'operation', 'qualification', 'frozen_sha256',
+        'fresh_sha256', 'normalized_frozen_sha256', 'normalized_fresh_sha256',
+        'raw_equal', 'observations_equal', 'normalized_errors', 'raw_diagnostics',
+        'pin', 'requests', 'fresh_artifact', 'manifest_sha256', 'manifest_current'),
+        'package JSON source qualification report')
+    if (type(observed['schema']) is not int or observed['schema'] != 1
+            or observed['operation'] != 'packagejson_source_check' or observed['pin'] != pin
+            or observed['qualification'] != QUALIFICATION
+            or observed['observations_equal'] is not True or observed['manifest_current'] is not True
+            or observed['normalized_frozen_sha256'] != observed['normalized_fresh_sha256']):
+        raise ValueError('invalid package JSON source qualification report')
+    return observed
+
+
 def measure(directory):
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
@@ -43,8 +60,12 @@ def measure(directory):
                 or group['tests'] != sorted(set(group['tests']))
                 or any(type(name) is not str or not name.startswith(group['prefix']) for name in group['tests'])):
             raise ValueError('invalid program helper test obligation')
+    source_reports = []
     for index, check in enumerate(CHECKS):
-        setup([sys.executable, *check], ROOT, directory/f'source-{index}')
+        output = setup([sys.executable, *check], ROOT, directory/f'source-{index}')
+        if check == ['scripts/s07_packagejson.py']:
+            observed = packagejson_source_report(output, document['upstream_pin'])
+            source_reports.append({'check': check, 'report': observed})
     packages = sorted({group['package'] for group in groups})
     args = ['cargo', 'test', '--locked', '--release', '--all-targets', '--no-run', '--message-format=json']
     for package in packages:
@@ -76,7 +97,8 @@ def measure(directory):
         for ordinal, name in enumerate(group['tests']):
             outcome = invoke([binaries[key],name,'--exact','--test-threads=1','--color=never'], ROOT, directory/f'test-{index}-{ordinal}')
             results.append({'package':key[0], 'target':key[1], 'test':name, 'passed':test_result(outcome,name)})
-    report = {'inventory_sha256':sha256(raw), 'source_checks':len(CHECKS), 'tests':len(results),
+    report = {'inventory_sha256':sha256(raw), 'source_checks':len(CHECKS),
+              'source_reports':source_reports, 'tests':len(results),
               'results':results, 'pass':all(row['passed'] for row in results)}
     (directory/'report.json').write_bytes(canonical(report)+b'\n')
     return report
