@@ -64,7 +64,11 @@ The production audit finds per-element complete slice resolution in
 but current `NodeSliceRead` borrows the entire `BindBuilder`/`ParsedFile` writer.
 That borrow cannot survive recursive `self.bind(...)` calls in safe Rust.
 Retaining list borrows requires a disjoint immutable auxiliary reader plus a
-restricted core/binding writer and a compatible AST read facade. A longer
+restricted core/binding writer and a compatible AST read facade. That is not
+required to remove per-element resolution: copying up to 16 IDs onto the stack
+lets each backing borrow end before recursion. The follow-up
+[list-copy experiment](S07-bis-list-copy.md) tests this bounded alternative;
+its stack and copy cost must pass a separate full-pipeline screen. A longer
 `AstView` lifetime would not establish this capability.
 
 An exclusive full-node borrow also cannot survive mutation of that node. Keep
@@ -175,15 +179,48 @@ promotion. It becomes the next experiment control at
 A0-b and the earlier controls remain immutable. CP1's general borrowed facade,
 compact generated storage and the four final S07 CPU/memory gates remain open.
 
+## Distance to historical Go budgets
+
+The [durable arithmetic replay](../tools/s07/performance-experiments/gate-distance/README.md)
+uses this CP1 candidate's medians and the original Go medians. It measures no
+new cross-runtime samples. The wall budget equals the old Go median; memory
+budgets equal 0.7 times their old Go medians. The ratio column divides by the
+full Go median, with required maxima of 1.0 for wall and 0.7 for memory.
+GB is decimal. Requested allocation and lifetime peak RSS are separate domains.
+
+| Domain | Workers | CP1 median | Historical budget | Median / old Go | Excess to budget |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Wall time | 1 | 4.590853 s | 2.937627 s | 1.562776 | 1.653226 s |
+| Wall time | 8 | 1.079901 s | 0.633963 s | 1.703414 | 0.445939 s |
+| Requested allocation | 1 | 4.642570 GB | 2.035226 GB | 1.596776 | 2.607344 GB |
+| Requested allocation | 8 | 4.642571 GB | 2.035767 GB | 1.596352 | 2.606804 GB |
+| Peak RSS | 1 | 4.506681 GB | 2.208948 GB | 1.428135 | 2.297733 GB |
+| Peak RSS | 8 | 4.509221 GB | 2.217045 GB | 1.423721 | 2.292176 GB |
+
+The remaining one-worker median gap is about **1.653 seconds** at that historical
+denominator. Without a current phase profile, it is not established that most
+of this gap is binding. CP1's same-screen A0-b control was 4.943356 seconds;
+the earlier A0-b promotion used a different capture. Their separate Rust/control
+percentages must not be multiplied into a measured cumulative improvement.
+
+Final timing qualification still requires fresh paired Rust/Go measurements,
+median ratios at most 1.0, bootstrap upper 95% ratio bounds at most 1.0 and both
+runtimes' relative MAD at most 5%, in both modes. The upper bounds in CP1's
+Rust/control screen do not transfer to this historical comparison. No new S07
+acceptance metric is emitted by the distance diagnostic.
+
 ## Next bounded node-access slice
 
 Compare current AST storage, typed payload rows and mixed plain/atomic word rows
 over Token, Identifier, PropertyAccessExpression, CallExpression,
 BinaryExpression, ExpressionStatement, Block, FunctionDeclaration and SourceFile.
 Those shapes represent 12,194,095 frozen physical nodes (62.23% of population,
-not CPU coverage). Use a real small syntax fixture plus declared diagnostic
-operations; the census cannot reconstruct node-level edge order, flags or an
-actual binder execution trace.
+not CPU coverage). Use a [recorded workload access trace](S07-bis-access-trace.md)
+as the performance driver. Keep small syntax fixtures for semantic
+counterexamples. The census cannot reconstruct node-level edge order, flags or
+an actual binder execution trace, and operation-frequency coverage alone is not
+CPU coverage. Record and replay actual accesses with the full retained working
+set, then confirm the selected representation in the complete pipeline.
 
 Keep the 24-byte header and text/list policy matched across compact candidates
 initially. Following the [absolute-cost review](S07-bis-list-tradeoff-review.md),

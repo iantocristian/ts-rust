@@ -149,6 +149,30 @@ screen. They compare today's two backends, so their reduction must not be added
 to the normal-binary result against the original frozen control. Near-one-second
 binding remains a later milestone after compact binding-field storage.
 
+## Distance to historical Go budgets
+
+The [arithmetic replay](../tools/s07/performance-experiments/gate-distance/README.md)
+compares this retained A0-b screen with the original Go medians. These are
+historical distances, not a fresh Go-relative acceptance result. The wall budget
+is the old Go median; each memory budget is 0.7 times its old Go median. Ratios
+below use the full Go median, so the required ratio is at most 1.0 for wall time
+and 0.7 for memory. GB is decimal; peak RSS and allocation traffic remain distinct.
+
+| Domain | Workers | A0-b median | Historical budget | Median / old Go | Excess to budget |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Wall time | 1 | 4.921846 s | 2.937627 s | 1.675450 | 1.984219 s |
+| Wall time | 8 | 1.165151 s | 0.633963 s | 1.837885 | 0.531188 s |
+| Requested allocation | 1 | 4.642569 GB | 2.035226 GB | 1.596775 | 2.607343 GB |
+| Requested allocation | 8 | 4.642572 GB | 2.035767 GB | 1.596352 | 2.606806 GB |
+| Peak RSS | 1 | 4.506714 GB | 2.208948 GB | 1.428146 | 2.297766 GB |
+| Peak RSS | 8 | 4.509221 GB | 2.217045 GB | 1.423721 | 2.292176 GB |
+
+Final CPU acceptance also needs a fresh Rust/Go bootstrap upper 95% ratio bound
+at most 1.0 and both runtimes' relative MAD at most 5%, in both worker modes.
+The checkpoint's Rust/control bounds above do not establish that condition.
+This historical comparison does not combine separate checkpoint improvements
+or attribute the remaining gap to a particular compiler phase.
+
 ## Correctness and durable evidence
 
 The implementation passed 177 workspace library tests, affected all-target

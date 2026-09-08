@@ -69,7 +69,12 @@ A0 initially keeps today's symbol/flow field maps. It tests direct syntax-field
 mutation and lookup routing, not elimination of the 633 MB full-binding-map
 request site. After a successful A0, put applicable binding fields directly in
 the compact per-shape payloads at CP3. Do not insert them into today's large
-inline enum first and accidentally enlarge every node or box identifiers.
+inline enum first and accidentally enlarge every node or box identifiers. The
+[compiled layout audit](../tools/s07/performance-experiments/binding-layout-audit/README.md)
+checks the current 40-byte enum / 80-byte node and the 48/88-byte result of an
+inline eight-byte field. Model compact fields from both inherited Go bases and
+direct fields: `CaseOrDefaultClause.FallthroughFlowNode` is outside the 83-type
+base union.
 
 ### Contract history
 
@@ -405,7 +410,13 @@ remaining traffic audit, not the first time temporary costs are considered.
 Each checkpoint ends with a recorded keep/reject decision and the remaining
 distance to all four performance gates. A locally useful improvement is not
 S07 completion. Retain one approved candidate as the next control; discarded
-experiments remain documented, not enabled in the production path.
+experiments remain documented, not enabled in the production path. Each record
+includes a running table of wall time, requested allocation and peak RSS at both
+worker counts against the historical Go budgets, with absolute excess and source
+identities. The [distance replay](../tools/s07/performance-experiments/gate-distance/README.md)
+provides the A0-b/CP1 reference. Label these historical comparisons explicitly;
+they supply neither fresh cross-runtime confidence bounds nor phase attribution.
+Do not multiply improvements from separate screening batches.
 
 Selected order: **CP0 → A0 → CP1 → CP3 → CP4 → CP5 → CP6 → CP7 → CP8**.
 Decide immediately after A0. **CP2 stays on hold** unless A0 is rejected or a
@@ -519,7 +530,16 @@ production optimization. Preserve both recorded list captures as controls. The
 bounded [CP1 implementation record](S07-bis-CP1.md) fixes the access comparison,
 charges cached slice metadata, and separately tests a checked exclusive-core
 node lookup. It requires a measured pipeline win for that leaf shortcut; the
-infrastructure exception below does not apply to it.
+infrastructure exception below does not apply to it. The next bounded
+[list-copy candidate](S07-bis-list-copy.md) resolves lists once per stack chunk
+without waiting for a persistent disjoint borrow. It has the same independent
+full-pipeline win requirement.
+
+Drive the compact-node CPU comparison with a separately captured
+[actual workload access trace](S07-bis-access-trace.md), including operation order,
+values and narrow writes, and reconstruct the full retained working set. Small
+fixtures remain semantic counterexamples. Report operation coverage separately
+from node population and CPU coverage, and confirm replay results in production.
 
 1. Introduce the borrowed facade in `ts_ast::storage`/`node_accessors`; change
    generated accessors and factory mutations at their emitter in
