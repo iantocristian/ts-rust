@@ -5,6 +5,16 @@ This directory implements the diagnostic screening policy in
 It writes no tracker metrics and does not replace full graph or ownership parity.
 `layout_model.py` and its inputs implement the separate CP0 layout model.
 
+The first [reviewed implementation checkpoint](../../../docs/S07-bis-A0.md)
+retains A0-b as the next experimental control. For a new candidate, pass
+`--control target/s07-bis/a0b-candidate` and
+`--control-sha 124956f668540814b95e6f677bdeae98bb2cad4f7586d3cb87f869e5c5af118f`
+to `build`, `graphs` and `screen`. Its already sealed candidate bundle can serve
+as the control without rebuilding or changing its manifest. Preserve the original
+control as well: the commands below document the first experiment. This manual
+checkpoint decision follows full graph, ownership and targeted-cost review; it
+does not change `freeze-control` into an automatic promotion mechanism.
+
 The original control is frozen under `target/s07-bis/control`; its externally
 recorded identity is [manifests/control.json](manifests/control.json). It contains
 the exact normal Rust, allocation Rust and Go executables from the accepted S07

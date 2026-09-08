@@ -7,16 +7,23 @@ memory captures, and emits no tracker metrics. Production storage is unchanged.
 
 ## Decision
 
-Continue the bounded A0 ownership/access experiment. Do not treat the compact
-layout as feasible yet, and do not start broad accessor migration with a fixed
-`Vec` directory for every shape in every file.
+With A0-b retained as the new control, the next bounded layout experiment is a
+safe word-class accessor/storage pilot. The actual core census now prices this
+option at 830.89 MB for modeled syntax, binding and directories, leaving only
+49.11 MB before escapes, runtime IDs and other unknowns. Its CPU cost is unproved.
+Do not start broad accessor migration or declare compact storage feasible yet.
 
 The straightforward 32-byte-header candidate exceeds the syntax/binding ceiling
 before payload page slack or escape storage; reject that particular layout.
-The 24-byte-header candidate still needs a compact/sparse shape directory and
-measured page occupancy, followed by explicit escape and runtime-ID budgets.
+The 24-byte-header candidate's actual file/shape occupancy and lean page policies
+are now priced in the [follow-up projection](../tools/s07/performance-experiments/phases/layout-projection.md).
+Even thin per-shape Box pages miss the combined ceiling at 887.49 MB. Sharing
+15 nonempty payload word widths reduces directory and page costs; all-atomic
+word rows avoid a separately indexed facts table, but require measured accessor
+and traversal tests before choosing that design. Explicit escape and runtime-ID
+budgets still remain.
 The entire native-live residual and temporary-traffic target also remain open.
-These findings constrain CP3; they do not establish an A0 performance result.
+These findings constrain CP3; the normal-binary A0-b result is recorded separately.
 
 ## Reproduce
 
@@ -158,8 +165,9 @@ counter identities, overlapping-worker phase rejection and strict JSON parsing.
 Three compiled Rust checks cover identity boundary round trips, open kind/shape
 independence and checked bounds. All pass on the host above.
 
-The next layout census needs separate core/overlay/lazy shape counts, actual
-per-file/per-shape capacities, field occupancy, name-backing mode counts and
-exception/control allocation. Keep feasibility unproved until those costs and
-the residual reconcile. A0 can proceed with today's layout and field maps to
-test direct syntax mutation and access independently of that wider migration.
+The follow-up census separates physical core shapes from the old merged overlay
+counts and supplies actual per-file occupancy. It does not measure replacement
+capacities: those are explicit policy projections, including every directory
+growth request. Lazy/fallback occupancy, name-backing modes, exception/control
+allocation and actual replacement storage still need measurement. Keep
+feasibility unproved until those costs and the native residual reconcile.

@@ -1,6 +1,7 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: selected implementation path; implementation has not started.
+Status: implementation in progress; A0-b passes its checkpoint screen and is
+retained. Compact-storage feasibility and final S07 gates remain open.
 Date: 2026-09-08. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
@@ -21,6 +22,13 @@ compact generated storage**. Keep today's published-file binder as the
 compatibility path. Run CP0, then A0, and decide the architecture before building
 the CP2 columns, locator and patch store. CP2 is now **on hold as the fallback**
 if A0 fails its correctness or measured-cost exits.
+
+The [A0 implementation record](S07-bis-A0.md) records both experiments. Initial
+A0 failed its screen; the predeclared A0-b variant preserves the parse-validation
+proof across narrow flag writes and passes. Keep that exclusive path, with CP2
+still held. Next, finish CP0's concrete page/escape/traffic budget and CP1's
+access contract before beginning the broad generated-storage migration. The
+[CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.
 
 Claude's second review identifies a sequencing error in the initial plan. The
 ordinary `FileCache::acquire` path parses, publishes and binds synchronously
@@ -65,7 +73,7 @@ The authority remains [S07](../sprints/S07.toml),
 [aggregation](../scripts/s07_benchmark_measure.py) and
 [statistics](../scripts/s07_benchmark_stats.py). Every ratio is Rust / Go.
 
-| Criterion | Required, unchanged | Current one / eight workers |
+| Criterion | Required, unchanged | Original baseline one / eight workers |
 | --- | --- | --- |
 | Pipeline wall time | Each median ratio <= 1.0 | 1.789 / 1.931 |
 | Timing qualification | Both runtimes' relative MAD <= 5%; bootstrap upper 95% ratio bound <= 1.0, in both modes | Fails |

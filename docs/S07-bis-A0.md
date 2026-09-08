@@ -55,8 +55,8 @@ a completed non-source fragment must return `InvalidGraph`, matching the publish
 binding entry point, rather than panic while looking up source metadata. That
 validation now precedes candidate selection.
 
-Results and the promotion decision will be recorded after semantic and measurement
-captures finish. No performance result is implied by compilation or unit tests.
+The separate results below distinguish the initial prototype and its revised
+candidate. No performance result is implied by compilation or unit tests.
 
 ## Predeclared follow-up: A0-b narrow flag mutation
 
@@ -102,3 +102,75 @@ so neither claims the large savings from future inline binding fields.
 Local capture: `target/s07-bis/a0-screen`; graph capture:
 `target/s07-bis/a0-graphs`. Candidate manifest SHA-256:
 `ee3399a930061772ca08d912d8bb1f3283169ef467066c7880f1df6d79fdde94`.
+
+## A0-b result and architecture decision
+
+**Keep the exclusive entry with narrow flag writes. CP2 stays on hold.** A0-b
+passes the predeclared checkpoint screen and demonstrates a reduction in the
+targeted binding/publication interval. The shared compact-layout work will put
+binding fields into their applicable payloads. This result does not establish
+that layout's feasibility or complete S07's memory/CPU gates.
+
+Both worker modes again matched all 13,094 frozen Go graphs, with 13,094 direct
+bindings and zero fallbacks. Eight warmups and all 56 measured observations are
+retained; replay validation passed. Normal executables provide wall time and
+lifetime peak RSS; separate instrumented executables provide requested bytes.
+
+| Metric | One worker | Eight workers |
+| --- | ---: | ---: |
+| Original control wall median | 5.183442 s | 1.232323 s |
+| A0-b wall median | 4.921846 s | 1.165151 s |
+| Wall median, candidate / control | 0.949532 | 0.945492 |
+| Timing bootstrap upper 95% ratio | 0.968732 | 0.958537 |
+| Requested-allocation median ratio | 0.981827 | 0.981827 |
+| Lifetime peak-RSS median ratio | 0.987347 | 0.987407 |
+
+Every mode meets the 1.02 non-regression bounds and both variants' 5% relative-MAD
+limits. Both wall medians clear the 0.95 improvement threshold; both timing upper
+bounds are below 1.0. The one-worker request reduction is 85.93 MB and RSS
+reduction 57.75 MB. A0-b still requests 4.643 GB and reaches 4.507 GB peak RSS;
+the roughly 2.035 GB allocation and 2.209 GB RSS limits derived from the old Go
+baseline remain distant. No fresh Go-relative acceptance result is claimed.
+
+The separate phase probe compares the two backends on **the same A0-b revision
+and executable**, with `layout-profile` enabled for both. It groups publication,
+required final validation and binding together, retaining all completed files
+through the endpoint. Seven alternating pairs produced:
+
+| One-worker elapsed interval | Published | Consuming | Consuming / published |
+| --- | ---: | ---: | ---: |
+| Parse median | 2.524859 s | 2.523302 s | 0.999384 |
+| Binding and publication median | 2.811072 s | 2.437283 s | 0.867030 |
+| Binding and publication range | 2.767792–2.894290 s | 2.407393–2.483136 s | — |
+
+The targeted interval is 13.3% lower while parse is essentially unchanged. These
+are diagnostic elapsed timers, not sampled CPU or an independent acceptance
+screen. They compare today's two backends, so their reduction must not be added
+to the normal-binary result against the original frozen control. Near-one-second
+binding remains a later milestone after compact binding-field storage.
+
+## Correctness and durable evidence
+
+The implementation passed 177 workspace library tests, affected all-target
+Clippy checks, the Rust 1.96 minimum-version build, six AST compile-fail
+doctests, and both full frozen graph modes. The actual E3 producer passed all
+27 S07 ownership cases in debug, release, strict-provenance Miri and ASan.
+The new cases exercise both binding routes, fallback selection, private failure
+cleanup, retained handles, traversal order and the narrow validation proof.
+Owner and allocation counters return to baseline. The broader future E3/S09
+scope is not claimed complete by those 27 cases.
+
+The [raw result archives and replay instructions](../tools/s07/performance-experiments/results/2026-09-08/README.md)
+preserve the unsuccessful initial A0 and the successful A0-b captures separately.
+The [phase probe](../tools/s07/performance-experiments/phases/README.md) documents
+its timing boundaries and provenance. Candidate A0-b manifest SHA-256:
+`124956f668540814b95e6f677bdeae98bb2cad4f7586d3cb87f869e5c5af118f`;
+phase-build manifest SHA-256:
+`8b42fd1109b96fbb56ef2411e39ee2b5c15ef93fd10f84948d66ada334c8dda7`.
+The E3 evidence object is
+`14950fa0ae8904282d890070c360c79380fa38a9da753ef21dfa751231ac95b5`.
+
+Committed status views are regenerated for this implementation. Prior evidence
+whose source closure changed is stale until its producer runs again; neither
+these diagnostic archives nor the current E3 success substitutes for those
+acceptance prerequisites. The branch remains an implementation in progress.

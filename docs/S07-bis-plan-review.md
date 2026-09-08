@@ -123,3 +123,29 @@ Revised-document validation passes 34 local links/anchors, both budget sums and
 the request/live equation, whitespace checks, `cargo xtask validate` and
 `cargo xtask status --check-committed`. No implementation, benchmark run, new
 acceptance result or history rewrite is claimed by these amendments.
+
+## 5. First implementation checkpoint review
+
+The selected route was implemented in `58db8c2`; the predeclared narrow flag-write
+revision is `584a7fe`. An independent implementation review checked eligibility,
+private-owner failure cleanup, retained API capabilities, recursive traversal
+and validation-proof boundaries. It found no substantive unresolved defect in
+the final A0-b candidate. This is a new review of the implementation, separate
+from the earlier plan reviews above.
+
+The initial A0 capture is retained as rejected: its timing upper bounds exceed
+the checkpoint guard and it demonstrates no pipeline wall-time win. The revised
+A0-b candidate passes both full graph modes, the actual four-mode E3 ownership
+producer and the fixed pipeline screen. Independent recomputation agrees with
+every reported median/MAD and the promotion decision. The phase probe confirms
+a lower combined binding/publication interval without moving publication or
+validation out of that timer; parse remains essentially unchanged.
+
+Decision: keep A0-b as the next experimental control, with CP2 still on hold.
+The [implementation record](S07-bis-A0.md) contains the measured values and
+durable raw-result references. Promotion applies to this frozen workload on
+macOS ARM against the previous Rust control. It does not establish fallback
+performance, eliminate the binding-field maps, validate a future compact node
+layout, or satisfy any Go-relative acceptance gate. The next layout checkpoint
+must account for actual shape occupancy, directories, escape storage, runtime
+IDs and request traffic before the general accessor migration.

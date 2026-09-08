@@ -81,6 +81,14 @@ ownership errors separately from upstream panic contracts.
 
 ### 3.1 Initialization before immutable publication
 
+S07-bis implementation update: ordinary eligible `ParsedFile` inputs now use
+the consuming parse→bind→publish path described in the
+[A0 record](S07-bis-A0.md). Its `CompletedFile` capability exposes bound state
+without promising a pristine parsed snapshot. The publication-first contract
+below remains the supported path for already published inputs and for files
+rejected by exclusive eligibility. This preserves the independent mapped-sibling
+initialization requirement that motivated the original S07 implementation.
+
 Binding changes more than a symbol side table: it writes parents/container
 links, local/export symbols and tables, flags, CommonJS indicators, flow links,
 source symbol counts and diagnostics. Inventory every assignment in the Go

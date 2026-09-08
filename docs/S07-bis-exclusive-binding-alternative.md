@@ -1,6 +1,7 @@
 # S07-bis exclusive binding: selected pilot and held general rewrite
 
-Status: **single-source A0 activated; general published-file rewrite on hold**.
+Status: **single-source A0-b retained after its checkpoint screen; general
+published-file rewrite on hold**.
 Date: 2026-09-08. The initial on-hold plan is preserved in commit `4173b89`.
 This file keeps its original name so references to Claude's alternative remain
 traceable. The [revised primary plan](S07-bis-performance-plan.md) is the execution
@@ -13,8 +14,12 @@ columns/locator/patch store or undertaking the general accessor migration.
 If A0 passes, proceed with compact per-shape storage and applicable inline
 binding fields. If it fails, CP2 is the retained side-table alternative.
 
+The [implementation results](S07-bis-A0.md) now select the revised A0-b pilot.
+The first A0 capture remains rejected and archived. CP2 stays on hold; passing
+this bounded pilot does not prove the compact-layout budget or final gates.
+
 The initial plan overstated the obstacle by treating a single-source consuming
-entry as though it had to replace every published-file contract. Current
+entry as though it had to replace every published-file contract. The original
 `FileCache::acquire` parses, publishes and binds before exposing `ProgramFile`;
 loader consumers read from the bound result. The benchmark follows the same
 sequence. A new exclusive entry can exploit that actual lifecycle while keeping
