@@ -3,10 +3,11 @@
 Status: selected implementation path; implementation has not started.
 Date: 2026-09-08. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
+Initial plan reference committed by the user: `4173b89`.
 Review: [independent plan findings and amendments](S07-bis-plan-review.md).
 
-Keep this work on the separate S07-bis branch. The plans are currently
-uncommitted; do not commit them or subsequent S07-bis work to the S07 branch.
+Keep this work on the separate S07-bis branch. Preserve the committed reference;
+do not amend it or commit subsequent S07-bis work to the S07 branch.
 
 S07-bis is the performance follow-through for S07, not a new tracker sprint or
 a replacement acceptance definition. Its objective is to make the existing
@@ -15,28 +16,34 @@ while keeping every existing correctness and ownership prerequisite current.
 
 ## 1. Decision
 
-Choose **compact storage with unchanged per-source publication**, implemented
-through bounded experiments. First expose cheap borrowed field access, replace
-the binding maps with compact typed storage, and establish a private validated
-owner scope. Then replace the uniform node representation, compact internal
-links and text, and remove demonstrated duplicate work and excess allocation.
+Choose **an early single-source exclusive-binding experiment, followed by
+compact generated storage**. Keep today's published-file binder as the
+compatibility path. Run CP0, then A0, and decide the architecture before building
+the CP2 columns, locator and patch store. CP2 is now **on hold as the fallback**
+if A0 fails its correctness or measured-cost exits.
 
-Claude's diagnosis identifies the right major costs. This plan adopts its
-per-kind field storage, smaller nodes and identifier handles, validation audit,
-symbol-table experiment and capacity audit. It separates those choices from
-the proposal to move binding before parsed publication. Moving the publication
-boundary is not necessary to test the storage changes, and it introduces
-additional questions about existing readers, mapped siblings and failure.
+Claude's second review identifies a sequencing error in the initial plan. The
+ordinary `FileCache::acquire` path parses, publishes and binds synchronously
+before returning a `ProgramFile`; the benchmark does the same. No parsed view
+escapes between those steps. The earlier plan imposed the general published-file
+constraints on that exclusive path and scheduled substantial replacement
+side-table work before testing whether it was needed.
 
-The [exclusive-binding alternative](S07-bis-exclusive-binding-alternative.md)
-is **on hold**. It is a real fallback, with activation conditions and a bounded
-first prototype, not a second implementation to develop concurrently.
+The mapped-sibling finding required independent initialization. Choosing
+overlays for every file was my broader implementation choice, not a requirement
+of that finding. A single-source consuming path can be tested without changing
+the existing published-unbound, mapped, imported or constructed-file contracts.
 
-This refines the earlier recommendation to prototype A first: the first
-experiment still targets A's measured binding costs, but preserves publication
-while testing compact fields and direct access. A and B need a joint layout
-budget. Simply moving eight more bytes into today's inline identifier payload
-can enlarge the enum or trigger millions of boxes under the current generator.
+The [exclusive-binding design record](S07-bis-exclusive-binding-alternative.md)
+now has its bounded single-source A0 path **activated**. A wholesale replacement
+of published-file binding remains on hold. Compact nodes/text, symbols/flows,
+validation, hashing and capacity work are shared between both storage paths.
+
+A0 initially keeps today's symbol/flow field maps. It tests direct syntax-field
+mutation and lookup routing, not elimination of the 633 MB full-binding-map
+request site. After a successful A0, put applicable binding fields directly in
+the compact per-shape payloads at CP3. Do not insert them into today's large
+inline enum first and accidentally enlarge every node or box identifiers.
 
 ### Contract history
 
@@ -45,10 +52,11 @@ S07 commit `1637157` explicitly changed that to per-source binding cells over
 published parsed cores following the mapped-sibling review. The current
 [S07 lifecycle](S07-implementation-plan.md#31-initialization-before-immutable-publication)
 and [review disposition](S07-implementation-plan.md#claude-fable-51-review-disposition)
-record the implemented choice. For S07-bis, retain that current lifecycle;
-the historical S06 wording does not authorize changing it silently. Reconcile
-those cross-references in the implementation's contract update without
-overwriting unrelated working-tree edits.
+record the implemented choice. Retain it for inputs that are already published.
+For the new consuming path, explicitly document parse→bind→publish, its bound
+result API and failure behavior; it does not claim a preserved parsed snapshot
+that was never published. Reconcile the cross-references in the implementation's
+contract update without overwriting unrelated work.
 
 ## 2. Exact destination and starting gap
 
@@ -112,7 +120,9 @@ and [binding operation record](S07-binding-operations.md).
   imported and lazy references. No workload-sized ID limit or stolen slot bit.
 - Keep per-logical-source once initialization, independent mapped siblings,
   initiator panic versus waiter failure, reentry handling, and unchanged parsed
-  observations after success or failure. Never mutate through a published borrow.
+  observations after success or failure on the existing published-file path.
+  The new consuming path may mutate only exclusively owned storage and publish
+  a completed bound result. Never mutate through a published borrow.
 - Retained nodes/symbols keep the complete required file or bundle. Cache
   validation uses the cache owner's retained graph. No new owning cycles.
 - Preserve lazy JSDoc/token identity and rollback, including nodes materialized
@@ -124,8 +134,10 @@ and [binding operation record](S07-binding-operations.md).
 
 The intended common access path is a borrowed header or typed payload plus a
 direct local index: no allocation, owner Arc increment, hash lookup or lock.
-Binder-written fields may additionally read their applicable compact column.
-That is an objective to measure, not a claim about all mapped/lazy operations.
+After the compact layout step, the exclusive path reads applicable binder fields
+from concrete payloads. The compatibility path resolves its existing overlays;
+compact replacement columns are conditional on the CP2 fallback decision.
+These are objectives to measure, not claims about all mapped/lazy operations.
 
 ## 4. Storage design and budget
 
@@ -144,7 +156,7 @@ Owned factory inputs can remain convenient construction values; convert them
 once on insertion. Keep the generic arena API's existing contracts available
 to its other consumers rather than making every arena AST-specific.
 
-### 4.2 Compact typed binding storage
+### 4.2 Direct binding fields, with a conditional side-table fallback
 
 Use the audited Go binder-write inventory to define separate storage for
 declaration symbols, locals/containers, flow links and actual syntax-field
@@ -158,7 +170,16 @@ paired with an identifier or unknown syntax kind must not select identifier
 storage. Field eligibility follows the audited payload and source operations,
 with a checked fallback for unusual constructed combinations.
 
-The first default is direct storage indexed by an eligible shape's local ordinal,
+After A0 succeeds, the primary default is binding fields inside their applicable
+concrete payloads, using result-local symbol/flow/table references where the
+owner proves provenance. Common node flags and parents are mutated directly.
+During A0, retain current field maps to isolate the ownership/access experiment.
+Shared binder operations must support direct and compatibility storage without
+two independent ports of the binder algorithm.
+
+The remainder of this section specifies **CP2 only if A0 is rejected**. Do not
+build these replacement columns or patch indexes speculatively beforehand.
+The fallback default is direct storage indexed by an eligible shape's local ordinal,
 with source-local symbol/flow references where the owning result proves their
 arena. Read-only syntax access bypasses binding storage; flag/parent/payload
 queries apply their specific overrides. A sparse patch store replaces full
@@ -193,14 +214,22 @@ have no general payload allocation. A header-held payload ordinal, or a charged
 slot directory, maps the stable public node identity to its concrete payload.
 Do not change identity when a physical page or directory grows.
 
-Model a roughly 32-byte header with a full parent ID first. A target near
-24 bytes additionally requires a compact parent link and its escape mechanism;
+Model the compact-parent, approximately 24-byte header first. It requires a
+checked full-range escape mechanism;
 include a separate payload-shape tag as well as the open syntax kind. Measure
 the complete weighted representation,
 including payloads, locators and page slack. These are provisional design sizes;
 actual compiler layout on all supported targets decides them. Node kind remains
 an open source-defined value; nullable fields and unusual factory kind/data
 pairs must retain their current behavior.
+
+Keep a roughly 32-byte full-parent header as a control or fallback only if its
+complete weighted model fits. At 19,593,488 used nodes, 32-byte headers cost
+627.0 MB and 24-byte headers 470.2 MB. With today's 20,968,456 header-slot capacity,
+they cost 671.0 and 503.2 MB, leaving only 109.0 or 276.8 MB of the 780 MB syntax
+sub-budget for the syntax portions of payloads and locators. Inline binding
+fields use the separate 100 MB sub-budget. New occupancy may differ; count
+it. The smaller header is the leading candidate, not a late optional saving.
 
 Internal same-owner edges can use private compact references. A separate escape
 mechanism preserves foreign/lazy references and the full slot range, rather
@@ -222,26 +251,32 @@ small field saving for a larger CPU regression.
 
 ### 4.4 A budget that includes replacements
 
-At checkpoint 0, produce an executable layout model using the owned-slot census
+At checkpoint 0, produce both an executable layout model and a request-traffic
+model using the owned-slot census
 and actual `size_of`/alignment. The following is an **initial requested-live
 storage budget**, not a measured achievable layout or a sum of predicted savings.
 Values are decimal MB; categories are disjoint and include replacement storage.
 
-| Retained compiler category | Working ceiling |
+| Retained requested-live category | Working ceiling |
 | --- | ---: |
-| Syntax headers, actual payloads, locators and their capacity | 780 |
+| Syntax headers, actual payloads including inline binding fields, locators, compatibility patches/indexes and capacity | 880 |
 | Syntax lists and all auxiliary backing/capacity | 140 |
-| Binding fields, syntax overrides and their indexes/capacity | 100 |
 | Symbols, flow records/lists, declaration backing and symbol tables | 440 |
 | Unique source and other text backing, including pooled names | 190 |
-| File metadata, caches exercised by the workload, directories not charged above, allocator-request residual | 50 |
-| **Total requested live compiler storage target** | **1,700** |
+| File metadata, exercised caches, retained driver/queue buffers, other directories and all remaining native requested-live bytes | 50 |
+| **Total native requested-live endpoint target** | **1,700** |
+
+The combined syntax/binding row retains the original sub-budgets of 780 MB for
+syntax and 100 MB for binding fields/patches. Moving fields into concrete
+payloads moves their accounting into the same physical allocation; it does not
+make them free or justify counting them twice. Charge each actual allocation
+once and preserve the sub-budget attribution in the layout model.
 
 Hash bucket/control allocations, Arc headers and temporary indexes must be
 included, not hidden outside the model. Unique source backing is charged once
-even when preloaded. Preload is excluded from pipeline allocation but included
-in lifetime RSS, so 1.70 GB live storage and 1.90 GB pipeline allocation are
-separate checks. Measure transient request traffic and process peak RSS directly.
+even when preloaded. The table must reconcile to the native requested-live
+counter, not stop at the reachable compiler census. Preload is excluded from
+pipeline allocation but included in endpoint live bytes and lifetime RSS.
 The residual row is a hard modeling challenge: if it is unknown or exceeded,
 report that fact and revise the design, not the observed counter.
 
@@ -250,12 +285,50 @@ the replacement tradeoff. A design that fits only by assuming zero map overhead,
 perfect page occupancy or zero temporary allocation does not pass this checkpoint.
 The model must also show tiny-file and rare-kind overhead, not only a giant file.
 
+### 4.5 Explicit request-traffic budget, required at CP0
+
+Use the same native allocator counters and boundaries for the identity:
+
+`pipeline_requests = endpoint_live - pre_pipeline_live + freed_or_superseded_requests`
+
+The last term includes freed requests and the full old requests superseded by
+reallocation; it is not physical copying or a pure cohort of pipeline temporaries.
+The diagnostic pre-pipeline live median was approximately 166.647 MB. If endpoint
+live is 1,700 MB, a 1,900 MB pipeline allocation ceiling leaves about **366.647 MB**
+for freed/superseded requests, not 200 MB. Measure the actual starting counter for
+each candidate; never assume the old preload/driver accounting remains constant.
+
+Set a provisional **350 MB** request-traffic ceiling: parse 200 MB, bind 125 MB,
+and publication/scheduling 25 MB. At the old starting counter and the endpoint
+ceiling, that implies 1,883.353 MB of pipeline requests. This requires about a
+62% reduction from the current 923.350 MB traffic and is a design constraint,
+not evidence that the reduction is available. If starting live changes, recompute
+the permitted traffic and enforce the independent 1,900 MB request target too.
+
+At CP0, model list Vec construction and final backing, scanner/cooked-text
+buffers, map growth, arena/directory requests, fallback and escape storage,
+freeze-time conversion and driver/scratch retention. Account for shared backing
+and native realloc behavior; do not assume every Vec-to-box conversion copies.
+Use disjoint global phase-counter deltas only in one-worker runs and retain an
+unknown remainder. Eight-worker phases overlap: reconcile their whole-pipeline
+counters, and add per-phase attribution only with separately validated accounting.
+Do not sum overlapping global phase intervals or treat missing phase values as
+zero traffic. A layout
+that fits retained storage but has no credible traffic budget fails CP0/CP3.
+Implement unavoidable list/buffer/growth changes alongside CP3/CP4; CP6 is the
+remaining traffic audit, not the first time temporary costs are considered.
+
 ## 5. Execution sequence
 
 Each checkpoint ends with a recorded keep/reject decision and the remaining
 distance to all four performance gates. A locally useful improvement is not
 S07 completion. Retain one approved candidate as the next control; discarded
 experiments remain documented, not enabled in the production path.
+
+Selected order: **CP0 → A0 → CP1 → CP3 → CP4 → CP5 → CP6 → CP7 → CP8**.
+Decide immediately after A0. **CP2 stays on hold** unless A0 is rejected or a
+later measured contract/cost problem requires that specific fallback. Keep the
+checkpoint numbers stable so the committed initial plan remains comparable.
 
 ### Checkpoint 0 — Freeze the experiment and check feasibility
 
@@ -269,14 +342,18 @@ experiments remain documented, not enabled in the production path.
 3. Extend the existing census with payload-kind distributions, field occupancy,
    actual per-file capacities, map control bytes where observable, and an
    explicitly unknown remainder. Use existing captures where sufficient.
-4. Build safe layout sketches for compact typed bindings and compact nodes/text.
-   Compare dense eligible-kind columns and packed sparse pages; do not integrate
-   both complete designs. Include nil entries, rare fields and multi-source cost.
-   Freeze the provisional locator's construction timing and later replacement.
+   Deduplicate current overlay copies when projecting replacement core payloads;
+   they are not additional syntax nodes in the compact representation.
+4. Build safe layout sketches for compact nodes/text with inline binding fields,
+   leading with the 24-byte compact-parent candidate. Keep typed side fields as
+   a fallback model, not implementation work. If activated later, CP2 must freeze
+   its provisional locator's construction timing and later replacement.
    Include open kind/payload pairings, lazy additions and empty per-shape
    directories: allocating a Vec header for every shape in every tiny file can
    consume substantial storage even before the first payload is inserted.
-5. Review whether the 1.70/1.90/2.10 GB working budgets have a plausible route.
+5. Model the 350 MB request-traffic ceiling in parallel with retained layout,
+   including list backing, scanner buffers and map growth. Review whether the
+   1.70/1.90/2.10 GB working budgets have a plausible route.
    If not, identify the specific category that needs a different representation
    before porting thousands of accessors. No feasibility claim from Go census
    subtraction or adding overlapping profiler rows.
@@ -284,6 +361,69 @@ experiments remain documented, not enabled in the production path.
 Exit: a reviewed ownership/API sketch, concrete module boundaries, measured
 layout sizes, candidate budget and frozen diagnostic protocol. No production
 optimization is claimed at this stage.
+
+### A0 — Test single-source exclusive binding before building CP2
+
+1. Add a consuming production entry, provisionally `bind_parsed(ParsedFile)`,
+   for eligible ordinary single-source files. Preserve `bind_source_file(&AstFile)`
+   as the existing published-file path. Route both the compiler cache and the
+   benchmark through the same new entry; do not create a benchmark-only shortcut.
+2. Use actual cache semantics: `FileCache::acquire` takes `&mut self` and stores
+   weak references to completed files. A failed acquisition installs no entry.
+   It has no contended pending-file once cell to replace. Drop failed private
+   construction and preserve cache retry behavior; do not add negative caching.
+   Install successful source bind completion with publication so later bind
+   requests are no-ops. Retain the existing once/panic/waiter protocol on the
+   shared published-file path rather than inventing new contention here.
+3. Keep current node layout and symbol/flow field maps initially. Bind core
+   syntax writes in place and bypass the full-node overlay for this path. Use
+   one binder algorithm with a narrow storage interface and record its code-size
+   and dispatch costs. Retain checked raw IDs and local provenance; exclusivity
+   alone does not validate an arbitrary ID or permit sibling writes.
+4. Resolve the main borrowing issue before broad migration: `parsed_view()`
+   currently provides syntax/list borrows across recursive mutable binder calls.
+   An exclusive mutable owner cannot provide that unrestricted lifetime while
+   changing nodes. Prove indexed traversal, split immutable child access, or
+   bounded small observations in representative container/binary/JSDoc paths.
+   Reject a workaround that clones every node/list or adds a second syntax graph.
+5. Classify eligibility before the first mutation and preserve the original
+   input for fallback. Published inputs, mapped/multi-source storage, transformed
+   shared children and unsupported imported/lazy ownership stay on the existing
+   path. Do not retry through fallback after partially mutating exclusive input.
+   For committed lazy nodes, either implement owner-exclusive access with a
+   real uniqueness proof or select fallback up front. `StorageTransaction::node_mut`
+   only accesses pending transaction nodes; it is not committed-lazy mutation.
+   If binding can create such nodes after eligibility, define that path before
+   starting the prototype. Record actual path counts and fallback reasons.
+6. Specify the result API and post-bind observations. Existing
+   `BoundFile::parsed_file()` exposes a pristine parsed view on the old route.
+   The consuming route must return a bound-only capability, or another explicitly
+   defined interface, rather than relabel mutated storage as that old snapshot.
+   Audit ProgramFile, factories, imported owner lookup, encoder and retained
+   handles. Never change existing published-file parsed-view guarantees silently.
+7. Extend corpus observation to execute the exclusive entry as well as the old
+   entry. Capture parsed observations before consumption, then compare complete
+   bound graphs, repeated binding and explicit retention. Existing adapters that
+   always publish first otherwise exercise only the fallback. Run focused
+   debug/release, scope/lifetime and E3 Miri/ASan coverage for both paths, including
+   success, unwind/disposal, wrong owner, eligibility fallback and lazy cases.
+8. Update diagnostic CPU/memory adapters and full-workload graph observations.
+   The new path executes parse→bind→publish inside the same measured interval;
+   phase timers and path counts must reflect it. Keep work, queues, preloading,
+   retained roots and final acceptance definitions unchanged.
+9. Screen the full frozen workload in both worker modes. Require verified
+   elimination of the targeted overlay operations on eligible files, a bind-time
+   improvement, complete applicable parity/ownership and the section-6 pipeline
+   promotion criteria. Include any new publication revalidation scan triggered
+   by `builder_mut()` in costs. The field maps remain, so A0 is not expected to
+   meet the final memory budget or a one-second bind by itself.
+
+Exit: an explicit **keep exclusive / activate CP2 / reject and revise** decision,
+before implementing replacement columns or the general accessor migration.
+If the borrowing or result protocol needs broad duplication, or the measured
+benefit does not survive complete-pipeline accounting, keep the existing path
+and activate CP2. Otherwise proceed to shared compact layout with inline fields.
+Do not defer this decision to CP7 or predict a calendar duration from file count.
 
 ### Checkpoint 1 — Make field reads cheap and representation-independent
 
@@ -304,7 +444,11 @@ Exit: equivalent observations with no per-read allocation/retention and no
 unexplained wall-time or memory regression. This is infrastructure for the next
 change; it is not justified by a large speculative future gain alone.
 
-### Checkpoint 2 — Replace binding maps and repeated owner resolution
+### Checkpoint 2 — On-hold fallback: compact binding side tables
+
+Execute only after a recorded decision rejecting the exclusive path. This is
+the initial plan's column/patch experiment, retained as an alternative; ordinary
+compatibility use of today's published-file binder does not activate this work.
 
 1. Implement the selected typed binding columns and sparse field patches. Include
    promotion/removal behavior currently split between full records and flow slots.
@@ -323,15 +467,18 @@ change; it is not justified by a large speculative future gain alone.
    new storage through the S06/S07 ownership instrumentation, not a test-only map.
 
 Exit: full binder-field parity and ownership, a measured reduction in binding
-storage/request traffic, and a defensible CPU result. If compact columns still
-leave accessor/publication routing dominant, retain the evidence for the held
-alternative's activation decision; do not accumulate more replacement maps.
+storage/request traffic, and a defensible CPU result. Apply the phase milestones
+below immediately; do not accumulate more replacement maps if this route still
+has no measured path to both CPU gates.
 
 ### Checkpoint 3 — Integrate compact syntax and owner-relative text
 
-1. Introduce generated per-kind storage and small headers. Share the payload
-   locator with applicable binding indexes; remove the temporary all-node index
-   if checkpoint 2 needed one. Keep one production representation after migration.
+1. Introduce generated per-shape storage and compact-parent headers. On the
+   selected exclusive route, put each audited binding field in its applicable
+   payload and remove its temporary map/flow-slot entry. If CP2 was activated,
+   share the payload locator with its binding indexes and remove any provisional
+   all-node index. Keep one syntax representation with the required binding
+   backends, rather than two copies of the parser or binder algorithm.
 2. Port common tokens/identifiers/edge payloads as a vertical slice, including
    parser construction, mutation, publication, binding and encoding. Include
    TokenData with identifier/unknown kinds to test the independent shape tag. Measure
@@ -351,7 +498,10 @@ alternative's activation decision; do not accumulate more replacement maps.
    omit new payloads. Recheck actual layouts on all four supported native targets.
 
 Exit: full AST/parser/binder/encoder parity and ownership, a new complete census,
-and a measured candidate whose remaining categories can fit the total budget.
+and a measured candidate whose live storage and request traffic can fit the total
+budget. Apply the bind/parse milestones below before continuing. Implement list
+construction and capacity changes needed to satisfy CP0's traffic model here;
+do not defer a known structural allocation miss to CP6.
 Do not continue polishing a node representation that makes the memory target
 impossible even with optimistic remaining categories.
 
@@ -378,6 +528,8 @@ impossible even with optimistic remaining categories.
 Exit: all symbol/flow graph and declaration-backing observations preserved;
 measured combined storage/request reduction. Hashing is optional if its gain is
 below the diagnostic decision threshold or another path remains dominant.
+Reassess the bind milestone now if it was missed at CP3; do not postpone a
+dominant access/storage cost until the final profiling checkpoint.
 
 ### Checkpoint 5 — Remove proved duplicate validation work
 
@@ -440,12 +592,15 @@ bounded small-file overhead and no hidden work outside the measurement interval.
    thresholds, work and measurement domains; both normal and allocation builds
    must use the same selected allocator. Never force collection, trim
    after the fact, drop roots early, subtract baseline RSS or alter Go's GC.
-5. Reassess the held alternative using its activation conditions. If no examined
-   candidate can pass, report the measured blocker and next specific experiment.
+5. Review only unresolved measured costs; A0's architecture decision has already
+   happened. If the exclusive candidate regresses, compare the specific CP2
+   fallback or a named storage fix using current evidence. Do not reopen a
+   wholesale published-file rewrite without a measured reason. If no examined
+   candidate can pass, report the blocker and next specific experiment.
    Do not declare the targets impossible from this plan or relax them to finish.
 
 Exit: either a combined candidate ready for acceptance, or a documented decision
-to activate the alternative / investigate a named remaining cost. This checkpoint
+to investigate a named remaining cost. This checkpoint
 prevents an endless sequence of small optimizations with no route to the gates.
 
 ### Checkpoint 8 — Independent review and final acceptance
@@ -470,6 +625,33 @@ prevents an endless sequence of small optimizations with no route to the gates.
 
 Done means `cargo xtask check S07` passes with current evidence. It does not
 mean full E3, E5's checker per-type footprint, or any future checker sprint passes.
+
+### Early CPU continuation exits
+
+Use matched phase observations on the designated host to decide whether to
+continue a representation, not just a distant final wall-time target:
+
+| Point | Required observation / continuation decision |
+| --- | --- |
+| A0, before CP2 or general facade migration | Targeted bind-time reduction, measured bypass of overlay operations, and section-6 complete-pipeline promotion; otherwise reject/revise A0 or activate CP2 immediately |
+| Completed binding-field storage, CP3 on the selected route or CP2 on the fallback | Aim for one-worker bind elapsed near or below 1.0 s; if missed, profile and name the next bounded change or reconsider the storage path before proceeding |
+| Compact syntax at CP3, rechecked after validation at CP5 | Aim for one-worker parse elapsed near or below 2.0 s; if missed, resolve the measured construction/access/validation cost before proceeding automatically |
+| Every integrated checkpoint | Record both full wall ratios, both memory ratios and remaining headroom; a good isolated phase is insufficient |
+
+These are review exits and engineering milestones, not promised A0 results or
+new acceptance thresholds. A miss requires a recorded measurement and decision
+before continuing; it cannot be waved through solely because correctness passed.
+Compare fresh Go and control timings alongside the nominal phase values so
+environmental changes are not mistaken for an implementation gain.
+
+One second of bind plus two seconds of parse already totals three seconds before
+orchestration, above the old 2.938-second one-worker gate. The internal 0.90
+headroom goal would be about 2.644 seconds at that Go median. Reaching these
+milestones therefore still requires further measured improvement; record that
+remaining combined budget explicitly. One-worker phase elapsed, eight-worker
+summed worker elapsed and sampled Running CPU are distinct. Final acceptance
+still uses uninstrumented whole-pipeline wall time and its unchanged uncertainty
+gate, not these diagnostic phase timers.
 
 ## 6. Screening and decision rules
 
@@ -576,7 +758,10 @@ Under the selected, unchanged allocator policy, retain the normal Rust mimalloc
 executable for timing/RSS, a separately
 identified cap build for original-layout allocation requests, and normal Go
 `GOGC=100`, no imposed `GOMEMLIMIT`, `GOMAXPROCS` equal to workers, and
-`GOTOOLCHAIN=local`. Preserve per-file parse→publish→bind order, bounded queues,
+`GOTOOLCHAIN=local`. The exclusive path uses per-file parse→bind→publish; the
+existing published-file path uses parse→publish→bind. Include every operation
+inside the same combined pipeline interval, record path/phase provenance and
+preserve bounded queues,
 retained endpoint roots, and the distinct preload/worker/pipeline boundaries.
 Requested allocation, live storage and lifetime peak RSS are never substituted
 for one another. Toolchain pins come from their existing manifests, not this doc.
@@ -588,14 +773,15 @@ within it, not reasons to postpone starting checkpoint 0:
 
 | Decision | Default / bounded challenger | Resolve by |
 | --- | --- | --- |
-| Binding field indexing | Eligible-kind direct columns / packed sparse pages | 0 layout model, 2 pipeline measurement |
-| Node layout | Small header + per-kind pages / reject if facade/directory cost defeats budget | 0 model, 3 vertical slice |
+| Binding lifecycle | Consuming single-source entry + existing published-file compatibility / CP2 side-table fallback | A0, before general facade or column implementation |
+| Binding fields | Applicable concrete payload fields / eligible-shape columns only if CP2 activated | 0 model, A0 direction, 3 integration |
+| Node layout | Compact-parent ~24-byte header + per-shape pages / 32-byte full-parent control only if budget fits | 0 model, 3 vertical slice |
 | Internal edge/text width | Owner-relative handles + full-range escapes / retain full ID where compression loses | 3 correctness and census |
 | Runtime identity cache | Lazy owner-held storage / existing inline field | 3 identity traces and timing |
 | Symbol hashing | Current keyed hashing / one reviewed fast keyed candidate | 4 observed hash cost |
 | Validation | Keep final scan, remove proved repeated construction checks / later completion proof | 5 counterexamples and profile |
-| Capacity | Available exact counts, bounded hints / current pages | 6 per-file traffic and slack |
-| Publication lifecycle | Current per-source parsed/bound cells / held exclusive alternative | 2, 3 and 7 activation review |
+| Capacity and traffic | Explicit 350 MB traffic model, exact counts and bounded hints / current pages | 0 budget, 3/4 structural implementation, 6 remaining audit |
+| General published-file rewrite | On hold; existing semantics remain on the compatibility path | Only a later measured fallback bottleneck warrants reconsideration |
 
 No checkpoint is credited in advance. The implementation record must state the
 last completed checkpoint, accepted/rejected candidates, current four ratios,
