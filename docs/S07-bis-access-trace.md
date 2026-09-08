@@ -4,6 +4,26 @@ Date: 2026-09-08. This replaces the small fixture as the **performance driver**
 of the next node-layout comparison. Small fixtures remain semantic regressions.
 No trace capture or layout timing is claimed by this plan.
 
+Implementation boundary for the first recorder: freeze the accepted CP1 bundle
+(`3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931`),
+export physical syntax before each bind, and capture the explicitly named
+ID-qualified operations. This first milestone does not reconstruct complete
+binding state, record every payload-field read, or rank layouts. Its registry
+lists excluded metadata, caches, copies, births and accessor families. A native
+retained-graph comparison with the original accepted executable must pass on
+exactly the selected inputs before the capture is accepted as an observation.
+
+The initial host has about 10 GiB free. Stream binary blocks through gzip level1;
+retain no uncompressed trace file. Declare a 32 GiB record-payload limit, a 3 GiB
+compressed-output limit and a 1 GiB free-space reserve before capture. Records
+and blocks are bounded at 1 MiB; logical text blobs use at most64 KiB chunks.
+Any overflow or write failure preserves an incomplete capture with its child
+exit receipt. First measure volume on the explicitly labelled union of the first
+16 and largest16 workload inputs, in original order. This sizing subset is not
+a full-workload capture or a CPU sample, and extrapolation from it is not a
+guarantee that the full workload fits. Keep the limits active on the complete
+13,094-file attempt; do not silently filter events or files to stay within them.
+
 Fable is right that population counts and a tiny fixture omit working-set size
 and real access order. Record actual binder operations from a separately staged,
 instrumented copy of the accepted implementation over the full frozen workload.
