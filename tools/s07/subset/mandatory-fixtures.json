@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "scope": "Separate ownership and future-checker fixture specifications; no execution metric is implied by this inventory.",
+  "rows": [
+    {"id":"ownership.shared_bound_file","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"programs":2,"parsed_owners":1,"bind_initializers":1,"retain_symbol":true,"drop_order":["first_program","second_program","retained_symbol"]},"expected_consumers":["E3","E7","E8"]},
+    {"id":"ownership.retained_snapshot_edit","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"snapshots":["old","edited"],"retain_old_query":true,"cross_import_matching_slots":"reject","drop_active_before_old_query":true},"expected_consumers":["E3","E7","E8"]},
+    {"id":"ownership.mapped_bundle","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"mapped_members":2,"retain_sibling_symbol":true,"drop_intermediate_roots":true,"require_complete_bundle_lifetime":true},"expected_consumers":["E3","E7","E8"]},
+    {"id":"ownership.lazy_storage","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"unused_cache_initializations":0,"concurrent_first_read":2,"initializations":1,"returned_identity":"shared"},"expected_consumers":["E3","E7","E8"]},
+    {"id":"ownership.binding_reentry","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"same_thread_same_source":"reject","ordinary_contending_thread":"wait","nested_distinct_lazy_scope":"allowed"},"expected_consumers":["E3","E7","E8"]},
+    {"id":"ownership.panic_retirement","kind":"Rust ownership contract","owner_sprint":"S07","completion":"pending E3 capture","request":{"initializer":"panic after provisional symbol allocation","initiator_panic":"preserve payload","retry":"terminal failure","provisional_import":"reject"},"expected_consumers":["E3","E7","E8"]},
+    {"id":"compiler.declaration_merging","kind":"Pinned compiler case","owner_sprint":"S08","completion":"planned checker behavior","primary_case":"conformance/interfaces/declarationMerging/mergeTwoInterfaces2.ts","request":{"all_effective_variants":true,"retain_original_baselines":true},"expected_consumers":["E2","E7","E8"]},
+    {"id":"compiler.recursion","kind":"Pinned compiler case","owner_sprint":"S08","completion":"planned checker behavior","primary_case":"compiler/parsingDeepParenthensizedExpression.ts","request":{"all_effective_variants":true,"retain_original_depth":true},"expected_consumers":["E2","E7","E8"]},
+    {"id":"compiler.malformed_input","kind":"Source feature family","owner_sprint":"S08","completion":"planned checker behavior","request":{"predicate":"eligible recovered source with nonempty original parser diagnostics","retain_all_matches":true,"diagnostics_are_exclusion":false},"expected_consumers":["E2","E7","E8"]},
+    {"id":"checker.retained_results","kind":"Future checker contract","owner_sprint":"S08","completion":"planned","request":{"retain_checker_query":true,"retire_checker_generation":true,"publication_after_retirement":"reject","allocated_owner_may_remain":true},"expected_consumers":["E2","E7","E8"]}
+  ]
+}

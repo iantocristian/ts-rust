@@ -1,0 +1,30 @@
+[package]
+name = "ts_compiler"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+stacker = "=0.1.25"
+ts_core = { version = "0.1.0", path = "../ts_core" }
+ts_tspath = { version = "0.1.0", path = "../ts_tspath" }
+ts_vfs = { version = "0.1.0", path = "../ts_vfs" }
+ts_bundled = { version = "0.1.0", path = "../ts_bundled" }
+ts_tsoptions = { version = "0.1.0", path = "../ts_tsoptions" }
+ts_module = { version = "0.1.0", path = "../ts_module" }
+ts_arena = { version = "0.1.0", path = "../ts_arena" }
+ts_ast = { version = "0.1.0", path = "../ts_ast" }
+ts_parser = { version = "0.1.0", path = "../ts_parser" }
+ts_scanner = { version = "0.1.0", path = "../ts_scanner" }
+ts_binder = { version = "0.1.0", path = "../ts_binder" }
+ts_jsstring = { version = "0.1.0", path = "../ts_jsstring" }
+ts_diagnostics = { version = "0.1.0", path = "../ts_diagnostics" }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json = "1"
+sha2 = "0.10"

@@ -1,0 +1,21 @@
+# Source-byte inventory only; this does not certify parser/binder execution.
+[vscode]
+repository = "https://github.com/microsoft/vscode"
+tag = "1.136.1"
+commit = "a44adf7f53e00964ab890f9f8758a334f1fc15bc"
+archive_url = "https://codeload.github.com/microsoft/vscode/tar.gz/a44adf7f53e00964ab890f9f8758a334f1fc15bc"
+archive_sha256 = "8b1b58e949bcc5b99967a2c2e19ed1f59ab3c41b88df6ee382dc7be39a06eb8d"
+license = "MIT"
+license_path = "LICENSE.txt"
+license_sha256 = "cce33203a80863c22499035b1cfb6aba5df5f02e4ea2669cf5bc5730c1864236"
+manifest = "data/s07/vscode-files.json"
+manifest_sha256 = "4193d6fccdd2b569c3ef5d86ad8842dbe74e86c8ddca8196b12ec1f5ac6af696"
+extensions = [".ts", ".tsx", ".mts", ".cts"]
+file_count = 13094
+source_bytes = 161740237
+upstream_library_pin = "1f70213d4922b434345f639b441681e470c7cfc1"
+intended_target = "ESNext"
+intended_script_kind = "pinned extension-derived"
+effective_parse_options = "data/s07/vscode-parse-options.json"
+effective_parse_options_sha256 = "9de5a4f479a12750b6f8fa38a647ca80e31f5c3140cdfc8a69b8a1e8f4c19028"
+effective_parse_options_authority = "pinned Go GetExternalModuleIndicatorOptions and GetScriptKindFromFileName; ESNext compiler option with empty package metadata"

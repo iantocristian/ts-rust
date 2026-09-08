@@ -1,0 +1,2080 @@
+{
+  "json": [
+    {
+      "id": "null",
+      "value": {
+        "kind": "null"
+      }
+    },
+    {
+      "id": "nil-array",
+      "value": {
+        "kind": "nil_array"
+      }
+    },
+    {
+      "id": "empty-struct",
+      "value": {
+        "kind": "empty"
+      }
+    },
+    {
+      "id": "invalid-bytes",
+      "value": {
+        "hex": "ffeda080f09f",
+        "kind": "string"
+      }
+    },
+    {
+      "id": "escapes",
+      "value": {
+        "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f223c3e265c2fe280a8e280a9",
+        "kind": "string"
+      }
+    },
+    {
+      "id": "invalid-key-collision",
+      "value": {
+        "entries": [
+          {
+            "key": "ff",
+            "value": {
+              "kind": "null"
+            }
+          },
+          {
+            "key": "fe",
+            "value": {
+              "kind": "null"
+            }
+          }
+        ],
+        "kind": "object"
+      }
+    },
+    {
+      "id": "float-0",
+      "value": {
+        "bits": "0000000000000000",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-1",
+      "value": {
+        "bits": "8000000000000000",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-2",
+      "value": {
+        "bits": "7ff0000000000000",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-3",
+      "value": {
+        "bits": "7ff8000000000000",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-4",
+      "value": {
+        "bits": "0000000000000001",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-5",
+      "value": {
+        "bits": "7fefffffffffffff",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-6",
+      "value": {
+        "bits": "3eb0c6f7a0b5ed8d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-7",
+      "value": {
+        "bits": "3e7ad7f29abcaf48",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-8",
+      "value": {
+        "bits": "4415af1d78b58c40",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-9",
+      "value": {
+        "bits": "444b1ae4d6e2ef50",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-10",
+      "value": {
+        "bits": "3ff3c0ca428c59fb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-11",
+      "value": {
+        "bits": "43abc16d674ec801",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-12",
+      "value": {
+        "bits": "c7cbc902071387be",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-13",
+      "value": {
+        "bits": "d9aff4355ef0b03e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-14",
+      "value": {
+        "bits": "ef26e3763285d3fa",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-15",
+      "value": {
+        "bits": "cfc7abaec23d1a10",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-16",
+      "value": {
+        "bits": "ab8dbe42d1358b2c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-17",
+      "value": {
+        "bits": "590901a2a3ac6246",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-18",
+      "value": {
+        "bits": "8d2a8d6c4de572ab",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-19",
+      "value": {
+        "bits": "7e2415370ab1c5f5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-20",
+      "value": {
+        "bits": "660705a75602908c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-21",
+      "value": {
+        "bits": "2407e05eb26ced61",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-22",
+      "value": {
+        "bits": "f6ddd7aa652f4749",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-23",
+      "value": {
+        "bits": "35fce78318d5f539",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-24",
+      "value": {
+        "bits": "dbac62200f69cb8f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-25",
+      "value": {
+        "bits": "66b6ad4d4d1b1e26",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-26",
+      "value": {
+        "bits": "f1038a7db6b346a4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-27",
+      "value": {
+        "bits": "5f22f79ecd65f8e7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-28",
+      "value": {
+        "bits": "e88f2fd0d7870fdc",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-29",
+      "value": {
+        "bits": "248663ad78537045",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-30",
+      "value": {
+        "bits": "8f992f1f875eeb99",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-31",
+      "value": {
+        "bits": "ef576bc6b63351a3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-32",
+      "value": {
+        "bits": "6325db01b985b61f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-33",
+      "value": {
+        "bits": "4791fc3bfbf69c0e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-34",
+      "value": {
+        "bits": "dc93ba09bfd6c72d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-35",
+      "value": {
+        "bits": "6018c5c564228d0a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-36",
+      "value": {
+        "bits": "a5c9c16be5e98252",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-37",
+      "value": {
+        "bits": "6950a730f1d28c96",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-38",
+      "value": {
+        "bits": "dd229c5c2605dec6",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-39",
+      "value": {
+        "bits": "40106268b7aac3d2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-40",
+      "value": {
+        "bits": "4b2621345959eb4d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-41",
+      "value": {
+        "bits": "9960dc457eb4bf45",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-42",
+      "value": {
+        "bits": "e873f1570552763e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-43",
+      "value": {
+        "bits": "3ff392b50646636f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-44",
+      "value": {
+        "bits": "f05441968f29a1eb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-45",
+      "value": {
+        "bits": "687ad1a202725e00",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-46",
+      "value": {
+        "bits": "f7dc7c4d4cb9f6d7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-47",
+      "value": {
+        "bits": "bfb7999b4dc82233",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-48",
+      "value": {
+        "bits": "4e01f5a088b001f5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-49",
+      "value": {
+        "bits": "fca308ec660ef5d0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-50",
+      "value": {
+        "bits": "8daa01f5268e69d7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-51",
+      "value": {
+        "bits": "26dd19da56630cd4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-52",
+      "value": {
+        "bits": "68c1cfa163cd527b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-53",
+      "value": {
+        "bits": "6ca5ef45d69bca8c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-54",
+      "value": {
+        "bits": "bae2b796e65ede31",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-55",
+      "value": {
+        "bits": "4089df9383e8f2aa",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-56",
+      "value": {
+        "bits": "a2d304e99e8d8ac0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-57",
+      "value": {
+        "bits": "151bb19c0ef8247e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-58",
+      "value": {
+        "bits": "476f983ef139d916",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-59",
+      "value": {
+        "bits": "27e3a3ca9a9b1805",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-60",
+      "value": {
+        "bits": "3cb70690329fcc54",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-61",
+      "value": {
+        "bits": "bf93e168eb7b46b0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-62",
+      "value": {
+        "bits": "4ab5f5f2be0f3a31",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-63",
+      "value": {
+        "bits": "cf86005469a28b33",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-64",
+      "value": {
+        "bits": "b0483ab79f9b3b9c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-65",
+      "value": {
+        "bits": "6636c3eebf64b9be",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-66",
+      "value": {
+        "bits": "39e2d04e4b2c7870",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-67",
+      "value": {
+        "bits": "f9ce56ac39871851",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-68",
+      "value": {
+        "bits": "e9d829e06bab4e51",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-69",
+      "value": {
+        "bits": "aade83962fd13908",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-70",
+      "value": {
+        "bits": "eec2e143df907912",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-71",
+      "value": {
+        "bits": "8d7480b17a1ddf17",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-72",
+      "value": {
+        "bits": "9d858bb453c7695e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-73",
+      "value": {
+        "bits": "72b631b213ee3ecc",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-74",
+      "value": {
+        "bits": "a6a2f6c733b2a67a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-75",
+      "value": {
+        "bits": "36c6d749ddb5c3a1",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-76",
+      "value": {
+        "bits": "c78ca59bbdc8be0e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-77",
+      "value": {
+        "bits": "dbd2ac2bfc0b8c1e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-78",
+      "value": {
+        "bits": "d5c2f44c6193ef37",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-79",
+      "value": {
+        "bits": "4cedfd6a67667af4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-80",
+      "value": {
+        "bits": "6b4c06001186031a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-81",
+      "value": {
+        "bits": "aa73068501956f6b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-82",
+      "value": {
+        "bits": "15aa5f33567cce9e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-83",
+      "value": {
+        "bits": "a5dd73a4d3c4805c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-84",
+      "value": {
+        "bits": "14381d66deb32020",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-85",
+      "value": {
+        "bits": "c1688c960c4f5db5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-86",
+      "value": {
+        "bits": "8a796df73ee6f7dd",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-87",
+      "value": {
+        "bits": "c62ab33c8ba68eb7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-88",
+      "value": {
+        "bits": "0b058d1c346bd3eb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-89",
+      "value": {
+        "bits": "d6399cdbefc5ca8f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-90",
+      "value": {
+        "bits": "529aa8532a484d46",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-91",
+      "value": {
+        "bits": "0c0754e821854f34",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-92",
+      "value": {
+        "bits": "7bda43db6509852d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-93",
+      "value": {
+        "bits": "6319ef552bf9acf4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-94",
+      "value": {
+        "bits": "be60e861313e1c62",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-95",
+      "value": {
+        "bits": "0cb497de4e1c98df",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-96",
+      "value": {
+        "bits": "be25d582a30f8be4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-97",
+      "value": {
+        "bits": "dfa6945c0b6c6839",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-98",
+      "value": {
+        "bits": "e2ef49cf975592a5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-99",
+      "value": {
+        "bits": "f25572c5641b392a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-100",
+      "value": {
+        "bits": "91b697701096e960",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-101",
+      "value": {
+        "bits": "d459d57d5d506c5c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-102",
+      "value": {
+        "bits": "cf0426b1ef7a01f1",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-103",
+      "value": {
+        "bits": "b368fb6900c50312",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-104",
+      "value": {
+        "bits": "5ffbdda5dd63c86d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-105",
+      "value": {
+        "bits": "507c9052be0e9d0a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-106",
+      "value": {
+        "bits": "99b748f3f563290d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-107",
+      "value": {
+        "bits": "b3e41646f56c5d00",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-108",
+      "value": {
+        "bits": "b2c61865a3d72c82",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-109",
+      "value": {
+        "bits": "ff52e244f42f1e3d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-110",
+      "value": {
+        "bits": "82aabbee79ce6eec",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-111",
+      "value": {
+        "bits": "29b33074dfa3c0ec",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-112",
+      "value": {
+        "bits": "b4fb342a7a350f44",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-113",
+      "value": {
+        "bits": "2ae02dbdd45c86ad",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-114",
+      "value": {
+        "bits": "30362e7ec5467d16",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-115",
+      "value": {
+        "bits": "a70857e4eced310a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-116",
+      "value": {
+        "bits": "e7fe9c580c970d24",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-117",
+      "value": {
+        "bits": "b5e7cc88b487bd96",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-118",
+      "value": {
+        "bits": "5bf7939d41b940b3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-119",
+      "value": {
+        "bits": "4daa42b3ae0fab1b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-120",
+      "value": {
+        "bits": "6d8b1fbf88b05d9a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-121",
+      "value": {
+        "bits": "3f24f584a01a3fb2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-122",
+      "value": {
+        "bits": "3311fa79ebdeb109",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-123",
+      "value": {
+        "bits": "e0c88012c3786c08",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-124",
+      "value": {
+        "bits": "e9f685061de9c268",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-125",
+      "value": {
+        "bits": "a91e6c20937101a8",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-126",
+      "value": {
+        "bits": "bece535b3ef6acf0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-127",
+      "value": {
+        "bits": "9929217f4aa9c502",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-128",
+      "value": {
+        "bits": "11d1d983e78380b0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-129",
+      "value": {
+        "bits": "63506c6e8d60af51",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-130",
+      "value": {
+        "bits": "d316d41e94e2354d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-131",
+      "value": {
+        "bits": "61e6000546ed5c50",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-132",
+      "value": {
+        "bits": "c340701dbfc0b0e2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-133",
+      "value": {
+        "bits": "b07fecb581f72d46",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-134",
+      "value": {
+        "bits": "db1c42274bd8a84f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-135",
+      "value": {
+        "bits": "c73a5f655b6b26bc",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-136",
+      "value": {
+        "bits": "973820ca2ebc66d7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-137",
+      "value": {
+        "bits": "5bd9291100258f87",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-138",
+      "value": {
+        "bits": "3c9e0ac0c6b521cf",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-139",
+      "value": {
+        "bits": "9759b3aa921fe66a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-140",
+      "value": {
+        "bits": "c4f4b0ec55bc9cdd",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-141",
+      "value": {
+        "bits": "01a82135efcfb518",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-142",
+      "value": {
+        "bits": "72a88039c44bc240",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-143",
+      "value": {
+        "bits": "21ad15396f119b49",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-144",
+      "value": {
+        "bits": "66bd17861744321e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-145",
+      "value": {
+        "bits": "7bb2c81e05b2f95a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-146",
+      "value": {
+        "bits": "95c1c91e80366936",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-147",
+      "value": {
+        "bits": "ef3532e7ebcca006",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-148",
+      "value": {
+        "bits": "29cfe92287c0f326",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-149",
+      "value": {
+        "bits": "02a1ce12aa089f2d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-150",
+      "value": {
+        "bits": "bfa669ba87e2ec1e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-151",
+      "value": {
+        "bits": "43e6e9997ed5d086",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-152",
+      "value": {
+        "bits": "5ae0cea4bde592af",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-153",
+      "value": {
+        "bits": "907d1be119351eee",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-154",
+      "value": {
+        "bits": "3e18bc935a3c3ba4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-155",
+      "value": {
+        "bits": "05a7f4cb694a352f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-156",
+      "value": {
+        "bits": "83f170467d12af93",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-157",
+      "value": {
+        "bits": "0157df96b419dd2a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-158",
+      "value": {
+        "bits": "8096fd6445404027",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-159",
+      "value": {
+        "bits": "b4684fbe72ae4542",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-160",
+      "value": {
+        "bits": "b83a93ee767ac7f5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-161",
+      "value": {
+        "bits": "b9b5c08971b42a58",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-162",
+      "value": {
+        "bits": "587887e9060501a7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-163",
+      "value": {
+        "bits": "e9517ede841116cf",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-164",
+      "value": {
+        "bits": "fd019581e7e4ca95",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-165",
+      "value": {
+        "bits": "1f369b85861d2dbb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-166",
+      "value": {
+        "bits": "78c6b7729bcf0378",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-167",
+      "value": {
+        "bits": "fff4d1cd14e95c19",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-168",
+      "value": {
+        "bits": "bfecc6d13daaecc8",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-169",
+      "value": {
+        "bits": "9bae0ac1dec5249c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-170",
+      "value": {
+        "bits": "a3b01add346553ac",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-171",
+      "value": {
+        "bits": "a474aed37bfe9bed",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-172",
+      "value": {
+        "bits": "88d864ef68b453c2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-173",
+      "value": {
+        "bits": "7590133d602bb7e4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-174",
+      "value": {
+        "bits": "2c9120a22c66aea3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-175",
+      "value": {
+        "bits": "0061c3c75e3a7322",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-176",
+      "value": {
+        "bits": "be74c0d604d5a468",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-177",
+      "value": {
+        "bits": "67b91a3d413d14f6",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-178",
+      "value": {
+        "bits": "634761f8484e5d55",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-179",
+      "value": {
+        "bits": "d6c3dc3e7f467f00",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-180",
+      "value": {
+        "bits": "e08c0391980dc42e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-181",
+      "value": {
+        "bits": "f7b6c54f1764ca47",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-182",
+      "value": {
+        "bits": "e792ff75079ab6e9",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-183",
+      "value": {
+        "bits": "9272fd7e70048f30",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-184",
+      "value": {
+        "bits": "1970591c6e1b04ae",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-185",
+      "value": {
+        "bits": "a98ab94d7e67d534",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-186",
+      "value": {
+        "bits": "26f01982162351cd",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-187",
+      "value": {
+        "bits": "b38de4c226646a02",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-188",
+      "value": {
+        "bits": "b9767557828e414c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-189",
+      "value": {
+        "bits": "053a098d90c425c7",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-190",
+      "value": {
+        "bits": "36f79976e80a203c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-191",
+      "value": {
+        "bits": "09c6e102b5ccaa3d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-192",
+      "value": {
+        "bits": "88be47fec4d801b0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-193",
+      "value": {
+        "bits": "ab815358c8411cdb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-194",
+      "value": {
+        "bits": "607f458881a94f44",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-195",
+      "value": {
+        "bits": "1c4764abfd1b0a3b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-196",
+      "value": {
+        "bits": "1d74888d6617b033",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-197",
+      "value": {
+        "bits": "4c53927be1350560",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-198",
+      "value": {
+        "bits": "2eac807a151ac222",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-199",
+      "value": {
+        "bits": "bb618ac161e66521",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-200",
+      "value": {
+        "bits": "5ccd2d9a50972850",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-201",
+      "value": {
+        "bits": "42dff782bef4c19c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-202",
+      "value": {
+        "bits": "a7a6ab7800215626",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-203",
+      "value": {
+        "bits": "250bcc2a68b4e171",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-204",
+      "value": {
+        "bits": "3eb806d2e3b9fe12",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-205",
+      "value": {
+        "bits": "1cd079fd892bebce",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-206",
+      "value": {
+        "bits": "d41d67fc27796015",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-207",
+      "value": {
+        "bits": "2571778a7aff57f0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-208",
+      "value": {
+        "bits": "aa381e010dce443b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-209",
+      "value": {
+        "bits": "68cc9f319eeb4caa",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-210",
+      "value": {
+        "bits": "bc7f81a2c3978717",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-211",
+      "value": {
+        "bits": "f788979009a386be",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-212",
+      "value": {
+        "bits": "0e93b27287e5fb96",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-213",
+      "value": {
+        "bits": "a3b50e6732461578",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-214",
+      "value": {
+        "bits": "aedd2a701188c75c",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-215",
+      "value": {
+        "bits": "c5c1fbd50823b8aa",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-216",
+      "value": {
+        "bits": "b756dbade1377f0a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-217",
+      "value": {
+        "bits": "c2d9152512d117ba",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-218",
+      "value": {
+        "bits": "c937cd45409c2f85",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-219",
+      "value": {
+        "bits": "f59068a955ecf215",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-220",
+      "value": {
+        "bits": "a859fa8f10f6b16e",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-221",
+      "value": {
+        "bits": "9f1573e62d8c4592",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-222",
+      "value": {
+        "bits": "05fb3dc4edf29e11",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-223",
+      "value": {
+        "bits": "82a1f0763b824a22",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-224",
+      "value": {
+        "bits": "6a0ec5275cff68e5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-225",
+      "value": {
+        "bits": "943ab412f6232f68",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-226",
+      "value": {
+        "bits": "25ffd9bc14bde467",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-227",
+      "value": {
+        "bits": "569c1f2e57c29fc2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-228",
+      "value": {
+        "bits": "829eb4d00c8063ec",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-229",
+      "value": {
+        "bits": "1d603b2aa6330de0",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-230",
+      "value": {
+        "bits": "18e17cb3f0e5265f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-231",
+      "value": {
+        "bits": "d705dd080204adbf",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-232",
+      "value": {
+        "bits": "749513106cdeb7d5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-233",
+      "value": {
+        "bits": "caa438dd235837b9",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-234",
+      "value": {
+        "bits": "ec2ae26de055c02a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-235",
+      "value": {
+        "bits": "7ecd66d22d692ff9",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-236",
+      "value": {
+        "bits": "2eb97b5c0377f2eb",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-237",
+      "value": {
+        "bits": "256dd3f09feac9dc",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-238",
+      "value": {
+        "bits": "5446be4d091ece1f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-239",
+      "value": {
+        "bits": "e7075f81d377efc5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-240",
+      "value": {
+        "bits": "c155998b6f9d1bde",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-241",
+      "value": {
+        "bits": "08c64ac954e326db",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-242",
+      "value": {
+        "bits": "bb894ee2745abf75",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-243",
+      "value": {
+        "bits": "d57b3c20f21adb1a",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-244",
+      "value": {
+        "bits": "c47c38a097a1c4fd",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-245",
+      "value": {
+        "bits": "fa75df54357286b2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-246",
+      "value": {
+        "bits": "ccadcffc6f252720",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-247",
+      "value": {
+        "bits": "e7a9152f8c187325",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-248",
+      "value": {
+        "bits": "fafb91df368b50e3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-249",
+      "value": {
+        "bits": "e1cae308cee0671b",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-250",
+      "value": {
+        "bits": "df355e2d392b8f73",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-251",
+      "value": {
+        "bits": "bd6f2d97d8e62cd8",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-252",
+      "value": {
+        "bits": "8927a0c363b776e3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-253",
+      "value": {
+        "bits": "d08803d23863c5a1",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-254",
+      "value": {
+        "bits": "224c3732bac5bfbe",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-255",
+      "value": {
+        "bits": "dbb7275bff91cb0d",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-256",
+      "value": {
+        "bits": "910bf7542a7504a2",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-257",
+      "value": {
+        "bits": "cd6235cd001b37e3",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-258",
+      "value": {
+        "bits": "c81944b740f03645",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-259",
+      "value": {
+        "bits": "56b3f2dcb2e98c58",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-260",
+      "value": {
+        "bits": "28fea923ef76d172",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-261",
+      "value": {
+        "bits": "e81d52e3d8bf07d9",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-262",
+      "value": {
+        "bits": "57ad03671202a319",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-263",
+      "value": {
+        "bits": "defd936815372ce5",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-264",
+      "value": {
+        "bits": "33d160b59d32cd93",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-265",
+      "value": {
+        "bits": "655b470ddb95fda4",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-266",
+      "value": {
+        "bits": "0db103c03ef6953f",
+        "kind": "number"
+      }
+    },
+    {
+      "id": "float-267",
+      "value": {
+        "bits": "a3bdd863f63b16c2",
+        "kind": "number"
+      }
+    }
+  ],
+  "mappers": [
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": false,
+      "files": {
+        "/home/project/a.ts": "let x;"
+      },
+      "id": "disabled-valid",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": false,
+      "RunExternalCode": false,
+      "files": {
+        "/home/project/a.ts": "let x;"
+      },
+      "id": "disabled-invalid-extensions",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\"vue\", \".ts\", \".D.TS\", \".vue\", \".vue\"]}, {\"package\": \"other\", \"extensions\": [\".VUE\", \".JS\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": false,
+      "files": {
+        "/home/project/a.ts": "let x;"
+      },
+      "id": "invalid-definition",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{}, {\"package\": \"\", \"extensions\": false, \"options\": null}, {\"package\": 3, \"extensions\": [\".vue\", null]}, 4]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"version\": \"1.2.3\", \"typescript\": {\"contentMapper\": {\"exec\": [\"node\", \"mapper.js\"], \"compilerOptions\": [\"target\", \"jsx\"], \"dynamicConfig\": true}}}"
+      },
+      "id": "valid",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"], \"options\": {\"html\": \"<>&\", \"null\": null, \"unicode\": \"\\u2028\", \"n\": -0.0}}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"version\": \"1.2.3\", \"typescript\": {\"contentMapper\": {\"exec\": [\"node\", \"mapper.js\"], \"compilerOptions\": [\"target\", \"jsx\"], \"dynamicConfig\": true}}}"
+      },
+      "id": "duplicates-case-sensitive",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\", \".VUE\", \".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;"
+      },
+      "id": "missing-package",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"missing\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{"
+      },
+      "id": "malformed",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"version\": \"1\"}"
+      },
+      "id": "missing-name",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\"}"
+      },
+      "id": "missing-object",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"typescript\": {\"contentMapper\": null}}"
+      },
+      "id": "null-object",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"typescript\": {\"contentMapper\": {}}}"
+      },
+      "id": "missing-exec",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"typescript\": {\"contentMapper\": {\"exec\": [1]}}}"
+      },
+      "id": "invalid-exec",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"typescript\": {\"contentMapper\": {\"exec\": []}}}"
+      },
+      "id": "empty-exec",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"typescript\": {\"contentMapper\": {\"exec\": [\"\"]}}}"
+      },
+      "id": "empty-string-exec",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    },
+    {
+      "CaseSensitive": true,
+      "RunExternalCode": true,
+      "files": {
+        "/home/project/a.ts": "let x;",
+        "/home/project/node_modules/mapper/package.json": "{\"name\": \"mapper\", \"version\": false, \"typescript\": {\"contentMapper\": {\"exec\": [\"run\"], \"compilerOptions\": [1], \"dynamicConfig\": \"yes\"}}}"
+      },
+      "id": "invalid-optional",
+      "text": "{\"files\": [\"a.ts\"], \"contentMappers\": [{\"package\": \"mapper\", \"extensions\": [\".vue\"]}]}"
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+[
+  {
+    "id": "relative-json",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "relative-extensionless",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "relative-ts-substitution",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "relative-tsx-no-substitution",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "",
+      "OriginalPath": "",
+      "Extension": "",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "relative-directory",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base/tsconfig.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-index",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/tsconfig.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-field",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/configs/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-field-extensionless",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-wrong-field",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/tsconfig.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-main-ignored",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "",
+      "OriginalPath": "",
+      "Extension": "",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-exports",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/configs/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-exports-block",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "",
+      "OriginalPath": "",
+      "Extension": "",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-conditions",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/cjs.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-subpath",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/config/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-pattern",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/configs/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "package-types-versions",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/configs/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "scoped-package",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/@scope/pkg/tsconfig.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "imports-map",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "self-name",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/src/base.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "malformed-package-fallback",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "/node_modules/pkg/tsconfig.json",
+      "OriginalPath": "",
+      "Extension": ".json",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": true,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "missing",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "",
+      "OriginalPath": "",
+      "Extension": "",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  },
+  {
+    "id": "url",
+    "result": {
+      "ResolutionDiagnostics": null,
+      "ResolvedFileName": "",
+      "OriginalPath": "",
+      "Extension": "",
+      "ResolvedUsingTsExtension": false,
+      "ResolvedUsingExtraExtensions": false,
+      "PackageId": {
+        "Name": "",
+        "SubModuleName": "",
+        "Version": "",
+        "PeerDependencies": ""
+      },
+      "IsExternalLibraryImport": false,
+      "AlternateResult": ""
+    }
+  }
+]

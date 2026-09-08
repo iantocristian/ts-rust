@@ -2,7 +2,7 @@
 
 use ts_jsstring::{helpers::to_lower_go, wtf8::decode_utf8};
 
-use crate::tables_generated::SIMPLE_FOLD;
+pub use ts_jsstring::equal_fold;
 
 fn runes(mut bytes: &[u8]) -> Vec<i32> {
     let mut result = Vec::with_capacity(bytes.len());
@@ -12,35 +12,6 @@ fn runes(mut bytes: &[u8]) -> Vec<i32> {
         bytes = &bytes[width..];
     }
     result
-}
-
-fn simple_fold(rune: i32) -> i32 {
-    SIMPLE_FOLD
-        .binary_search_by_key(&(rune as u32), |row| row.0)
-        .map_or(rune, |index| SIMPLE_FOLD[index].1 as i32)
-}
-
-/// Go `strings.EqualFold`, using the pinned toolchain's simple-fold cycles.
-/// Malformed bytes each decode to RuneError; equality does not repair the input.
-pub fn equal_fold(mut left: &[u8], mut right: &[u8]) -> bool {
-    while !left.is_empty() && !right.is_empty() {
-        let (a, width_a) = decode_utf8(left);
-        let (b, width_b) = decode_utf8(right);
-        left = &left[width_a..];
-        right = &right[width_b..];
-        if a == b {
-            continue;
-        }
-        let (small, large) = if a < b { (a, b) } else { (b, a) };
-        let mut folded = simple_fold(small);
-        while folded != small && folded < large {
-            folded = simple_fold(folded);
-        }
-        if folded != large {
-            return false;
-        }
-    }
-    left.is_empty() && right.is_empty()
 }
 
 /// port: tsc/internal/core/core.go:GetSpellingSuggestionForStrings

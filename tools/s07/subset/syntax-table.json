@@ -1,0 +1,2463 @@
+{
+  "version": 1,
+  "source": "tsc/internal/ast/kind_generated.go",
+  "rows": [
+    {
+      "kind": "KindUnknown",
+      "value": 0,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEndOfFile",
+      "value": 1,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSingleLineCommentTrivia",
+      "value": 2,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindMultiLineCommentTrivia",
+      "value": 3,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNewLineTrivia",
+      "value": 4,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindWhitespaceTrivia",
+      "value": 5,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindConflictMarkerTrivia",
+      "value": 6,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNonTextFileMarkerTrivia",
+      "value": 7,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNumericLiteral",
+      "value": 8,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBigIntLiteral",
+      "value": 9,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindStringLiteral",
+      "value": 10,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindJsxText",
+      "value": 11,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxTextAllWhiteSpaces",
+      "value": 12,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindRegularExpressionLiteral",
+      "value": 13,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNoSubstitutionTemplateLiteral",
+      "value": 14,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTemplateHead",
+      "value": 15,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTemplateMiddle",
+      "value": 16,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTemplateTail",
+      "value": 17,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOpenBraceToken",
+      "value": 18,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCloseBraceToken",
+      "value": 19,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOpenParenToken",
+      "value": 20,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCloseParenToken",
+      "value": 21,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOpenBracketToken",
+      "value": 22,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCloseBracketToken",
+      "value": 23,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDotToken",
+      "value": 24,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDotDotDotToken",
+      "value": 25,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSemicolonToken",
+      "value": 26,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCommaToken",
+      "value": 27,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindQuestionDotToken",
+      "value": 28,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLessThanToken",
+      "value": 29,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLessThanSlashToken",
+      "value": 30,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanToken",
+      "value": 31,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLessThanEqualsToken",
+      "value": 32,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanEqualsToken",
+      "value": 33,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEqualsEqualsToken",
+      "value": 34,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindExclamationEqualsToken",
+      "value": 35,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEqualsEqualsEqualsToken",
+      "value": 36,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindExclamationEqualsEqualsToken",
+      "value": 37,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEqualsGreaterThanToken",
+      "value": 38,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPlusToken",
+      "value": 39,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindMinusToken",
+      "value": 40,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsteriskToken",
+      "value": 41,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsteriskAsteriskToken",
+      "value": 42,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSlashToken",
+      "value": 43,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPercentToken",
+      "value": 44,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPlusPlusToken",
+      "value": 45,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindMinusMinusToken",
+      "value": 46,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLessThanLessThanToken",
+      "value": 47,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanGreaterThanToken",
+      "value": 48,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanGreaterThanGreaterThanToken",
+      "value": 49,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAmpersandToken",
+      "value": 50,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBarToken",
+      "value": 51,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCaretToken",
+      "value": 52,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindExclamationToken",
+      "value": 53,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTildeToken",
+      "value": 54,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAmpersandAmpersandToken",
+      "value": 55,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBarBarToken",
+      "value": 56,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindQuestionToken",
+      "value": 57,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindColonToken",
+      "value": 58,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAtToken",
+      "value": 59,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindQuestionQuestionToken",
+      "value": 60,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBacktickToken",
+      "value": 61,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindHashToken",
+      "value": 62,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEqualsToken",
+      "value": 63,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPlusEqualsToken",
+      "value": 64,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindMinusEqualsToken",
+      "value": 65,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsteriskEqualsToken",
+      "value": 66,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsteriskAsteriskEqualsToken",
+      "value": 67,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSlashEqualsToken",
+      "value": 68,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPercentEqualsToken",
+      "value": 69,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLessThanLessThanEqualsToken",
+      "value": 70,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanGreaterThanEqualsToken",
+      "value": 71,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGreaterThanGreaterThanGreaterThanEqualsToken",
+      "value": 72,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAmpersandEqualsToken",
+      "value": 73,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBarEqualsToken",
+      "value": 74,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBarBarEqualsToken",
+      "value": 75,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAmpersandAmpersandEqualsToken",
+      "value": 76,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindQuestionQuestionEqualsToken",
+      "value": 77,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCaretEqualsToken",
+      "value": 78,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindIdentifier",
+      "value": 79,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPrivateIdentifier",
+      "value": 80,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindJSDocCommentTextToken",
+      "value": 81,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBreakKeyword",
+      "value": 82,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCaseKeyword",
+      "value": 83,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindCatchKeyword",
+      "value": 84,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindClassKeyword",
+      "value": 85,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindConstKeyword",
+      "value": 86,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindContinueKeyword",
+      "value": 87,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDebuggerKeyword",
+      "value": 88,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDefaultKeyword",
+      "value": 89,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDeleteKeyword",
+      "value": 90,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDoKeyword",
+      "value": 91,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindElseKeyword",
+      "value": 92,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindEnumKeyword",
+      "value": 93,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindExportKeyword",
+      "value": 94,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindExtendsKeyword",
+      "value": 95,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindFalseKeyword",
+      "value": 96,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindFinallyKeyword",
+      "value": 97,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindForKeyword",
+      "value": 98,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindFunctionKeyword",
+      "value": 99,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindIfKeyword",
+      "value": 100,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindImportKeyword",
+      "value": 101,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindInKeyword",
+      "value": 102,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindInstanceOfKeyword",
+      "value": 103,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNewKeyword",
+      "value": 104,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNullKeyword",
+      "value": 105,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindReturnKeyword",
+      "value": 106,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSuperKeyword",
+      "value": 107,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSwitchKeyword",
+      "value": 108,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindThisKeyword",
+      "value": 109,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindThrowKeyword",
+      "value": 110,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTrueKeyword",
+      "value": 111,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTryKeyword",
+      "value": 112,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTypeOfKeyword",
+      "value": 113,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindVarKeyword",
+      "value": 114,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindVoidKeyword",
+      "value": 115,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindWhileKeyword",
+      "value": 116,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindWithKeyword",
+      "value": 117,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindImplementsKeyword",
+      "value": 118,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindInterfaceKeyword",
+      "value": 119,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindLetKeyword",
+      "value": 120,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPackageKeyword",
+      "value": 121,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPrivateKeyword",
+      "value": 122,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindProtectedKeyword",
+      "value": 123,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindPublicKeyword",
+      "value": 124,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindStaticKeyword",
+      "value": 125,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindYieldKeyword",
+      "value": 126,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAbstractKeyword",
+      "value": 127,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAccessorKeyword",
+      "value": 128,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsKeyword",
+      "value": 129,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAssertsKeyword",
+      "value": 130,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAssertKeyword",
+      "value": 131,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAnyKeyword",
+      "value": 132,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAsyncKeyword",
+      "value": 133,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindAwaitKeyword",
+      "value": 134,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBooleanKeyword",
+      "value": 135,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindConstructorKeyword",
+      "value": 136,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDeclareKeyword",
+      "value": 137,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGetKeyword",
+      "value": 138,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindImmediateKeyword",
+      "value": 139,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindInferKeyword",
+      "value": 140,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindIntrinsicKeyword",
+      "value": 141,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindIsKeyword",
+      "value": 142,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindKeyOfKeyword",
+      "value": 143,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindModuleKeyword",
+      "value": 144,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNamespaceKeyword",
+      "value": 145,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNeverKeyword",
+      "value": 146,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOutKeyword",
+      "value": 147,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindReadonlyKeyword",
+      "value": 148,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindRequireKeyword",
+      "value": 149,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindNumberKeyword",
+      "value": 150,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindObjectKeyword",
+      "value": 151,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSatisfiesKeyword",
+      "value": 152,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSetKeyword",
+      "value": 153,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindStringKeyword",
+      "value": 154,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindSymbolKeyword",
+      "value": 155,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindTypeKeyword",
+      "value": 156,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindUndefinedKeyword",
+      "value": 157,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindUniqueKeyword",
+      "value": 158,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindUnknownKeyword",
+      "value": 159,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindUsingKeyword",
+      "value": 160,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindFromKeyword",
+      "value": 161,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindGlobalKeyword",
+      "value": 162,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindBigIntKeyword",
+      "value": 163,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOverrideKeyword",
+      "value": 164,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindOfKeyword",
+      "value": 165,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindDeferKeyword",
+      "value": 166,
+      "disposition": "allow",
+      "family": "tokens_and_recovery",
+      "reason": "Token, literal, modifier or recovered token; containing AST features are classified independently."
+    },
+    {
+      "kind": "KindQualifiedName",
+      "value": 167,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindComputedPropertyName",
+      "value": 168,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindTypeParameter",
+      "value": 169,
+      "disposition": "reject",
+      "family": "explicit_type_parameters",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindParameter",
+      "value": 170,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindDecorator",
+      "value": 171,
+      "disposition": "reject",
+      "family": "decorators",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindPropertySignature",
+      "value": 172,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindPropertyDeclaration",
+      "value": 173,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindMethodSignature",
+      "value": 174,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindMethodDeclaration",
+      "value": 175,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindClassStaticBlockDeclaration",
+      "value": 176,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindConstructor",
+      "value": 177,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindGetAccessor",
+      "value": 178,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindSetAccessor",
+      "value": 179,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindCallSignature",
+      "value": 180,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindConstructSignature",
+      "value": 181,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindIndexSignature",
+      "value": 182,
+      "disposition": "allow",
+      "family": "declaration_members",
+      "reason": "Member/function declaration structure, including accessors, static blocks and index signatures."
+    },
+    {
+      "kind": "KindTypePredicate",
+      "value": 183,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeReference",
+      "value": 184,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindFunctionType",
+      "value": 185,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindConstructorType",
+      "value": 186,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeQuery",
+      "value": 187,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeLiteral",
+      "value": 188,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindArrayType",
+      "value": 189,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTupleType",
+      "value": 190,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindOptionalType",
+      "value": 191,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindRestType",
+      "value": 192,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindUnionType",
+      "value": 193,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindIntersectionType",
+      "value": 194,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindConditionalType",
+      "value": 195,
+      "disposition": "reject",
+      "family": "conditional_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindInferType",
+      "value": 196,
+      "disposition": "reject",
+      "family": "infer_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindParenthesizedType",
+      "value": 197,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindThisType",
+      "value": 198,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeOperator",
+      "value": 199,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindIndexedAccessType",
+      "value": 200,
+      "disposition": "reject",
+      "family": "indexed_access_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindMappedType",
+      "value": 201,
+      "disposition": "reject",
+      "family": "mapped_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindLiteralType",
+      "value": 202,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindNamedTupleMember",
+      "value": 203,
+      "disposition": "allow",
+      "family": "non_generic_type_syntax",
+      "reason": "Allowed type structure; nonempty type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTemplateLiteralType",
+      "value": 204,
+      "disposition": "reject",
+      "family": "template_literal_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindTemplateLiteralTypeSpan",
+      "value": 205,
+      "disposition": "reject",
+      "family": "template_literal_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindImportType",
+      "value": 206,
+      "disposition": "reject",
+      "family": "import_types",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindObjectBindingPattern",
+      "value": 207,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindArrayBindingPattern",
+      "value": 208,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindBindingElement",
+      "value": 209,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindArrayLiteralExpression",
+      "value": 210,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindObjectLiteralExpression",
+      "value": 211,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindPropertyAccessExpression",
+      "value": 212,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindElementAccessExpression",
+      "value": 213,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindCallExpression",
+      "value": 214,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindNewExpression",
+      "value": 215,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTaggedTemplateExpression",
+      "value": 216,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeAssertionExpression",
+      "value": 217,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindParenthesizedExpression",
+      "value": 218,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindFunctionExpression",
+      "value": 219,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindArrowFunction",
+      "value": 220,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindDeleteExpression",
+      "value": 221,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTypeOfExpression",
+      "value": 222,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindVoidExpression",
+      "value": 223,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindAwaitExpression",
+      "value": 224,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindPrefixUnaryExpression",
+      "value": 225,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindPostfixUnaryExpression",
+      "value": 226,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindBinaryExpression",
+      "value": 227,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindConditionalExpression",
+      "value": 228,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTemplateExpression",
+      "value": 229,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindYieldExpression",
+      "value": 230,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindSpreadElement",
+      "value": 231,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindClassExpression",
+      "value": 232,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindOmittedExpression",
+      "value": 233,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindExpressionWithTypeArguments",
+      "value": 234,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindAsExpression",
+      "value": 235,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindNonNullExpression",
+      "value": 236,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindMetaProperty",
+      "value": 237,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindSyntheticExpression",
+      "value": 238,
+      "disposition": "irrelevant",
+      "family": "transformation_only",
+      "reason": "Transformation-only payload; this phase classifies parser-produced source trees."
+    },
+    {
+      "kind": "KindSatisfiesExpression",
+      "value": 239,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindTemplateSpan",
+      "value": 240,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindSemicolonClassElement",
+      "value": 241,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindBlock",
+      "value": 242,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindEmptyStatement",
+      "value": 243,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindVariableStatement",
+      "value": 244,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindExpressionStatement",
+      "value": 245,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindIfStatement",
+      "value": 246,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindDoStatement",
+      "value": 247,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindWhileStatement",
+      "value": 248,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindForStatement",
+      "value": 249,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindForInStatement",
+      "value": 250,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindForOfStatement",
+      "value": 251,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindContinueStatement",
+      "value": 252,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindBreakStatement",
+      "value": 253,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindReturnStatement",
+      "value": 254,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindWithStatement",
+      "value": 255,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindSwitchStatement",
+      "value": 256,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindLabeledStatement",
+      "value": 257,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindThrowStatement",
+      "value": 258,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindTryStatement",
+      "value": 259,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindDebuggerStatement",
+      "value": 260,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindVariableDeclaration",
+      "value": 261,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindVariableDeclarationList",
+      "value": 262,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindFunctionDeclaration",
+      "value": 263,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindClassDeclaration",
+      "value": 264,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindInterfaceDeclaration",
+      "value": 265,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindTypeAliasDeclaration",
+      "value": 266,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindEnumDeclaration",
+      "value": 267,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindModuleDeclaration",
+      "value": 268,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindModuleBlock",
+      "value": 269,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindCaseBlock",
+      "value": 270,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindNamespaceExportDeclaration",
+      "value": 271,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindImportEqualsDeclaration",
+      "value": 272,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindImportDeclaration",
+      "value": 273,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindImportClause",
+      "value": 274,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindNamespaceImport",
+      "value": 275,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindNamedImports",
+      "value": 276,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindImportSpecifier",
+      "value": 277,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindExportAssignment",
+      "value": 278,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindExportDeclaration",
+      "value": 279,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindNamedExports",
+      "value": 280,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindNamespaceExport",
+      "value": 281,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindExportSpecifier",
+      "value": 282,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindMissingDeclaration",
+      "value": 283,
+      "disposition": "allow",
+      "family": "structure_and_recovery",
+      "reason": "Structural or parser-recovery node does not itself exclude malformed input."
+    },
+    {
+      "kind": "KindExternalModuleReference",
+      "value": 284,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindJsxElement",
+      "value": 285,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxSelfClosingElement",
+      "value": 286,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxOpeningElement",
+      "value": 287,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxClosingElement",
+      "value": 288,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxFragment",
+      "value": 289,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxOpeningFragment",
+      "value": 290,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxClosingFragment",
+      "value": 291,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxAttribute",
+      "value": 292,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxAttributes",
+      "value": 293,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxSpreadAttribute",
+      "value": 294,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxExpression",
+      "value": 295,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindJsxNamespacedName",
+      "value": 296,
+      "disposition": "reject",
+      "family": "jsx",
+      "reason": "JSX source syntax is outside version 1."
+    },
+    {
+      "kind": "KindCaseClause",
+      "value": 297,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindDefaultClause",
+      "value": 298,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindHeritageClause",
+      "value": 299,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindCatchClause",
+      "value": 300,
+      "disposition": "allow",
+      "family": "control_flow",
+      "reason": "Ordinary statement/control-flow syntax, including unreachable and malformed input."
+    },
+    {
+      "kind": "KindImportAttributes",
+      "value": 301,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindImportAttribute",
+      "value": 302,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindPropertyAssignment",
+      "value": 303,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindShorthandPropertyAssignment",
+      "value": 304,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindSpreadAssignment",
+      "value": 305,
+      "disposition": "allow",
+      "family": "expressions_and_bindings",
+      "reason": "Ordinary expressions, destructuring and function bodies; type arguments are independently rejected."
+    },
+    {
+      "kind": "KindEnumMember",
+      "value": 306,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindSourceFile",
+      "value": 307,
+      "disposition": "allow",
+      "family": "structure_and_recovery",
+      "reason": "Structural or parser-recovery node does not itself exclude malformed input."
+    },
+    {
+      "kind": "KindJSDocTypeExpression",
+      "value": 308,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocNameReference",
+      "value": 309,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocAllType",
+      "value": 310,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocNullableType",
+      "value": 311,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocNonNullableType",
+      "value": 312,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocOptionalType",
+      "value": 313,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocVariadicType",
+      "value": 314,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDoc",
+      "value": 315,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocText",
+      "value": 316,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocTypeLiteral",
+      "value": 317,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocSignature",
+      "value": 318,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocLink",
+      "value": 319,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocLinkCode",
+      "value": 320,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocLinkPlain",
+      "value": 321,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocUnknownTag",
+      "value": 322,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocAugmentsTag",
+      "value": 323,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocImplementsTag",
+      "value": 324,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocDeprecatedTag",
+      "value": 325,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocPublicTag",
+      "value": 326,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocPrivateTag",
+      "value": 327,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocProtectedTag",
+      "value": 328,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocReadonlyTag",
+      "value": 329,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocOverrideTag",
+      "value": 330,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocCallbackTag",
+      "value": 331,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocOverloadTag",
+      "value": 332,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocParameterTag",
+      "value": 333,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocReturnTag",
+      "value": 334,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocThisTag",
+      "value": 335,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocTypeTag",
+      "value": 336,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocTemplateTag",
+      "value": 337,
+      "disposition": "reject",
+      "family": "explicit_type_parameters",
+      "reason": "Outside proposed S08 source-case type/feature scope; library use becomes an obligation."
+    },
+    {
+      "kind": "KindJSDocTypedefTag",
+      "value": 338,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocSeeTag",
+      "value": 339,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocPropertyTag",
+      "value": 340,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocThrowsTag",
+      "value": 341,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocSatisfiesTag",
+      "value": 342,
+      "disposition": "allow",
+      "family": "jsdoc",
+      "reason": "JSDoc metadata and type syntax; contained rejected nodes and type arguments still reject the source case."
+    },
+    {
+      "kind": "KindJSDocImportTag",
+      "value": 343,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindSyntaxList",
+      "value": 344,
+      "disposition": "allow",
+      "family": "structure_and_recovery",
+      "reason": "Structural or parser-recovery node does not itself exclude malformed input."
+    },
+    {
+      "kind": "KindJSTypeAliasDeclaration",
+      "value": 345,
+      "disposition": "allow",
+      "family": "declarations_and_merging",
+      "reason": "Allowed declarations and declaration merging; type parameters are independently rejected."
+    },
+    {
+      "kind": "KindJSImportDeclaration",
+      "value": 346,
+      "disposition": "allow",
+      "family": "imports_and_exports",
+      "reason": "Direct imports/exports and import attributes require source program/name resolution."
+    },
+    {
+      "kind": "KindNotEmittedStatement",
+      "value": 347,
+      "disposition": "irrelevant",
+      "family": "transformation_only",
+      "reason": "Transformation-only payload; this phase classifies parser-produced source trees."
+    },
+    {
+      "kind": "KindPartiallyEmittedExpression",
+      "value": 348,
+      "disposition": "irrelevant",
+      "family": "transformation_only",
+      "reason": "Transformation-only payload; this phase classifies parser-produced source trees."
+    },
+    {
+      "kind": "KindSyntheticReferenceExpression",
+      "value": 349,
+      "disposition": "irrelevant",
+      "family": "transformation_only",
+      "reason": "Transformation-only payload; this phase classifies parser-produced source trees."
+    },
+    {
+      "kind": "KindNotEmittedTypeElement",
+      "value": 350,
+      "disposition": "irrelevant",
+      "family": "transformation_only",
+      "reason": "Transformation-only payload; this phase classifies parser-produced source trees."
+    }
+  ]
+}

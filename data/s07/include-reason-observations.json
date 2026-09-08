@@ -1,0 +1,3567 @@
+[
+  {
+    "id": "singleton-import",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 17,
+          "End": 24,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 17,
+              "End": 24,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6d61696e2e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/main.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "",
+        "reasons": []
+      },
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f6d697373696e672e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/missing.ts",
+        "reasons": []
+      }
+    ]
+  },
+  {
+    "id": "reason-identity",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 23,
+          "End": 30,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 23,
+              "End": 30,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "references",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 21,
+          "End": 29,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1400,
+                  "Args": [
+                    "2e2f6465702e7473",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1400,
+                  "Args": [
+                    "2e2f6465702e7473",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 55,
+              "End": 63,
+              "Code": 1401,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1400,
+              "Args": [
+                "2e2f6465702e7473",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 21,
+              "End": 29,
+              "Code": 1401,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1400,
+              "Args": [
+                "2e2f6465702e7473",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1400,
+              "Args": [
+                "2e2f6465702e7473",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 55,
+              "End": 63,
+              "Code": 1401,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1400,
+              "Args": [
+                "2e2f6465702e7473",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "type-reference-package-zero",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 22,
+          "End": 25,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f4074797065732f706b672f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/node_modules/@types/pkg/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1402,
+              "Args": [
+                "706b67",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 22,
+              "End": 25,
+              "Code": 1404,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1402,
+              "Args": [
+                "706b67",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "automatic-type-package",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f4074797065732f706b672f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1420,
+                  "Args": [
+                    "706b67"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/node_modules/@types/pkg/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1420,
+              "Args": [
+                "706b67"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1420,
+              "Args": [
+                "706b67"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "module-augmentation",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 26,
+          "End": 33,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 26,
+              "End": 33,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "synthetic-helper",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f74736c69622f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1396,
+                  "Args": [
+                    "2274736c696222",
+                    "2f7372632f6d61696e2e7473",
+                    "74736c69622f696e6465782e642e747340322e302e30"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/node_modules/tslib/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1396,
+              "Args": [
+                "2274736c696222",
+                "2f7372632f6d61696e2e7473",
+                "74736c69622f696e6465782e642e747340322e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1396,
+              "Args": [
+                "2274736c696222",
+                "6d61696e2e7473",
+                "74736c69622f696e6465782e642e747340322e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "synthetic-jsx",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f72656163742f6a73782d72756e74696d652e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1397,
+                  "Args": [
+                    "2272656163742f6a73782d72756e74696d6522",
+                    "2f7372632f6d61696e2e747378"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/node_modules/react/jsx-runtime.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1397,
+              "Args": [
+                "2272656163742f6a73782d72756e74696d6522",
+                "2f7372632f6d61696e2e747378"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1397,
+              "Args": [
+                "2272656163742f6a73782d72756e74696d6522",
+                "6d61696e2e747378"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "format/module",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 17,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1458,
+              "Args": [
+                "2f7372632f7061636b6167652e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 17,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "format/commonjs",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 17,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1459,
+              "Args": [
+                "2f7372632f7061636b6167652e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 17,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "format/unknown",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 17,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1459,
+              "Args": [
+                "2f7372632f7061636b6167652e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 17,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "format/absent-type",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 17,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1460,
+              "Args": [
+                "2f7372632f7061636b6167652e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 17,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "format/missing",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 17,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1461,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 17,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f6465702e6a7322",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "invalid-trivia-bytes",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 13,
+          "End": 20,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 13,
+              "End": 20,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "library-directive",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 20,
+          "End": 23,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e6573352e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "bundled:///libs/lib.es5.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1405,
+              "Args": [
+                "657335",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 20,
+              "End": 23,
+              "Code": 1406,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1405,
+              "Args": [
+                "657335",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rootdir-import-location",
+    "include_files": {
+      "/src/bound/main.ts": [
+        {
+          "File": "2f7372632f626f756e642f6d61696e2e7473",
+          "Pos": 7,
+          "End": 15,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f7372632f626f756e64"
+          ],
+          "Chain": [],
+          "Related": []
+        }
+      ]
+    },
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f626f756e642f6d61696e2e7473",
+          "Pos": 7,
+          "End": 15,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2e2f64657022",
+                "2f7372632f626f756e642f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f626f756e642f6d61696e2e7473",
+              "Pos": 7,
+              "End": 15,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2e2f64657022",
+                "626f756e642f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rootdir-root-global",
+    "include_files": {},
+    "include_globals": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 6059,
+        "Args": [
+          "2f7372632f6465702e7473",
+          "2f6f74686572"
+        ],
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 1430,
+            "Args": [],
+            "Chain": [
+              {
+                "File": "",
+                "Pos": -1,
+                "End": -1,
+                "Code": 1427,
+                "Args": [],
+                "Chain": [],
+                "Related": []
+              }
+            ],
+            "Related": []
+          }
+        ],
+        "Related": []
+      }
+    ],
+    "program": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 6059,
+        "Args": [
+          "2f7372632f6465702e7473",
+          "2f6f74686572"
+        ],
+        "Chain": [
+          {
+            "File": "",
+            "Pos": -1,
+            "End": -1,
+            "Code": 1430,
+            "Args": [],
+            "Chain": [
+              {
+                "File": "",
+                "Pos": -1,
+                "End": -1,
+                "Code": 1427,
+                "Args": [],
+                "Chain": [],
+                "Related": []
+              }
+            ],
+            "Related": []
+          }
+        ],
+        "Related": []
+      }
+    ],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1427,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1427,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "composite-import-location",
+    "include_files": {
+      "/src/main.ts": [
+        {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6307,
+          "Args": [
+            "2f7372632f6465702e7473",
+            ""
+          ],
+          "Chain": [],
+          "Related": []
+        }
+      ]
+    },
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "package-redirect",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 10,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f612f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [],
+          "Related": []
+        },
+        "path": "/src/node_modules/a/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1394,
+              "Args": [
+                "226122",
+                "2f7372632f6d61696e2e7473",
+                "706b672f696e6465782e642e747340312e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 10,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1394,
+              "Args": [
+                "226122",
+                "6d61696e2e7473",
+                "706b672f696e6465782e642e747340312e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      },
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 19,
+          "End": 22,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f622f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1429,
+              "Args": [
+                "2f7372632f6e6f64655f6d6f64756c65732f612f696e6465782e642e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/node_modules/b/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1394,
+              "Args": [
+                "226222",
+                "2f7372632f6d61696e2e7473",
+                "706b672f696e6465782e642e747340312e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 19,
+              "End": 22,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1394,
+              "Args": [
+                "226222",
+                "6d61696e2e7473",
+                "706b672f696e6465782e642e747340312e302e30"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/target-scalar",
+    "include_files": {},
+    "include_globals": [],
+    "program": [
+      {
+        "File": "2f7372632f7473636f6e6669672e6a736f6e",
+        "Pos": 31,
+        "End": 36,
+        "Code": 5108,
+        "Args": [
+          "746172676574",
+          "455335"
+        ],
+        "Chain": [],
+        "Related": []
+      }
+    ],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1425,
+                  "Args": [
+                    "455335"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "bundled:///libs/lib.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/target-array",
+    "include_files": {},
+    "include_globals": [],
+    "program": [
+      {
+        "File": "2f7372632f7473636f6e6669672e6a736f6e",
+        "Pos": 31,
+        "End": 38,
+        "Code": 5108,
+        "Args": [
+          "746172676574",
+          "455335"
+        ],
+        "Chain": [],
+        "Related": []
+      }
+    ],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1425,
+                  "Args": [
+                    "455335"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 32,
+              "End": 37,
+              "Code": 1426,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "bundled:///libs/lib.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 32,
+              "End": 37,
+              "Code": 1426,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/types",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6e6f64655f6d6f64756c65732f4074797065732f706b672f696e6465782e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1417,
+                  "Args": [
+                    "706b67"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 29,
+              "End": 34,
+              "Code": 1419,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/node_modules/@types/pkg/index.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1417,
+              "Args": [
+                "706b67"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 29,
+              "End": 34,
+              "Code": 1419,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1417,
+              "Args": [
+                "706b67"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/lib-array",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e6573352e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1422,
+                  "Args": [
+                    "6c69622e6573352e642e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 27,
+              "End": 41,
+              "Code": 1423,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "bundled:///libs/lib.es5.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1422,
+              "Args": [
+                "6c69622e6573352e642e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 27,
+              "End": 41,
+              "Code": 1423,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1422,
+              "Args": [
+                "6c69622e6573352e642e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "default-library",
+    "include_files": {},
+    "include_globals": [],
+    "program": [
+      {
+        "File": "",
+        "Pos": -1,
+        "End": -1,
+        "Code": 5108,
+        "Args": [
+          "746172676574",
+          "455335"
+        ],
+        "Chain": [],
+        "Related": []
+      }
+    ],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1425,
+                  "Args": [
+                    "455335"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "bundled:///libs/lib.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1425,
+              "Args": [
+                "455335"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "explicit-library",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "",
+          "Pos": -1,
+          "End": -1,
+          "Code": 6059,
+          "Args": [
+            "62756e646c65643a2f2f2f6c6962732f6c69622e6573352e642e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1422,
+                  "Args": [
+                    "6c69622e6573352e642e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "bundled:///libs/lib.es5.d.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1422,
+              "Args": [
+                "6c69622e6573352e642e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1422,
+              "Args": [
+                "6c69622e6573352e642e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/files",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1409,
+                  "Args": [
+                    "2e2f6465702e7473",
+                    "2f7372632f6465702e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 11,
+              "End": 21,
+              "Code": 1410,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "2e2f6465702e7473",
+                "2f7372632f6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 11,
+              "End": 21,
+              "Code": 1410,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "2e2f6465702e7473",
+                "6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/include",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1407,
+                  "Args": [
+                    "2e2f2a2e7473",
+                    "2f7372632f7473636f6e6669672e6a736f6e"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 13,
+              "End": 21,
+              "Code": 1408,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1407,
+              "Args": [
+                "2e2f2a2e7473",
+                "2f7372632f7473636f6e6669672e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 13,
+              "End": 21,
+              "Code": 1408,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1407,
+              "Args": [
+                "2e2f2a2e7473",
+                "7473636f6e6669672e6a736f6e"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/default",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1457,
+                  "Args": [],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1457,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1457,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/substitution",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1409,
+                  "Args": [
+                    "247b636f6e6669674469727d2f6465702e7473",
+                    "2f7372632f6465702e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": [
+            {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 11,
+              "End": 32,
+              "Code": 1410,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            }
+          ]
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "247b636f6e6669674469727d2f6465702e7473",
+                "2f7372632f6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f7473636f6e6669672e6a736f6e",
+              "Pos": 11,
+              "End": 32,
+              "Code": 1410,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "247b636f6e6669674469727d2f6465702e7473",
+                "6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "config/duplicate-property",
+    "include_files": {},
+    "include_globals": [],
+    "program": [],
+    "queries": [
+      {
+        "diagnostic": {
+          "File": "2f7372632f6d61696e2e7473",
+          "Pos": 7,
+          "End": 14,
+          "Code": 6059,
+          "Args": [
+            "2f7372632f6465702e7473",
+            "2f726f6f74"
+          ],
+          "Chain": [
+            {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1430,
+              "Args": [],
+              "Chain": [
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1393,
+                  "Args": [
+                    "222e2f64657022",
+                    "2f7372632f6d61696e2e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                },
+                {
+                  "File": "",
+                  "Pos": -1,
+                  "End": -1,
+                  "Code": 1409,
+                  "Args": [
+                    "2e2f6465702e7473",
+                    "2f7372632f6465702e7473"
+                  ],
+                  "Chain": [],
+                  "Related": []
+                }
+              ],
+              "Related": []
+            }
+          ],
+          "Related": []
+        },
+        "path": "/src/dep.ts",
+        "reasons": [
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "2f7372632f6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": {
+              "File": "2f7372632f6d61696e2e7473",
+              "Pos": 7,
+              "End": 14,
+              "Code": 1399,
+              "Args": [],
+              "Chain": [],
+              "Related": []
+            },
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1393,
+              "Args": [
+                "222e2f64657022",
+                "6d61696e2e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          },
+          {
+            "absolute": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "2e2f6465702e7473",
+                "2f7372632f6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "related": null,
+            "relative": {
+              "File": "",
+              "Pos": -1,
+              "End": -1,
+              "Code": 1409,
+              "Args": [
+                "2e2f6465702e7473",
+                "6465702e7473"
+              ],
+              "Chain": [],
+              "Related": []
+            },
+            "stable": true
+          }
+        ]
+      }
+    ]
+  }
+]

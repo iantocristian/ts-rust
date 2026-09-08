@@ -27,6 +27,13 @@ macro_rules! slice_handle {
             pub(crate) len: u32,
         }
         impl $name {
+            /// Non-owning backing identity for observing shared slice headers.
+            pub fn backing_id(self) -> Option<AuxId> {
+                self.backing
+            }
+            pub fn start(self) -> u32 {
+                self.start
+            }
             pub const fn empty() -> Self {
                 Self {
                     backing: None,

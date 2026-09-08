@@ -5,38 +5,23 @@ use crate::{
     ArenaId, AuxId, Counters, Error, NodeId, NodeRecord,
 };
 use std::{
-    cell::RefCell,
     collections::BTreeMap,
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::{Arc, OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
 const PAGE_SIZE: usize = 256;
-thread_local! {
-    static ACTIVE_INITIALIZERS: RefCell<Vec<ArenaId>> = const { RefCell::new(Vec::new()) };
-}
 fn assert_not_initializing(id: ArenaId) {
-    ACTIVE_INITIALIZERS.with(|active| {
-        assert!(
-            !active.borrow().contains(&id),
-            "ts_arena: lazy initializer reentered its file's lazy storage"
-        );
-    });
+    crate::InitializationGuard::assert_inactive(id, crate::InitializationDomain::Lazy, 0);
 }
-struct InitializerGuard(ArenaId);
+struct InitializerGuard {
+    _guard: crate::InitializationGuard,
+}
 impl InitializerGuard {
     fn enter(id: ArenaId) -> Self {
-        assert_not_initializing(id);
-        ACTIVE_INITIALIZERS.with(|active| active.borrow_mut().push(id));
-        Self(id)
-    }
-}
-impl Drop for InitializerGuard {
-    fn drop(&mut self) {
-        ACTIVE_INITIALIZERS.with(|active| {
-            let popped = active.borrow_mut().pop();
-            debug_assert_eq!(popped, Some(self.0));
-        });
+        Self {
+            _guard: crate::InitializationGuard::enter(id, crate::InitializationDomain::Lazy, 0),
+        }
     }
 }
 

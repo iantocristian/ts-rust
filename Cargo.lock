@@ -27,6 +27,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cap"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f125eb85b84a24c36b02ed1d22c9dd8632f53b3cde6e4d23512f94021030003"
+
+[[package]]
 name = "cc"
 version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -122,10 +128,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
+name = "libmimalloc-sys"
+version = "0.1.49"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a45a52f43e1c16f667ccfe4dd8c85b7f7c204fd5e3bf46c5b0db9a5c3c0b8e9"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "mimalloc"
+version = "0.1.48"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1ee66a4b64c74f4ef288bcbb9192ad9c3feaad75193129ac8509af543894fd8"
+dependencies = [
+ "libmimalloc-sys",
+]
 
 [[package]]
 name = "num-bigint"
@@ -234,6 +258,7 @@ version = "1.0.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
 dependencies = [
+ "indexmap",
  "itoa",
  "memchr",
  "serde",
@@ -352,8 +377,74 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_bench"
+version = "0.1.0"
+dependencies = [
+ "cap",
+ "mimalloc",
+ "serde",
+ "serde_json",
+ "sha2",
+ "ts_arena",
+ "ts_ast",
+ "ts_binder",
+ "ts_core",
+ "ts_jsstring",
+ "ts_parser",
+]
+
+[[package]]
+name = "ts_binder"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "stacker",
+ "ts_arena",
+ "ts_ast",
+ "ts_core",
+ "ts_diagnostics",
+ "ts_jsstring",
+ "ts_parser",
+ "ts_scanner",
+]
+
+[[package]]
+name = "ts_bundled"
+version = "0.1.0"
+dependencies = [
+ "ts_jsstring",
+ "ts_vfs",
+]
+
+[[package]]
+name = "ts_compiler"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "sha2",
+ "stacker",
+ "ts_arena",
+ "ts_ast",
+ "ts_binder",
+ "ts_bundled",
+ "ts_core",
+ "ts_diagnostics",
+ "ts_jsstring",
+ "ts_module",
+ "ts_parser",
+ "ts_scanner",
+ "ts_tsoptions",
+ "ts_tspath",
+ "ts_vfs",
+]
+
+[[package]]
 name = "ts_core"
 version = "0.1.0"
+dependencies = [
+ "ts_jsstring",
+]
 
 [[package]]
 name = "ts_diagnostics"
@@ -391,6 +482,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_module"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "ts_ast",
+ "ts_core",
+ "ts_diagnostics",
+ "ts_jsstring",
+ "ts_semver",
+ "ts_tsoptions",
+ "ts_tspath",
+ "ts_vfs",
+]
+
+[[package]]
 name = "ts_parser"
 version = "0.1.0"
 dependencies = [
@@ -414,11 +521,55 @@ dependencies = [
  "serde",
  "serde_json",
  "stacker",
+ "ts_arena",
  "ts_ast",
  "ts_core",
  "ts_diagnostics",
  "ts_jsnum",
  "ts_jsstring",
+]
+
+[[package]]
+name = "ts_semver"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "ts_jsstring",
+]
+
+[[package]]
+name = "ts_tsoptions"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "stacker",
+ "ts_ast",
+ "ts_bundled",
+ "ts_core",
+ "ts_diagnostics",
+ "ts_jsnum",
+ "ts_jsstring",
+ "ts_parser",
+ "ts_scanner",
+ "ts_tspath",
+ "ts_vfs",
+]
+
+[[package]]
+name = "ts_tspath"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "ts_core",
+ "ts_jsstring",
+]
+
+[[package]]
+name = "ts_vfs"
+version = "0.1.0"
+dependencies = [
+ "ts_jsstring",
+ "ts_tspath",
 ]
 
 [[package]]

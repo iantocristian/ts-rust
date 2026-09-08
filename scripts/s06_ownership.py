@@ -24,7 +24,7 @@ def load_cases(root):
     return cases
 
 
-def validate_output(output, cases, mode):
+def validate_output(output, cases, mode, scope="AST ownership"):
     """Check observations, not Cargo's zero exit status or an aggregate count."""
     text = output.decode("utf-8")
     sys.stderr.write(text)
@@ -50,7 +50,7 @@ def validate_output(output, cases, mode):
                 details.append(f"{label}: {', '.join(values)}")
         if not summary_valid or running != [str(len(cases))]:
             details.append(f"expected one complete {len(cases)}-test summary with no ignores")
-        raise ValueError(f"AST ownership {mode}: " + "; ".join(details))
+        raise ValueError(f"{scope} {mode}: " + "; ".join(details))
 
 
 def measure(root, invoke, prefix, options, env, cases, mode):

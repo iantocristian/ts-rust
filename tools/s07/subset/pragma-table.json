@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "source": "tsc/internal/parser/parser.go:6467",
+  "rows": [
+    {
+      "key": "reference",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve path/types/lib references, resolution-mode, preserve and ignored no-default-lib metadata; actual loader supplies closure."
+    },
+    {
+      "key": "ts-check",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve per-file JavaScript checking directive."
+    },
+    {
+      "key": "ts-nocheck",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve per-file checking suppression; diagnostics do not determine eligibility."
+    },
+    {
+      "key": "jsx",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve factory metadata even when the tree contains no JSX."
+    },
+    {
+      "key": "jsxfrag",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve fragment factory metadata; actual JSX node kinds are separately rejected."
+    },
+    {
+      "key": "jsximportsource",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve implicit runtime import operation if applicable."
+    },
+    {
+      "key": "jsxruntime",
+      "disposition": "allow",
+      "family": "source_pragma",
+      "reason": "Preserve effective JSX runtime mode and its loader operation."
+    }
+  ]
+}

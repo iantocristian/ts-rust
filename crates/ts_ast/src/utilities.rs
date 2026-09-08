@@ -1,7 +1,8 @@
 //! Source syntax classification and parent/edge utilities. Graph reads retain
 //! the caller's ownership checks; pure predicates preserve the open Kind domain.
 use crate::{
-    modifier_flags, node_flags, AstView, Node, NodeId, NodeKind, SourceFileState, SyntaxKind as K,
+    modifier_flags, node_flags, AstView, Node, NodeId, NodeKind, SourceFileRead, SourceFileState,
+    SyntaxKind as K,
 };
 use ts_arena::Error;
 use ts_core::TextRange;
@@ -532,8 +533,8 @@ pub fn is_external_module(file: &SourceFileState) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsExternalOrCommonJSModule
-pub fn is_external_or_common_js_module(file: &SourceFileState) -> bool {
-    file.external_module_indicator.is_some() || file.common_js_module_indicator.is_some()
+pub fn is_external_or_common_js_module(file: &SourceFileRead<'_>) -> bool {
+    file.external_module_indicator.is_some() || file.common_js_module_indicator().is_some()
 }
 
 /// port: tsc/internal/ast/utilities.go:IsCompoundAssignment

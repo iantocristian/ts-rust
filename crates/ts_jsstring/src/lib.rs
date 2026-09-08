@@ -12,8 +12,11 @@ pub mod source_text;
 pub mod wtf8;
 
 mod case_tables;
+mod go_fold_generated;
 mod go_print_generated;
 mod go_quote;
+mod simple_fold;
+pub use simple_fold::equal_fold;
 
 pub use escape::{LiteralEscapeFlags, QuoteChar};
 pub use go_quote::go_quote;

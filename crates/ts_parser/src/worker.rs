@@ -2,6 +2,21 @@ use std::{cell::Cell, panic::resume_unwind, thread};
 
 thread_local! { static ON_PARSER_WORKER: Cell<bool> = const { Cell::new(false) }; }
 
+/// Start one reserved-stack worker for a scoped batch. Parser and binder entry
+/// points invoked by this worker run inline for the lifetime of the batch.
+pub fn spawn_parser_worker<'scope, 'env, T: Send + 'scope>(
+    scope: &'scope thread::Scope<'scope, 'env>,
+    operation: impl FnOnce() -> T + Send + 'scope,
+) -> std::io::Result<thread::ScopedJoinHandle<'scope, T>> {
+    thread::Builder::new()
+        .name("ts-parser".into())
+        .stack_size(256 * 1024 * 1024)
+        .spawn_scoped(scope, || {
+            ON_PARSER_WORKER.set(true);
+            operation()
+        })
+}
+
 /// Execute a complete parse or a batch on the reserved native parser stack.
 /// Recursive grammar uses stacker segments; the initial reservation also covers
 /// source-equivalent traversals that occur before a grammar guard. Lazy callers
@@ -14,14 +29,8 @@ pub fn on_parser_worker<T: Send>(operation: impl FnOnce() -> T + Send) -> T {
         return operation();
     }
     thread::scope(|scope| {
-        let worker = thread::Builder::new()
-            .name("ts-parser".into())
-            .stack_size(256 * 1024 * 1024)
-            .spawn_scoped(scope, || {
-                ON_PARSER_WORKER.set(true);
-                operation()
-            })
-            .expect("could not start native parser worker");
+        let worker =
+            spawn_parser_worker(scope, operation).expect("could not start native parser worker");
         match worker.join() {
             Ok(value) => value,
             Err(panic) => resume_unwind(panic),

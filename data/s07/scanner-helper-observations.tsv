@@ -1,0 +1,34 @@
+text/trivia	32	47	42	99	42	47	32	110	97	109	101	255
+text/trim	110	97	109	101	255
+name/real	110	97	109	101	255
+name/nil	40	77	105	115	115	105	110	103	41
+name/synthetic	40	77	105	115	115	105	110	103	41
+text/nil
+text/missing
+text/jsdoc	65	10	66	10	67
+text/reparsed-type	65	10	66	10	67
+text/transformed/0	34	120	255	34
+text/transformed/1	39	120	255	39
+text/transformed-id	99	111	111	107	101	100	255
+text/transformed-panic	4
+text/synthetic-panic	3
+token/0	7	11
+token/1	2	3
+token/2	12	12
+token/3	15	15
+token/negative	3
+error/source	7	11
+error/empty	0	0
+error/jsx	0	12
+error/missing	2	2
+error/declaration	7	12
+error/nameless-class	7	11
+error/keyword/0	7	13
+error/keyword/1	7	13
+error/arrow	7	14
+error/constructor	1	25
+error/constructor-reparsed	1	30
+error/satisfies-match	6	12
+error/satisfies-first	0	5
+error/satisfies-no-eager	15	24
+error/satisfies-native	15	24

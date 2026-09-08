@@ -1,0 +1,255 @@
+[
+  {
+    "id": "packages",
+    "cwd": "/repo",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "traceResolution": true,
+      "types": [
+        "*"
+      ]
+    },
+    "files": {
+      "/repo/src/main.ts": "",
+      "/repo/src/dep.ts": "export {}",
+      "/repo/generated/virtual.ts": "export {}",
+      "/repo/package.json": "{\"type\": \"module\", \"imports\": {\"#alias\": \"./src/dep.ts\", \"#blocked\": null, \"#condition\": {\"custom\": \"./missing.ts\", \"types\": \"./src/dep.ts\"}}}",
+      "/repo/node_modules/pkg/package.json": "{\"name\": \"pkg\", \"version\": \"1.2.3\", \"exports\": {\".\": {\"import\": \"./esm.d.ts\", \"require\": \"./cjs.d.ts\"}, \"./*\": \"./*.d.ts\"}, \"peerDependencies\": {\"peer\": \"*\", \"missing\": \"*\"}}",
+      "/repo/node_modules/pkg/esm.d.ts": "export {}",
+      "/repo/node_modules/pkg/cjs.d.ts": "export {}",
+      "/repo/node_modules/pkg/extra.d.ts": "export {}",
+      "/repo/node_modules/peer/package.json": "{\"version\":\"2.0.0\"}",
+      "/repo/node_modules/ver/package.json": "{\"name\": \"ver\", \"version\": \"1\", \"types\": \"index.d.ts\", \"typesVersions\": {\"not semver\": {}, \">=7.0\": {\"*\": [\"new/*\"]}}}",
+      "/repo/node_modules/ver/new/index.d.ts": "export {}",
+      "/repo/node_modules/invalid/package.json": "{\"typings\":false,\"types\":\"\",\"main\":42,\"typesVersions\":false}",
+      "/repo/node_modules/invalid/index.d.ts": "export {}",
+      "/repo/node_modules/@types/scoped__foo/package.json": "{\"name\":\"@types/scoped__foo\",\"version\":\"1\",\"types\":\"index.d.ts\"}",
+      "/repo/node_modules/@types/scoped__foo/index.d.ts": "export {}"
+    },
+    "operations": [
+      {
+        "kind": "metadata",
+        "name": "/repo/src",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "automatic",
+        "name": "",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "module",
+        "name": "./dep.js",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "./dep.js",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "pkg",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "pkg",
+        "file": "/repo/src/main.ts",
+        "mode": 1
+      },
+      {
+        "kind": "module",
+        "name": "pkg/extra",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "#alias",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "#blocked",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "#condition",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "ver",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "invalid",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "missing",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "type",
+        "name": "@scoped/foo",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "type",
+        "name": "missing",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      },
+      {
+        "kind": "module",
+        "name": "https://example.test/library/mod.ts",
+        "file": "/repo/src/main.ts",
+        "mode": 99
+      }
+    ],
+    "case_sensitive": true
+  },
+  {
+    "id": "paths-roots",
+    "cwd": "/repo",
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "traceResolution": true,
+      "paths": {
+        "alias/*": [
+          "./src/*"
+        ]
+      },
+      "pathsBasePath": "/repo",
+      "rootDirs": [
+        "/repo/src",
+        "/repo/generated"
+      ]
+    },
+    "files": {
+      "/repo/src/main.ts": "",
+      "/repo/src/dep.ts": "export {}",
+      "/repo/generated/virtual.ts": "export {}",
+      "/repo/package.json": "{\"type\": \"module\", \"imports\": {\"#alias\": \"./src/dep.ts\", \"#blocked\": null, \"#condition\": {\"custom\": \"./missing.ts\", \"types\": \"./src/dep.ts\"}}}",
+      "/repo/node_modules/pkg/package.json": "{\"name\": \"pkg\", \"version\": \"1.2.3\", \"exports\": {\".\": {\"import\": \"./esm.d.ts\", \"require\": \"./cjs.d.ts\"}, \"./*\": \"./*.d.ts\"}, \"peerDependencies\": {\"peer\": \"*\", \"missing\": \"*\"}}",
+      "/repo/node_modules/pkg/esm.d.ts": "export {}",
+      "/repo/node_modules/pkg/cjs.d.ts": "export {}",
+      "/repo/node_modules/pkg/extra.d.ts": "export {}",
+      "/repo/node_modules/peer/package.json": "{\"version\":\"2.0.0\"}",
+      "/repo/node_modules/ver/package.json": "{\"name\": \"ver\", \"version\": \"1\", \"types\": \"index.d.ts\", \"typesVersions\": {\"not semver\": {}, \">=7.0\": {\"*\": [\"new/*\"]}}}",
+      "/repo/node_modules/ver/new/index.d.ts": "export {}",
+      "/repo/node_modules/invalid/package.json": "{\"typings\":false,\"types\":\"\",\"main\":42,\"typesVersions\":false}",
+      "/repo/node_modules/invalid/index.d.ts": "export {}",
+      "/repo/node_modules/@types/scoped__foo/package.json": "{\"name\":\"@types/scoped__foo\",\"version\":\"1\",\"types\":\"index.d.ts\"}",
+      "/repo/node_modules/@types/scoped__foo/index.d.ts": "export {}"
+    },
+    "operations": [
+      {
+        "kind": "module",
+        "name": "alias/dep",
+        "file": "/repo/src/main.ts",
+        "mode": 1
+      },
+      {
+        "kind": "module",
+        "name": "./virtual",
+        "file": "/repo/src/main.ts",
+        "mode": 1
+      },
+      {
+        "kind": "module",
+        "name": "./absent",
+        "file": "/repo/src/main.ts",
+        "mode": 1
+      }
+    ],
+    "case_sensitive": true
+  },
+  {
+    "id": "package-directory-aliases",
+    "cwd": "/repo",
+    "case_sensitive": false,
+    "options": {
+      "module": 199,
+      "moduleResolution": 99,
+      "traceResolution": true,
+      "types": [
+        "*"
+      ]
+    },
+    "files": {
+      "/repo/src/main.ts": "",
+      "/repo/src/dep.ts": "export {}",
+      "/repo/generated/virtual.ts": "export {}",
+      "/repo/package.json": "{\"type\": \"module\", \"imports\": {\"#alias\": \"./src/dep.ts\", \"#blocked\": null, \"#condition\": {\"custom\": \"./missing.ts\", \"types\": \"./src/dep.ts\"}}}",
+      "/repo/node_modules/pkg/package.json": "{\"name\": \"pkg\", \"version\": \"1.2.3\", \"exports\": {\".\": {\"import\": \"./esm.d.ts\", \"require\": \"./cjs.d.ts\"}, \"./*\": \"./*.d.ts\"}, \"peerDependencies\": {\"peer\": \"*\", \"missing\": \"*\"}}",
+      "/repo/node_modules/pkg/esm.d.ts": "export {}",
+      "/repo/node_modules/pkg/cjs.d.ts": "export {}",
+      "/repo/node_modules/pkg/extra.d.ts": "export {}",
+      "/repo/node_modules/peer/package.json": "{\"version\":\"2.0.0\"}",
+      "/repo/node_modules/ver/package.json": "{\"name\": \"ver\", \"version\": \"1\", \"types\": \"index.d.ts\", \"typesVersions\": {\"not semver\": {}, \">=7.0\": {\"*\": [\"new/*\"]}}}",
+      "/repo/node_modules/ver/new/index.d.ts": "export {}",
+      "/repo/node_modules/invalid/package.json": "{\"typings\":false,\"types\":\"\",\"main\":42,\"typesVersions\":false}",
+      "/repo/node_modules/invalid/index.d.ts": "export {}",
+      "/repo/node_modules/@types/scoped__foo/package.json": "{\"name\":\"@types/scoped__foo\",\"version\":\"1\",\"types\":\"index.d.ts\"}",
+      "/repo/node_modules/@types/scoped__foo/index.d.ts": "export {}"
+    },
+    "operations": [
+      {
+        "kind": "metadata",
+        "name": "/repo/node_modules/ver",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "metadata",
+        "name": "/repo/node_modules/ver",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "metadata",
+        "name": "/repo/node_modules/ver/",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "module",
+        "name": "ver",
+        "file": "/REPO/src/main.ts",
+        "mode": 1
+      },
+      {
+        "kind": "metadata",
+        "name": "/REPO/node_modules/ver/",
+        "file": "/repo/src/main.ts",
+        "mode": 0
+      },
+      {
+        "kind": "module",
+        "name": "ver",
+        "file": "/repo/src/main.ts",
+        "mode": 1
+      }
+    ]
+  }
+]

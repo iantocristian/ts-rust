@@ -1,6 +1,6 @@
 use crate::{
-    AstBuilder, AstTransaction, Node, NodeData, NodeId, NodeKind, NodeRead, SourceFileRead,
-    SourceFileState,
+    AstBuilder, AstTransaction, AstView, Node, NodeData, NodeId, NodeKind, NodeRead,
+    SourceFileRead, SourceFileState,
 };
 use ts_arena::Error;
 
@@ -40,6 +40,28 @@ pub trait Factory {
     fn finish_clone(&mut self, updated: NodeId, original: NodeId) -> NodeId;
 }
 impl AstBuilder {
+    /// Factory copies observe completed binding writes on retained source
+    /// owners. Ordinary builder views and mutable construction remain parsed.
+    /// This borrows the publication cell without initializing it or retaining
+    /// another owner; only imported nodes need logical-source resolution.
+    pub(crate) fn factory_view(&self, id: NodeId) -> Result<AstView<'_>, Error> {
+        let parsed = self.view();
+        if id.arena() == self.id().arena() {
+            return Ok(parsed);
+        }
+        if parsed.for_node_owner(id)?.0.id() == self.id() {
+            return Ok(parsed);
+        }
+        let source = match parsed.owning_source(id) {
+            Ok(source) => source,
+            // Parentless synthetic nodes have no logical binding selection.
+            Err(Error::InvalidGraph) => return Ok(parsed),
+            Err(error) => return Err(error),
+        };
+        let binding = parsed.source_file(source)?.state_ref().binding.result();
+        Ok(AstView(parsed.0, binding))
+    }
+
     pub(crate) fn new_node_before_hook(&mut self, kind: NodeKind, data: NodeData) -> NodeId {
         self.view()
             .validate_data(&data)
@@ -57,7 +79,7 @@ impl AstBuilder {
 }
 impl Factory for AstBuilder {
     fn read_source_file(&self, id: NodeId) -> Result<SourceFileRead<'_>, Error> {
-        self.view().source_file(id)
+        self.factory_view(id)?.source_file(id)
     }
     fn mut_source_file(&mut self, id: NodeId) -> Result<&mut SourceFileState, Error> {
         self.source_file_mut(id)
@@ -69,7 +91,8 @@ impl Factory for AstBuilder {
         AstBuilder::text_count(self)
     }
     fn node(&self, id: NodeId) -> NodeRead<'_> {
-        self.view()
+        self.factory_view(id)
+            .expect("factory node belongs to retained storage")
             .node(id)
             .expect("factory node belongs to retained storage")
     }

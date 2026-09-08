@@ -315,6 +315,15 @@ enum ReadLocation<'a, T> {
     Lazy(LazyRecord<T>),
 }
 impl<'a, T> StorageRead<'a, T> {
+    /// Core records borrow the owner directly. Lazy page reads instead retain
+    /// their page and cannot extend a borrow beyond this guard.
+    pub fn as_borrowed(&self) -> Option<&'a T> {
+        match &self.value {
+            ReadLocation::Borrowed(value) => Some(*value),
+            ReadLocation::Lazy(_) => None,
+        }
+    }
+
     pub fn borrowed(value: &'a T) -> Self {
         Self {
             value: ReadLocation::Borrowed(value),

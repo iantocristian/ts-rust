@@ -1,0 +1,238 @@
+[
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}"
+    },
+    "id": "relative-json",
+    "name": "./base.json"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}",
+      "/src/base.ts": "ignored"
+    },
+    "id": "relative-extensionless",
+    "name": "./base"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}",
+      "/src/base.ts": "ignored"
+    },
+    "id": "relative-ts-substitution",
+    "name": "./base.ts"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}"
+    },
+    "id": "relative-tsx-no-substitution",
+    "name": "./base.tsx"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base/index.json": "ignored",
+      "/src/base/tsconfig.json": "{}"
+    },
+    "id": "relative-directory",
+    "name": "./base"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/tsconfig.json": "{}"
+    },
+    "id": "package-index",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/configs/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"tsconfig\":\"./configs/base.json\",\"main\":\"ignored.js\"}"
+    },
+    "id": "package-field",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"tsconfig\":\"base\"}"
+    },
+    "id": "package-field-extensionless",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/package.json": "{\"tsconfig\":false}",
+      "/node_modules/pkg/tsconfig.json": "{}"
+    },
+    "id": "package-wrong-field",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"main\":\"base.json\"}"
+    },
+    "id": "package-main-ignored",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/configs/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"exports\":{\".\":\"./configs/base.json\"}}"
+    },
+    "id": "package-exports",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/package.json": "{\"exports\":{\".\":null}}",
+      "/node_modules/pkg/tsconfig.json": "{}"
+    },
+    "id": "package-exports-block",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/base.json": "{}",
+      "/node_modules/pkg/cjs.json": "{}",
+      "/node_modules/pkg/package.json": "{\"exports\":{\".\":{\"import\":\"./esm.json\",\"require\":\"./cjs.json\",\"default\":\"./base.json\"}}}"
+    },
+    "id": "package-conditions",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/config/base.json": "{}"
+    },
+    "id": "package-subpath",
+    "name": "pkg/config/base"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/configs/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"exports\":{\"./config/*\":\"./configs/*.json\"}}"
+    },
+    "id": "package-pattern",
+    "name": "pkg/config/base"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/configs/base.json": "{}",
+      "/node_modules/pkg/package.json": "{\"typesVersions\":{\"*\":{\"tsconfig\":[\"configs/base.json\"]}}}"
+    },
+    "id": "package-types-versions",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/@scope/pkg/tsconfig.json": "{}"
+    },
+    "id": "scoped-package",
+    "name": "@scope/pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}",
+      "/src/package.json": "{\"imports\":{\"#config\":\"./base.json\"}}"
+    },
+    "id": "imports-map",
+    "name": "#config"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/base.json": "{}",
+      "/src/package.json": "{\"name\":\"pkg\",\"exports\":{\"./base\":\"./base.json\"}}"
+    },
+    "id": "self-name",
+    "name": "pkg/base"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/node_modules/pkg/package.json": "{invalid",
+      "/node_modules/pkg/tsconfig.json": "{}"
+    },
+    "id": "malformed-package-fallback",
+    "name": "pkg"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/tsconfig.json": "{}"
+    },
+    "id": "missing",
+    "name": "missing"
+  },
+  {
+    "case_sensitive": true,
+    "cwd": "/",
+    "file": "/src/tsconfig.json",
+    "files": {
+      "/src/tsconfig.json": "{}"
+    },
+    "id": "url",
+    "name": "https://example.com/config.json"
+  }
+]

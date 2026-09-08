@@ -1,0 +1,46 @@
+assignment/0	1	1	1
+assignment/1	4	1	1
+assignment/2	2	1	1
+assignment/3	2	1	1
+assignment/4	3	1	1
+assignment/5	4	1	1
+assignment/6	0	1	1
+assignment/7	4	1	1
+assignment/8	0	1	0
+assignment/9	4	1	1
+define/0	1	6	1
+define-ts/0	0
+define/1	1	6	1
+define-ts/1	0
+define/2	1	5	1
+define-ts/2	0
+define/3	0	0	0
+define-ts/3	0
+define/4	0	0	0
+define-ts/4	0
+define/no-args	0
+names	0	1	0	0	1	0	0
+module/0	2	1	1
+module/1	1	0	0
+module/2	1	0	0
+module/3	3	0	1
+module/4	2	1	1
+module/5	1	0	0
+module/6	3	0	1
+module/7	2	1	1
+module/8	2	1	1
+module/9	2	1	1
+module/cycle	1
+module/nil-child	1
+module/payload-dispatch	2
+expando	0	1	0	1	1
+expando/ts-object	0
+container	1
+container/unparented	1
+iife	1
+missing	1	1
+declaration/payload	0	0	1
+declaration/type-parameter-parent	1
+constructor	1
+module/alias-order/0	3
+module/alias-order/1	2

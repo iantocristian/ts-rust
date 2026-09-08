@@ -115,6 +115,16 @@ rather than caching a raw prebind location for a later bound read. Integrate and
 test encoder/helper/visitor reads of bound fields before porting binder algorithms.
 Public bound queries cannot accept an unbound view accidentally.
 
+The current checked binding root contract covers ordinary parsed logical sources
+whose syntax belongs to that source. It does not cover rebinding a shallow
+`SourceFile.Clone` or `UpdateSourceFile` transformation result that shares children
+still parented to another logical source. Pinned Go can bind such a clone and
+mutate the shared children while the original source remains unbound; Rust does
+not represent that operation as an upstream panic or a passing parity case.
+Source cloning retains its separate S06 AST contract. Transformer integration
+must resolve shared-child binding semantics before claiming clone-plus-rebind
+support; see [binding operations and the pinned witness](S07-binding-operations.md).
+
 `publish_unbound` remains the S06 parser-tool path. It does not certify binding;
 its file-owned cell can subsequently initialize a bind result without reopening
 mutable core access. The cell remains inside the file owner after publication;
@@ -399,7 +409,10 @@ also the dependency contract for E2/E7/E8.
   filesystem versions unless its inputs prove equivalence.
 - Load roots, references, imports, automatic types and lib references in the
   source's inclusion order. Preserve missing/duplicate/case-conflict diagnostics,
-  source reasons and default-lib/no-default-lib handling. `bundled.LibNames`
+  source reasons and pinned default-library handling. At this pin,
+  `parser/parser.go:6654` explicitly ignores `no-default-lib="true"`; preserve that
+  behavior and freeze a loader discriminator showing that only the `noLib`
+  option suppresses default libraries. `bundled.LibNames`
   alphabetic listing is different from the compiler's lib dependency/load order.
 - Embed the pinned library bytes under `bundled:///libs` with their license.
   These bytes bypass filesystem BOM decoding. Source filesystem loading retains
@@ -503,24 +516,26 @@ the production compiler/owner code under their compatible instrumented allocator
 they do not certify mimalloc internals.
 
 Allocation measurement uses a separate instrumented driver with
-`tracking-allocator = 0.4.0` wrapping that allocator through its safe API. Its
-tracker performs only atomic accounting, reports original requested bytes and
-wrapper overhead separately, and covers all worker threads. Keep counter overflow
-checked and treat missing events as invalid evidence. Its wrapper changes layouts,
-so neither E6 timing nor peak RSS is taken from this allocation-instrumented
-binary. Validate alloc/zeroed/realloc/dealloc and cross-thread accounting with
-known allocations before using it. Verify constructor/MSRV/dependency behavior
-in a minimal preflight before accepting this dependency choice.
+`cap = 0.1.2` and its `stats` feature wrapping mimalloc through its safe const
+API. It reports original requested bytes across all worker threads, including
+the full new size of successful reallocations, and adds no per-object metadata.
+Keep counter snapshots and arithmetic checked and treat missing events as invalid
+evidence. Instrumentation affects allocator calls, so neither E6 timing nor peak
+RSS is taken from this allocation-instrumented binary. An eight-worker preflight
+on the MSRV passed alloc/zeroed/realloc/dealloc byte accounting in debug/release;
+the final adapters repeat those discriminators and record actual build identity.
 
 The capability reason is actual allocator-request measurement without custom
 unsafe Rust in compiler crates. Arena counters are rejected as a substitute;
 `allocation-counter`'s thread-local System-allocator model would not match the
 chosen allocator and eight-worker contract; `stats_alloc`'s generic const
-constructor currently requires its nightly feature. The selected wrapper's
-[tracker contract](https://docs.rs/tracking-allocator/0.4.0/tracking_allocator/trait.AllocationTracker.html)
-distinguishes object and wrapper sizes. If preflight exposes an incompatible
-contract, resolve and record a measurement mechanism before producing ratios;
-never silently use a proxy or weaken the gate.
+constructor currently requires its nightly feature and its growth-delta counter
+is not full requested-byte accounting. The initially proposed
+`tracking-allocator 0.4.0` was rejected during preflight because MPL-2.0 is outside
+the project's license allow-list. The selected wrapper's
+[published source](https://github.com/alecmocatta/cap) uses MIT/Apache-2.0 and
+records successful full requests. No dependency-policy exception is introduced.
+
 
 Use one reusable bounded worker pool for a whole batch with exactly one or eight
 workers. Both adapters use N persistent workers consuming a bounded queue of
@@ -758,3 +773,29 @@ No divergence approval is inferred from the request to proceed. The mapped-file
 proposal was corrected to preserve per-file initialization, rather than approved
 as a new observable behavior. Implementation may now begin at checkpoint B/C;
 measured acceptance still requires every stated gate.
+
+### Implementation contract corrections
+
+The typed binder-write inventory found two source-defined symbol names that
+embed process-global numeric identities: ambient modules with import-attribute
+patterns (`binder.go:314`, Node identity) and private class identifiers
+(`binder.go:375`, Symbol identity). Their observation records must retain the
+literal name bytes plus a structured reference for precisely that embedded
+identity component. Compare the reference by canonical graph identity; retain
+the raw numeric name for diagnosis. Ordinary names and all other bytes remain
+exact comparisons. This is graph-identity canonicalization, not a diagnostic or
+name waiver, and its discriminator fixtures must reject changed delimiters,
+descriptions and referenced identities.
+
+Allocator preflight rejected `tracking-allocator 0.4.0`: its MPL-2.0 license is
+outside the accepted dependency allow-list. The implementation instead selects
+`cap 0.1.2` with its `stats` feature, wrapping `mimalloc 0.1.48`. The published
+MIT/Apache-2.0 source exposes a safe const constructor and counts original
+requested bytes across all threads, including the full new size on successful
+reallocation. It adds no per-allocation metadata. An eight-worker preflight on
+Rust 1.96.0, both debug and release with `unsafe_code = forbid`, observed exactly
+9,600,400 requested bytes and zero final live-byte delta, and checked zeroed
+contents and preservation through reallocation. Allocation-instrumented builds
+remain separate from wall-time/RSS measurement. The future benchmark's locked
+transitive allocator version is recorded with its actual build, rather than
+assuming a cached `libmimalloc-sys` version. No license-policy exception is made.

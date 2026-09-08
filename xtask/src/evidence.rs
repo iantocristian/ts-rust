@@ -250,8 +250,16 @@ pub fn ledger_generated_hash(root: &Path) -> Result<String> {
             return Err(format!("duplicate generated source path {path}"));
         }
     }
-    let canonical =
-        serde_json::json!({"pin":pin,"file":projected.into_values().collect::<Vec<_>>()});
+    // Canonical ordering must not depend on another workspace crate enabling
+    // serde_json's preserve_order feature through Cargo feature unification.
+    let canonical = BTreeMap::from([
+        ("pin", serde_json::Value::String(pin)),
+        (
+            "file",
+            serde_json::to_value(projected.into_values().collect::<Vec<_>>())
+                .map_err(|e| e.to_string())?,
+        ),
+    ]);
     Ok(hash(
         &serde_json::to_vec(&canonical).map_err(|e| e.to_string())?,
     ))

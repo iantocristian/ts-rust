@@ -51,7 +51,7 @@ impl AstBuilder {
         }
     }
     pub fn view(&self) -> AstView<'_> {
-        AstView(self.storage.view())
+        AstView(self.storage.view(), None)
     }
     pub fn id(&self) -> ts_arena::FileId {
         self.storage.id()
@@ -146,7 +146,10 @@ impl AstBuilder {
         self.view().node(root)?;
         self.frame_mut().root = Some(root);
         self.view().validate_core()?;
-        Ok(ParsedFile { builder: self })
+        Ok(ParsedFile {
+            builder: self,
+            validated: true,
+        })
     }
 }
 
@@ -172,12 +175,14 @@ impl AstBuilder {
 #[derive(Debug)]
 pub struct ParsedFile {
     builder: AstBuilder,
+    validated: bool,
 }
 impl ParsedFile {
     pub fn view(&self) -> AstView<'_> {
         self.builder.view()
     }
     pub fn builder_mut(&mut self) -> &mut AstBuilder {
+        self.validated = false;
         &mut self.builder
     }
     pub fn root(&self) -> NodeId {
@@ -189,9 +194,12 @@ impl ParsedFile {
             .expect("published AST references belong to retained storage")
     }
     /// Revalidate every core record and auxiliary edge after exclusive mutations.
-    /// This is an O(nodes + auxiliary values + stored edges) publication pass.
+    /// A freshly completed parse carries its validation through publication;
+    /// requesting its mutable builder invalidates that proof conservatively.
     pub fn try_publish_unbound(self) -> Result<AstFile, Error> {
-        self.view().validate_core()?;
+        if !self.validated {
+            self.view().validate_core()?;
+        }
         Ok(AstFile(self.builder.storage.finish()))
     }
     /// Publish a mapped group under one retention root, without asserting binding.
@@ -204,7 +212,7 @@ impl ParsedFile {
         members.extend(supplemental.iter().map(|file| &file.builder.storage));
         StorageBuilder::with_group_views(&members, |views| {
             for view in views {
-                AstView(*view).validate_core()?;
+                AstView(*view, None).validate_core()?;
             }
             Ok(())
         })?;
@@ -254,7 +262,7 @@ impl AstBundle {
 pub struct AstFile(pub(crate) StorageHandle<Node>);
 impl AstFile {
     pub fn view(&self) -> AstView<'_> {
-        AstView(self.0.view())
+        AstView(self.0.view(), None)
     }
     pub fn root(&self) -> Option<NodeId> {
         self.view().file_info().root
@@ -298,10 +306,22 @@ impl std::ops::Deref for RetainedNode {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct AstView<'a>(pub(crate) StorageView<'a, Node>);
+pub struct AstView<'a>(
+    pub(crate) StorageView<'a, Node>,
+    pub(crate) Option<&'a crate::BindResult>,
+);
 impl<'a> AstView<'a> {
+    /// Development-only layout inventory. Excluded from normal production builds.
+    #[cfg(feature = "layout-profile")]
+    pub fn layout_profile(self) -> std::collections::BTreeMap<&'static str, usize> {
+        let mut counts = std::collections::BTreeMap::new();
+        for node in self.0.core_nodes() {
+            *counts.entry(node.data().name()).or_default() += 1;
+        }
+        counts
+    }
     pub fn for_node_owner(self, node: NodeId) -> Result<Self, Error> {
-        self.0.for_node_owner(node).map(Self)
+        self.0.for_node_owner(node).map(|view| Self(view, self.1))
     }
     pub fn source(self) -> &'a SourceText {
         self.0.source()
@@ -310,7 +330,67 @@ impl<'a> AstView<'a> {
         self.0.position_map()
     }
     pub fn node(self, id: NodeId) -> Result<NodeRead<'a>, Error> {
+        if let Some(node) = self
+            .binding_for_node(id)?
+            .and_then(|result| result.overlay(id))
+        {
+            return Ok(StorageRead::borrowed(node));
+        }
         self.0.node(id)
+    }
+    pub(crate) fn binding_for_node(
+        self,
+        id: NodeId,
+    ) -> Result<Option<&'a crate::BindResult>, Error> {
+        let Some(active) = self.1 else {
+            return Ok(None);
+        };
+        if active.is_single_source_owner(id) {
+            return Ok(Some(active));
+        }
+        let source = match self.owning_source(id) {
+            Ok(source) => source,
+            // A general AST read may inspect a parentless synthetic node. Only
+            // bound retention requires an unambiguous logical source.
+            Err(Error::InvalidGraph) => return Ok(None),
+            Err(error) => return Err(error),
+        };
+        if source == active.source() {
+            return Ok(Some(active));
+        }
+        let parsed = AstView(self.0, None);
+        Ok(parsed.source_file(source)?.state_ref().binding.result())
+    }
+    /// Resolve a logical source through the immutable syntax parent chain. Do
+    /// not guess an arena's canonical root for orphans or parent cycles.
+    pub(crate) fn owning_source(self, id: NodeId) -> Result<NodeId, Error> {
+        let mut slow = Some(id);
+        let mut fast = Some(id);
+        loop {
+            let current = slow.ok_or(Error::InvalidGraph)?;
+            let node = self.0.node(current)?;
+            if node.kind() == crate::SyntaxKind::SourceFile {
+                AstView(self.0, None).source_file(current)?;
+                return Ok(current);
+            }
+            slow = node.parent();
+            for _ in 0..2 {
+                fast = match fast {
+                    Some(id) => {
+                        let node = self.0.node(id)?;
+                        if node.kind() == crate::SyntaxKind::SourceFile {
+                            None
+                        } else {
+                            node.parent()
+                        }
+                    }
+                    None => None,
+                };
+            }
+            if slow.is_some() && slow == fast {
+                return Err(Error::InvalidGraph);
+            }
+        }
     }
     pub fn file_info(self) -> FileInfo {
         let id = self.0.metadata().expect("AST storage has a file frame");

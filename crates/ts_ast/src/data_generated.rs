@@ -1253,8 +1253,8 @@ pub struct JSDocParameterOrPropertyTagData {
     pub is_name_first: bool,
 }
 
-// Payloads with a conservative field budget above 64 bytes are boxed.
-// S06 will measure this initial layout; accessors hide the variant storage.
+// Payloads with a conservative field budget above 32 bytes are boxed.
+// Common identifier/edge payloads stay inline; accessors hide storage.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NodeData {
     Token(TokenData),
@@ -1287,7 +1287,7 @@ pub enum NodeData {
     VariableDeclaration(VariableDeclarationData),
     VariableDeclarationList(VariableDeclarationListData),
     BindingPattern(BindingPatternData),
-    ParameterDeclaration(ParameterDeclarationData),
+    ParameterDeclaration(Box<ParameterDeclarationData>),
     BindingElement(BindingElementData),
     MissingDeclaration(MissingDeclarationData),
     FunctionDeclaration(Box<FunctionDeclarationData>),
@@ -1315,21 +1315,21 @@ pub enum NodeData {
     ConstructorDeclaration(Box<ConstructorDeclarationData>),
     GetAccessorDeclaration(Box<GetAccessorDeclarationData>),
     SetAccessorDeclaration(Box<SetAccessorDeclarationData>),
-    IndexSignatureDeclaration(IndexSignatureDeclarationData),
+    IndexSignatureDeclaration(Box<IndexSignatureDeclarationData>),
     MethodSignatureDeclaration(Box<MethodSignatureDeclarationData>),
     MethodDeclaration(Box<MethodDeclarationData>),
-    PropertySignatureDeclaration(PropertySignatureDeclarationData),
-    PropertyDeclaration(PropertyDeclarationData),
+    PropertySignatureDeclaration(Box<PropertySignatureDeclarationData>),
+    PropertyDeclaration(Box<PropertyDeclarationData>),
     SemicolonClassElement(SemicolonClassElementData),
     ClassStaticBlockDeclaration(ClassStaticBlockDeclarationData),
     OmittedExpression(OmittedExpressionData),
     KeywordExpression(KeywordExpressionData),
-    StringLiteral(StringLiteralData),
-    NumericLiteral(NumericLiteralData),
-    BigIntLiteral(BigIntLiteralData),
-    RegularExpressionLiteral(RegularExpressionLiteralData),
+    StringLiteral(Box<StringLiteralData>),
+    NumericLiteral(Box<NumericLiteralData>),
+    BigIntLiteral(Box<BigIntLiteralData>),
+    RegularExpressionLiteral(Box<RegularExpressionLiteralData>),
     NoSubstitutionTemplateLiteral(Box<NoSubstitutionTemplateLiteralData>),
-    BinaryExpression(BinaryExpressionData),
+    BinaryExpression(Box<BinaryExpressionData>),
     PrefixUnaryExpression(PrefixUnaryExpressionData),
     PostfixUnaryExpression(PostfixUnaryExpressionData),
     YieldExpression(YieldExpressionData),
@@ -1337,7 +1337,7 @@ pub enum NodeData {
     FunctionExpression(Box<FunctionExpressionData>),
     AsExpression(AsExpressionData),
     SatisfiesExpression(SatisfiesExpressionData),
-    ConditionalExpression(ConditionalExpressionData),
+    ConditionalExpression(Box<ConditionalExpressionData>),
     PropertyAccessExpression(PropertyAccessExpressionData),
     ElementAccessExpression(ElementAccessExpressionData),
     CallExpression(CallExpressionData),
@@ -1352,8 +1352,8 @@ pub enum NodeData {
     ArrayLiteralExpression(ArrayLiteralExpressionData),
     ObjectLiteralExpression(ObjectLiteralExpressionData),
     SpreadAssignment(SpreadAssignmentData),
-    PropertyAssignment(PropertyAssignmentData),
-    ShorthandPropertyAssignment(ShorthandPropertyAssignmentData),
+    PropertyAssignment(Box<PropertyAssignmentData>),
+    ShorthandPropertyAssignment(Box<ShorthandPropertyAssignmentData>),
     DeleteExpression(DeleteExpressionData),
     TypeOfExpression(TypeOfExpressionData),
     VoidExpression(VoidExpressionData),
@@ -1375,15 +1375,15 @@ pub enum NodeData {
     ImportAttribute(ImportAttributeData),
     ImportAttributes(ImportAttributesData),
     TypeQueryNode(TypeQueryNodeData),
-    MappedTypeNode(MappedTypeNodeData),
+    MappedTypeNode(Box<MappedTypeNodeData>),
     TypeLiteralNode(TypeLiteralNodeData),
     TupleTypeNode(TupleTypeNodeData),
     NamedTupleMember(NamedTupleMemberData),
     OptionalTypeNode(OptionalTypeNodeData),
     RestTypeNode(RestTypeNodeData),
     ParenthesizedTypeNode(ParenthesizedTypeNodeData),
-    FunctionTypeNode(FunctionTypeNodeData),
-    ConstructorTypeNode(ConstructorTypeNodeData),
+    FunctionTypeNode(Box<FunctionTypeNodeData>),
+    ConstructorTypeNode(Box<ConstructorTypeNodeData>),
     TemplateHead(Box<TemplateHeadData>),
     TemplateMiddle(Box<TemplateMiddleData>),
     TemplateTail(Box<TemplateTailData>),
@@ -1403,7 +1403,7 @@ pub enum NodeData {
     JsxSpreadAttribute(JsxSpreadAttributeData),
     JsxClosingElement(JsxClosingElementData),
     JsxExpression(JsxExpressionData),
-    JsxText(JsxTextData),
+    JsxText(Box<JsxTextData>),
     SyntaxList(SyntaxListData),
     JSDoc(JSDocData),
     JSDocTypeExpression(JSDocTypeExpressionData),
@@ -1428,27 +1428,27 @@ pub enum NodeData {
     JSDocSatisfiesTag(JSDocSatisfiesTagData),
     JSDocThrowsTag(JSDocThrowsTagData),
     JSDocThisTag(JSDocThisTagData),
-    JSDocImportTag(JSDocImportTagData),
+    JSDocImportTag(Box<JSDocImportTagData>),
     JSDocCallbackTag(JSDocCallbackTagData),
     JSDocOverloadTag(JSDocOverloadTagData),
     JSDocTypedefTag(JSDocTypedefTagData),
     JSDocSignature(JSDocSignatureData),
     JSDocNameReference(JSDocNameReferenceData),
     SourceFile(SourceFileData),
-    ModuleDeclaration(ModuleDeclarationData),
+    ModuleDeclaration(Box<ModuleDeclarationData>),
     ImportEqualsDeclaration(ImportEqualsDeclarationData),
-    ExportDeclaration(ExportDeclarationData),
-    ImportTypeNode(ImportTypeNodeData),
+    ExportDeclaration(Box<ExportDeclarationData>),
+    ImportTypeNode(Box<ImportTypeNodeData>),
     ImportClause(ImportClauseData),
     ImportSpecifier(ImportSpecifierData),
     JSDocText(JSDocTextData),
     JSDocLink(JSDocLinkData),
     JSDocLinkPlain(JSDocLinkPlainData),
     JSDocLinkCode(JSDocLinkCodeData),
-    TypeParameterDeclaration(TypeParameterDeclarationData),
+    TypeParameterDeclaration(Box<TypeParameterDeclarationData>),
     SyntheticReferenceExpression(SyntheticReferenceExpressionData),
     JSDocTypeLiteral(JSDocTypeLiteralData),
-    JSDocParameterOrPropertyTag(JSDocParameterOrPropertyTagData),
+    JSDocParameterOrPropertyTag(Box<JSDocParameterOrPropertyTagData>),
 }
 
 impl From<TokenData> for NodeData {
@@ -1603,7 +1603,7 @@ impl From<BindingPatternData> for NodeData {
 }
 impl From<ParameterDeclarationData> for NodeData {
     fn from(data: ParameterDeclarationData) -> Self {
-        Self::ParameterDeclaration(data)
+        Self::ParameterDeclaration(Box::new(data))
     }
 }
 impl From<BindingElementData> for NodeData {
@@ -1743,7 +1743,7 @@ impl From<SetAccessorDeclarationData> for NodeData {
 }
 impl From<IndexSignatureDeclarationData> for NodeData {
     fn from(data: IndexSignatureDeclarationData) -> Self {
-        Self::IndexSignatureDeclaration(data)
+        Self::IndexSignatureDeclaration(Box::new(data))
     }
 }
 impl From<MethodSignatureDeclarationData> for NodeData {
@@ -1758,12 +1758,12 @@ impl From<MethodDeclarationData> for NodeData {
 }
 impl From<PropertySignatureDeclarationData> for NodeData {
     fn from(data: PropertySignatureDeclarationData) -> Self {
-        Self::PropertySignatureDeclaration(data)
+        Self::PropertySignatureDeclaration(Box::new(data))
     }
 }
 impl From<PropertyDeclarationData> for NodeData {
     fn from(data: PropertyDeclarationData) -> Self {
-        Self::PropertyDeclaration(data)
+        Self::PropertyDeclaration(Box::new(data))
     }
 }
 impl From<SemicolonClassElementData> for NodeData {
@@ -1788,22 +1788,22 @@ impl From<KeywordExpressionData> for NodeData {
 }
 impl From<StringLiteralData> for NodeData {
     fn from(data: StringLiteralData) -> Self {
-        Self::StringLiteral(data)
+        Self::StringLiteral(Box::new(data))
     }
 }
 impl From<NumericLiteralData> for NodeData {
     fn from(data: NumericLiteralData) -> Self {
-        Self::NumericLiteral(data)
+        Self::NumericLiteral(Box::new(data))
     }
 }
 impl From<BigIntLiteralData> for NodeData {
     fn from(data: BigIntLiteralData) -> Self {
-        Self::BigIntLiteral(data)
+        Self::BigIntLiteral(Box::new(data))
     }
 }
 impl From<RegularExpressionLiteralData> for NodeData {
     fn from(data: RegularExpressionLiteralData) -> Self {
-        Self::RegularExpressionLiteral(data)
+        Self::RegularExpressionLiteral(Box::new(data))
     }
 }
 impl From<NoSubstitutionTemplateLiteralData> for NodeData {
@@ -1813,7 +1813,7 @@ impl From<NoSubstitutionTemplateLiteralData> for NodeData {
 }
 impl From<BinaryExpressionData> for NodeData {
     fn from(data: BinaryExpressionData) -> Self {
-        Self::BinaryExpression(data)
+        Self::BinaryExpression(Box::new(data))
     }
 }
 impl From<PrefixUnaryExpressionData> for NodeData {
@@ -1853,7 +1853,7 @@ impl From<SatisfiesExpressionData> for NodeData {
 }
 impl From<ConditionalExpressionData> for NodeData {
     fn from(data: ConditionalExpressionData) -> Self {
-        Self::ConditionalExpression(data)
+        Self::ConditionalExpression(Box::new(data))
     }
 }
 impl From<PropertyAccessExpressionData> for NodeData {
@@ -1928,12 +1928,12 @@ impl From<SpreadAssignmentData> for NodeData {
 }
 impl From<PropertyAssignmentData> for NodeData {
     fn from(data: PropertyAssignmentData) -> Self {
-        Self::PropertyAssignment(data)
+        Self::PropertyAssignment(Box::new(data))
     }
 }
 impl From<ShorthandPropertyAssignmentData> for NodeData {
     fn from(data: ShorthandPropertyAssignmentData) -> Self {
-        Self::ShorthandPropertyAssignment(data)
+        Self::ShorthandPropertyAssignment(Box::new(data))
     }
 }
 impl From<DeleteExpressionData> for NodeData {
@@ -2043,7 +2043,7 @@ impl From<TypeQueryNodeData> for NodeData {
 }
 impl From<MappedTypeNodeData> for NodeData {
     fn from(data: MappedTypeNodeData) -> Self {
-        Self::MappedTypeNode(data)
+        Self::MappedTypeNode(Box::new(data))
     }
 }
 impl From<TypeLiteralNodeData> for NodeData {
@@ -2078,12 +2078,12 @@ impl From<ParenthesizedTypeNodeData> for NodeData {
 }
 impl From<FunctionTypeNodeData> for NodeData {
     fn from(data: FunctionTypeNodeData) -> Self {
-        Self::FunctionTypeNode(data)
+        Self::FunctionTypeNode(Box::new(data))
     }
 }
 impl From<ConstructorTypeNodeData> for NodeData {
     fn from(data: ConstructorTypeNodeData) -> Self {
-        Self::ConstructorTypeNode(data)
+        Self::ConstructorTypeNode(Box::new(data))
     }
 }
 impl From<TemplateHeadData> for NodeData {
@@ -2183,7 +2183,7 @@ impl From<JsxExpressionData> for NodeData {
 }
 impl From<JsxTextData> for NodeData {
     fn from(data: JsxTextData) -> Self {
-        Self::JsxText(data)
+        Self::JsxText(Box::new(data))
     }
 }
 impl From<SyntaxListData> for NodeData {
@@ -2308,7 +2308,7 @@ impl From<JSDocThisTagData> for NodeData {
 }
 impl From<JSDocImportTagData> for NodeData {
     fn from(data: JSDocImportTagData) -> Self {
-        Self::JSDocImportTag(data)
+        Self::JSDocImportTag(Box::new(data))
     }
 }
 impl From<JSDocCallbackTagData> for NodeData {
@@ -2343,7 +2343,7 @@ impl From<SourceFileData> for NodeData {
 }
 impl From<ModuleDeclarationData> for NodeData {
     fn from(data: ModuleDeclarationData) -> Self {
-        Self::ModuleDeclaration(data)
+        Self::ModuleDeclaration(Box::new(data))
     }
 }
 impl From<ImportEqualsDeclarationData> for NodeData {
@@ -2353,12 +2353,12 @@ impl From<ImportEqualsDeclarationData> for NodeData {
 }
 impl From<ExportDeclarationData> for NodeData {
     fn from(data: ExportDeclarationData) -> Self {
-        Self::ExportDeclaration(data)
+        Self::ExportDeclaration(Box::new(data))
     }
 }
 impl From<ImportTypeNodeData> for NodeData {
     fn from(data: ImportTypeNodeData) -> Self {
-        Self::ImportTypeNode(data)
+        Self::ImportTypeNode(Box::new(data))
     }
 }
 impl From<ImportClauseData> for NodeData {
@@ -2393,7 +2393,7 @@ impl From<JSDocLinkCodeData> for NodeData {
 }
 impl From<TypeParameterDeclarationData> for NodeData {
     fn from(data: TypeParameterDeclarationData) -> Self {
-        Self::TypeParameterDeclaration(data)
+        Self::TypeParameterDeclaration(Box::new(data))
     }
 }
 impl From<SyntheticReferenceExpressionData> for NodeData {
@@ -2408,7 +2408,7 @@ impl From<JSDocTypeLiteralData> for NodeData {
 }
 impl From<JSDocParameterOrPropertyTagData> for NodeData {
     fn from(data: JSDocParameterOrPropertyTagData) -> Self {
-        Self::JSDocParameterOrPropertyTag(data)
+        Self::JSDocParameterOrPropertyTag(Box::new(data))
     }
 }
 

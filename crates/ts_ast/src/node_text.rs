@@ -1,5 +1,5 @@
 //! Node.Text keeps stored bytes borrowed; only Go's concatenation paths allocate.
-use crate::{AstView, Node, NodeData, NodeId, NodeRead, SyntaxKind as K, TextSliceRead};
+use crate::{AstView, JsString, Node, NodeData, NodeId, NodeRead, SyntaxKind as K, TextSliceRead};
 use std::ops::Deref;
 use ts_arena::Error;
 
@@ -11,6 +11,16 @@ enum TextStorage<'a> {
     Joined(Vec<u8>),
 }
 impl NodeText<'_> {
+    /// Retain the existing string backing when text is stored in a node. Go's
+    /// concatenation paths transfer their newly allocated bytes instead.
+    pub fn into_js_string(self) -> JsString {
+        match self.0 {
+            TextStorage::Empty => JsString::default(),
+            TextStorage::Node(node) => stored_string(&node).clone(),
+            TextStorage::Fragment(parts) => parts[0].clone(),
+            TextStorage::Joined(bytes) => JsString::from_bytes(bytes),
+        }
+    }
     pub fn as_bytes(&self) -> &[u8] {
         match &self.0 {
             TextStorage::Empty => &[],
@@ -40,20 +50,35 @@ macro_rules! bytes_field {
     };
 }
 
-fn stored_text(node: &Node) -> &[u8] {
-    match node.kind().known() {
-        Some(K::Identifier) => bytes_field!(node, Identifier, text),
-        Some(K::PrivateIdentifier) => bytes_field!(node, PrivateIdentifier, text),
-        Some(K::StringLiteral) => bytes_field!(node, StringLiteral, text),
-        Some(K::NumericLiteral) => bytes_field!(node, NumericLiteral, text),
-        Some(K::BigIntLiteral) => bytes_field!(node, BigIntLiteral, text),
-        Some(K::NoSubstitutionTemplateLiteral) => {
-            bytes_field!(node, NoSubstitutionTemplateLiteral, text)
+macro_rules! string_field {
+    ($node:expr, $variant:ident, $field:ident) => {
+        match $node.data() {
+            NodeData::$variant(data) => &data.$field,
+            _ => panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.{}",
+                $node.data().name(),
+                stringify!($variant)
+            ),
         }
-        Some(K::TemplateHead) => bytes_field!(node, TemplateHead, text),
-        Some(K::TemplateMiddle) => bytes_field!(node, TemplateMiddle, text),
-        Some(K::TemplateTail) => bytes_field!(node, TemplateTail, text),
-        Some(K::RegularExpressionLiteral) => bytes_field!(node, RegularExpressionLiteral, text),
+    };
+}
+fn stored_text(node: &Node) -> &[u8] {
+    stored_string(node).as_bytes()
+}
+fn stored_string(node: &Node) -> &JsString {
+    match node.kind().known() {
+        Some(K::Identifier) => string_field!(node, Identifier, text),
+        Some(K::PrivateIdentifier) => string_field!(node, PrivateIdentifier, text),
+        Some(K::StringLiteral) => string_field!(node, StringLiteral, text),
+        Some(K::NumericLiteral) => string_field!(node, NumericLiteral, text),
+        Some(K::BigIntLiteral) => string_field!(node, BigIntLiteral, text),
+        Some(K::NoSubstitutionTemplateLiteral) => {
+            string_field!(node, NoSubstitutionTemplateLiteral, text)
+        }
+        Some(K::TemplateHead) => string_field!(node, TemplateHead, text),
+        Some(K::TemplateMiddle) => string_field!(node, TemplateMiddle, text),
+        Some(K::TemplateTail) => string_field!(node, TemplateTail, text),
+        Some(K::RegularExpressionLiteral) => string_field!(node, RegularExpressionLiteral, text),
         _ => panic!("Unhandled case in Node.Text: *ast.{}", node.data().name()),
     }
 }

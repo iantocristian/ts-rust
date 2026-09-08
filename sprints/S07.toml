@@ -13,6 +13,14 @@ goal = "Real binding with file-owned symbols, the module resolution and options 
 exit = [
   "sprint.S06.done == 1",
   "run.binder.parity == 1",
+  "run.binder.reached_bind == true",
+  "run.binder.supplemental_parity == 1",
+  "run.binder.protocol == true",
+  "run.binder.helpers == true",
+  "run.binder.resolvers == true",
+  "run.binder.graph_contracts == true",
+  "run.binder.depth == true",
+  "run.bindworkload.parity == 1",
   "run.program.subset_loads == true",
   "exp.E2.frozen_subset.pass == 1",
   "exp.E3.shared_bound_file.pass == 1",
@@ -20,6 +28,7 @@ exit = [
   "exp.E5.peak_rss.pass == 1",
   "exp.E5.allocated_bytes.pass == 1",
   "exp.E6.pass == 1",
+  "run.e6.stable == true",
   "functions.package[internal/binder].ratio >= 0.9",
   "run.clippy.clean == true",
 ]
@@ -29,7 +38,7 @@ id = "S07-1"
 title = "ts_binder with file-owned symbols and flow nodes (ADR 0007); bind parity over the corpus against the oracle's symbol dump"
 kind = "task"
 required = true
-done_when = ["run.binder.parity == 1"]
+done_when = ["run.binder.parity == 1", "run.binder.reached_bind == true", "run.binder.supplemental_parity == 1", "run.binder.protocol == true", "run.binder.helpers == true", "run.binder.resolvers == true", "run.binder.graph_contracts == true", "run.binder.depth == true"]
 
 [[item]]
 id = "S07-2"
@@ -50,7 +59,7 @@ id = "S07-4"
 title = "Parse-and-bind benchmark on the pinned VS Code workload, Rust against Go, at 1 and 8 threads, with peak RSS and bytes allocated"
 kind = "task"
 required = true
-done_when = ["exp.E5.peak_rss.pass == 1", "exp.E5.allocated_bytes.pass == 1", "exp.E6.one_thread.pass == 1", "exp.E6.eight_threads.pass == 1"]
+done_when = ["run.bindworkload.parity == 1", "exp.E5.peak_rss.pass == 1", "exp.E5.allocated_bytes.pass == 1", "exp.E6.one_thread.pass == 1", "exp.E6.eight_threads.pass == 1", "run.e6.stable == true"]
 
 [[item]]
 id = "S07-5"
