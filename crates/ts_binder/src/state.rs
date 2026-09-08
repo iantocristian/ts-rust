@@ -94,7 +94,7 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             expando_assignments: Vec::new(),
         }
     }
-    pub fn parsed_view(&self) -> AstView<'ast> {
+    pub fn parsed_view(&self) -> AstView<'_> {
         self.builder.parsed_view()
     }
     pub fn view(&self) -> AstView<'_> {

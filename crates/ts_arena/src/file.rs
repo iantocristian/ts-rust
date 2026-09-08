@@ -126,6 +126,15 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn push_symbol(&mut self, symbol: S) -> SymbolId {
         SymbolId::new(self.owner.symbols.id, self.owner.symbols.push(symbol))
     }
+    /// Whether all existing graph storage belongs to this exclusive core owner.
+    /// Eager JSDoc cache entries may refer to core nodes without lazy allocations.
+    pub fn is_core_only(&self) -> bool {
+        self.owner.imports.is_empty() && !self.owner.lazy.has_records()
+    }
+    /// Checked core access without imported-owner or lazy-arena routing.
+    pub fn core_node(&self, id: NodeId) -> Result<&N, Error> {
+        self.owner.core.get(id.arena(), id.slot())
+    }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
         self.owner.core.get_mut(id.arena(), id.slot())
     }

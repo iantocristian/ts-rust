@@ -255,6 +255,10 @@ impl<N: NodeRecord> LazyArena<N> {
     pub(crate) fn id(&self) -> ArenaId {
         self.id
     }
+    pub(crate) fn has_records(&self) -> bool {
+        let state = self.read();
+        state.pages.reserved != 0 || state.auxiliary.reserved != 0
+    }
     pub(crate) fn auxiliary_id(&self) -> ArenaId {
         self.auxiliary_id
     }

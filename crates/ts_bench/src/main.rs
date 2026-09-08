@@ -13,7 +13,7 @@ use std::{
     thread,
     time::Instant,
 };
-use ts_ast::{BoundFile, ExternalModuleIndicatorOptions, JsString, SourceFileParseOptions};
+use ts_ast::{CompletedFile, ExternalModuleIndicatorOptions, JsString, SourceFileParseOptions};
 use ts_jsstring::SourceText;
 
 #[cfg(feature = "allocation")]
@@ -110,13 +110,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .transpose()?;
     let graph_mode =
         args.len() == 4 && (graph_argument == Some("--graphs") || graph_index.is_some());
-    if args.len() != 3 && !graph_mode {
+    let binding_paths = args.len() == 4 && graph_argument == Some("--binding-paths");
+    if args.len() != 3 && !graph_mode && !binding_paths {
         return Err(
-            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX]"
+            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX | --binding-paths]"
                 .into(),
         );
     }
-    if graph_mode && cfg!(any(feature = "allocation", feature = "profile")) {
+    if (graph_mode || binding_paths) && cfg!(any(feature = "allocation", feature = "profile")) {
         return Err("graph reporting requires the uninstrumented binary".into());
     }
     let workers: usize = args[2].to_str().ok_or("invalid worker count")?.parse()?;
@@ -168,7 +169,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let finished = &finished;
             let release = &release;
             handles.push(ts_parser::spawn_parser_worker(scope, move || {
-                let mut retained: Vec<BoundFile> = Vec::with_capacity(file_count.div_ceil(workers));
+                let mut retained: Vec<CompletedFile> =
+                    Vec::with_capacity(file_count.div_ceil(workers));
                 let mut failure = None;
                 ready.wait();
                 while let Ok(index) = receive.recv() {
@@ -182,10 +184,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             input.script_kind,
                             input.options.clone(),
                         );
-                        let source = parsed.root();
-                        let file = parsed.publish_unbound();
-                        ts_binder::bind_source_file(&file, source)
-                            .expect("workload binding must complete")
+                        ts_binder::bind_parsed_file(parsed).expect("workload binding must complete")
                     }));
                     match outcome {
                         Ok(file) => retained.push(file),
@@ -259,6 +258,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         if report.files != file_count {
             return Err("workload file count mismatch".into());
+        }
+        if binding_paths {
+            let exclusive = files
+                .iter()
+                .flatten()
+                .filter(|file| file.bound_in_place())
+                .count();
+            println!(
+                "{}",
+                serde_json::json!({
+                    "version": 1, "workers": workers, "files": file_count,
+                    "bound_in_place_files": exclusive, "fallback_files": file_count - exclusive,
+                    "loaded_input_sha256": report.loaded_input_sha256,
+                })
+            );
+            std::hint::black_box(&files);
+            return Ok(());
         }
         if graph_mode {
             let stdout = io::stdout();

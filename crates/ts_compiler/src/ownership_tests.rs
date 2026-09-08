@@ -1,7 +1,7 @@
 use crate::{FileCache, Program, ProgramOptions};
 use std::sync::{Arc, Barrier};
 use ts_arena::{Counters, Counts, Error, SymbolId};
-use ts_ast::BoundFile;
+use ts_ast::CompletedFile;
 use ts_core::{CompilerOptions, Tristate};
 use ts_jsstring::JsString;
 use ts_tsoptions::ParsedCommandLine;
@@ -30,7 +30,7 @@ fn snapshot(text: &[u8], cache: &mut FileCache, counters: &Counters) -> Program 
     .unwrap()
 }
 
-fn local(file: &BoundFile, name: &[u8]) -> SymbolId {
+fn local(file: &CompletedFile, name: &[u8]) -> SymbolId {
     let view = file.view();
     let table = view
         .node_binding(file.source())

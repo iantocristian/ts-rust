@@ -178,6 +178,9 @@ pub struct ParsedFile {
     validated: bool,
 }
 impl ParsedFile {
+    pub(crate) fn exclusive_core_only(&self) -> bool {
+        self.builder.hooks.is_none() && self.builder.storage.is_core_only()
+    }
     pub fn view(&self) -> AstView<'_> {
         self.builder.view()
     }

@@ -137,8 +137,80 @@ fn has_body_data(node: &Node) -> bool {
     )
 }
 
-impl<'ast> Binder<'_, 'ast> {
-    pub(crate) fn syntax_nodes(&self, list: Option<NodeListId>) -> ts_ast::NodeSliceRead<'ast> {
+// The pinned schema's largest immediate visitor has nine fields (a method).
+// Lists are one descriptor regardless of their length. The schema test below
+// guards this bound; collection never retains a node, string or list backing.
+const MAX_IMMEDIATE_CHILDREN: usize = 9;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ImmediateChild {
+    Node(NodeId),
+    List(NodeListId),
+    Slice(NodeSlice),
+}
+
+struct ImmediateChildren {
+    entries: [Option<ImmediateChild>; MAX_IMMEDIATE_CHILDREN],
+    len: usize,
+}
+impl ImmediateChildren {
+    fn of(node: &Node) -> Self {
+        let mut children = Self {
+            entries: [None; MAX_IMMEDIATE_CHILDREN],
+            len: 0,
+        };
+        let _ = node.for_each_child(&mut children);
+        children
+    }
+    fn push(&mut self, child: ImmediateChild) -> ControlFlow<()> {
+        let entry = self
+            .entries
+            .get_mut(self.len)
+            .expect("schema immediate-child bound must include every visitor field");
+        *entry = Some(child);
+        self.len += 1;
+        ControlFlow::Continue(())
+    }
+    fn visit(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {
+        for child in self.entries[..self.len].iter().flatten() {
+            match *child {
+                ImmediateChild::Node(node) => visitor.visit_node(node)?,
+                ImmediateChild::List(list) => visitor.visit_list(list)?,
+                ImmediateChild::Slice(nodes) => visitor.visit_node_slice(nodes)?,
+            }
+        }
+        ControlFlow::Continue(())
+    }
+}
+impl ChildVisitor for ImmediateChildren {
+    fn visit_node(&mut self, node: NodeId) -> ControlFlow<()> {
+        self.push(ImmediateChild::Node(node))
+    }
+    fn visit_list(&mut self, list: NodeListId) -> ControlFlow<()> {
+        self.push(ImmediateChild::List(list))
+    }
+    fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
+        self.push(ImmediateChild::Slice(nodes))
+    }
+}
+
+impl Binder<'_, '_> {
+    pub(crate) fn syntax_slice(&self, list: Option<NodeListId>) -> NodeSlice {
+        let parsed = self.parsed_view();
+        let nodes = list.map_or_else(NodeSlice::empty, |list| {
+            parsed.list(list).expect("retained syntax list").nodes()
+        });
+        // Preserve validation for allocated empty slices too, whose owner would
+        // otherwise never be checked by the indexed loop.
+        let _ = parsed.node_slice(nodes).expect("retained syntax slice");
+        nodes
+    }
+    pub(crate) fn syntax_node(&self, nodes: NodeSlice, index: usize) -> Option<NodeId> {
+        self.parsed_view()
+            .node_slice(nodes)
+            .expect("retained syntax slice")[index]
+    }
+    pub(crate) fn syntax_nodes(&self, list: Option<NodeListId>) -> ts_ast::NodeSliceRead<'_> {
         let parsed = self.parsed_view();
         let nodes = list.map_or_else(NodeSlice::empty, |list| {
             parsed.list(list).expect("retained syntax list").nodes()
@@ -266,15 +338,9 @@ impl<'ast> Binder<'_, 'ast> {
             self.bind_children(node);
         }
         if self.n(node).kind() == K::SourceFile && u::is_in_js_file(Some(&self.n(node))) {
-            let parsed = self.parsed_view();
-            let list = parsed
-                .list(need(self.n(node).statement_list()))
-                .expect("source statement list");
-            let statements = parsed
-                .node_slice(list.nodes())
-                .expect("source statement slice");
-            for &statement in &*statements {
-                let statement = need(statement);
+            let statements = self.syntax_slice(Some(need(self.n(node).statement_list())));
+            for index in 0..statements.len() {
+                let statement = need(self.syntax_node(statements, index));
                 if self.n(statement).kind() == K::JSTypeAliasDeclaration {
                     self.bind_block_scoped_declaration(
                         statement,
@@ -392,25 +458,28 @@ impl<'ast> Binder<'_, 'ast> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachChild
     pub(crate) fn bind_each_child(&mut self, node: NodeId) {
-        let parsed = self.parsed_view();
-        let node = parsed.node(node).expect("binder syntax is retained");
-        let _ = node.for_each_child(self);
+        // Binding changes flags and binding fields, not these syntax edges or
+        // their order. Copy only the immediate descriptors before recursively
+        // mutating the exclusive owner; list elements are read when visited.
+        let children = ImmediateChildren::of(
+            &self
+                .parsed_view()
+                .node(node)
+                .expect("binder syntax is retained"),
+        );
+        let _ = children.visit(self);
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEach
-    pub(crate) fn bind_each(&mut self, nodes: &[Option<NodeId>]) {
-        for &node in nodes {
-            self.bind(node);
+    pub(crate) fn bind_each(&mut self, nodes: NodeSlice) {
+        for index in 0..nodes.len() {
+            self.bind(self.syntax_node(nodes, index));
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.bindNodeList
     pub(crate) fn bind_node_list(&mut self, list: Option<NodeListId>) {
         if let Some(list) = list {
-            let parsed = self.parsed_view();
-            let list = parsed.list(list).expect("retained syntax list");
-            let nodes = parsed
-                .node_slice(list.nodes())
-                .expect("retained syntax slice");
-            self.bind_each(&nodes);
+            let nodes = self.syntax_slice(Some(list));
+            self.bind_each(nodes);
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.bindModifiers
@@ -419,17 +488,15 @@ impl<'ast> Binder<'_, 'ast> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachStatementFunctionsFirst
     pub(crate) fn bind_each_statement_functions_first(&mut self, statements: NodeListId) {
-        let parsed = self.parsed_view();
-        let list = parsed.list(statements).expect("retained statement list");
-        let nodes = parsed
-            .node_slice(list.nodes())
-            .expect("retained statement slice");
-        for &node in &*nodes {
+        let nodes = self.syntax_slice(Some(statements));
+        for index in 0..nodes.len() {
+            let node = self.syntax_node(nodes, index);
             if self.n(need(node)).kind() == K::FunctionDeclaration {
                 self.bind(node);
             }
         }
-        for &node in &*nodes {
+        for index in 0..nodes.len() {
+            let node = self.syntax_node(nodes, index);
             if self.n(need(node)).kind() != K::FunctionDeclaration {
                 self.bind(node);
             }
@@ -506,18 +573,182 @@ impl ChildVisitor for Binder<'_, '_> {
         }
     }
     fn visit_list(&mut self, list: NodeListId) -> ControlFlow<()> {
-        let parsed = self.parsed_view();
-        let list = parsed.list(list).expect("retained child list");
-        self.visit_node_slice(list.nodes())
+        let nodes = self
+            .parsed_view()
+            .list(list)
+            .expect("retained child list")
+            .nodes();
+        self.visit_node_slice(nodes)
     }
     fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
-        let parsed = self.parsed_view();
-        let nodes = parsed.node_slice(nodes).expect("retained child slice");
-        for &node in &*nodes {
+        let len = self
+            .parsed_view()
+            .node_slice(nodes)
+            .expect("retained child slice")
+            .len();
+        for index in 0..len {
+            let node = self.syntax_node(nodes, index);
             if self.bind(node) {
                 return ControlFlow::Break(());
             }
         }
         ControlFlow::Continue(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ts_arena::Counters;
+    use ts_ast::{
+        AstBuilder, FactoryMethods, JSDocParameterOrPropertyTagData, MethodDeclarationData,
+    };
+    use ts_core::TextRange;
+    use ts_jsstring::SourceText;
+
+    #[test]
+    fn immediate_child_storage_covers_the_pinned_schema() {
+        let schema: serde_json::Value =
+            serde_json::from_str(include_str!("../../../data/s03/schema/ast.json")).unwrap();
+        let maximum = schema["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|node| {
+                node["members"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .filter(|member| member["child"] == true)
+                    .count()
+            })
+            .max()
+            .unwrap();
+        assert_eq!(maximum, MAX_IMMEDIATE_CHILDREN);
+    }
+
+    struct Visits {
+        entries: Vec<ImmediateChild>,
+        stop_after: usize,
+    }
+    impl Visits {
+        fn push(&mut self, child: ImmediateChild) -> ControlFlow<()> {
+            self.entries.push(child);
+            if self.entries.len() == self.stop_after {
+                ControlFlow::Break(())
+            } else {
+                ControlFlow::Continue(())
+            }
+        }
+    }
+    impl ChildVisitor for Visits {
+        fn visit_node(&mut self, node: NodeId) -> ControlFlow<()> {
+            self.push(ImmediateChild::Node(node))
+        }
+        fn visit_list(&mut self, list: NodeListId) -> ControlFlow<()> {
+            self.push(ImmediateChild::List(list))
+        }
+        fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
+            self.push(ImmediateChild::Slice(nodes))
+        }
+    }
+    fn assert_visits(node: &Node, expected: &[ImmediateChild]) {
+        let children = ImmediateChildren::of(node);
+        for stop_after in 1..=expected.len() + 1 {
+            let mut visits = Visits {
+                entries: Vec::new(),
+                stop_after,
+            };
+            let outcome = children.visit(&mut visits);
+            assert_eq!(visits.entries, expected[..stop_after.min(expected.len())]);
+            assert_eq!(outcome.is_break(), stop_after <= expected.len());
+        }
+    }
+
+    #[test]
+    fn immediate_children_preserve_method_order_and_short_circuit() {
+        let mut ast = AstBuilder::new(SourceText::default(), &Counters::new());
+        let ids: [_; 6] = std::array::from_fn(|_| ast.new_identifier(JsString::default()));
+        let lists: [_; 3] = std::array::from_fn(|_| {
+            ast.new_list(TextRange::new(-1, -1), NodeSlice::empty())
+                .unwrap()
+        });
+        let node = Node::from_factory_parts(
+            K::MethodDeclaration.into(),
+            MethodDeclarationData {
+                modifiers: Some(lists[0]),
+                asterisk_token: Some(ids[0]),
+                name: Some(ids[1]),
+                postfix_token: Some(ids[2]),
+                type_parameters: Some(lists[1]),
+                parameters: Some(lists[2]),
+                r#type: Some(ids[3]),
+                full_signature: Some(ids[4]),
+                body: Some(ids[5]),
+            }
+            .into(),
+        );
+        assert_visits(
+            &node,
+            &[
+                ImmediateChild::List(lists[0]),
+                ImmediateChild::Node(ids[0]),
+                ImmediateChild::Node(ids[1]),
+                ImmediateChild::Node(ids[2]),
+                ImmediateChild::List(lists[1]),
+                ImmediateChild::List(lists[2]),
+                ImmediateChild::Node(ids[3]),
+                ImmediateChild::Node(ids[4]),
+                ImmediateChild::Node(ids[5]),
+            ],
+        );
+    }
+
+    #[test]
+    fn immediate_children_preserve_dynamic_jsdoc_order_and_raw_slices() {
+        let mut ast = AstBuilder::new(SourceText::default(), &Counters::new());
+        let ids: [_; 3] = std::array::from_fn(|_| ast.new_identifier(JsString::default()));
+        let comment = ast
+            .new_list(TextRange::new(-1, -1), NodeSlice::empty())
+            .unwrap();
+        for is_name_first in [false, true] {
+            let node = Node::from_factory_parts(
+                K::JSDocParameterTag.into(),
+                JSDocParameterOrPropertyTagData {
+                    tag_name: Some(ids[0]),
+                    name: Some(ids[1]),
+                    type_expression: Some(ids[2]),
+                    is_name_first,
+                    is_bracketed: false,
+                    comment: Some(comment),
+                }
+                .into(),
+            );
+            let (first, second) = if is_name_first {
+                (ids[1], ids[2])
+            } else {
+                (ids[2], ids[1])
+            };
+            assert_visits(
+                &node,
+                &[
+                    ImmediateChild::Node(ids[0]),
+                    ImmediateChild::Node(first),
+                    ImmediateChild::Node(second),
+                    ImmediateChild::List(comment),
+                ],
+            );
+        }
+        // A raw empty slice still emits a callback; it is not an absent field.
+        let empty = ast.node_slice(Vec::new()).unwrap();
+        let node = Node::from_factory_parts(
+            K::JSDocTypeLiteral.into(),
+            ts_ast::JSDocTypeLiteralData {
+                js_doc_property_tags: empty,
+                is_array_type: false,
+            }
+            .into(),
+        );
+        assert_visits(&node, &[ImmediateChild::Slice(empty)]);
     }
 }

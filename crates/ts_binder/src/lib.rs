@@ -56,14 +56,32 @@ fn bind_source_file_worker(
     source: ts_ast::NodeId,
 ) -> Result<(), ts_ast::BindError> {
     file.bind_with(source, |builder| {
-        let mut binder = Binder::new(builder);
-        binder.unreachable_flow = Some(binder.new_flow_node(ts_ast::flow_flags::UNREACHABLE));
-        binder.bind(Some(source));
-        binder.bind_deferred_expando_assignments();
-        binder.builder.set_symbol_count(binder.symbol_count);
+        initialize_binding(builder);
         Ok(())
     })?;
     Ok(())
+}
+
+/// Bind the exclusive parser result before publishing its completed syntax.
+/// Unusual constructed owners select the existing shared-publication backend.
+pub fn bind_parsed_file(
+    parsed: ts_ast::ParsedFile,
+) -> Result<ts_ast::CompletedFile, ts_ast::BindError> {
+    ts_parser::on_parser_worker(|| {
+        parsed.bind_and_publish(|builder| {
+            initialize_binding(builder);
+            Ok(())
+        })
+    })
+}
+
+fn initialize_binding(builder: &mut ts_ast::BindBuilder<'_>) {
+    let source = builder.source();
+    let mut binder = Binder::new(builder);
+    binder.unreachable_flow = Some(binder.new_flow_node(ts_ast::flow_flags::UNREACHABLE));
+    binder.bind(Some(source));
+    binder.bind_deferred_expando_assignments();
+    binder.builder.set_symbol_count(binder.symbol_count);
 }
 
 #[cfg(test)]
@@ -71,3 +89,6 @@ mod recursion_tests;
 
 #[cfg(test)]
 mod bound_factory_tests;
+
+#[cfg(test)]
+mod exclusive_tests;

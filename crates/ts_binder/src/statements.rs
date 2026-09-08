@@ -341,7 +341,7 @@ impl Binder<'_, '_> {
     pub(crate) fn bind_case_block(&mut self, node: NodeId) {
         let statement = need(self.n(node).parent());
         let expression = need(self.n(statement).expression());
-        let clauses = self.syntax_nodes(Some(need(payload!(self, node, as_case_block).clauses)));
+        let clauses = self.syntax_slice(Some(need(payload!(self, node, as_case_block).clauses)));
         let narrowing =
             self.n(expression).kind() == K::TrueKeyword || self.is_narrowing_expression(expression);
         let mut fallthrough = self.unreachable_flow;
@@ -349,14 +349,17 @@ impl Binder<'_, '_> {
         while index < clauses.len() {
             let start = index;
             while self
-                .syntax_nodes(self.n(need(clauses[index])).statement_list())
+                .syntax_nodes(
+                    self.n(need(self.syntax_node(clauses, index)))
+                        .statement_list(),
+                )
                 .is_empty()
                 && index + 1 < clauses.len()
             {
                 if fallthrough == self.unreachable_flow {
                     self.current_flow = self.pre_switch_case_flow;
                 }
-                self.bind(clauses[index]);
+                self.bind(self.syntax_node(clauses, index));
                 index += 1;
             }
             let pre_case = self.create_branch_label();
@@ -373,7 +376,7 @@ impl Binder<'_, '_> {
             self.add_antecedent(pre_case, pre_flow);
             self.add_antecedent(pre_case, need(fallthrough));
             self.current_flow = Some(self.finish_flow_label(pre_case));
-            let clause = need(clauses[index]);
+            let clause = need(self.syntax_node(clauses, index));
             self.bind(Some(clause));
             fallthrough = self.current_flow;
             if self.flow(need(self.current_flow)).flags & F::UNREACHABLE == 0

@@ -3,7 +3,7 @@ use crate::{need, Binder};
 use ts_ast::{flow_flags as F, node_flags, utilities as u, FlowId, NodeId, SyntaxKind as K};
 
 // These payloads contain only non-owning identities and scalar fields. Snapshot
-// their fields before mutating the binding overlay, without retaining AST owners.
+// their fields before mutating binding storage, without retaining AST owners.
 macro_rules! payload {
     ($b:expr, $node:expr, $accessor:ident) => {
         $b.n($node)
@@ -20,9 +20,9 @@ impl Binder<'_, '_> {
     pub(crate) fn bind_assignment_target_flow(&mut self, node: NodeId) {
         match self.n(node).kind().known() {
             Some(K::ArrayLiteralExpression) => {
-                let elements = self.n(node).element_list();
-                for &element in &*self.syntax_nodes(elements) {
-                    let element = need(element);
+                let elements = self.syntax_slice(self.n(node).element_list());
+                for index in 0..elements.len() {
+                    let element = need(self.syntax_node(elements, index));
                     if self.n(element).kind() == K::SpreadElement {
                         self.bind_assignment_target_flow(need(self.n(element).expression()));
                     } else {
@@ -31,8 +31,9 @@ impl Binder<'_, '_> {
                 }
             }
             Some(K::ObjectLiteralExpression) => {
-                for &property in &*self.syntax_nodes(self.n(node).property_list()) {
-                    let property = need(property);
+                let properties = self.syntax_slice(self.n(node).property_list());
+                for index in 0..properties.len() {
+                    let property = need(self.syntax_node(properties, index));
                     match self.n(property).kind().known() {
                         Some(K::PropertyAssignment) => self
                             .bind_destructuring_target_flow(need(self.n(property).initializer())),
@@ -258,8 +259,9 @@ impl Binder<'_, '_> {
             None
         };
         if let Some(name) = name.filter(|&name| u::is_binding_pattern(&self.n(name))) {
-            for &child in &*self.syntax_nodes(self.n(name).element_list()) {
-                self.bind_initialized_variable_flow(need(child));
+            let elements = self.syntax_slice(self.n(name).element_list());
+            for index in 0..elements.len() {
+                self.bind_initialized_variable_flow(need(self.syntax_node(elements, index)));
             }
         } else {
             self.current_flow =

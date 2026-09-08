@@ -42,8 +42,8 @@ mod visitor;
 mod visitors_generated;
 
 pub use bind_result::{
-    BindBuilder, BindError, BindResult, BoundFile, BoundView, NodeBinding, PatternAmbientModule,
-    RetainedBoundNode, RetainedSymbol,
+    BindBuilder, BindError, BindResult, BoundFile, BoundView, CompletedFile, CompletedNode,
+    CompletedSymbol, NodeBinding, PatternAmbientModule, RetainedBoundNode, RetainedSymbol,
 };
 pub use clone::{
     clone_node, deep_clone_node, deep_clone_reparse, deep_clone_reparse_modifiers,

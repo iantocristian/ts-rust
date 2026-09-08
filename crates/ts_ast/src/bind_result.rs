@@ -3,7 +3,9 @@
 use crate::flow::{FlowId, FlowLists, FlowNodes};
 use crate::node_map::NodeMap;
 use crate::symbols::{DeclarationLists, Symbol, SymbolTableId, SymbolTables};
-use crate::{AstFile, AstView, Diagnostic, Node, NodeId, NodeRead, SourceFileRead};
+use crate::{
+    AstBuilder, AstFile, AstView, Diagnostic, Node, NodeId, NodeRead, ParsedFile, SourceFileRead,
+};
 use std::{
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::OnceLock,
@@ -33,6 +35,7 @@ pub struct PatternAmbientModule {
 pub struct BindResult {
     source: NodeId,
     multiple_sources: bool,
+    direct_nodes: bool,
     nodes: NodeMap<Node>,
     bindings: NodeMap<NodeBinding>,
     flow_bindings: ts_arena::NodeSlots<FlowId>,
@@ -74,6 +77,7 @@ impl BindResult {
         Self {
             source,
             multiple_sources,
+            direct_nodes: false,
             nodes: NodeMap::default(),
             bindings: NodeMap::default(),
             flow_bindings: ts_arena::NodeSlots::new(source.arena()),
@@ -146,7 +150,11 @@ impl BindResult {
             }))
     }
     pub(crate) fn overlay(&self, id: NodeId) -> Option<&Node> {
-        self.nodes.get(&id)
+        if self.direct_nodes {
+            None
+        } else {
+            self.nodes.get(&id)
+        }
     }
     pub(crate) fn is_single_source_owner(&self, id: NodeId) -> bool {
         !self.multiple_sources && id.arena() == self.source.arena()
@@ -205,7 +213,7 @@ impl BindCell {
             );
             match catch_unwind(AssertUnwindSafe(|| {
                 let mut builder = BindBuilder {
-                    parsed: view,
+                    storage: BindStorage::Published(view),
                     result: BindResult::new(view, source),
                 };
                 initialize(&mut builder)?;
@@ -241,19 +249,27 @@ impl BindCell {
 /// binding contract; source cloning itself remains supported by AST factories.
 /// See docs/S07-binding-operations.md for the pinned successful Go counterexample.
 pub struct BindBuilder<'a> {
-    parsed: AstView<'a>,
+    storage: BindStorage<'a>,
     result: BindResult,
 }
-impl<'ast> BindBuilder<'ast> {
-    /// Syntax children stay immutable while binding stages header and side-field writes.
-    pub fn parsed_view(&self) -> AstView<'ast> {
-        self.parsed
+enum BindStorage<'a> {
+    Published(AstView<'a>),
+    Exclusive(&'a mut AstBuilder),
+}
+impl BindBuilder<'_> {
+    /// Borrow syntax only until the next binder mutation. On the consuming path,
+    /// headers already include earlier writes; child edges remain unchanged.
+    pub fn parsed_view(&self) -> AstView<'_> {
+        match &self.storage {
+            BindStorage::Published(view) => *view,
+            BindStorage::Exclusive(builder) => builder.view(),
+        }
     }
     pub fn result(&self) -> &BindResult {
         &self.result
     }
     pub fn view(&self) -> AstView<'_> {
-        AstView(self.parsed.0, Some(&self.result))
+        AstView(self.parsed_view().0, Some(&self.result))
     }
     pub fn source(&self) -> NodeId {
         self.result.source
@@ -262,23 +278,31 @@ impl<'ast> BindBuilder<'ast> {
         self.view().node(id)
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
-        self.validate_write_owner(id)?;
-        if !self.result.nodes.contains_key(&id) {
-            let node = self.parsed.node(id)?;
-            self.result.nodes.insert(id, node.copy_for_binding());
+        let parsed = match &mut self.storage {
+            BindStorage::Exclusive(builder) => return builder.node_mut(id),
+            BindStorage::Published(parsed) => *parsed,
+        };
+        // The immutable backend still preserves the original parsed headers.
+        let owner = parsed.for_node_owner(id)?;
+        if owner.0.id() != parsed.0.id()
+            || (self.result.multiple_sources && parsed.owning_source(id)? != self.result.source)
+        {
+            return Err(Error::WrongOwner);
         }
-        Ok(self
-            .result
-            .nodes
-            .get_mut(&id)
-            .expect("binding overlay installed"))
+        match self.result.nodes.entry(id) {
+            std::collections::hash_map::Entry::Occupied(entry) => Ok(entry.into_mut()),
+            std::collections::hash_map::Entry::Vacant(entry) => {
+                Ok(entry.insert(parsed.node(id)?.copy_for_binding()))
+            }
+        }
     }
+
     pub fn binding(&self, id: NodeId) -> Result<Option<NodeBinding>, Error> {
-        self.parsed.node(id)?;
+        self.parsed_view().node(id)?;
         Ok(self.result.node_binding(id))
     }
     pub fn node_symbol(&self, id: NodeId) -> Result<Option<SymbolId>, Error> {
-        self.parsed.node(id)?;
+        self.parsed_view().node(id)?;
         Ok(self
             .result
             .bindings
@@ -286,7 +310,7 @@ impl<'ast> BindBuilder<'ast> {
             .and_then(|binding| binding.symbol))
     }
     pub fn node_locals(&self, id: NodeId) -> Result<Option<SymbolTableId>, Error> {
-        self.parsed.node(id)?;
+        self.parsed_view().node(id)?;
         Ok(self
             .result
             .bindings
@@ -367,11 +391,17 @@ impl<'ast> BindBuilder<'ast> {
         self.result.global_exports = table;
     }
     fn validate_write_owner(&self, id: NodeId) -> Result<(), Error> {
-        let owner = self.parsed.for_node_owner(id)?;
-        if owner.0.id() != self.parsed.0.id() {
+        if let BindStorage::Exclusive(builder) = &self.storage {
+            builder.storage.core_node(id)?;
+            return Ok(());
+        }
+        let owner = self.parsed_view().for_node_owner(id)?;
+        if owner.0.id() != self.parsed_view().0.id() {
             return Err(Error::WrongOwner);
         }
-        if self.result.multiple_sources && self.parsed.owning_source(id)? != self.result.source {
+        if self.result.multiple_sources
+            && self.parsed_view().owning_source(id)? != self.result.source
+        {
             return Err(Error::WrongOwner);
         }
         Ok(())
@@ -380,7 +410,7 @@ impl<'ast> BindBuilder<'ast> {
         for (_, symbol) in self.result.symbols.iter() {
             self.result.declarations.get(symbol.declarations)?;
             if let Some(node) = symbol.value_declaration {
-                self.parsed.node(node)?;
+                self.parsed_view().node(node)?;
             }
             for table in [symbol.members, symbol.exports].into_iter().flatten() {
                 self.result.tables.get(table)?;
@@ -391,7 +421,7 @@ impl<'ast> BindBuilder<'ast> {
         }
         for (_, nodes) in self.result.declarations.iter() {
             for &node in nodes.iter().flatten() {
-                self.parsed.node(node)?;
+                self.parsed_view().node(node)?;
             }
         }
         for (_, table) in self.result.tables.iter() {
@@ -412,11 +442,11 @@ impl<'ast> BindBuilder<'ast> {
             }
             match flow.node {
                 Some(FlowData::Ast(node)) => {
-                    self.parsed.node(node)?;
+                    self.parsed_view().node(node)?;
                 }
                 Some(FlowData::SwitchClause(data)) => {
                     if let Some(node) = data.switch_statement {
-                        self.parsed.node(node)?;
+                        self.parsed_view().node(node)?;
                     }
                 }
                 Some(FlowData::ReduceLabel(data)) => {
@@ -444,9 +474,9 @@ impl<'ast> BindBuilder<'ast> {
         for (&id, node) in &self.result.nodes {
             self.validate_write_owner(id)?;
             if let Some(parent) = node.parent() {
-                self.parsed.node(parent)?;
+                self.parsed_view().node(parent)?;
             }
-            self.parsed.validate_data(node.data())?;
+            self.parsed_view().validate_data(node.data())?;
         }
         for (id, binding) in self.result.bindings() {
             self.validate_write_owner(id)?;
@@ -457,7 +487,7 @@ impl<'ast> BindBuilder<'ast> {
                 self.result.tables.get(table)?;
             }
             if let Some(next) = binding.next_container {
-                self.parsed.node(next)?;
+                self.parsed_view().node(next)?;
             }
             for flow in [
                 binding.flow_node,
@@ -472,7 +502,7 @@ impl<'ast> BindBuilder<'ast> {
             }
         }
         if let Some(indicator) = self.result.common_js_module_indicator {
-            self.parsed.node(indicator)?;
+            self.parsed_view().node(indicator)?;
         }
         if let Some(table) = self.result.global_exports {
             self.result.tables.get(table)?;
@@ -487,7 +517,7 @@ impl<'ast> BindBuilder<'ast> {
         let mut diagnostics: Vec<_> = self.result.diagnostics.iter().collect();
         while let Some(diagnostic) = diagnostics.pop() {
             if let Some(file) = diagnostic.file {
-                self.parsed.node(file)?;
+                self.parsed_view().node(file)?;
             }
             diagnostics.extend(diagnostic.message_chain.iter().map(AsRef::as_ref));
             diagnostics.extend(diagnostic.related_information.iter().map(AsRef::as_ref));
@@ -652,6 +682,129 @@ impl AstFile {
         Ok(BoundFile {
             file: self.clone(),
             source,
+        })
+    }
+}
+
+/// Retention capability for the consuming parse/bind/publish path. It exposes
+/// completed syntax only: there is no promise of a second, pristine parsed AST.
+///
+/// ```compile_fail
+/// fn parsed(file: &ts_ast::CompletedFile) { file.parsed_file(); }
+/// ```
+#[derive(Clone, Debug)]
+pub struct CompletedFile {
+    bound: BoundFile,
+}
+impl CompletedFile {
+    pub fn view(&self) -> BoundView<'_> {
+        self.bound.view()
+    }
+    pub fn source(&self) -> NodeId {
+        self.bound.source()
+    }
+    /// Diagnostic provenance for the A0 experiment, not a parity metric.
+    pub fn bound_in_place(&self) -> bool {
+        self.view().result.direct_nodes
+    }
+    pub fn retain_symbol(&self, id: SymbolId) -> Result<CompletedSymbol, Error> {
+        self.view().symbol(id)?;
+        Ok(CompletedSymbol {
+            file: self.clone(),
+            id,
+        })
+    }
+    pub fn retain_node(&self, id: NodeId) -> Result<CompletedNode, Error> {
+        let retained = self.bound.retain_node(id)?;
+        Ok(CompletedNode {
+            file: Self {
+                bound: retained.file,
+            },
+            id,
+        })
+    }
+}
+#[derive(Clone, Debug)]
+pub struct CompletedSymbol {
+    file: CompletedFile,
+    id: SymbolId,
+}
+impl CompletedSymbol {
+    pub fn id(&self) -> SymbolId {
+        self.id
+    }
+    pub fn file(&self) -> &CompletedFile {
+        &self.file
+    }
+}
+impl std::ops::Deref for CompletedSymbol {
+    type Target = Symbol;
+    fn deref(&self) -> &Symbol {
+        self.file.view().symbol(self.id).expect("retained symbol")
+    }
+}
+#[derive(Clone, Debug)]
+pub struct CompletedNode {
+    file: CompletedFile,
+    id: NodeId,
+}
+impl CompletedNode {
+    pub fn id(&self) -> NodeId {
+        self.id
+    }
+    pub fn file(&self) -> &CompletedFile {
+        &self.file
+    }
+    pub fn node(&self) -> NodeRead<'_> {
+        self.file.view().node(self.id).expect("retained node")
+    }
+}
+impl ParsedFile {
+    /// Consume a completed parse, bind, and publish. Selection happens before
+    /// mutation. Imported, mapped, multiple-source and existing lazy storage
+    /// retain the published binding path. Errors and panics drop the exclusive
+    /// owner; no completed cache entry or half-bound file can escape.
+    /// Call this on a reserved-stack worker, as with `AstFile::bind_with`.
+    pub fn bind_and_publish(
+        mut self,
+        initialize: impl FnOnce(&mut BindBuilder<'_>) -> Result<(), Error>,
+    ) -> Result<CompletedFile, BindError> {
+        let source = self.root();
+        self.view().source_file(source)?;
+        let mut result = BindResult::new(self.view(), source);
+        let eligible = !result.multiple_sources
+            && self.exclusive_core_only()
+            && self
+                .view()
+                .source_file(source)?
+                .content_mapper_info()
+                .is_none();
+        if !eligible {
+            let file = self.try_publish_unbound()?;
+            file.bind_with(source, initialize)?;
+            return Ok(CompletedFile {
+                bound: file.retain_bound(source)?,
+            });
+        }
+        result.direct_nodes = true;
+        let result = {
+            let mut binding = BindBuilder {
+                storage: BindStorage::Exclusive(self.builder_mut()),
+                result,
+            };
+            initialize(&mut binding)?;
+            binding.validate()?;
+            binding.result
+        };
+        self.builder_mut()
+            .source_file_mut(source)?
+            .binding
+            .0
+            .set(Ok(result))
+            .map_err(|_| Error::InvalidGraph)?;
+        let file = self.try_publish_unbound()?;
+        Ok(CompletedFile {
+            bound: file.retain_bound(source)?,
         })
     }
 }
