@@ -44,6 +44,7 @@ or graph mismatch leaves raw diagnostics and an unsuccessful receipt.
 python3 tools/s07/performance-experiments/access-trace/probe.py build --output target/s07-bis/access-trace-build-1
 python3 tools/s07/performance-experiments/access-trace/probe.py capture --build BUILD --build-sha SHA --output SIZING --sizing
 python3 tools/s07/performance-experiments/access-trace/probe.py capture --build BUILD --build-sha SHA --output FULL
+python3 tools/s07/performance-experiments/access-trace/probe.py record --build BUILD --build-sha SHA --output PENDING
 python3 tools/s07/performance-experiments/access-trace/probe.py verify --output FULL/trace.bin.gz
 ```
 
@@ -55,3 +56,9 @@ normalization exception. The native source, observer patches, actual executable,
 tool closure, loaded-input identity, raw reports and invocation receipts are
 recorded. Builds/captures use the existing measurement lock to avoid contaminating
 another experiment; their elapsed times are not performance samples.
+
+`record` seals raw data, child receipts and native graph checks with the manifest
+kind `s07_bis_access_trace_pending_verification` and `trace_verified: false`.
+This permits a separately recorded native decoder to verify large streams. It
+does not satisfy the verified-capture consumer; a later result must reference
+both the immutable recording and the successful verifier invocation.

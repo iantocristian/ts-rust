@@ -218,7 +218,7 @@ def match_trace_work(trace, summary, graphs):
             raise ValueError('trace diagnostics differ from native summary')
 
 
-def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limit):
+def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limit, record_only=False):
     record = validate_build(build_dir, build_sha)
     runner.validate_inputs(build_dir, record['expected_work'])
     output.mkdir(parents=True, exist_ok=False)
@@ -297,6 +297,18 @@ def capture(build_dir, build_sha, output, sizing, payload_limit, compressed_limi
     # Keep that rule intact: revalidate the complete frozen parent, then compare
     # the native selected digest against the selected recipes derived above.
     runner.validate_inputs(build_dir, record['expected_work'])
+    if record_only:
+        if before_tools != tool_files():
+            raise ValueError('recording tools changed')
+        # Large traces may be verified by a separately recorded decoder. Seal
+        # the raw invocation and graph checks, but make its pending state explicit
+        # and incompatible with the verified-capture replay consumer.
+        return seal(output, {'version': 1, 'kind': 's07_bis_access_trace_pending_verification',
+            'diagnostic_only': True, 'trace_verified': False, 'build_manifest_sha256': build_sha,
+            'declaration': declaration, 'receipt': receipt, 'summary': summary,
+            'graph_matches': graphs, 'tool_inputs': before_tools,
+            'limitations': ['Native recording and retained-graph checks completed; trace framing/value verification is still required.',
+                            'No layout timing or sprint acceptance evidence.']})
     registries = [build_dir / 'tool-snapshot' / HERE.relative_to(ROOT) / (name + '-registry.json')
                   for name in ('protocol', 'state', 'hooks')]
     trace_report = verify_capture(raw, payload_limit, compressed_limit, registries=registries, expected={
@@ -362,7 +374,7 @@ def replay(directory, capture_sha, build_dir, build_sha):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['build', 'capture', 'verify', 'replay'])
+    parser.add_argument('command', choices=['build', 'capture', 'record', 'verify', 'replay'])
     parser.add_argument('--build', type=Path)
     parser.add_argument('--build-sha')
     parser.add_argument('--capture-sha')
@@ -387,7 +399,7 @@ def main():
         try:
             sha = build(args.output.resolve()) if args.command == 'build' else capture(
                 args.build.resolve(), args.build_sha, args.output.resolve(), args.sizing,
-                args.payload_limit, args.compressed_limit)
+                args.payload_limit, args.compressed_limit, record_only=args.command == 'record')
         except Exception as error:
             # Preserve a diagnostic even when the native child succeeded but a
             # later graph/format/provenance check rejected the capture.

@@ -24,6 +24,16 @@ a full-workload capture or a CPU sample, and extrapolation from it is not a
 guarantee that the full workload fits. Keep the limits active on the complete
 13,094-file attempt; do not silently filter events or files to stay within them.
 
+The verified sizing capture contains23,574,043 records for1,558,205 nodes. Scaling
+its bytes by node count suggests about16 GB raw and1.71 GB compressed for the
+full workload; this is a capacity estimate, not a guarantee. The Python reference
+verifier takes minutes even on this subset. Full recording may therefore seal
+its raw invocation and graph comparisons as **pending trace verification**, with
+an explicit incompatible manifest kind. A separate native decoder must match
+the Python reference on malformed fixtures and the recorded sizing trace before
+verifying the full stream. Its binary, registry, input and result hashes must be
+recorded separately. A pending recording is never a verified trace or gate result.
+
 Fable is right that population counts and a tiny fixture omit working-set size
 and real access order. Record actual binder operations from a separately staged,
 instrumented copy of the accepted implementation over the full frozen workload.
