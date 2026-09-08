@@ -1,6 +1,13 @@
 # Actual core occupancy and compact-storage projections
 
 These are requested-byte models, not replacement storage or acceptance results.
+The 780/880 MB category allocations below are provisional. Their margins and
+misses remain useful diagnostics; they do not select a storage family before
+the complete owner budget is modeled. The
+[subsequent budget review](../../../../docs/S07-bis-plan-review.md#6-layout-budget-review-after-a0)
+keeps typed pages in the comparison and adds tighter identifier text as a
+separate candidate. The recorded matrix and its arithmetic are unchanged.
+
 The frozen original A0 executable supplied an **untimed** census of all 13,094
 files, with every completed root retained. All files used consuming binding;
 19,593,488 core nodes and the loaded-input digest matched the frozen workload.
@@ -43,7 +50,8 @@ copy or claim anything about in-place realloc.
 Decimal MB below include the 24-byte header, bound payload capacity and all
 modeled directories. “Traffic” is requests minus retained modeled bytes.
 Remaining escape, runtime-ID, compatibility and owner costs are excluded and
-must still fit the plan's 880 MB syntax-plus-binding ceiling.
+must still be charged against the provisional 880 MB syntax-plus-binding
+allocation or an explicitly revised whole-owner budget.
 
 | Storage candidate | Retained | Requests | Traffic |
 | --- | ---: | ---: | ---: |
@@ -60,9 +68,12 @@ The best per-shape thin-page candidate uses 32-slot header pages, four-slot
 payload pages, and optional one-or-many stores. It still misses the byte budget
 before unknowns and entails 6.71 million modeled allocation calls. The flat
 payload-vector policy alone exceeds the entire 350 MB transient ceiling. These
-results reject those particular envelopes, not compact storage in general.
+results show which envelopes miss the original category allocation. They do
+not reject an envelope under a different, explicitly reconciled whole-owner
+budget. The high allocation-call count remains a separate concern to measure
+in the implementation.
 
-## Bounded next prototype: word classes
+## Word-class candidates for a bounded prototype
 
 The generated compact payloads have four-byte alignment and 15 nonempty word
 widths, plus zero-payload shapes. Sharing pages by width reduces the active
@@ -107,7 +118,8 @@ allocation calls and slightly fewer replacement requests. It leaves only
 alone. Measure native allocation calls, elapsed CPU and retained/peak RSS for
 both; requested-byte totals do not predict allocator rounding or RSS.
 
-Proceed only to a small safe accessor/storage pilot: representative identifier,
+After the whole-owner and identifier-text models support a candidate selection,
+proceed only to a small safe accessor/storage pilot: representative identifier,
 token, binary-expression and function payloads; checked shape/class/ordinal
 lookups; private writes and shared reads; facts operations; page growth and
 partial-construction/drop tests. Measure actual hot-read/write and traversal

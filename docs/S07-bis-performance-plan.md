@@ -26,8 +26,10 @@ if A0 fails its correctness or measured-cost exits.
 The [A0 implementation record](S07-bis-A0.md) records both experiments. Initial
 A0 failed its screen; the predeclared A0-b variant preserves the parse-validation
 proof across narrow flag writes and passes. Keep that exclusive path, with CP2
-still held. Next, finish CP0's concrete page/escape/traffic budget and CP1's
-access contract before beginning the broad generated-storage migration. The
+still held. Next, finish CP0's whole-owner model, including symbols, flows,
+lists, text and residuals; evaluate a four-byte identifier-text encoding; and
+finish CP1's access contract before selecting a payload storage family or
+beginning the broad generated-storage migration. The
 [CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.
 
 Claude's second review identifies a sequencing error in the initial plan. The
@@ -217,8 +219,10 @@ whole-tree scan on every field access or every binding request.
 
 ### 4.3 Compact syntax, links and text
 
-Prototype a small common header and generated per-kind payload pages. Tokens
-have no general payload allocation. A header-held payload ordinal, or a charged
+Prototype a small common header and generated payload access/storage with
+independent concrete-shape tags. Select typed pages or word classes after the
+whole-owner and hot-access comparison. Tokens have no general payload allocation.
+A header-held payload ordinal, or a charged
 slot directory, maps the stable public node identity to its concrete payload.
 Do not change identity when a physical page or directory grows.
 
@@ -278,7 +282,30 @@ The combined syntax/binding row retains the original sub-budgets of 780 MB for
 syntax and 100 MB for binding fields/patches. Moving fields into concrete
 payloads moves their accounting into the same physical allocation; it does not
 make them free or justify counting them twice. Charge each actual allocation
-once and preserve the sub-budget attribution in the layout model.
+once and preserve the sub-budget attribution in the layout model. These category
+ceilings are provisional allocations of the whole-owner target, not independent
+acceptance gates. A category miss identifies an explicit tradeoff to price;
+it does not by itself reject a storage family. In particular, do not select
+all-atomic word rows over ordinary typed pages merely to satisfy the 780/880 MB
+split before the other retained categories are modeled.
+
+Compare complete owned allocations for compact symbols, flow records/lists,
+declaration backing, symbol tables and syntax lists using the Rust physical
+census, compiled layouts, actual per-file occupancy, directory/bucket/control
+costs and replacement traffic. Retain the current ceilings until that model
+supports a recorded reallocation; plausible smaller used-payload totals do not
+constitute available headroom. The final allocation and RSS gates remain
+independent of this internal retained-live target.
+
+Keep the current 24-byte header with its independent `u16` shape and full
+`u32` payload ordinal. Packing an eight-bit shape with a 24-bit ordinal buys no
+header-size reduction and creates an unnecessary narrowing case. Add a separate
+four-byte identifier-text candidate to the existing eight-byte source-range
+model: the bound identifier would shrink from 12 to eight bytes. Its source-end
+derivation or pool handle must preserve arbitrary factory text, decoded names,
+range mutation, synthetic positions, cloned/imported text and the full public
+domains. Price the fallback pool, handles, conversion work and page changes;
+do not treat all identifier text as an immutable suffix of its current range.
 
 Hash bucket/control allocations, Arc headers and temporary indexes must be
 included, not hidden outside the model. Unique source backing is charged once
@@ -481,7 +508,8 @@ has no measured path to both CPU gates.
 
 ### Checkpoint 3 — Integrate compact syntax and owner-relative text
 
-1. Introduce generated per-shape storage and compact-parent headers. On the
+1. Introduce the selected generated payload storage with independent shape tags
+   and compact-parent headers. On the
    selected exclusive route, put each audited binding field in its applicable
    payload and remove its temporary map/flow-slot entry. If CP2 was activated,
    share the payload locator with its binding indexes and remove any provisional

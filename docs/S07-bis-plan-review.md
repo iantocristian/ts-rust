@@ -149,3 +149,76 @@ performance, eliminate the binding-field maps, validate a future compact node
 layout, or satisfy any Go-relative acceptance gate. The next layout checkpoint
 must account for actual shape occupancy, directories, escape storage, runtime
 IDs and request traffic before the general accessor migration.
+
+## 6. Layout-budget review after A0
+
+Claude's subsequent layout assessment correctly challenges treating the 780 MB
+syntax allocation as a fixed design constraint. It was an initial division of
+the 1,700 MB whole-owner working target, not an acceptance gate. The preceding
+CP0 result let that split favor all-atomic word rows before the other categories
+were modeled. The amended next step completes the owner budget and evaluates
+tighter identifier text before selecting typed pages or word-class storage.
+No numerical category reallocation or new performance result is claimed yet.
+
+Two independent read-only audits checked the physical census and accounting,
+and separately checked the header, payload and text contracts. The disposition
+is as follows:
+
+| Claim or proposal | Verified result and decision |
+| --- | --- |
+| 24 bytes is the floor and needs an eight-bit shape plus 24-bit ordinal | Keep 24 bytes as the preferred design, not a proved universal minimum. The compiled existing header already fits an independent `u16` shape and full `u32` ordinal. Packing them narrows the domain without saving header bytes |
+| Zero-payload tokens, local links, composite-only facts and sparse/small pages make the budget possible | Those properties are already charged in CP0. They are not additional savings against its reported totals. Full-range link escapes remain required, including a valid maximum local slot if MAX is reserved |
+| Bound identifiers can occupy eight bytes | A useful new variant: four bytes of text encoding plus four of flow. CP0 currently models 12, not the production 32-byte string representation. Rust has 6,792,761 physical identifiers, so the additional used-byte saving is 27,171,044 before pool, capacity and conversion costs |
+| Text is recoverable from end minus raw length except for Unicode escapes | Incomplete fallback contract. Arbitrary factory text, decoded names, independent range edits, negative synthetic positions and cross-source clones also require preservation. A range edit must not silently change identifier text |
+| BinaryExpression payload is 20 bytes | Five compact syntax links cost 20; composite facts add four and the applicable symbol adds four. The existing bound model correctly charges 28 bytes |
+| Roughly 25% payload slack is sufficient | Not a property established for replacement pages. Use the actual per-file shape counts and explicit growth/directory policies; the recorded matrix already does so |
+| Other categories provide 200–250 MB of headroom | Plausible design targets, not established spare capacity. Model their complete replacements before reallocating the budget; the sensitivity calculations below retain unpriced costs explicitly |
+
+The original physical counts come from `native/rust-1-0-census.json` in the
+[memory archive](../tools/s07/memory-profile/results/2026-09-08/raw-captures.tar.xz).
+The [layout projection](../tools/s07/performance-experiments/phases/layout-projection.md)
+uses the later separate core-shape census. These have different scopes; Go's
+reachable counts and mixed backing/header counters are not interchangeable with
+Rust's allocated physical records.
+
+For symbols, flows, flow lists, declaration backing and symbol tables, applying
+the proposed compact widths, additionally assuming eight-byte declaration-backing
+descriptors and 16-byte symbol-table headers, gives **231.27 MB of used storage**.
+Those two descriptor widths are assumptions of this sensitivity, not explicit
+widths established in Claude's text. Applying the
+observed capacities instead gives **297.99 MB**, with another **17.64 MB** for
+the existing five arena directories. That 315.64 MB sensitivity is still before
+hash controls, synthetic flow payloads, runtime identities, escapes and pooling.
+It is not a lower bound for a redesigned page policy or a compiled replacement.
+In particular, 48-byte symbols depend on a four-byte name handle and relocated
+runtime identity; 16-byte flows need an independent discriminant and charged
+exceptional payloads. The public symbol-table entry capacity alone is 1.605
+times used entries, before bucket/control storage, so 1.5 times is not an
+observed complete hash-overhead factor.
+
+Syntax lists contain **6,047,867 elements**, **3,511,932 NodeList headers** and
+**3,114,989 distinct backing records**. The quoted 4.9 million figure mixes
+declaration-list census counters. Even assumed 16-byte list headers plus four-byte
+elements use 80.38 MB before backing descriptors, capacity and other auxiliary
+metadata. The header must still preserve locations, modifiers and slice identity.
+
+Unique `JsString` backing currently occupies **171.17 MB**, plus **11.22 MB** of
+separately estimated Arc headers. A 175 MB text category needs a real pooling
+and ownership design; the 161.74 MB source input alone does not price its indexes,
+descriptors or other text. The **257.48 MB** baseline native-live residual remains
+unattributed and cannot silently become the 50 MB other/unknown allowance.
+
+The proposed optimistic rows sum to 1,445–1,525 MB including the existing 50 MB
+other allowance. Under the recorded 166.647 MB starting-live counter, those
+endpoints would permit 541.647–621.647 MB of freed/superseded requests inside
+the 1,900 MB request target. Even at 1,700 MB endpoint live the allowance is
+366.647 MB, not 200 MB. These are conditional accounting identities, not measured
+headroom or evidence that the current 923.35 MB traffic can be reduced that far.
+
+Decision: retain A0-b and the 24-byte/full-ordinal header baseline. Finish the
+whole-owner and four-byte identifier-text models, then compare ordinary typed
+pages, scalar word rows with separate facts, and all-atomic word rows on complete
+storage and hot-access costs. The existing eight-/16-row word policies remain
+recorded candidates, not the selected production representation. Category misses
+require an explicit whole-budget tradeoff; final CPU, allocation and RSS gates
+remain unchanged. No Rust implementation or capture was changed by this review.

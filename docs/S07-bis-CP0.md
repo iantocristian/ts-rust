@@ -7,21 +7,26 @@ memory captures, and emits no tracker metrics. Production storage is unchanged.
 
 ## Decision
 
-With A0-b retained as the new control, the next bounded layout experiment is a
-safe word-class accessor/storage pilot. The actual core census now prices this
-option at 830.89 MB for modeled syntax, binding and directories, leaving only
-49.11 MB before escapes, runtime IDs and other unknowns. Its CPU cost is unproved.
+With A0-b retained as the new control, finish the whole-owner budget and the
+four-byte identifier-text representation experiment before selecting typed
+pages or word-class storage. The actual core census prices one all-atomic
+word-class option at 830.89 MB for modeled syntax, binding and directories.
+Its 49.11 MB margin belongs to the provisional 880 MB category allocation;
+it does not establish complete feasibility or justify its unmeasured CPU cost.
 Do not start broad accessor migration or declare compact storage feasible yet.
 
-The straightforward 32-byte-header candidate exceeds the syntax/binding ceiling
-before payload page slack or escape storage; reject that particular layout.
+The straightforward 32-byte-header candidate exceeds the initial syntax/binding
+allocation before payload page slack or escape storage. The 24-byte header
+remains the preferred baseline; the larger header's category miss alone is not
+a proof that it cannot fit any complete owner budget.
 The 24-byte-header candidate's actual file/shape occupancy and lean page policies
 are now priced in the [follow-up projection](../tools/s07/performance-experiments/phases/layout-projection.md).
-Even thin per-shape Box pages miss the combined ceiling at 887.49 MB. Sharing
+Even thin per-shape Box pages miss that provisional allocation at 887.49 MB. Sharing
 15 nonempty payload word widths reduces directory and page costs; all-atomic
 word rows avoid a separately indexed facts table, but require measured accessor
-and traversal tests before choosing that design. Explicit escape and runtime-ID
-budgets still remain.
+and traversal tests before choosing that design. Keep ordinary typed pages in
+the comparison while modeling the other categories and tighter text handles.
+Explicit escape and runtime-ID budgets still remain.
 The entire native-live residual and temporary-traffic target also remain open.
 These findings constrain CP3; the normal-binary A0-b result is recorded separately.
 
