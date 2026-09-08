@@ -29,15 +29,21 @@ A0 failed its screen; the predeclared A0-b variant preserves the parse-validatio
 proof across narrow flag writes and passes. Keep that exclusive path, with CP2
 still held. The [storage pilot](S07-bis-storage-pilot.md) now implements four-byte
 identifier text and compact list construction, records a fresh physical owner
-census, and prices concrete binding/auxiliary records. The first list replay
-reduces construction requests but regresses traversal, so its page-spanning
-representation is not selected. A second capture finds that contiguous chunks
-add cost without recovering checked traversal speed. The separate
+census, and prices concrete binding/auxiliary records. **Use 256-word edge pages
+as the leading list integration candidate**, retaining 64-word pages as a bounded
+memory challenger. The [list tradeoff review](S07-bis-list-tradeoff-review.md)
+corrects the earlier decision: the isolated traversal percentage was insufficient
+reason to hold back a policy with material request/live savings. A second capture
+finds that contiguous chunks add cost without recovering checked traversal speed;
+those tested chunk policies remain rejected as replacements for pages. The separate
 [CP1 access trial](S07-bis-CP1.md) recovers most of that gap with owner-descriptor
 reads and more with explicitly charged cached slices. Its bounded production
 node-lookup candidate passes a full-pipeline screen and becomes the next control;
-this does not select list storage or implement the general borrowed facade.
-Next test representative node access. Finish the whole-owner accounting (including name
+this does not promote production list storage or implement the general borrowed
+facade. Carry pages into the next representative node-access slice and resolve
+lists once where the actual caller can retain that proof; do not require pages
+to match a raw boxed-slice microbenchmark before integration. Finish the
+whole-owner accounting (including name
 interning, escapes and residuals) and CP1's access contract before selecting a
 payload storage family or beginning the broad generated-storage migration. The
 [CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.
@@ -762,6 +768,46 @@ still uses uninstrumented whole-pipeline wall time and its unchanged uncertainty
 gate, not these diagnostic phase timers.
 
 ## 6. Screening and decision rules
+
+### Establish absolute relevance before applying ratios
+
+For every candidate, first report absolute CPU deltas in milliseconds and memory
+deltas in decimal MB, alongside the complete-pipeline control and the applicable
+Go-derived gate budgets. Keep pipeline requests, retained requested-live storage
+and peak RSS distinct. State the source revision, worker mode, workload,
+measurement endpoints, invocation counts and denominator for every conversion.
+Historical Go medians contextualize scale; fresh Go measurements still determine
+the final gates.
+
+A microbenchmark ratio is not a pipeline regression or an early veto. Divide
+multi-sweep timings by the declared sweep count and show the absolute difference.
+If actual production frequency and matching operations are measured, report the
+resulting estimate with its assumptions. Otherwise show conditional sensitivity
+rows and label the production effect unknown; do not invent a pass count or
+describe a raw-slice baseline as the full production access path. Shared memory
+and whole-program cache effects also prevent an isolated difference from being
+a rigorous upper bound on integration cost.
+
+For example, the first page-256 replay saved 16.874 ms of construction,
+200.942 MB of requests and 46.784 MB of retained storage, while eight synthetic
+sweeps added 33.493 ms (4.187 ms per sweep on average). Two/three equivalent
+sweeps would add 8.373/12.560 ms before construction, but those frequencies and
+cost equivalences have not been established for the compiler. The request saving
+is about 9.9% of the historical 2,035 MB allocation budget; it is a reason to
+prioritize integration, not a measured reduction in the production allocator.
+See the [review](S07-bis-list-tradeoff-review.md) for the baseline and proof limits.
+
+Use these absolute costs and remaining budget gaps to rank bounded experiments.
+Keep semantic validity and complete replacement costs mandatory. In particular,
+page-backed lists enter CP3 with a named resolved-reader contract; matching
+legacy's isolated traversal percentage is not a prerequisite. A component may
+remain a leading candidate while its integrated CPU/memory effect is unmeasured.
+The 5% win and 2% non-regression rules below apply to actual complete-pipeline
+screens, never to the microbenchmark's percentages or hypothetical conversions.
+The existing infrastructure exception remains available for a necessary CP3
+component after its full-pipeline non-regression checks; no final gate is relaxed.
+
+### Complete-pipeline capture and promotion
 
 Implement a small diagnostic runner under the checkpoint-0 tools directory,
 reusing existing build/input/protocol validation. It may compare isolated

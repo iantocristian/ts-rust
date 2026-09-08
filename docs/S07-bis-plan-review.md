@@ -294,11 +294,12 @@ the documented metadata recovery retains the unchanged successful child's bytes.
 The compiled owner model keeps canonical-name interning, packed-flow escapes,
 owner dispatch and the unexplained native residual as explicit obligations.
 
-The first fixed list replay exposes an adverse result: 256-word pages reduce
+The first fixed list replay exposes a tradeoff: 256-word pages reduce
 construction requests by 64.7% and construction time by 33.9%, while eight-sweep
-traversal is 35.6% slower. Host load also limits timing confidence. No production
-promotion follows. Continue with contiguous typed chunks and checked slice reads,
-preserving this capture and charging the new descriptors and chunk tails. Broad
+traversal is 35.6% slower (+33.493 ms total). Host load also limits timing
+confidence. The initial response tested contiguous typed chunks and checked
+slice reads, preserving the capture and charging descriptors and tails. Section
+10 corrects the excessive weight given to the isolated traversal ratio. Broad
 generated-storage migration still requires the representative node-access pilot
 and a complete owner/traffic budget; no S07 gate changes or new passing metrics
 are introduced by these diagnostics.
@@ -350,3 +351,34 @@ cache or a production storage selection. The next representative row comparison
 must preserve sequentially consistent facts, actual binary-expression fields,
 directory costs and short payload borrows across recursive binding. The general
 facade, whole-owner budget and final S07 acceptance remain unfinished.
+
+## 10. Fable's list-policy and absolute-cost review
+
+The [detailed disposition](S07-bis-list-tradeoff-review.md) accepts the central
+criticism: an isolated traversal percentage was insufficient reason to hold back
+page integration. The first capture saves 16.874 ms construction, 200.942 MB of
+requests and 46.784 MB retained, at an extra 4.187 ms per synthetic sweep on
+average. Restore page-256 as the leading list candidate and page-64 as a bounded
+memory challenger; the tested contiguous chunks remain rejected as replacements.
+
+The caller audit qualifies the proposed pipeline conversion. Actual binding
+re-resolves slices per element and scans statement lists twice; other parser,
+factory and validation passes also read lists. The replay includes obsolete
+physical backings and omits production record routing. Two/three equivalent
+sweeps are useful sensitivity rows, not established production frequency, and
+the isolated delta is not a rigorous upper bound. Requested-live bytes remain
+distinct from RSS and are not subtracted from production allocation as a measured
+saving.
+
+Checked `NodeSliceRead` supplies a scoped proof, but recursive mutable binding
+cannot currently keep that whole-owner borrow. A disjoint list reader carries
+the proof across narrow node writes. The page prototype maintains valid backing
+ranges during private construction; publication itself only checks completion.
+Hoist logical range/identity resolution into that reader without adding another
+publication scan or dropping safe physical bounds and raw/imported checks.
+
+The plan and Rust guide now require absolute milliseconds/MB and explicit
+denominators before ratios. Whole-pipeline screening thresholds and final S07
+gates are unchanged. Pages enter the next integrated node/list slice without an
+extra requirement to match the raw boxed-slice microbenchmark. No native
+measurement or historical capture was rerun or rewritten for this amendment.

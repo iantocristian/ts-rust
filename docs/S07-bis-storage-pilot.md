@@ -149,12 +149,15 @@ the 18-CPU host's initial load averages were 27.79 / 30.06 / 29.03. Process-name
 checks and low dispersion do not rule out unrelated load or systematic timing
 bias. Treat this as an exploratory comparison, not a production CPU result.
 
-Decision: do not promote the page-spanning list representation. Preserve this
-capture and test a separate contiguous chunk variant: finish each backing into
-one typed chunk, expose a checked contiguous `&[u32]`, and charge larger backing
-descriptors and abandoned chunk tails. The hypothesis is that direct backing
-reads can retain construction savings without the page-span traversal penalty;
-the first capture does not establish that hypothesis.
+The initial decision held back page integration and tested contiguous chunks.
+That priority was too strongly driven by the isolated 35.6% traversal ratio.
+The [absolute-cost review](S07-bis-list-tradeoff-review.md) restores **page-256 as
+the leading integration candidate**, with page-64 as a bounded memory challenger.
+The first capture saves 200.942 MB of requests and 46.784 MB retained; its
+traversal penalty is 33.493 ms across eight synthetic sweeps, or 4.187 ms per
+sweep on average. Production frequency and cost equivalence are unmeasured.
+Keep the raw capture and subsequent chunk hypothesis unchanged; final promotion
+still requires integrated correctness and CPU/memory measurements.
 
 ## Contiguous-chunk result and next decision
 
@@ -217,8 +220,10 @@ measurements support testing a disjoint list reader across recursive node writes
 they do not select a production list representation. Two further contract tests
 and a compile-fail lifetime test pass, bringing the isolated crate to 30 tests.
 
-Next compare representative hot flag reads, child enumeration and narrow binding
-writes for typed versus mixed payload rows. Preserve production's sequentially
+Next carry page-256 lists into the representative hot flag, child-enumeration and
+narrow-binding-write comparison for typed versus mixed payload rows. The raw
+boxed-slice traversal percentage is not a gate before that integration. Resolve
+list access once where the disjoint reader permits it. Preserve production's sequentially
 consistent facts ordering and actual payload fields in that CPU comparison.
 Broad generated-accessor migration remains gated on viable whole-owner accounting
 and that node-access comparison. Separately, CP1's checked exclusive-core lookup

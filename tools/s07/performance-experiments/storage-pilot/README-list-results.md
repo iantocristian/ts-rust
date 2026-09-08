@@ -1,5 +1,10 @@
 # Recorded list-distribution pilot
 
+Decision update: the [absolute-cost review](../../../../docs/S07-bis-list-tradeoff-review.md)
+restores page-256 as the leading integration candidate, with page-64 as a bounded
+memory challenger. The isolated traversal ratio below is not a production veto.
+All recorded observations and their original scope remain unchanged.
+
 This diagnostic replays every physical node-backing length in the sealed owner
 census, in its per-file auxiliary allocation/completion order. Each backing gets
 the same synthetic sequence `index % 17`, including nil words. It compares the

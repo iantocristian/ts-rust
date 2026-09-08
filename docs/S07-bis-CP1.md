@@ -185,8 +185,11 @@ not CPU coverage). Use a real small syntax fixture plus declared diagnostic
 operations; the census cannot reconstruct node-level edge order, flags or an
 actual binder execution trace.
 
-Keep the 24-byte header, text/list policy and page size matched across compact
-candidates initially. Expose an immutable list reader disjoint from a restricted
+Keep the 24-byte header and text/list policy matched across compact candidates
+initially. Following the [absolute-cost review](S07-bis-list-tradeoff-review.md),
+use 256-word list edge pages as the integration default and retain page-64 as a
+bounded memory challenger. An isolated traversal ratio is not a prerequisite
+for including pages. Expose an immutable list reader disjoint from a restricted
 node/binding writer. Preserve short payload borrows and scalar/immediate-child
 snapshots across recursive writes. Include functions-first passes, flag/text
 reads, narrow symbol/flow/container writes, child enumeration and cold/warm

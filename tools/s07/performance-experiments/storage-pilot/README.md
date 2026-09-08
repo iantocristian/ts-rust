@@ -83,6 +83,13 @@ It does not: the tested chunk policies cost more than pages without a traversal
 improvement. Both captures remain preserved, and neither representation is
 promoted into the compiler.
 
+The [absolute-cost decision amendment](../../../../docs/S07-bis-list-tradeoff-review.md)
+prioritizes page-256 for integration, retaining page-64 as a bounded memory
+challenger. Its 200.942 MB request saving and 4.187 ms average penalty per
+synthetic sweep warrant a complete caller/owner comparison. Matching the raw
+boxed-slice microbenchmark is not a prerequisite for carrying pages into that
+slice. These figures remain isolated observations, not production savings.
+
 `chunks.rs` keeps completed backings contiguous with next-fit allocation of
 `max(policy_words, backing_length)`. It exposes checked `&[u32]` borrows, preserving
 nested staging and shared mutation before publication. Backing descriptors cost

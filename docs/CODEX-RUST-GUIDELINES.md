@@ -352,6 +352,16 @@ storage in any proposed savings, and use separate
 CPU profiles before attributing time to a suspected cost. Safe ownership and
 semantic parity do not establish acceptable memory use or speed.
 
+Judge performance tradeoffs at the scale of the actual requirement. Report
+absolute milliseconds and MB before relative percentages, with explicit sweep
+counts, production invocation frequency and allocation/live/RSS endpoints. A
+large slowdown inside a tiny microbenchmark is not a whole-pipeline veto, and a
+microbenchmark saving is not automatically available in production. If the real
+frequency or caller contract is unmeasured, show conditional arithmetic and name
+the missing observation. Apply pipeline thresholds only to pipeline measurements;
+keep a materially smaller storage candidate in contention while testing its
+integration. Do not infer a rigorous upper bound from a cheaper synthetic control.
+
 Do not use report grades or counts as acceptance criteria. Shorter files,
 fewer casts, fewer `expect`s, more derives, more comments and more probes can
 each make a port worse if pursued without examining the contract. Identify
