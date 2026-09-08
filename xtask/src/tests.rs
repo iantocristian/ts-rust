@@ -209,6 +209,57 @@ fn complete_evidence_is_required_for_verification_and_experiments() {
 }
 
 #[test]
+fn scanner_evidence_does_not_complete_e4_or_ast_diagnostic_integration() {
+    let f = Fixture::new();
+    f.write(
+        "status/experiments.toml",
+        include_str!("../../status/experiments.toml"),
+    );
+    let ledger: Ledger = toml::from_str(include_str!("../../PORTS.toml")).unwrap();
+    let ast_checks = &ledger
+        .file
+        .iter()
+        .find(|file| file.go == "tsc/internal/ast/diagnostic.go")
+        .unwrap()
+        .verify;
+    f.replace(
+        "PORTS.toml",
+        "verify = [\"run.proof.ok == true\"]",
+        &format!("verify = {}", serde_json::to_string(ast_checks).unwrap()),
+    );
+    f.replace("status/runs.toml", "[proof]", "[scanner]");
+    let mut runs = fs::read_to_string(f.0.join("status/runs.toml")).unwrap();
+    runs.push_str("\n[e1]\ncommand = [\"python3\", \"e1.py\"]\ninputs = [\"e1.py\"]\ntarget = \"host\"\nconfig = \"test\"\n");
+    f.write("status/runs.toml", &runs);
+    f.write("e1.py", "print('{\"metrics\":{\"parity\":1}}')\n");
+    f.write(
+        "producer.py",
+        &format!(
+            "print({:?})\n",
+            serde_json::json!({"metrics": {
+                "parity": 1, "regexp_parity": 1, "rescan_parity": 1,
+                "diagnostics": true, "token_value_bytes": true, "table_current": true
+            }})
+            .to_string()
+        ),
+    );
+    f.manifest();
+    assert!(evidence::run(&f.0, "scanner", PIN).unwrap());
+    assert!(evidence::run(&f.0, "e1", PIN).unwrap());
+    let report = f.report();
+    assert!(report.errors.is_empty(), "{:?}", report.errors);
+    assert_eq!(num(&report.metrics, "exp.E4.diagnostics.pass"), 1.0);
+    assert_eq!(num(&report.metrics, "exp.E4.token_value_bytes.pass"), 1.0);
+    assert_eq!(num(&report.metrics, "exp.E4.pass"), 0.0);
+    assert_eq!(num(&report.metrics, "ledger.files_verified"), 0.0);
+    assert!(!report.metrics.contains_key("run.e4.diagnostics"));
+    assert_eq!(
+        eval_check(&report.metrics, "run.e1.parity >= 0.999"),
+        Some(true)
+    );
+}
+
+#[test]
 fn s04_instrumentation_does_not_complete_s09_all_scenarios_item() {
     let f = Fixture::new();
     f.write("sprints/S09.toml", include_str!("../../sprints/S09.toml"));

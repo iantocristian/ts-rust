@@ -1,0 +1,17 @@
+{
+  "go": "go1.27.1",
+  "go_unicode_version": "17.0.0",
+  "identifier_unicode_version": "15.1.0",
+  "inputs": {
+    "tsc/internal/ast/kind_generated.go": "e4ad34d87478a6ed4693fb4b984e807ffd1ea75c3990756fc2e07ae52cab34eb",
+    "tsc/internal/scanner/scanner.go": "86a39d89a75bb17000a4ecee14fc77172496ebb27a45873f533114b181ed05cb",
+    "tsc/internal/scanner/unicodeproperties.go": "fe5999f1ce91a2d376d1edf4d3288f13de261227cfc91b69289f4a7f71aac437",
+    "tsc/internal/stringutil/identifier_parts_generated.go": "5fac39c9509df8bcd337dcfc9d148c8c94b0f4569a8e4df5022b2ecbcb0ff563"
+  },
+  "outputs": {
+    "crates/ts_scanner/src/tables_generated.rs": "bc9efa90dd2c8968ae04b8a2e8011c2b1e1c99c5bfee4ef8de7071715a268309",
+    "data/s05/tables.json": "2accdd4925b8f2177b0f1243fb8ae67594e90b2e399bf4d42452f226f78923c2"
+  },
+  "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "version": 1
+}

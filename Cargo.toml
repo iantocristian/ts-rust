@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["xtask", "crates/ts_jsstring", "crates/ts_arena", "crates/ts_ast", "crates/ts_diagnostics", "crates/ts_encoder"]
+members = ["xtask", "crates/ts_jsstring", "crates/ts_arena", "crates/ts_ast", "crates/ts_diagnostics", "crates/ts_encoder", "crates/ts_core", "crates/ts_jsnum", "crates/ts_scanner"]
 # Compiler crates are added under crates/ as they are created; see PLAN.md, section 8,
 # and sprints/README.md for the Phase 0 order.
 
@@ -21,8 +21,8 @@ rust_2018_idioms = { level = "warn", priority = -1 }
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 float_cmp = "allow"                # thresholds and recorded metrics compare exact values by design
-cast_precision_loss = "allow"      # counts and byte lengths become f64 for reporting only
-cast_possible_truncation = "allow" # positions and lengths are bounded by the source text and the wire format
+cast_precision_loss = "allow"      # Go Number conversions round to IEEE-754; evidence counters also use f64
+cast_possible_truncation = "allow" # Go position/rune narrowing and guarded Number casts are deliberate
 cast_possible_wrap = "allow"       # see cast_possible_truncation
 cast_sign_loss = "allow"           # see cast_possible_truncation
 format_push_string = "allow"       # report builders append formatted lines

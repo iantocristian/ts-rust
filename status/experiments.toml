@@ -252,10 +252,10 @@ unit = "source bytes, BOM removal and UTF-16 decoding match Go"
 
 [[E4.criteria]]
 id = "diagnostics"
-metric = "run.e4.diagnostics"
+metric = "run.scanner.diagnostics"
 op = "=="
 threshold = true
-unit = "scanner and literal diagnostics match Go on successful and malformed input"
+unit = "scanner and scanned-literal diagnostic callbacks match Go on successful and malformed input; AST diagnostic integration remains separate"
 
 [[E4.criteria]]
 id = "token_literal_bytes"
@@ -315,7 +315,7 @@ unit = "leaf case mapping, truncation and escape helpers match Go replacements a
 
 [[E4.criteria]]
 id = "token_value_bytes"
-metric = "run.e4.token_value_bytes"
+metric = "run.scanner.token_value_bytes"
 op = "=="
 threshold = true
 unit = "scanner token bytes, literal value bytes and rescans match Go; checker-created literal types remain a separate integration requirement"

@@ -325,6 +325,7 @@ phase = 0
 kind = "source"
 status = "planned"
 rust = []
+# Future AST diagnostic integration: scanner callbacks do not provide this metric.
 verify = ["run.e1.parity >= 0.999", "run.e4.diagnostics == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e7a3a521d0991a4880220d8114be20c411ddb9645ae11d4e1673bf1ab9889f38"
@@ -505,9 +506,9 @@ package = "internal/ast"
 crate = "ts_ast"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.e4.token_literal_bytes == true"]
+status = "ported"
+rust = ["crates/ts_ast/src/tokens.rs"]
+verify = ["run.scanner.parity == 1", "run.scanner.token_value_bytes == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "98f7010c7113b1ac781205175de9fe0c9c9c5854b10744d03e32127eb72f2b29"
 loc = 33
@@ -1376,8 +1377,8 @@ package = "internal/core"
 crate = "ts_core"
 phase = 1
 kind = "source"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_core/src/lib.rs"]
 verify = []
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "5a60c4cd3fcd7fe2e1f37be6553b7097290219a39f1dbe1a30a113b544670ec4"
@@ -1403,8 +1404,8 @@ crate = "ts_core"
 phase = 1
 kind = "source"
 status = "in-progress"
-rust = ["crates/ts_jsstring/src/line_map.rs"]
-verify = ["run.e4.utf8_positions == true", "run.e4.utf16_positions == true"]
+rust = ["crates/ts_jsstring/src/line_map.rs", "crates/ts_scanner/src/spelling.rs"]
+verify = ["run.e4.utf8_positions == true", "run.e4.utf16_positions == true", "run.scanner.regexp_parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "e94ac393477052b119bdd175c3cd5d20d7ce01cefd7b06f0334c80b2e915f814"
 loc = 876
@@ -1415,9 +1416,9 @@ package = "internal/core"
 crate = "ts_core"
 phase = 1
 kind = "source"
-status = "planned"
-rust = []
-verify = []
+status = "ported"
+rust = ["crates/ts_core/src/lib.rs"]
+verify = ["run.scanner.parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "8f739e1d0572d0538d052d428bfdf4c1aa50b72f3eea883da7a3ea7f2e99f639"
 loc = 11
@@ -1571,9 +1572,9 @@ package = "internal/core"
 crate = "ts_core"
 phase = 1
 kind = "source"
-status = "planned"
-rust = []
-verify = []
+status = "in-progress"
+rust = ["crates/ts_core/src/lib.rs"]
+verify = ["run.scanner.parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "dad1b4d0bb8fbd4a1c3c686a6a4fff940cfac17551c7c5ca564c33273e2277e4"
 loc = 82
@@ -2806,9 +2807,9 @@ package = "internal/jsnum"
 crate = "ts_jsnum"
 phase = 1
 kind = "source"
-status = "planned"
-rust = []
-verify = []
+status = "in-progress"
+rust = ["crates/ts_jsnum/src/bigint.rs"]
+verify = ["run.scanner.parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "bdd6628982a1471e6a887c54948c58d2056120f1320a1b80ccb25a75b7ea8a99"
 loc = 66
@@ -2819,9 +2820,9 @@ package = "internal/jsnum"
 crate = "ts_jsnum"
 phase = 1
 kind = "source"
-status = "planned"
-rust = []
-verify = []
+status = "ported"
+rust = ["crates/ts_jsnum/src/lib.rs", "crates/ts_jsnum/src/string.rs"]
+verify = ["run.scanner.parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "79cba5294aa96796c280169b6d3d5ed1b62da2b2aad312c8d9d06dc0a563d62b"
 loc = 341
@@ -5081,9 +5082,9 @@ package = "internal/scanner"
 crate = "ts_scanner"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.scanner.regexp_parity == 1", "run.e4.diagnostics == true"]
+status = "ported"
+rust = ["crates/ts_scanner/src/regexp/mod.rs", "crates/ts_scanner/src/regexp/grammar.rs", "crates/ts_scanner/src/regexp/classes.rs", "crates/ts_scanner/src/regexp/escapes.rs", "crates/ts_scanner/src/regexp/properties.rs"]
+verify = ["run.scanner.regexp_parity == 1", "run.scanner.diagnostics == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "ddadb4e90539fd9acb8174cf58eb63a4ec168871ca55e1e0bffcfcd01459177b"
 loc = 1105
@@ -5095,8 +5096,8 @@ crate = "ts_scanner"
 phase = 0
 kind = "source"
 status = "in-progress"
-rust = ["crates/ts_jsstring/src/scanner_positions.rs"]
-verify = ["run.scanner.parity == 1", "run.e4.diagnostics == true", "run.e4.token_literal_bytes == true", "run.e4.utf16_positions == true", "run.e4.utf8_positions == true"]
+rust = ["crates/ts_scanner/src/state.rs", "crates/ts_scanner/src/scan.rs", "crates/ts_scanner/src/identifier.rs", "crates/ts_scanner/src/number.rs", "crates/ts_scanner/src/literal.rs", "crates/ts_scanner/src/escape.rs", "crates/ts_scanner/src/rescan.rs", "crates/ts_scanner/src/trivia.rs", "crates/ts_jsstring/src/scanner_positions.rs"]
+verify = ["run.scanner.parity == 1", "run.scanner.diagnostics == true", "run.scanner.token_value_bytes == true", "run.e4.utf16_positions == true", "run.e4.utf8_positions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "86a39d89a75bb17000a4ecee14fc77172496ebb27a45873f533114b181ed05cb"
 loc = 2917
@@ -5107,9 +5108,9 @@ package = "internal/scanner"
 crate = "ts_scanner"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
-verify = ["run.scanner.parity == 1"]
+status = "ported"
+rust = ["crates/ts_scanner/src/tables_generated.rs"]
+verify = ["run.scanner.table_current == true", "run.scanner.regexp_parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "fe5999f1ce91a2d376d1edf4d3288f13de261227cfc91b69289f4a7f71aac437"
 loc = 162
@@ -5120,8 +5121,8 @@ package = "internal/scanner"
 crate = "ts_scanner"
 phase = 0
 kind = "source"
-status = "planned"
-rust = []
+status = "in-progress"
+rust = ["crates/ts_scanner/src/utilities.rs", "crates/ts_jsstring/src/scanner_positions.rs"]
 verify = ["run.scanner.parity == 1", "run.e4.utf8_positions == true"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "61ff9d7fd717a2112b15850aabfeeab249186f12a35e4fbf20f615f7865768f0"
@@ -5289,9 +5290,9 @@ package = "internal/stringutil"
 crate = "ts_stringutil"
 phase = 1
 kind = "generated"
-status = "planned"
-rust = []
-verify = []
+status = "ported"
+rust = ["crates/ts_scanner/src/tables_generated.rs"]
+verify = ["run.scanner.table_current == true", "run.scanner.parity == 1"]
 pin = "1f70213d4922b434345f639b441681e470c7cfc1"
 source_hash = "5fac39c9509df8bcd337dcfc9d148c8c94b0f4569a8e4df5022b2ecbcb0ff563"
 loc = 1391
