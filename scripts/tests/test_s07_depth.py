@@ -26,6 +26,45 @@ class DepthTests(unittest.TestCase):
         for index,key,value in [(0,'binary_nodes',0),(0,'max_binary_frames',20000),(1,'actual_segment_growths',0),(1,'actual_segment_growths',True),(2,'terminal_failure',False),(2,'guard_entries',0)]:
             rows=copy.deepcopy(self.rows);rows[index][key]=value
             with self.subTest(key=key,value=value),self.assertRaises(ValueError):native_rows(self.wire(rows),self.inventory)
+    def test_injected_unwind_accepts_first_growth_before_completed_depth_threshold(self):
+        # A larger native frame reached its first segment growth after 468
+        # entries. An even earlier growth is valid if the same fault contract
+        # was observed; no completed-depth claim is made for this scenario.
+        for entries in (1, 468, 500):
+            rows = copy.deepcopy(self.rows)
+            rows[2]['guard_entries'] = entries
+            with self.subTest(entries=entries):
+                self.assertEqual(native_rows(self.wire(rows), self.inventory), rows)
+
+    def test_completed_scenarios_still_require_more_than_500_guard_entries(self):
+        for index in (0, 1):
+            for entries in (0, 1, 468, 500):
+                rows = copy.deepcopy(self.rows)
+                rows[index]['guard_entries'] = entries
+                with self.subTest(index=index, entries=entries), self.assertRaisesRegex(ValueError, 'guard'):
+                    native_rows(self.wire(rows), self.inventory)
+        rows = copy.deepcopy(self.rows)
+        rows[1]['guard_entries'] = 501
+        self.assertEqual(native_rows(self.wire(rows), self.inventory), rows)
+
+    def test_early_unwind_requires_positive_entries_real_growth_and_terminal_failure(self):
+        for key, value in (('guard_entries', 0), ('guard_entries', True),
+                           ('actual_segment_growths', 0), ('actual_segment_growths', True),
+                           ('terminal_failure', False), ('terminal_failure', 1)):
+            rows = copy.deepcopy(self.rows)
+            rows[2]['guard_entries'] = 1
+            rows[2][key] = value
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                native_rows(self.wire(rows), self.inventory)
+        # Terminal failure cannot silently lose the actual-growth requirement
+        # if its otherwise redundant manifest flag is omitted.
+        inventory = copy.deepcopy(self.inventory)
+        del inventory['constructed'][0]['require_growth']
+        rows = copy.deepcopy(self.rows)
+        rows[2]['guard_entries'] = 1
+        rows[2]['actual_segment_growths'] = 0
+        with self.assertRaisesRegex(ValueError, 'segment growth'):
+            native_rows(self.wire(rows), inventory)
     def test_unknown_counter_is_not_silently_consumed(self):
         rows=copy.deepcopy(self.rows);rows[0]['fake_growth']=1
         with self.assertRaises(ValueError):native_rows(self.wire(rows),self.inventory)

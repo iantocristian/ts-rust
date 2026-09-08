@@ -74,3 +74,25 @@ An accepted candidate becomes the next immutable control. Neither decision
 completes the memory gates or proves where the remaining CPU gap resides. The
 page-backed integrated slice and [recorded access trace](S07-bis-access-trace.md)
 remain separate work, not prerequisites for this bounded copy experiment.
+
+## Depth-validator correction before timing
+
+The first broader binder capture recorded every primary/supplemental graph row
+as passing but reported `depth: false`. Its three native depth tests all passed.
+The injected-unwind observation stopped after the first actual stack growth at
+468 guard entries, with the expected panic and terminal failure. The producer
+incorrectly applied a minimum of 501 entries to this deliberately early-aborted
+scenario as well as to completed deep traversals.
+
+Keep the 501-entry minimum for completed scenarios. An injected unwind instead
+requires positive guard entries, actual segment growth and terminal failure;
+native tests also check the exact injected panic and rejection of a retry. Nine
+Python depth tests cover the distinct thresholds and reject missing/zero/boolean
+growth or failure observations. This corrects the observation contract, not the
+candidate's production stack policy. The additional stack buffer can still
+change growth frequency and remains a cost to screen.
+
+Preserve the first evidence (`923e6da7…`), native log, request observations and
+old producer separately. Replay of its 12 native observations passes the corrected
+validator, but does not rewrite its recorded failed depth metric or complete the
+skipped depth graph comparisons. Rerun the complete producer before timing.

@@ -92,3 +92,124 @@ Publish absolute milliseconds and MB first, operation coverage/unknowns,
 full-pipeline control distances and all raw samples. A recorded-trace result
 selects the integrated experiment; only actual whole-pipeline parity, ownership
 and CPU/memory measurements can promote production storage or pass S07 gates.
+
+## Feasibility appendix: hook points and implementation sequence
+
+This sequence preserves the trace contract and its explicit unchanged fallbacks.
+Completeness applies to each operation family a comparison claims to cover;
+full binder field coverage is not a prerequisite to every useful bounded pilot.
+The first ID-qualified surface can validate provenance, event volume and replay
+plumbing, but is not sufficient by itself to rank payload layouts. Subsequent
+named read/write families can support the bounded nine-shape comparison with
+the remainder unchanged and its full working set charged. Every capture starts
+from the **latest accepted immutable candidate**; an unpromoted working-tree
+optimization is not its source.
+
+Several useful hooks already have an explicit NodeId. Other APIs return plain
+borrows and public fields, so a lookup hook cannot observe everything the caller
+does afterward:
+
+| Surface | Concrete hook points | What a hook can truthfully record |
+| --- | --- | --- |
+| Binder entry and phase order | `ts_binder/src/lib.rs::initialize_binding`; the parse → bind → retained-file loop in `ts_bench/src/main.rs` | File/phase boundaries and binder entry/exit. Keep initial-state inspection in a separate observer domain. |
+| Node resolution | `ts_binder/src/state.rs::n`, `ts_ast/src/bind_result.rs::BindBuilder::node`, `ts_ast/src/storage.rs::AstView::node` | Requested owner-qualified ID, lookup mode and success/error. Distinguish a caller request from nested routing events so they are not counted twice. The exclusive-core branch bypasses AstView. Shape can enrich an event from the physical-state registry; that does not make the lookup a captured shape-field read. |
+| Named kind/flag reads | `dispatch.rs::bind_node_head`, `bind_worker`, `bind_node_error`; `state.rs::set_flags` | These sites already hold NodeId and can log the actual getter result with one evaluation of the original expression. This is bounded staging work; it does not cover kind/flag reads elsewhere automatically. |
+| Lists and immediate children | `containers.rs::syntax_slice`, `syntax_node`, `syntax_nodes`, `ImmediateChildren::of`, `ChildVisitor` implementation; `storage.rs::node_slice_read` | Resolution, explicit indexed reads and emitted child descriptors, with list/backing/subrange identity and order. A slice resolution is not a read of all its elements; a nonnil visitor callback does not capture the absent-field checks preceding it. |
+| Narrow node/binding writes | `BindBuilder::set_node_flags`, `set_node_flow`; explicit assignments through `Binder::binding_mut` | Field, node ID, requested value and successful write. Preserve the existing validation and flag-write proof. Record failed attempts separately. |
+| Copies | `expressions.rs::payload!`; explicit payload clones in `diagnostics.rs`; `ts_ast/src/lib.rs::Node::clone` and `copy_for_binding` | A copy operation and its source/temporary identity. Subsequent reads of a copied payload are temporary reads, not repeated reads of the arena record. |
+| Record births | `ts_arena/src/file.rs::StorageBuilder::push/push_aux`; `ts_arena/src/lazy.rs::StorageTransaction::push/push_aux/publish`; symbol/table/flow allocation paths | Assigned identities, physical creation order and publication/abort state. Lazy reservation is distinct from successful publication, and failed slots remain burned. |
+
+The narrow binding-field assignment inventory is small enough to instrument
+explicitly in the staged copy: `declarations.rs` writes symbol/local_symbol;
+`state.rs` creates locals; `containers.rs` writes end_flow_node,
+return_flow_node and next_container; `statements.rs` writes
+fallthrough_flow_node; `modules.rs` restores the source symbol. Flow writes also
+pass through `set_node_flow`. A hook at `binding_mut` alone observes obtaining
+`&mut NodeBinding`, not which field is written later. A guard that compares the
+record on drop observes only net changes and can lose repeated or reverted
+writes; it must not stand in for the actual ordered write events.
+
+The proposed 16-ID list-chunk helper is **conditional on that candidate being
+promoted**. If it becomes the accepted source, capture each actual
+`copy_from_slice` range and its temporary IDs, then distinguish later temporary
+consumption from backing access. Do not replay its copied IDs as the previous
+per-element `node_slice` resolutions. Conversely, a trace of the earlier control
+must not invent chunk copies that it never executed. Keep copy traffic even
+when a later consumer does less work with the copied range.
+
+Implement in these bounded stages:
+
+1. **Freeze the event registry and identity ledger.** Reuse the owner-census
+   staging/build/loaded-input approach, but add a full per-file physical state
+   export before binding and explicit births during binding. Existing census
+   histograms do not contain node edges, scalar values or allocation events and
+   cannot reconstruct that state. Retain obsolete records and shared list/text
+   backing identities. Do not call runtime-ID allocation or subtree-facts
+   computation to label records. Observer reads need suppression/domain tagging
+   so serializing initial state does not become apparent binder activity.
+2. **Capture the ID-qualified surface first.** Add node resolutions, the named
+   kind/flag sites, explicit list indexing/enumeration/copies and narrow writes
+   listed above, preserving original evaluation and mutation order. Check this
+   surface's values and final-state effects against its snapshots and the
+   semantic protocol. This milestone can expose event volume and missing
+   mappings; record the uninstrumented surfaces and leave unavailable counts
+   unavailable. Do not use it as a payload-layout performance result.
+3. **Carry provenance through the compared borrows and copies.**
+   `Node` has no owner ID and `NodeRead` is an alias for `StorageRead<Node>`;
+   `Node::kind/flags/data` receive only `&self`. A feature-gated origin carried
+   by staged nodes or explicit ID-bearing accessor contexts can cover general
+   getter calls, but must distinguish resident records, overlay representations
+   of the same logical node, new factory nodes and temporary clones. Structural
+   Node cloning resets caches, while binding-overlay copying preserves the
+   logical node and selected caches; trace origins must follow those different
+   operations. Named sites already carrying NodeId can log their results
+   directly; do not require a general accessor migration to observe those sites.
+   Never attribute a getter to the most recently resolved node.
+4. **Compare complete, explicitly scoped operation families.** Extend the first
+   surface with actual shape checks, kind/flag reads, child enumeration, narrow
+   binding writes and named representative payload reads for the bounded slice.
+   Examples include property-access expression/name, call expression/arguments
+   and binary left/operator/right reads at their actual consuming sites. Include
+   the observed temporary-copy operations and their later reads where applicable.
+   Capture all events within each declared compared family; do not invent reads
+   for untouched fields. Retain explicit unchanged adapters for the remaining
+   operations and shapes, charge their full working set and preserve their place
+   in the sequence. Report coverage and unavailable counts without renormalizing
+   the supported events to 100%. This can rank a bounded layout/accessor slice
+   for the next integrated experiment; it establishes neither complete field
+   coverage nor full-binder CPU performance.
+5. **Expand getter/read-site coverage where a broader claim requires it.**
+   Generated `NodeData::as_*` methods return payload references, and generated
+   payloads expose public scalar/ID fields. Logging the shape borrow does not
+   reveal later `.expression`, `.arguments` or `.initializer` reads.
+   `payload!` clones those fields into a temporary without retaining its NodeId.
+   Complete per-field coverage therefore needs explicit staged read-site
+   instrumentation or migration to provenance-carrying getters, including
+   temporary reads. This broader work is required before claiming that coverage,
+   not automatically before the scoped comparison in stage 4. Extend only the
+   needed surfaces in `node_accessors.rs`, `runtime_generated.rs`,
+   `visitors_generated.rs`, `subtree_generated.rs` and handwritten subtree/helper
+   paths from an audited operation inventory; do not emit synthetic reads for
+   every field when only one accessor or copy ran. Likewise `NodeSliceRead`
+   dereferences to an ordinary slice: indexing/iteration after that dereference
+   needs consuming-site or iterator instrumentation to expose element reads.
+   Returned slices and public fields prevent a single boundary hook from
+   providing the full trace. Use bounded staged hooks to inform the production
+   accessor decision; do not port thousands of accessors twice merely to obtain
+   the first useful comparison.
+
+Facts cache loads/stores are a separate operation family at
+`Node::cached_subtree_facts/store_subtree_facts` and `subtree_facts.rs::cached`.
+Preserve sequential consistency, hits versus misses and actual computation;
+peeking or computing facts for metadata must not masquerade as a consumer read.
+Symbol/flow/table contents needed by replay also require birth/state coverage
+or an explicit unchanged adapter; recording a FlowId assignment alone does not
+reconstruct the referenced flow graph.
+
+These are observed **source-level operations**, not a hardware memory-access
+trace. Instrumentation can prevent compiler elimination or coalescing of reads,
+including fields in structural copies. Keep that distinction alongside the
+existing decoder/cache caveats. Validate provenance and semantic completeness
+for the compared families before expanding capture volume, then use results
+within their reported coverage to choose the integrated experiment under the
+original full-pipeline promotion requirements.
