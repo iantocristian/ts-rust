@@ -110,3 +110,10 @@ The chunk module adds 12 tests for contiguous/oversized backing ranges, abandone
 tails, full-width domains, frame errors, mutation aliases and publication. They
 also pass debug/release, Rust 1.96 and strict-provenance Miri. The combined crate
 passes all 28 debug tests and all-target/all-feature Clippy with warnings denied.
+
+The [access follow-up](README-access-results.md) compares checked chunk IDs,
+owner-descriptor iteration and explicitly charged cached slice borrows. It adds
+two contract tests and a compile-fail owner-lifetime test. All 30 tests pass in
+debug/release and Rust 1.96, all 14 chunk tests pass strict-provenance Miri, and
+all-target/all-feature Clippy passes with warnings denied. The separate producer
+and archive adapters preserve the historical trial helpers.

@@ -49,6 +49,112 @@ fn declare(builder: &mut BindBuilder<'_>, child: NodeId) -> Result<ts_arena::Sym
 }
 
 #[test]
+fn exclusive_node_reads_observe_mutations_and_reject_unretained_owners() {
+    let counters = Counters::new();
+    let (parsed, _, child) = make_parsed(&counters, b"/direct-node.ts");
+    let (foreign, _, foreign_child) = make_parsed(&counters, b"/foreign-node.ts");
+    let runtime_id = runtime_node_id(&parsed.view().node(child).unwrap());
+    let completed = parsed
+        .bind_and_publish(|builder| {
+            assert_eq!(builder.node(child)?.flags(), 0);
+            assert!(builder.node(child)?.as_borrowed().is_some());
+            builder.set_node_flags(child, node_flags::UNREACHABLE)?;
+            assert_eq!(builder.node(child)?.flags(), node_flags::UNREACHABLE);
+            let NodeData::Identifier(identifier) = builder.node_mut(child)?.data_mut() else {
+                panic!("fixture identifier payload");
+            };
+            identifier.text = JsString::from_bytes(b"updated".as_slice());
+            assert_eq!(
+                builder
+                    .node(child)?
+                    .data()
+                    .as_identifier()
+                    .unwrap()
+                    .text
+                    .as_bytes(),
+                b"updated"
+            );
+            assert_eq!(runtime_node_id(&*builder.node(child)?), runtime_id);
+            assert!(matches!(
+                builder.node(foreign_child),
+                Err(Error::WrongOwner)
+            ));
+            Ok(())
+        })
+        .unwrap();
+    assert!(completed.bound_in_place());
+    assert_eq!(
+        completed.view().node(child).unwrap().flags(),
+        node_flags::UNREACHABLE
+    );
+    assert_eq!(foreign.view().node(foreign_child).unwrap().flags(), 0);
+}
+
+#[test]
+fn exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots() {
+    let counters = Counters::new();
+    let (parsed, source, child) = make_parsed(&counters, b"/direct-lazy.ts");
+    let mut committed = None;
+    let completed = parsed
+        .bind_and_publish(|builder| {
+            // Selection happened before these lazy records existed. The core
+            // fast path cannot replace routing for every subsequent read.
+            let mut failed = None;
+            let result = builder
+                .parsed_view()
+                .source_jsdoc(source, child, |transaction| {
+                    failed = Some(
+                        transaction.new_identifier(JsString::from_bytes(b"failed".as_slice())),
+                    );
+                    Err(Error::InvalidGraph)
+                });
+            assert!(matches!(result, Err(Error::InvalidGraph)));
+            let failed = failed.unwrap();
+            assert!(matches!(builder.node(failed), Err(Error::InvalidSlot)));
+            let roots = builder
+                .parsed_view()
+                .source_jsdoc(source, child, |transaction| {
+                    let lazy = transaction.new_identifier(JsString::from_bytes(b"lazy".as_slice()));
+                    transaction.node_mut(lazy)?.set_parent(Some(child));
+                    Ok(vec![lazy])
+                })?;
+            let lazy = roots[0];
+            committed = Some(lazy);
+            assert_ne!(failed, lazy);
+            assert_ne!(lazy.arena(), source.arena());
+            assert!(builder.node(lazy)?.as_borrowed().is_none());
+            assert_eq!(
+                builder
+                    .node(lazy)?
+                    .data()
+                    .as_identifier()
+                    .unwrap()
+                    .text
+                    .as_bytes(),
+                b"lazy"
+            );
+            assert!(matches!(builder.node(failed), Err(Error::InvalidSlot)));
+            builder.set_node_flags(child, node_flags::AMBIENT)?;
+            assert_eq!(builder.node(child)?.flags(), node_flags::AMBIENT);
+            Ok(())
+        })
+        .unwrap();
+    assert!(completed.bound_in_place());
+    let retained = completed.retain_node(committed.unwrap()).unwrap();
+    drop(completed);
+    assert_eq!(
+        retained
+            .node()
+            .data()
+            .as_identifier()
+            .unwrap()
+            .text
+            .as_bytes(),
+        b"lazy"
+    );
+}
+
+#[test]
 fn flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows() {
     let counters = Counters::new();
     let (parsed, source, child) = make_parsed(&counters, b"/flow-promotion.ts");
@@ -99,6 +205,8 @@ fn binding_publishes_staged_headers_symbols_and_source_metadata_without_changing
                 &builder.view().source_file(source)?
             ));
             assert_eq!(builder.view().node(child)?.flags(), node_flags::UNREACHABLE);
+            assert_eq!(builder.node(child)?.flags(), node_flags::UNREACHABLE);
+            assert_eq!(builder.parsed_view().node(child)?.flags(), 0);
             Ok(())
         })
         .unwrap();
@@ -368,6 +476,10 @@ fn binding_imported_initializer_cannot_borrow_the_importers_wider_retention() {
     assert!(caller.view().node(foreign_child).is_ok());
     assert!(matches!(
         caller.bind_with(source, |builder| {
+            assert!(matches!(
+                builder.node(foreign_child),
+                Err(Error::WrongOwner)
+            ));
             builder.node_mut(child)?.set_parent(Some(foreign_child));
             Ok(())
         }),
@@ -403,6 +515,8 @@ fn bound_mapped_reads_and_retention_select_the_target_sources_completed_overlay(
         .bind_with(b, |builder| {
             declare(builder, child_b)?;
             builder.node_mut(child_b)?.set_flags(node_flags::AMBIENT);
+            assert_eq!(builder.node(child_b)?.flags(), node_flags::AMBIENT);
+            assert_eq!(builder.node(child_a)?.flags(), node_flags::UNREACHABLE);
             builder.set_common_js_module_indicator(Some(child_b));
             builder.diagnostics_mut().push(Diagnostic::new(
                 Some(b),
@@ -498,6 +612,8 @@ fn bound_same_arena_sources_route_independently_and_reject_ambiguous_retention()
     file.bind_with(b, |builder| {
         declare(builder, child_b)?;
         builder.node_mut(child_b)?.set_flags(node_flags::AMBIENT);
+        assert_eq!(builder.node(child_b)?.flags(), node_flags::AMBIENT);
+        assert_eq!(builder.node(child_a)?.flags(), node_flags::UNREACHABLE);
         builder.set_common_js_module_indicator(Some(child_b));
         Ok(())
     })

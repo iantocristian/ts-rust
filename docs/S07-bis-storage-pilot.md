@@ -207,9 +207,21 @@ arithmetic replay against the historical controls and all five new candidates.
 The owner census and list producer have separate malformed-input/provenance
 tests. These results do not replace production E3 or full graph parity.
 
-The next trial isolates resolved-owner access, followed by representative hot
-flag reads, child enumeration and narrow binding writes for typed versus mixed
-payload rows.
+The separate [CP1 access trial](S07-bis-CP1.md) is now complete. Direct owner
+descriptors reduce eight-sweep traversal from 128.041 to 98.353 ms without extra
+allocation, against 92.747 ms for same-batch legacy lists. Cached slices reach
+85.833 ms, with an exact 50.154 MB extra request/live cost. The
+[recorded result](../tools/s07/performance-experiments/storage-pilot/README-access-results.md)
+preserves every sample and the third trial's independent controls. These
+measurements support testing a disjoint list reader across recursive node writes;
+they do not select a production list representation. Two further contract tests
+and a compile-fail lifetime test pass, bringing the isolated crate to 30 tests.
+
+Next compare representative hot flag reads, child enumeration and narrow binding
+writes for typed versus mixed payload rows. Preserve production's sequentially
+consistent facts ordering and actual payload fields in that CPU comparison.
 Broad generated-accessor migration remains gated on viable whole-owner accounting
-and that node-access comparison. A0-b remains the production control, and the
-four final Go-relative memory/CPU criteria remain open.
+and that node-access comparison. Separately, CP1's checked exclusive-core lookup
+passes its full-pipeline screen and becomes the next production control; its
+7.1% / 5.6% observed wall reductions leave allocation/RSS effectively unchanged.
+The four final Go-relative memory/CPU criteria remain open.

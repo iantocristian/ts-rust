@@ -23,12 +23,16 @@ class OwnershipScope(unittest.TestCase):
 
     def test_inventory_keeps_existing_cases_and_adds_both_consuming_suites(self):
         self.assertEqual(self.manifest["version"], 2)
-        self.assertEqual(len(self.manifest["common"]["binding_publication"]["cases"]), 12)
+        self.assertEqual(len(self.manifest["common"]["binding_publication"]["cases"]), 14)
+        self.assertTrue({
+            "bind_tests::exclusive_node_reads_observe_mutations_and_reject_unretained_owners",
+            "bind_tests::exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots",
+        }.issubset(self.manifest["common"]["binding_publication"]["cases"]))
         self.assertEqual(len(self.manifest["common"]["exclusive_binding"]["cases"]), 10)
         self.assertEqual(len(self.manifest["common"]["core_validation_proof"]["cases"]), 3)
         report = {"metrics": {}}
         publish_metrics(report, self.modes, self.manifest)
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 27)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 29)
 
     def test_missing_or_retargeted_common_inventory_is_rejected(self):
         for name in COMMON:
@@ -109,7 +113,7 @@ class OwnershipScope(unittest.TestCase):
         self.assertFalse(report["metrics"]["shared_bound_file"])
         self.assertFalse(report["metrics"]["retained_snapshot_edit"])
         self.assertFalse(report["metrics"]["shared_bound_file_miri"])
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 17)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 19)
 
     def test_each_common_suite_is_required_in_each_mode(self):
         for mode in MODES:
@@ -124,6 +128,31 @@ class OwnershipScope(unittest.TestCase):
                     del modes[mode][suite]
                     with self.assertRaises(ValueError):
                         publish_metrics({"metrics": {}}, modes, self.manifest)
+
+    def test_missing_or_failed_core_lookup_case_cannot_publish_ownership_success(self):
+        suites = {**self.manifest["common"], **self.manifest["groups"]}
+        cases = self.manifest["common"]["binding_publication"]["cases"]
+        new_cases = [case for case in cases if case.startswith("bind_tests::exclusive_node_reads_")]
+        for affected in new_cases:
+            for failed in (False, True):
+                def invoke(root, args, env):
+                    suite = next(suite for suite in suites.values() if suite["filter"] in args)
+                    if suite["filter"] != "bind_tests::":
+                        return suite_output(suite["cases"])
+                    if failed:
+                        return suite_output(cases).replace(
+                            f"test {affected} ... ok".encode(), f"test {affected} ... FAILED".encode())
+                    return suite_output([case for case in cases if case != affected])
+
+                with self.subTest(case=affected, failed=failed), redirect_stderr(io.StringIO()):
+                    modes = copy.deepcopy(self.modes)
+                    modes["debug"] = measure(Path("."), invoke, ["cargo"], [], {}, self.manifest, "debug")
+                    self.assertFalse(modes["debug"]["binding_publication"])
+                    report = {"metrics": {}}
+                    publish_metrics(report, modes, self.manifest)
+                    self.assertFalse(report["metrics"]["shared_bound_file"])
+                    self.assertFalse(report["metrics"]["retained_snapshot_edit"])
+                    self.assertEqual(report["metrics"]["program_ownership_tests"], 15)
 
     def test_old_two_group_success_shape_and_nonboolean_observations_fail(self):
         old = {mode: {group: True for group in GROUPS} for mode in MODES}

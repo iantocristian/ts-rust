@@ -1,7 +1,8 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: implementation in progress; A0-b passes its checkpoint screen and is
-retained. Compact-storage feasibility and final S07 gates remain open.
+Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
+pass their checkpoint screens and are retained. Compact-storage feasibility,
+the general borrowed facade and final S07 gates remain open.
 Date: 2026-09-08. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
@@ -31,9 +32,12 @@ identifier text and compact list construction, records a fresh physical owner
 census, and prices concrete binding/auxiliary records. The first list replay
 reduces construction requests but regresses traversal, so its page-spanning
 representation is not selected. A second capture finds that contiguous chunks
-add cost without recovering checked traversal speed. Next isolate lookup and
-validation costs in already resolved owner borrows, then test representative
-node access. Finish the whole-owner accounting (including name
+add cost without recovering checked traversal speed. The separate
+[CP1 access trial](S07-bis-CP1.md) recovers most of that gap with owner-descriptor
+reads and more with explicitly charged cached slices. Its bounded production
+node-lookup candidate passes a full-pipeline screen and becomes the next control;
+this does not select list storage or implement the general borrowed facade.
+Next test representative node access. Finish the whole-owner accounting (including name
 interning, escapes and residuals) and CP1's access contract before selecting a
 payload storage family or beginning the broad generated-storage migration. The
 [CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.

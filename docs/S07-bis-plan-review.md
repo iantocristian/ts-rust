@@ -311,3 +311,42 @@ The next experiment isolates resolution/validation from reads through an already
 resolved owner borrow. Safe bounds checks and checked foreign/stale entry paths
 remain required. The whole-owner model and the actual binder access contract,
 not this microprobe alone, will determine production feasibility.
+
+## 9. CP1 access implementation and promotion review
+
+The [CP1 record](S07-bis-CP1.md) fixes separate access and full-pipeline
+experiments, with promotion criteria committed before measurement. Independent
+reviews of the isolated Rust access paths, their capture/archive protocols and
+the production lookup candidate found no unresolved substantive issue. Safe
+short borrows, checked physical ranges, foreign/lazy/published fallback and exact
+cached-metadata allocation charges were verified. Both new production cases
+belong to the explicit 29-case S07 E3 inventory and passed in all four modes.
+
+The review corrected the performance attribution: A0-b already avoids overlay
+hashing on exclusive reads. Frozen normal arm64 disassembly shows that the CP1
+shortcut removes remaining view routing while keeping core owner/slot checks.
+It does not remove the whole previously measured lookup union. Full raw replay
+supports keeping the candidate: wall median reductions of 7.1% / 5.6%, both
+upper confidence bounds below one, and all declared noise/non-regression limits
+met. The broad one-worker confidence interval and effectively unchanged memory
+are stated explicitly. All warmups and samples remain present.
+
+Archive review added exact graph-stream inventory checks and independent hashes
+for the binder report/request ledger. Initial offline replay also caught omitted
+subprocess-only helper snapshots; the archive closure now includes every helper
+fingerprinted by capture. These packaging corrections preserve the original
+native observations and reject missing streams, altered request identities or
+missing source snapshots. Superseded preparation attempts remain local diagnostics.
+
+All frozen Go graphs pass using the existing normalization, including 49
+eight-worker raw differences. The broader binder producer, expanded E3 run and
+workspace library tests pass. An initial binder attempt failed on sandbox access
+to the existing Go cache; its original error and successful retry are preserved.
+
+The third list trial separately finds a 23.2% traversal reduction from direct
+owner descriptors, with cached slices faster again at a 50.154 MB metadata cost.
+This supports a real disjoint list-reader/node-writer pilot, not an all-list
+cache or a production storage selection. The next representative row comparison
+must preserve sequentially consistent facts, actual binary-expression fields,
+directory costs and short payload borrows across recursive binding. The general
+facade, whole-owner budget and final S07 acceptance remain unfinished.

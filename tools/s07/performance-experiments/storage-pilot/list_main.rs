@@ -13,6 +13,7 @@ static ALLOCATOR: cap::Cap<mimalloc::MiMalloc> = cap::Cap::new(mimalloc::MiMallo
 static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 type Legacy = Vec<Vec<Box<[Option<NonZeroU64>]>>>;
+type BorrowedViews<'a> = Vec<Vec<&'a [u32]>>;
 enum Roots {
     Legacy(Legacy),
     Page64(Vec<Published<64>>),
@@ -20,6 +21,8 @@ enum Roots {
     Page1024(Vec<Published<1024>>),
     Chunk256(Vec<chunks::Published<256>>),
     Chunk1024(Vec<chunks::Published<1024>>),
+    Chunk256Owned(Vec<chunks::Published<256>>),
+    Chunk256Borrowed(Vec<chunks::Published<256>>),
 }
 
 #[cfg(feature = "allocation")]
@@ -121,10 +124,26 @@ impl Roots {
             "page1024" => Self::Page1024(paged(files)),
             "chunk256" => Self::Chunk256(chunked(files)),
             "chunk1024" => Self::Chunk1024(chunked(files)),
-            _ => {
-                return Err("mode must be legacy, page64, page256, page1024, chunk256 or chunk1024")
-            }
+            "chunk256-owned" => Self::Chunk256Owned(chunked(files)),
+            "chunk256-borrowed" => Self::Chunk256Borrowed(chunked(files)),
+            _ => return Err("unknown list construction/access mode"),
         })
+    }
+    /// Resolve through the checked public-ID route once. All descriptor vectors
+    /// are allocated before construction's timer/counter endpoint and retained
+    /// through every sweep. These borrows prevent disposing the underlying roots.
+    fn prepare_borrowed_views(&self) -> Option<BorrowedViews<'_>> {
+        let Self::Chunk256Borrowed(files) = self else {
+            return None;
+        };
+        let mut owners = Vec::with_capacity(files.len());
+        for file in files {
+            let mut views = Vec::with_capacity(file.stats().backings);
+            file.for_each_backing(|words| views.push(words))
+                .expect("published backing range");
+            owners.push(views);
+        }
+        Some(owners)
     }
     #[inline(never)]
     fn checksum(&self) -> u64 {
@@ -179,10 +198,22 @@ impl Roots {
                     .expect("published backing range");
                 }
             }
+            Self::Chunk256Owned(files) => {
+                for file in files {
+                    for words in file.owned_backings() {
+                        for &word in words.expect("published backing range") {
+                            visit(word);
+                        }
+                    }
+                }
+            }
+            Self::Chunk256Borrowed(_) => {
+                unreachable!("borrowed route uses its charged descriptor cache")
+            }
         }
         checksum
     }
-    fn storage_stats(&self) -> Value {
+    fn storage_stats(&self, borrowed: Option<&BorrowedViews<'_>>) -> Value {
         fn stats<const N: usize>(files: &[Published<N>]) -> Value {
             let mut pages = 0;
             let mut spare_words = 0;
@@ -216,8 +247,35 @@ impl Roots {
             Self::Page1024(files) => stats(files),
             Self::Chunk256(files) => chunk_stats(files),
             Self::Chunk1024(files) => chunk_stats(files),
+            Self::Chunk256Owned(files) | Self::Chunk256Borrowed(files) => {
+                let mut stats = chunk_stats(files);
+                let count = borrowed.map_or(0, |owners| owners.iter().map(Vec::len).sum::<usize>());
+                let bytes = borrowed.map_or(0, |owners| {
+                    owners.capacity() * size_of::<Vec<&[u32]>>()
+                        + owners
+                            .iter()
+                            .map(|views| views.capacity() * size_of::<&[u32]>())
+                            .sum::<usize>()
+                });
+                stats["borrowed_view_count"] = json!(count);
+                stats["borrowed_view_capacity_bytes"] = json!(bytes);
+                stats
+            }
         }
     }
+}
+
+#[inline(never)]
+fn checksum_borrowed(files: &BorrowedViews<'_>) -> u64 {
+    let mut checksum = 0u64;
+    for file in files {
+        for backing in file {
+            for &word in *backing {
+                checksum = checksum.wrapping_mul(31).wrapping_add(u64::from(word));
+            }
+        }
+    }
+    checksum
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -228,7 +286,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if args.len() != 4 {
-        return Err("usage: list-pilot CENSUS.ndjson legacy|page64|page256|page1024|chunk256|chunk1024 SWEEPS".into());
+        return Err("usage: list-pilot CENSUS.ndjson MODE SWEEPS".into());
     }
     let sweeps: usize = args[3].parse()?;
     if !(1..=100).contains(&sweeps) {
@@ -268,6 +326,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (before_requests, before_live) = (ALLOCATOR.total_allocated(), ALLOCATOR.allocated());
     let start = Instant::now();
     let roots = black_box(Roots::build(&args[2], black_box(&files))?);
+    let borrowed = black_box(roots.prepare_borrowed_views());
     let construction_ns = start.elapsed().as_nanos();
     #[cfg(feature = "allocation")]
     let (requests, live) = (
@@ -276,7 +335,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let start = Instant::now();
     for _ in 0..sweeps {
-        if black_box(&roots).checksum() != expected_checksum {
+        let observed = match &borrowed {
+            Some(views) => checksum_borrowed(black_box(views)),
+            None => black_box(&roots).checksum(),
+        };
+        if observed != expected_checksum {
             return Err("backing edge/order mismatch".into());
         }
     }
@@ -289,11 +352,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         return Err("read-only backing traversal allocated".into());
     }
-    let stats = roots.storage_stats();
+    let stats = roots.storage_stats(borrowed.as_ref());
     // Stats JSON owns diagnostic allocations; record its cost before checking
     // whether dropping the actual storage returns to the starting endpoint.
     #[cfg(feature = "allocation")]
     let stats_live = ALLOCATOR.allocated() - live_after_reads;
+    drop(borrowed);
     drop(roots);
     #[cfg(feature = "allocation")]
     if ALLOCATOR.allocated() - stats_live != before_live {

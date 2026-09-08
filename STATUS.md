@@ -249,13 +249,13 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 
 | Run | State | Artifact |
 |---|---|---|
-| binder | stale: source, pin, command or inputs changed | [result](status/evidence/258975e72a027bc20fe7186474dc362cb6d2eedd4da28d351565f9554863a099.json) |
+| binder | current | [result](status/evidence/4a778e65f27886a66c0b6bbd2bd956d41ef6c4ae8e3bbaa671a7235c0082b72d.json) |
 | bindworkload | stale: source, pin, command or inputs changed | [result](status/evidence/f60c479e8525cd84304e8b745d87167f379629aa17381c9bd5c8a1227e2af1ed.json) |
 | clippy | stale: source, pin, command or inputs changed | [result](status/evidence/af885af71851f8188b005d9bb35fd244c08eddb9f371cd1ff3da65346d2068c0.json) |
 | deny | stale: source, pin, command or inputs changed | [result](status/evidence/7ead4f161a68a1f92f39e946e7bfa146487b29e18705dd8f4f57b536939a7e0f.json) |
 | e1 | stale: source, pin, command or inputs changed | [result](status/evidence/9f3547df0cc15f57360e946348886ad96a3653c1757cb5e6ccf33aa357ee0b88.json) |
 | e2 | current | [result](status/evidence/9c1f559ece21dd632eec71dc5554e4cf81548a76b204c33049a1ea56496d8c51.json) |
-| e3 | current | [result](status/evidence/14950fa0ae8904282d890070c360c79380fa38a9da753ef21dfa751231ac95b5.json) |
+| e3 | current | [result](status/evidence/75dde69056152a7d7e876c4e28f4200ca3be9f4f3b90be07f4ce7dc7dd35f77a.json) |
 | e4 | current | [result](status/evidence/64b2fe82534cc47330243bc434def31b3d998a582289e06e14d37cc4eefa159c.json) |
 | e5 | stale: source, pin, command or inputs changed | [result](status/evidence/30c6deb72aeba3cbead4d1a1d92f19aef0ef0feaf35d7add4623476885eb35f6.json) |
 | e6 | stale: source, pin, command or inputs changed | [result](status/evidence/494380cb1f91f529c7c9cd9090d1fb465aa8448881275217e4b321bb984498af.json) |
@@ -428,14 +428,14 @@ Real binding with file-owned symbols, the module resolution and options the subs
 Exit checks:
 
 - [ ] `sprint.S06.done == 1`
-- [ ] `run.binder.parity == 1` (unknown metric)
-- [ ] `run.binder.reached_bind == true` (unknown metric)
-- [ ] `run.binder.supplemental_parity == 1` (unknown metric)
-- [ ] `run.binder.protocol == true` (unknown metric)
-- [ ] `run.binder.helpers == true` (unknown metric)
-- [ ] `run.binder.resolvers == true` (unknown metric)
-- [ ] `run.binder.graph_contracts == true` (unknown metric)
-- [ ] `run.binder.depth == true` (unknown metric)
+- [x] `run.binder.parity == 1`
+- [x] `run.binder.reached_bind == true`
+- [x] `run.binder.supplemental_parity == 1`
+- [x] `run.binder.protocol == true`
+- [x] `run.binder.helpers == true`
+- [x] `run.binder.resolvers == true`
+- [x] `run.binder.graph_contracts == true`
+- [x] `run.binder.depth == true`
 - [ ] `run.bindworkload.parity == 1` (unknown metric)
 - [ ] `run.program.subset_loads == true` (unknown metric)
 - [x] `exp.E2.frozen_subset.pass == 1`
@@ -450,7 +450,7 @@ Exit checks:
 
 Items:
 
-- [ ] S07-1 ts_binder with file-owned symbols and flow nodes (ADR 0007); bind parity over the corpus against the oracle's symbol dump
+- [x] S07-1 ts_binder with file-owned symbols and flow nodes (ADR 0007); bind parity over the corpus against the oracle's symbol dump
 - [ ] S07-2 ts_core, ts_tsoptions, ts_module and ts_vfs slices; the in-memory program host; pinned lib loading through ts_bundled; unsupported operations fail explicitly and are listed in the slice manifest
 - [x] S07-3 Frozen spike subset (PLAN.md, section 13, item 16): the checked-in rule, manifest, options, exclusions and the dependency operations E2, E7 and E8 need
 - [ ] S07-4 Parse-and-bind benchmark on the pinned VS Code workload, Rust against Go, at 1 and 8 threads, with peak RSS and bytes allocated

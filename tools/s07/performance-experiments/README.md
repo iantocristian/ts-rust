@@ -5,13 +5,15 @@ This directory implements the diagnostic screening policy in
 It writes no tracker metrics and does not replace full graph or ownership parity.
 `layout_model.py` and its inputs implement the separate CP0 layout model.
 
-The first [reviewed implementation checkpoint](../../../docs/S07-bis-A0.md)
-retains A0-b as the next experimental control. For a new candidate, pass
-`--control target/s07-bis/a0b-candidate` and
-`--control-sha 124956f668540814b95e6f677bdeae98bb2cad4f7586d3cb87f869e5c5af118f`
+The latest [reviewed implementation checkpoint](../../../docs/S07-bis-CP1.md)
+retains CP1's checked exclusive-core node lookup as the next experimental
+control. For a new candidate, pass
+`--control target/s07-bis/cp1-node-read-candidate` and
+`--control-sha 3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931`
 to `build`, `graphs` and `screen`. Its already sealed candidate bundle can serve
 as the control without rebuilding or changing its manifest. Preserve the original
-control as well: the commands below document the first experiment. This manual
+control and [A0-b](../../../docs/S07-bis-A0.md) as well: the commands below
+document the first experiment. This manual
 checkpoint decision follows full graph, ownership and targeted-cost review; it
 does not change `freeze-control` into an automatic promotion mechanism.
 

@@ -479,10 +479,42 @@ impl<const CHUNK: usize> Published<CHUNK> {
     pub fn stats(&self) -> Stats {
         self.store.stats()
     }
+    /// Visit backing descriptors already borrowed from this owner. No public
+    /// identity is reminted or looked up again. Physical range and chunk bounds
+    /// remain checked; arbitrary slice IDs still enter through `words`.
+    ///
+    /// This exposes local words, not retained AST nodes. The returned borrows
+    /// cannot outlive the owner or coexist with mutable construction.
+    ///
+    /// ```compile_fail
+    /// use ts_s07_storage_pilot::chunks::{Builder, NodeRef};
+    /// fn escape() -> &'static [u32] {
+    ///     let mut builder = Builder::<4>::new(1, 1);
+    ///     let frame = builder.begin().unwrap();
+    ///     builder.push(&frame, Some(NodeRef { owner: 1, slot: 1 })).unwrap();
+    ///     builder.finish(&frame).unwrap();
+    ///     let owner = builder.publish().unwrap();
+    ///     owner.owned_backings().next().unwrap().unwrap()
+    /// }
+    /// ```
+    pub fn owned_backings(&self) -> impl ExactSizeIterator<Item = Result<&[u32], Error>> + '_ {
+        self.store.backings.iter().map(|backing| {
+            if backing.len == 0 {
+                return Ok(&[][..]);
+            }
+            let chunk = self
+                .store
+                .chunks
+                .get(backing.chunk as usize)
+                .ok_or(Error::InvalidSlice)?;
+            let range = checked_local_range(backing.start, backing.len, chunk.used)?;
+            chunk.words.get(range).ok_or(Error::InvalidSlice)
+        })
+    }
     /// Visit every physical backing in completion order, including empty and
     /// otherwise unreferenced ones, with the public getter's checks per backing.
     /// The callback receives one contiguous slice; there is no page-span visitor.
-    pub fn for_each_backing(&self, mut visit: impl FnMut(&[u32])) -> Result<(), Error> {
+    pub fn for_each_backing<'a>(&'a self, mut visit: impl FnMut(&'a [u32])) -> Result<(), Error> {
         for (index, backing) in self.store.backings.iter().enumerate() {
             let slice = self.store.wrap(LocalSlice {
                 backing: checked_backing_id(index)?,
@@ -511,6 +543,57 @@ mod tests {
                 .unwrap();
         }
         builder.finish(&frame).unwrap()
+    }
+
+    #[test]
+    fn owned_borrows_match_checked_reads_after_nested_construction_and_alias_writes() {
+        let mut builder = Builder::<4>::new(1, 9);
+        let parent = builder.begin().unwrap();
+        builder.push(&parent, node(1)).unwrap();
+        let child = add(&mut builder, &[2, 0, 3, 4, 5]);
+        let empty = add(&mut builder, &[]);
+        builder.push(&parent, node(6)).unwrap();
+        let outer = builder.finish(&parent).unwrap();
+        builder.set(child.slice(1..4).unwrap(), 1, node(9)).unwrap();
+        let owner = builder.publish().unwrap();
+        let expected = [&[2, 0, 9, 4, 5][..], &[][..], &[1, 6][..]];
+        let borrowed: Vec<_> = owner.owned_backings().collect::<Result<_, _>>().unwrap();
+        assert_eq!(borrowed, expected);
+        for (slice, words) in [child, empty, outer].into_iter().zip(borrowed) {
+            assert_eq!(owner.words(slice).unwrap(), words);
+        }
+    }
+
+    #[test]
+    fn owned_descriptor_access_still_checks_chunk_and_initialized_range() {
+        let mut builder = Builder::<4>::new(1, 9);
+        add(&mut builder, &[1, 2]);
+        let mut owner = builder.publish().unwrap();
+        let original = owner.store.backings[0];
+        for backing in [
+            Backing {
+                chunk: 1,
+                ..original
+            },
+            Backing {
+                start: u32::MAX,
+                len: 2,
+                ..original
+            },
+            Backing {
+                start: 2,
+                len: 1,
+                ..original
+            },
+        ] {
+            owner.store.backings[0] = backing;
+            assert_eq!(
+                owner.owned_backings().next().unwrap(),
+                Err(Error::InvalidSlice)
+            );
+        }
+        owner.store.backings[0] = original;
+        assert_eq!(owner.owned_backings().next().unwrap(), Ok(&[1, 2][..]));
     }
 
     #[test]
