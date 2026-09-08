@@ -47,6 +47,17 @@ all are included in the program helper inventory.
 
 ## Evidence interpretation
 
+The first CI run exposed a missing build input in all four MSRV jobs:
+`ts_bundled` embeds the pinned upstream copyright notice and 108 library files,
+but the MSRV checkout did not initialize submodules. The shared MSRV job now
+checks out `upstream`, as the other build jobs already did. The local MSRV result
+had used an initialized checkout and therefore did not exercise this failure.
+A fresh local checkout reproduced the missing-file errors before submodule
+initialization. After checking out the exact gitlink, Rust 1.96.0 passed
+`cargo check --workspace --all-targets --all-features --locked`. An independent
+asset audit confirmed that all 109 embedded upstream files are committed inputs;
+no generation step or nested submodule is required.
+
 The frozen source subset is selected independently of Rust results. Its operation
 inventory records static calls, named function references, dynamic/interface
 boundaries and package initialization dependencies separately; it is not a

@@ -56,6 +56,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # ts_bundled embeds libraries from the pinned upstream gitlink.
+          submodules: true
       - name: Read and validate toolchain pins
         id: pins
         run: python3 scripts/s04_runtime.py github-outputs >> "$GITHUB_OUTPUT"

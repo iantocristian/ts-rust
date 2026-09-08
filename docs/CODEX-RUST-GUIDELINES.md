@@ -340,6 +340,12 @@ Independent captures and artifact publication should remain reachable after
 unrelated failures while their prerequisites still hold. A successful run alone
 does not test that failure path or demonstrate a warm cache hit.
 
+When a crate adds compile-time assets, audit every workspace build job's checkout
+inputs. S07's MSRV check passed locally with an initialized `upstream`, while
+all four CI MSRV targets lacked those embedded library files. Reproduce the job
+from a fresh checkout; an installed compiler and a passing warm workspace check
+do not establish that CI retrieves all required files.
+
 ## My review and delivery routine
 
 1. **Plan from contracts.** Read the relevant design notes, source functions and
