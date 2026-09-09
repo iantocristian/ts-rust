@@ -4,8 +4,8 @@ Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. All 192 compact shapes and the
 borrowed facade are implemented; their completed screens reduce memory
 but fail CPU non-regression. The vector policy was rejected. Compact binding
-storage and the combined construction/access repair have completed their screens.
-The latest uses 2.434 GB allocated / 2.506 GB RSS, with CPU ratios 1.098 / 1.076
+storage, construction/access and parent/auxiliary combinations have completed
+their screens. The latest uses 2.331 GB allocated / 2.322 GB RSS, with CPU ratios 1.119 / 1.070
 against same-screen CP1. This remains experimental: CPU confidence bounds fail
 non-regression, and final S07 gates remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
@@ -129,11 +129,24 @@ the request total. Even free page/directory/root overhead would recover only
 132.262 MB of requests, below the roughly 399 MB remaining allocation deficit.
 Keep the four-row payload policy. Select the
 [compact auxiliary implementation](S07-bis-auxiliary-plan.md) alongside the
-checked owner-local parent-attachment work. Its 95–107 MB retained estimate is
-useful but insufficient by itself and remains unmeasured. Preserve unrestricted
+checked owner-local parent-attachment work. Its implemented policy models
+115.677 MB less retained storage and 96.154 MB fewer requests, with 1.813 million
+additional allocation calls; these are projections. Preserve unrestricted
 list mutation by cold promotion of only the touched header, retaining its AuxId
 and direct `&mut NodeList` semantics. No allocation-bearing mutation guard is
 introduced. Complete and screen the combination before any promotion decision.
+
+That combination is now recorded and verified: 5.263 / 1.158 s against same-screen
+CP1 at 4.704 / 1.083 s, CPU upper 95% ratios 1.175 / 1.102, allocation 2.331 GB,
+and peak RSS 2.322 GB. All workload graphs match at both worker counts. It remains
+experimental, with roughly 295 MB of allocation and 105–110 MB of RSS still above
+historical limits, alongside the CPU deficit. Its complete archive preserves
+the failed performance screen as well as passing correctness/instrumentation
+checks. Do not promote it on memory alone or add separate captures as if paired.
+The next bounded combination follows the reviewed
+[parser list construction plan](S07-bis-parser-list-plan.md), removing short
+temporary buffers without changing traversal or the row policy. Its conditional
+request opportunity is useful but insufficient for gate closure by itself.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB

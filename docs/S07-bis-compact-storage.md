@@ -662,3 +662,72 @@ Keep that policy and implement the
 [compact auxiliary plan](S07-bis-auxiliary-plan.md) next. Screen this coherent
 combination after implementation; these intermediate checks are correctness
 evidence, not another performance capture.
+
+### Parent/auxiliary combined screen: memory closer, CPU still slower
+
+Frozen revision `2acbc06`, manifest
+`994668cbfcee24edd93f47844a227dacb16eb1ef71f5a544d654f9684cc90dbb`,
+combines owner-local parent attachment and the narrow binder read hint with
+compact core auxiliary records. Normal executable SHA:
+`940bbf2ab71d7d6473d850acfde6ccc93298c743f5d69cb2df662a92afe995c0`.
+All 13,094 graphs match Go in both worker modes, with all files bound in place
+and zero fallbacks. All eight warmups and 56 measured runs complete; receipt
+replay verifies the raw observations, artifact inventory and graph prerequisite.
+
+| Metric | One worker: candidate / CP1 | Ratio | Eight workers: candidate / CP1 | Ratio |
+| --- | ---: | ---: | ---: | ---: |
+| Wall | 5.262963 / 4.704426 s | 1.1187 | 1.158306 / 1.082522 s | 1.0700 |
+| Allocated | 2.330772 / 4.642571 GB | 0.5020 | 2.330776 / 4.642570 GB | 0.5020 |
+| Peak RSS | 2.318549 / 4.506698 GB | 0.5145 | 2.321760 / 4.509270 GB | 0.5149 |
+
+CPU upper 95% ratios are **1.1750 / 1.1015**, with lower bounds 1.0905 / 1.0386.
+Timing relative MAD is 1.55% / 0.53% for the candidate and 1.30% / 2.48% for
+CP1. Against its same-screen control, the whole combination saves about
+2.312 GB of requests and 2.188 GB RSS while adding 559 ms / 76 ms wall time.
+The runner records `regressing_or_uncertain`; both timing intervals are above
+parity. This remains **experimental, not promoted**, with CP1 retained as control.
+
+The implemented auxiliary policy's static projection is 115.677 MB less retained
+storage and 96.154 MB fewer requests, including its actual four-row directories
+and 1.813 million additional allocation calls. The combined allocation median
+is about 103.24 MB below the preceding construction/access capture, but that is
+a separate capture of several changes and not an isolated auxiliary saving.
+Neither modeled retained bytes nor that difference predicts RSS. In particular,
+the preceding eight-worker CP1 median was 1.397 s versus this batch's 1.083 s;
+subtracting candidate wall medians across those batches would be misleading.
+
+| Remaining distance to historical Go-derived limits | One worker | Eight workers |
+| --- | ---: | ---: |
+| Wall above limit | 2.325 s (1.792× limit) | 0.524 s (1.827× limit) |
+| Allocated above limit | 295.546 MB | 295.009 MB |
+| Peak RSS above limit | 109.601 MB | 104.715 MB |
+
+These are historical planning distances, not fresh paired Go acceptance.
+Memory is closer, but all final CPU and memory gates remain open. Component
+tradeoffs remain admissible within the measured combined experiment; the memory
+result alone does not promote this combination or excuse the CPU regression.
+
+Validation includes 126 AST, 26 parser, 28 binder, 12 compiler and 26 arena
+library tests; 29 AST and five encoder integration tests; 13 AST and eight arena
+doctests; workspace Clippy and declared Rust 1.96 checking; pinned generated
+source/client-byte checks; and formatting. Strict-provenance Miri passes all
+26 arena tests, nine selected auxiliary tests and seven parent tests.
+AddressSanitizer passes all 26 arena and 126 AST library tests with the existing
+macOS leak-detection setting. These scoped runs do not claim fresh complete
+ownership-producer evidence. Independent implementation and arithmetic reviews
+found no actionable issue.
+
+The [review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-auxiliary-parent/README.md)
+preserves 467 files: frozen source/binaries, graph streams, all raw samples,
+receipt, exact generator inputs, successful and failed development checks,
+instrumentation commands/results, and auxiliary accounting. Every archive member
+was read back and hash-verified. Unchanged CP1/helpers and the earlier physical
+census remain pinned through their respective prior archives.
+
+Continue with the reviewed [parser list construction plan](S07-bis-parser-list-plan.md):
+remove short temporary buffers while keeping recursive edge publication and
+custom/lazy dispatch unchanged. Its conditional opportunity is roughly 100 MB
+of requests across represented successful backings, with actual coverage and CPU
+effect unmeasured. This does not close the remaining gates by itself. Build it
+into the coherent candidate and measure once; keep the row policy, avoid another
+traversal experiment, and record the remaining CPU deficit explicitly.
