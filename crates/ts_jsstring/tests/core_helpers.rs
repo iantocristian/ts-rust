@@ -307,3 +307,43 @@ fn every_slice_boundary_reclassifies_utf8_and_surrogate_fragments() {
         }
     }
 }
+
+#[test]
+fn nested_byte_views_keep_their_own_validity_and_checked_relative_ranges() {
+    for bytes in [
+        "Aé中😀Z".as_bytes(),
+        b"\xffA\xc3\xa9\xe4\xb8\xad\xf0\x9f\x98\x80Z\xfe",
+        b"A\xed\xa0\x80\xc3\xa9Z",
+        b"\xf0\x9fA\x80Z",
+    ] {
+        let root = JsString::from_bytes(bytes);
+        for start in 0..=root.len() {
+            for end in start..=root.len() {
+                let parent = root.slice(start..end).unwrap();
+                for inner_start in 0..=parent.len() {
+                    for inner_end in inner_start..=parent.len() {
+                        let range = inner_start..inner_end;
+                        let child = parent.slice(range.clone()).unwrap();
+                        let selected = &parent.as_bytes()[range];
+                        // A fresh constructor always classifies the exact bytes,
+                        // independently of any parent or nested-view proof.
+                        let fresh = JsString::from_bytes(selected);
+                        assert_eq!(child.validity(), fresh.validity());
+                        assert_eq!(child.as_str(), fresh.as_str());
+                        assert_eq!(child.as_bytes(), selected);
+                        assert_eq!(child.as_bytes().as_ptr(), selected.as_ptr());
+                    }
+                }
+                for invalid in [
+                    parent.len() + 1..parent.len() + 1,
+                    0..parent.len() + 1,
+                    std::ops::Range { start: 1, end: 0 },
+                    usize::MAX..usize::MAX,
+                    0..usize::MAX,
+                ] {
+                    assert!(parent.slice(invalid).is_none());
+                }
+            }
+        }
+    }
+}

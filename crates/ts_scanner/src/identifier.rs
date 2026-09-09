@@ -2,7 +2,7 @@ use ts_ast::SyntaxKind;
 use ts_core::LanguageVariant;
 use ts_jsstring::wtf8::{encode_rune, is_high_surrogate};
 
-use crate::tables_generated::{IDENTIFIER_PART, IDENTIFIER_START, KEYWORDS, TOKENS};
+use crate::tables_generated::{keyword_kind, IDENTIFIER_PART, IDENTIFIER_START, KEYWORDS, TOKENS};
 use crate::utilities::{is_ascii_letter, is_digit};
 use crate::{IdentifierVariant, Scanner, TokenValue};
 
@@ -17,12 +17,9 @@ fn in_ranges(ch: i32, ranges: &[(u32, u32, u32)]) -> bool {
 }
 
 pub(crate) fn keyword(bytes: &[u8]) -> SyntaxKind {
-    KEYWORDS
-        .binary_search_by(|&(text, _)| text.as_bytes().cmp(bytes))
-        .ok()
-        .map_or(SyntaxKind::Unknown, |index| {
-            SyntaxKind::from_u16(KEYWORDS[index].1).expect("pinned keyword kind")
-        })
+    keyword_kind(bytes).map_or(SyntaxKind::Unknown, |kind| {
+        SyntaxKind::from_u16(kind).expect("pinned keyword kind")
+    })
 }
 
 /// port: tsc/internal/scanner/scanner.go:GetIdentifierToken
@@ -35,6 +32,7 @@ pub fn get_identifier_token(text: &[u8]) -> SyntaxKind {
     }
     SyntaxKind::Identifier
 }
+
 /// port: tsc/internal/scanner/scanner.go:IsValidIdentifier
 pub fn is_valid_identifier(text: &[u8]) -> bool {
     if text.is_empty() {
@@ -235,3 +233,7 @@ impl<'src> Scanner<'src> {
         None
     }
 }
+
+#[cfg(test)]
+#[path = "identifier_tests.rs"]
+mod tests;

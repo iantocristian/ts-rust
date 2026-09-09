@@ -97,12 +97,22 @@ impl JsString {
 
     /// Bounds are checked in bytes; endpoints need not be character boundaries.
     pub fn slice(&self, range: Range<usize>) -> Option<Self> {
-        let bytes = self.as_bytes().get(range.clone())?;
+        let parent = self.as_bytes();
+        let bytes = parent.get(range.clone())?;
+        // In a validated UTF-8 view, only continuation bytes lie inside a
+        // scalar. Check relative endpoints without rescanning the parent.
+        let boundary = |offset| offset == parent.len() || parent[offset] & 0xc0 != 0x80;
+        let validity =
+            if self.validity() == Validity::Utf8 && boundary(range.start) && boundary(range.end) {
+                Validity::Utf8
+            } else {
+                classify(bytes)
+            };
         let start = self.range().start;
         Some(Self::from_validated_range(
             Arc::clone(&self.storage),
             start + range.start..start + range.end,
-            classify(bytes),
+            validity,
         ))
     }
 

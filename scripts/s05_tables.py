@@ -12,6 +12,31 @@ INPUTS = ("tsc/internal/scanner/scanner.go", "tsc/internal/scanner/unicodeproper
           "tsc/internal/stringutil/identifier_parts_generated.go", "tsc/internal/ast/kind_generated.go")
 
 
+def rust_string_literal(text):
+    # JSON's \uXXXX escapes are not Rust string escapes.
+    escaped = []
+    for character in text:
+        if character in ('"', "\\"):
+            escaped.append("\\" + character)
+        elif ord(character) < 0x20 or ord(character) == 0x7F:
+            escaped.append(f"\\u{{{ord(character):x}}}")
+        else:
+            escaped.append(character)
+    return '"' + "".join(escaped) + '"'
+
+
+def rust_byte_literal(text):
+    escaped = []
+    for byte in text.encode("utf-8"):
+        if byte in (ord('"'), ord("\\")):
+            escaped.append("\\" + chr(byte))
+        elif 0x20 <= byte < 0x7F:
+            escaped.append(chr(byte))
+        else:
+            escaped.append(f"\\x{byte:02x}")
+    return 'b"' + "".join(escaped) + '"'
+
+
 def validate_tables(tables):
     if type(tables) is not dict or set(tables) != {"version", "scanner", "identifier", "simple_fold", "go_unicode_version"} or type(tables["version"]) is not int or tables["version"] != 1:
         raise ValueError("invalid table export envelope")
@@ -81,16 +106,19 @@ def render(tables, pin):
         out.append("];")
     def strings(name, rows):
         out.append(f"pub(crate) const {name}: &[&str] = &[")
-        out.extend(json.dumps(row) + "," for row in rows)
+        out.extend(rust_string_literal(row) + "," for row in rows)
         out.append("];")
     def mapping(name, rows, numeric=False):
         out.append(f"pub(crate) const {name}: &[(&str, {'u16' if numeric else '&str'})] = &[")
-        out.extend(f"({json.dumps(key)}, {value if numeric else json.dumps(value)})," for key, value in sorted(rows.items()))
+        out.extend(f"({rust_string_literal(key)}, {value if numeric else rust_string_literal(value)})," for key, value in sorted(rows.items()))
         out.append("];")
     integers("IDENTIFIER_START", tables["identifier"]["start"], 3)
     integers("IDENTIFIER_PART", tables["identifier"]["part"], 3)
     scanner = tables["scanner"]
     mapping("KEYWORDS", scanner["keywords"], True)
+    out.extend(["pub(crate) fn keyword_kind(bytes: &[u8]) -> Option<u16> {", "match bytes {"])
+    out.extend(f"{rust_byte_literal(key)} => Some({value})," for key, value in sorted(scanner["keywords"].items()))
+    out.extend(["_ => None,", "}", "}"])
     mapping("TOKENS", scanner["tokens"], True)
     mapping("NON_BINARY_PROPERTIES", scanner["non_binary"])
     strings("BINARY_PROPERTIES", scanner["binary"])
