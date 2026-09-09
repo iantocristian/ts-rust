@@ -3,7 +3,7 @@
 Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. Compact-storage feasibility,
 the general borrowed facade and final S07 gates remain open.
-Date: 2026-09-08. Work branch: `codex/s07-bis`.
+Date: 2026-09-09. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
 Review: [independent plan findings and amendments](S07-bis-plan-review.md).
@@ -17,6 +17,29 @@ S07 parse-and-bind implementation pass both memory criteria and both CPU modes,
 while keeping every existing correctness and ownership prerequisite current.
 
 ## 1. Decision
+
+The next sequence, approved after the first full access capture, is **one bounded
+[lookup-reuse experiment](S07-bis-lookup-reuse.md), then integrated compact storage
+using typed payload rows**. Defer expanded field-level tracing and the three-layout
+replay harness. The existing capture supplies useful operation frequencies; it
+does not measure residual lookup latency or guarantee a reduction to two reads
+per node. Further diagnostics must resolve a specific decision left open by the
+integrated result, rather than become another prerequisite to integration.
+
+Typed rows are the selected first implementation, with mixed word rows held as
+an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
+requested, before missing owner costs. This is an engineering choice to test,
+not a measured CPU advantage or a guaranteed whole-owner fit. Establish contextual
+borrowed access and construction on representative shapes, then measure one
+complete generated backend for all 192 shapes. Do not maintain a permanent
+nine-shape compact backend alongside the legacy syntax representation.
+
+Keep the lookup trial to one coherent candidate and one fixed screen. Run focused
+correctness checks and full workload graphs before that screen; only a promising
+candidate proceeds to the broader binder/ownership producers required for
+promotion. A failed screen ends this CPU detour. Do not tune another variant,
+extend samples, or build more instrumentation to rescue it. Compact storage is
+the next substantial work either way. Reuse existing prototypes and producers.
 
 Choose **an early single-source exclusive-binding experiment, followed by
 compact generated storage**. Keep today's published-file binder as the
@@ -42,12 +65,13 @@ node-lookup candidate passes a full-pipeline screen and becomes the next control
 this does not promote production list storage or implement the general borrowed
 facade. The subsequent [stack-copy trial](S07-bis-list-copy.md) passes parity and
 non-regression checks but misses the predeclared 5% win (0.83% / 0.19% wall median
-reductions, no meaningful memory change); reject that standalone shortcut. Carry pages into the next representative node-access slice and resolve
+reductions, no meaningful memory change); reject that standalone shortcut. Carry pages into the integrated compact-storage implementation and resolve
 lists once where the actual caller can retain that proof; do not require pages
-to match a raw boxed-slice microbenchmark before integration. Finish the
-whole-owner accounting (including name
-interning, escapes and residuals) and CP1's access contract before selecting a
-payload storage family or beginning the broad generated-storage migration. The
+to match a raw boxed-slice microbenchmark before integration. Complete the
+whole-owner accounting (including name interning, escapes and residuals) through
+implementation and measured attribution; it remains required before claiming a
+path to the memory gates. Resolve the borrowed access/factory contract first,
+without requiring a further payload-family comparison. The
 [CP0 model](S07-bis-CP0.md) is a projection, not measured replacement storage.
 
 Claude's second review identifies a sequencing error in the initial plan. The
@@ -242,9 +266,10 @@ whole-tree scan on every field access or every binding request.
 
 ### 4.3 Compact syntax, links and text
 
-Prototype a small common header and generated payload access/storage with
-independent concrete-shape tags. Select typed pages or word classes after the
-whole-owner and hot-access comparison. Tokens have no general payload allocation.
+Implement a small common header and generated typed payload storage with
+independent concrete-shape tags. Typed pages are the first integrated candidate;
+word classes remain a conditional alternative after measured attribution.
+Tokens have no general payload allocation.
 A header-held payload ordinal, or a charged
 slot directory, maps the stable public node identity to its concrete payload.
 Do not change identity when a physical page or directory grows.
@@ -602,7 +627,8 @@ has no measured path to both CPU gates.
    `next_container` also carries a syntax-node reference. Do not expose raw
    payload mutation as proof-preserving or discard final binding-graph checks
    merely because their fields have moved out of maps.
-2. Port common tokens/identifiers/edge payloads as a vertical slice, including
+2. Establish common tokens/identifiers/edge payloads as the first implementation
+   checkpoint, including
    parser construction, mutation, publication, binding and encoding. Include
    TokenData with identifier/unknown kinds to test the independent shape tag,
    and parameter/argument list edges with recursively nested list construction.
@@ -612,7 +638,8 @@ has no measured path to both CPU gates.
    global edge buffer alone does not solve nested-list interleaving. Attribute
    initial Vec construction separately from list completion and auxiliary growth.
    Preserve nil/allocated-empty/missing states, locations and modifiers in this
-   pilot. Measure actual end-to-end costs before extending it to every shape.
+   checkpoint. Validate the contextual access/construction contract before
+   extending generation; the pipeline candidate must cover all 192 shapes.
 3. Migrate the remaining concrete shapes and auxiliary/list storage. Preserve
    backing identity, nil versus allocated-empty lists, parent updates, cycles,
    shared children and clone/update behavior. Do not compact mutable lists by

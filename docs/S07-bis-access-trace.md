@@ -5,6 +5,12 @@ of the next node-layout comparison. Small fixtures remain semantic regressions.
 The [first capture results](S07-bis-access-trace-results.md) now establish the
 scoped observation milestone below. Layout timing remains pending.
 
+2026-09-09 decision: **further field-level capture and layout replay are deferred**.
+The approved [primary sequence](S07-bis-performance-plan.md#1-decision) chooses
+typed rows for the first integrated storage candidate after one bounded lookup
+trial. The remaining stages below preserve the earlier design as a conditional
+diagnostic reference; they are no longer integration prerequisites.
+
 Implementation boundary for the first recorder: freeze the accepted CP1 bundle
 (`3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931`),
 export physical syntax before each bind, and capture the explicitly named

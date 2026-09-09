@@ -118,6 +118,11 @@ commands are documented beside the tools and review bundle.
 
 ## Next bounded slice
 
+Superseded on 2026-09-09: the field-level stages below are deferred by the
+[revised sequence](S07-bis-performance-plan.md#1-decision). Use the existing counts
+to inform one bounded lookup-reuse candidate, then integrate typed compact rows.
+Do not expand the observer merely to decide between the modeled row families.
+
 The highest `Binder::n` shape counts are Identifier (36,264,661), PropertyAccess
 (19,393,029), Call (8,602,656), Binary (4,574,170), ExpressionStatement (3,993,446)
 and Token (3,841,111). These guide the next hook inventory; they do not identify
