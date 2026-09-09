@@ -404,3 +404,66 @@ validation 167 ms with no overlap. These overlapping categories must not be
 summed; the source/sample does not establish that all access or allocation work
 is removable. They support the integrated storage/traffic work without another
 field trace or lookup-only trial.
+
+### CP4 result: memory improves, CPU still fails
+
+The combined candidate (`b731d85`, manifest
+`5495f69555cd2ea580e6e2351ab649b6f228005529ff838654c0bb57c3e648c3`)
+passes all 13,094 complete workload graphs at both worker counts. Every file
+binds in place, with zero fallbacks. All eight warmups and 56 samples were
+retained, and receipt verification passes.
+The [fifth review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-binding/README.md)
+retains the frozen changed source/binaries, complete graphs, raw measurements,
+validation logs and this candidate's native CPU exports.
+
+| Metric | Same-screen CP1 | CP4 candidate | Candidate/control |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 4.546 s | 6.202 s | 1.364 |
+| Eight-worker wall | 1.058 s | 1.399 s | 1.322 |
+| Allocation, worse median | 4.643 GB | 2.574 GB | 0.554 |
+| Peak RSS, worse median | 4.509 GB | 2.505 GB | 0.555 |
+
+CPU upper 95% bootstrap ratios are 1.380 / 1.344. Relative MAD is below 1.3%
+for both variants and all modes. **Not promoted; CP1 remains the control.**
+This implementation removes substantial memory, but still fails the unchanged
+CPU rule. Differences between candidate medians in separate captures are not
+paired improvement estimates. No threshold or sample count was changed.
+
+| Metric | CP4 candidate | Historical same-mode limit | Remaining reduction |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 6.202202 s | 2.937627 s | 3.264575 s |
+| Eight-worker wall | 1.398779 s | 0.633963 s | 0.764816 s |
+| One-worker allocation | 2.573774 GB | 2.035226 GB | 0.538548 GB |
+| Eight-worker allocation | 2.573778 GB | 2.035767 GB | 0.538012 GB |
+| One-worker peak RSS | 2.501706 GB | 2.208948 GB | 0.292758 GB |
+| Eight-worker peak RSS | 2.504884 GB | 2.217045 GB | 0.287839 GB |
+
+These historical limits support planning; fresh qualified Go-relative evidence
+is still required for acceptance. The exact frozen CP4 normal binary also
+completed a native CPU capture with the full input digest and expected node,
+symbol and diagnostic counts. Review its sampled stack unions before selecting
+further CPU work; memory progress does not explain away the regression.
+
+### CP5 implementation decision: retain final parent and metadata checks
+
+Keep checked construction and carry a private construction-edge proof into
+completion. A clean builder may omit only the final payload/list/backing checks
+already established by construction. Final parent validation remains: parent
+links are assigned after insertion, and the public parent setter deliberately
+defers invalid-target failure until completion. Source metadata also remains
+validated because its public mutable access is used during every parse.
+
+Unrestricted node/list edits, including edits from factory hooks, invalidate the
+proof and use the existing full completion scan with its existing failure order.
+Add narrow list-location and modifier-flag setters for the ordinary parser path;
+these cannot change graph edges. Do not introduce per-node proof maps or move
+the parent check into every write: parsing may assign a parent repeatedly, so
+that would move or increase checks rather than establish a saving.
+
+This refines CP5's initially conservative completion-scan policy: checked
+construction stays authoritative for the specific immutable edges it proves,
+while completion checks the remaining obligations. Counterexamples must cover
+invalid final parents, source metadata, mutated payloads/list backings, hooks,
+imported owners and the clean versus dirty completion paths. The preceding thin
+sample's 352 ms whole completion weight is an upper bound, not an expected
+saving; the required parent/metadata work remains. No CPU-gate closure is claimed.

@@ -3,8 +3,9 @@
 Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. All 192 compact shapes and the
 borrowed facade are implemented; their completed screens reduce memory
-but fail CPU non-regression. The vector policy was rejected; compact binding
-storage and request-traffic work is in progress. Final S07 gates
+but fail CPU non-regression. The vector policy was rejected. Compact binding
+storage has now completed its screen: 2.574 GB allocated / 2.505 GB RSS, but
+CPU ratios remain 1.364 / 1.322 against same-screen CP1. Final S07 gates
 remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
@@ -78,6 +79,24 @@ limits of the historical size arithmetic. A short native sample of the frozen
 thin candidate audits remaining CPU costs without expanding trace/replay work.
 No more row-policy matrix or small lookup trial is scheduled. CP1 remains the
 retained control until a complete candidate passes all required screens/evidence.
+
+CP4 now passes all workload graphs and receipt verification but fails CPU
+non-regression. Its CPU upper 95% ratios are 1.380 / 1.344; relative MAD is below
+1.3% in both modes. The remaining distance to historical limits is about 0.54 GB
+allocated and 0.29 GB RSS, with a much larger CPU gap. Preserve this result and
+audit its exact native profile before choosing another change. CP5 must establish
+which final graph obligations construction and subsequent narrow writes already
+prove; removing a scan without that proof is not an optimization. Auxiliary
+record compaction also needs a concrete current-layout cost bound. Do not reopen
+field tracing, a row-policy matrix, or another standalone lookup trial.
+
+The bounded CP5 implementation now retains checked construction and uses its
+private edge proof to omit only duplicated final payload/list/backing checks.
+Keep the final parent scan and metadata validation. Unrestricted node/list edits
+and hooks dirty that proof and retain the original full scan/error order. Narrow
+list range/flag edits preserve it. This is the later completion-scan reduction
+allowed by CP5, with its explicit mutation audit and counterexamples recorded in
+the [compact implementation record](S07-bis-compact-storage.md).
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
