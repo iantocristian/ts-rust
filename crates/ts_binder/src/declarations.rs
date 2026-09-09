@@ -6,7 +6,7 @@ use ts_ast::{
 };
 use ts_diagnostics as d;
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.newSymbol
     pub fn new_symbol(&mut self, flags: u32, name: JsString) -> SymbolId {
         self.symbol_count = self.symbol_count.wrapping_add(1);
@@ -422,7 +422,7 @@ pub(crate) fn is_effective_module_declaration(node: &(impl a::NodeAccess + ?Size
     )
 }
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.declareModuleMember
     pub fn declare_module_member(&mut self, node: NodeId, flags: u32, excludes: u32) -> SymbolId {
         let container = need(self.container);

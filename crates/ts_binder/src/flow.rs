@@ -6,7 +6,7 @@ use ts_ast::{
     FlowNodeRead, FlowReduceLabelData, FlowSwitchClauseData, NodeId, SyntaxKind as K,
 };
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     pub(crate) fn flow(&self, id: FlowId) -> FlowNodeRead<'_> {
         self.builder
             .flows()
@@ -15,14 +15,12 @@ impl Binder<'_, '_> {
     }
     pub(crate) fn set_flow_data(&mut self, id: FlowId, value: Option<FlowData>) {
         self.builder
-            .flows_mut()
-            .set_node(id, value)
+            .set_flow_data(id, value)
             .expect("binder flow belongs to result");
     }
     pub(crate) fn set_flow_antecedents(&mut self, id: FlowId, value: Option<FlowListId>) {
         self.builder
-            .flows_mut()
-            .set_antecedents(id, value)
+            .set_flow_antecedents(id, value)
             .expect("binder flow belongs to result");
     }
     pub(crate) fn flow_list(&self, id: FlowListId) -> FlowList {
@@ -34,7 +32,7 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.newFlowNode
     pub(crate) fn new_flow_node(&mut self, flags: u32) -> FlowId {
-        self.builder.flows_mut().push(FlowNode::new(flags))
+        self.builder.push_flow(FlowNode::new(flags))
     }
     // port: tsc/internal/binder/binder.go:Binder.newFlowNodeEx
     pub(crate) fn new_flow_node_ex(
@@ -44,8 +42,7 @@ impl Binder<'_, '_> {
         antecedent: Option<FlowId>,
     ) -> FlowId {
         self.builder
-            .flows_mut()
-            .push(FlowNode::new_ex(flags, node, antecedent))
+            .push_flow(FlowNode::new_ex(flags, node, antecedent))
     }
     // port: tsc/internal/binder/binder.go:Binder.createLoopLabel
     pub(crate) fn create_loop_label(&mut self) -> FlowId {
@@ -150,7 +147,7 @@ impl Binder<'_, '_> {
         head: Option<FlowId>,
         tail: Option<FlowListId>,
     ) -> FlowListId {
-        self.builder.flow_lists_mut().push(FlowList {
+        self.builder.push_flow_list(FlowList {
             flow: head,
             next: tail,
         })
@@ -179,8 +176,7 @@ impl Binder<'_, '_> {
     pub(crate) fn set_flow_node_referenced(&mut self, flow: FlowId) {
         let flags = self
             .builder
-            .flows_mut()
-            .flags_mut(flow)
+            .flow_flags_mut(flow)
             .expect("binder flow belongs to result");
         *flags |= if *flags & F::REFERENCED == 0 {
             F::REFERENCED
@@ -206,8 +202,7 @@ impl Binder<'_, '_> {
         let new = self.new_flow_list(Some(antecedent), None);
         if let Some(last) = last {
             self.builder
-                .flow_lists_mut()
-                .set_next(last, Some(new))
+                .set_flow_list_next(last, Some(new))
                 .expect("retained flow list");
         } else {
             self.set_flow_antecedents(label, Some(new));

@@ -1,7 +1,7 @@
 use crate::{
     arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, AuxiliaryRead,
-    Counters, Error, FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle, StorageRead,
-    StorageTransaction, SymbolId,
+    CoreScopeMut, Counters, Error, FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle,
+    StorageRead, StorageTransaction, SymbolId,
 };
 use std::{
     collections::HashMap,
@@ -122,6 +122,97 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     }
     pub fn store_and_source_mut(&mut self) -> (&mut N::Store, &SourceText) {
         (&mut self.owner.store, &self.owner.source)
+    }
+    /// Open this exclusive core with a fresh invariant scope. Checked local
+    /// handles cannot escape or be used with any other scope, even on this same
+    /// builder. The callback does not grant growth or publication capabilities.
+    /// Writes are not rolled back on error or unwind; the caller must decide
+    /// whether a failed operation permits retaining the exclusive builder.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// let escaped = builder.with_core_scope(|scope| scope.check(id).unwrap());
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut first = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let mut second = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = first.push(Node::new(0, ()));
+    /// second.push(Node::new(0, ()));
+    /// first.with_core_scope(|first| {
+    ///     let local = first.check(id).unwrap();
+    ///     second.with_core_scope(|mut second| second.get_mut(local).kind = 1);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// builder.with_core_scope(|mut scope| {
+    ///     let local = scope.check(id).unwrap();
+    ///     let read = scope.get(local);
+    ///     scope.get_mut(local).kind = 1;
+    ///     assert_eq!(read.kind, 0);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// builder.with_core_scope(|mut scope| {
+    ///     let local = scope.check(id).unwrap();
+    ///     let view = scope.view();
+    ///     scope.get_mut(local).kind = 1;
+    ///     assert_eq!(view.core_node(id).unwrap().kind, 0);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// builder.with_core_scope(|scope| {
+    ///     builder.push(Node::new(0, ()));
+    ///     let _ = scope.source();
+    /// });
+    /// ```
+    #[inline]
+    pub fn with_core_scope<R>(
+        &mut self,
+        operation: impl for<'brand> FnOnce(CoreScopeMut<'brand, '_, N, S>) -> R,
+    ) -> R {
+        operation(CoreScopeMut::new(self))
+    }
+
+    #[inline]
+    pub(crate) fn core_slot(&self, slot: u32) -> Result<&N, Error> {
+        self.owner.core.get_slot(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_slot_mut(&mut self, slot: u32) -> Result<&mut N, Error> {
+        self.owner.core.get_slot_mut(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_auxiliary_slot(&self, slot: u32) -> Result<&N::CoreAux, Error> {
+        self.owner.auxiliary.get_slot(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_slot_store_and_source_mut(
+        &mut self,
+        slot: u32,
+    ) -> Result<(&mut N, &mut N::Store, &SourceText), Error> {
+        Ok((
+            self.owner.core.get_slot_mut(slot)?,
+            &mut self.owner.store,
+            &self.owner.source,
+        ))
     }
     /// Split exclusive core records from immutable construction data. Both
     /// halves borrow this builder; neither can grow storage or escape its owner.

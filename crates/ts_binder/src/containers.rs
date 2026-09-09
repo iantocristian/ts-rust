@@ -194,7 +194,7 @@ impl ChildVisitor for ImmediateChildren {
     }
 }
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     pub(crate) fn syntax_slice(&self, list: Option<NodeListId>) -> NodeSlice {
         let parsed = self.parsed_view();
         let nodes = list.map_or_else(NodeSlice::empty, |list| {
@@ -462,6 +462,9 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachChild
     pub(crate) fn bind_each_child(&mut self, node: NodeId) {
+        if self.try_bind_local_children(node) {
+            return;
+        }
         // Binding changes flags and binding fields, not these syntax edges or
         // their order. Copy only the immediate descriptors before recursively
         // mutating the exclusive owner; list elements are read when visited.
@@ -508,6 +511,9 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:setFlowNode
     pub(crate) fn set_flow_node(&mut self, node: NodeId, flow: Option<FlowId>) {
+        if self.builder.try_set_local_flow(node, flow) {
+            return;
+        }
         if has_flow_node_data(&self.n(node)) {
             self.builder
                 .set_node_flow(node, flow)
@@ -568,7 +574,7 @@ impl Binder<'_, '_> {
         self.last_container = Some(next);
     }
 }
-impl ChildVisitor for Binder<'_, '_> {
+impl ChildVisitor for Binder<'_, '_, '_> {
     fn visit_node(&mut self, node: NodeId) -> ControlFlow<()> {
         if self.bind(Some(node)) {
             ControlFlow::Break(())

@@ -35,6 +35,22 @@ impl EdgePages {
         }
     }
 
+    /// Scope eligibility checks this before treating stored words as local slots.
+    pub(crate) fn has_escapes(&self) -> bool {
+        !self.escapes.is_empty()
+    }
+
+    /// Read a stored word without namespace decoding. Zero preserves a nil edge.
+    /// Local callers must establish `!has_escapes()` before importing nonzero
+    /// words as core slots; this method does not resolve an escape sentinel.
+    #[inline]
+    pub(crate) fn local_word(&self, index: usize) -> Option<u32> {
+        if index >= self.len {
+            return None;
+        }
+        Some(self.pages[index / PAGE_WORDS][index % PAGE_WORDS])
+    }
+
     pub(crate) fn append(
         &mut self,
         owner: ArenaId,
@@ -78,10 +94,7 @@ impl EdgePages {
 
     #[allow(clippy::option_option)] // A present nil edge differs from an out-of-bounds index.
     pub(crate) fn get(&self, owner: ArenaId, index: usize) -> Option<Option<NodeId>> {
-        if index >= self.len {
-            return None;
-        }
-        let word = self.pages[index / PAGE_WORDS][index % PAGE_WORDS];
+        let word = self.local_word(index)?;
         Some(match word {
             0 => None,
             ESCAPE => Some(
@@ -195,8 +208,39 @@ mod tests {
                 pages.escapes.len(),
                 usize::from(matches!(value, Some(id) if id == full || id == foreign))
             );
+            assert_eq!(
+                pages.has_escapes(),
+                value.is_some_and(|id| id == full || id == foreign)
+            );
         }
         assert_eq!(pages.set(owner, 1, None), Err(Error::InvalidSlot));
         assert_eq!(pages.get(owner, 0), Some(Some(foreign)));
+    }
+
+    #[test]
+    fn local_words_preserve_cross_page_nils_and_reject_out_of_range_indices() {
+        let owner = owner();
+        let local = NodeId::from_parts(owner, 7).unwrap();
+        let mut pages = EdgePages::default();
+        assert!(!pages.has_escapes());
+        assert_eq!(pages.local_word(0), None);
+        pages.append(owner, &vec![Some(local); 255]).unwrap();
+        let backing = pages.append(owner, &[None, Some(local), None]).unwrap();
+        assert!(!pages.has_escapes());
+        assert_eq!((backing.start, backing.len), (255, 3));
+        assert!(pages.valid_range(backing.start..backing.start + backing.len as usize));
+        assert_eq!(pages.local_word(254), Some(7));
+        assert_eq!(pages.local_word(255), Some(0));
+        assert_eq!(pages.local_word(256), Some(7));
+        assert_eq!(pages.local_word(257), Some(0));
+        assert_eq!(pages.local_word(258), None);
+        assert_eq!(pages.local_word(usize::MAX), None);
+        assert!(pages.valid_range(258..258));
+        assert!(!pages.valid_range(257..259));
+        assert!(!pages.valid_range(Range {
+            start: 258,
+            end: 257
+        }));
+        assert!(!pages.valid_range(usize::MAX..usize::MAX));
     }
 }

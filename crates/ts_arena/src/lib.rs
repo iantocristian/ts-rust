@@ -33,7 +33,7 @@ pub use refs::{
     AuxiliaryRead, CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead,
     StorageSymbolRef,
 };
-pub use scope::{LocalNode, StorageLocalArena, StorageScope};
+pub use scope::{CoreScopeMut, LocalNode, StorageLocalArena, StorageScope};
 pub use scratch::ScratchOwner;
 
 #[cfg(any(test, feature = "harness"))]

@@ -225,7 +225,25 @@ pub fn is_assignment_target(view: AstView<'_>, id: NodeId) -> Result<bool, Error
 /// port: tsc/internal/ast/utilities.go:IsIdentifierName
 pub fn is_identifier_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
     let p = view.node(parent(view, id)?)?;
-    Ok(match p.kind().known() {
+    Ok(match identifier_name_role(p.kind()) {
+        IdentifierNameRole::Name => p.name() == Some(id),
+        IdentifierNameRole::Right => payload!(p, QualifiedName).right() == Some(id),
+        IdentifierNameRole::PropertyName => p.property_name() == Some(id),
+        IdentifierNameRole::Always => true,
+        IdentifierNameRole::Never => false,
+    })
+}
+
+pub(crate) enum IdentifierNameRole {
+    Name,
+    Right,
+    PropertyName,
+    Always,
+    Never,
+}
+
+pub(crate) fn identifier_name_role(kind: crate::NodeKind) -> IdentifierNameRole {
+    match kind.known() {
         Some(
             K::PropertyDeclaration
             | K::PropertySignature
@@ -236,18 +254,18 @@ pub fn is_identifier_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> 
             | K::EnumMember
             | K::PropertyAssignment
             | K::PropertyAccessExpression,
-        ) => p.name() == Some(id),
-        Some(K::QualifiedName) => payload!(p, QualifiedName).right() == Some(id),
-        Some(K::BindingElement | K::ImportSpecifier) => p.property_name() == Some(id),
+        ) => IdentifierNameRole::Name,
+        Some(K::QualifiedName) => IdentifierNameRole::Right,
+        Some(K::BindingElement | K::ImportSpecifier) => IdentifierNameRole::PropertyName,
         Some(
             K::ExportSpecifier
             | K::JsxAttribute
             | K::JsxSelfClosingElement
             | K::JsxOpeningElement
             | K::JsxClosingElement,
-        ) => true,
-        _ => false,
-    })
+        ) => IdentifierNameRole::Always,
+        _ => IdentifierNameRole::Never,
+    }
 }
 /// port: tsc/internal/ast/utilities.go:IsPushOrUnshiftIdentifier
 pub fn is_push_or_unshift_identifier(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {

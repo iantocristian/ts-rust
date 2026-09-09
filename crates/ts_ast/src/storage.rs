@@ -398,6 +398,21 @@ pub struct ParsedFile {
     validated: bool,
 }
 impl ParsedFile {
+    pub(crate) fn local_binding_eligible(&self) -> bool {
+        self.validated
+            && self.exclusive_core_only()
+            && self.builder.storage.store().local_binding_eligible()
+    }
+
+    pub(crate) fn with_local_core<R>(
+        &mut self,
+        operation: impl for<'scope> FnOnce(ts_arena::CoreScopeMut<'scope, '_, StoredNode>) -> R,
+    ) -> R {
+        // The caller checked eligibility. Only the AST's narrow local writer
+        // receives this scope, preserving the completed syntax validation.
+        self.builder.storage.with_core_scope(operation)
+    }
+
     pub(crate) fn initialize_binding_storage(
         &mut self,
         arenas: crate::compact::binding::BindingArenas,

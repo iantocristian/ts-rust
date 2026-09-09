@@ -42,9 +42,9 @@ impl FieldKey {
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct CompactSlice {
-    backing: u32,
-    start: u32,
-    len: u32,
+    pub(crate) backing: u32,
+    pub(crate) start: u32,
+    pub(crate) len: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -90,6 +90,24 @@ pub(crate) struct PackingContext<'a> {
 }
 
 impl CoreStore {
+    pub(crate) fn local_binding_eligible(&self) -> bool {
+        self.links.is_empty()
+            && self.binding_overrides.is_empty()
+            && !self.edges.has_escapes()
+            && self.auxiliary.local_lists_only()
+    }
+
+    #[inline]
+    pub(crate) fn local_text<'a>(
+        &'a self,
+        key: FieldKey,
+        word: u32,
+        end: i32,
+        source: &'a SourceText,
+    ) -> &'a [u8] {
+        self.text.bytes(key, word, end, source)
+    }
+
     pub(crate) fn has_link_escapes(&self) -> bool {
         !self.links.is_empty()
     }

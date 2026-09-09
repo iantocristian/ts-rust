@@ -111,10 +111,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .transpose()?;
     let graph_mode =
         args.len() == 4 && (graph_argument == Some("--graphs") || graph_index.is_some());
-    let binding_paths = args.len() == 4 && graph_argument == Some("--binding-paths");
+    let local_binding_paths = args.len() == 4 && graph_argument == Some("--local-binding-paths");
+    let binding_paths =
+        local_binding_paths || args.len() == 4 && graph_argument == Some("--binding-paths");
     if args.len() != 3 && !graph_mode && !binding_paths {
         return Err(
-            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX | --binding-paths]"
+            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX | --binding-paths | --local-binding-paths]"
                 .into(),
         );
     }
@@ -261,19 +263,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err("workload file count mismatch".into());
         }
         if binding_paths {
+            let local = files
+                .iter()
+                .flatten()
+                .filter(|file| file.bound_with_local_scope())
+                .count();
             let exclusive = files
                 .iter()
                 .flatten()
                 .filter(|file| file.bound_in_place())
                 .count();
-            println!(
-                "{}",
-                serde_json::json!({
-                    "version": 1, "workers": workers, "files": file_count,
-                    "bound_in_place_files": exclusive, "fallback_files": file_count - exclusive,
-                    "loaded_input_sha256": report.loaded_input_sha256,
-                })
-            );
+            let mut paths = serde_json::json!({
+                "version": 1, "workers": workers, "files": file_count,
+                "bound_in_place_files": exclusive, "fallback_files": file_count - exclusive,
+                "loaded_input_sha256": report.loaded_input_sha256,
+            });
+            if local_binding_paths {
+                paths["local_scope_files"] = local.into();
+                paths["checked_scope_files"] = (file_count - local).into();
+            }
+            println!("{paths}");
             std::hint::black_box(&files);
             return Ok(());
         }

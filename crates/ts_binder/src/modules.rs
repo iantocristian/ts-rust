@@ -5,7 +5,7 @@ use ts_ast::{
 };
 use ts_diagnostics as d;
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindSourceFileIfExternalModule
     pub fn bind_source_file_if_external_module(&mut self) {
         self.set_export_context_flag(self.file);

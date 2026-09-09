@@ -30,6 +30,22 @@ fn members(node: &Value) -> Result<Vec<&Value>, String> {
         .collect())
 }
 
+/// Public child enumeration selects kinds before checking the concrete shape.
+/// Payloads on unhandled token/unknown kinds have no public children.
+pub(super) fn child_kind_pattern(node: &Value) -> Result<Option<String>, String> {
+    if !members(node)?.iter().any(|member| flag(member, "child")) && !flag(node, "handWritten") {
+        return Ok(None);
+    }
+    Ok(Some(format!(
+        "Some({})",
+        strings(array(node, "kinds")?)?
+            .iter()
+            .map(|kind| format!("SyntaxKind::{kind}"))
+            .collect::<Vec<_>>()
+            .join(" | ")
+    )))
+}
+
 fn parameter_type(member: &Value) -> Result<String, String> {
     let typ = rust_type(&member["type"])?;
     Ok(if nullable(member)? {
@@ -579,10 +595,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
                 emit_transform(&mut transform, &mut scope, node)?;
             }
             emit_children(&mut runtime, &mut scope, node)?;
-            if members(node)?
-                .iter()
-                .any(|m| m["name"] == "name" && flag(m, "private"))
-            {
+            if super::ast::has_declaration_name(node)? {
                 runtime.push_str(&format!("impl {name}Data {{\n"));
                 mapped(&mut runtime, &mut scope, name, "Name");
                 runtime.push_str(
@@ -654,18 +667,9 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
     let mut stored_children = String::from("impl AstPayloadStore {\n    pub(crate) fn for_each_stored_child(&self, kind: NodeKind, shape: u16, ordinal: u32, end: i32, context: crate::compact::CompactContext<'_>, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match kind.known() {\n");
     for (shape, node) in nodes.iter().enumerate() {
         let name = string(node, "name")?;
-        let child = members(node)?.iter().any(|m| flag(m, "child"));
-        if !child && !flag(node, "handWritten") {
+        let Some(pattern) = child_kind_pattern(node)? else {
             continue;
-        }
-        let pattern = format!(
-            "Some({})",
-            strings(array(node, "kinds")?)?
-                .iter()
-                .map(|k| format!("SyntaxKind::{k}"))
-                .collect::<Vec<_>>()
-                .join(" | ")
-        );
+        };
         runtime.push_str(&format!("            {pattern} => node.data_source().as_{}().expect(\"{name} kind requires {name} payload\").for_each_child(visitor),\n",snake(name)));
         stored_children.push_str(&format!("            {pattern} => {{\n                assert!(shape == {shape}, \"{name} kind requires {name} payload\");\n                self.read_{}(ordinal, context, end).for_each_child(visitor)\n            }},\n", snake(name)));
         if name == "SyntheticExpression" {

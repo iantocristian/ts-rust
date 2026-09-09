@@ -2,7 +2,7 @@
 use crate::{expressions::payload, need, ActiveLabel, Binder};
 use ts_ast::{flow_flags as F, node_flags, FlowId, JsString, NodeId, SyntaxKind as K};
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.setContinueTarget
     pub(crate) fn set_continue_target(&mut self, mut node: NodeId, target: FlowId) -> FlowId {
         let mut label = self.active_label_list;

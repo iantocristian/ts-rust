@@ -86,6 +86,12 @@ fn binding_fields(node: &Value) -> Result<Vec<BindingField>, String> {
         .collect())
 }
 
+pub(super) fn has_flow_node(node: &Value) -> Result<bool, String> {
+    Ok(binding_fields(node)?
+        .iter()
+        .any(|field| field.name == "flow_node"))
+}
+
 pub(super) fn row_type(field: &Value) -> Result<String, String> {
     Ok(match rust_type(&field["type"])?.as_str() {
         "NodeId" | "NodeListId" | "JsString" => "u32".into(),
@@ -220,6 +226,11 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
             code.push_str("\n    #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.\n");
         }
         code.push_str(&format!("\n    #[inline]\n    pub(crate) fn read_{member}<'a>(&'a self, ordinal: u32, context: CompactContext<'a>, end: i32) -> {name}DataRead<'a> {{\n        {name}DataRead::from_stored({row}, context, ordinal, end)\n    }}\n"));
+        if !stored {
+            code.push_str("\n    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.\n");
+        }
+        let ordinal = if stored { "ordinal" } else { "_ordinal" };
+        code.push_str(&format!("\n    #[inline]\n    pub(crate) fn local_{member}_row(&self, {ordinal}: u32) -> &{name}Row {{\n        {row}\n    }}\n"));
     }
     code.push_str("\n    pub(crate) fn read<'a>(&'a self, shape: u16, ordinal: u32, context: CompactContext<'a>, end: i32) -> NodeDataRead<'a> {\n        match shape {\n");
     for (shape, node) in nodes.iter().enumerate() {
@@ -358,7 +369,13 @@ fn emit_binding_operations(code: &mut String, nodes: &[Value]) -> Result<(), Str
             ));
         }
         code.push_str("            _ => None,\n        }\n    }\n");
-        code.push_str(&format!("\n    /// Narrow binding writes do not modify syntax edges or its validation proof.\n    pub(crate) fn set_{}(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {{\n        match shape {{\n",field.name));
+        let setter = if field.name == "flow_node" {
+            code.push_str("\n    #[inline]\n    pub(crate) fn set_flow_node(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {\n        self.set_local_flow_node(shape, ordinal, word)\n    }\n");
+            "set_local_flow_node".into()
+        } else {
+            format!("set_{}", field.name)
+        };
+        code.push_str(&format!("\n    /// Narrow binding writes do not modify syntax edges or its validation proof.\n    pub(crate) fn {setter}(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {{\n        match shape {{\n"));
         for (shape, node) in eligible {
             code.push_str(&format!("            {shape} => {{ self.{}.as_mut().expect(\"compact shape directory\").get_mut(ordinal).expect(\"compact payload ordinal\").{} = word; }},\n",snake(string(node,"name")?),field.name));
         }

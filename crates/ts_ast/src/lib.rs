@@ -5,6 +5,11 @@
 
 mod accessors_generated;
 mod bind_result;
+pub use bind_result::local_bind;
+#[cfg(any(test, doctest))]
+mod local_bind_tests;
+mod local_read_generated;
+pub use local_read_generated::*;
 mod flow;
 mod symbol_access;
 pub mod symbol_flags;

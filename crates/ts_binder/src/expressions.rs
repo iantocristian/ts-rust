@@ -15,7 +15,7 @@ macro_rules! payload {
 }
 pub(crate) use payload;
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindAssignmentTargetFlow
     pub(crate) fn bind_assignment_target_flow(&mut self, node: NodeId) {
         match self.n(node).kind().known() {
@@ -498,6 +498,11 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:isNarrowableReference
     pub(crate) fn is_narrowable_reference(&self, node: NodeId) -> bool {
+        if let crate::backend::Backend::Local(local) = &self.builder {
+            if let Ok(node) = local.import_node(node) {
+                return crate::local::is_narrowable_reference(local, node);
+            }
+        }
         match self.n(node).kind().known() {
             Some(K::Identifier | K::ThisKeyword | K::SuperKeyword | K::MetaProperty) => true,
             Some(

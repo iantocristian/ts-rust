@@ -5643,6 +5643,12 @@ impl AstPayloadStore {
         TokenDataRead::from_stored(&TokenRow {}, context, ordinal, end)
     }
 
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_token_row(&self, _ordinal: u32) -> &TokenRow {
+        &TokenRow {}
+    }
+
     #[inline]
     pub(crate) fn read_identifier<'a>(
         &'a self,
@@ -5660,6 +5666,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_identifier_row(&self, ordinal: u32) -> &IdentifierRow {
+        self.identifier
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5682,6 +5697,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_private_identifier_row(&self, ordinal: u32) -> &PrivateIdentifierRow {
+        self.private_identifier
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_qualified_name<'a>(
         &'a self,
         ordinal: u32,
@@ -5698,6 +5722,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_qualified_name_row(&self, ordinal: u32) -> &QualifiedNameRow {
+        self.qualified_name
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5720,6 +5753,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_computed_property_name_row(
+        &self,
+        ordinal: u32,
+    ) -> &ComputedPropertyNameRow {
+        self.computed_property_name
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_decorator<'a>(
         &'a self,
         ordinal: u32,
@@ -5736,6 +5781,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_decorator_row(&self, ordinal: u32) -> &DecoratorRow {
+        self.decorator
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5758,6 +5812,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_empty_statement_row(&self, ordinal: u32) -> &EmptyStatementRow {
+        self.empty_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_if_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -5774,6 +5837,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_if_statement_row(&self, ordinal: u32) -> &IfStatementRow {
+        self.if_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5796,6 +5868,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_do_statement_row(&self, ordinal: u32) -> &DoStatementRow {
+        self.do_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_while_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -5812,6 +5893,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_while_statement_row(&self, ordinal: u32) -> &WhileStatementRow {
+        self.while_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5834,6 +5924,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_for_statement_row(&self, ordinal: u32) -> &ForStatementRow {
+        self.for_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_for_in_or_of_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -5850,6 +5949,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_for_in_or_of_statement_row(&self, ordinal: u32) -> &ForInOrOfStatementRow {
+        self.for_in_or_of_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5872,6 +5980,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_break_statement_row(&self, ordinal: u32) -> &BreakStatementRow {
+        self.break_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_continue_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -5888,6 +6005,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_continue_statement_row(&self, ordinal: u32) -> &ContinueStatementRow {
+        self.continue_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5910,6 +6036,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_return_statement_row(&self, ordinal: u32) -> &ReturnStatementRow {
+        self.return_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_with_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -5926,6 +6061,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_with_statement_row(&self, ordinal: u32) -> &WithStatementRow {
+        self.with_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5948,6 +6092,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_switch_statement_row(&self, ordinal: u32) -> &SwitchStatementRow {
+        self.switch_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_case_block<'a>(
         &'a self,
         ordinal: u32,
@@ -5964,6 +6117,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_case_block_row(&self, ordinal: u32) -> &CaseBlockRow {
+        self.case_block
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -5986,6 +6148,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_case_or_default_clause_row(&self, ordinal: u32) -> &CaseOrDefaultClauseRow {
+        self.case_or_default_clause
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_throw_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -6002,6 +6173,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_throw_statement_row(&self, ordinal: u32) -> &ThrowStatementRow {
+        self.throw_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6024,6 +6204,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_try_statement_row(&self, ordinal: u32) -> &TryStatementRow {
+        self.try_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_catch_clause<'a>(
         &'a self,
         ordinal: u32,
@@ -6040,6 +6229,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_catch_clause_row(&self, ordinal: u32) -> &CatchClauseRow {
+        self.catch_clause
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6062,6 +6260,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_debugger_statement_row(&self, ordinal: u32) -> &DebuggerStatementRow {
+        self.debugger_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_labeled_statement<'a>(
         &'a self,
         ordinal: u32,
@@ -6078,6 +6285,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_labeled_statement_row(&self, ordinal: u32) -> &LabeledStatementRow {
+        self.labeled_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6100,6 +6316,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_expression_statement_row(&self, ordinal: u32) -> &ExpressionStatementRow {
+        self.expression_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_block<'a>(
         &'a self,
         ordinal: u32,
@@ -6116,6 +6341,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_block_row(&self, ordinal: u32) -> &BlockRow {
+        self.block
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6138,6 +6372,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_variable_statement_row(&self, ordinal: u32) -> &VariableStatementRow {
+        self.variable_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_variable_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6154,6 +6397,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_variable_declaration_row(&self, ordinal: u32) -> &VariableDeclarationRow {
+        self.variable_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6176,6 +6428,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_variable_declaration_list_row(
+        &self,
+        ordinal: u32,
+    ) -> &VariableDeclarationListRow {
+        self.variable_declaration_list
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_binding_pattern<'a>(
         &'a self,
         ordinal: u32,
@@ -6192,6 +6456,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_binding_pattern_row(&self, ordinal: u32) -> &BindingPatternRow {
+        self.binding_pattern
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6214,6 +6487,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_parameter_declaration_row(&self, ordinal: u32) -> &ParameterDeclarationRow {
+        self.parameter_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_binding_element<'a>(
         &'a self,
         ordinal: u32,
@@ -6230,6 +6512,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_binding_element_row(&self, ordinal: u32) -> &BindingElementRow {
+        self.binding_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6252,6 +6543,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_missing_declaration_row(&self, ordinal: u32) -> &MissingDeclarationRow {
+        self.missing_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_function_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6268,6 +6568,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_function_declaration_row(&self, ordinal: u32) -> &FunctionDeclarationRow {
+        self.function_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6290,6 +6599,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_class_declaration_row(&self, ordinal: u32) -> &ClassDeclarationRow {
+        self.class_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_class_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -6306,6 +6624,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_class_expression_row(&self, ordinal: u32) -> &ClassExpressionRow {
+        self.class_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6328,6 +6655,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_heritage_clause_row(&self, ordinal: u32) -> &HeritageClauseRow {
+        self.heritage_clause
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_interface_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6344,6 +6680,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_interface_declaration_row(&self, ordinal: u32) -> &InterfaceDeclarationRow {
+        self.interface_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6366,6 +6711,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_type_alias_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &TypeAliasDeclarationRow {
+        self.type_alias_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_enum_member<'a>(
         &'a self,
         ordinal: u32,
@@ -6382,6 +6739,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_enum_member_row(&self, ordinal: u32) -> &EnumMemberRow {
+        self.enum_member
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6404,6 +6770,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_enum_declaration_row(&self, ordinal: u32) -> &EnumDeclarationRow {
+        self.enum_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_module_block<'a>(
         &'a self,
         ordinal: u32,
@@ -6420,6 +6795,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_module_block_row(&self, ordinal: u32) -> &ModuleBlockRow {
+        self.module_block
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6441,6 +6825,15 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_not_emitted_statement_row(&self, ordinal: u32) -> &NotEmittedStatementRow {
+        self.not_emitted_statement
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_not_emitted_type_element<'a>(
@@ -6455,6 +6848,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_not_emitted_type_element_row(
+        &self,
+        _ordinal: u32,
+    ) -> &NotEmittedTypeElementRow {
+        &NotEmittedTypeElementRow {}
     }
 
     #[inline]
@@ -6477,6 +6879,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_import_declaration_row(&self, ordinal: u32) -> &ImportDeclarationRow {
+        self.import_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_external_module_reference<'a>(
         &'a self,
         ordinal: u32,
@@ -6493,6 +6904,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_external_module_reference_row(
+        &self,
+        ordinal: u32,
+    ) -> &ExternalModuleReferenceRow {
+        self.external_module_reference
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6515,6 +6938,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_namespace_import_row(&self, ordinal: u32) -> &NamespaceImportRow {
+        self.namespace_import
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_named_imports<'a>(
         &'a self,
         ordinal: u32,
@@ -6531,6 +6963,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_named_imports_row(&self, ordinal: u32) -> &NamedImportsRow {
+        self.named_imports
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6553,6 +6994,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_export_assignment_row(&self, ordinal: u32) -> &ExportAssignmentRow {
+        self.export_assignment
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_namespace_export_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6569,6 +7019,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_namespace_export_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &NamespaceExportDeclarationRow {
+        self.namespace_export_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6591,6 +7053,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_namespace_export_row(&self, ordinal: u32) -> &NamespaceExportRow {
+        self.namespace_export
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_named_exports<'a>(
         &'a self,
         ordinal: u32,
@@ -6607,6 +7078,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_named_exports_row(&self, ordinal: u32) -> &NamedExportsRow {
+        self.named_exports
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6629,6 +7109,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_export_specifier_row(&self, ordinal: u32) -> &ExportSpecifierRow {
+        self.export_specifier
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_call_signature_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6645,6 +7134,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_call_signature_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &CallSignatureDeclarationRow {
+        self.call_signature_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6667,6 +7168,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_construct_signature_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &ConstructSignatureDeclarationRow {
+        self.construct_signature_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_constructor_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6683,6 +7196,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_constructor_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &ConstructorDeclarationRow {
+        self.constructor_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6705,6 +7230,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_get_accessor_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &GetAccessorDeclarationRow {
+        self.get_accessor_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_set_accessor_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6721,6 +7258,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_set_accessor_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &SetAccessorDeclarationRow {
+        self.set_accessor_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6743,6 +7292,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_index_signature_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &IndexSignatureDeclarationRow {
+        self.index_signature_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_method_signature_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6759,6 +7320,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_method_signature_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &MethodSignatureDeclarationRow {
+        self.method_signature_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6781,6 +7354,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_method_declaration_row(&self, ordinal: u32) -> &MethodDeclarationRow {
+        self.method_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_property_signature_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -6797,6 +7379,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_property_signature_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &PropertySignatureDeclarationRow {
+        self.property_signature_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6819,6 +7413,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_property_declaration_row(&self, ordinal: u32) -> &PropertyDeclarationRow {
+        self.property_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_semicolon_class_element<'a>(
         &'a self,
         ordinal: u32,
@@ -6835,6 +7438,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_semicolon_class_element_row(
+        &self,
+        ordinal: u32,
+    ) -> &SemicolonClassElementRow {
+        self.semicolon_class_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6856,6 +7471,18 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_class_static_block_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &ClassStaticBlockDeclarationRow {
+        self.class_static_block_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_omitted_expression<'a>(
@@ -6865,6 +7492,12 @@ impl AstPayloadStore {
         end: i32,
     ) -> OmittedExpressionDataRead<'a> {
         OmittedExpressionDataRead::from_stored(&OmittedExpressionRow {}, context, ordinal, end)
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_omitted_expression_row(&self, _ordinal: u32) -> &OmittedExpressionRow {
+        &OmittedExpressionRow {}
     }
 
     #[inline]
@@ -6887,6 +7520,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_keyword_expression_row(&self, ordinal: u32) -> &KeywordExpressionRow {
+        self.keyword_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_string_literal<'a>(
         &'a self,
         ordinal: u32,
@@ -6903,6 +7545,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_string_literal_row(&self, ordinal: u32) -> &StringLiteralRow {
+        self.string_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6925,6 +7576,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_numeric_literal_row(&self, ordinal: u32) -> &NumericLiteralRow {
+        self.numeric_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_big_int_literal<'a>(
         &'a self,
         ordinal: u32,
@@ -6941,6 +7601,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_big_int_literal_row(&self, ordinal: u32) -> &BigIntLiteralRow {
+        self.big_int_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -6963,6 +7632,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_regular_expression_literal_row(
+        &self,
+        ordinal: u32,
+    ) -> &RegularExpressionLiteralRow {
+        self.regular_expression_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_no_substitution_template_literal<'a>(
         &'a self,
         ordinal: u32,
@@ -6979,6 +7660,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_no_substitution_template_literal_row(
+        &self,
+        ordinal: u32,
+    ) -> &NoSubstitutionTemplateLiteralRow {
+        self.no_substitution_template_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7001,6 +7694,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_binary_expression_row(&self, ordinal: u32) -> &BinaryExpressionRow {
+        self.binary_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_prefix_unary_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7017,6 +7719,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_prefix_unary_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &PrefixUnaryExpressionRow {
+        self.prefix_unary_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7039,6 +7753,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_postfix_unary_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &PostfixUnaryExpressionRow {
+        self.postfix_unary_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_yield_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7055,6 +7781,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_yield_expression_row(&self, ordinal: u32) -> &YieldExpressionRow {
+        self.yield_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7077,6 +7812,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_arrow_function_row(&self, ordinal: u32) -> &ArrowFunctionRow {
+        self.arrow_function
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_function_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7093,6 +7837,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_function_expression_row(&self, ordinal: u32) -> &FunctionExpressionRow {
+        self.function_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7115,6 +7868,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_as_expression_row(&self, ordinal: u32) -> &AsExpressionRow {
+        self.as_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_satisfies_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7131,6 +7893,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_satisfies_expression_row(&self, ordinal: u32) -> &SatisfiesExpressionRow {
+        self.satisfies_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7153,6 +7924,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_conditional_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &ConditionalExpressionRow {
+        self.conditional_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_property_access_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7169,6 +7952,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_property_access_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &PropertyAccessExpressionRow {
+        self.property_access_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7191,6 +7986,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_element_access_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &ElementAccessExpressionRow {
+        self.element_access_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_call_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7207,6 +8014,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_call_expression_row(&self, ordinal: u32) -> &CallExpressionRow {
+        self.call_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7229,6 +8045,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_new_expression_row(&self, ordinal: u32) -> &NewExpressionRow {
+        self.new_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_meta_property<'a>(
         &'a self,
         ordinal: u32,
@@ -7245,6 +8070,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_meta_property_row(&self, ordinal: u32) -> &MetaPropertyRow {
+        self.meta_property
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7267,6 +8101,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_non_null_expression_row(&self, ordinal: u32) -> &NonNullExpressionRow {
+        self.non_null_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_spread_element<'a>(
         &'a self,
         ordinal: u32,
@@ -7283,6 +8126,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_spread_element_row(&self, ordinal: u32) -> &SpreadElementRow {
+        self.spread_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7305,6 +8157,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_template_expression_row(&self, ordinal: u32) -> &TemplateExpressionRow {
+        self.template_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_template_span<'a>(
         &'a self,
         ordinal: u32,
@@ -7321,6 +8182,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_template_span_row(&self, ordinal: u32) -> &TemplateSpanRow {
+        self.template_span
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7343,6 +8213,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_tagged_template_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &TaggedTemplateExpressionRow {
+        self.tagged_template_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_parenthesized_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7359,6 +8241,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_parenthesized_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &ParenthesizedExpressionRow {
+        self.parenthesized_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7381,6 +8275,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_array_literal_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &ArrayLiteralExpressionRow {
+        self.array_literal_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_object_literal_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7397,6 +8303,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_object_literal_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &ObjectLiteralExpressionRow {
+        self.object_literal_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7419,6 +8337,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_spread_assignment_row(&self, ordinal: u32) -> &SpreadAssignmentRow {
+        self.spread_assignment
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_property_assignment<'a>(
         &'a self,
         ordinal: u32,
@@ -7435,6 +8362,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_property_assignment_row(&self, ordinal: u32) -> &PropertyAssignmentRow {
+        self.property_assignment
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7457,6 +8393,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_shorthand_property_assignment_row(
+        &self,
+        ordinal: u32,
+    ) -> &ShorthandPropertyAssignmentRow {
+        self.shorthand_property_assignment
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_delete_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7473,6 +8421,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_delete_expression_row(&self, ordinal: u32) -> &DeleteExpressionRow {
+        self.delete_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7495,6 +8452,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_type_of_expression_row(&self, ordinal: u32) -> &TypeOfExpressionRow {
+        self.type_of_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_void_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -7511,6 +8477,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_void_expression_row(&self, ordinal: u32) -> &VoidExpressionRow {
+        self.void_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7533,6 +8508,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_await_expression_row(&self, ordinal: u32) -> &AwaitExpressionRow {
+        self.await_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_assertion<'a>(
         &'a self,
         ordinal: u32,
@@ -7551,6 +8535,15 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_type_assertion_row(&self, ordinal: u32) -> &TypeAssertionRow {
+        self.type_assertion
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_keyword_type_node<'a>(
@@ -7560,6 +8553,12 @@ impl AstPayloadStore {
         end: i32,
     ) -> KeywordTypeNodeDataRead<'a> {
         KeywordTypeNodeDataRead::from_stored(&KeywordTypeNodeRow {}, context, ordinal, end)
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_keyword_type_node_row(&self, _ordinal: u32) -> &KeywordTypeNodeRow {
+        &KeywordTypeNodeRow {}
     }
 
     #[inline]
@@ -7582,6 +8581,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_union_type_node_row(&self, ordinal: u32) -> &UnionTypeNodeRow {
+        self.union_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_intersection_type_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7598,6 +8606,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_intersection_type_node_row(
+        &self,
+        ordinal: u32,
+    ) -> &IntersectionTypeNodeRow {
+        self.intersection_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7620,6 +8640,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_conditional_type_node_row(&self, ordinal: u32) -> &ConditionalTypeNodeRow {
+        self.conditional_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_operator_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7636,6 +8665,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_type_operator_node_row(&self, ordinal: u32) -> &TypeOperatorNodeRow {
+        self.type_operator_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7658,6 +8696,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_infer_type_node_row(&self, ordinal: u32) -> &InferTypeNodeRow {
+        self.infer_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_array_type_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7674,6 +8721,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_array_type_node_row(&self, ordinal: u32) -> &ArrayTypeNodeRow {
+        self.array_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7696,6 +8752,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_indexed_access_type_node_row(
+        &self,
+        ordinal: u32,
+    ) -> &IndexedAccessTypeNodeRow {
+        self.indexed_access_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_reference_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7712,6 +8780,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_type_reference_node_row(&self, ordinal: u32) -> &TypeReferenceNodeRow {
+        self.type_reference_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7734,6 +8811,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_expression_with_type_arguments_row(
+        &self,
+        ordinal: u32,
+    ) -> &ExpressionWithTypeArgumentsRow {
+        self.expression_with_type_arguments
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_literal_type_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7752,6 +8841,15 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_literal_type_node_row(&self, ordinal: u32) -> &LiteralTypeNodeRow {
+        self.literal_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_this_type_node<'a>(
@@ -7761,6 +8859,12 @@ impl AstPayloadStore {
         end: i32,
     ) -> ThisTypeNodeDataRead<'a> {
         ThisTypeNodeDataRead::from_stored(&ThisTypeNodeRow {}, context, ordinal, end)
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_this_type_node_row(&self, _ordinal: u32) -> &ThisTypeNodeRow {
+        &ThisTypeNodeRow {}
     }
 
     #[inline]
@@ -7783,6 +8887,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_type_predicate_node_row(&self, ordinal: u32) -> &TypePredicateNodeRow {
+        self.type_predicate_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_import_attribute<'a>(
         &'a self,
         ordinal: u32,
@@ -7799,6 +8912,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_import_attribute_row(&self, ordinal: u32) -> &ImportAttributeRow {
+        self.import_attribute
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7821,6 +8943,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_import_attributes_row(&self, ordinal: u32) -> &ImportAttributesRow {
+        self.import_attributes
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_query_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7837,6 +8968,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_type_query_node_row(&self, ordinal: u32) -> &TypeQueryNodeRow {
+        self.type_query_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7859,6 +8999,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_mapped_type_node_row(&self, ordinal: u32) -> &MappedTypeNodeRow {
+        self.mapped_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_literal_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7875,6 +9024,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_type_literal_node_row(&self, ordinal: u32) -> &TypeLiteralNodeRow {
+        self.type_literal_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7897,6 +9055,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_tuple_type_node_row(&self, ordinal: u32) -> &TupleTypeNodeRow {
+        self.tuple_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_named_tuple_member<'a>(
         &'a self,
         ordinal: u32,
@@ -7913,6 +9080,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_named_tuple_member_row(&self, ordinal: u32) -> &NamedTupleMemberRow {
+        self.named_tuple_member
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7935,6 +9111,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_optional_type_node_row(&self, ordinal: u32) -> &OptionalTypeNodeRow {
+        self.optional_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_rest_type_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7951,6 +9136,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_rest_type_node_row(&self, ordinal: u32) -> &RestTypeNodeRow {
+        self.rest_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -7973,6 +9167,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_parenthesized_type_node_row(
+        &self,
+        ordinal: u32,
+    ) -> &ParenthesizedTypeNodeRow {
+        self.parenthesized_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_function_type_node<'a>(
         &'a self,
         ordinal: u32,
@@ -7989,6 +9195,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_function_type_node_row(&self, ordinal: u32) -> &FunctionTypeNodeRow {
+        self.function_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8011,6 +9226,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_constructor_type_node_row(&self, ordinal: u32) -> &ConstructorTypeNodeRow {
+        self.constructor_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_template_head<'a>(
         &'a self,
         ordinal: u32,
@@ -8027,6 +9251,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_template_head_row(&self, ordinal: u32) -> &TemplateHeadRow {
+        self.template_head
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8049,6 +9282,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_template_middle_row(&self, ordinal: u32) -> &TemplateMiddleRow {
+        self.template_middle
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_template_tail<'a>(
         &'a self,
         ordinal: u32,
@@ -8065,6 +9307,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_template_tail_row(&self, ordinal: u32) -> &TemplateTailRow {
+        self.template_tail
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8087,6 +9338,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_template_literal_type_node_row(
+        &self,
+        ordinal: u32,
+    ) -> &TemplateLiteralTypeNodeRow {
+        self.template_literal_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_template_literal_type_span<'a>(
         &'a self,
         ordinal: u32,
@@ -8103,6 +9366,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_template_literal_type_span_row(
+        &self,
+        ordinal: u32,
+    ) -> &TemplateLiteralTypeSpanRow {
+        self.template_literal_type_span
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8125,6 +9400,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_synthetic_expression_row(&self, ordinal: u32) -> &SyntheticExpressionRow {
+        self.synthetic_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_partially_emitted_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -8141,6 +9425,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_partially_emitted_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &PartiallyEmittedExpressionRow {
+        self.partially_emitted_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8163,6 +9459,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_element_row(&self, ordinal: u32) -> &JsxElementRow {
+        self.jsx_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_jsx_attributes<'a>(
         &'a self,
         ordinal: u32,
@@ -8179,6 +9484,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_jsx_attributes_row(&self, ordinal: u32) -> &JsxAttributesRow {
+        self.jsx_attributes
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8201,6 +9515,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_namespaced_name_row(&self, ordinal: u32) -> &JsxNamespacedNameRow {
+        self.jsx_namespaced_name
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_jsx_opening_element<'a>(
         &'a self,
         ordinal: u32,
@@ -8217,6 +9540,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_jsx_opening_element_row(&self, ordinal: u32) -> &JsxOpeningElementRow {
+        self.jsx_opening_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8239,6 +9571,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_self_closing_element_row(
+        &self,
+        ordinal: u32,
+    ) -> &JsxSelfClosingElementRow {
+        self.jsx_self_closing_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_jsx_fragment<'a>(
         &'a self,
         ordinal: u32,
@@ -8257,6 +9601,15 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_jsx_fragment_row(&self, ordinal: u32) -> &JsxFragmentRow {
+        self.jsx_fragment
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_jsx_opening_fragment<'a>(
@@ -8268,6 +9621,12 @@ impl AstPayloadStore {
         JsxOpeningFragmentDataRead::from_stored(&JsxOpeningFragmentRow {}, context, ordinal, end)
     }
 
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_jsx_opening_fragment_row(&self, _ordinal: u32) -> &JsxOpeningFragmentRow {
+        &JsxOpeningFragmentRow {}
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_jsx_closing_fragment<'a>(
@@ -8277,6 +9636,12 @@ impl AstPayloadStore {
         end: i32,
     ) -> JsxClosingFragmentDataRead<'a> {
         JsxClosingFragmentDataRead::from_stored(&JsxClosingFragmentRow {}, context, ordinal, end)
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_jsx_closing_fragment_row(&self, _ordinal: u32) -> &JsxClosingFragmentRow {
+        &JsxClosingFragmentRow {}
     }
 
     #[inline]
@@ -8299,6 +9664,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_attribute_row(&self, ordinal: u32) -> &JsxAttributeRow {
+        self.jsx_attribute
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_jsx_spread_attribute<'a>(
         &'a self,
         ordinal: u32,
@@ -8315,6 +9689,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_jsx_spread_attribute_row(&self, ordinal: u32) -> &JsxSpreadAttributeRow {
+        self.jsx_spread_attribute
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8337,6 +9720,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_closing_element_row(&self, ordinal: u32) -> &JsxClosingElementRow {
+        self.jsx_closing_element
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_jsx_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -8353,6 +9745,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_jsx_expression_row(&self, ordinal: u32) -> &JsxExpressionRow {
+        self.jsx_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8375,6 +9776,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_jsx_text_row(&self, ordinal: u32) -> &JsxTextRow {
+        self.jsx_text
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_syntax_list<'a>(
         &'a self,
         ordinal: u32,
@@ -8391,6 +9801,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_syntax_list_row(&self, ordinal: u32) -> &SyntaxListRow {
+        self.syntax_list
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8413,6 +9832,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_row(&self, ordinal: u32) -> &JSDocRow {
+        self.js_doc
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_type_expression<'a>(
         &'a self,
         ordinal: u32,
@@ -8429,6 +9857,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_type_expression_row(&self, ordinal: u32) -> &JSDocTypeExpressionRow {
+        self.js_doc_type_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8451,6 +9888,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_non_nullable_type_row(
+        &self,
+        ordinal: u32,
+    ) -> &JSDocNonNullableTypeRow {
+        self.js_doc_non_nullable_type
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_nullable_type<'a>(
         &'a self,
         ordinal: u32,
@@ -8469,6 +9918,15 @@ impl AstPayloadStore {
         )
     }
 
+    #[inline]
+    pub(crate) fn local_js_doc_nullable_type_row(&self, ordinal: u32) -> &JSDocNullableTypeRow {
+        self.js_doc_nullable_type
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.
     #[inline]
     pub(crate) fn read_js_doc_all_type<'a>(
@@ -8478,6 +9936,12 @@ impl AstPayloadStore {
         end: i32,
     ) -> JSDocAllTypeDataRead<'a> {
         JSDocAllTypeDataRead::from_stored(&JSDocAllTypeRow {}, context, ordinal, end)
+    }
+
+    #[allow(clippy::unused_self)] // Payloadless shapes have no page or ordinal to resolve.
+    #[inline]
+    pub(crate) fn local_js_doc_all_type_row(&self, _ordinal: u32) -> &JSDocAllTypeRow {
+        &JSDocAllTypeRow {}
     }
 
     #[inline]
@@ -8500,6 +9964,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_variadic_type_row(&self, ordinal: u32) -> &JSDocVariadicTypeRow {
+        self.js_doc_variadic_type
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_optional_type<'a>(
         &'a self,
         ordinal: u32,
@@ -8516,6 +9989,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_optional_type_row(&self, ordinal: u32) -> &JSDocOptionalTypeRow {
+        self.js_doc_optional_type
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8538,6 +10020,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_type_tag_row(&self, ordinal: u32) -> &JSDocTypeTagRow {
+        self.js_doc_type_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_unknown_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8554,6 +10045,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_unknown_tag_row(&self, ordinal: u32) -> &JSDocUnknownTagRow {
+        self.js_doc_unknown_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8576,6 +10076,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_template_tag_row(&self, ordinal: u32) -> &JSDocTemplateTagRow {
+        self.js_doc_template_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_return_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8592,6 +10101,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_return_tag_row(&self, ordinal: u32) -> &JSDocReturnTagRow {
+        self.js_doc_return_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8614,6 +10132,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_public_tag_row(&self, ordinal: u32) -> &JSDocPublicTagRow {
+        self.js_doc_public_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_private_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8630,6 +10157,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_private_tag_row(&self, ordinal: u32) -> &JSDocPrivateTagRow {
+        self.js_doc_private_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8652,6 +10188,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_protected_tag_row(&self, ordinal: u32) -> &JSDocProtectedTagRow {
+        self.js_doc_protected_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_readonly_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8668,6 +10213,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_readonly_tag_row(&self, ordinal: u32) -> &JSDocReadonlyTagRow {
+        self.js_doc_readonly_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8690,6 +10244,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_override_tag_row(&self, ordinal: u32) -> &JSDocOverrideTagRow {
+        self.js_doc_override_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_deprecated_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8706,6 +10269,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_deprecated_tag_row(&self, ordinal: u32) -> &JSDocDeprecatedTagRow {
+        self.js_doc_deprecated_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8728,6 +10300,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_see_tag_row(&self, ordinal: u32) -> &JSDocSeeTagRow {
+        self.js_doc_see_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_implements_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8744,6 +10325,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_implements_tag_row(&self, ordinal: u32) -> &JSDocImplementsTagRow {
+        self.js_doc_implements_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8766,6 +10356,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_augments_tag_row(&self, ordinal: u32) -> &JSDocAugmentsTagRow {
+        self.js_doc_augments_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_satisfies_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8782,6 +10381,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_satisfies_tag_row(&self, ordinal: u32) -> &JSDocSatisfiesTagRow {
+        self.js_doc_satisfies_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8804,6 +10412,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_throws_tag_row(&self, ordinal: u32) -> &JSDocThrowsTagRow {
+        self.js_doc_throws_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_this_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8820,6 +10437,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_this_tag_row(&self, ordinal: u32) -> &JSDocThisTagRow {
+        self.js_doc_this_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8842,6 +10468,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_import_tag_row(&self, ordinal: u32) -> &JSDocImportTagRow {
+        self.js_doc_import_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_callback_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8858,6 +10493,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_callback_tag_row(&self, ordinal: u32) -> &JSDocCallbackTagRow {
+        self.js_doc_callback_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8880,6 +10524,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_overload_tag_row(&self, ordinal: u32) -> &JSDocOverloadTagRow {
+        self.js_doc_overload_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_typedef_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -8896,6 +10549,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_typedef_tag_row(&self, ordinal: u32) -> &JSDocTypedefTagRow {
+        self.js_doc_typedef_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8918,6 +10580,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_signature_row(&self, ordinal: u32) -> &JSDocSignatureRow {
+        self.js_doc_signature
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_name_reference<'a>(
         &'a self,
         ordinal: u32,
@@ -8934,6 +10605,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_name_reference_row(&self, ordinal: u32) -> &JSDocNameReferenceRow {
+        self.js_doc_name_reference
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8956,6 +10636,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_source_file_row(&self, ordinal: u32) -> &SourceFileRow {
+        self.source_file
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_module_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -8972,6 +10661,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_module_declaration_row(&self, ordinal: u32) -> &ModuleDeclarationRow {
+        self.module_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -8994,6 +10692,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_import_equals_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &ImportEqualsDeclarationRow {
+        self.import_equals_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_export_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -9010,6 +10720,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_export_declaration_row(&self, ordinal: u32) -> &ExportDeclarationRow {
+        self.export_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -9032,6 +10751,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_import_type_node_row(&self, ordinal: u32) -> &ImportTypeNodeRow {
+        self.import_type_node
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_import_clause<'a>(
         &'a self,
         ordinal: u32,
@@ -9048,6 +10776,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_import_clause_row(&self, ordinal: u32) -> &ImportClauseRow {
+        self.import_clause
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -9070,6 +10807,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_import_specifier_row(&self, ordinal: u32) -> &ImportSpecifierRow {
+        self.import_specifier
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_text<'a>(
         &'a self,
         ordinal: u32,
@@ -9086,6 +10832,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_text_row(&self, ordinal: u32) -> &JSDocTextRow {
+        self.js_doc_text
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -9108,6 +10863,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_link_row(&self, ordinal: u32) -> &JSDocLinkRow {
+        self.js_doc_link
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_link_plain<'a>(
         &'a self,
         ordinal: u32,
@@ -9124,6 +10888,15 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_link_plain_row(&self, ordinal: u32) -> &JSDocLinkPlainRow {
+        self.js_doc_link_plain
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -9146,6 +10919,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_link_code_row(&self, ordinal: u32) -> &JSDocLinkCodeRow {
+        self.js_doc_link_code
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_type_parameter_declaration<'a>(
         &'a self,
         ordinal: u32,
@@ -9162,6 +10944,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_type_parameter_declaration_row(
+        &self,
+        ordinal: u32,
+    ) -> &TypeParameterDeclarationRow {
+        self.type_parameter_declaration
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     #[inline]
@@ -9184,6 +10978,18 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_synthetic_reference_expression_row(
+        &self,
+        ordinal: u32,
+    ) -> &SyntheticReferenceExpressionRow {
+        self.synthetic_reference_expression
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_type_literal<'a>(
         &'a self,
         ordinal: u32,
@@ -9203,6 +11009,15 @@ impl AstPayloadStore {
     }
 
     #[inline]
+    pub(crate) fn local_js_doc_type_literal_row(&self, ordinal: u32) -> &JSDocTypeLiteralRow {
+        self.js_doc_type_literal
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
+    }
+
+    #[inline]
     pub(crate) fn read_js_doc_parameter_or_property_tag<'a>(
         &'a self,
         ordinal: u32,
@@ -9219,6 +11034,18 @@ impl AstPayloadStore {
             ordinal,
             end,
         )
+    }
+
+    #[inline]
+    pub(crate) fn local_js_doc_parameter_or_property_tag_row(
+        &self,
+        ordinal: u32,
+    ) -> &JSDocParameterOrPropertyTagRow {
+        self.js_doc_parameter_or_property_tag
+            .as_ref()
+            .expect("compact shape directory")
+            .get(ordinal)
+            .expect("compact payload ordinal")
     }
 
     pub(crate) fn read<'a>(
@@ -19606,8 +21433,13 @@ impl AstPayloadStore {
         }
     }
 
-    /// Narrow binding writes do not modify syntax edges or its validation proof.
+    #[inline]
     pub(crate) fn set_flow_node(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {
+        self.set_local_flow_node(shape, ordinal, word)
+    }
+
+    /// Narrow binding writes do not modify syntax edges or its validation proof.
+    pub(crate) fn set_local_flow_node(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {
         match shape {
             1 => {
                 self.identifier

@@ -5,7 +5,7 @@ use ts_ast::{
     SymbolId, SymbolTable, SymbolTableId, SyntaxKind as K,
 };
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.addLateBoundAssignmentDeclarationToSymbol
     pub fn add_late_bound_assignment_declaration_to_symbol(
         &mut self,

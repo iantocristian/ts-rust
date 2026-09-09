@@ -4,15 +4,20 @@ use ts_ast::{
     SyntaxKind as K,
 };
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bind
     pub fn bind(&mut self, node: Option<NodeId>) -> bool {
         if node.is_none() {
             return false;
         }
+        if let crate::backend::Backend::Local(local) = &self.builder {
+            if let Ok(node) = local.import_node(node.expect("nonnull bind input")) {
+                return self.bind_local_entry(node);
+            }
+        }
         crate::recursion::guarded(|| self.bind_worker(node))
     }
-    fn bind_worker(&mut self, node: Option<NodeId>) -> bool {
+    pub(crate) fn bind_worker(&mut self, node: Option<NodeId>) -> bool {
         let Some(node) = node else {
             return false;
         };

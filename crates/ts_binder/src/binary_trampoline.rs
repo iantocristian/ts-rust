@@ -15,7 +15,7 @@ enum Step {
     AfterRight(NodeId),
     Exit(Exit),
 }
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     pub(crate) fn bind_binary_expression_trampoline(&mut self, node: NodeId) {
         let expression = payload!(self, node, as_binary_expression);
         let left = expression.left;

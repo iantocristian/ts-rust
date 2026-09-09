@@ -12,6 +12,9 @@ use std::{
 };
 use ts_arena::{Error, InitializationDomain, InitializationGuard, SymbolId};
 
+#[path = "local_bind.rs"]
+pub mod local_bind;
+
 /// Fields absent from the parsed syntax representation, indexed by stable NodeId.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodeBinding {
@@ -36,6 +39,7 @@ pub struct BindResult {
     source: NodeId,
     multiple_sources: bool,
     direct_nodes: bool,
+    used_local_scope: bool,
     nodes: NodeMap<Node>,
     bindings: NodeMap<NodeBinding>,
     flow_bindings: NodeMap<FlowId>,
@@ -50,7 +54,98 @@ pub struct BindResult {
     pub(crate) symbol_count: isize,
     pub(crate) pattern_ambient_modules: Vec<PatternAmbientModule>,
 }
+
+enum ColdBindingWrite {
+    Absent,
+    Applied,
+    NeedsMaterialization,
+}
+
 impl BindResult {
+    /// The writer checks the target first. This shared step checks only the
+    /// referenced namespace and must finish before any binding record changes.
+    fn validate_binding_value(
+        &self,
+        parsed: AstView<'_>,
+        write: BindingWrite,
+    ) -> Result<(), Error> {
+        match write {
+            BindingWrite::Symbol(Some(value)) | BindingWrite::LocalSymbol(Some(value)) => {
+                self.symbols().get(value)?;
+            }
+            BindingWrite::Locals(Some(value)) => {
+                self.tables.get(value)?;
+            }
+            BindingWrite::NextContainer(Some(value)) => {
+                parsed.node(value)?;
+            }
+            BindingWrite::Flow(Some(value))
+            | BindingWrite::ReturnFlow(Some(value))
+            | BindingWrite::EndFlow(Some(value))
+            | BindingWrite::FallthroughFlow(Some(value)) => {
+                self.flows.get(value)?;
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
+    /// A materialized record supersedes every inline field. A flow-only record
+    /// can be updated here, but promotion waits for the caller's checked read.
+    #[inline]
+    fn write_existing_binding(&mut self, id: NodeId, write: BindingWrite) -> ColdBindingWrite {
+        if !self.bindings.is_empty() {
+            if let Some(binding) = self.bindings.get_mut(&id) {
+                write.apply(binding);
+                return ColdBindingWrite::Applied;
+            }
+        }
+        if !self.flow_bindings.is_empty() && self.flow_bindings.contains_key(&id) {
+            if let BindingWrite::Flow(flow) = write {
+                if let Some(flow) = flow {
+                    self.flow_bindings.insert(id, flow);
+                } else {
+                    self.flow_bindings.remove(&id);
+                }
+                return ColdBindingWrite::Applied;
+            }
+            return ColdBindingWrite::NeedsMaterialization;
+        }
+        ColdBindingWrite::Absent
+    }
+
+    fn materialize_binding(&mut self, id: NodeId, inline: Option<NodeBinding>) -> &mut NodeBinding {
+        let inline = inline.unwrap_or_default();
+        let flow = self.flow_bindings.remove(&id);
+        self.bindings.entry(id).or_insert_with(|| NodeBinding {
+            flow_node: flow.or(inline.flow_node),
+            ..inline
+        })
+    }
+
+    /// Finish a checked write when the concrete shape cannot store it inline.
+    /// Clearing a sparse flow removes it; clearing a materialized record keeps
+    /// that record's presence and the other fields inherited from the header.
+    fn write_fallback_binding(
+        &mut self,
+        id: NodeId,
+        write: BindingWrite,
+        inline: Option<NodeBinding>,
+    ) {
+        if let BindingWrite::Flow(flow) = write {
+            if let Some(mut binding) = inline {
+                binding.flow_node = flow;
+                self.bindings.insert(id, binding);
+            } else if let Some(flow) = flow {
+                self.flow_bindings.insert(id, flow);
+            } else {
+                self.flow_bindings.remove(&id);
+            }
+        } else {
+            write.apply(self.materialize_binding(id, inline));
+        }
+    }
+
     /// Development-only table capacities, not malloc or resident-byte metrics.
     #[cfg(feature = "layout-profile")]
     pub fn layout_profile(&self) -> [usize; 3] {
@@ -78,6 +173,7 @@ impl BindResult {
             source,
             multiple_sources,
             direct_nodes: false,
+            used_local_scope: false,
             nodes: NodeMap::default(),
             bindings: NodeMap::default(),
             flow_bindings: NodeMap::default(),
@@ -476,48 +572,15 @@ impl BindBuilder<'_> {
     }
     fn set_binding_field(&mut self, id: NodeId, write: BindingWrite) -> Result<(), Error> {
         self.validate_write_owner(id)?;
-        match write {
-            BindingWrite::Symbol(value) | BindingWrite::LocalSymbol(value) => {
-                if let Some(value) = value {
-                    self.result.symbols().get(value)?;
-                }
-            }
-            BindingWrite::Locals(value) => {
-                if let Some(value) = value {
-                    self.result.tables.get(value)?;
-                }
-            }
-            BindingWrite::NextContainer(value) => {
-                if let Some(value) = value {
-                    self.parsed_view().node(value)?;
-                }
-            }
-            BindingWrite::Flow(value)
-            | BindingWrite::ReturnFlow(value)
-            | BindingWrite::EndFlow(value)
-            | BindingWrite::FallthroughFlow(value) => {
-                if let Some(value) = value {
-                    self.result.flows.get(value)?;
-                }
-            }
-        }
-        if !self.result.bindings.is_empty() {
-            if let Some(binding) = self.result.bindings.get_mut(&id) {
-                write.apply(binding);
+        self.result
+            .validate_binding_value(self.parsed_view(), write)?;
+        match self.result.write_existing_binding(id, write) {
+            ColdBindingWrite::Applied => return Ok(()),
+            ColdBindingWrite::NeedsMaterialization => {
+                write.apply(self.binding_mut(id)?);
                 return Ok(());
             }
-        }
-        if !self.result.flow_bindings.is_empty() && self.result.flow_bindings.contains_key(&id) {
-            if let BindingWrite::Flow(flow) = write {
-                if let Some(flow) = flow {
-                    self.result.flow_bindings.insert(id, flow);
-                } else {
-                    self.result.flow_bindings.remove(&id);
-                }
-            } else {
-                write.apply(self.binding_mut(id)?);
-            }
-            return Ok(());
+            ColdBindingWrite::Absent => {}
         }
         if let BindStorage::Exclusive(parsed) = &mut self.storage {
             if id.arena() == self.result.source.arena() && parsed.write_binding_field(id, write)? {
@@ -527,32 +590,13 @@ impl BindBuilder<'_> {
         // Rare unsupported shapes and already-published owners keep the original
         // side records. A compatibility record supersedes every inline field.
         let inline = self.node(id)?.inline_binding();
-        if let BindingWrite::Flow(flow) = write {
-            if let Some(mut binding) = inline {
-                binding.flow_node = flow;
-                self.result.bindings.insert(id, binding);
-            } else if let Some(flow) = flow {
-                self.result.flow_bindings.insert(id, flow);
-            } else {
-                self.result.flow_bindings.remove(&id);
-            }
-        } else {
-            write.apply(self.binding_mut(id)?);
-        }
+        self.result.write_fallback_binding(id, write, inline);
         Ok(())
     }
     pub fn binding_mut(&mut self, id: NodeId) -> Result<&mut NodeBinding, Error> {
         self.validate_write_owner(id)?;
-        let inline = self.node(id)?.inline_binding().unwrap_or_default();
-        let flow = self.result.flow_bindings.remove(&id);
-        Ok(self
-            .result
-            .bindings
-            .entry(id)
-            .or_insert_with(|| NodeBinding {
-                flow_node: flow.or(inline.flow_node),
-                ..inline
-            }))
+        let inline = self.node(id)?.inline_binding();
+        Ok(self.result.materialize_binding(id, inline))
     }
     pub fn symbols(&self) -> SymbolsRead<'_> {
         self.result.symbols()
@@ -921,6 +965,11 @@ impl CompletedFile {
     /// Diagnostic provenance for the A0 experiment, not a parity metric.
     pub fn bound_in_place(&self) -> bool {
         self.view().result.direct_nodes
+    }
+    /// Records whether binding actually entered the scoped local backend.
+    /// This describes path selection, not correctness or performance acceptance.
+    pub fn bound_with_local_scope(&self) -> bool {
+        self.view().result.used_local_scope
     }
     pub fn retain_symbol(&self, id: SymbolId) -> Result<CompletedSymbol, Error> {
         self.view().symbol(id)?;

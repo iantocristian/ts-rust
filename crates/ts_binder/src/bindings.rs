@@ -5,7 +5,7 @@ use ts_ast::{
 };
 use ts_diagnostics as d;
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindPropertyWorker
     pub fn bind_property_worker(&mut self, node: NodeId) {
         let accessor = checked(a::is_auto_accessor_property_declaration(self.view(), node));

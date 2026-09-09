@@ -1,4 +1,8 @@
 //! File binding and hook-driven name/reference resolution at the pinned source.
+mod backend;
+mod local;
+#[cfg(test)]
+mod local_tests;
 mod state;
 pub use state::ContainerFlags;
 pub(crate) use state::{ActiveLabel, Binder};
@@ -76,8 +80,18 @@ pub fn bind_parsed_file(
 }
 
 fn initialize_binding(builder: &mut ts_ast::BindBuilder<'_>) {
-    let source = builder.source();
-    let mut binder = Binder::new(builder);
+    if builder
+        .with_local_scope(|local| {
+            run_binding(Binder::from_backend(backend::Backend::Local(local)));
+        })
+        .is_none()
+    {
+        run_binding(Binder::new(builder));
+    }
+}
+
+fn run_binding(mut binder: Binder<'_, '_, '_>) {
+    let source = binder.file;
     binder.unreachable_flow = Some(binder.new_flow_node(ts_ast::flow_flags::UNREACHABLE));
     binder.bind(Some(source));
     binder.bind_deferred_expando_assignments();

@@ -33,8 +33,8 @@ pub(crate) struct ActiveLabel {
     pub referenced: bool,
 }
 
-pub(crate) struct Binder<'build, 'ast> {
-    pub builder: &'build mut BindBuilder<'ast>,
+pub(crate) struct Binder<'build, 'scope, 'ast> {
+    pub builder: crate::backend::Backend<'build, 'scope, 'ast>,
     pub file: NodeId,
     pub unreachable_flow: Option<FlowId>,
     pub container: Option<NodeId>,
@@ -57,13 +57,24 @@ pub(crate) struct Binder<'build, 'ast> {
     pub has_flow_effects: bool,
     pub in_assignment_pattern: bool,
     pub seen_parse_error: bool,
+    pub source_has_parse_errors: bool,
+    pub source_is_external_module: bool,
     pub symbol_count: isize,
     pub not_const_enum_only_modules: HashSet<SymbolId>,
     pub expando_assignments: Vec<ExpandoAssignmentInfo>,
 }
-impl<'build, 'ast> Binder<'build, 'ast> {
+impl<'build, 'scope, 'ast> Binder<'build, 'scope, 'ast> {
     pub fn new(builder: &'build mut BindBuilder<'ast>) -> Self {
+        Self::from_backend(crate::backend::Backend::Checked(builder))
+    }
+    pub fn from_backend(builder: crate::backend::Backend<'build, 'scope, 'ast>) -> Self {
         let file = builder.source();
+        let source = builder
+            .view()
+            .source_file(file)
+            .expect("validated binding source");
+        let source_has_parse_errors = !source.diagnostics.is_empty();
+        let source_is_external_module = source.external_module_indicator.is_some();
         Self {
             builder,
             file,
@@ -88,6 +99,8 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             has_flow_effects: false,
             in_assignment_pattern: false,
             seen_parse_error: false,
+            source_has_parse_errors,
+            source_is_external_module,
             symbol_count: 0,
             not_const_enum_only_modules: HashSet::new(),
             expando_assignments: Vec::new(),

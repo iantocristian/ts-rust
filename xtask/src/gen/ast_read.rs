@@ -113,7 +113,7 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
             code.push_str(&format!("            {member}: self.{getter}(),\n"));
         }
         code.push_str("        }\n    }\n");
-        emit_children(&mut code, node)?;
+        emit_children(&mut code, node, "ChildVisitor")?;
         code.push_str("}\n\n");
         code.push_str(&format!(
             "/// Borrowed {name} payload selected by its concrete storage shape.\n/// The view cannot outlive its originating node read.\npub struct {view}<'read, 'owner> {{\n    node: &'read NodeRead<'owner>,\n"
@@ -233,11 +233,11 @@ fn emit_child_call(code: &mut String, field: &Value, indent: &str) -> Result<(),
     Ok(())
 }
 
-fn emit_children(code: &mut String, node: &Value) -> Result<(), String> {
+pub(super) fn emit_children(code: &mut String, node: &Value, visitor: &str) -> Result<(), String> {
     let children = children(node)?;
-    code.push_str(
-        "    pub fn for_each_child(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n",
-    );
+    code.push_str(&format!(
+        "    pub fn for_each_child(&self, visitor: &mut impl {visitor}) -> ControlFlow<()> {{\n",
+    ));
     if children.is_empty() {
         code.push_str("        let _ = visitor;\n");
     } else if flag(node, "handWrittenVisitor") {
@@ -378,11 +378,7 @@ fn emit_runtime_data(code: &mut String, nodes: &[Value]) -> Result<(), String> {
     }
     code.push_str("        }\n        Ok(())\n    }\n    pub fn declaration_name_generated(&self) -> Option<NodeId> {\n        match self {\n");
     for node in nodes {
-        if !flag(node, "handWritten")
-            && array(node, "members")?.iter().any(|member| {
-                member["name"] == "name" && flag(member, "private") && !flag(member, "noFactory")
-            })
-        {
+        if super::ast::has_declaration_name(node)? {
             let name = string(node, "name")?;
             code.push_str(&format!("            Self::{name}(data) => data.name(),\n"));
         }

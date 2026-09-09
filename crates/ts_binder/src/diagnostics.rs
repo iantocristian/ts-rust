@@ -2,7 +2,7 @@ use crate::{ast as a, checked, need, Binder};
 use ts_ast::{node_flags as nf, AstView, Diagnostic, JsString, NodeId, SyntaxKind as K};
 use ts_diagnostics::{self as d, Message};
 
-impl Binder<'_, '_> {
+impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.errorOnNode
     pub fn error_on_node(&mut self, node: NodeId, message: &'static Message, args: Vec<JsString>) {
         let diagnostic = self.create_diagnostic_for_node(node, message, args);
@@ -46,59 +46,89 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.checkContextualIdentifier
     pub fn check_contextual_identifier(&mut self, node: NodeId) {
-        if checked(self.view().source_file(self.file))
-            .diagnostics
-            .is_empty()
-            && self.n(node).flags() & (nf::AMBIENT | nf::JS_DOC) == 0
+        if self.source_has_parse_errors {
+            return;
+        }
+        let flags = if let crate::backend::Backend::Local(local) = &self.builder {
+            if let Ok(id) = local.import_node(node) {
+                if local.node(id).as_identifier().is_some() {
+                    self.check_local_contextual_identifier(id);
+                    return;
+                }
+            }
+            self.n(node).flags()
+        } else {
+            self.n(node).flags()
+        };
+        if flags & (nf::AMBIENT | nf::JS_DOC) == 0
             && !checked(a::is_identifier_name(self.view(), node))
         {
-            let keyword = {
-                let text = self.view().node_text(node).expect("text payload required");
-                ts_scanner::get_identifier_token(text.as_bytes())
-            };
-            if keyword == K::Identifier {
-                return;
-            }
-            let message = if keyword >= K::FirstFutureReservedWord
-                && keyword <= K::LastFutureReservedWord
-            {
+            let text = self.view().node_text(node).expect("text payload required");
+            let keyword = ts_scanner::get_identifier_token(text.as_bytes());
+            self.check_contextual_keyword(node, keyword, flags);
+        }
+    }
+    pub(crate) fn check_local_contextual_identifier(
+        &mut self,
+        node: ts_ast::local_bind::BindNode<'scope>,
+    ) {
+        if self.source_has_parse_errors {
+            return;
+        }
+        let crate::backend::Backend::Local(local) = &self.builder else {
+            unreachable!("local binder scope");
+        };
+        let read = local.node(node);
+        let flags = read.flags();
+        if flags & (nf::AMBIENT | nf::JS_DOC) != 0 || local.is_identifier_name(node) {
+            return;
+        }
+        // Preserve parent/name classification before reading identifier text.
+        let keyword = ts_scanner::get_identifier_token(
+            read.as_identifier().expect("Identifier payload").text(),
+        );
+        if keyword == K::Identifier {
+            return;
+        }
+        let id = local.node_id(node);
+        self.check_contextual_keyword(id, keyword, flags);
+    }
+    fn check_contextual_keyword(&mut self, node: NodeId, keyword: K, flags: u32) {
+        if keyword == K::Identifier {
+            return;
+        }
+        let message =
+            if keyword >= K::FirstFutureReservedWord && keyword <= K::LastFutureReservedWord {
                 Some(self.get_strict_mode_identifier_message(node))
             } else if keyword == K::AwaitKeyword {
-                if checked(self.view().source_file(self.file))
-                    .external_module_indicator
-                    .is_some()
+                if self.source_is_external_module
                     && checked(a::is_in_top_level_context(self.view(), node))
                 {
                     Some(d::Identifier_expected_0_is_a_reserved_word_at_the_top_level_of_a_module)
-                } else if self.n(node).flags() & nf::AWAIT_CONTEXT != 0 {
+                } else if flags & nf::AWAIT_CONTEXT != 0 {
                     Some(d::Identifier_expected_0_is_a_reserved_word_that_cannot_be_used_here)
                 } else {
                     None
                 }
-            } else if keyword == K::YieldKeyword && self.n(node).flags() & nf::YIELD_CONTEXT != 0 {
+            } else if keyword == K::YieldKeyword && flags & nf::YIELD_CONTEXT != 0 {
                 Some(d::Identifier_expected_0_is_a_reserved_word_that_cannot_be_used_here)
             } else {
                 None
             };
-            if let Some(message) = message {
-                self.error_on_node(
-                    node,
-                    message,
-                    vec![checked(ts_scanner::declaration_name_to_string(
-                        self.view(),
-                        Some(node),
-                    ))],
-                );
-            }
+        if let Some(message) = message {
+            self.error_on_node(
+                node,
+                message,
+                vec![checked(ts_scanner::declaration_name_to_string(
+                    self.view(),
+                    Some(node),
+                ))],
+            );
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkPrivateIdentifier
     pub fn check_private_identifier(&mut self, node: NodeId) {
-        if self.text(node).as_bytes() == b"#constructor"
-            && checked(self.view().source_file(self.file))
-                .diagnostics
-                .is_empty()
-        {
+        if self.text(node).as_bytes() == b"#constructor" && !self.source_has_parse_errors {
             self.error_on_node(
                 node,
                 d::X_constructor_is_a_reserved_word,
@@ -113,10 +143,7 @@ impl Binder<'_, '_> {
     pub fn get_strict_mode_identifier_message(&self, node: NodeId) -> &'static Message {
         if checked(a::get_containing_class(self.view(), node)).is_some() {
             d::Identifier_expected_0_is_a_reserved_word_in_strict_mode_Class_definitions_are_automatically_in_strict_mode
-        } else if checked(self.view().source_file(self.file))
-            .external_module_indicator
-            .is_some()
-        {
+        } else if self.source_is_external_module {
             d::Identifier_expected_0_is_a_reserved_word_in_strict_mode_Modules_are_automatically_in_strict_mode
         } else {
             d::Identifier_expected_0_is_a_reserved_word_in_strict_mode
@@ -230,10 +257,7 @@ impl Binder<'_, '_> {
     pub fn get_strict_mode_eval_or_arguments_message(&self, node: NodeId) -> &'static Message {
         if checked(a::get_containing_class(self.view(), node)).is_some() {
             d::Code_contained_in_a_class_is_evaluated_in_JavaScript_s_strict_mode_which_does_not_allow_this_use_of_0_For_more_information_see_https_Colon_Slash_Slashdeveloper_mozilla_org_Slashen_US_Slashdocs_SlashWeb_SlashJavaScript_SlashReference_SlashStrict_mode
-        } else if checked(self.view().source_file(self.file))
-            .external_module_indicator
-            .is_some()
-        {
+        } else if self.source_is_external_module {
             d::Invalid_use_of_0_Modules_are_automatically_in_strict_mode
         } else {
             d::Invalid_use_of_0_in_strict_mode

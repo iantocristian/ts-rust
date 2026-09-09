@@ -1,5 +1,5 @@
 //! Core auxiliary identities select compact rows; lazy records keep full values.
-use crate::compact::{lists::CompactNodes, CoreStore, RowPages, StoredNode};
+use crate::compact::{lists::CompactNodes, CompactSlice, CoreStore, RowPages, StoredNode};
 use crate::{AstStorageData, NodeList, NodeSlice};
 use std::collections::HashMap;
 use ts_arena::{ArenaId, AuxId, AuxiliaryRead, Error, StorageRead, StorageView};
@@ -47,6 +47,51 @@ pub(crate) enum AuxValue<'a> {
 }
 
 impl AuxStore {
+    /// Admit only list representations whose links stay in the core owner.
+    /// Cold metadata and wide compact backing offsets do not require ID routing.
+    /// Inspect the exceptional collection, not every ordinary list/backing row.
+    pub(crate) fn local_lists_only(&self) -> bool {
+        self.foreign.is_empty()
+            && self
+                .cold
+                .iter()
+                .all(|value| !matches!(value, AstStorageData::List(_) | AstStorageData::Nodes(_)))
+    }
+
+    /// Copy the local backing word and range without reconstructing an AuxId.
+    /// A returned descriptor still requires backing-kind and range validation.
+    #[inline]
+    pub(crate) fn local_list(&self, record: &StoredAux) -> Option<CompactSlice> {
+        if record.kind != LIST {
+            return None;
+        }
+        let row = self.lists.get(record.row)?;
+        Some(CompactSlice {
+            backing: row.backing,
+            start: row.start,
+            len: row.len,
+        })
+    }
+
+    /// Keep full-width cold offsets intact; edge bounds are checked by the caller.
+    #[inline]
+    pub(crate) fn local_backing(&self, record: &StoredAux) -> Option<CompactNodes> {
+        match record.kind {
+            BACKING => {
+                let row = self.backings.get(record.row)?;
+                Some(CompactNodes {
+                    start: row.start as usize,
+                    len: row.len,
+                })
+            }
+            COLD => match self.cold.get(record.row as usize)? {
+                AstStorageData::CompactNodes(backing) => Some(*backing),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
     pub(crate) fn push(&mut self, value: AstStorageData, owner: ArenaId) -> StoredAux {
         match value {
             AstStorageData::List(list) => {
@@ -369,6 +414,9 @@ mod tests {
             owner,
         );
         assert_eq!(ordinary.kind, BACKING);
+        let local = store.local_backing(&ordinary).unwrap();
+        assert_eq!((local.start, local.len), (42, 8));
+        assert!(store.local_list(&ordinary).is_none());
         assert!(matches!(
             store.list_mut(&mut ordinary, owner),
             Err(Error::InvalidGraph)
@@ -383,8 +431,99 @@ mod tests {
             owner,
         );
         assert_eq!(wide.kind, COLD);
+        let local = store.local_backing(&wide).unwrap();
+        assert_eq!((local.start, local.len), (usize::MAX, 1));
+        assert!(store.local_lists_only());
         assert!(
             matches!(store.value(&wide, owner), AuxValue::Full(AstStorageData::CompactNodes(value)) if value.start == usize::MAX && value.len == 1)
         );
+    }
+
+    #[test]
+    fn local_list_descriptors_preserve_nil_missing_and_slice_offsets() {
+        let builder =
+            StorageBuilder::<ts_arena::Node<()>>::new(Vec::new().into(), &Counters::new());
+        let owner = builder.view().auxiliary_arena();
+        let mut store = AuxStore::default();
+        for nodes in [
+            NodeSlice::empty(),
+            NodeSlice::missing(),
+            NodeSlice {
+                backing: Some(AuxId::from_parts(owner, u32::MAX).unwrap()),
+                start: 255,
+                len: 3,
+            },
+        ] {
+            let record = store.push(
+                AstStorageData::List(NodeList::new(TextRange::new(1, 4), nodes)),
+                owner,
+            );
+            let local = store.local_list(&record).unwrap();
+            assert_eq!(local.backing, nodes.backing.map_or(0, AuxId::slot));
+            assert_eq!((local.start, local.len), (nodes.start, nodes.len));
+            assert!(store.local_backing(&record).is_none());
+        }
+        assert!(store.local_lists_only());
+        assert!(store
+            .local_list(&StoredAux {
+                kind: LIST,
+                row: u32::MAX
+            })
+            .is_none());
+        assert!(store
+            .local_backing(&StoredAux {
+                kind: BACKING,
+                row: u32::MAX
+            })
+            .is_none());
+        assert!(store
+            .local_backing(&StoredAux {
+                kind: COLD,
+                row: u32::MAX
+            })
+            .is_none());
+    }
+
+    #[test]
+    fn local_list_eligibility_rejects_foreign_and_promoted_links_but_allows_metadata() {
+        let counters = Counters::new();
+        let first = StorageBuilder::<ts_arena::Node<()>>::new(Vec::new().into(), &counters);
+        let second = StorageBuilder::<ts_arena::Node<()>>::new(Vec::new().into(), &counters);
+        let owner = first.view().auxiliary_arena();
+        let mut store = AuxStore::default();
+        let text = store.push(AstStorageData::Text(Box::new([])), owner);
+        let file = store.push(AstStorageData::File(crate::FileInfo::default()), owner);
+        assert!(store.local_lists_only());
+        assert!(store.local_list(&text).is_none());
+        assert!(store.local_backing(&file).is_none());
+        let mut record = store.push(
+            AstStorageData::List(NodeList::new(
+                TextRange::new(0, 0),
+                NodeSlice {
+                    backing: Some(AuxId::from_parts(second.view().auxiliary_arena(), 1).unwrap()),
+                    start: 0,
+                    len: 0,
+                },
+            )),
+            owner,
+        );
+        assert!(!store.local_lists_only());
+        assert!(store.local_list(&record).is_none());
+        store
+            .set_nodes(&mut record, NodeSlice::missing(), owner)
+            .unwrap();
+        assert!(store.local_lists_only());
+        assert_eq!(store.local_list(&record).unwrap().start, 1);
+        store
+            .list_mut(&mut record, owner)
+            .unwrap()
+            .set_loc(TextRange::new(4, 8));
+        assert!(!store.local_lists_only());
+        assert!(store.local_list(&record).is_none());
+
+        let mut full_nodes = AuxStore::default();
+        let backing = full_nodes.push(AstStorageData::Nodes(Box::new([None])), owner);
+        assert!(!full_nodes.local_lists_only());
+        assert!(full_nodes.local_backing(&backing).is_none());
     }
 }
