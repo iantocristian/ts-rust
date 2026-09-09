@@ -111,3 +111,9 @@ used by both parser and binder; the profile establishes workload relevance.
 Replacements still perform comparisons and boundary checks, so the sampled
 weight is not an expected saving. Keep the compact layout and measure the
 combined candidate once. This does not promise closure of the remaining gates.
+
+The [complete diagnostic archive](../tools/s07/performance-experiments/results/2026-09-09-current-compact-costs/README.md)
+retains 747 files with read-back hash verification: exact source/binaries,
+build/capture receipts, failed staging attempt, raw observations, native exports
+and the counter/source/caller audits. Native trace and workload sources remain
+local; unchanged original candidate artifacts are pinned in its preceding archive.
