@@ -1,6 +1,6 @@
 use crate::{
     AstStorageData, FactoryHooks, FileInfo, JSDocRoots, JsString, Node, NodeData, NodeId, NodeList,
-    NodeListId, NodeListRead, NodeSlice, NodeSliceRead, TextSlice, TextSliceRead,
+    NodeListId, NodeListRead, NodeRead, NodeSlice, NodeSliceRead, TextSlice, TextSliceRead,
 };
 use std::sync::Arc;
 use ts_arena::{
@@ -9,8 +9,6 @@ use ts_arena::{
 };
 use ts_core::TextRange;
 use ts_jsstring::SourceText;
-
-pub type NodeRead<'a> = StorageRead<'a, Node>;
 
 /// Exclusive syntax construction. Hooks exist only during this exclusive phase.
 pub struct AstBuilder {
@@ -184,6 +182,14 @@ impl ParsedFile {
     pub(crate) fn core_node(&self, id: NodeId) -> Result<&Node, Error> {
         self.builder.storage.core_node(id)
     }
+    pub(crate) fn core_node_read(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
+        let record = self.builder.storage.core_node(id)?;
+        Ok(NodeRead::resolved(
+            id,
+            StorageRead::borrowed(record),
+            self.builder.storage.view(),
+        ))
+    }
     pub(crate) fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
         self.builder.node_mut(id)?.set_flags(flags);
         // Do not restore a proof invalidated by an earlier unrestricted edit.
@@ -303,6 +309,18 @@ impl RetainedNode {
     pub fn id(&self) -> NodeId {
         self.0.id()
     }
+    /// Borrow the existing retained record and its physical owner context.
+    /// A retained lazy page is already stable: this does not reacquire its
+    /// directory lock or retain a second page/file handle.
+    pub fn read(&self) -> NodeRead<'_> {
+        let owner = self
+            .0
+            .owner()
+            .view()
+            .for_arena(self.id().arena())
+            .expect("retained node belongs to its retained graph");
+        NodeRead::resolved(self.id(), StorageRead::borrowed(&self.0), owner)
+    }
     /// Explicitly retain the file through which this node was resolved, including
     /// its mapped siblings and imported dependencies.
     pub fn file(&self) -> AstFile {
@@ -345,9 +363,14 @@ impl<'a> AstView<'a> {
             .binding_for_node(id)?
             .and_then(|result| result.overlay(id))
         {
-            return Ok(StorageRead::borrowed(node));
+            // The overlay's identity was validated when it was inserted. Select
+            // its retained owner without reading the parsed record or locking
+            // its lazy directory a second time.
+            let owner = self.0.for_arena(id.arena())?;
+            return Ok(NodeRead::resolved(id, StorageRead::borrowed(node), owner));
         }
-        self.0.node(id)
+        let (record, owner) = self.0.node_with_owner(id)?;
+        Ok(NodeRead::resolved(id, record, owner))
     }
     pub(crate) fn binding_for_node(
         self,
@@ -541,7 +564,12 @@ pub struct AstTransaction<'a, 'storage> {
 }
 impl AstTransaction<'_, '_> {
     pub fn node(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
-        self.storage.node(id).map(StorageRead::borrowed)
+        Ok(NodeRead::new(
+            id,
+            StorageRead::borrowed(self.storage.node(id)?),
+            self.storage.owner_id(),
+            self.storage.source(),
+        ))
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
         self.storage.node_mut(id)

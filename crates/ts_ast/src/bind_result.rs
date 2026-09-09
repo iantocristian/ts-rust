@@ -8,9 +8,7 @@ use std::{
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::OnceLock,
 };
-use ts_arena::{
-    Error, InitializationDomain, InitializationGuard, StorageRead, SymbolArena, SymbolId,
-};
+use ts_arena::{Error, InitializationDomain, InitializationGuard, SymbolArena, SymbolId};
 
 /// Fields absent from the parsed syntax representation, indexed by stable NodeId.
 #[derive(Clone, Copy, Debug, Default)]
@@ -280,7 +278,7 @@ impl BindBuilder<'_> {
             // owner/slot access and the borrow bounded by this builder; lazy
             // records created during initialization still use ordinary routing.
             BindStorage::Exclusive(parsed) if id.arena() == self.result.source.arena() => {
-                parsed.core_node(id).map(StorageRead::borrowed)
+                parsed.core_node_read(id)
             }
             _ => self.view().node(id),
         }

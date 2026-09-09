@@ -258,9 +258,14 @@ impl<N: NodeRecord, S> StorageHandle<N, S> {
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<CachedNodes<N, S>, Error> {
         self.node(parent)?;
-        let ids = self
-            .lazy
-            .jsdoc(None, parent, &self.core, &self.auxiliary, initialize)?;
+        let ids = self.lazy.jsdoc(
+            None,
+            parent,
+            &self.core,
+            &self.auxiliary,
+            self.source_text(),
+            initialize,
+        )?;
         Ok(CachedNodes {
             owner: self.clone(),
             ids,

@@ -155,8 +155,18 @@ pub struct StorageTransaction<'a, N: NodeRecord> {
     auxiliary: Staging<'a, N::Aux>,
     core: &'a Arena<N>,
     core_auxiliary: &'a Arena<N::Aux>,
+    source: &'a ts_jsstring::SourceText,
 }
 impl<N: NodeRecord> StorageTransaction<'_, N> {
+    /// Physical file owning both this transaction's core and lazy arenas.
+    pub fn owner_id(&self) -> crate::FileId {
+        crate::FileId(self.core.id)
+    }
+    /// The source is borrowed before initialization acquires its publication
+    /// lock. Reading it here cannot reenter the lazy directory.
+    pub fn source(&self) -> &ts_jsstring::SourceText {
+        self.source
+    }
     pub fn staged_nodes(&self) -> impl Iterator<Item = &N> {
         self.nodes.pending.iter()
     }
@@ -315,6 +325,7 @@ impl<N: NodeRecord> LazyArena<N> {
         parent: NodeId,
         core: &Arena<N>,
         core_auxiliary: &Arena<N::Aux>,
+        source_text: &ts_jsstring::SourceText,
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<Arc<[NodeId]>, Error> {
         if let Some(ids) = self.read().jsdoc.get(&(source, parent)) {
@@ -334,6 +345,7 @@ impl<N: NodeRecord> LazyArena<N> {
                 auxiliary: Staging::new(auxiliary),
                 core,
                 core_auxiliary,
+                source: source_text,
             };
             let roots = initialize(&mut transaction)?;
             transaction.publish(&roots)?;

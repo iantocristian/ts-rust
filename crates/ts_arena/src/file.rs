@@ -331,7 +331,10 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             retention: ViewRetention::Handle(handle),
         }
     }
-    pub(crate) fn for_arena(self, arena: ArenaId) -> Result<Self, Error> {
+    /// Select an arena's physical owner within the retained graph, without
+    /// reading a node or acquiring the lazy directory lock. This establishes
+    /// retention only: it does not validate any record slot or publication.
+    pub fn for_arena(self, arena: ArenaId) -> Result<Self, Error> {
         let contains = |owner: &&StorageOwner<N, S>| {
             owner.core.id == arena
                 || owner.lazy_arena() == arena
@@ -420,6 +423,12 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn node(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         self.for_arena(id.arena())?.node_here(id)
     }
+    /// Resolve a node and its physical owner together. The selected view keeps
+    /// the caller's retention context; this performs the slot read only once.
+    pub fn node_with_owner(self, id: NodeId) -> Result<(StorageRead<'a, N>, Self), Error> {
+        let owner = self.for_arena(id.arena())?;
+        Ok((owner.node_here(id)?, owner))
+    }
     fn node_here(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         if id.arena() == self.owner.core.id {
             Ok(StorageRead::borrowed(self.owner.core.get_slot(id.slot())?))
@@ -467,6 +476,7 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             parent,
             &selected.owner.core,
             &selected.owner.auxiliary,
+            selected.owner.source_text(),
             initialize,
         )
     }
@@ -485,6 +495,7 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             parent,
             &selected.owner.core,
             &selected.owner.auxiliary,
+            selected.owner.source_text(),
             initialize,
         )
     }

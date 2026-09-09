@@ -27,6 +27,7 @@ pub mod node_flags;
 mod node_index;
 mod node_kind;
 mod node_map;
+mod node_read;
 mod node_text;
 mod precedence;
 mod runtime_generated;
@@ -64,13 +65,14 @@ pub use lists::{
 };
 pub use node_index::NodeIndexCache;
 pub use node_kind::NodeKind;
+pub use node_read::NodeRead;
 pub use node_text::NodeText;
 pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;
 pub use runtime_id::{existing_runtime_node_id, runtime_node_id};
 pub use source_file::*;
 pub use storage::{
-    AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile, RetainedNode,
+    AstBuilder, AstBundle, AstFile, AstTransaction, AstView, ParsedFile, RetainedNode,
 };
 pub use subtree_facts::{is_left_hand_side_expression_kind, subtree_flags, SubtreeFacts};
 pub use subtree_generated::SubtreeContext;

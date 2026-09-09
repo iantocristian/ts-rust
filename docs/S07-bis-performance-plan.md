@@ -28,8 +28,9 @@ integrated result, rather than become another prerequisite to integration.
 
 The lookup trial is now complete and **rejected**: 52.010 / 12.893 ms wall savings
 (1.13% / 1.21%), with no meaningful memory change, miss the committed 5% screen.
-Production is restored to CP1. Proceed to the typed compact backend; there is
-no further standalone lookup experiment queued.
+The candidate's binder changes were restored to CP1 before the compact-storage
+migration started. Proceed to the typed compact backend; there is no further
+standalone lookup experiment queued.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
@@ -217,6 +218,32 @@ an 80-byte temporary node, clone a payload or retain an Arc on every read.
 Owned factory inputs can remain convenient construction values; convert them
 once on insertion. Keep the generic arena API's existing contracts available
 to its other consumers rather than making every arena AST-specific.
+
+The first implementation step replaces the `NodeRead` alias with an AST read
+that borrows the existing record and carries its full identity, physical file
+identity and physical source. Imported and lazy records use their actual owner,
+not the importing caller or a logical `SourceFile` text override. Core lookup
+still reads one slot; bound overlays retain their original priority. Lazy
+transactions borrow source context before taking their publication lock, and
+retained reads borrow their already-held record without reacquiring that lock.
+
+This is migration infrastructure over the existing 80-byte node, with a temporary
+`Deref<Target = Node>` for unmigrated consumers. It adds no owner retention or
+payload copies, but enlarges the transient read descriptor; its runtime cost is
+not yet measured. Generated contextual payload access, compact parent/list
+resolution, construction and the typed backend remain to be implemented. In
+particular, the generic arena's owner-free `storage_parent` contract must change
+before parents can be stored as local words. Do not treat this step as a storage
+or performance promotion.
+
+Validation for this boundary: 182 workspace library tests, six AST doctests,
+workspace all-target Clippy with warnings denied and Rust 1.96 checks, plus the
+three new namespace/overlay/lazy-retention tests in release, strict-provenance
+Miri and ASan. Independent review caught the retained-read lock reacquisition;
+the fixed path is exercised inside a same-owner initializer. Local commands,
+source hashes and logs are in
+`target/s07-bis/contextual-read-step1-validation/`. These are development checks;
+they do not refresh the tracker producers or final performance evidence.
 
 ### 4.2 Direct binding fields, with a conditional side-table fallback
 
