@@ -5,7 +5,7 @@ pub(crate) mod lists;
 mod pages;
 mod text;
 
-pub(crate) use pages::RowPages;
+pub(crate) use pages::TypedRows;
 
 use crate::{AstStorageData, JsString, NodeId, NodeKind, NodeListId, NodeSlice, TextSlice};
 use std::collections::HashMap;

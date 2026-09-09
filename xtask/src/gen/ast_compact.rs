@@ -118,7 +118,7 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
         );
     }
     let mut code = header(pin, "ast_generated.go");
-    code.push_str("#[allow(clippy::wildcard_imports)] // Generated storage consumes every schema payload.\nuse crate::*;\nuse crate::compact::{CompactContext, CompactSlice, FieldKey, PackingContext, RowPages, StoredNode};\nuse std::sync::atomic::{AtomicU32, Ordering};\n\n");
+    code.push_str("#[allow(clippy::wildcard_imports)] // Generated storage consumes every schema payload.\nuse crate::*;\nuse crate::compact::{CompactContext, CompactSlice, FieldKey, PackingContext, TypedRows, StoredNode};\nuse std::sync::atomic::{AtomicU32, Ordering};\n\n");
     for node in nodes {
         let name = string(node, "name")?;
         if fields(node)?.len() >= 0x8000 {
@@ -142,11 +142,11 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
         }
         code.push_str("}\n\n");
     }
-    code.push_str("/// Only populated concrete shapes allocate a typed page directory.\n#[derive(Default)]\npub struct AstPayloadStore {\n");
+    code.push_str("/// Only populated concrete shapes allocate a row store.\n#[derive(Default)]\npub struct AstPayloadStore {\n");
     for node in nodes {
         if has_row(node)? {
             code.push_str(&format!(
-                "    {}: Option<Box<RowPages<{}Row>>>,\n",
+                "    {}: Option<Box<TypedRows<{}Row>>>,\n",
                 snake(string(node, "name")?),
                 string(node, "name")?
             ));
