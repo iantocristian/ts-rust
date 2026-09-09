@@ -1,15 +1,12 @@
 use ts_ast::{
-    AstBuilder, AstTransaction, BorrowedFactory, JsString, NodeList, NodeListId, NodeSlice,
-    RuntimeFactory, TextSlice,
+    AstBuilder, AstTransaction, BorrowedFactory, JsString, NodeListId, NodeSlice, RuntimeFactory,
+    TextSlice,
 };
 
 /// Eager and lazy parsers share AST factory/list operations. These additional
 /// methods expose only parser text backing and exclusive list mutation.
 pub(crate) trait ParserFactory: RuntimeFactory {
     fn alloc_text(&mut self, text: Vec<JsString>) -> TextSlice;
-    fn list_mut(&mut self, id: NodeListId) -> &mut NodeList {
-        self.mutable_list(id)
-    }
     fn set_list_nodes(&mut self, id: NodeListId, nodes: NodeSlice);
     fn mark_list_missing(&mut self, id: NodeListId);
 }

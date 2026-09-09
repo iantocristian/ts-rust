@@ -17,6 +17,9 @@ pub struct AstBuilder {
     pub(crate) storage: StorageBuilder<StoredNode>,
     pub(crate) hooks: Option<Arc<dyn FactoryHooks>>,
     frame: AuxId,
+    // Constructors validate payload edges and backing ranges before insertion.
+    // Unrestricted syntax mutation can only invalidate this proof, never restore it.
+    construction_edges_valid: bool,
 }
 impl std::fmt::Debug for AstBuilder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -44,10 +47,12 @@ impl AstBuilder {
         storage
             .set_metadata(frame)
             .expect("new file frame belongs to core storage");
+        let construction_edges_valid = hooks.is_none();
         Self {
             storage,
             hooks,
             frame,
+            construction_edges_valid,
         }
     }
     pub fn view(&self) -> AstView<'_> {
@@ -60,6 +65,7 @@ impl AstBuilder {
     /// Importing a mapped member retains its complete bundle and dependencies.
     pub fn retain_file(&mut self, file: AstFile) {
         self.storage.retain_file(file.0);
+        self.construction_edges_valid = false;
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<NodeMut<'_>, Error> {
         let header = self.storage.core_node(id)?;
@@ -67,8 +73,10 @@ impl AstBuilder {
             .to_owned_preserving_identity();
         let auxiliary = self.storage.view().auxiliary_arena();
         let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
+        self.construction_edges_valid = false;
         Ok(NodeMut::core(value, header, store, source, id, auxiliary))
     }
+    /// Called only after factory payload validation; the input is parentless.
     pub(crate) fn push_node(&mut self, node: Node) -> NodeId {
         let nodes = self.id().arena();
         let auxiliary = self.storage.view().auxiliary_arena();
@@ -181,17 +189,41 @@ impl AstBuilder {
     }
     pub fn list_mut(&mut self, id: NodeListId) -> Result<&mut NodeList, Error> {
         match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => Ok(list),
+            AstStorageData::List(list) => {
+                self.construction_edges_valid = false;
+                Ok(list)
+            }
             _ => Err(Error::InvalidGraph),
         }
     }
     pub fn set_list_nodes(&mut self, id: NodeListId, nodes: NodeSlice) -> Result<(), Error> {
         self.view().node_slice(nodes)?;
-        self.list_mut(id)?.set_nodes(nodes);
+        match self.storage.aux_mut(id.0)? {
+            AstStorageData::List(list) => list.set_nodes(nodes),
+            _ => return Err(Error::InvalidGraph),
+        }
+        Ok(())
+    }
+    /// Location and cached modifier flags cannot change syntax edges.
+    pub fn set_list_location(&mut self, id: NodeListId, loc: TextRange) -> Result<(), Error> {
+        match self.storage.aux_mut(id.0)? {
+            AstStorageData::List(list) => list.set_loc(loc),
+            _ => return Err(Error::InvalidGraph),
+        }
+        Ok(())
+    }
+    pub fn set_list_modifier_flags(&mut self, id: NodeListId, flags: u32) -> Result<(), Error> {
+        match self.storage.aux_mut(id.0)? {
+            AstStorageData::List(list) => list.set_modifier_flags(flags),
+            _ => return Err(Error::InvalidGraph),
+        }
         Ok(())
     }
     pub fn mark_list_missing(&mut self, id: NodeListId) -> Result<(), Error> {
-        self.list_mut(id)?.set_missing(true);
+        match self.storage.aux_mut(id.0)? {
+            AstStorageData::List(list) => list.set_missing(true),
+            _ => return Err(Error::InvalidGraph),
+        }
         Ok(())
     }
     pub fn seed_jsdoc(&mut self, parent: NodeId, roots: Vec<NodeId>) -> Result<(), Error> {
@@ -210,7 +242,8 @@ impl AstBuilder {
     pub fn complete(mut self, root: NodeId) -> Result<ParsedFile, Error> {
         self.view().node(root)?;
         self.frame_mut().root = Some(root);
-        self.view().validate_core()?;
+        let checked = self.construction_edges_valid && self.storage.is_core_only();
+        self.view().validate_core_with_construction_edges(checked)?;
         Ok(ParsedFile {
             builder: self,
             validated: true,
@@ -624,6 +657,12 @@ impl<'a> AstView<'a> {
         )
     }
     fn validate_core(self) -> Result<(), Error> {
+        self.validate_core_with_construction_edges(false)
+    }
+    /// Parent links and source metadata can change after construction and are
+    /// always checked in the original node/auxiliary order. Only immutable or
+    /// narrowly updated syntax edges can carry their construction proof here.
+    fn validate_core_with_construction_edges(self, checked: bool) -> Result<(), Error> {
         let context = CompactContext {
             nodes: self.0.id().arena(),
             auxiliary: self.0.auxiliary_arena(),
@@ -638,37 +677,45 @@ impl<'a> AstView<'a> {
             if let Some(parent) = context.decode_node(FieldKey::parent(id.slot()), header.parent) {
                 self.node(parent)?;
             }
-            context.store.payloads.validate_references(
-                header,
-                context,
-                |id| self.node(id).map(|_| ()),
-                |id| self.list(id).map(|_| ()),
-                |slice| self.node_slice(slice).map(|_| ()),
-                |slice| self.text_slice(slice).map(|_| ()),
-            )?;
+            if !checked {
+                context.store.payloads.validate_references(
+                    header,
+                    context,
+                    |id| self.node(id).map(|_| ()),
+                    |id| self.list(id).map(|_| ()),
+                    |slice| self.node_slice(slice).map(|_| ()),
+                    |slice| self.text_slice(slice).map(|_| ()),
+                )?;
+            }
         }
         for value in self.0.core_auxiliary() {
             match value {
                 AstStorageData::List(list) => {
-                    self.node_slice(list.nodes())?;
+                    if !checked {
+                        self.node_slice(list.nodes())?;
+                    }
                 }
                 AstStorageData::Nodes(nodes) => {
-                    for &node in nodes.iter().flatten() {
-                        self.node(node)?;
+                    if !checked {
+                        for &node in nodes.iter().flatten() {
+                            self.node(node)?;
+                        }
                     }
                 }
                 AstStorageData::CompactNodes(backing) => {
-                    let edges = &self.0.store().edges;
-                    let range = backing.start
-                        ..backing
-                            .start
-                            .checked_add(backing.len as usize)
-                            .ok_or(Error::InvalidGraph)?;
-                    if !edges.valid_range(range.clone()) {
-                        return Err(Error::InvalidGraph);
-                    }
-                    for node in edges.iter(self.0.id().arena(), range).flatten() {
-                        self.node(node)?;
+                    if !checked {
+                        let edges = &self.0.store().edges;
+                        let range = backing.start
+                            ..backing
+                                .start
+                                .checked_add(backing.len as usize)
+                                .ok_or(Error::InvalidGraph)?;
+                        if !edges.valid_range(range.clone()) {
+                            return Err(Error::InvalidGraph);
+                        }
+                        for node in edges.iter(self.0.id().arena(), range).flatten() {
+                            self.node(node)?;
+                        }
                     }
                 }
                 AstStorageData::FallbackNode(_) => return Err(Error::InvalidGraph),
@@ -947,12 +994,228 @@ fn validate_data(
 #[cfg(test)]
 mod validation_proof_tests {
     use super::*;
-    use crate::{node_flags, FactoryMethods, SyntaxKind};
+    use crate::{
+        node_flags, BorrowedFactory, Factory, FactoryMethods, PrefixUnaryExpressionData,
+        RuntimeFactory, SourceFileParseOptions, SyntaxKind,
+    };
 
     fn parsed(counters: &Counters) -> (ParsedFile, NodeId) {
         let mut builder = AstBuilder::new(SourceText::default(), counters);
         let root = builder.new_token(SyntaxKind::Unknown.into());
         (builder.complete(root).unwrap(), root)
+    }
+
+    fn source(builder: &mut AstBuilder) -> NodeId {
+        builder.new_source_file(
+            SourceFileParseOptions {
+                file_name: JsString::from_bytes(b"/proof.ts".as_slice()),
+                ..SourceFileParseOptions::default()
+            },
+            SourceText::default(),
+            None,
+            None,
+        )
+    }
+
+    #[test]
+    fn construction_errors_and_narrow_list_edits_preserve_the_edge_proof() {
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        let foreign_slice = other.node_slice(vec![Some(foreign)]).unwrap();
+        let mut builder = AstBuilder::new(SourceText::default(), &counters);
+        let root = builder.new_token(SyntaxKind::ExportKeyword.into());
+        let before = builder.node_count();
+        let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            builder.new_prefix_unary_expression(SyntaxKind::PlusToken.into(), Some(foreign));
+        }))
+        .unwrap_err();
+        assert_eq!(
+            panic.downcast_ref::<String>().unwrap(),
+            "factory edges belong to retained storage: WrongOwner"
+        );
+        assert_eq!(builder.node_count(), before);
+        assert_eq!(
+            builder.node_slice(vec![Some(foreign)]),
+            Err(Error::WrongOwner)
+        );
+        assert_eq!(
+            builder.new_list(TextRange::new(0, 1), foreign_slice),
+            Err(Error::WrongOwner)
+        );
+        assert!(builder.construction_edges_valid);
+        let nodes = builder.node_slice(vec![Some(root), None]).unwrap();
+        let modifiers = builder.node_slice(vec![Some(root)]).unwrap();
+        let list = {
+            let mut factory = BorrowedFactory(&mut builder);
+            let list = factory.new_modifier_list(modifiers);
+            factory.set_list_location(list, TextRange::new(-1, 9));
+            factory.set_list_modifier_flags(list, 0x8123_4567);
+            factory.finish_node(root, TextRange::new(-1, 8), 1);
+            factory.add_node_flags(root, 2);
+            list
+        };
+        assert_eq!(
+            builder.view().list(list).unwrap().loc(),
+            TextRange::new(-1, 9)
+        );
+        assert_eq!(
+            builder.view().list(list).unwrap().modifier_flags(),
+            0x8123_4567
+        );
+        builder.set_list_nodes(list, nodes).unwrap();
+        let copied = builder.clone_list(list).unwrap();
+        builder.mark_list_missing(copied).unwrap();
+        assert!(builder.view().list(copied).unwrap().is_missing());
+        assert!(builder.construction_edges_valid);
+        let parsed = builder.complete(root).unwrap();
+        assert!(parsed.validated);
+        assert_eq!(parsed.view().node(root).unwrap().flags(), 3);
+        assert!(parsed.try_publish_unbound().is_ok());
+    }
+
+    #[test]
+    fn clean_completion_still_checks_final_parents_and_mutable_metadata_in_order() {
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        for case in 0..3 {
+            let mut builder = AstBuilder::new(SourceText::default(), &counters);
+            let orphan = builder.new_token(SyntaxKind::Unknown.into());
+            let root = source(&mut builder);
+            if case == 1 {
+                let nodes = builder.source_nodes(vec![Some(root)]).unwrap();
+                builder.source_nodes_mut(nodes).unwrap()[0] = Some(foreign);
+            } else {
+                builder
+                    .source_file_mut(root)
+                    .unwrap()
+                    .external_module_indicator = Some(foreign);
+            }
+            if case == 2 {
+                let missing = NodeId::from_parts(builder.id().arena(), u32::MAX).unwrap();
+                // This setter must keep its delayed-error behavior.
+                Factory::set_node_parent(&mut builder, orphan, Some(missing));
+            }
+            assert!(builder.construction_edges_valid);
+            let expected = if case == 2 {
+                Error::InvalidSlot
+            } else {
+                Error::WrongOwner
+            };
+            assert_eq!(builder.view().validate_core(), Err(expected));
+            assert_eq!(builder.complete(root).unwrap_err(), expected);
+        }
+    }
+
+    #[test]
+    fn unrestricted_node_edits_force_the_original_scan_and_never_restore_the_proof() {
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        let mut builder = AstBuilder::new(SourceText::default(), &counters);
+        let first = builder.new_token(SyntaxKind::Unknown.into());
+        let later = builder.new_token(SyntaxKind::Unknown.into());
+        *builder.node_mut(first).unwrap().data_mut() = PrefixUnaryExpressionData {
+            operator: SyntaxKind::PlusToken.into(),
+            operand: Some(foreign),
+        }
+        .into();
+        let missing = NodeId::from_parts(builder.id().arena(), u32::MAX).unwrap();
+        Factory::set_node_parent(&mut builder, later, Some(missing));
+        Factory::finish_node(&mut builder, first, TextRange::new(0, 1), 0);
+        builder.new_token(SyntaxKind::Unknown.into());
+        assert!(!builder.construction_edges_valid);
+        // The first node's payload failure precedes the later parent's error.
+        assert_eq!(builder.view().validate_core(), Err(Error::WrongOwner));
+        assert_eq!(builder.complete(later).unwrap_err(), Error::WrongOwner);
+    }
+
+    #[test]
+    fn unrestricted_list_edits_force_backing_validation_and_rejected_edits_stay_clean() {
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        let foreign_slice = other.node_slice(vec![Some(foreign)]).unwrap();
+        let foreign_list = other.new_list(TextRange::new(0, 1), foreign_slice).unwrap();
+        let mut builder = AstBuilder::new(SourceText::default(), &counters);
+        let root = builder.new_token(SyntaxKind::Unknown.into());
+        let list = builder
+            .new_list(TextRange::new(0, 0), NodeSlice::empty())
+            .unwrap();
+        assert!(matches!(builder.node_mut(foreign), Err(Error::WrongOwner)));
+        assert!(matches!(
+            builder.list_mut(foreign_list),
+            Err(Error::WrongOwner)
+        ));
+        assert!(builder.construction_edges_valid);
+        *builder.list_mut(list).unwrap() = NodeList::new(TextRange::new(0, 1), foreign_slice);
+        builder
+            .set_list_location(list, TextRange::new(1, 2))
+            .unwrap();
+        builder.set_list_modifier_flags(list, 0).unwrap();
+        builder.new_token(SyntaxKind::Unknown.into());
+        assert!(!builder.construction_edges_valid);
+        assert_eq!(builder.view().validate_core(), Err(Error::WrongOwner));
+        assert_eq!(builder.complete(root).unwrap_err(), Error::WrongOwner);
+    }
+
+    #[test]
+    fn hooks_and_imports_keep_full_completion_validation() {
+        struct Hook(NodeId);
+        impl FactoryHooks for Hook {
+            fn on_create(&self, factory: &mut dyn Factory, node: NodeId) {
+                *factory.node_mut(node).data_mut() = PrefixUnaryExpressionData {
+                    operator: SyntaxKind::PlusToken.into(),
+                    operand: Some(self.0),
+                }
+                .into();
+            }
+        }
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        let mut hooked =
+            AstBuilder::with_hooks(SourceText::default(), &counters, Arc::new(Hook(foreign)));
+        let root = hooked.new_token(SyntaxKind::Unknown.into());
+        assert!(!hooked.construction_edges_valid);
+        assert_eq!(hooked.complete(root).unwrap_err(), Error::WrongOwner);
+        let imported = other.complete(foreign).unwrap().publish_unbound();
+        let mut builder = AstBuilder::new(SourceText::default(), &counters);
+        builder.retain_file(imported);
+        assert!(!builder.construction_edges_valid);
+        let root = builder.new_prefix_unary_expression(SyntaxKind::PlusToken.into(), Some(foreign));
+        assert!(builder.complete(root).is_ok());
+    }
+
+    #[test]
+    fn lazy_initializers_keep_staged_validation_and_disable_core_only_completion() {
+        let counters = Counters::new();
+        let mut other = AstBuilder::new(SourceText::default(), &counters);
+        let foreign = other.new_token(SyntaxKind::Unknown.into());
+        let mut builder = AstBuilder::new(SourceText::default(), &counters);
+        let root = builder.new_token(SyntaxKind::Unknown.into());
+        let error = builder.view().jsdoc(root, |transaction| {
+            let node = transaction.new_token(SyntaxKind::Unknown.into());
+            *transaction.node_mut(node)?.data_mut() = PrefixUnaryExpressionData {
+                operator: SyntaxKind::PlusToken.into(),
+                operand: Some(foreign),
+            }
+            .into();
+            Ok(vec![node])
+        });
+        assert!(matches!(error, Err(Error::WrongOwner)));
+        // Failed lazy slots remain reserved so their identities are never reused.
+        assert!(!builder.storage.is_core_only());
+        let roots = builder
+            .view()
+            .jsdoc(root, |transaction| {
+                Ok(vec![transaction.new_token(SyntaxKind::Unknown.into())])
+            })
+            .unwrap();
+        assert!(!roots.is_empty());
+        assert!(!builder.storage.is_core_only());
+        assert!(builder.complete(root).is_ok());
     }
 
     #[test]

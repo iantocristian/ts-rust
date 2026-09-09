@@ -467,3 +467,51 @@ invalid final parents, source metadata, mutated payloads/list backings, hooks,
 imported owners and the clean versus dirty completion paths. The preceding thin
 sample's 352 ms whole completion weight is an upper bound, not an expected
 saving; the required parent/metadata work remains. No CPU-gate closure is claimed.
+
+The proof is now implemented. A builder with hooks, retained imports or any lazy
+reservations uses the full scan. A failed lazy initializer still burns its
+reservations and therefore conservatively disables the shortcut. Independent
+review found no production issue; it corrected a test that incorrectly expected
+such a builder to remain core-only. All 112 AST, 25 parser and 28 binder library
+tests pass, including nine construction/publication proof tests. Workspace
+all-target/all-feature Clippy and Rust 1.96 compilation pass. These checks do not
+constitute a new performance result for CP5.
+
+### Matched phase elapsed diagnostic: both phases regress
+
+The [phase archive](../tools/s07/performance-experiments/results/2026-09-09-compact-phases/README.md)
+contains separately built frozen CP1 and CP4 production sources with the same
+existing phase adapter. Both use the consuming binding path, Rust 1.97.1,
+normal mimalloc, the same release configuration and `ts_ast/layout-profile`.
+The adapter source is unchanged and identical between builds. One warmup and
+three alternating measured children per revision ran on one worker; all eight
+children preserve the complete input digest, work counts, 13,094 in-place files
+and zero fallbacks. The schedule was fixed before capture and was not extended.
+
+| Elapsed phase median | CP1 | CP4 | Difference | CP4/CP1 |
+| --- | ---: | ---: | ---: | ---: |
+| Parse, including completion | 2.568171 s | 3.509063 s | +0.940892 s | 1.366 |
+| Bind and publication | 2.137196 s | 2.971233 s | +0.834037 s | 1.390 |
+| Diagnostic pipeline | 4.720425 s | 6.495556 s | +1.775131 s | 1.376 |
+
+These clocks include timer overhead and descheduling. Binding includes the full
+publication/validation transition; it is not an isolated binder CPU timer.
+Three samples provide attribution, not bootstrap acceptance or a new control.
+Do not compare these adapter medians numerically with a differently built normal
+screen or add separately taken phase medians as an exact pipeline decomposition.
+
+The result rules out the proposed explanation that a binding improvement is
+hidden by slower parsing: both phase groups are slower in this comparison. It
+does not isolate the causal contribution of inline fields from the other layout
+changes. The compact implementation has not delivered its predicted net binding
+speedup; smaller memory use and removed maps did not establish that outcome.
+
+The exact CP4 native sample supports this interpretation without substituting
+for the clocks: 6,251 ms worker CPU weight splits into 3,387 ms parser-entry,
+2,854 ms consuming-binder-entry and 10 ms unattributed samples, with no overlap.
+AST access has 1,190 ms of worker samples across four actual paths. Exact outer
+completion validation is 369 ms, constructor edge validation 151 ms, and payload
+insertion 242 ms. These overlapping categories include necessary work and must
+not be summed as removable cost. New name/table/symbol/flow/declaration families
+have a combined observed union of 362 ms; they do not justify another isolated
+hasher or small lookup experiment.

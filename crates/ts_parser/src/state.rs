@@ -275,7 +275,7 @@ impl<'src, F: ParserFactory> Parser<'src, F> {
                 .alloc_nodes(nodes.into_iter().map(Some).collect())
         };
         let list = self.factory.new_modifier_list(nodes);
-        self.factory.list_mut(list).set_loc(loc);
+        self.factory.set_list_location(list, loc);
         list
     }
     /// port: tsc/internal/parser/parser.go:modifierListHasAsync

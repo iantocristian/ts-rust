@@ -13,6 +13,12 @@ pub trait RuntimeFactory: Factory {
     fn alloc_nodes(&mut self, nodes: Vec<Option<NodeId>>) -> NodeSlice;
     fn alloc_list(&mut self, loc: TextRange, nodes: NodeSlice) -> NodeListId;
     fn mutable_list(&mut self, id: NodeListId) -> &mut NodeList;
+    fn set_list_location(&mut self, id: NodeListId, loc: TextRange) {
+        self.mutable_list(id).set_loc(loc);
+    }
+    fn set_list_modifier_flags(&mut self, id: NodeListId, flags: u32) {
+        self.mutable_list(id).set_modifier_flags(flags);
+    }
     fn clone_source(&mut self, original: NodeId) -> NodeId;
     fn update_source(
         &mut self,
@@ -49,7 +55,7 @@ pub trait RuntimeFactory: Factory {
     fn new_modifier_list(&mut self, nodes: NodeSlice) -> NodeListId {
         let list = self.alloc_list(TextRange::new(-1, -1), nodes);
         let flags = self.modifiers_to_flags(nodes);
-        self.mutable_list(list).set_modifier_flags(flags);
+        self.set_list_modifier_flags(list, flags);
         list
     }
     // port: tsc/internal/ast/utilities.go:ModifiersToFlags
@@ -76,6 +82,12 @@ impl RuntimeFactory for AstBuilder {
     }
     fn mutable_list(&mut self, id: NodeListId) -> &mut NodeList {
         self.list_mut(id).expect("factory owns list")
+    }
+    fn set_list_location(&mut self, id: NodeListId, loc: TextRange) {
+        AstBuilder::set_list_location(self, id, loc).expect("factory owns list");
+    }
+    fn set_list_modifier_flags(&mut self, id: NodeListId, flags: u32) {
+        AstBuilder::set_list_modifier_flags(self, id, flags).expect("factory owns list");
     }
     fn clone_source(&mut self, original: NodeId) -> NodeId {
         self.clone_source_file(original)
@@ -564,6 +576,12 @@ impl<T: RuntimeFactory + ?Sized> RuntimeFactory for crate::BorrowedFactory<'_, T
     }
     fn mutable_list(&mut self, id: NodeListId) -> &mut NodeList {
         self.0.mutable_list(id)
+    }
+    fn set_list_location(&mut self, id: NodeListId, loc: TextRange) {
+        self.0.set_list_location(id, loc);
+    }
+    fn set_list_modifier_flags(&mut self, id: NodeListId, flags: u32) {
+        self.0.set_list_modifier_flags(id, flags);
     }
     fn clone_source(&mut self, original: NodeId) -> NodeId {
         self.0.clone_source(original)
