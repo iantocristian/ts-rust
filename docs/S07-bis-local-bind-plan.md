@@ -3,10 +3,10 @@
 Status: the [selected binding/declaration/expression/statement slice is implemented](S07-bis-local-bind-completion.md),
 including scoped syntax/list and symbol/table consumers, after the
 [dispatch/list/flow milestone](S07-bis-local-bind-migration.md) and
-[first local scope](S07-bis-local-bind-milestone.md). Its combined screen qualifies
-for review, but the full ownership capture rejects stale test inventories. The
-[owned-text and inventory repair](S07-bis-local-text-repair.md) is implemented;
-its final validation and new combined screen are pending. Explicit shared-helper, diagnostics, lazy and
+[first local scope](S07-bis-local-bind-milestone.md). The
+[owned-text and inventory repair](S07-bis-local-text-repair.md) passes final
+checks, full graphs, corrected E3 and the combined screen, and is accepted as
+the next experimental control. Explicit shared-helper, diagnostics, lazy and
 public-reference boundaries remain. This is not a claim that the entire binder
 is facade-free. This supersedes the standalone experiment sequence in
 [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic counterexamples
@@ -159,22 +159,22 @@ the passing scoped validation.
 
 | Item | Established evidence / outstanding measurement |
 | --- | --- |
-| Accepted control | CP1 remains unchanged. The compact/local implementation remains the experimental candidate. |
+| Accepted control | The shared-text local combination, immutable manifest `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`, replaces CP1 for subsequent experiments. Both earlier freezes remain preserved. |
 | Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Affected native checks, scoped instrumentation and both full-workload graphs pass. |
 | Earlier migration native profile | [One untimed capture](S07-bis-local-bind-migration-cpu.md), no rebuild or paired screen. Remaining general helper/validation callers were identified; it does not measure this later source or establish CPU improvement. |
 | Continuations and temporary observations | Earlier selected binary: `Step` 24 bytes, alignment 8; `Exit` 24 bytes. Final artifact layout, peak capacity, tuple/adapter stack costs and request traffic must be charged; no saving is assumed. |
-| Allocation mechanism evidence | [Earlier frozen attribution](S07-bis-allocation-traffic.md): 333.733 MB traffic, 108.289 MB unclassified. The complete local candidate requests 2.302 GB, about 57.9 MB more than that older compact capture; this increase is not yet attributed by family. |
-| Final graph/ownership/toolchain validation | Both 13,094-file graph modes, all-local probes, affected native checks, scoped Miri/ASan and full binder parity pass. Full E3 rejects three stale exact inventories, including an unintended substring-filter selection; its failed evidence is retained. |
-| Both CPU modes, allocation and RSS | Completed fixed screen qualifies for review: CPU ratios 0.859609 / 0.837626, upper bounds 0.880953 / 0.854378; allocation 2.302 GB and RSS 2.320 GB. All distances improve against same-screen CP1; final Go-relative gates remain open. |
-| Parse versus bind | One source-matched elapsed diagnostic: parse 2.230553404 s, bind/publication/validation 1.639655704 s. It is not a paired phase speedup or a Go ratio. |
+| Allocation mechanism evidence | [Earlier frozen attribution](S07-bis-allocation-traffic.md): 333.733 MB traffic, 108.289 MB unclassified. The repaired local text operation retains source/pool backing and removes about 58.5 MB of requests from v1. The complete candidate requests 2.244 GB; older family attribution is not relabelled as a measurement of it. |
+| Final graph/ownership/toolchain validation | Both 13,094-file graph modes, all-local probes and affected native checks pass. Corrected E3 observes all 29 S06 / 76 S07 cases in debug/release/Miri/ASan. The unchanged checked-binder corpus remains the v1 capture; new checked/local fixtures validate this repair. No fresh full v2 binder producer is claimed. |
+| Both CPU modes, allocation and RSS | Complete fixed screen: CPU ratios 0.854300 / 0.821120, upper bounds 0.855997 / 0.831178; requested allocation 2.244 GB and RSS 2.322 GB. Every metric improves against same-screen CP1; final Go-relative gates remain open. |
+| Parse versus bind | Preceding v1 elapsed diagnostic: parse 2.230553404 s, bind/publication/validation 1.639655704 s. It is not a phase measurement of this repair, a paired speedup or a Go ratio. |
 
 The fixed schedule remains eight warmup executions and 56 recorded executions
 across the normal/allocation binaries, both worker counts and both variants.
 Freeze and hash-check the selected compiler artifacts and their source/configuration
 before measuring. Report all rows, failures and all metric distances. Do not
 launch another small screening sequence or silently lengthen an inconclusive
-batch. Retain the completed combination as a measured candidate, without
-promotion while E3 is false. The next revision corrects its ownership inventory
-and filtering, and forwards local owned text through the existing source/pool
-retention operation. It needs its own source-bound validation and combined
-measurement. No fresh Go gate is claimed from this CP1 comparison.
+batch. The corrected complete combination meets the normal substantial-candidate
+rule and supplies the next experimental control. The preceding E3 failure and
+all earlier results remain recorded. No fresh Go gate is claimed from this CP1
+comparison. Restore the six reviewed traceability markers with the next source
+revision; the current worklist honestly records their missing mappings.

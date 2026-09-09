@@ -5,13 +5,13 @@ This directory implements the diagnostic screening policy in
 It writes no tracker metrics and does not replace full graph or ownership parity.
 `layout_model.py` and its inputs implement the separate CP0 layout model.
 
-The latest [reviewed implementation checkpoint](../../../docs/S07-bis-CP1.md)
-retains CP1's checked exclusive-core node lookup as the next experimental
-control. For a new candidate, pass
-`--control target/s07-bis/cp1-node-read-candidate` and
-`--control-sha 3a57976f667b9857891edbe9f76de5261c43480ac8c62d946b4545d9ee19d931`
+The latest [reviewed complete local binder](../../../docs/S07-bis-local-text-repair.md)
+is the next experimental control after full graphs, corrected ownership evidence
+and its fixed combined screen. For a new candidate, pass
+`--control target/s07-bis/local-text-owned-repair-candidate` and
+`--control-sha 99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`
 to `build`, `graphs` and `screen`. Its already sealed candidate bundle can serve
-as the control without rebuilding or changing its manifest. Preserve the original
+as the control without rebuilding or changing its manifest. Preserve CP1, the original
 control and [A0-b](../../../docs/S07-bis-A0.md) as well: the commands below
 document the first experiment. This manual
 checkpoint decision follows full graph, ownership and targeted-cost review; it

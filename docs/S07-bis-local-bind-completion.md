@@ -1,14 +1,16 @@
 # S07-bis: selected local binder migration completion
 
-Status: implementation, source review, scoped correctness validation and the
+Status of this v1 freeze: implementation, source review, scoped correctness validation and the
 combined performance screen are complete. The screen qualifies for review;
 the full binder producer passes, but E3 rejects stale declared test inventories.
 This version is not promoted. This records
 `bindings.rs`, `declarations.rs`, `expressions.rs` and `statements.rs`, with their
 dispatch/container/flow adapters, under the
 [local binding plan](S07-bis-local-bind-plan.md). “Completion” names that slice,
-not an entirely facade-free binder or completed S07-bis gates. CP1 remains the
-accepted performance control.
+not an entirely facade-free binder or completed S07-bis gates. CP1 remained the
+accepted performance control at this checkpoint. The subsequent
+[shared-text/inventory repair](S07-bis-local-text-repair.md) has its own complete
+evidence and is now the experimental control; this v1 result is unchanged.
 
 ## Implementation and shared contracts
 
