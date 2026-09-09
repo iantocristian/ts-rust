@@ -111,9 +111,8 @@ slice tests and AddressSanitizer passes all 12 string core-helper tests. Initial
 Go-cache sandbox failures and successful authorized retries remain recorded.
 These scoped instrumentation runs do not claim the complete ownership producer.
 
-The coherent candidate still needs its frozen graph check and fixed paired
-performance screen. No speedup or performance admission is claimed from the
-passing correctness checks.
+The corrected freeze and its fixed paired screen are now complete; the result
+below supersedes the pending status, not any earlier experiment verdict.
 
 ## Build provenance correction before timing
 
@@ -135,3 +134,41 @@ native profile checks. A real Cargo regression fixture checks the isolation.
 The corrected freeze uses a new output directory and repeats full graphs before
 the single fixed timing schedule; this is a build-defect retry, not extra timing
 samples selected for a favorable result.
+
+## Combined screen outcome
+
+Implementation `aa6a5f6`, frozen with build-isolation fix `8f7236e`, passes all
+13,094 workload graphs at one and eight workers. All files bind in place with
+zero fallback; work counts and input digest match the retained CP1 control.
+The corrected manifest is
+`bab5c54fc779b86ebdb1f2bd5a2289dcd7a4066612eb004ceb02e16e1c906fdc`.
+Eight warmups and all 56 planned samples completed without a timing retry.
+
+| Metric | CP1 one worker | Candidate one worker | CP1 eight workers | Candidate eight workers |
+| --- | ---: | ---: | ---: | ---: |
+| Wall | 5.078450 s | 5.180391 s | 1.087606 s | 1.079982 s |
+| Allocated bytes | 4.642568 GB | 2.244183 GB | 4.642573 GB | 2.244184 GB |
+| Peak RSS | 4.506599 GB | 2.318565 GB | 4.509237 GB | 2.321842 GB |
+
+CPU candidate/control ratios are 1.020073 and 0.992991. Their 95% intervals are
+[0.973742, 1.055861] and [0.951295, 1.006322]. CPU relative MAD is 1.604%/3.370%
+(candidate/control) at one worker and 1.056%/0.405% at eight. The single-worker
+upper bound does not satisfy the 1.02 nonregression screen. Neither interval
+establishes a CPU win. Memory medians remain about 51.7% lower for allocation
+and 48.5% lower for RSS than this batch's control.
+
+The complete combination remains experimental. This result does not establish
+an isolated keyword/slice saving: the preceding parser-list batch had a
+different paired control and host conditions. No separate medians are added or
+subtracted to claim a component effect, and no extra batch is run to rescue the
+verdict. Keep the reviewed coherent candidate as the ongoing experiment; end
+keyword/slice tuning here. All final gates remain open. Against historical
+Go-derived limits, one/eight-worker wall still needs 2.243/0.446 s improvement,
+allocation 208.956/208.417 MB, and RSS 109.617/104.797 MB. Those are planning
+distances, not fresh Go-relative acceptance measurements.
+
+The [complete review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-text-processing/README.md)
+retains both build attempts, the interrupted invalid graphs, the corrected
+frozen source/binaries, all graph and sample data, receipt and correctness logs.
+The initial stale-artifact bundle is explicitly invalid and is not used by the
+complete screen. Prior frozen observations keep their original verdicts.
