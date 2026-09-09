@@ -515,3 +515,43 @@ insertion 242 ms. These overlapping categories include necessary work and must
 not be summed as removable cost. New name/table/symbol/flow/declaration families
 have a combined observed union of 362 ms; they do not justify another isolated
 hasher or small lookup experiment.
+
+### Next combined construction and access candidate
+
+Keep the implemented CP5 proof and remove avoidable intermediates on the ordinary
+typed construction/read path. Judge the complete changed implementation in one
+full-workload screen; these components do not face separate promotion gates.
+
+Generate concrete `Factory::new_<shape>_data(kind, XxxData)` entry points. Default
+implementations forward to the existing `new_node` path, preserving custom and
+lazy factories. `AstBuilder` validates the supplied edges in the same order,
+inserts the selected typed payload directly and then runs its create hook.
+Keep the generic constructor as the compatibility entry. Reuse the same generated
+packing routines from both paths. Ordinary construction should not allocate a
+boxed owned payload merely to unpack it into an already selected typed row.
+Preserve existing text-counter-before-validation behavior, and validate before
+node-count increment or ID/row allocation. Finish-time parent attachment is
+unchanged, including hook-visible edits.
+
+The original measured boxed-payload widths joined with verified physical core
+shape counts price 3,149,779 such payloads at 139.760 MB. This is a request-saving
+opportunity, not a current allocation attribution or promised saving: extra
+construction/replacement, allocator behavior and optimized code still need to be
+measured. The native profile attributes 242 ms to payload insertion, including
+92 ms of allocator samples; required row storage remains within those figures.
+
+Also provide direct checked core reads from an already selected physical owner.
+For parsed views, or the matching exclusive binding result, construct `NodeRead`
+from that borrowed core header without first constructing a generic `StorageRead`.
+Keep namespace/slot checks and the same borrow lifetime. Published overlays,
+mapped siblings, imported owners and lazy records retain the general resolver.
+This does not cache headers or change the number of semantic reads; it removes
+an intermediate representation within the combined construction/access change.
+The 1,190 ms AST-access union is a cost bound, not a saving estimate.
+
+Countertest default/custom factory dispatch, hooks and counter/error order,
+kind-versus-shape mismatches, large payloads, lazy/imported graphs and overlay
+selection. Complete graph comparisons and the fixed combined screen before
+claiming a net improvement. Hold auxiliary compaction while testing this change:
+its current estimate is only 95–107 MB retained and requires a core/lazy auxiliary
+API split; neither that estimate nor smaller rows establish a CPU benefit.

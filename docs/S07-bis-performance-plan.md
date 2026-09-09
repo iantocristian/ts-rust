@@ -98,6 +98,16 @@ list range/flag edits preserve it. This is the later completion-scan reduction
 allowed by CP5, with its explicit mutation audit and counterexamples recorded in
 the [compact implementation record](S07-bis-compact-storage.md).
 
+CP5's proof and affected tests are complete. Matched frozen CP1/CP4 elapsed-phase
+diagnostics now show both phase groups regressing: parse 2.568 → 3.509 s and bind
+with publication 2.137 → 2.971 s. The next combined candidate removes temporary
+owned payload boxing/union dispatch from generated concrete construction and
+generic read intermediates from already selected core reads, retaining the CP5
+proof. Its [implementation scope](S07-bis-compact-storage.md) preserves custom
+factory hooks, counters, error order and all compatibility readers. Screen this
+combination once; do not impose independent promotion gates on its parts.
+Auxiliary compaction stays on hold until that result. Final gates are unchanged.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,
