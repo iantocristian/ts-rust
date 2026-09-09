@@ -46,6 +46,18 @@ slot, shape and overwrite validation. Re-run the fixed pipeline screen for the
 changed candidate before choosing subsequent storage work; memory savings do
 not authorize promotion with a CPU regression.
 
+That combined repair has now completed its fixed screen: memory remains
+3.185 / 2.837 GB, while one/eight-worker wall is 6.099 / 1.315 s versus
+same-screen CP1 at 4.363 / 0.968 s. It still fails non-regression; no sample
+extension or threshold change is permitted. A new short native sample identifies
+physical-read construction as the largest remaining self-cost. The next bounded
+implementation borrows the selected physical owner, constructs payload context
+only on demand, and validates stored row references directly without a borrowed
+union roundtrip. Preserve all validation and error order. This addresses overhead
+of the current representation before trying another page policy, expanded trace,
+or symbol/flow redesign. The result record names its limits and keeps CP1 as the
+retained control.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,

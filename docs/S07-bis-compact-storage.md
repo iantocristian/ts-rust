@@ -161,4 +161,58 @@ ownership doctests, including explicit direct-selector lifetime protection;
 workspace all-target/all-feature Clippy with warnings denied; Rust 1.96 all-target
 compilation; formatting; pinned generation and observer drift. The first lint
 failure and its narrow generator correction are retained in the logs. The
-changed candidate still needs its frozen graph comparison and fixed screen.
+changed candidate passed its frozen graph comparison at both worker counts, with
+13,094 files binding in place and zero fallbacks. Its fixed screen and receipt
+verification also completed, retaining all eight warmups and 56 samples.
+
+| Metric | Same-screen CP1 | Repaired compact candidate | Candidate/control |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 4.363 s | 6.099 s | 1.398 |
+| Eight-worker wall | 0.968 s | 1.315 s | 1.358 |
+| Allocated bytes, worse median | 4.643 GB | 3.185 GB | 0.686 |
+| Peak RSS, worse median | 4.509 GB | 2.837 GB | 0.629 |
+
+Candidate manifest:
+`2e6b9eab562633c98c47ae5465abf3fa07e7da9370617ff1001d0865d9f9d1b9`.
+The [second review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-typed-repair/README.md)
+retains the changed binary/source, complete graphs, samples and exported profile;
+the unchanged CP1 bundle is referenced from the first archive.
+The wall upper 95% bootstrap bounds are 1.408 and 1.376, with both variants' MAD
+below 0.6%. **Still not promoted.** The controls differ between captures, so the
+two candidate medians must not be subtracted as a paired measurement of the
+repair. The remaining same-screen CPU regression is about 40% / 36%.
+
+| Metric | Repaired candidate | Historical same-mode limit | Remaining reduction |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 6.098883 s | 2.937627 s | 3.161256 s |
+| Eight-worker wall | 1.314566 s | 0.633963 s | 0.680603 s |
+| One-worker allocation | 3.184523 GB | 2.035226 GB | 1.149297 GB |
+| Eight-worker allocation | 3.184523 GB | 2.035767 GB | 1.148756 GB |
+| One-worker peak RSS | 2.834317 GB | 2.208948 GB | 0.625369 GB |
+| Eight-worker peak RSS | 2.837316 GB | 2.217045 GB | 0.620270 GB |
+
+A second single native CPU sample uses the repaired normal binary. Its worker
+has 6,083 ms sampled CPU; `AstView::node`, `BindBuilder::node`,
+`StorageView::node_here` and `for_arena` contribute 649, 265, 320 and 120 ms self
+samples. No exact phase attribution or removable-cost sum is inferred. The
+remaining repair therefore targets the physical read descriptor: borrow the
+already-selected owner and defer payload context until a payload is requested.
+Transaction reads must preserve their split owner borrows and lazy guard rules.
+
+Completion validation still constructs `NodeDataRead` and immediately rematches
+it. Generate stored-row reference validation directly while preserving every
+check and its order. Restrict text-range dispatch to suffix-capable identifiers;
+other text fields are independent of node ranges. This forms the next changed
+candidate. Keep small typed pages and boxed public construction inputs unchanged
+until their costs warrant a separate decision. CP1 stays the control; neither
+completed compact screen qualifies for the infrastructure exception or promotion.
+
+Text attribution identifies another new cost: converting raw-word `NodeText`
+into owned `JsString` reclassifies the source slice, whereas the old owned text
+cloned its existing validity tag. Of 240 ms under `from_utf8` in this sample,
+136 ms occur under compact owned conversion, including 83 ms in contextual
+keyword checking. Keyword lookup only needs borrowed bytes, so keep the text
+borrow scoped to that lookup and release it before diagnostic mutation. Leave
+declaration-name ownership and the S04 string contract intact. Ordinary borrowed
+compact text reads already avoid classification. This caller change belongs
+to the combined repair, not a separate claimed CPU win.
