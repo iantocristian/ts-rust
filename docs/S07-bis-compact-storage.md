@@ -571,3 +571,70 @@ establish implementation readiness for the frozen combined screen, not a
 performance result or promotion. Full workload graph comparison precedes that
 screen; broader ownership instrumentation and fresh Go acceptance remain later
 prerequisites.
+
+### Combined construction/access screen: memory retained, CPU still slower
+
+Frozen revision `f3426ac`, manifest
+`825fe92c286d1fb6c72324636e9afa8a07badc6b30263bc491f52d2e2ddbe69e`,
+combines CP5 with direct generated typed construction and selected-core reads.
+The normal executable SHA is
+`ae3adb7fe14078c08d4d04e4bc032d8a3a17289dbeadac3f8f6e779383c8f88d`.
+All 13,094 graphs match Go at one and eight workers; all files use in-place
+binding, with zero fallbacks. The fixed eight warmups and 56 measured children
+complete successfully, and receipt replay verifies their full artifact inventory.
+
+| Metric | One worker: candidate / CP1 | Ratio | Eight workers: candidate / CP1 | Ratio |
+| --- | ---: | ---: | ---: | ---: |
+| Wall | 5.177888 / 4.714439 s | 1.0983 | 1.504122 / 1.397319 s | 1.0764 |
+| Allocated | 2.434015 / 4.642571 GB | 0.5243 | 2.434017 / 4.642571 GB | 0.5243 |
+| Peak RSS | 2.502164 / 4.506649 GB | 0.5552 | 2.505589 / 4.509188 GB | 0.5557 |
+
+CPU upper 95% ratios are **1.1231 / 1.1128**; lower bounds are 1.0891 / 1.0276.
+Timing relative MAD is 0.56% / 0.72% for the candidate and 0.80% / 2.15% for
+CP1. The measured combination saves 2.209 GB of requests and about 2.004 GB RSS
+against its same-screen control, while adding 463 ms / 107 ms wall time.
+It therefore remains **experimental, not promoted**. CP1 remains the control.
+
+This compares the whole compact candidate with CP1. It does not isolate CP5,
+typed construction or the read path, nor establish a paired improvement against
+CP4. The 139.759 MB difference from CP4's recorded allocation median is consistent
+with the box-traffic projection, but comes from separate captures and is not a
+new component attribution. The eight-worker control is slower than in the CP4
+capture; cross-capture wall-time subtraction is particularly misleading here.
+
+| Remaining distance to historical Go-derived limits | One worker | Eight workers |
+| --- | ---: | ---: |
+| Wall above limit | 2.240 s (1.763× limit) | 0.870 s (2.373× limit) |
+| Allocated above limit | 398.789 MB | 398.250 MB |
+| Peak RSS above limit | 293.216 MB | 288.544 MB |
+
+These are planning distances using historical Go medians, not fresh paired Go
+acceptance. Both CPU modes and both memory gates still need to pass together.
+The measured memory result supports retaining the combined experiment for
+further work; it does not waive the CPU gates or justify a weighted score.
+
+The exact new normal binary's native sample validates all workload counts and
+the loaded digest. It has 6,031 ms of worker CPU samples: 3,065 under parsing,
+2,938 under consuming binding and 28 unattributed, without phase overlap.
+Completion validation under its new method name accounts for 83 ms; querying
+only the old method would incorrectly report its disappearance. Parent
+attachment and header finishing together account for 541 ms of disjoint sample
+weight, including required parent writes and preservation of identifier text.
+The native run takes 6.694 s versus the separate normal-screen median 5.178 s;
+this perturbation prevents treating sampled weights as a prediction of elapsed
+savings. The retained audit script resolves the exact executable and XML hashes.
+
+No demonstrated single bounded change closes both remaining gates. Continue with
+one combined finishing/allocation direction: use concrete owner-local finishing
+and parent attachment where it preserves the generic path's observation order,
+and price the current physical allocation/capacity costs before changing their
+policy. Preserve custom factories, hooks, imported/lazy nodes, final range text,
+and construction proofs. Do not reopen a row-policy matrix or promote isolated
+parts. The 541 ms sampled region is an upper bound on work to inspect, not a
+forecast of removable time.
+
+The [complete review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-construction-access/README.md)
+retains this screen, exact sources/binaries, generator sources, graph streams,
+raw observations, successful and failed development checks, and native CPU
+exports with their audit. The regenerated tracker views reflect stale evidence
+as pending; this diagnostic screen has not been substituted for tracker capture.

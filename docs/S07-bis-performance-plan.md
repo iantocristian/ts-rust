@@ -4,9 +4,10 @@ Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. All 192 compact shapes and the
 borrowed facade are implemented; their completed screens reduce memory
 but fail CPU non-regression. The vector policy was rejected. Compact binding
-storage has now completed its screen: 2.574 GB allocated / 2.505 GB RSS, but
-CPU ratios remain 1.364 / 1.322 against same-screen CP1. Final S07 gates
-remain open.
+storage and the combined construction/access repair have completed their screens.
+The latest uses 2.434 GB allocated / 2.506 GB RSS, with CPU ratios 1.098 / 1.076
+against same-screen CP1. This remains experimental: CPU confidence bounds fail
+non-regression, and final S07 gates remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
@@ -106,7 +107,21 @@ generic read intermediates from already selected core reads, retaining the CP5
 proof. Its [implementation scope](S07-bis-compact-storage.md) preserves custom
 factory hooks, counters, error order and all compatibility readers. Screen this
 combination once; do not impose independent promotion gates on its parts.
-Auxiliary compaction stays on hold until that result. Final gates are unchanged.
+
+That combined screen is now complete and verified, with all workload graphs
+matching in both modes and zero binding fallbacks. One-worker wall is 5.178 s
+against 4.714 s CP1; eight-worker wall is 1.504 s against 1.397 s. CPU upper 95%
+ratios are 1.123 / 1.113. Allocation is 2.434 GB and peak RSS is 2.506 GB.
+Retain the complete result as an experiment, without changing the control or
+calling the combination accepted. Its exact native sample leaves 541 ms of
+disjoint parent-attachment/header-finishing weight, including required work.
+Continue with concrete owner-local finishing/parent attachment, preserving the
+generic path and its observation order. In parallel, price current payload-page
+allocations/directories from the verified physical census and exact source before
+selecting CP6 capacity changes. Judge the next coherent combination once; do not
+infer individual component savings or add results from the earlier captures.
+Auxiliary compaction remains a separately priced option, not a promised saving.
+Final gates are unchanged.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
