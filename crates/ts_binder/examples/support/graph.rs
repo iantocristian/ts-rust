@@ -1,7 +1,7 @@
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use ts_ast::{
-    AstView, BindResult, DeclarationSlice, FlowData, FlowId, FlowListId, NodeData, NodeId,
+    AstView, BindResult, DeclarationSlice, FlowData, FlowId, FlowListId, NodeDataRead, NodeId,
     NodeListId, NodeSlice, Symbol, SymbolId, SymbolTableId, TextSlice,
 };
 
@@ -159,10 +159,10 @@ impl<'a> Graph<'a> {
             if ts_ast::is_ambient_module(view, declaration).expect("ambient module") {
                 let node = view.node(declaration).expect("module declaration");
                 let attributes = node
-                    .data()
+                    .data_source()
                     .as_module_declaration()
                     .expect("module payload")
-                    .attributes;
+                    .attributes();
                 let name = view.node_text(name).expect("module name");
                 let pattern = ts_core::pattern::Pattern::parse(name.as_bytes());
                 if let Some(attributes) =
@@ -192,7 +192,7 @@ impl<'a> Graph<'a> {
                 };
                 let Some(owner) = self
                     .result()
-                    .node_binding(class)
+                    .node_binding(view, class)
                     .and_then(|binding| binding.symbol)
                 else {
                     continue;
@@ -255,7 +255,7 @@ impl<'a> Graph<'a> {
                 };
                 let binding = self
                     .result
-                    .and_then(|result| result.node_binding(node_id))
+                    .and_then(|result| result.node_binding(view, node_id))
                     .unwrap_or_default();
                 json!({"id":id,"kind":node.kind().raw(),"flags":node.flags(),"pos":node.pos(),"end":node.end(),"parent":parent,"payload":payload,"fields":fields,"jsdoc":docs,"symbol":self.symbol_ref(binding.symbol),"local_symbol":self.symbol_ref(binding.local_symbol),"locals":self.table_ref(binding.locals),"next_container":self.node_ref(binding.next_container),"flow_node":self.flow_ref(binding.flow_node),"end_flow_node":self.flow_ref(binding.end_flow_node),"return_flow_node":self.flow_ref(binding.return_flow_node),"fallthrough_flow_node":self.flow_ref(binding.fallthrough_flow_node)})
             }
@@ -264,7 +264,7 @@ impl<'a> Graph<'a> {
                 json!({"id":id,"pos":list.loc().pos(),"end":list.loc().end(),"nodes":self.node_slice_ref(list.nodes()),"missing":list.is_missing(),"modifier_flags":list.modifier_flags(),"is_modifier":modifier})
             }
             Work::Nodes(nodes) => {
-                json!({"id":id,"values":self.node_refs(&view.node_slice(nodes).expect("syntax node slice"))})
+                json!({"id":id,"values":view.node_slice(nodes).expect("syntax node slice").iter().map(|id| self.node_ref(id)).collect::<Vec<_>>()})
             }
             Work::Texts(texts) => {
                 json!({"id":id,"values_hex":view.text_slice(texts).expect("syntax text slice").iter().map(|value|hex(value.as_bytes())).collect::<Vec<_>>()})

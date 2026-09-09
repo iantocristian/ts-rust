@@ -1,7 +1,7 @@
-use crate::NodeRecord;
 use crate::{
     lazy::LazyRecord, Error, Node, NodeId, StorageHandle, StorageTransaction, SymbolId, TokenKey,
 };
+use crate::{NodeParentRecord, NodeRecord};
 use std::{fmt, ops::Deref, sync::Arc};
 
 enum Location<N: NodeRecord> {
@@ -258,14 +258,7 @@ impl<N: NodeRecord, S> StorageHandle<N, S> {
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<CachedNodes<N, S>, Error> {
         self.node(parent)?;
-        let ids = self.lazy.jsdoc(
-            None,
-            parent,
-            &self.core,
-            &self.auxiliary,
-            self.source_text(),
-            initialize,
-        )?;
+        let ids = self.lazy.jsdoc(None, parent, self, initialize)?;
         Ok(CachedNodes {
             owner: self.clone(),
             ids,
@@ -280,7 +273,10 @@ impl<N: NodeRecord, S> StorageHandle<N, S> {
         key: TokenKey,
         kind: u32,
         initialize: impl FnOnce() -> N,
-    ) -> Result<RecordRef<'_, N, S>, Error> {
+    ) -> Result<RecordRef<'_, N, S>, Error>
+    where
+        N: NodeParentRecord,
+    {
         match self.try_token_record(key, kind, initialize) {
             Err(
                 error @ (Error::TokenKindMismatch { .. }
@@ -297,15 +293,30 @@ impl<N: NodeRecord, S> StorageHandle<N, S> {
         key: TokenKey,
         kind: u32,
         initialize: impl FnOnce() -> N,
+    ) -> Result<RecordRef<'_, N, S>, Error>
+    where
+        N: NodeParentRecord,
+    {
+        let parent = self.node(key.parent)?;
+        let id = self
+            .lazy
+            .token(key, kind, parent.storage_reparsed(), self, initialize)?;
+        self.node(id)
+    }
+
+    /// Fallible token initialization with owner-aware auxiliary staging. The
+    /// callback must prepare the parent link and must not reenter this file's
+    /// lazy APIs. All staged records publish together with the cache entry.
+    pub fn try_token_prepared(
+        &self,
+        key: TokenKey,
+        kind: u32,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>, NodeId) -> Result<N, Error>,
     ) -> Result<RecordRef<'_, N, S>, Error> {
         let parent = self.node(key.parent)?;
-        let id = self.lazy.token(
-            key,
-            kind,
-            parent.storage_reparsed(),
-            self.source().len(),
-            initialize,
-        )?;
+        let id =
+            self.lazy
+                .token_prepared(key, kind, parent.storage_reparsed(), self, initialize)?;
         self.node(id)
     }
 }

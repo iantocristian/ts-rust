@@ -1,5 +1,6 @@
 //! Per-source binding publication. Private staging owns all mutable binder data;
 //! published results contain non-owning graph identities and borrow their file.
+use crate::compact::binding::{BindingArenas, BindingWrite};
 use crate::flow::{FlowId, FlowLists, FlowNodes};
 use crate::node_map::NodeMap;
 use crate::symbols::{DeclarationLists, Symbol, SymbolTableId, SymbolTables};
@@ -36,7 +37,7 @@ pub struct BindResult {
     direct_nodes: bool,
     nodes: NodeMap<Node>,
     bindings: NodeMap<NodeBinding>,
-    flow_bindings: ts_arena::NodeSlots<FlowId>,
+    flow_bindings: NodeMap<FlowId>,
     pub(crate) symbols: SymbolArena<Symbol>,
     pub(crate) tables: SymbolTables,
     pub(crate) declarations: DeclarationLists,
@@ -78,7 +79,7 @@ impl BindResult {
             direct_nodes: false,
             nodes: NodeMap::default(),
             bindings: NodeMap::default(),
-            flow_bindings: ts_arena::NodeSlots::new(source.arena()),
+            flow_bindings: NodeMap::default(),
             symbols: SymbolArena::new(counters),
             tables: SymbolTables::new(counters),
             declarations: DeclarationLists::new(counters),
@@ -98,12 +99,19 @@ impl BindResult {
         self.source
     }
     /// Return non-owning graph links by value; this does not retain any owner.
-    pub fn node_binding(&self, id: NodeId) -> Option<NodeBinding> {
+    fn cold_node_binding(&self, id: NodeId) -> Option<NodeBinding> {
         self.bindings.get(&id).copied().or_else(|| {
             self.flow_bindings.get(&id).map(|&flow| NodeBinding {
                 flow_node: Some(flow),
                 ..NodeBinding::default()
             })
+        })
+    }
+    pub fn node_binding(&self, view: AstView<'_>, id: NodeId) -> Option<NodeBinding> {
+        self.cold_node_binding(id).or_else(|| {
+            (self.direct_nodes && id.arena() == self.source.arena())
+                .then(|| view.node(id).ok().and_then(|node| node.inline_binding()))
+                .flatten()
         })
     }
     pub fn symbols(&self) -> &SymbolArena<Symbol> {
@@ -133,11 +141,11 @@ impl BindResult {
     pub fn global_exports(&self) -> Option<SymbolTableId> {
         self.global_exports
     }
-    pub fn bindings(&self) -> impl Iterator<Item = (NodeId, NodeBinding)> + '_ {
+    fn cold_bindings(&self) -> impl Iterator<Item = (NodeId, NodeBinding)> + '_ {
         self.bindings
             .iter()
             .map(|(&id, &binding)| (id, binding))
-            .chain(self.flow_bindings.iter().map(|(id, &flow)| {
+            .chain(self.flow_bindings.iter().map(|(&id, &flow)| {
                 (
                     id,
                     NodeBinding {
@@ -147,8 +155,39 @@ impl BindResult {
                 )
             }))
     }
+    pub fn bindings<'a>(
+        &'a self,
+        view: AstView<'a>,
+    ) -> impl Iterator<Item = (NodeId, NodeBinding)> + 'a {
+        self.cold_bindings().chain(
+            self.direct_nodes
+                .then(|| view.0.for_arena(self.source.arena()).ok())
+                .flatten()
+                .into_iter()
+                .flat_map(move |owner| {
+                    owner
+                        .core_nodes()
+                        .enumerate()
+                        .filter_map(move |(index, _)| {
+                            let slot = u32::try_from(index + 1).expect("allocated core node slot");
+                            let id = NodeId::from_parts(self.source.arena(), slot)
+                                .expect("nonzero core slot");
+                            if !self.bindings.is_empty() && self.bindings.contains_key(&id) {
+                                return None;
+                            }
+                            if !self.flow_bindings.is_empty()
+                                && self.flow_bindings.contains_key(&id)
+                            {
+                                return None;
+                            }
+                            let node = AstView(owner, None).node(id).expect("published core node");
+                            node.inline_binding().map(|binding| (id, binding))
+                        })
+                }),
+        )
+    }
     pub(crate) fn overlay(&self, id: NodeId) -> Option<&Node> {
-        if self.direct_nodes {
+        if self.direct_nodes && id.arena() == self.source.arena() {
             None
         } else {
             self.nodes.get(&id)
@@ -283,9 +322,14 @@ impl BindBuilder<'_> {
             _ => self.view().node(id),
         }
     }
-    pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
+    pub fn node_mut(&mut self, id: NodeId) -> Result<crate::NodeMut<'_>, Error> {
         let parsed = match &mut self.storage {
-            BindStorage::Exclusive(parsed) => return parsed.builder_mut().node_mut(id),
+            BindStorage::Exclusive(parsed) => {
+                if id.arena() == self.result.source.arena() {
+                    return parsed.builder_mut().node_mut(id);
+                }
+                parsed.view()
+            }
             BindStorage::Published(parsed) => *parsed,
         };
         // The immutable backend still preserves the original parsed headers.
@@ -296,10 +340,12 @@ impl BindBuilder<'_> {
             return Err(Error::WrongOwner);
         }
         match self.result.nodes.entry(id) {
-            std::collections::hash_map::Entry::Occupied(entry) => Ok(entry.into_mut()),
-            std::collections::hash_map::Entry::Vacant(entry) => {
-                Ok(entry.insert(parsed.node(id)?.copy_for_binding()))
+            std::collections::hash_map::Entry::Occupied(entry) => {
+                Ok(crate::NodeMut::owned(entry.into_mut()))
             }
+            std::collections::hash_map::Entry::Vacant(entry) => Ok(crate::NodeMut::owned(
+                entry.insert(parsed.node(id)?.copy_for_binding()),
+            )),
         }
     }
 
@@ -307,8 +353,10 @@ impl BindBuilder<'_> {
     /// its parse validation proof while unrestricted `node_mut` still dirties it.
     pub fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
         match &mut self.storage {
-            BindStorage::Exclusive(parsed) => parsed.set_node_flags(id, flags),
-            BindStorage::Published(_) => {
+            BindStorage::Exclusive(parsed) if id.arena() == self.result.source.arena() => {
+                parsed.set_node_flags(id, flags)
+            }
+            BindStorage::Exclusive(_) | BindStorage::Published(_) => {
                 self.node_mut(id)?.set_flags(flags);
                 Ok(())
             }
@@ -316,50 +364,171 @@ impl BindBuilder<'_> {
     }
     pub fn binding(&self, id: NodeId) -> Result<Option<NodeBinding>, Error> {
         self.parsed_view().node(id)?;
-        Ok(self.result.node_binding(id))
+        Ok(self.result.node_binding(self.parsed_view(), id))
     }
     pub fn node_symbol(&self, id: NodeId) -> Result<Option<SymbolId>, Error> {
-        self.parsed_view().node(id)?;
-        Ok(self
-            .result
-            .bindings
-            .get(&id)
-            .and_then(|binding| binding.symbol))
+        let node = self.node(id)?;
+        if !self.result.bindings.is_empty() {
+            if let Some(binding) = self.result.bindings.get(&id) {
+                return Ok(binding.symbol);
+            }
+        }
+        Ok(
+            if self.result.direct_nodes && id.arena() == self.result.source.arena() {
+                node.inline_symbol()
+            } else {
+                None
+            },
+        )
     }
     pub fn node_locals(&self, id: NodeId) -> Result<Option<SymbolTableId>, Error> {
-        self.parsed_view().node(id)?;
-        Ok(self
-            .result
-            .bindings
-            .get(&id)
-            .and_then(|binding| binding.locals))
+        let node = self.node(id)?;
+        if !self.result.bindings.is_empty() {
+            if let Some(binding) = self.result.bindings.get(&id) {
+                return Ok(binding.locals);
+            }
+        }
+        Ok(
+            if self.result.direct_nodes && id.arena() == self.result.source.arena() {
+                node.inline_locals()
+            } else {
+                None
+            },
+        )
+    }
+    pub fn node_flow(&self, id: NodeId) -> Result<Option<FlowId>, Error> {
+        let node = self.node(id)?;
+        if let Some(binding) = self.result.cold_node_binding(id) {
+            return Ok(binding.flow_node);
+        }
+        Ok(
+            if self.result.direct_nodes && id.arena() == self.result.source.arena() {
+                node.inline_flow()
+            } else {
+                None
+            },
+        )
+    }
+    pub fn set_node_symbol(&mut self, id: NodeId, value: Option<SymbolId>) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::Symbol(value))
+    }
+    pub fn set_node_local_symbol(
+        &mut self,
+        id: NodeId,
+        value: Option<SymbolId>,
+    ) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::LocalSymbol(value))
+    }
+    pub fn set_node_locals(
+        &mut self,
+        id: NodeId,
+        value: Option<SymbolTableId>,
+    ) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::Locals(value))
+    }
+    pub fn set_node_next_container(
+        &mut self,
+        id: NodeId,
+        value: Option<NodeId>,
+    ) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::NextContainer(value))
+    }
+    pub fn set_node_return_flow(&mut self, id: NodeId, value: Option<FlowId>) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::ReturnFlow(value))
+    }
+    pub fn set_node_end_flow(&mut self, id: NodeId, value: Option<FlowId>) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::EndFlow(value))
+    }
+    pub fn set_node_fallthrough_flow(
+        &mut self,
+        id: NodeId,
+        value: Option<FlowId>,
+    ) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::FallthroughFlow(value))
     }
     /// The overwhelmingly common identifier/access edge needs only one FlowId.
     /// Promotion to a full declaration/container record preserves that edge.
     pub fn set_node_flow(&mut self, id: NodeId, flow: Option<FlowId>) -> Result<(), Error> {
+        self.set_binding_field(id, BindingWrite::Flow(flow))
+    }
+    fn set_binding_field(&mut self, id: NodeId, write: BindingWrite) -> Result<(), Error> {
         self.validate_write_owner(id)?;
-        if let Some(flow) = flow {
-            self.result.flows.get(flow)?;
+        match write {
+            BindingWrite::Symbol(value) | BindingWrite::LocalSymbol(value) => {
+                if let Some(value) = value {
+                    self.result.symbols.get(value)?;
+                }
+            }
+            BindingWrite::Locals(value) => {
+                if let Some(value) = value {
+                    self.result.tables.get(value)?;
+                }
+            }
+            BindingWrite::NextContainer(value) => {
+                if let Some(value) = value {
+                    self.parsed_view().node(value)?;
+                }
+            }
+            BindingWrite::Flow(value)
+            | BindingWrite::ReturnFlow(value)
+            | BindingWrite::EndFlow(value)
+            | BindingWrite::FallthroughFlow(value) => {
+                if let Some(value) = value {
+                    self.result.flows.get(value)?;
+                }
+            }
         }
-        if let Some(binding) = self.result.bindings.get_mut(&id) {
-            binding.flow_node = flow;
-        } else if let Some(flow) = flow {
-            self.result.flow_bindings.insert(id, flow);
+        if !self.result.bindings.is_empty() {
+            if let Some(binding) = self.result.bindings.get_mut(&id) {
+                write.apply(binding);
+                return Ok(());
+            }
+        }
+        if !self.result.flow_bindings.is_empty() && self.result.flow_bindings.contains_key(&id) {
+            if let BindingWrite::Flow(flow) = write {
+                if let Some(flow) = flow {
+                    self.result.flow_bindings.insert(id, flow);
+                } else {
+                    self.result.flow_bindings.remove(&id);
+                }
+            } else {
+                write.apply(self.binding_mut(id)?);
+            }
+            return Ok(());
+        }
+        if let BindStorage::Exclusive(parsed) = &mut self.storage {
+            if id.arena() == self.result.source.arena() && parsed.write_binding_field(id, write)? {
+                return Ok(());
+            }
+        }
+        // Rare unsupported shapes and already-published owners keep the original
+        // side records. A compatibility record supersedes every inline field.
+        let inline = self.node(id)?.inline_binding();
+        if let BindingWrite::Flow(flow) = write {
+            if let Some(mut binding) = inline {
+                binding.flow_node = flow;
+                self.result.bindings.insert(id, binding);
+            } else if let Some(flow) = flow {
+                self.result.flow_bindings.insert(id, flow);
+            } else {
+                self.result.flow_bindings.remove(&id);
+            }
         } else {
-            self.result.flow_bindings.remove(&id);
+            write.apply(self.binding_mut(id)?);
         }
         Ok(())
     }
     pub fn binding_mut(&mut self, id: NodeId) -> Result<&mut NodeBinding, Error> {
         self.validate_write_owner(id)?;
+        let inline = self.node(id)?.inline_binding().unwrap_or_default();
         let flow = self.result.flow_bindings.remove(&id);
         Ok(self
             .result
             .bindings
             .entry(id)
             .or_insert_with(|| NodeBinding {
-                flow_node: flow,
-                ..NodeBinding::default()
+                flow_node: flow.or(inline.flow_node),
+                ..inline
             }))
     }
     pub fn symbols(&self) -> &SymbolArena<Symbol> {
@@ -409,8 +578,10 @@ impl BindBuilder<'_> {
     }
     fn validate_write_owner(&self, id: NodeId) -> Result<(), Error> {
         if let BindStorage::Exclusive(builder) = &self.storage {
-            builder.core_node(id)?;
-            return Ok(());
+            if id.arena() == self.result.source.arena() {
+                builder.core_node(id)?;
+                return Ok(());
+            }
         }
         let owner = self.parsed_view().for_node_owner(id)?;
         if owner.0.id() != self.parsed_view().0.id() {
@@ -495,7 +666,9 @@ impl BindBuilder<'_> {
             }
             self.parsed_view().validate_data(node.data())?;
         }
-        for (id, binding) in self.result.bindings() {
+        // Narrow inline writes validate their target IDs at the write. Only the
+        // compatibility records can still carry unchecked field assignments.
+        for (id, binding) in self.result.cold_bindings() {
             self.validate_write_owner(id)?;
             for symbol in [binding.symbol, binding.local_symbol].into_iter().flatten() {
                 self.result.symbols.get(symbol)?;
@@ -565,7 +738,7 @@ impl<'a> BoundView<'a> {
         Ok(self
             .ast
             .binding_for_node(id)?
-            .and_then(|result| result.node_binding(id)))
+            .and_then(|result| result.node_binding(self.ast, id)))
     }
     pub fn source_file(self) -> Result<SourceFileRead<'a>, Error> {
         self.ast.source_file(self.result.source)
@@ -804,6 +977,11 @@ impl ParsedFile {
             });
         }
         result.direct_nodes = true;
+        self.initialize_binding_storage(BindingArenas {
+            symbols: result.symbols.id(),
+            tables: result.tables.id(),
+            flows: result.flows.id(),
+        });
         let result = {
             let mut binding = BindBuilder {
                 storage: BindStorage::Exclusive(&mut self),

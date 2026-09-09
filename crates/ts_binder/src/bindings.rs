@@ -164,7 +164,7 @@ impl Binder<'_, '_> {
                     .node_slice(checked(self.n(parent).parameters(self.view()))),
             )
             .iter()
-            .position(|&id| id == Some(node))
+            .position(|id| id == Some(node))
             .map_or(-1, |index| index as isize);
             self.bind_anonymous_declaration(
                 node,
@@ -188,10 +188,10 @@ impl Binder<'_, '_> {
             let flags = sf::PROPERTY
                 | if self
                     .n(node)
-                    .data()
+                    .data_source()
                     .as_parameter_declaration()
                     .expect("parameter payload")
-                    .question_token
+                    .question_token()
                     .is_some()
                 {
                     sf::OPTIONAL
@@ -217,10 +217,10 @@ impl Binder<'_, '_> {
                 self.n(parent).kind() == K::ConditionalType
                     && self
                         .n(parent)
-                        .data()
+                        .data_source()
                         .as_conditional_type_node()
                         .expect("conditional type payload")
-                        .extends_type
+                        .extends_type()
                         == Some(node)
             }) {
                 return parent;

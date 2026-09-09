@@ -28,7 +28,7 @@ fn parse(bytes: &[u8], kind: ScriptKind, counters: &Counters) -> ParsedFile {
 fn first_statement(view: AstView<'_>, source: NodeId) -> NodeId {
     let list = view.node(source).unwrap().statement_list().unwrap();
     let nodes = view.list(list).unwrap().nodes();
-    view.node_slice(nodes).unwrap()[0].unwrap()
+    view.node_slice(nodes).unwrap().at(0).unwrap()
 }
 
 fn assert_graph_eq(
@@ -358,11 +358,10 @@ fn committed_lazy_records_select_compatibility_and_remain_retained() {
     assert_eq!(
         retained
             .node()
-            .data()
+            .data_source()
             .as_identifier()
             .unwrap()
-            .text
-            .as_bytes(),
+            .text(),
         b"lazy"
     );
     drop(retained);
@@ -392,12 +391,13 @@ fn unrestricted_parent_and_payload_edits_still_require_core_validation() {
                 }
             };
             if before_binding {
-                corrupt(parsed.builder_mut().node_mut(statement).unwrap());
+                corrupt(&mut parsed.builder_mut().node_mut(statement).unwrap());
             }
             let outcome = ts_parser::on_parser_worker(|| {
                 parsed.bind_and_publish(|builder| {
                     if !before_binding {
-                        corrupt(builder.node_mut(statement)?);
+                        let mut node = builder.node_mut(statement)?;
+                        corrupt(&mut node);
                     }
                     // A subsequent narrow write cannot restore a proof dirtied
                     // either before binding or through BindBuilder::node_mut.

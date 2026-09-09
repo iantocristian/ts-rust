@@ -19,12 +19,15 @@ fn first_statement(file: &ParsedFile) -> NodeId {
     let list = view
         .node(file.root())
         .unwrap()
-        .data()
+        .data_source()
         .as_source_file()
         .unwrap()
-        .statements
+        .statements()
         .unwrap();
-    view.node_slice(view.list(list).unwrap().nodes()).unwrap()[0].unwrap()
+    view.node_slice(view.list(list).unwrap().nodes())
+        .unwrap()
+        .at(0)
+        .unwrap()
 }
 
 #[test]
@@ -42,7 +45,7 @@ fn empty_jsdoc_comment_has_the_pinned_non_nil_backing() {
         .unwrap();
     let doc = view.node(docs[0]).unwrap();
     let list = view
-        .list(doc.data().as_js_doc().unwrap().comment.unwrap())
+        .list(doc.data_source().as_js_doc().unwrap().comment().unwrap())
         .unwrap();
     assert_eq!(list.loc(), ts_core::TextRange::new(0, 4));
     assert!(!list.nodes().is_nil());
@@ -66,17 +69,17 @@ fn leading_jsdoc_link_preserves_nil_text_slice() {
         .unwrap();
     let doc = view.node(docs[0]).unwrap();
     let comment = view
-        .list(doc.data().as_js_doc().unwrap().comment.unwrap())
+        .list(doc.data_source().as_js_doc().unwrap().comment().unwrap())
         .unwrap();
     let parts = view.node_slice(comment.nodes()).unwrap();
-    let leading = view.node(parts[0].unwrap()).unwrap();
+    let leading = view.node(parts.at(0).unwrap()).unwrap();
     assert_eq!(leading.range(), ts_core::TextRange::new(0, 4));
-    let text = leading.data().as_js_doc_text().unwrap().text;
+    let text = leading.data_source().as_js_doc_text().unwrap().text();
     assert!(text.is_nil());
     assert!(view.text_slice(text).unwrap().is_empty());
-    let link = view.node(parts[1].unwrap()).unwrap();
+    let link = view.node(parts.at(1).unwrap()).unwrap();
     assert_eq!(link.kind(), ts_ast::SyntaxKind::JSDocLink);
-    assert!(link.data().as_js_doc_link().unwrap().text.is_nil());
+    assert!(link.data_source().as_js_doc_link().unwrap().text().is_nil());
 }
 
 #[test]
@@ -139,8 +142,7 @@ fn ordinary_nodes_and_empty_flagged_comments_have_distinct_cache_paths() {
         .source_eager_jsdoc(root, parent)
         .unwrap()
         .is_none());
-    let node = file.builder_mut().node_mut(parent).unwrap();
-    node.set_flags(node.flags() | node_flags::HAS_JS_DOC);
+    ts_ast::Factory::add_node_flags(file.builder_mut(), parent, node_flags::HAS_JS_DOC);
     assert!(provider
         .jsdoc(file.view(), root, parent)
         .unwrap()

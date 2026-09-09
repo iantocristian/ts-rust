@@ -174,9 +174,12 @@ impl<'a> Decoder<'a> {
                     DecodeError::Baseline(format!("at node {index} (kind {kind}): {message}"))
                 })?;
             let flags = self.node_field(index, 24);
-            let node_mut = self.factory.node_mut(node).expect("decoded node owner");
-            node_mut.set_range(TextRange::new(i64::from(pos), i64::from(end)));
-            node_mut.set_flags(flags);
+            ts_ast::Factory::set_node_range(
+                &mut self.factory,
+                node,
+                TextRange::new(i64::from(pos), i64::from(end)),
+            );
+            ts_ast::Factory::set_node_flags(&mut self.factory, node, flags);
             self.nodes[index] = Some(node);
         }
         Ok(DecodedTree {

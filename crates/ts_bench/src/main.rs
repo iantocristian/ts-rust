@@ -90,10 +90,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(
             "{}",
             serde_json::json!({
-                "node": std::mem::size_of::<ts_ast::Node>(),
-                "node_data": std::mem::size_of::<ts_ast::NodeData>(),
-                "node_binding": std::mem::size_of::<ts_ast::NodeBinding>(),
+                "owned_construction_node": std::mem::size_of::<ts_ast::Node>(),
+                "owned_construction_payload": std::mem::size_of::<ts_ast::NodeData>(),
+                "owned_binding_snapshot": std::mem::size_of::<ts_ast::NodeBinding>(),
                 "auxiliary": std::mem::size_of::<ts_ast::AstStorageData>(),
+                "retained_core_total": "unavailable: use allocator and RSS captures; construction sizes do not describe compact headers and rows",
                 "node_list": std::mem::size_of::<ts_ast::NodeList>(),
                 "symbol": std::mem::size_of::<ts_ast::Symbol>(),
                 "flow_node": std::mem::size_of::<ts_ast::FlowNode>(),
@@ -323,7 +324,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     *total += count;
                 }
-                for (_, binding) in file.view().result().bindings() {
+                for (_, binding) in file.view().result().bindings(file.view().ast()) {
                     bindings += 1;
                     if binding.symbol.is_none()
                         && binding.local_symbol.is_none()

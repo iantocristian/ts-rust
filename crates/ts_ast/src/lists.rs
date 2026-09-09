@@ -149,8 +149,11 @@ pub struct FileInfo {
 /// This enum is storage plumbing; checked AST APIs distinguish its record kinds.
 #[derive(Debug)]
 pub enum AstStorageData {
+    /// Cold lazy nodes retain full construction payloads under the publication lock.
+    FallbackNode(std::sync::Arc<crate::Node>),
     List(NodeList),
     Nodes(Box<[Option<NodeId>]>),
+    CompactNodes(crate::compact::lists::CompactNodes),
     Text(Box<[JsString]>),
     File(FileInfo),
     SourceMetadata(crate::SourceMetadataData),
@@ -175,12 +178,12 @@ impl std::fmt::Debug for NodeListRead<'_> {
 
 pub struct NodeSliceRead<'a> {
     pub(crate) record: Option<StorageRead<'a, AstStorageData>>,
+    pub(crate) compact: Option<(&'a crate::compact::lists::EdgePages, ts_arena::ArenaId)>,
     pub(crate) start: usize,
     pub(crate) len: usize,
 }
-impl Deref for NodeSliceRead<'_> {
-    type Target = [Option<NodeId>];
-    fn deref(&self) -> &Self::Target {
+impl NodeSliceRead<'_> {
+    fn values(&self) -> &[Option<NodeId>] {
         match &self.record {
             None => &[],
             Some(record) => match &**record {
@@ -189,7 +192,127 @@ impl Deref for NodeSliceRead<'_> {
             },
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.len
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    /// Read a node identity by value; `Some(None)` is a present nil element.
+    pub fn get(&self, index: usize) -> Option<Option<NodeId>> {
+        if index >= self.len {
+            return None;
+        }
+        match self.compact {
+            Some((edges, owner)) => edges.get(owner, self.start + index),
+            None => self.values().get(index).copied(),
+        }
+    }
+
+    /// Read an existing element, preserving the bounds panic of slice indexing.
+    #[track_caller]
+    pub fn at(&self, index: usize) -> Option<NodeId> {
+        self.get(index).unwrap_or_else(|| {
+            panic!(
+                "index out of bounds: the len is {} but the index is {index}",
+                self.len
+            )
+        })
+    }
+
+    pub fn first(&self) -> Option<Option<NodeId>> {
+        self.get(0)
+    }
+
+    pub fn last(&self) -> Option<Option<NodeId>> {
+        self.len.checked_sub(1).and_then(|index| self.get(index))
+    }
+
+    /// Borrow the read guard while yielding copied, non-retaining identities.
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = Option<NodeId>> + ExactSizeIterator + '_ {
+        match self.compact {
+            Some((edges, owner)) => NodeSliceIter::Compact {
+                edges,
+                owner,
+                range: self.start..self.start + self.len,
+            },
+            None => NodeSliceIter::Full(self.values().iter().copied()),
+        }
+    }
 }
+
+enum NodeSliceIter<'a> {
+    Full(std::iter::Copied<std::slice::Iter<'a, Option<NodeId>>>),
+    Compact {
+        edges: &'a crate::compact::lists::EdgePages,
+        owner: ts_arena::ArenaId,
+        range: std::ops::Range<usize>,
+    },
+}
+
+impl Iterator for NodeSliceIter<'_> {
+    type Item = Option<NodeId>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.nth(0)
+    }
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        match self {
+            Self::Full(values) => values.nth(n),
+            Self::Compact {
+                edges,
+                owner,
+                range,
+            } => range.nth(n).map(|index| {
+                edges
+                    .get(*owner, index)
+                    .expect("validated compact edge index")
+            }),
+        }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
+    fn count(self) -> usize {
+        self.len()
+    }
+    fn last(mut self) -> Option<Self::Item> {
+        self.next_back()
+    }
+}
+
+impl DoubleEndedIterator for NodeSliceIter<'_> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.nth_back(0)
+    }
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+        match self {
+            Self::Full(values) => values.nth_back(n),
+            Self::Compact {
+                edges,
+                owner,
+                range,
+            } => range.nth_back(n).map(|index| {
+                edges
+                    .get(*owner, index)
+                    .expect("validated compact edge index")
+            }),
+        }
+    }
+}
+
+impl ExactSizeIterator for NodeSliceIter<'_> {
+    fn len(&self) -> usize {
+        match self {
+            Self::Full(values) => values.len(),
+            Self::Compact { range, .. } => range.len(),
+        }
+    }
+}
+impl std::iter::FusedIterator for NodeSliceIter<'_> {}
+
 pub struct TextSliceRead<'a> {
     pub(crate) record: Option<StorageRead<'a, AstStorageData>>,
     pub(crate) start: usize,

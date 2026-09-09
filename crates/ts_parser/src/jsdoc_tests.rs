@@ -153,16 +153,22 @@ fn type_tag_sets_the_full_signature_edge_and_its_immediate_parent() {
     let list = view
         .node(file.root())
         .unwrap()
-        .data()
+        .data_source()
         .as_source_file()
         .unwrap()
-        .statements
+        .statements()
         .unwrap();
-    let fun = view.node_slice(view.list(list).unwrap().nodes()).unwrap()[0].unwrap();
+    let fun = view
+        .node_slice(view.list(list).unwrap().nodes())
+        .unwrap()
+        .at(0)
+        .unwrap();
     let node = view.node(fun).unwrap();
-    let data = node.data().as_function_declaration().unwrap();
-    assert!(data.r#type.is_none());
-    let signature = data.full_signature.expect("@type annotates FullSignature");
+    let data = node.data_source().as_function_declaration().unwrap();
+    assert!(data.r#type().is_none());
+    let signature = data
+        .full_signature()
+        .expect("@type annotates FullSignature");
     assert_eq!(view.node(signature).unwrap().parent(), Some(fun));
     assert_eq!(
         view.node(signature).unwrap().kind(),

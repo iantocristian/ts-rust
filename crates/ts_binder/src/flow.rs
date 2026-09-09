@@ -329,7 +329,7 @@ mod tests {
         file.bind_with(source, |builder| {
             let mut b = Binder::new(builder);
             let statements = b.syntax_nodes(b.n(source).statement_list());
-            let expression = |index: usize| b.n(need(statements[index])).expression().unwrap();
+            let expression = |index: usize| b.n(need(statements.at(index))).expression().unwrap();
             let (name, yes, no, optional, nullish) = (
                 expression(0),
                 expression(1),
@@ -338,7 +338,13 @@ mod tests {
                 expression(4),
             );
             let optional_base = need(b.n(optional).expression());
-            let nullish_base = need(b.n(nullish).data().as_binary_expression().unwrap().left);
+            let nullish_base = need(
+                b.n(nullish)
+                    .data_source()
+                    .as_binary_expression()
+                    .unwrap()
+                    .left(),
+            );
             let unreachable = b.new_flow_node(F::UNREACHABLE);
             b.unreachable_flow = Some(unreachable);
             let start = b.new_flow_node(F::START);

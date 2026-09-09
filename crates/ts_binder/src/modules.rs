@@ -17,7 +17,7 @@ impl Binder<'_, '_> {
             let original = need(self.symbol(self.file));
             let exports = self.ensure_exports(original);
             self.declare_symbol(exports, Some(original), self.file, sf::PROPERTY, sf::ALL);
-            self.binding_mut(self.file).symbol = Some(original);
+            self.set_node_symbol(self.file, Some(original));
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.bindSourceFileAsExternalModule
@@ -60,10 +60,10 @@ impl Binder<'_, '_> {
                             });
                     } else if self
                         .n(node)
-                        .data()
+                        .data_source()
                         .as_module_declaration()
                         .expect("module payload")
-                        .attributes
+                        .attributes()
                         .is_some()
                     {
                         self.error_on_node(name, d::An_ambient_module_declaration_with_import_attributes_must_use_a_pattern_name_with_an_Asterisk_character, Vec::new());
@@ -160,10 +160,10 @@ impl Binder<'_, '_> {
     pub fn bind_export_declaration(&mut self, node: NodeId) {
         let clause = self
             .n(node)
-            .data()
+            .data_source()
             .as_export_declaration()
             .expect("export declaration payload")
-            .export_clause;
+            .export_clause();
         if let Some(parent) = self.symbol(need(self.container)) {
             if clause.is_none() {
                 let table = self.ensure_exports(parent);
@@ -201,10 +201,10 @@ impl Binder<'_, '_> {
             let symbol = self.declare_symbol(table, Some(parent), node, flags, sf::ALL);
             if self
                 .n(node)
-                .data()
+                .data_source()
                 .as_export_assignment()
                 .expect("export assignment payload")
-                .is_export_equals
+                .is_export_equals()
             {
                 self.set_value_declaration(symbol, node);
             }
@@ -237,7 +237,6 @@ impl Binder<'_, '_> {
                     .node_slice(checked(self.n(body).statements(self.view()))),
             )
             .iter()
-            .copied()
             .any(|node| {
                 matches!(
                     self.n(need(node)).kind().known(),

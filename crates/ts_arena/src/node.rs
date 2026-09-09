@@ -4,10 +4,16 @@ use crate::NodeId;
 /// interface. Concrete AST records own their header; storage adds no wrapper.
 pub trait NodeRecord {
     type Aux;
+    /// Exclusive per-owner payload storage, published with its record headers.
+    type Store: Default;
     fn storage_kind(&self) -> u32;
-    fn storage_parent(&self) -> Option<NodeId>;
-    fn set_storage_parent(&mut self, parent: Option<NodeId>);
     fn storage_reparsed(&self) -> bool;
+}
+
+/// Full records whose parent can be assigned without owner-specific payload
+/// context. Compact records initialize that link through a transaction instead.
+pub trait NodeParentRecord: NodeRecord {
+    fn set_storage_parent(&mut self, parent: Option<NodeId>);
 }
 
 /// Storage metadata around an AST-defined payload. Graph edges are non-owning ids.
@@ -32,16 +38,17 @@ impl<T> Node<T> {
 
 impl<T> NodeRecord for Node<T> {
     type Aux = ();
+    type Store = ();
     fn storage_kind(&self) -> u32 {
         self.kind
     }
-    fn storage_parent(&self) -> Option<NodeId> {
-        self.parent
-    }
-    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
-        self.parent = parent;
-    }
     fn storage_reparsed(&self) -> bool {
         self.reparsed
+    }
+}
+
+impl<T> NodeParentRecord for Node<T> {
+    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
+        self.parent = parent;
     }
 }

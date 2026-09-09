@@ -1,7 +1,7 @@
 //! Source config validation and manifest metadata; mapper execution is separate.
 use crate::{ConfigValue, TsConfigSourceFile};
 use std::collections::BTreeSet;
-use ts_ast::{Diagnostic, NodeData, NodeId, SyntaxKind as K};
+use ts_ast::{Diagnostic, NodeDataRead, NodeId, SyntaxKind as K};
 use ts_diagnostics as diagnostics;
 use ts_jsstring::JsString;
 
@@ -194,21 +194,24 @@ pub fn mapper_syntax(config: &TsConfigSourceFile, index: isize, subkey: &[u8]) -
     let property = crate::find_property(config, &[b"contentMappers"])?;
     let view = config.file.view();
     let node = view.node(property).expect("config property");
-    let NodeData::PropertyAssignment(data) = node.data() else {
+    let NodeDataRead::PropertyAssignment(data) = node.data() else {
         return None;
     };
-    let initializer = data.initializer?;
+    let initializer = data.initializer()?;
     let node = view.node(initializer).expect("config initializer");
-    let NodeData::ArrayLiteralExpression(data) = node.data() else {
+    let NodeDataRead::ArrayLiteralExpression(data) = node.data() else {
         return Some(initializer);
     };
     let elements = view
-        .node_slice(view.list(data.elements?).expect("mapper elements").nodes())
+        .node_slice(
+            view.list(data.elements()?)
+                .expect("mapper elements")
+                .nodes(),
+        )
         .expect("mapper element slice");
     let Some(element) = usize::try_from(index)
         .ok()
         .and_then(|index| elements.get(index))
-        .copied()
         .flatten()
     else {
         return Some(initializer);
@@ -216,8 +219,8 @@ pub fn mapper_syntax(config: &TsConfigSourceFile, index: isize, subkey: &[u8]) -
     if !subkey.is_empty() {
         if let Some(property) = crate::find_property_in_object(config, element, &[subkey]) {
             let node = view.node(property).expect("mapper property");
-            if let NodeData::PropertyAssignment(data) = node.data() {
-                if let Some(value) = data.initializer {
+            if let NodeDataRead::PropertyAssignment(data) = node.data() {
+                if let Some(value) = data.initializer() {
                     return Some(value);
                 }
             }
@@ -244,18 +247,18 @@ pub fn extension_syntax(
     let id = mapper_syntax(config, index, b"extensions")?;
     let view = config.file.view();
     let node = view.node(id).expect("extension node");
-    if let NodeData::ArrayLiteralExpression(data) = node.data() {
-        if let Some(list) = data.elements {
+    if let NodeDataRead::ArrayLiteralExpression(data) = node.data() {
+        if let Some(list) = data.elements() {
             for element in view
                 .node_slice(view.list(list).expect("extensions list").nodes())
                 .expect("extension slice")
                 .iter()
                 .flatten()
             {
-                if view.node(*element).expect("extension element").kind() == K::StringLiteral
-                    && view.node_text(*element).expect("extension text").as_bytes() == extension
+                if view.node(element).expect("extension element").kind() == K::StringLiteral
+                    && view.node_text(element).expect("extension text").as_bytes() == extension
                 {
-                    return Some(*element);
+                    return Some(element);
                 }
             }
         }

@@ -7,10 +7,10 @@ use ts_ast::{flow_flags as F, node_flags, utilities as u, FlowId, NodeId, Syntax
 macro_rules! payload {
     ($b:expr, $node:expr, $accessor:ident) => {
         $b.n($node)
-            .data()
+            .data_source()
             .$accessor()
             .expect("binder syntax payload")
-            .clone()
+            .to_owned()
     };
 }
 pub(crate) use payload;
@@ -242,7 +242,7 @@ impl Binder<'_, '_> {
                 self.n(need(self.n(node).parent()))
                     .parent()
                     .map(|id| self.n(id))
-                    .as_deref(),
+                    .as_ref(),
             )
         {
             self.bind_initialized_variable_flow(node);
@@ -250,6 +250,10 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindInitializedVariableFlow
     pub(crate) fn bind_initialized_variable_flow(&mut self, node: NodeId) {
+        // This descent follows nested binding patterns without reentering bind.
+        crate::recursion::guarded(|| self.bind_initialized_variable_flow_worker(node));
+    }
+    fn bind_initialized_variable_flow_worker(&mut self, node: NodeId) {
         let name = if matches!(
             self.n(node).kind().known(),
             Some(K::VariableDeclaration | K::BindingElement)
@@ -523,7 +527,7 @@ impl Binder<'_, '_> {
     // port: tsc/internal/binder/binder.go:hasNarrowableArgument
     pub(crate) fn has_narrowable_argument(&self, node: NodeId) -> bool {
         let call = payload!(self, node, as_call_expression);
-        for &argument in &*self.syntax_nodes(Some(need(call.arguments))) {
+        for argument in self.syntax_nodes(Some(need(call.arguments))).iter() {
             if self.contains_narrowable_reference(need(argument)) {
                 return true;
             }

@@ -1,5 +1,8 @@
 //! Node.Text keeps stored bytes borrowed; only Go's concatenation paths allocate.
-use crate::{AstView, JsString, Node, NodeData, NodeId, NodeRead, SyntaxKind as K, TextSliceRead};
+use crate::{
+    AstView, JsString, Node, NodeAccess, NodeDataRead, NodeId, NodeRead, SyntaxKind as K,
+    TextSliceRead,
+};
 use std::ops::Deref;
 use ts_arena::Error;
 
@@ -35,19 +38,6 @@ impl Deref for NodeText<'_> {
     fn deref(&self) -> &Self::Target {
         self.as_bytes()
     }
-}
-
-macro_rules! bytes_field {
-    ($node:expr, $variant:ident, $field:ident) => {
-        match $node.data() {
-            NodeData::$variant(data) => data.$field.as_bytes(),
-            _ => panic!(
-                "interface conversion: ast.nodeData is *ast.{}, not *ast.{}",
-                $node.data().name(),
-                stringify!($variant)
-            ),
-        }
-    };
 }
 
 // Byte access must not require a physical `&JsString`: compact identifiers
@@ -113,14 +103,13 @@ fn stored_owned_text(node: &NodeRead<'_>) -> JsString {
 }
 
 impl Node {
-    /// port: tsc/internal/ast/ast.go:Node.RawText
     pub fn raw_text(&self) -> &[u8] {
-        match self.kind().known() {
-            Some(K::TemplateHead) => bytes_field!(self, TemplateHead, raw_text),
-            Some(K::TemplateMiddle) => bytes_field!(self, TemplateMiddle, raw_text),
-            Some(K::TemplateTail) => bytes_field!(self, TemplateTail, raw_text),
-            _ => panic!("Unhandled case in Node.RawText: {}", self.kind()),
-        }
+        NodeAccess::raw_text(self)
+    }
+}
+impl NodeRead<'_> {
+    pub fn raw_text(&self) -> &[u8] {
+        NodeAccess::raw_text(self)
     }
 }
 
@@ -134,27 +123,27 @@ impl<'a> AstView<'a> {
             let node = self.node(id)?;
             match node.kind().known() {
                 Some(K::MetaProperty) => {
-                    let NodeData::MetaProperty(data) = node.data() else {
+                    let NodeDataRead::MetaProperty(data) = node.data() else {
                         panic!(
                             "interface conversion: ast.nodeData is *ast.{}, not *ast.MetaProperty",
                             node.data().name()
                         );
                     };
                     id = data
-                        .name
+                        .name()
                         .expect("runtime error: invalid memory address or nil pointer dereference");
                 }
                 Some(K::JsxNamespacedName) => {
-                    let NodeData::JsxNamespacedName(data) = node.data() else {
+                    let NodeDataRead::JsxNamespacedName(data) = node.data() else {
                         panic!(
                             "interface conversion: ast.nodeData is *ast.{}, not *ast.JsxNamespacedName",
                             node.data().name()
                         );
                     };
-                    let namespace = self.node_text(data.namespace.expect(
+                    let namespace = self.node_text(data.namespace().expect(
                         "runtime error: invalid memory address or nil pointer dereference",
                     ))?;
-                    let name = self.node_text(data.name.expect(
+                    let name = self.node_text(data.name().expect(
                         "runtime error: invalid memory address or nil pointer dereference",
                     ))?;
                     let mut bytes = Vec::with_capacity(namespace.len() + 1 + name.len());
@@ -167,10 +156,10 @@ impl<'a> AstView<'a> {
                     kind @ (K::JSDocText | K::JSDocLink | K::JSDocLinkCode | K::JSDocLinkPlain),
                 ) => {
                     let text = match (kind, node.data()) {
-                        (K::JSDocText, NodeData::JSDocText(data)) => data.text,
-                        (K::JSDocLink, NodeData::JSDocLink(data)) => data.text,
-                        (K::JSDocLinkCode, NodeData::JSDocLinkCode(data)) => data.text,
-                        (K::JSDocLinkPlain, NodeData::JSDocLinkPlain(data)) => data.text,
+                        (K::JSDocText, NodeDataRead::JSDocText(data)) => data.text(),
+                        (K::JSDocLink, NodeDataRead::JSDocLink(data)) => data.text(),
+                        (K::JSDocLinkCode, NodeDataRead::JSDocLinkCode(data)) => data.text(),
+                        (K::JSDocLinkPlain, NodeDataRead::JSDocLinkPlain(data)) => data.text(),
                         _ => panic!(
                             "interface conversion: ast.nodeData is *ast.{}, not *ast.{kind:?}",
                             node.data().name()

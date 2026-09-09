@@ -141,7 +141,7 @@ impl ReferenceResolver {
         let mut location = Some(reference);
         if start_in_declaration_container {
             if let Some(parent) = host.node(reference)?.parent() {
-                if ts_ast::is_declaration(&*host.node(parent)?)
+                if ts_ast::is_declaration(&host.node(parent)?)
                     && host.node(parent)?.name() == Some(reference)
                 {
                     location = ts_ast::get_declaration_container(host.ast(parent)?, parent)?;

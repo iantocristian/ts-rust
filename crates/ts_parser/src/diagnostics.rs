@@ -77,10 +77,10 @@ impl<'src, F: ParserFactory> Parser<'src, F> {
         let node_ref = self.factory.node(node);
         if node_ref.kind() == K::TaggedTemplateExpression {
             let template = node_ref
-                .data()
+                .data_source()
                 .as_tagged_template_expression()
                 .expect("tagged template payload")
-                .template
+                .template()
                 .expect("parsed template");
             let loc = self.skip_range_trivia(self.factory.node(template).range());
             drop(node_ref);
@@ -93,11 +93,10 @@ impl<'src, F: ParserFactory> Parser<'src, F> {
         }
         let text = if node_ref.kind() == K::Identifier {
             node_ref
-                .data()
+                .data_source()
                 .as_identifier()
                 .expect("identifier payload")
-                .text
-                .clone()
+                .text_owned()
         } else {
             JsString::default()
         };

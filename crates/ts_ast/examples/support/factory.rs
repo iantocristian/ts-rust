@@ -203,10 +203,10 @@ pub fn run(scenario: &str, s: &Sink) {
                     copied == original,
                     same_empty == empty,
                     f.node(empty)
-                        .data()
+                        .data_source()
                         .as_syntax_list()
                         .unwrap()
-                        .children
+                        .children()
                         .is_nil(),
                 ],
                 vec![],
@@ -236,7 +236,7 @@ pub fn run(scenario: &str, s: &Sink) {
             values.extend(v.factory().read_nodes(nodes).iter().map(|n| {
                 if n.is_none() {
                     0
-                } else if *n == Some(c) {
+                } else if n == Some(c) {
                     2
                 } else {
                     1
@@ -267,7 +267,7 @@ pub fn run(scenario: &str, s: &Sink) {
                 vec![i(result.len())],
                 vec![
                     changed,
-                    v.factory().read_nodes(result)[0] == Some(syntax),
+                    v.factory().read_nodes(result).at(0) == Some(syntax),
                     lifted == Some(a),
                 ],
                 vec![],
@@ -303,16 +303,16 @@ pub fn run(scenario: &str, s: &Sink) {
             let direct = v.visit_embedded_statement(Some(token));
             let updated = v.visit_each_child(Some(loop_node)).unwrap();
             let node = v.node(updated);
-            let data = node.data().as_while_statement().unwrap();
-            let statement = data.statement.unwrap();
-            let expression = data.expression;
+            let data = node.data_source().as_while_statement().unwrap();
+            let statement = data.statement().unwrap();
+            let expression = data.expression();
             drop(node);
             let list = v
                 .node(statement)
-                .data()
+                .data_source()
                 .as_block()
                 .unwrap()
-                .statements
+                .statements()
                 .unwrap();
             let len = v.factory().read_list(list).nodes().len();
             emit(
@@ -325,15 +325,15 @@ pub fn run(scenario: &str, s: &Sink) {
             let access = v.new_property_access_expression(Some(expr), Some(token), Some(expr), 0);
             let rewritten = v.visit_each_child(Some(access)).unwrap();
             let node = v.node(rewritten);
-            let data = node.data().as_property_access_expression().unwrap();
+            let data = node.data_source().as_property_access_expression().unwrap();
             emit(
                 s,
                 "token",
                 vec![],
                 vec![
-                    data.question_dot_token == Some(token),
-                    data.expression.is_none(),
-                    data.name.is_none(),
+                    data.question_dot_token() == Some(token),
+                    data.expression().is_none(),
+                    data.name().is_none(),
                 ],
                 vec![],
             );
@@ -356,15 +356,16 @@ pub fn run(scenario: &str, s: &Sink) {
             let cloned = deep_clone_node(&mut destination, Some(root)).unwrap();
             let cl = destination
                 .node(cloned)
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .unwrap()
-                .elements
+                .elements()
                 .unwrap();
             let cc = destination
                 .view()
                 .node_slice(destination.view().list(cl).unwrap().nodes())
-                .unwrap()[0]
+                .unwrap()
+                .at(0)
                 .unwrap();
             emit(
                 s,
@@ -390,15 +391,16 @@ pub fn run(scenario: &str, s: &Sink) {
             let reparsed = deep_clone_reparse(&mut destination, Some(root)).unwrap();
             let list = destination
                 .node(reparsed)
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .unwrap()
-                .elements
+                .elements()
                 .unwrap();
             let rc = destination
                 .view()
                 .node_slice(destination.view().list(list).unwrap().nodes())
-                .unwrap()[0]
+                .unwrap()
+                .at(0)
                 .unwrap();
             emit(
                 s,
@@ -419,10 +421,10 @@ pub fn run(scenario: &str, s: &Sink) {
             let empty_clone = deep_clone_node(&mut destination, Some(empty)).unwrap();
             let cloned_list = destination
                 .node(empty_clone)
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .unwrap()
-                .elements
+                .elements()
                 .unwrap();
             emit(
                 s,
@@ -571,7 +573,11 @@ pub fn run(scenario: &str, s: &Sink) {
                     unchanged == node,
                     sf.check_js_directive.is_none(),
                     sf.external_module_indicator == Some(node),
-                    cn.data().as_source_file().unwrap().end_of_file_token == Some(eof),
+                    cn.data_source()
+                        .as_source_file()
+                        .unwrap()
+                        .end_of_file_token()
+                        == Some(eof),
                 ],
                 vec![
                     hex(sf.text().as_bytes()),

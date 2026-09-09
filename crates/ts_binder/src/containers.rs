@@ -4,8 +4,8 @@ use std::ops::ControlFlow;
 use ts_arena::Error;
 use ts_ast::{
     flow_flags as F, modifier_flags, node_flags as N, symbol_flags as S, utilities as u, AstView,
-    ChildVisitor, FlowData, FlowId, JsString, Node, NodeData, NodeId, NodeListId, NodeSlice,
-    SyntaxKind as K,
+    ChildVisitor, FlowData, FlowId, JsString, NodeAccess, NodeDataRead, NodeId, NodeListId,
+    NodeSlice, SyntaxKind as K,
 };
 
 // port: tsc/internal/binder/binder.go:GetContainerFlags
@@ -74,66 +74,66 @@ pub fn get_container_flags(view: AstView<'_>, id: NodeId) -> Result<C, Error> {
 
 // FlowNodeData is a payload interface. Open SyntaxKind values can disagree with
 // the payload, so this follows the generated Go embedding graph, not kind ranges.
-pub(crate) fn has_flow_node_data(node: &Node) -> bool {
+pub(crate) fn has_flow_node_data(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.data(),
-        NodeData::Identifier(_)
-            | NodeData::QualifiedName(_)
-            | NodeData::EmptyStatement(_)
-            | NodeData::IfStatement(_)
-            | NodeData::DoStatement(_)
-            | NodeData::WhileStatement(_)
-            | NodeData::ForStatement(_)
-            | NodeData::ForInOrOfStatement(_)
-            | NodeData::BreakStatement(_)
-            | NodeData::ContinueStatement(_)
-            | NodeData::ReturnStatement(_)
-            | NodeData::WithStatement(_)
-            | NodeData::SwitchStatement(_)
-            | NodeData::ThrowStatement(_)
-            | NodeData::TryStatement(_)
-            | NodeData::DebuggerStatement(_)
-            | NodeData::LabeledStatement(_)
-            | NodeData::ExpressionStatement(_)
-            | NodeData::Block(_)
-            | NodeData::VariableStatement(_)
-            | NodeData::BindingElement(_)
-            | NodeData::MissingDeclaration(_)
-            | NodeData::FunctionDeclaration(_)
-            | NodeData::ClassDeclaration(_)
-            | NodeData::InterfaceDeclaration(_)
-            | NodeData::TypeAliasDeclaration(_)
-            | NodeData::EnumDeclaration(_)
-            | NodeData::ModuleBlock(_)
-            | NodeData::NotEmittedStatement(_)
-            | NodeData::ImportDeclaration(_)
-            | NodeData::ExportAssignment(_)
-            | NodeData::NamespaceExportDeclaration(_)
-            | NodeData::GetAccessorDeclaration(_)
-            | NodeData::SetAccessorDeclaration(_)
-            | NodeData::MethodDeclaration(_)
-            | NodeData::KeywordExpression(_)
-            | NodeData::ArrowFunction(_)
-            | NodeData::FunctionExpression(_)
-            | NodeData::PropertyAccessExpression(_)
-            | NodeData::ElementAccessExpression(_)
-            | NodeData::MetaProperty(_)
-            | NodeData::ModuleDeclaration(_)
-            | NodeData::ImportEqualsDeclaration(_)
-            | NodeData::ExportDeclaration(_)
+        NodeDataRead::Identifier(_)
+            | NodeDataRead::QualifiedName(_)
+            | NodeDataRead::EmptyStatement(_)
+            | NodeDataRead::IfStatement(_)
+            | NodeDataRead::DoStatement(_)
+            | NodeDataRead::WhileStatement(_)
+            | NodeDataRead::ForStatement(_)
+            | NodeDataRead::ForInOrOfStatement(_)
+            | NodeDataRead::BreakStatement(_)
+            | NodeDataRead::ContinueStatement(_)
+            | NodeDataRead::ReturnStatement(_)
+            | NodeDataRead::WithStatement(_)
+            | NodeDataRead::SwitchStatement(_)
+            | NodeDataRead::ThrowStatement(_)
+            | NodeDataRead::TryStatement(_)
+            | NodeDataRead::DebuggerStatement(_)
+            | NodeDataRead::LabeledStatement(_)
+            | NodeDataRead::ExpressionStatement(_)
+            | NodeDataRead::Block(_)
+            | NodeDataRead::VariableStatement(_)
+            | NodeDataRead::BindingElement(_)
+            | NodeDataRead::MissingDeclaration(_)
+            | NodeDataRead::FunctionDeclaration(_)
+            | NodeDataRead::ClassDeclaration(_)
+            | NodeDataRead::InterfaceDeclaration(_)
+            | NodeDataRead::TypeAliasDeclaration(_)
+            | NodeDataRead::EnumDeclaration(_)
+            | NodeDataRead::ModuleBlock(_)
+            | NodeDataRead::NotEmittedStatement(_)
+            | NodeDataRead::ImportDeclaration(_)
+            | NodeDataRead::ExportAssignment(_)
+            | NodeDataRead::NamespaceExportDeclaration(_)
+            | NodeDataRead::GetAccessorDeclaration(_)
+            | NodeDataRead::SetAccessorDeclaration(_)
+            | NodeDataRead::MethodDeclaration(_)
+            | NodeDataRead::KeywordExpression(_)
+            | NodeDataRead::ArrowFunction(_)
+            | NodeDataRead::FunctionExpression(_)
+            | NodeDataRead::PropertyAccessExpression(_)
+            | NodeDataRead::ElementAccessExpression(_)
+            | NodeDataRead::MetaProperty(_)
+            | NodeDataRead::ModuleDeclaration(_)
+            | NodeDataRead::ImportEqualsDeclaration(_)
+            | NodeDataRead::ExportDeclaration(_)
     )
 }
-fn has_body_data(node: &Node) -> bool {
+fn has_body_data(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.data(),
-        NodeData::FunctionDeclaration(_)
-            | NodeData::ConstructorDeclaration(_)
-            | NodeData::GetAccessorDeclaration(_)
-            | NodeData::SetAccessorDeclaration(_)
-            | NodeData::MethodDeclaration(_)
-            | NodeData::ArrowFunction(_)
-            | NodeData::FunctionExpression(_)
-            | NodeData::ModuleDeclaration(_)
+        NodeDataRead::FunctionDeclaration(_)
+            | NodeDataRead::ConstructorDeclaration(_)
+            | NodeDataRead::GetAccessorDeclaration(_)
+            | NodeDataRead::SetAccessorDeclaration(_)
+            | NodeDataRead::MethodDeclaration(_)
+            | NodeDataRead::ArrowFunction(_)
+            | NodeDataRead::FunctionExpression(_)
+            | NodeDataRead::ModuleDeclaration(_)
     )
 }
 
@@ -154,7 +154,7 @@ struct ImmediateChildren {
     len: usize,
 }
 impl ImmediateChildren {
-    fn of(node: &Node) -> Self {
+    fn of(node: &impl NodeAccess) -> Self {
         let mut children = Self {
             entries: [None; MAX_IMMEDIATE_CHILDREN],
             len: 0,
@@ -208,7 +208,8 @@ impl Binder<'_, '_> {
     pub(crate) fn syntax_node(&self, nodes: NodeSlice, index: usize) -> Option<NodeId> {
         self.parsed_view()
             .node_slice(nodes)
-            .expect("retained syntax slice")[index]
+            .expect("retained syntax slice")
+            .at(index)
     }
     pub(crate) fn syntax_nodes(&self, list: Option<NodeListId>) -> ts_ast::NodeSliceRead<'_> {
         let parsed = self.parsed_view();
@@ -289,7 +290,7 @@ impl Binder<'_, '_> {
                     if self.has_explicit_return {
                         node_flags |= N::HAS_EXPLICIT_RETURN;
                     }
-                    self.binding_mut(node).end_flow_node = self.current_flow;
+                    self.set_node_end_flow(node, self.current_flow);
                 }
             }
             if self.seen_this_keyword {
@@ -431,9 +432,12 @@ impl Binder<'_, '_> {
             Some(K::NonNullExpression) => self.bind_non_null_expression_flow(node),
             Some(K::SourceFile) => {
                 let n = self.n(node);
-                let source = n.data().as_source_file().expect("SourceFile payload");
-                let statements = source.statements;
-                let eof = source.end_of_file_token;
+                let source = n
+                    .data_source()
+                    .as_source_file()
+                    .expect("SourceFile payload");
+                let statements = source.statements();
+                let eof = source.end_of_file_token();
                 drop(n);
                 self.bind_each_statement_functions_first(need(statements));
                 self.bind(eof);
@@ -515,41 +519,41 @@ impl Binder<'_, '_> {
         match self.n(node).kind().known() {
             Some(K::Constructor) => {
                 self.n(node)
-                    .data()
+                    .data_source()
                     .as_constructor_declaration()
                     .expect("Constructor payload");
             }
             Some(K::FunctionDeclaration) => {
                 self.n(node)
-                    .data()
+                    .data_source()
                     .as_function_declaration()
                     .expect("FunctionDeclaration payload");
             }
             Some(K::FunctionExpression) => {
                 self.n(node)
-                    .data()
+                    .data_source()
                     .as_function_expression()
                     .expect("FunctionExpression payload");
             }
             Some(K::ClassStaticBlockDeclaration) => {
                 self.n(node)
-                    .data()
+                    .data_source()
                     .as_class_static_block_declaration()
                     .expect("ClassStaticBlockDeclaration payload");
             }
             _ => return,
         }
-        self.binding_mut(node).return_flow_node = flow;
+        self.set_node_return_flow(node, flow);
     }
     // port: tsc/internal/binder/binder.go:isGeneratorFunctionExpression
     pub(crate) fn is_generator_function_expression(&self, node: NodeId) -> bool {
         self.n(node).kind() == K::FunctionExpression
             && self
                 .n(node)
-                .data()
+                .data_source()
                 .as_function_expression()
                 .expect("FunctionExpression payload")
-                .asterisk_token
+                .asterisk_token()
                 .is_some()
     }
     // port: tsc/internal/binder/binder.go:Binder.addToContainerChain
@@ -559,7 +563,7 @@ impl Binder<'_, '_> {
                 ts_ast::is_locals_container(&self.n(last)),
                 "locals-container payload required"
             );
-            self.binding_mut(last).next_container = Some(next);
+            self.set_node_next_container(last, Some(next));
         }
         self.last_container = Some(next);
     }
@@ -600,6 +604,7 @@ impl ChildVisitor for Binder<'_, '_> {
 mod tests {
     use super::*;
     use ts_arena::Counters;
+    use ts_ast::Node;
     use ts_ast::{
         AstBuilder, FactoryMethods, JSDocParameterOrPropertyTagData, MethodDeclarationData,
     };

@@ -1,7 +1,9 @@
+use crate::compact::{CompactContext, FieldKey, StoredNode};
 use crate::{
     AstStorageData, FactoryHooks, FileInfo, JSDocRoots, JsString, Node, NodeData, NodeId, NodeList,
     NodeListId, NodeListRead, NodeRead, NodeSlice, NodeSliceRead, TextSlice, TextSliceRead,
 };
+use crate::{NodeDataRead, NodeMut};
 use std::sync::Arc;
 use ts_arena::{
     AuxId, Counters, Error, StorageBuilder, StorageHandle, StorageRead, StorageTransaction,
@@ -12,7 +14,7 @@ use ts_jsstring::SourceText;
 
 /// Exclusive syntax construction. Hooks exist only during this exclusive phase.
 pub struct AstBuilder {
-    pub(crate) storage: StorageBuilder<Node>,
+    pub(crate) storage: StorageBuilder<StoredNode>,
     pub(crate) hooks: Option<Arc<dyn FactoryHooks>>,
     frame: AuxId,
 }
@@ -59,8 +61,70 @@ impl AstBuilder {
     pub fn retain_file(&mut self, file: AstFile) {
         self.storage.retain_file(file.0);
     }
-    pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
-        self.storage.node_mut(id)
+    pub fn node_mut(&mut self, id: NodeId) -> Result<NodeMut<'_>, Error> {
+        let header = self.storage.core_node(id)?;
+        let value = NodeRead::resolved(id, &StorageRead::borrowed(header), self.storage.view())
+            .to_owned_preserving_identity();
+        let auxiliary = self.storage.view().auxiliary_arena();
+        let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
+        Ok(NodeMut::core(value, header, store, source, id, auxiliary))
+    }
+    pub(crate) fn push_node(&mut self, node: Node) -> NodeId {
+        let nodes = self.id().arena();
+        let auxiliary = self.storage.view().auxiliary_arena();
+        let (store, source) = self.storage.store_and_source_mut();
+        let (payloads, mut context) = store.packing_parts(nodes, auxiliary, source, node.end());
+        let (shape, ordinal) = payloads.insert(node.data, &mut context);
+        let id = self.storage.push(StoredNode {
+            kind: node.kind,
+            flags: node.flags,
+            pos: node.pos,
+            end: node.end,
+            parent: 0,
+            shape,
+            ordinal,
+        });
+        if node.parent.is_some() {
+            self.write_parent(id, node.parent).expect("new core header");
+        }
+        id
+    }
+    pub(crate) fn write_parent(&mut self, id: NodeId, parent: Option<NodeId>) -> Result<(), Error> {
+        let auxiliary = self.storage.view().auxiliary_arena();
+        let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
+        let (_, mut context) = store.packing_parts(id.arena(), auxiliary, source, header.end);
+        header.parent = context.encode_node(FieldKey::parent(id.slot()), parent);
+        Ok(())
+    }
+    pub(crate) fn finish_header(
+        &mut self,
+        id: NodeId,
+        range: TextRange,
+        flags: u32,
+        replace_flags: bool,
+    ) -> Result<(), Error> {
+        let auxiliary = self.storage.view().auxiliary_arena();
+        let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
+        let new_end = range.end() as i32;
+        if header.end != new_end {
+            let (payloads, mut context) =
+                store.packing_parts(id.arena(), auxiliary, source, new_end);
+            payloads.change_text_end(
+                header.actual_shape(),
+                header.ordinal,
+                header.end,
+                new_end,
+                &mut context,
+            );
+        }
+        header.pos = range.pos() as i32;
+        header.end = new_end;
+        header.flags = if replace_flags {
+            flags
+        } else {
+            header.flags | flags
+        };
+        Ok(())
     }
     pub(crate) fn frame_mut(&mut self) -> &mut FileInfo {
         match self.storage.aux_mut(self.frame).expect("core file frame") {
@@ -74,14 +138,15 @@ impl AstBuilder {
     pub fn text_count(&self) -> i64 {
         self.view().file_info().text_count
     }
+    #[allow(clippy::needless_pass_by_value)] // Construction transfers and releases its temporary vector.
     pub fn node_slice(&mut self, nodes: Vec<Option<NodeId>>) -> Result<NodeSlice, Error> {
         for &id in nodes.iter().flatten() {
             self.view().node(id)?;
         }
         let len = checked_len(nodes.len())?;
-        let backing = self
-            .storage
-            .push_aux(AstStorageData::Nodes(nodes.into_boxed_slice()));
+        let owner = self.id().arena();
+        let compact = self.storage.store_mut().edges.append(owner, &nodes)?;
+        let backing = self.storage.push_aux(AstStorageData::CompactNodes(compact));
         Ok(NodeSlice {
             backing: Some(backing),
             start: 0,
@@ -176,22 +241,44 @@ pub struct ParsedFile {
     validated: bool,
 }
 impl ParsedFile {
+    pub(crate) fn initialize_binding_storage(
+        &mut self,
+        arenas: crate::compact::binding::BindingArenas,
+    ) {
+        self.builder.storage.store_mut().initialize_binding(arenas);
+    }
+    pub(crate) fn write_binding_field(
+        &mut self,
+        id: NodeId,
+        write: crate::compact::binding::BindingWrite,
+    ) -> Result<bool, Error> {
+        let auxiliary = self.builder.storage.view().auxiliary_arena();
+        let (header, store, source) = self.builder.storage.node_store_and_source_mut(id)?;
+        Ok(store.write_binding(header, id, auxiliary, source, write))
+    }
     pub(crate) fn exclusive_core_only(&self) -> bool {
         self.builder.hooks.is_none() && self.builder.storage.is_core_only()
     }
-    pub(crate) fn core_node(&self, id: NodeId) -> Result<&Node, Error> {
+    pub(crate) fn core_node(&self, id: NodeId) -> Result<&StoredNode, Error> {
         self.builder.storage.core_node(id)
     }
     pub(crate) fn core_node_read(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
         let record = self.builder.storage.core_node(id)?;
-        Ok(NodeRead::resolved(
+        let owner = self.builder.storage.view();
+        Ok(NodeRead::core(
             id,
-            StorageRead::borrowed(record),
-            self.builder.storage.view(),
+            owner.id(),
+            record,
+            CompactContext {
+                nodes: owner.id().arena(),
+                auxiliary: owner.auxiliary_arena(),
+                source: owner.source(),
+                store: owner.store(),
+            },
         ))
     }
     pub(crate) fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
-        self.builder.node_mut(id)?.set_flags(flags);
+        self.builder.storage.node_mut(id)?.set_flags(flags);
         // Do not restore a proof invalidated by an earlier unrestricted edit.
         Ok(())
     }
@@ -244,7 +331,7 @@ impl ParsedFile {
 }
 
 #[derive(Clone, Debug)]
-pub struct AstBundle(Arc<ts_arena::StorageBundle<Node>>);
+pub struct AstBundle(Arc<ts_arena::StorageBundle<StoredNode>>);
 impl AstBundle {
     pub fn len(&self) -> usize {
         self.0.len()
@@ -276,7 +363,7 @@ impl AstBundle {
 /// }
 /// ```
 #[derive(Clone, Debug)]
-pub struct AstFile(pub(crate) StorageHandle<Node>);
+pub struct AstFile(pub(crate) StorageHandle<StoredNode>);
 impl AstFile {
     pub fn view(&self) -> AstView<'_> {
         AstView(self.0.view(), None)
@@ -285,9 +372,18 @@ impl AstFile {
         self.view().file_info().root
     }
     pub fn retain_node(&self, id: NodeId) -> Result<RetainedNode, Error> {
-        self.0
-            .resolved_node(id)
-            .map(|node| RetainedNode(node.retain()))
+        let record = self.0.resolved_node(id)?.retain();
+        let owner = self.0.view().for_arena(id.arena())?;
+        let fallback = if id.arena() == owner.id().arena() {
+            None
+        } else {
+            let aux = AuxId::from_parts(owner.lazy_auxiliary_arena(), record.ordinal)?;
+            match &*owner.aux(aux)? {
+                AstStorageData::FallbackNode(node) => Some(node.clone()),
+                _ => return Err(Error::InvalidGraph),
+            }
+        };
+        Ok(RetainedNode { record, fallback })
     }
     /// Follow a mapped-file or imported-file identity within this retention root.
     pub fn file(&self, id: ts_arena::FileId) -> Option<Self> {
@@ -304,39 +400,37 @@ impl AstFile {
 /// }
 /// ```
 #[derive(Clone, Debug)]
-pub struct RetainedNode(ts_arena::RetainedRecord<Node>);
+pub struct RetainedNode {
+    record: ts_arena::RetainedRecord<StoredNode>,
+    fallback: Option<Arc<Node>>,
+}
 impl RetainedNode {
     pub fn id(&self) -> NodeId {
-        self.0.id()
+        self.record.id()
     }
-    /// Borrow the existing retained record and its physical owner context.
-    /// A retained lazy page is already stable: this does not reacquire its
-    /// directory lock or retain a second page/file handle.
+    /// Escaped lazy payloads already retain their stable backing; this read
+    /// never reacquires a lazy publication lock or increments a reference count.
     pub fn read(&self) -> NodeRead<'_> {
         let owner = self
-            .0
+            .record
             .owner()
             .view()
             .for_arena(self.id().arena())
-            .expect("retained node belongs to its retained graph");
-        NodeRead::resolved(self.id(), StorageRead::borrowed(&self.0), owner)
+            .expect("retained node owner");
+        if let Some(node) = &self.fallback {
+            NodeRead::owned(self.id(), node, owner.id(), owner.source())
+        } else {
+            NodeRead::resolved(self.id(), &StorageRead::borrowed(&self.record), owner)
+        }
     }
-    /// Explicitly retain the file through which this node was resolved, including
-    /// its mapped siblings and imported dependencies.
     pub fn file(&self) -> AstFile {
-        AstFile(self.0.owner().clone())
-    }
-}
-impl std::ops::Deref for RetainedNode {
-    type Target = Node;
-    fn deref(&self) -> &Node {
-        &self.0
+        AstFile(self.record.owner().clone())
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub struct AstView<'a>(
-    pub(crate) StorageView<'a, Node>,
+    pub(crate) StorageView<'a, StoredNode>,
     pub(crate) Option<&'a crate::BindResult>,
 );
 impl<'a> AstView<'a> {
@@ -344,8 +438,20 @@ impl<'a> AstView<'a> {
     #[cfg(feature = "layout-profile")]
     pub fn layout_profile(self) -> std::collections::BTreeMap<&'static str, usize> {
         let mut counts = std::collections::BTreeMap::new();
-        for node in self.0.core_nodes() {
-            *counts.entry(node.data().name()).or_default() += 1;
+        let context = CompactContext {
+            nodes: self.0.id().arena(),
+            auxiliary: self.0.auxiliary_arena(),
+            source: self.source(),
+            store: self.0.store(),
+        };
+        for header in self.0.core_nodes() {
+            let data = context.store.payloads.read(
+                header.actual_shape(),
+                header.ordinal,
+                context,
+                header.end,
+            );
+            *counts.entry(data.name()).or_default() += 1;
         }
         counts
     }
@@ -367,10 +473,10 @@ impl<'a> AstView<'a> {
             // its retained owner without reading the parsed record or locking
             // its lazy directory a second time.
             let owner = self.0.for_arena(id.arena())?;
-            return Ok(NodeRead::resolved(id, StorageRead::borrowed(node), owner));
+            return Ok(NodeRead::owned(id, node, owner.id(), owner.source()));
         }
         let (record, owner) = self.0.node_with_owner(id)?;
-        Ok(NodeRead::resolved(id, record, owner))
+        Ok(NodeRead::resolved(id, &record, owner))
     }
     pub(crate) fn binding_for_node(
         self,
@@ -402,7 +508,7 @@ impl<'a> AstView<'a> {
         let mut fast = Some(id);
         loop {
             let current = slow.ok_or(Error::InvalidGraph)?;
-            let node = self.0.node(current)?;
+            let node = AstView(self.0, None).node(current)?;
             if node.kind() == crate::SyntaxKind::SourceFile {
                 AstView(self.0, None).source_file(current)?;
                 return Ok(current);
@@ -411,7 +517,7 @@ impl<'a> AstView<'a> {
             for _ in 0..2 {
                 fast = match fast {
                     Some(id) => {
-                        let node = self.0.node(id)?;
+                        let node = AstView(self.0, None).node(id)?;
                         if node.kind() == crate::SyntaxKind::SourceFile {
                             None
                         } else {
@@ -447,7 +553,17 @@ impl<'a> AstView<'a> {
         Ok(i64::from(self.node(last)?.end()) < list.loc().end())
     }
     pub fn node_slice(self, nodes: NodeSlice) -> Result<NodeSliceRead<'a>, Error> {
-        node_slice_read(nodes, nodes.backing.map(|id| self.0.aux(id)).transpose()?)
+        let (record, compact) = match nodes.backing {
+            Some(id) => {
+                let (record, owner) = self.0.aux_with_owner(id)?;
+                (
+                    Some(record),
+                    Some((&owner.store().edges, owner.id().arena())),
+                )
+            }
+            None => (None, None),
+        };
+        node_slice_read(nodes, record, compact)
     }
     pub fn text_slice(self, text: TextSlice) -> Result<TextSliceRead<'a>, Error> {
         text_slice_read(text, text.backing.map(|id| self.0.aux(id)).transpose()?)
@@ -515,12 +631,25 @@ impl<'a> AstView<'a> {
             |slice| self.text_slice(slice).map(|_| ()),
         )
     }
+    fn validate_read_data(self, data: NodeDataRead<'_>) -> Result<(), Error> {
+        data.validate_references(
+            |id| self.node(id).map(|_| ()),
+            |id| self.list(id).map(|_| ()),
+            |slice| self.node_slice(slice).map(|_| ()),
+            |slice| self.text_slice(slice).map(|_| ()),
+        )
+    }
     fn validate_core(self) -> Result<(), Error> {
-        for node in self.0.core_nodes() {
+        for (index, header) in self.0.core_nodes().enumerate() {
+            let id = NodeId::from_parts(
+                self.0.id().arena(),
+                u32::try_from(index + 1).map_err(|_| Error::InvalidSlot)?,
+            )?;
+            let node = NodeRead::resolved(id, &StorageRead::borrowed(header), self.0);
             if let Some(parent) = node.parent() {
                 self.node(parent)?;
             }
-            self.validate_data(node.data())?;
+            self.validate_read_data(node.data())?;
         }
         for value in self.0.core_auxiliary() {
             match value {
@@ -532,6 +661,21 @@ impl<'a> AstView<'a> {
                         self.node(node)?;
                     }
                 }
+                AstStorageData::CompactNodes(backing) => {
+                    let edges = &self.0.store().edges;
+                    let range = backing.start
+                        ..backing
+                            .start
+                            .checked_add(backing.len as usize)
+                            .ok_or(Error::InvalidGraph)?;
+                    if !edges.valid_range(range.clone()) {
+                        return Err(Error::InvalidGraph);
+                    }
+                    for node in edges.iter(self.0.id().arena(), range).flatten() {
+                        self.node(node)?;
+                    }
+                }
+                AstStorageData::FallbackNode(_) => return Err(Error::InvalidGraph),
                 AstStorageData::SourceMetadata(data) => data.validate(self)?,
                 AstStorageData::Text(_) => {}
                 AstStorageData::File(info) => {
@@ -558,21 +702,59 @@ impl<'a> AstView<'a> {
 
 /// A borrowed transaction is never sent to a worker or used to reacquire its lock.
 pub struct AstTransaction<'a, 'storage> {
-    pub(crate) storage: &'a mut StorageTransaction<'storage, Node>,
+    pub(crate) storage: &'a mut StorageTransaction<'storage, StoredNode>,
     pub(crate) node_count: i64,
     pub(crate) text_count: i64,
 }
 impl AstTransaction<'_, '_> {
     pub fn node(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
-        Ok(NodeRead::new(
-            id,
-            StorageRead::borrowed(self.storage.node(id)?),
-            self.storage.owner_id(),
-            self.storage.source(),
-        ))
+        let header = self.storage.node(id)?;
+        if id.arena() == self.storage.owner_id().arena() {
+            Ok(NodeRead::core(
+                id,
+                self.storage.owner_id(),
+                header,
+                CompactContext {
+                    nodes: self.storage.owner_id().arena(),
+                    auxiliary: self.storage.core_auxiliary_arena(),
+                    source: self.storage.source(),
+                    store: self.storage.store(),
+                },
+            ))
+        } else {
+            let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), header.ordinal)?;
+            match self.storage.aux(aux)? {
+                AstStorageData::FallbackNode(node) => Ok(NodeRead::owned(
+                    id,
+                    node,
+                    self.storage.owner_id(),
+                    self.storage.source(),
+                )),
+                _ => Err(Error::InvalidGraph),
+            }
+        }
     }
-    pub fn node_mut(&mut self, id: NodeId) -> Result<&mut Node, Error> {
-        self.storage.node_mut(id)
+    pub fn node_mut(&mut self, id: NodeId) -> Result<NodeMut<'_>, Error> {
+        let ordinal = self.storage.node_mut(id)?.ordinal;
+        let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), ordinal)?;
+        let (header, payload) = self.storage.node_and_aux_mut(id, aux)?;
+        match payload {
+            AstStorageData::FallbackNode(node) => Ok(NodeMut::lazy(
+                Arc::get_mut(node).expect("unpublished payload is exclusive"),
+                header,
+            )),
+            _ => Err(Error::InvalidGraph),
+        }
+    }
+    pub(crate) fn push_node(&mut self, node: Node) -> NodeId {
+        let header = Self::stage_node(self.storage, node);
+        self.storage.push(header)
+    }
+    fn stage_node(storage: &mut StorageTransaction<'_, StoredNode>, node: Node) -> StoredNode {
+        let mut header = StoredNode::fallback(&node, 0);
+        let aux = storage.push_aux(AstStorageData::FallbackNode(Arc::new(node)));
+        header.ordinal = aux.slot();
+        header
     }
     pub fn list(&self, id: NodeListId) -> Result<NodeListRead<'_>, Error> {
         list_read(StorageRead::borrowed(self.storage.aux(id.0)?))
@@ -584,6 +766,7 @@ impl AstTransaction<'_, '_> {
                 .backing
                 .map(|id| self.storage.aux(id).map(StorageRead::borrowed))
                 .transpose()?,
+            Some((&self.storage.store().edges, self.storage.owner_id().arena())),
         )
     }
     pub fn text_slice_read(&self, text: TextSlice) -> Result<TextSliceRead<'_>, Error> {
@@ -657,14 +840,20 @@ impl AstTransaction<'_, '_> {
         )
     }
     fn validate_staged(&self) -> Result<(), Error> {
-        for node in self.storage.staged_nodes() {
-            if let Some(parent) = node.parent() {
-                self.storage.node(parent)?;
+        for header in self.storage.staged_nodes() {
+            let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), header.ordinal)?;
+            if !matches!(self.storage.aux(aux)?, AstStorageData::FallbackNode(_)) {
+                return Err(Error::InvalidGraph);
             }
-            self.validate_data(node.data())?;
         }
         for value in self.storage.staged_aux() {
             match value {
+                AstStorageData::FallbackNode(node) => {
+                    if let Some(parent) = node.parent() {
+                        self.storage.node(parent)?;
+                    }
+                    self.validate_data(node.data())?;
+                }
                 AstStorageData::List(list) => {
                     self.node_slice_read(list.nodes())?;
                 }
@@ -674,7 +863,8 @@ impl AstTransaction<'_, '_> {
                     }
                 }
                 AstStorageData::Text(_) => {}
-                AstStorageData::File(_)
+                AstStorageData::CompactNodes(_)
+                | AstStorageData::File(_)
                 | AstStorageData::SourceFiles(_)
                 | AstStorageData::SourceMetadata(_) => {
                     return Err(Error::InvalidGraph);
@@ -694,12 +884,14 @@ fn list_read(record: StorageRead<'_, AstStorageData>) -> Result<NodeListRead<'_>
     }
     Ok(NodeListRead(record))
 }
-fn node_slice_read(
+fn node_slice_read<'a>(
     nodes: NodeSlice,
-    record: Option<StorageRead<'_, AstStorageData>>,
-) -> Result<NodeSliceRead<'_>, Error> {
-    let start = nodes.start as usize;
+    record: Option<StorageRead<'a, AstStorageData>>,
+    compact: Option<(&'a crate::compact::lists::EdgePages, ts_arena::ArenaId)>,
+) -> Result<NodeSliceRead<'a>, Error> {
+    let mut start = nodes.start as usize;
     let len = nodes.len();
+    let mut selected_compact = None;
     match &record {
         None if len == 0 && (start == 0 || nodes.is_missing()) => {}
         Some(record) => match &**record {
@@ -707,11 +899,34 @@ fn node_slice_read(
                 if start
                     .checked_add(len)
                     .is_some_and(|end| end <= values.len()) => {}
+            AstStorageData::CompactNodes(backing) => {
+                let (edges, owner) = compact.ok_or(Error::InvalidGraph)?;
+                if start
+                    .checked_add(len)
+                    .is_none_or(|end| end > backing.len as usize)
+                {
+                    return Err(Error::InvalidGraph);
+                }
+                start = backing
+                    .start
+                    .checked_add(start)
+                    .ok_or(Error::InvalidGraph)?;
+                let end = start.checked_add(len).ok_or(Error::InvalidGraph)?;
+                if !edges.valid_range(start..end) {
+                    return Err(Error::InvalidGraph);
+                }
+                selected_compact = Some((edges, owner));
+            }
             _ => return Err(Error::InvalidGraph),
         },
         None => return Err(Error::InvalidGraph),
     }
-    Ok(NodeSliceRead { record, start, len })
+    Ok(NodeSliceRead {
+        record,
+        compact: selected_compact,
+        start,
+        len,
+    })
 }
 fn text_slice_read(
     text: TextSlice,

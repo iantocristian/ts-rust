@@ -30,10 +30,10 @@ impl<F: ParserFactory> Parser<'_, F> {
         if node.flags() & node_flags::REPARSER_TRANSFORMED_LITERAL != 0 {
             if node.kind() == SyntaxKind::StringLiteral {
                 let quote = if node
-                    .data()
+                    .data_source()
                     .as_string_literal()
                     .expect("string literal payload")
-                    .token_flags
+                    .token_flags()
                     & token_flags::SINGLE_QUOTE
                     != 0
                 {
@@ -49,11 +49,10 @@ impl<F: ParserFactory> Parser<'_, F> {
             }
             if node.kind() == SyntaxKind::Identifier {
                 return node
-                    .data()
+                    .data_source()
                     .as_identifier()
                     .expect("identifier payload")
-                    .text
-                    .clone();
+                    .text_owned();
             }
             panic!(
                 "Debug failure. Unexpected reparser-transformed node kind\nNode {} was unexpected.",

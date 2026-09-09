@@ -1,7 +1,7 @@
 //! Owner-contained storage for the encoder's per-SourceFile lazy node table.
 //! The encoder builds the traversal; this type adds no AST-to-encoder dependency.
 
-use crate::{runtime_node_id, AstView, Node, NodeId};
+use crate::{runtime_node_id, AstView, NodeAccess, NodeId};
 use std::{
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::{Mutex, OnceLock},
@@ -30,7 +30,11 @@ impl NodeIndexCache {
     /// Source lookup initializes its sorted table before dereferencing the query.
     /// Nil is an upstream contract panic; a non-member is the zero sentinel.
     /// port: tsc/internal/api/encoder/encoder.go:NodeIndexTable.GetIndex
-    pub fn get_index(&self, view: AstView<'_>, node: Option<&Node>) -> Result<u32, Error> {
+    pub fn get_index(
+        &self,
+        view: AstView<'_>,
+        node: Option<&dyn NodeAccess>,
+    ) -> Result<u32, Error> {
         let sorted = self.sorted_indexes(view)?;
         let target = node.expect("nil node in NodeIndexTable.GetIndex");
         let target = runtime_node_id(target);

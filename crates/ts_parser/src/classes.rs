@@ -1,6 +1,8 @@
 use crate::tokens::token_is_identifier_or_keyword;
 use crate::{parse_flags, Parser, ParserFactory, ParsingContext};
-use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeId, NodeListId, SyntaxKind as K};
+use ts_ast::{
+    node_flags, FactoryMethods, JsString, NodeDataRead, NodeId, NodeListId, SyntaxKind as K,
+};
 use ts_diagnostics as diag;
 
 impl<F: ParserFactory> Parser<'_, F> {
@@ -17,9 +19,13 @@ impl<F: ParserFactory> Parser<'_, F> {
     pub(crate) fn mark_modifiers_ambient(&mut self, list: NodeListId) {
         let nodes = self.factory.read_list(list).nodes();
         for index in 0..nodes.len() {
-            let node = self.factory.read_nodes(nodes)[index].expect("parser modifier");
+            let node = self
+                .factory
+                .read_nodes(nodes)
+                .at(index)
+                .expect("parser modifier");
             let flags = self.factory.node(node).flags() | node_flags::AMBIENT;
-            self.factory.node_mut(node).set_flags(flags);
+            self.factory.set_node_flags(node, flags);
         }
     }
     /// port: tsc/internal/parser/parser.go:Parser.parseClassDeclaration
@@ -99,19 +105,26 @@ impl<F: ParserFactory> Parser<'_, F> {
             if let Some(heritage) = heritage {
                 let clauses = self.factory.read_list(heritage).nodes();
                 for index in 0..clauses.len() {
-                    let clause = self.factory.read_nodes(clauses)[index].expect("heritage clause");
+                    let clause = self
+                        .factory
+                        .read_nodes(clauses)
+                        .at(index)
+                        .expect("heritage clause");
                     let (token, types) = {
                         let clause = self.factory.node(clause);
-                        let NodeData::HeritageClause(data) = clause.data() else {
+                        let NodeDataRead::HeritageClause(data) = clause.data() else {
                             unreachable!()
                         };
-                        (data.token, data.types)
+                        (data.token(), data.types())
                     };
                     if token == K::ExtendsKeyword {
                         if let Some(types) = types {
                             let types = self.factory.read_list(types).nodes();
                             for index in 0..types.len() {
-                                let ty = self.factory.read_nodes(types)[index]
+                                let ty = self
+                                    .factory
+                                    .read_nodes(types)
+                                    .at(index)
                                     .expect("heritage expression");
                                 self.check_js_syntax(ty);
                             }
@@ -170,12 +183,12 @@ impl<F: ParserFactory> Parser<'_, F> {
         let node = self.parse_expression_with_type_arguments();
         let (expression, arguments) = {
             let node = self.factory.node(node);
-            let NodeData::ExpressionWithTypeArguments(data) = node.data() else {
+            let NodeDataRead::ExpressionWithTypeArguments(data) = node.data() else {
                 unreachable!()
             };
             (
-                data.expression.expect("heritage expression"),
-                data.type_arguments,
+                data.expression().expect("heritage expression"),
+                data.type_arguments(),
             )
         };
         if !self.is_valid_heritage_type_reference_expression(expression) {
@@ -197,13 +210,13 @@ impl<F: ParserFactory> Parser<'_, F> {
             {
                 return false;
             }
-            let NodeData::PropertyAccessExpression(data) = data.data() else {
+            let NodeDataRead::PropertyAccessExpression(data) = data.data() else {
                 unreachable!()
             };
-            if self.node_is_missing(data.name) {
+            if self.node_is_missing(data.name()) {
                 return false;
             }
-            node = data.expression.expect("property expression");
+            node = data.expression().expect("property expression");
         }
     }
     /// port: tsc/internal/parser/parser.go:Parser.convertEntityNameExpressionToEntityName
@@ -214,11 +227,11 @@ impl<F: ParserFactory> Parser<'_, F> {
         let mut path = Vec::new();
         while self.factory.node(node).kind() != K::Identifier {
             let record = self.factory.node(node);
-            let NodeData::PropertyAccessExpression(data) = record.data() else {
+            let NodeDataRead::PropertyAccessExpression(data) = record.data() else {
                 unreachable!()
             };
-            path.push((data.name, record.range()));
-            node = data.expression.expect("property expression");
+            path.push((data.name(), record.range()));
+            node = data.expression().expect("property expression");
         }
         for (name, range) in path.into_iter().rev() {
             node = self.factory.new_qualified_name(Some(node), name);

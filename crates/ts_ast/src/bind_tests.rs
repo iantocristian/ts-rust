@@ -60,21 +60,23 @@ fn exclusive_node_reads_observe_mutations_and_reject_unretained_owners() {
             assert!(builder.node(child)?.as_borrowed().is_some());
             builder.set_node_flags(child, node_flags::UNREACHABLE)?;
             assert_eq!(builder.node(child)?.flags(), node_flags::UNREACHABLE);
-            let NodeData::Identifier(identifier) = builder.node_mut(child)?.data_mut() else {
-                panic!("fixture identifier payload");
-            };
-            identifier.text = JsString::from_bytes(b"updated".as_slice());
+            {
+                let mut node = builder.node_mut(child)?;
+                let NodeData::Identifier(identifier) = node.data_mut() else {
+                    panic!("fixture identifier payload");
+                };
+                identifier.text = JsString::from_bytes(b"updated".as_slice());
+            }
             assert_eq!(
                 builder
                     .node(child)?
-                    .data()
+                    .data_source()
                     .as_identifier()
                     .unwrap()
-                    .text
-                    .as_bytes(),
+                    .text(),
                 b"updated"
             );
-            assert_eq!(runtime_node_id(&*builder.node(child)?), runtime_id);
+            assert_eq!(runtime_node_id(&builder.node(child)?), runtime_id);
             assert!(matches!(
                 builder.node(foreign_child),
                 Err(Error::WrongOwner)
@@ -126,11 +128,10 @@ fn exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots() {
             assert_eq!(
                 builder
                     .node(lazy)?
-                    .data()
+                    .data_source()
                     .as_identifier()
                     .unwrap()
-                    .text
-                    .as_bytes(),
+                    .text(),
                 b"lazy"
             );
             assert!(matches!(builder.node(failed), Err(Error::InvalidSlot)));
@@ -145,13 +146,65 @@ fn exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots() {
     assert_eq!(
         retained
             .node()
-            .data()
+            .data_source()
             .as_identifier()
             .unwrap()
-            .text
-            .as_bytes(),
+            .text(),
         b"lazy"
     );
+}
+
+#[test]
+fn exclusive_binding_observes_and_retains_writes_to_new_same_owner_lazy_nodes() {
+    let counters = Counters::new();
+    let baseline = counters.snapshot();
+    {
+        let (parsed, source, child) = make_parsed(&counters, b"/lazy-during-binding.ts");
+        let mut observed = None;
+        let completed = parsed
+            .bind_and_publish(|binding| {
+                let lazy = binding
+                    .parsed_view()
+                    .source_jsdoc(source, child, |transaction| {
+                        let node =
+                            transaction.new_identifier(JsString::from_bytes(b"lazy".as_slice()));
+                        transaction.node_mut(node)?.set_parent(Some(child));
+                        Ok(vec![node])
+                    })?[0];
+                assert_eq!(binding.parsed_view().owning_source(lazy)?, source);
+                assert_eq!(binding.node(lazy)?.flags(), 0);
+                binding.set_node_flags(lazy, node_flags::AMBIENT)?;
+                assert_eq!(binding.node(lazy)?.flags(), node_flags::AMBIENT);
+                assert_eq!(binding.parsed_view().node(lazy)?.flags(), 0);
+                let flow = binding.flows_mut().push(FlowNode::new(flow_flags::START));
+                binding.set_node_flow(lazy, Some(flow))?;
+                assert_eq!(binding.node_flow(lazy)?, Some(flow));
+                binding.set_node_flow(lazy, None)?;
+                assert!(binding.binding(lazy)?.is_none());
+                let symbol = binding.symbols_mut().push(Symbol::new(
+                    symbol_flags::FUNCTION,
+                    JsString::from_bytes(b"lazy".as_slice()),
+                ));
+                binding.set_node_symbol(lazy, Some(symbol))?;
+                binding.set_node_flow(lazy, Some(flow))?;
+                assert_eq!(binding.node_symbol(lazy)?, Some(symbol));
+                assert_eq!(binding.node_flow(lazy)?, Some(flow));
+                observed = Some((lazy, symbol, flow));
+                Ok(())
+            })
+            .unwrap();
+        assert!(completed.bound_in_place());
+        let (lazy, symbol, flow) = observed.unwrap();
+        let binding = completed.view().node_binding(lazy).unwrap().unwrap();
+        assert_eq!(binding.symbol, Some(symbol));
+        assert_eq!(binding.flow_node, Some(flow));
+        let retained = completed.retain_node(lazy).unwrap();
+        drop(completed);
+        assert_eq!(retained.node().flags(), node_flags::AMBIENT);
+        assert_eq!(retained.node().parent(), Some(child));
+        assert_eq!(retained.node().as_identifier().unwrap().text(), b"lazy");
+    }
+    assert_eq!(counters.snapshot(), baseline);
 }
 
 #[test]
@@ -171,7 +224,7 @@ fn flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows() {
             assert!(builder.binding(child)?.is_none());
             builder.set_node_flow(child, Some(flow))?;
             assert_eq!(builder.binding(child)?.unwrap().flow_node, Some(flow));
-            assert_eq!(builder.result().bindings().count(), 1);
+            assert_eq!(builder.result().bindings(builder.parsed_view()).count(), 1);
             builder.set_node_flow(child, None)?;
             assert!(builder.binding(child)?.is_none());
             builder.set_node_flow(child, Some(flow))?;
@@ -179,7 +232,7 @@ fn flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows() {
             let binding = builder.binding(child)?.unwrap();
             assert_eq!(binding.flow_node, Some(flow));
             assert_eq!(binding.symbol, Some(symbol));
-            assert_eq!(builder.result().bindings().count(), 1);
+            assert_eq!(builder.result().bindings(builder.parsed_view()).count(), 1);
             builder.set_node_flow(child, None)?;
             assert_eq!(builder.binding(child)?.unwrap().symbol, Some(symbol));
             assert_eq!(builder.binding(child)?.unwrap().flow_node, None);
@@ -187,7 +240,104 @@ fn flow_only_storage_promotes_without_losing_links_and_rejects_foreign_flows() {
         })
         .unwrap();
     assert_eq!(bound.node_binding(child).unwrap().unwrap().flow_node, None);
-    assert_eq!(bound.result().bindings().count(), 1);
+    assert_eq!(bound.result().bindings(bound.ast()).count(), 1);
+}
+
+#[test]
+fn exclusive_inline_bindings_preserve_presence_ids_and_shape_changes() {
+    let counters = Counters::new();
+    let (mut parsed, source, _) = make_parsed(&counters, b"/inline-bindings.ts");
+    let function = parsed
+        .builder_mut()
+        .new_function_declaration(None, None, None, None, None, None, None, None);
+    parsed
+        .builder_mut()
+        .node_mut(function)
+        .unwrap()
+        .set_parent(Some(source));
+    let runtime = runtime_node_id(&parsed.view().node(function).unwrap());
+    let mut expected = None;
+    let completed = parsed
+        .bind_and_publish(|builder| {
+            let flow = builder.flows_mut().push(FlowNode::new(flow_flags::START));
+            assert!(builder.binding(function)?.is_none());
+            builder.set_node_flow(function, Some(flow))?;
+            assert_eq!(builder.node_flow(function)?, Some(flow));
+            builder.set_node_flow(function, None)?;
+            assert!(builder.binding(function)?.is_none());
+            builder.set_node_symbol(function, None)?;
+            assert!(builder.binding(function)?.is_some());
+            builder.set_node_flow(function, Some(flow))?;
+            builder.set_node_flow(function, None)?;
+            let empty = builder.binding(function)?.unwrap();
+            assert!(empty.symbol.is_none());
+            assert!(empty.locals.is_none());
+            assert!(empty.flow_node.is_none());
+            let symbol = builder.symbols_mut().push(Symbol::new(
+                symbol_flags::FUNCTION,
+                JsString::from_bytes(b"function".as_slice()),
+            ));
+            let locals = builder.tables_mut().alloc(SymbolTable::new());
+            builder.set_node_symbol(function, Some(symbol))?;
+            builder.set_node_local_symbol(function, Some(symbol))?;
+            builder.set_node_locals(function, Some(locals))?;
+            builder.set_node_next_container(function, Some(source))?;
+            builder.set_node_flow(function, Some(flow))?;
+            builder.set_node_return_flow(function, Some(flow))?;
+            builder.set_node_end_flow(function, Some(flow))?;
+            assert_eq!(builder.node_symbol(function)?, Some(symbol));
+            assert_eq!(builder.node_locals(function)?, Some(locals));
+            assert_eq!(builder.node_flow(function)?, Some(flow));
+            // This assertion reads the physical row, so a cold result-map-only
+            // implementation cannot satisfy the intended exclusive-path coverage.
+            let inline = builder.node(function)?.inline_binding().unwrap();
+            assert_eq!(inline.symbol, Some(symbol));
+            assert_eq!(inline.locals, Some(locals));
+            assert_eq!(inline.flow_node, Some(flow));
+            *builder.node_mut(function)?.data_mut() = TokenData {}.into();
+            assert!(builder.node(function)?.as_token().is_some());
+            assert_eq!(runtime_node_id(&builder.node(function)?), runtime);
+            let binding = builder.binding(function)?.unwrap();
+            assert_eq!(binding.symbol, Some(symbol));
+            assert_eq!(binding.local_symbol, Some(symbol));
+            assert_eq!(binding.locals, Some(locals));
+            assert_eq!(binding.next_container, Some(source));
+            assert_eq!(binding.flow_node, Some(flow));
+            assert_eq!(binding.return_flow_node, Some(flow));
+            assert_eq!(binding.end_flow_node, Some(flow));
+            expected = Some((symbol, locals, flow));
+            Ok(())
+        })
+        .unwrap();
+    assert!(completed.bound_in_place());
+    let (symbol, locals, flow) = expected.unwrap();
+    let binding = completed.view().node_binding(function).unwrap().unwrap();
+    assert_eq!(binding.symbol, Some(symbol));
+    assert_eq!(binding.locals, Some(locals));
+    assert_eq!(binding.flow_node, Some(flow));
+    assert_eq!(
+        runtime_node_id(&completed.view().node(function).unwrap()),
+        runtime
+    );
+}
+
+#[test]
+fn exclusive_legacy_binding_mut_keeps_foreign_id_validation_deferred() {
+    let counters = Counters::new();
+    let (parsed, _, child) = make_parsed(&counters, b"/deferred-binding.ts");
+    let mut foreign = ts_arena::SymbolArena::new(&counters);
+    let symbol = foreign.push(Symbol::new(symbol_flags::FUNCTION, JsString::default()));
+    let result = parsed.bind_and_publish(|builder| {
+        assert_eq!(
+            builder.set_node_symbol(child, Some(symbol)),
+            Err(Error::WrongOwner)
+        );
+        assert!(builder.binding(child)?.is_none());
+        builder.binding_mut(child)?.symbol = Some(symbol);
+        assert_eq!(builder.binding(child)?.unwrap().symbol, Some(symbol));
+        Ok(())
+    });
+    assert!(matches!(result, Err(BindError::Storage(Error::WrongOwner))));
 }
 
 #[test]
@@ -227,13 +377,18 @@ fn binding_publishes_staged_headers_symbols_and_source_metadata_without_changing
     assert!(utilities::is_external_or_common_js_module(
         &bound.source_file().unwrap()
     ));
-    let symbol = bound.result().node_binding(child).unwrap().symbol.unwrap();
+    let symbol = bound
+        .result()
+        .node_binding(bound.ast(), child)
+        .unwrap()
+        .symbol
+        .unwrap();
     assert_eq!(bound.symbol(symbol).unwrap().value_declaration, Some(child));
     assert_eq!(
         file.bind_with(source, |_| panic!("must not replay binding"))
             .unwrap()
             .result()
-            .node_binding(child)
+            .node_binding(file.view(), child)
             .unwrap()
             .symbol,
         Some(symbol)
@@ -259,7 +414,12 @@ fn binding_concurrent_first_use_publishes_once_and_keeps_stable_symbol_ids() {
                             Ok(())
                         })
                         .unwrap();
-                    bound.result().node_binding(child).unwrap().symbol.unwrap()
+                    bound
+                        .result()
+                        .node_binding(bound.ast(), child)
+                        .unwrap()
+                        .symbol
+                        .unwrap()
                 })
             })
             .collect();
@@ -368,7 +528,7 @@ fn binding_mapped_members_initialize_independently_and_retained_symbols_keep_the
             .unwrap();
         let id = bound
             .result()
-            .node_binding(child_a)
+            .node_binding(bound.ast(), child_a)
             .unwrap()
             .symbol
             .unwrap();
@@ -409,7 +569,7 @@ fn binding_mapped_members_initialize_independently_and_retained_symbols_keep_the
         .unwrap()
         .unwrap()
         .result()
-        .node_binding(retained.3)
+        .node_binding(sibling.view(), retained.3)
         .unwrap()
         .symbol
         .is_some());

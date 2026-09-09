@@ -5,7 +5,7 @@ use crate::{
     OptionKind, TsConfigSourceFile, COMPILER_OPTIONS, ROOT_OPTIONS, TYPE_ACQUISITION_OPTIONS,
 };
 use std::sync::Arc;
-use ts_ast::{Diagnostic, NodeData, NodeId, SyntaxKind as K};
+use ts_ast::{Diagnostic, NodeDataRead, NodeId, SyntaxKind as K};
 use ts_core::TextRange;
 use ts_diagnostics::{self as d, Message};
 use ts_jsstring::{JsString, SourceText};
@@ -101,15 +101,14 @@ pub fn convert_config_file_to_object(
 ) -> (ConfigValue, Vec<Diagnostic>) {
     let view = config.file.view();
     let root = view.node(config.root).expect("JSON source root");
-    let NodeData::SourceFile(data) = root.data() else {
+    let NodeDataRead::SourceFile(data) = root.data() else {
         panic!("config root must be a source file")
     };
-    let expression = data.statements.and_then(|list| {
+    let expression = data.statements().and_then(|list| {
         let list = view.list(list).expect("JSON statements");
         let nodes = view.node_slice(list.nodes()).expect("JSON statement slice");
         nodes
             .first()
-            .copied()
             .flatten()
             .and_then(|node| view.node(node).expect("JSON statement").expression())
     });
@@ -131,14 +130,15 @@ pub fn convert_config_file_to_object(
             vec![JsString::from_bytes(name)],
         )];
         let root = view.node(expression).expect("JSON root expression");
-        if let NodeData::ArrayLiteralExpression(data) = root.data() {
-            if let Some(list) = data.elements {
+        if let NodeDataRead::ArrayLiteralExpression(data) = root.data() {
+            if let Some(list) = data.elements() {
                 let list = view.list(list).expect("recovered JSON elements");
                 let nodes = view.node_slice(list.nodes()).expect("recovered JSON slice");
-                if let Some(object) = nodes.iter().flatten().find(|node| {
-                    view.node(**node).expect("JSON element").kind() == K::ObjectLiteralExpression
-                }) {
-                    expression = *object;
+                let object = nodes.iter().flatten().find(|node| {
+                    view.node(*node).expect("JSON element").kind() == K::ObjectLiteralExpression
+                });
+                if let Some(object) = object {
+                    expression = object;
                     // Source recovery returns conversion diagnostics directly,
                     // discarding the already-created root-value diagnostic.
                     return convert_value(config, expression, root_options, &mut notifier);
@@ -178,11 +178,11 @@ fn convert_value(
             );
         }
         Some(K::PrefixUnaryExpression) => {
-            let NodeData::PrefixUnaryExpression(data) = read.data() else {
+            let NodeDataRead::PrefixUnaryExpression(data) = read.data() else {
                 unreachable!("unary payload")
             };
-            if data.operator == K::MinusToken {
-                let operand = data.operand.expect("unary operand");
+            if data.operator() == K::MinusToken {
+                let operand = data.operand().expect("unary operand");
                 if view.node(operand).expect("unary JSON operand").kind() == K::NumericLiteral {
                     return (
                         ConfigValue::Number(
@@ -198,12 +198,12 @@ fn convert_value(
         }
         Some(K::ObjectLiteralExpression) => return convert_object(config, node, option, notifier),
         Some(K::ArrayLiteralExpression) => {
-            let NodeData::ArrayLiteralExpression(data) = read.data() else {
+            let NodeDataRead::ArrayLiteralExpression(data) = read.data() else {
                 unreachable!("array payload")
             };
             let mut values = None;
             let mut errors = Vec::new();
-            if let Some(list) = data.elements {
+            if let Some(list) = data.elements() {
                 let list = view.list(list).expect("JSON array list");
                 let nodes = view.node_slice(list.nodes()).expect("JSON array slice");
                 if nodes.is_empty() {
@@ -211,7 +211,7 @@ fn convert_value(
                 }
                 for element in nodes.iter().flatten() {
                     let (value, mut diagnostics) =
-                        convert_value(config, *element, option, &mut None);
+                        convert_value(config, element, option, &mut None);
                     errors.append(&mut diagnostics);
                     if !value.is_null() {
                         values.get_or_insert_with(Vec::new).push(value);
@@ -247,20 +247,20 @@ fn convert_object(
 ) -> (ConfigValue, Vec<Diagnostic>) {
     let view = config.file.view();
     let read = view.node(node).expect("JSON object");
-    let NodeData::ObjectLiteralExpression(data) = read.data() else {
+    let NodeDataRead::ObjectLiteralExpression(data) = read.data() else {
         unreachable!("object payload")
     };
     let mut result = ConfigValue::Object(Vec::new());
     let mut errors = Vec::new();
-    if let Some(list) = data.properties {
+    if let Some(list) = data.properties() {
         let list = view.list(list).expect("JSON properties");
         let nodes = view.node_slice(list.nodes()).expect("JSON property slice");
         for property in nodes.iter().flatten() {
-            let element = view.node(*property).expect("JSON property");
-            let NodeData::PropertyAssignment(data) = element.data() else {
+            let element = view.node(property).expect("JSON property");
+            let NodeDataRead::PropertyAssignment(data) = element.data() else {
                 errors.push(raw_diagnostic(
                     config,
-                    *property,
+                    property,
                     d::Property_assignment_expected,
                     vec![],
                 ));
@@ -278,7 +278,7 @@ fn convert_object(
                 ));
             }
             let name = data
-                .name
+                .name()
                 .and_then(|name| property_name(config, name))
                 .unwrap_or_default();
             let option = (!name.is_empty())
@@ -286,7 +286,7 @@ fn convert_object(
                 .flatten();
             let (value, mut diagnostics) = convert_value(
                 config,
-                data.initializer.expect("property initializer"),
+                data.initializer().expect("property initializer"),
                 option,
                 notifier,
             );
@@ -297,7 +297,7 @@ fn convert_object(
                     errors.extend(callback(
                         &name,
                         result.get(name.as_bytes()).expect("assigned JSON property"),
-                        *property,
+                        property,
                         parent,
                         option,
                     ));

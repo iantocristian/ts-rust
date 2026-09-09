@@ -108,10 +108,10 @@ impl Binder<'_, '_> {
                             || self.n(node).kind() == K::ExportAssignment
                                 && !self
                                     .n(node)
-                                    .data()
+                                    .data_source()
                                     .as_export_assignment()
                                     .expect("export assignment payload")
-                                    .is_export_equals);
+                                    .is_export_equals());
                     if multiple_defaults {
                         message = d::A_module_cannot_have_multiple_default_exports;
                         needs_name = false;
@@ -216,10 +216,10 @@ impl Binder<'_, '_> {
             return JsString::from_bytes(
                 if self
                     .n(node)
-                    .data()
+                    .data_source()
                     .as_export_assignment()
                     .expect("export assignment payload")
-                    .is_export_equals
+                    .is_export_equals()
                 {
                     names::EXPORT_EQUALS
                 } else {
@@ -237,10 +237,10 @@ impl Binder<'_, '_> {
                 if pattern.is_valid() && pattern.star_index >= 0 {
                     if let Some(attributes) = self
                         .n(node)
-                        .data()
+                        .data_source()
                         .as_module_declaration()
                         .expect("module payload")
-                        .attributes
+                        .attributes()
                     {
                         let id = a::runtime_node_id(&self.n(attributes));
                         return JsString::from_bytes(
@@ -282,10 +282,10 @@ impl Binder<'_, '_> {
                 {
                     let unary = self
                         .n(expression)
-                        .data()
+                        .data_source()
                         .as_prefix_unary_expression()
                         .expect("prefix payload")
-                        .clone();
+                        .to_owned();
                     let token =
                         ts_scanner::token_to_string(unary.operator.known().unwrap_or(K::Unknown));
                     return JsString::from_bytes(
@@ -324,7 +324,7 @@ impl Binder<'_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.addDeclarationToSymbol
     pub fn add_declaration_to_symbol(&mut self, symbol: SymbolId, node: NodeId, flags: u32) {
         self.sm(symbol).flags |= flags;
-        self.binding_mut(node).symbol = Some(symbol);
+        self.set_node_symbol(node, Some(symbol));
         let declarations = self.s(symbol).declarations;
         let declarations = if declarations.is_nil() {
             self.new_single_declaration(Some(node))
@@ -378,7 +378,7 @@ pub fn get_symbol_name_for_private_identifier(symbol: &Symbol, description: &[u8
     )
 }
 // port: tsc/internal/binder/binder.go:isAssignmentDeclaration
-pub(crate) fn is_assignment_declaration(node: &a::Node) -> bool {
+pub(crate) fn is_assignment_declaration(node: &(impl a::NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -391,7 +391,7 @@ pub(crate) fn is_assignment_declaration(node: &a::Node) -> bool {
     )
 }
 // port: tsc/internal/binder/binder.go:isEffectiveModuleDeclaration
-pub(crate) fn is_effective_module_declaration(node: &a::Node) -> bool {
+pub(crate) fn is_effective_module_declaration(node: &(impl a::NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ModuleDeclaration | K::Identifier)
@@ -438,7 +438,7 @@ impl Binder<'_, '_> {
             let local = self.declare_symbol(table, None, node, export_kind, excludes);
             let exported = self.declare_symbol(exports, Some(parent), node, flags, excludes);
             self.sm(local).export_symbol = Some(exported);
-            self.binding_mut(node).local_symbol = Some(local);
+            self.set_node_local_symbol(node, Some(local));
             return local;
         }
         let table = self.ensure_locals(container);

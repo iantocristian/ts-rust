@@ -1,5 +1,5 @@
 use crate::Error;
-use ts_ast::{AstView, ExternalModuleIndicatorOptions, NodeData, NodeId, SyntaxKind as K};
+use ts_ast::{AstView, ExternalModuleIndicatorOptions, NodeDataRead, NodeId, SyntaxKind as K};
 use ts_core::{CompilerOptions, JsxEmit, ModuleDetectionKind, ModuleKind, ModuleResolutionKind};
 use ts_jsstring::JsString;
 use ts_module::Resolver;
@@ -110,25 +110,25 @@ pub(crate) fn usage_mode(
         id.map_or(Ok(false), |id| Ok(view.node(id)?.is_type_only()))
     };
     let attributes = match parent_node.data() {
-        NodeData::ImportDeclaration(data) => {
-            if type_only(data.import_clause)? {
-                data.attributes
+        NodeDataRead::ImportDeclaration(data) => {
+            if type_only(data.import_clause())? {
+                data.attributes()
             } else {
                 None
             }
         }
-        NodeData::ExportDeclaration(data) if data.is_type_only => data.attributes,
-        NodeData::JSDocImportTag(data) => {
-            if type_only(data.import_clause)? {
-                data.attributes
+        NodeDataRead::ExportDeclaration(data) if data.is_type_only() => data.attributes(),
+        NodeDataRead::JSDocImportTag(data) => {
+            if type_only(data.import_clause())? {
+                data.attributes()
             } else {
                 None
             }
         }
-        NodeData::LiteralTypeNode(_) => {
+        NodeDataRead::LiteralTypeNode(_) => {
             if let Some(grandparent) = parent_node.parent() {
-                if let NodeData::ImportTypeNode(data) = view.node(grandparent)?.data() {
-                    data.attributes
+                if let NodeDataRead::ImportTypeNode(data) = view.node(grandparent)?.data() {
+                    data.attributes()
                 } else {
                     None
                 }
@@ -195,21 +195,21 @@ fn resolution_override(
     };
     let node = view.node(attributes)?;
     let data = node
-        .data()
+        .data_source()
         .as_import_attributes()
         .ok_or(ts_arena::Error::InvalidGraph)?;
-    let list = data.attributes.ok_or(ts_arena::Error::InvalidGraph)?;
+    let list = data.attributes().ok_or(ts_arena::Error::InvalidGraph)?;
     for id in view.node_slice(view.list(list)?.nodes())?.iter() {
         let node = view.node(id.ok_or(ts_arena::Error::InvalidGraph)?)?;
         let data = node
-            .data()
+            .data_source()
             .as_import_attribute()
             .ok_or(ts_arena::Error::InvalidGraph)?;
-        let name = data.name.ok_or(ts_arena::Error::InvalidGraph)?;
+        let name = data.name().ok_or(ts_arena::Error::InvalidGraph)?;
         if view.node_text(name)?.as_bytes() != b"resolution-mode" {
             continue;
         }
-        let value = data.value.ok_or(ts_arena::Error::InvalidGraph)?;
+        let value = data.value().ok_or(ts_arena::Error::InvalidGraph)?;
         if !matches!(
             view.node(value)?.kind().known(),
             Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral)

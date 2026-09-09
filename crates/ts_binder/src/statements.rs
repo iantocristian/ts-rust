@@ -327,7 +327,7 @@ impl Binder<'_, '_> {
         let has_default = self
             .syntax_nodes(Some(need(case_block.clauses)))
             .iter()
-            .any(|&clause| self.n(need(clause)).kind() == K::DefaultClause);
+            .any(|clause| self.n(need(clause)).kind() == K::DefaultClause);
         if !has_default {
             let clause =
                 self.create_flow_switch_clause(need(self.pre_switch_case_flow), node, 0, 0);
@@ -382,7 +382,7 @@ impl Binder<'_, '_> {
             if self.flow(need(self.current_flow)).flags & F::UNREACHABLE == 0
                 && index != clauses.len() - 1
             {
-                self.binding_mut(clause).fallthrough_flow_node = self.current_flow;
+                self.set_node_fallthrough_flow(clause, self.current_flow);
             }
             index += 1;
         }

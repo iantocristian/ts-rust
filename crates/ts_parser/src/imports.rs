@@ -1,15 +1,17 @@
 use crate::tokens::token_is_identifier_or_keyword;
 use crate::{Parser, ParserFactory, ParsingContext};
-use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeId, NodeListId, SyntaxKind as K};
+use ts_ast::{
+    node_flags, FactoryMethods, JsString, NodeDataRead, NodeId, NodeListId, SyntaxKind as K,
+};
 use ts_diagnostics as diag;
 
 impl<F: ParserFactory> Parser<'_, F> {
     fn import_identifier_has_text(&self, node: NodeId, text: &[u8]) -> bool {
         let node = self.factory.node(node);
-        let NodeData::Identifier(data) = node.data() else {
+        let NodeDataRead::Identifier(data) = node.data() else {
             unreachable!("import identifier")
         };
-        data.text.as_bytes() == text
+        data.text() == text
     }
     /// port: tsc/internal/parser/parser.go:Parser.parseImportDeclarationOrImportEqualsDeclaration
     pub(crate) fn parse_import_declaration_or_import_equals_declaration(

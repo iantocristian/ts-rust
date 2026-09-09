@@ -311,10 +311,8 @@ impl<F: ParserFactory> Parser<'_, F> {
             let body = if self.parse_optional(K::DotToken) {
                 let export = self.factory.new_modifier(K::ExportKeyword.into());
                 let range = TextRange::new(self.node_pos(), self.node_pos());
-                self.factory.node_mut(export).set_range(range);
-                self.factory
-                    .node_mut(export)
-                    .set_flags(node_flags::REPARSED);
+                self.factory.set_node_range(export, range);
+                self.factory.set_node_flags(export, node_flags::REPARSED);
                 let modifiers = self.new_modifier_list(range, vec![export]);
                 self.parse_module_or_namespace_declaration(
                     self.node_pos(),

@@ -1,5 +1,5 @@
 use crate::{
-    modifier_flags, AstBuilder, AstTransaction, ChildRole, Factory, FactoryMethods, Node, NodeData,
+    modifier_flags, AstBuilder, AstTransaction, ChildRole, Factory, FactoryMethods, NodeData,
     NodeId, NodeKind, NodeList, NodeListId, NodeListRead, NodeRead, NodeSlice, NodeSliceRead,
     SyntaxKind, VisitContext, VisitorMethods,
 };
@@ -55,7 +55,7 @@ pub trait RuntimeFactory: Factory {
     // port: tsc/internal/ast/utilities.go:ModifiersToFlags
     fn modifiers_to_flags(&self, nodes: NodeSlice) -> u32 {
         let mut flags = 0;
-        for &node in &*self.read_nodes(nodes) {
+        for node in self.read_nodes(nodes).iter() {
             flags |= modifier_to_flag(self.node(node.expect("nil modifier")).kind());
         }
         flags
@@ -115,8 +115,11 @@ impl RuntimeFactory for AstTransaction<'_, '_> {
         eof: Option<NodeId>,
     ) -> NodeId {
         let node = Factory::node(self, original);
-        let data = node.data().as_source_file().expect("SourceFile payload");
-        if data.statements == statements && data.end_of_file_token == eof {
+        let data = node
+            .data_source()
+            .as_source_file()
+            .expect("SourceFile payload");
+        if data.statements() == statements && data.end_of_file_token() == eof {
             return original;
         }
         panic!("lazy AST transaction cannot create source-file owner metadata")
@@ -226,7 +229,7 @@ impl<'a> NodeVisitor<'a> {
     pub fn visit_source_file(&mut self, id: NodeId) -> NodeId {
         let id = self.visit_node(Some(id)).expect("nil visited source file");
         assert!(
-            matches!(self.node(id).data(), NodeData::SourceFile(_)),
+            matches!(self.node(id).data(), crate::NodeDataRead::SourceFile(_)),
             "SourceFile payload"
         );
         id
@@ -247,7 +250,7 @@ impl<'a> NodeVisitor<'a> {
                         children.len() == 1,
                         "Expected only a single node to be written to output"
                     );
-                    visited = children[0];
+                    visited = children.at(0);
                     if let Some(id) = visited {
                         assert!(
                             self.node(id).kind() != SyntaxKind::SyntaxList,
@@ -306,18 +309,22 @@ impl<'a> NodeVisitor<'a> {
             return (nodes, false);
         }
         for index in 0..nodes.len() {
-            let node = self.factory().read_nodes(nodes)[index];
+            let node = self.factory().read_nodes(nodes).at(index);
             let Some(visit) = self.visit else { break };
             let mut visited = visit(self, node);
             if visited.is_none() || visited != node {
-                let mut updated = self.factory().read_nodes(nodes)[..index].to_vec();
+                let mut updated: Vec<_> = self
+                    .factory()
+                    .read_nodes(nodes)
+                    .iter()
+                    .take(index)
+                    .collect();
                 let mut index = index;
                 loop {
                     if let Some(id) = visited {
                         if self.node(id).kind() == SyntaxKind::SyntaxList {
-                            updated.extend_from_slice(
-                                &self.factory().read_nodes(self.syntax_children(id)),
-                            );
+                            updated
+                                .extend(self.factory().read_nodes(self.syntax_children(id)).iter());
                         } else {
                             updated.push(Some(id));
                         }
@@ -327,10 +334,10 @@ impl<'a> NodeVisitor<'a> {
                         break;
                     }
                     if let Some(visit) = self.visit {
-                        let node = self.factory().read_nodes(nodes)[index];
+                        let node = self.factory().read_nodes(nodes).at(index);
                         visited = visit(self, node);
                     } else {
-                        updated.extend_from_slice(&self.factory().read_nodes(nodes)[index..]);
+                        updated.extend(self.factory().read_nodes(nodes).iter().skip(index));
                         break;
                     }
                 }
@@ -352,10 +359,10 @@ impl<'a> NodeVisitor<'a> {
     }
     fn syntax_children(&self, id: NodeId) -> NodeSlice {
         self.node(id)
-            .data()
+            .data_source()
             .as_syntax_list()
             .expect("SyntaxList payload")
-            .children
+            .children()
     }
     // port: tsc/internal/ast/visitor.go:NodeVisitor.liftToBlock
     fn lift_to_block(&mut self, node: Option<NodeId>) -> NodeId {
@@ -369,7 +376,10 @@ impl<'a> NodeVisitor<'a> {
             NodeSlice::empty()
         };
         let id = if nodes.len() == 1 {
-            self.factory().read_nodes(nodes)[0].expect("nil lifted statement")
+            self.factory()
+                .read_nodes(nodes)
+                .at(0)
+                .expect("nil lifted statement")
         } else {
             let list = self.factory_mut().alloc_list(TextRange::new(-1, -1), nodes);
             self.new_block(Some(list), true)
@@ -460,7 +470,7 @@ impl Factory for NodeVisitor<'_> {
     fn node(&self, id: NodeId) -> NodeRead<'_> {
         self.factory().node(id)
     }
-    fn node_mut(&mut self, id: NodeId) -> &mut Node {
+    fn node_mut(&mut self, id: NodeId) -> crate::NodeMut<'_> {
         self.factory_mut().node_mut(id)
     }
     fn node_count(&self) -> i64 {
@@ -506,12 +516,17 @@ impl VisitContext for NodeVisitor<'_> {
     fn map_raw_nodes(&mut self, nodes: NodeSlice) -> NodeSlice {
         let mut updated: Option<Vec<Option<NodeId>>> = None;
         for index in 0..nodes.len() {
-            let original = self.factory().read_nodes(nodes)[index];
+            let original = self.factory().read_nodes(nodes).at(index);
             let visited = self.role_node(original);
             if let Some(updated) = &mut updated {
                 updated.push(visited);
             } else if visited != original {
-                let mut prefix = self.factory().read_nodes(nodes)[..index].to_vec();
+                let mut prefix: Vec<_> = self
+                    .factory()
+                    .read_nodes(nodes)
+                    .iter()
+                    .take(index)
+                    .collect();
                 prefix.push(visited);
                 updated = Some(prefix);
             }
@@ -522,8 +537,11 @@ impl VisitContext for NodeVisitor<'_> {
     fn visit_each_child_source_file(&mut self, id: NodeId) -> NodeId {
         let (statements, eof) = {
             let node = self.node(id);
-            let data = node.data().as_source_file().expect("SourceFile payload");
-            (data.statements, data.end_of_file_token)
+            let data = node
+                .data_source()
+                .as_source_file()
+                .expect("SourceFile payload");
+            (data.statements(), data.end_of_file_token())
         };
         let statements = self.role_top_level(statements);
         let eof = self.role_token(eof);

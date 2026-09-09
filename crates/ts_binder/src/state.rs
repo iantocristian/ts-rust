@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use ts_ast::{
-    AstView, BindBuilder, FlowId, JsString, NodeBinding, NodeId, NodeRead, SymbolId, SymbolTable,
-    SymbolTableId,
+    AstView, BindBuilder, FlowId, JsString, NodeId, NodeRead, SymbolId, SymbolTable, SymbolTableId,
 };
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -103,10 +102,40 @@ impl<'build, 'ast> Binder<'build, 'ast> {
     pub fn n(&self, id: NodeId) -> NodeRead<'_> {
         self.builder.node(id).expect("binder node is retained")
     }
-    pub fn binding_mut(&mut self, id: NodeId) -> &mut NodeBinding {
+    pub fn set_node_symbol(&mut self, id: NodeId, value: Option<SymbolId>) {
         self.builder
-            .binding_mut(id)
-            .expect("binder writes its own file")
+            .set_node_symbol(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_local_symbol(&mut self, id: NodeId, value: Option<SymbolId>) {
+        self.builder
+            .set_node_local_symbol(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_locals(&mut self, id: NodeId, value: Option<SymbolTableId>) {
+        self.builder
+            .set_node_locals(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_next_container(&mut self, id: NodeId, value: Option<NodeId>) {
+        self.builder
+            .set_node_next_container(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_end_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+        self.builder
+            .set_node_end_flow(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_return_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+        self.builder
+            .set_node_return_flow(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_fallthrough_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+        self.builder
+            .set_node_fallthrough_flow(id, value)
+            .expect("binder writes its own file");
     }
     pub fn symbol(&self, node: NodeId) -> Option<SymbolId> {
         self.builder
@@ -140,7 +169,7 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             "locals-container payload required"
         );
         let table = self.builder.tables_mut().alloc(SymbolTable::new());
-        self.binding_mut(node).locals = Some(table);
+        self.set_node_locals(node, Some(table));
         table
     }
     pub fn set_flags(&mut self, node: NodeId, flags: u32) {

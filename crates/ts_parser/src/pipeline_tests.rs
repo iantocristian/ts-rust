@@ -1,5 +1,5 @@
 use ts_ast::{
-    ExternalModuleIndicatorOptions, JsString, NodeData, ParsedFile, SourceFileParseOptions,
+    ExternalModuleIndicatorOptions, JsString, NodeDataRead, ParsedFile, SourceFileParseOptions,
     SyntaxKind as K,
 };
 use ts_core::{ScriptKind, Tristate};
@@ -55,25 +55,28 @@ fn json_token_payload_and_recovery_keep_source_counts_and_diagnostic_order() {
                 let list = view
                     .node(root)
                     .unwrap()
-                    .data()
+                    .data_source()
                     .as_source_file()
                     .unwrap()
-                    .statements
+                    .statements()
                     .unwrap();
-                let statement =
-                    view.node_slice(view.list(list).unwrap().nodes()).unwrap()[0].unwrap();
+                let statement = view
+                    .node_slice(view.list(list).unwrap().nodes())
+                    .unwrap()
+                    .at(0)
+                    .unwrap();
                 let value = view
                     .node(statement)
                     .unwrap()
-                    .data()
+                    .data_source()
                     .as_expression_statement()
                     .unwrap()
-                    .expression
+                    .expression()
                     .unwrap();
                 assert_eq!(view.node(value).unwrap().kind(), K::TrueKeyword);
                 assert!(matches!(
                     view.node(value).unwrap().data(),
-                    NodeData::Token(_)
+                    NodeDataRead::Token(_)
                 ));
             }
         }
@@ -126,12 +129,12 @@ fn module_references_preserve_static_order_ambient_filter_and_node_prefix_preced
             (b"/ambient.d.ts", b"declare module 'a' { import x from './x'; import y from 'y'; declare module 'z' {} }", ScriptKind::TS, vec![b"y".as_slice()], Tristate::UNKNOWN, vec![b"a".as_slice()], vec![b"z".as_slice()], 18),
         ] {
             let file = parse(name, text, kind); let view = file.view(); let data = view.source_file(file.root()).unwrap();
-            let imports: Vec<_> = data.imports().unwrap().iter().flatten().map(|&id| view.node(id).unwrap().data().as_string_literal().unwrap().text.clone()).collect();
+            let imports: Vec<_> = data.imports().unwrap().iter().flatten().map(|&id| view.node(id).unwrap().data_source().as_string_literal().unwrap().text_owned()).collect();
             assert_eq!(imports.iter().map(JsString::as_bytes).collect::<Vec<_>>(), expected);
             assert_eq!(data.uses_uri_style_node_core_modules, uri);
             assert_eq!(data.node_count, count);
             assert_eq!(data.ambient_module_names().unwrap().iter().map(JsString::as_bytes).collect::<Vec<_>>(), ambient);
-            let names: Vec<_> = data.module_augmentations().unwrap().iter().flatten().map(|&id| view.node(id).unwrap().data().as_string_literal().unwrap().text.clone()).collect();
+            let names: Vec<_> = data.module_augmentations().unwrap().iter().flatten().map(|&id| view.node(id).unwrap().data_source().as_string_literal().unwrap().text_owned()).collect();
             assert_eq!(names.iter().map(JsString::as_bytes).collect::<Vec<_>>(), augmentations);
         }
     });
@@ -314,10 +317,10 @@ fn top_level_await_reparse_keeps_discarded_allocation_counts_and_final_statement
             let list = view
                 .node(root)
                 .unwrap()
-                .data()
+                .data_source()
                 .as_source_file()
                 .unwrap()
-                .statements
+                .statements()
                 .unwrap();
             let statements = view.node_slice(view.list(list).unwrap().nodes()).unwrap();
             assert_eq!(statements.len(), 3);

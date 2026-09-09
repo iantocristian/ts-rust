@@ -1,5 +1,5 @@
 use super::*;
-use crate::{AstBuilder, Factory, FactoryMethods, JsString, NodeListId};
+use crate::{AstBuilder, Factory, FactoryMethods, JsString, NodeData, NodeListId};
 use std::collections::BTreeMap;
 use ts_arena::Counters;
 use ts_core::TextRange;
@@ -347,7 +347,7 @@ fn binding_syntax_branches_match_frozen_source_observations() {
     emit(
         "missing",
         &[
-            b(node_is_missing(None)),
+            b(node_is_missing(None::<&crate::Node>)),
             b(node_is_present(Some(&f.view().node(name).unwrap()))),
         ],
     );
@@ -436,18 +436,13 @@ fn binding_syntax_branches_match_frozen_source_observations() {
 
 #[test]
 fn module_state_preserves_lazy_runtime_identity_side_effects() {
-    use std::sync::atomic::Ordering;
     let mut f = AstBuilder::new(SourceText::default(), &Counters::new());
     let child = interface(&mut f);
     let body = block(&mut f, vec![Some(child)]);
     let root = module(&mut f, Some(body));
     for id in [child, body, root] {
         assert_eq!(
-            f.view()
-                .node(id)
-                .unwrap()
-                .runtime_id
-                .load(Ordering::Relaxed),
+            crate::existing_runtime_node_id(&f.view().node(id).unwrap()),
             0
         );
     }
@@ -456,29 +451,15 @@ fn module_state_preserves_lazy_runtime_identity_side_effects() {
         ModuleInstanceState::NonInstantiated
     );
     assert_eq!(
-        f.view()
-            .node(root)
-            .unwrap()
-            .runtime_id
-            .load(Ordering::Relaxed),
+        crate::existing_runtime_node_id(&f.view().node(root).unwrap()),
         0
     );
-    let before = [child, body].map(|id| {
-        f.view()
-            .node(id)
-            .unwrap()
-            .runtime_id
-            .load(Ordering::Relaxed)
-    });
+    let before =
+        [child, body].map(|id| crate::existing_runtime_node_id(&f.view().node(id).unwrap()));
     assert!(before.iter().all(|&id| id != 0));
     get_module_instance_state(f.view(), root).unwrap();
     assert_eq!(
         before,
-        [child, body].map(|id| f
-            .view()
-            .node(id)
-            .unwrap()
-            .runtime_id
-            .load(Ordering::Relaxed))
+        [child, body].map(|id| crate::existing_runtime_node_id(&f.view().node(id).unwrap()))
     );
 }

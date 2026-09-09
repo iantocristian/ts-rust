@@ -106,7 +106,7 @@ fn original_go_mapper_validation_and_manifests() {
             .unwrap_or_default();
         let property = ts_tsoptions::find_property(&parsed.source, &[b"contentMappers"]).unwrap();
         let node = parsed.source.file.view().node(property).unwrap();
-        let ts_ast::NodeData::PropertyAssignment(data) = node.data() else {
+        let ts_ast::NodeDataRead::PropertyAssignment(data) = node.data() else {
             panic!("config property")
         };
         let option = ts_tsoptions::ROOT_OPTIONS
@@ -120,7 +120,7 @@ fn original_go_mapper_validation_and_manifests() {
             ts_tsoptions::OptionSyntax {
                 config: Some(&parsed.source),
                 property: Some(property),
-                value: data.initializer,
+                value: data.initializer(),
             },
         );
         let result = validate_content_mappers(

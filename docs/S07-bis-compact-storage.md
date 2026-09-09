@@ -110,11 +110,14 @@ Distance to the historical Go planning limits remains explicit:
 | --- | ---: | ---: | ---: |
 | One-worker wall | 7.265 s | 2.938 s | 4.327 s |
 | Eight-worker wall | 1.624 s | 0.634 s | 0.990 s |
-| Allocated bytes | 3.185 GB | 2.035 GB | 1.150 GB |
-| Peak RSS | 2.837 GB | 2.209 GB | 0.628 GB |
+| One-worker allocated bytes | 3.184523 GB | 2.035226 GB | 1.149296 GB |
+| Eight-worker allocated bytes | 3.184523 GB | 2.035767 GB | 1.148757 GB |
+| One-worker peak RSS | 2.834252 GB | 2.208948 GB | 0.625304 GB |
+| Eight-worker peak RSS | 2.837283 GB | 2.217045 GB | 0.620238 GB |
 
-These rounded historical denominators are planning comparisons. Final E5/E6
-acceptance still requires fresh qualified Go/Rust captures.
+These rounded historical denominators are planning comparisons, paired with the
+same worker mode. Final E5/E6 acceptance uses the worse worker-mode memory ratio
+and still requires fresh qualified Go/Rust captures.
 
 A single Time Profiler capture of the exact normal candidate executable produced
 8,165 running-CPU rows, including 7,215 ms on the worker. It adds no source hooks,
@@ -127,3 +130,35 @@ The normal binary has no phase wrappers, so this capture does not claim exact
 exclusive parse/bind attribution. Field-key hashing also appears in self samples
 and warrants checking whether supposedly exceptional operations run on ordinary
 local-field writes.
+
+The subsequent [hashing audit](../tools/s07/performance-experiments/results/2026-09-09-compact-typed-first/fieldkey-audit.txt)
+attributes a 423 ms stack union to field-key hashing, including its nested hasher
+frames. The pinned `HashMap::remove` hashes before checking table emptiness.
+Ordinary node construction, parent updates and inline binding writes were calling
+it to clear nonexistent escapes. An explicit empty-map guard preserves nonempty
+overwrite cleanup while avoiding that work. Tests cover foreign/full-slot to
+local/nil overwrites in all five reference namespaces, with another escape still
+present, and reuse of an allocated-but-empty map. This diagnoses a removable
+operation; the combined repair's pipeline effect remains to be measured.
+
+## Bounded read-path repair
+
+Already-checked exclusive core reads now construct their borrowed `NodeRead`
+directly. Generic resolution keeps its lazy path separate, and source metadata
+is stored only where it is not already present in the core context. This retains
+the owner-before-slot error order and the lazy publication guard.
+
+Generated `NodeDataSource` selectors borrow that read and resolve only the
+requested typed row after checking the actual shape. Known-shape visitors,
+factory updates and handwritten field readers use them; exhaustive `data()`
+matches keep their existing semantics. Shape remains independent of public kind.
+The empty exceptional-reference cleanup described above is part of the same
+candidate. No new profiling hooks or field replay are introduced.
+
+Independent review of these changes found no actionable correctness issue.
+Validation passes: 88 AST, 28 binder and 25 parser library tests; 11 arena/AST
+ownership doctests, including explicit direct-selector lifetime protection;
+workspace all-target/all-feature Clippy with warnings denied; Rust 1.96 all-target
+compilation; formatting; pinned generation and observer drift. The first lint
+failure and its narrow generator correction are retained in the logs. The
+changed candidate still needs its frozen graph comparison and fixed screen.

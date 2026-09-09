@@ -115,7 +115,7 @@ fn raw_slice_updates_use_backing_identity_and_all_empty_slices_compare_same() {
         .data()
         .as_js_doc_link()
         .unwrap()
-        .text
+        .text()
         .same(first));
 
     let missing = factory.new_case_or_default_clause(SyntaxKind::DefaultClause.into(), None, None);
@@ -125,7 +125,7 @@ fn raw_slice_updates_use_backing_identity_and_all_empty_slices_compare_same() {
             .data()
             .as_case_or_default_clause()
             .unwrap()
-            .expression,
+            .expression(),
         None
     );
     let raw = factory.node_slice(vec![None, Some(missing)]).unwrap();
@@ -133,9 +133,17 @@ fn raw_slice_updates_use_backing_identity_and_all_empty_slices_compare_same() {
     assert_eq!(
         factory
             .view()
-            .node_slice(factory.node(list).data().as_syntax_list().unwrap().children)
+            .node_slice(
+                factory
+                    .node(list)
+                    .data()
+                    .as_syntax_list()
+                    .unwrap()
+                    .children()
+            )
             .unwrap()
-            .as_ref(),
+            .iter()
+            .collect::<Vec<_>>(),
         &[None, Some(missing)]
     );
 }
@@ -161,7 +169,7 @@ impl Factory for IdentityVisitor<'_> {
     fn node(&self, id: NodeId) -> NodeRead<'_> {
         self.factory.node(id)
     }
-    fn node_mut(&mut self, id: NodeId) -> &mut Node {
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_> {
         Factory::node_mut(self.factory, id)
     }
     fn node_count(&self) -> i64 {

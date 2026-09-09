@@ -13,6 +13,9 @@ pub use symbols::*;
 mod binder_helpers;
 pub use binder_helpers::*;
 mod clone;
+mod compact;
+mod compact_generated;
+pub(crate) use compact_generated::AstPayloadStore;
 mod data_generated;
 mod diagnostic;
 mod diagnostic_order;
@@ -22,11 +25,15 @@ mod jsdoc;
 mod kinds_generated;
 mod lists;
 pub mod modifier_flags;
+mod node_access;
+pub use node_access::NodeAccess;
 mod node_accessors;
 pub mod node_flags;
 mod node_index;
 mod node_kind;
 mod node_map;
+mod node_mut;
+pub use node_mut::NodeMut;
 mod node_read;
 mod node_read_generated;
 mod node_text;
@@ -166,14 +173,6 @@ impl Node {
             runtime_id: AtomicU64::new(0),
         })
     }
-    pub(crate) fn copy_for_binding(&self) -> Self {
-        let mut copy = self.clone();
-        // Both representations name one logical node. Materialize identity on
-        // the canonical parsed record before copying it into the sparse overlay.
-        copy.runtime_id = AtomicU64::new(runtime_node_id(self));
-        copy.subtree_facts = AtomicU32::new(self.cached_subtree_facts());
-        copy
-    }
     pub fn kind(&self) -> NodeKind {
         self.kind
     }
@@ -284,18 +283,19 @@ mod tests;
 
 impl ts_arena::NodeRecord for Node {
     type Aux = AstStorageData;
+    type Store = compact::CoreStore;
     fn storage_kind(&self) -> u32 {
         u32::from(self.kind.raw() as u16)
-    }
-    fn storage_parent(&self) -> Option<NodeId> {
-        self.parent
-    }
-    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
-        self.parent = parent;
     }
     fn storage_reparsed(&self) -> bool {
         // Pinned NodeFlagsReparsed; no second reparsed bit is stored.
         self.flags & node_flags::REPARSED != 0
+    }
+}
+
+impl ts_arena::NodeParentRecord for Node {
+    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
+        self.parent = parent;
     }
 }
 

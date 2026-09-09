@@ -83,14 +83,20 @@ fn matches_pinned_go_front_utility_observations() {
             emit($name.to_string(), $value.to_string())
         };
     }
-    emit!("nil/for", u::is_for_in_or_of_statement(None));
-    emit!("nil/function", u::is_function_like(None));
-    emit!("nil/function-decl", u::is_function_like_declaration(None));
+    emit!(
+        "nil/for",
+        u::is_for_in_or_of_statement(None::<&ts_ast::Node>)
+    );
+    emit!("nil/function", u::is_function_like(None::<&ts_ast::Node>));
+    emit!(
+        "nil/function-decl",
+        u::is_function_like_declaration(None::<&ts_ast::Node>)
+    );
     emit!(
         "nil/function-static",
-        u::is_function_like_or_class_static_block_declaration(None)
+        u::is_function_like_or_class_static_block_declaration(None::<&ts_ast::NodeRead<'_>>)
     );
-    emit!("nil/js", u::is_in_js_file(None));
+    emit!("nil/js", u::is_in_js_file(None::<&ts_ast::Node>));
     emit!("nil/block", u::is_function_block(f.view(), None).unwrap());
     emit!(
         "nil/object-method",
@@ -176,9 +182,9 @@ fn matches_pinned_go_front_utility_observations() {
             .unwrap()
             .is_none()
     );
-    let mut yes1 = |_: &ts_ast::Node| true;
-    let mut yes2 = |_: &ts_ast::Node| true;
-    let mut yes3 = |_: &ts_ast::Node| true;
+    let mut yes1 = |_: &ts_ast::NodeRead<'_>| true;
+    let mut yes2 = |_: &ts_ast::NodeRead<'_>| true;
+    let mut yes3 = |_: &ts_ast::NodeRead<'_>| true;
     let many =
         u::find_many_ancestors(f.view(), Some(a), &mut [&mut yes1, &mut yes2, &mut yes3]).unwrap();
     emit!("ancestor/many-order", many == [Some(a), Some(b), Some(c)]);
@@ -189,7 +195,7 @@ fn matches_pinned_go_front_utility_observations() {
             .is_empty()
     );
     for value in [-1, 0, 1, 2, 3] {
-        let callback = |n: &ts_ast::Node| {
+        let callback = |n: &ts_ast::NodeRead<'_>| {
             if n.kind() == K::Identifier {
                 u::FindAncestorResult(value)
             } else {

@@ -129,10 +129,10 @@ impl Binder<'_, '_> {
     pub fn check_strict_mode_binary_expression(&mut self, node: NodeId) {
         let data = self
             .n(node)
-            .data()
+            .data_source()
             .as_binary_expression()
             .expect("binary payload")
-            .clone();
+            .to_owned();
         if checked(a::is_left_hand_side_expression(
             self.view(),
             need(data.left),
@@ -145,10 +145,10 @@ impl Binder<'_, '_> {
     pub fn check_strict_mode_catch_clause(&mut self, node: NodeId) {
         let declaration = self
             .n(node)
-            .data()
+            .data_source()
             .as_catch_clause()
             .expect("catch payload")
-            .variable_declaration;
+            .variable_declaration();
         if let Some(declaration) = declaration {
             self.check_strict_mode_eval_or_arguments(node, self.n(declaration).name());
         }
@@ -169,20 +169,20 @@ impl Binder<'_, '_> {
         self.check_strict_mode_eval_or_arguments(
             node,
             self.n(node)
-                .data()
+                .data_source()
                 .as_postfix_unary_expression()
                 .expect("postfix payload")
-                .operand,
+                .operand(),
         );
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModePrefixUnaryExpression
     pub fn check_strict_mode_prefix_unary_expression(&mut self, node: NodeId) {
         let data = self
             .n(node)
-            .data()
+            .data_source()
             .as_prefix_unary_expression()
             .expect("prefix payload")
-            .clone();
+            .to_owned();
         if matches!(
             data.operator.known(),
             Some(K::PlusPlusToken | K::MinusMinusToken)
@@ -202,10 +202,10 @@ impl Binder<'_, '_> {
     pub fn check_strict_mode_labeled_statement(&mut self, node: NodeId) {
         let data = self
             .n(node)
-            .data()
+            .data_source()
             .as_labeled_statement()
             .expect("label payload")
-            .clone();
+            .to_owned();
         let statement = self.n(need(data.statement));
         if a::is_declaration_statement(&statement) || statement.kind() == K::VariableStatement {
             self.error_on_first_token(need(data.label), d::A_label_is_not_allowed_here, Vec::new());

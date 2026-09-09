@@ -43,10 +43,10 @@ impl Binder<'_, '_> {
             let container = need(self.symbol(self.file));
             let right = need(
                 self.n(node)
-                    .data()
+                    .data_source()
                     .as_binary_expression()
                     .expect("binary payload")
-                    .right,
+                    .right(),
             );
             let flags = if checked(a::expression_is_alias(self.view(), right)) {
                 sf::ALIAS
@@ -116,10 +116,10 @@ impl Binder<'_, '_> {
             Some(K::BinaryExpression) => need(
                 self.n(need(
                     self.n(node)
-                        .data()
+                        .data_source()
                         .as_binary_expression()
                         .expect("binary payload")
-                        .left,
+                        .left(),
                 ))
                 .expression(),
             ),
@@ -127,7 +127,8 @@ impl Binder<'_, '_> {
                 checked(
                     self.view()
                         .node_slice(checked(self.n(node).arguments(self.view()))),
-                )[0],
+                )
+                .at(0),
             ),
             _ => panic!("Unhandled case in getParentOfPropertyAssignment"),
         }
@@ -141,10 +142,10 @@ impl Binder<'_, '_> {
                     self.view(),
                     need(
                         self.n(node)
-                            .data()
+                            .data_source()
                             .as_binary_expression()
                             .expect("binary payload")
-                            .right,
+                            .right(),
                     ),
                 )) {
                 sf::ALIAS
@@ -178,10 +179,10 @@ impl Binder<'_, '_> {
             self.n(declaration).initializer()
         } else if kind == K::BinaryExpression && a::is_in_js_file(Some(&self.n(declaration))) {
             self.n(declaration)
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("binary payload")
-                .right
+                .right()
         } else {
             return None;
         };
@@ -202,10 +203,10 @@ impl Binder<'_, '_> {
         }
         let left = need(
             self.n(node)
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("binary payload")
-                .left,
+                .left(),
         );
         if self.n(left).kind() == K::PropertyAccessExpression
             && self.n(need(self.n(left).name())).kind() == K::PrivateIdentifier

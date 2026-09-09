@@ -159,6 +159,12 @@ macro_rules! flow_store {
 flow_store!(FlowId, FlowNodes, FlowNode);
 flow_store!(FlowListId, FlowLists, FlowList);
 
+impl FlowId {
+    pub(crate) fn from_parts(arena: ArenaId, slot: u32) -> Result<Self, Error> {
+        AuxId::from_parts(arena, slot).map(Self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

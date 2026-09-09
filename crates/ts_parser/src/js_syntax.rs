@@ -36,7 +36,11 @@ impl<F: ParserFactory> Parser<'_, F> {
         let kind = self.factory.node(node).kind();
         if can_have_illegal_decorators(kind) {
             if let Some(index) = self.js_find_modifier(modifiers, 0, K::Decorator) {
-                let modifier = self.factory.read_nodes(modifiers)[index].expect("parsed modifier");
+                let modifier = self
+                    .factory
+                    .read_nodes(modifiers)
+                    .at(index)
+                    .expect("parsed modifier");
                 self.js_error_at_range(
                     self.factory.node(modifier).range(),
                     diagnostics::Decorators_are_not_valid_here,
@@ -59,7 +63,11 @@ impl<F: ParserFactory> Parser<'_, F> {
         };
         let default = self.js_find_modifier(modifiers, 0, K::DefaultKeyword);
         if decorator > export && default.is_some_and(|default| decorator < default) {
-            let modifier = self.factory.read_nodes(modifiers)[decorator].expect("parsed decorator");
+            let modifier = self
+                .factory
+                .read_nodes(modifiers)
+                .at(decorator)
+                .expect("parsed decorator");
             self.js_error_at_range(
                 self.factory.node(modifier).range(),
                 diagnostics::Decorators_are_not_valid_here,
@@ -67,10 +75,16 @@ impl<F: ParserFactory> Parser<'_, F> {
             );
         } else if decorator < export {
             if let Some(trailing) = self.js_find_modifier(modifiers, export, K::Decorator) {
-                let trailing =
-                    self.factory.read_nodes(modifiers)[trailing].expect("parsed decorator");
-                let first =
-                    self.factory.read_nodes(modifiers)[decorator].expect("parsed decorator");
+                let trailing = self
+                    .factory
+                    .read_nodes(modifiers)
+                    .at(trailing)
+                    .expect("parsed decorator");
+                let first = self
+                    .factory
+                    .read_nodes(modifiers)
+                    .at(decorator)
+                    .expect("parsed decorator");
                 let mut diagnostic = Diagnostic::new(None, self.skip_range_trivia(self.factory.node(trailing).range()), diagnostics::Decorators_may_not_appear_after_export_or_export_default_if_they_also_appear_before_export, vec![]);
                 diagnostic
                     .related_information
@@ -103,9 +117,9 @@ impl<F: ParserFactory> Parser<'_, F> {
             Some(K::Parameter | K::PropertyDeclaration | K::MethodDeclaration)
         ) {
             let question = match self.factory.node(node).data() {
-                ts_ast::NodeData::ParameterDeclaration(data) => data.question_token,
-                ts_ast::NodeData::PropertyDeclaration(data) => data.postfix_token,
-                ts_ast::NodeData::MethodDeclaration(data) => data.postfix_token,
+                ts_ast::NodeDataRead::ParameterDeclaration(data) => data.question_token(),
+                ts_ast::NodeDataRead::PropertyDeclaration(data) => data.postfix_token(),
+                ts_ast::NodeDataRead::MethodDeclaration(data) => data.postfix_token(),
                 _ => unreachable!("parsed declaration payload"),
             };
             if let Some(question) = question {
@@ -165,17 +179,17 @@ impl<F: ParserFactory> Parser<'_, F> {
                 let clause = self
                     .factory
                     .node(node)
-                    .data()
+                    .data_source()
                     .as_import_declaration()
                     .expect("import payload")
-                    .import_clause;
+                    .import_clause();
                 if clause.is_some_and(|clause| {
                     self.factory
                         .node(clause)
-                        .data()
+                        .data_source()
                         .as_import_clause()
                         .expect("import clause payload")
-                        .phase_modifier
+                        .phase_modifier()
                         == K::TypeKeyword
                 }) {
                     self.js_error_at_range(
@@ -187,14 +201,14 @@ impl<F: ParserFactory> Parser<'_, F> {
             }
             Some(K::ExportDeclaration | K::ImportSpecifier | K::ExportSpecifier) => {
                 let (type_only, message) = match self.factory.node(node).data() {
-                    ts_ast::NodeData::ExportDeclaration(data) => {
-                        (data.is_type_only, b"export type".as_slice())
+                    ts_ast::NodeDataRead::ExportDeclaration(data) => {
+                        (data.is_type_only(), b"export type".as_slice())
                     }
-                    ts_ast::NodeData::ImportSpecifier(data) => {
-                        (data.is_type_only, b"import...type".as_slice())
+                    ts_ast::NodeDataRead::ImportSpecifier(data) => {
+                        (data.is_type_only(), b"import...type".as_slice())
                     }
-                    ts_ast::NodeData::ExportSpecifier(data) => {
-                        (data.is_type_only, b"export...type".as_slice())
+                    ts_ast::NodeDataRead::ExportSpecifier(data) => {
+                        (data.is_type_only(), b"export...type".as_slice())
                     }
                     _ => unreachable!("parsed import/export payload"),
                 };
@@ -215,10 +229,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                 if self
                     .factory
                     .node(node)
-                    .data()
+                    .data_source()
                     .as_export_assignment()
                     .expect("export assignment payload")
-                    .is_export_equals
+                    .is_export_equals()
                 {
                     self.js_error_at_range(
                         loc,
@@ -231,10 +245,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                 if self
                     .factory
                     .node(node)
-                    .data()
+                    .data_source()
                     .as_heritage_clause()
                     .expect("heritage clause payload")
-                    .token
+                    .token()
                     == K::ImplementsKeyword
                 {
                     self.js_error_at_range(
@@ -273,10 +287,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                             let keyword = self
                                 .factory
                                 .node(node)
-                                .data()
+                                .data_source()
                                 .as_module_declaration()
                                 .expect("module payload")
-                                .keyword;
+                                .keyword();
                             keyword
                                 .known()
                                 .map_or_else(JsString::default, crate::tokens::token_text)
@@ -330,9 +344,12 @@ impl<F: ParserFactory> Parser<'_, F> {
                 if let Some(list) = self.node_modifiers(node) {
                     let nodes = self.factory.read_list(list).nodes();
                     for i in 0..nodes.len() {
-                        let modifier = self
-                            .factory
-                            .node(self.factory.read_nodes(nodes)[i].expect("parsed modifier"));
+                        let modifier = self.factory.node(
+                            self.factory
+                                .read_nodes(nodes)
+                                .at(i)
+                                .expect("parsed modifier"),
+                        );
                         if modifier.flags() & node_flags::REPARSED == 0
                             && modifier.kind() != K::Decorator
                             && ts_ast::modifier_to_flag(modifier.kind())
@@ -394,7 +411,8 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
 
     fn js_find_modifier(&self, nodes: NodeSlice, start: usize, kind: K) -> Option<usize> {
-        self.factory.read_nodes(nodes)[start..]
+        self.factory
+            .read_nodes(nodes.slice(start..nodes.len()).expect("modifier range"))
             .iter()
             .position(|id| self.factory.node(id.expect("parsed modifier")).kind() == kind)
             .map(|index| start + index)
@@ -409,62 +427,62 @@ impl<F: ParserFactory> Parser<'_, F> {
             })
     }
     fn js_syntax_body(&self, node: NodeId) -> Option<NodeId> {
-        use ts_ast::NodeData as D;
+        use ts_ast::NodeDataRead as D;
         match self.factory.node(node).data() {
-            D::MethodDeclaration(d) => d.body,
-            D::ConstructorDeclaration(d) => d.body,
-            D::GetAccessorDeclaration(d) => d.body,
-            D::SetAccessorDeclaration(d) => d.body,
-            D::FunctionDeclaration(d) => d.body,
-            D::FunctionExpression(d) => d.body,
-            D::ArrowFunction(d) => d.body,
+            D::MethodDeclaration(d) => d.body(),
+            D::ConstructorDeclaration(d) => d.body(),
+            D::GetAccessorDeclaration(d) => d.body(),
+            D::SetAccessorDeclaration(d) => d.body(),
+            D::FunctionDeclaration(d) => d.body(),
+            D::FunctionExpression(d) => d.body(),
+            D::ArrowFunction(d) => d.body(),
             _ => None,
         }
     }
     fn js_syntax_annotation(&self, node: NodeId) -> Option<NodeId> {
-        use ts_ast::NodeData as D;
+        use ts_ast::NodeDataRead as D;
         match self.factory.node(node).data() {
-            D::ParameterDeclaration(d) => d.r#type,
-            D::PropertyDeclaration(d) => d.r#type,
-            D::MethodDeclaration(d) => d.r#type,
-            D::MethodSignatureDeclaration(d) => d.r#type,
-            D::ConstructorDeclaration(d) => d.r#type,
-            D::GetAccessorDeclaration(d) => d.r#type,
-            D::SetAccessorDeclaration(d) => d.r#type,
-            D::FunctionExpression(d) => d.r#type,
-            D::FunctionDeclaration(d) => d.r#type,
-            D::ArrowFunction(d) => d.r#type,
-            D::VariableDeclaration(d) => d.r#type,
-            D::IndexSignatureDeclaration(d) => d.r#type,
-            D::AsExpression(d) => d.r#type,
-            D::SatisfiesExpression(d) => d.r#type,
+            D::ParameterDeclaration(d) => d.r#type(),
+            D::PropertyDeclaration(d) => d.r#type(),
+            D::MethodDeclaration(d) => d.r#type(),
+            D::MethodSignatureDeclaration(d) => d.r#type(),
+            D::ConstructorDeclaration(d) => d.r#type(),
+            D::GetAccessorDeclaration(d) => d.r#type(),
+            D::SetAccessorDeclaration(d) => d.r#type(),
+            D::FunctionExpression(d) => d.r#type(),
+            D::FunctionDeclaration(d) => d.r#type(),
+            D::ArrowFunction(d) => d.r#type(),
+            D::VariableDeclaration(d) => d.r#type(),
+            D::IndexSignatureDeclaration(d) => d.r#type(),
+            D::AsExpression(d) => d.r#type(),
+            D::SatisfiesExpression(d) => d.r#type(),
             _ => None,
         }
     }
     fn js_syntax_type_parameters(&self, node: NodeId) -> Option<NodeListId> {
-        use ts_ast::NodeData as D;
+        use ts_ast::NodeDataRead as D;
         match self.factory.node(node).data() {
-            D::ClassDeclaration(d) => d.type_parameters,
-            D::ClassExpression(d) => d.type_parameters,
-            D::MethodDeclaration(d) => d.type_parameters,
-            D::ConstructorDeclaration(d) => d.type_parameters,
-            D::GetAccessorDeclaration(d) => d.type_parameters,
-            D::SetAccessorDeclaration(d) => d.type_parameters,
-            D::FunctionExpression(d) => d.type_parameters,
-            D::FunctionDeclaration(d) => d.type_parameters,
-            D::ArrowFunction(d) => d.type_parameters,
+            D::ClassDeclaration(d) => d.type_parameters(),
+            D::ClassExpression(d) => d.type_parameters(),
+            D::MethodDeclaration(d) => d.type_parameters(),
+            D::ConstructorDeclaration(d) => d.type_parameters(),
+            D::GetAccessorDeclaration(d) => d.type_parameters(),
+            D::SetAccessorDeclaration(d) => d.type_parameters(),
+            D::FunctionExpression(d) => d.type_parameters(),
+            D::FunctionDeclaration(d) => d.type_parameters(),
+            D::ArrowFunction(d) => d.type_parameters(),
             _ => None,
         }
     }
     fn js_syntax_type_arguments(&self, node: NodeId) -> Option<NodeListId> {
-        use ts_ast::NodeData as D;
+        use ts_ast::NodeDataRead as D;
         match self.factory.node(node).data() {
-            D::CallExpression(d) => d.type_arguments,
-            D::NewExpression(d) => d.type_arguments,
-            D::ExpressionWithTypeArguments(d) => d.type_arguments,
-            D::JsxSelfClosingElement(d) => d.type_arguments,
-            D::JsxOpeningElement(d) => d.type_arguments,
-            D::TaggedTemplateExpression(d) => d.type_arguments,
+            D::CallExpression(d) => d.type_arguments(),
+            D::NewExpression(d) => d.type_arguments(),
+            D::ExpressionWithTypeArguments(d) => d.type_arguments(),
+            D::JsxSelfClosingElement(d) => d.type_arguments(),
+            D::JsxOpeningElement(d) => d.type_arguments(),
+            D::TaggedTemplateExpression(d) => d.type_arguments(),
             _ => None,
         }
     }

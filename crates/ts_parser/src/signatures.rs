@@ -1,6 +1,8 @@
 use crate::tokens::token_is_identifier_or_keyword;
 use crate::{parse_flags, Parser, ParserFactory, ParsingContext};
-use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeId, NodeListId, SyntaxKind as K};
+use ts_ast::{
+    node_flags, FactoryMethods, JsString, NodeDataRead, NodeId, NodeListId, SyntaxKind as K,
+};
 use ts_diagnostics as diag;
 
 impl<F: ParserFactory> Parser<'_, F> {
@@ -60,8 +62,11 @@ impl<F: ParserFactory> Parser<'_, F> {
                     .new_parameter_declaration(modifiers, None, Some(name), None, ty, None);
             if let Some(modifiers) = modifiers {
                 let nodes = self.factory.read_list(modifiers).nodes();
-                let first =
-                    self.factory.read_nodes(nodes)[0].expect("modifier list contains nodes");
+                let first = self
+                    .factory
+                    .read_nodes(nodes)
+                    .at(0)
+                    .expect("modifier list contains nodes");
                 let range = self.factory.node(first).range();
                 self.parse_error_at_range(
                     range,
@@ -509,10 +514,10 @@ impl<F: ParserFactory> Parser<'_, F> {
         let optional = {
             let node = self.factory.node(ty);
             if node.kind() == K::JSDocNullableType {
-                let NodeData::JSDocNullableType(data) = node.data() else {
+                let NodeDataRead::JSDocNullableType(data) = node.data() else {
                     panic!("JSDoc nullable payload required");
                 };
-                let inner = data.r#type.expect("JSDoc nullable type has inner type");
+                let inner = data.r#type().expect("JSDoc nullable type has inner type");
                 (node.pos() == self.factory.node(inner).pos()).then_some((
                     inner,
                     node.flags(),
@@ -524,9 +529,9 @@ impl<F: ParserFactory> Parser<'_, F> {
         };
         if let Some((inner, flags, range)) = optional {
             let node = self.factory.new_optional_type_node(Some(inner));
-            self.factory.node_mut(node).set_flags(flags);
-            self.factory.node_mut(node).set_range(range);
-            self.factory.node_mut(inner).set_parent(Some(node));
+            self.factory.set_node_flags(node, flags);
+            self.factory.set_node_range(node, range);
+            self.factory.set_node_parent(inner, Some(node));
             return node;
         }
         ty

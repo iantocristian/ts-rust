@@ -1,7 +1,9 @@
 //! File-owned binding symbols. Graph links and slice/table identities do not
 //! retain storage; their enclosing bind result supplies checked resolution.
 
-use crate::{modifier_flags, symbol_flags, AstView, JsString, Node, NodeData, NodeId, NodeText};
+use crate::{
+    modifier_flags, symbol_flags, AstView, JsString, NodeAccess, NodeDataRead, NodeId, NodeText,
+};
 use std::{
     borrow::Cow,
     collections::HashMap,
@@ -37,10 +39,10 @@ pub fn is_alias_symbol_declaration(view: AstView<'_>, id: NodeId) -> Result<bool
             | K::ExportSpecifier,
         ) => Ok(true),
         Some(K::ImportClause) => Ok(node
-            .data()
+            .data_source()
             .as_import_clause()
             .expect("ImportClause payload")
-            .name
+            .name()
             .is_some()),
         Some(K::ExportAssignment) => {
             crate::expression_is_alias(view, node.expression().expect("nil alias expression"))
@@ -55,10 +57,10 @@ pub fn is_alias_symbol_declaration(view: AstView<'_>, id: NodeId) -> Result<bool
             ) {
                 crate::expression_is_alias(
                     view,
-                    node.data()
+                    node.data_source()
                         .as_binary_expression()
                         .expect("BinaryExpression payload")
-                        .right
+                        .right()
                         .expect("nil alias expression"),
                 )
             } else {
@@ -243,6 +245,12 @@ pub type SymbolTable = HashMap<JsString, Option<SymbolId>>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SymbolTableId(AuxId);
 impl SymbolTableId {
+    pub(crate) fn from_parts(arena: ArenaId, slot: u32) -> Result<Self, Error> {
+        AuxId::from_parts(arena, slot).map(Self)
+    }
+    pub(crate) fn slot(self) -> u32 {
+        self.0.slot()
+    }
     pub fn bits(self) -> u64 {
         self.0.bits()
     }
@@ -492,45 +500,45 @@ fn declaration_growth_capacity(len: usize, old: usize) -> Result<usize, Error> {
 /// The source tests the payload's promoted LocalsContainerData method, even for
 /// an open kind/payload mismatch. Token(SourceFile) therefore has no locals.
 // port: tsc/internal/ast/ast.go:IsLocalsContainer
-pub fn is_locals_container(node: &Node) -> bool {
+pub fn is_locals_container(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.data(),
-        NodeData::SourceFile(_)
-            | NodeData::ForStatement(_)
-            | NodeData::ForInOrOfStatement(_)
-            | NodeData::SwitchStatement(_)
-            | NodeData::CaseBlock(_)
-            | NodeData::TryStatement(_)
-            | NodeData::CatchClause(_)
-            | NodeData::Block(_)
-            | NodeData::FunctionDeclaration(_)
-            | NodeData::ClassDeclaration(_)
-            | NodeData::ClassExpression(_)
-            | NodeData::TypeAliasDeclaration(_)
-            | NodeData::CallSignatureDeclaration(_)
-            | NodeData::ConstructSignatureDeclaration(_)
-            | NodeData::ConstructorDeclaration(_)
-            | NodeData::GetAccessorDeclaration(_)
-            | NodeData::SetAccessorDeclaration(_)
-            | NodeData::IndexSignatureDeclaration(_)
-            | NodeData::MethodSignatureDeclaration(_)
-            | NodeData::MethodDeclaration(_)
-            | NodeData::ClassStaticBlockDeclaration(_)
-            | NodeData::ArrowFunction(_)
-            | NodeData::FunctionExpression(_)
-            | NodeData::ConditionalTypeNode(_)
-            | NodeData::MappedTypeNode(_)
-            | NodeData::FunctionTypeNode(_)
-            | NodeData::ConstructorTypeNode(_)
-            | NodeData::JSDocSignature(_)
-            | NodeData::ModuleDeclaration(_)
+        NodeDataRead::SourceFile(_)
+            | NodeDataRead::ForStatement(_)
+            | NodeDataRead::ForInOrOfStatement(_)
+            | NodeDataRead::SwitchStatement(_)
+            | NodeDataRead::CaseBlock(_)
+            | NodeDataRead::TryStatement(_)
+            | NodeDataRead::CatchClause(_)
+            | NodeDataRead::Block(_)
+            | NodeDataRead::FunctionDeclaration(_)
+            | NodeDataRead::ClassDeclaration(_)
+            | NodeDataRead::ClassExpression(_)
+            | NodeDataRead::TypeAliasDeclaration(_)
+            | NodeDataRead::CallSignatureDeclaration(_)
+            | NodeDataRead::ConstructSignatureDeclaration(_)
+            | NodeDataRead::ConstructorDeclaration(_)
+            | NodeDataRead::GetAccessorDeclaration(_)
+            | NodeDataRead::SetAccessorDeclaration(_)
+            | NodeDataRead::IndexSignatureDeclaration(_)
+            | NodeDataRead::MethodSignatureDeclaration(_)
+            | NodeDataRead::MethodDeclaration(_)
+            | NodeDataRead::ClassStaticBlockDeclaration(_)
+            | NodeDataRead::ArrowFunction(_)
+            | NodeDataRead::FunctionExpression(_)
+            | NodeDataRead::ConditionalTypeNode(_)
+            | NodeDataRead::MappedTypeNode(_)
+            | NodeDataRead::FunctionTypeNode(_)
+            | NodeDataRead::ConstructorTypeNode(_)
+            | NodeDataRead::JSDocSignature(_)
+            | NodeDataRead::ModuleDeclaration(_)
     )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AstBuilder, Factory, FactoryMethods, RuntimeFactory, SyntaxKind};
+    use crate::{AstBuilder, Factory, FactoryMethods, Node, RuntimeFactory, SyntaxKind};
     use ts_arena::SymbolArena;
     use ts_jsstring::SourceText;
 

@@ -2620,239 +2620,261 @@ pub trait VisitorMethods: VisitContext {
         let visit: fn(&mut Self, NodeId) -> NodeId = {
             let original = self.node(original_id);
             match original.data() {
-                NodeData::QualifiedName(_) => Self::visit_each_child_qualified_name,
-                NodeData::ComputedPropertyName(_) => Self::visit_each_child_computed_property_name,
-                NodeData::Decorator(_) => Self::visit_each_child_decorator,
-                NodeData::IfStatement(_) => Self::visit_each_child_if_statement,
-                NodeData::DoStatement(_) => Self::visit_each_child_do_statement,
-                NodeData::WhileStatement(_) => Self::visit_each_child_while_statement,
-                NodeData::ForStatement(_) => Self::visit_each_child_for_statement,
-                NodeData::ForInOrOfStatement(_) => Self::visit_each_child_for_in_or_of_statement,
-                NodeData::BreakStatement(_) => Self::visit_each_child_break_statement,
-                NodeData::ContinueStatement(_) => Self::visit_each_child_continue_statement,
-                NodeData::ReturnStatement(_) => Self::visit_each_child_return_statement,
-                NodeData::WithStatement(_) => Self::visit_each_child_with_statement,
-                NodeData::SwitchStatement(_) => Self::visit_each_child_switch_statement,
-                NodeData::CaseBlock(_) => Self::visit_each_child_case_block,
-                NodeData::CaseOrDefaultClause(_) => Self::visit_each_child_case_or_default_clause,
-                NodeData::ThrowStatement(_) => Self::visit_each_child_throw_statement,
-                NodeData::TryStatement(_) => Self::visit_each_child_try_statement,
-                NodeData::CatchClause(_) => Self::visit_each_child_catch_clause,
-                NodeData::LabeledStatement(_) => Self::visit_each_child_labeled_statement,
-                NodeData::ExpressionStatement(_) => Self::visit_each_child_expression_statement,
-                NodeData::Block(_) => Self::visit_each_child_block,
-                NodeData::VariableStatement(_) => Self::visit_each_child_variable_statement,
-                NodeData::VariableDeclaration(_) => Self::visit_each_child_variable_declaration,
-                NodeData::VariableDeclarationList(_) => {
+                NodeDataRead::QualifiedName(_) => Self::visit_each_child_qualified_name,
+                NodeDataRead::ComputedPropertyName(_) => {
+                    Self::visit_each_child_computed_property_name
+                }
+                NodeDataRead::Decorator(_) => Self::visit_each_child_decorator,
+                NodeDataRead::IfStatement(_) => Self::visit_each_child_if_statement,
+                NodeDataRead::DoStatement(_) => Self::visit_each_child_do_statement,
+                NodeDataRead::WhileStatement(_) => Self::visit_each_child_while_statement,
+                NodeDataRead::ForStatement(_) => Self::visit_each_child_for_statement,
+                NodeDataRead::ForInOrOfStatement(_) => {
+                    Self::visit_each_child_for_in_or_of_statement
+                }
+                NodeDataRead::BreakStatement(_) => Self::visit_each_child_break_statement,
+                NodeDataRead::ContinueStatement(_) => Self::visit_each_child_continue_statement,
+                NodeDataRead::ReturnStatement(_) => Self::visit_each_child_return_statement,
+                NodeDataRead::WithStatement(_) => Self::visit_each_child_with_statement,
+                NodeDataRead::SwitchStatement(_) => Self::visit_each_child_switch_statement,
+                NodeDataRead::CaseBlock(_) => Self::visit_each_child_case_block,
+                NodeDataRead::CaseOrDefaultClause(_) => {
+                    Self::visit_each_child_case_or_default_clause
+                }
+                NodeDataRead::ThrowStatement(_) => Self::visit_each_child_throw_statement,
+                NodeDataRead::TryStatement(_) => Self::visit_each_child_try_statement,
+                NodeDataRead::CatchClause(_) => Self::visit_each_child_catch_clause,
+                NodeDataRead::LabeledStatement(_) => Self::visit_each_child_labeled_statement,
+                NodeDataRead::ExpressionStatement(_) => Self::visit_each_child_expression_statement,
+                NodeDataRead::Block(_) => Self::visit_each_child_block,
+                NodeDataRead::VariableStatement(_) => Self::visit_each_child_variable_statement,
+                NodeDataRead::VariableDeclaration(_) => Self::visit_each_child_variable_declaration,
+                NodeDataRead::VariableDeclarationList(_) => {
                     Self::visit_each_child_variable_declaration_list
                 }
-                NodeData::BindingPattern(_) => Self::visit_each_child_binding_pattern,
-                NodeData::ParameterDeclaration(_) => Self::visit_each_child_parameter_declaration,
-                NodeData::BindingElement(_) => Self::visit_each_child_binding_element,
-                NodeData::MissingDeclaration(_) => Self::visit_each_child_missing_declaration,
-                NodeData::FunctionDeclaration(_) => Self::visit_each_child_function_declaration,
-                NodeData::ClassDeclaration(_) => Self::visit_each_child_class_declaration,
-                NodeData::ClassExpression(_) => Self::visit_each_child_class_expression,
-                NodeData::HeritageClause(_) => Self::visit_each_child_heritage_clause,
-                NodeData::InterfaceDeclaration(_) => Self::visit_each_child_interface_declaration,
-                NodeData::TypeAliasDeclaration(_) => Self::visit_each_child_type_alias_declaration,
-                NodeData::EnumMember(_) => Self::visit_each_child_enum_member,
-                NodeData::EnumDeclaration(_) => Self::visit_each_child_enum_declaration,
-                NodeData::ModuleBlock(_) => Self::visit_each_child_module_block,
-                NodeData::ImportDeclaration(_) => Self::visit_each_child_import_declaration,
-                NodeData::ExternalModuleReference(_) => {
+                NodeDataRead::BindingPattern(_) => Self::visit_each_child_binding_pattern,
+                NodeDataRead::ParameterDeclaration(_) => {
+                    Self::visit_each_child_parameter_declaration
+                }
+                NodeDataRead::BindingElement(_) => Self::visit_each_child_binding_element,
+                NodeDataRead::MissingDeclaration(_) => Self::visit_each_child_missing_declaration,
+                NodeDataRead::FunctionDeclaration(_) => Self::visit_each_child_function_declaration,
+                NodeDataRead::ClassDeclaration(_) => Self::visit_each_child_class_declaration,
+                NodeDataRead::ClassExpression(_) => Self::visit_each_child_class_expression,
+                NodeDataRead::HeritageClause(_) => Self::visit_each_child_heritage_clause,
+                NodeDataRead::InterfaceDeclaration(_) => {
+                    Self::visit_each_child_interface_declaration
+                }
+                NodeDataRead::TypeAliasDeclaration(_) => {
+                    Self::visit_each_child_type_alias_declaration
+                }
+                NodeDataRead::EnumMember(_) => Self::visit_each_child_enum_member,
+                NodeDataRead::EnumDeclaration(_) => Self::visit_each_child_enum_declaration,
+                NodeDataRead::ModuleBlock(_) => Self::visit_each_child_module_block,
+                NodeDataRead::ImportDeclaration(_) => Self::visit_each_child_import_declaration,
+                NodeDataRead::ExternalModuleReference(_) => {
                     Self::visit_each_child_external_module_reference
                 }
-                NodeData::NamespaceImport(_) => Self::visit_each_child_namespace_import,
-                NodeData::NamedImports(_) => Self::visit_each_child_named_imports,
-                NodeData::ExportAssignment(_) => Self::visit_each_child_export_assignment,
-                NodeData::NamespaceExportDeclaration(_) => {
+                NodeDataRead::NamespaceImport(_) => Self::visit_each_child_namespace_import,
+                NodeDataRead::NamedImports(_) => Self::visit_each_child_named_imports,
+                NodeDataRead::ExportAssignment(_) => Self::visit_each_child_export_assignment,
+                NodeDataRead::NamespaceExportDeclaration(_) => {
                     Self::visit_each_child_namespace_export_declaration
                 }
-                NodeData::NamespaceExport(_) => Self::visit_each_child_namespace_export,
-                NodeData::NamedExports(_) => Self::visit_each_child_named_exports,
-                NodeData::ExportSpecifier(_) => Self::visit_each_child_export_specifier,
-                NodeData::CallSignatureDeclaration(_) => {
+                NodeDataRead::NamespaceExport(_) => Self::visit_each_child_namespace_export,
+                NodeDataRead::NamedExports(_) => Self::visit_each_child_named_exports,
+                NodeDataRead::ExportSpecifier(_) => Self::visit_each_child_export_specifier,
+                NodeDataRead::CallSignatureDeclaration(_) => {
                     Self::visit_each_child_call_signature_declaration
                 }
-                NodeData::ConstructSignatureDeclaration(_) => {
+                NodeDataRead::ConstructSignatureDeclaration(_) => {
                     Self::visit_each_child_construct_signature_declaration
                 }
-                NodeData::ConstructorDeclaration(_) => {
+                NodeDataRead::ConstructorDeclaration(_) => {
                     Self::visit_each_child_constructor_declaration
                 }
-                NodeData::GetAccessorDeclaration(_) => {
+                NodeDataRead::GetAccessorDeclaration(_) => {
                     Self::visit_each_child_get_accessor_declaration
                 }
-                NodeData::SetAccessorDeclaration(_) => {
+                NodeDataRead::SetAccessorDeclaration(_) => {
                     Self::visit_each_child_set_accessor_declaration
                 }
-                NodeData::IndexSignatureDeclaration(_) => {
+                NodeDataRead::IndexSignatureDeclaration(_) => {
                     Self::visit_each_child_index_signature_declaration
                 }
-                NodeData::MethodSignatureDeclaration(_) => {
+                NodeDataRead::MethodSignatureDeclaration(_) => {
                     Self::visit_each_child_method_signature_declaration
                 }
-                NodeData::MethodDeclaration(_) => Self::visit_each_child_method_declaration,
-                NodeData::PropertySignatureDeclaration(_) => {
+                NodeDataRead::MethodDeclaration(_) => Self::visit_each_child_method_declaration,
+                NodeDataRead::PropertySignatureDeclaration(_) => {
                     Self::visit_each_child_property_signature_declaration
                 }
-                NodeData::PropertyDeclaration(_) => Self::visit_each_child_property_declaration,
-                NodeData::ClassStaticBlockDeclaration(_) => {
+                NodeDataRead::PropertyDeclaration(_) => Self::visit_each_child_property_declaration,
+                NodeDataRead::ClassStaticBlockDeclaration(_) => {
                     Self::visit_each_child_class_static_block_declaration
                 }
-                NodeData::BinaryExpression(_) => Self::visit_each_child_binary_expression,
-                NodeData::PrefixUnaryExpression(_) => {
+                NodeDataRead::BinaryExpression(_) => Self::visit_each_child_binary_expression,
+                NodeDataRead::PrefixUnaryExpression(_) => {
                     Self::visit_each_child_prefix_unary_expression
                 }
-                NodeData::PostfixUnaryExpression(_) => {
+                NodeDataRead::PostfixUnaryExpression(_) => {
                     Self::visit_each_child_postfix_unary_expression
                 }
-                NodeData::YieldExpression(_) => Self::visit_each_child_yield_expression,
-                NodeData::ArrowFunction(_) => Self::visit_each_child_arrow_function,
-                NodeData::FunctionExpression(_) => Self::visit_each_child_function_expression,
-                NodeData::AsExpression(_) => Self::visit_each_child_as_expression,
-                NodeData::SatisfiesExpression(_) => Self::visit_each_child_satisfies_expression,
-                NodeData::ConditionalExpression(_) => Self::visit_each_child_conditional_expression,
-                NodeData::PropertyAccessExpression(_) => {
+                NodeDataRead::YieldExpression(_) => Self::visit_each_child_yield_expression,
+                NodeDataRead::ArrowFunction(_) => Self::visit_each_child_arrow_function,
+                NodeDataRead::FunctionExpression(_) => Self::visit_each_child_function_expression,
+                NodeDataRead::AsExpression(_) => Self::visit_each_child_as_expression,
+                NodeDataRead::SatisfiesExpression(_) => Self::visit_each_child_satisfies_expression,
+                NodeDataRead::ConditionalExpression(_) => {
+                    Self::visit_each_child_conditional_expression
+                }
+                NodeDataRead::PropertyAccessExpression(_) => {
                     Self::visit_each_child_property_access_expression
                 }
-                NodeData::ElementAccessExpression(_) => {
+                NodeDataRead::ElementAccessExpression(_) => {
                     Self::visit_each_child_element_access_expression
                 }
-                NodeData::CallExpression(_) => Self::visit_each_child_call_expression,
-                NodeData::NewExpression(_) => Self::visit_each_child_new_expression,
-                NodeData::MetaProperty(_) => Self::visit_each_child_meta_property,
-                NodeData::NonNullExpression(_) => Self::visit_each_child_non_null_expression,
-                NodeData::SpreadElement(_) => Self::visit_each_child_spread_element,
-                NodeData::TemplateExpression(_) => Self::visit_each_child_template_expression,
-                NodeData::TemplateSpan(_) => Self::visit_each_child_template_span,
-                NodeData::TaggedTemplateExpression(_) => {
+                NodeDataRead::CallExpression(_) => Self::visit_each_child_call_expression,
+                NodeDataRead::NewExpression(_) => Self::visit_each_child_new_expression,
+                NodeDataRead::MetaProperty(_) => Self::visit_each_child_meta_property,
+                NodeDataRead::NonNullExpression(_) => Self::visit_each_child_non_null_expression,
+                NodeDataRead::SpreadElement(_) => Self::visit_each_child_spread_element,
+                NodeDataRead::TemplateExpression(_) => Self::visit_each_child_template_expression,
+                NodeDataRead::TemplateSpan(_) => Self::visit_each_child_template_span,
+                NodeDataRead::TaggedTemplateExpression(_) => {
                     Self::visit_each_child_tagged_template_expression
                 }
-                NodeData::ParenthesizedExpression(_) => {
+                NodeDataRead::ParenthesizedExpression(_) => {
                     Self::visit_each_child_parenthesized_expression
                 }
-                NodeData::ArrayLiteralExpression(_) => {
+                NodeDataRead::ArrayLiteralExpression(_) => {
                     Self::visit_each_child_array_literal_expression
                 }
-                NodeData::ObjectLiteralExpression(_) => {
+                NodeDataRead::ObjectLiteralExpression(_) => {
                     Self::visit_each_child_object_literal_expression
                 }
-                NodeData::SpreadAssignment(_) => Self::visit_each_child_spread_assignment,
-                NodeData::PropertyAssignment(_) => Self::visit_each_child_property_assignment,
-                NodeData::ShorthandPropertyAssignment(_) => {
+                NodeDataRead::SpreadAssignment(_) => Self::visit_each_child_spread_assignment,
+                NodeDataRead::PropertyAssignment(_) => Self::visit_each_child_property_assignment,
+                NodeDataRead::ShorthandPropertyAssignment(_) => {
                     Self::visit_each_child_shorthand_property_assignment
                 }
-                NodeData::DeleteExpression(_) => Self::visit_each_child_delete_expression,
-                NodeData::TypeOfExpression(_) => Self::visit_each_child_type_of_expression,
-                NodeData::VoidExpression(_) => Self::visit_each_child_void_expression,
-                NodeData::AwaitExpression(_) => Self::visit_each_child_await_expression,
-                NodeData::TypeAssertion(_) => Self::visit_each_child_type_assertion,
-                NodeData::UnionTypeNode(_) => Self::visit_each_child_union_type_node,
-                NodeData::IntersectionTypeNode(_) => Self::visit_each_child_intersection_type_node,
-                NodeData::ConditionalTypeNode(_) => Self::visit_each_child_conditional_type_node,
-                NodeData::TypeOperatorNode(_) => Self::visit_each_child_type_operator_node,
-                NodeData::InferTypeNode(_) => Self::visit_each_child_infer_type_node,
-                NodeData::ArrayTypeNode(_) => Self::visit_each_child_array_type_node,
-                NodeData::IndexedAccessTypeNode(_) => {
+                NodeDataRead::DeleteExpression(_) => Self::visit_each_child_delete_expression,
+                NodeDataRead::TypeOfExpression(_) => Self::visit_each_child_type_of_expression,
+                NodeDataRead::VoidExpression(_) => Self::visit_each_child_void_expression,
+                NodeDataRead::AwaitExpression(_) => Self::visit_each_child_await_expression,
+                NodeDataRead::TypeAssertion(_) => Self::visit_each_child_type_assertion,
+                NodeDataRead::UnionTypeNode(_) => Self::visit_each_child_union_type_node,
+                NodeDataRead::IntersectionTypeNode(_) => {
+                    Self::visit_each_child_intersection_type_node
+                }
+                NodeDataRead::ConditionalTypeNode(_) => {
+                    Self::visit_each_child_conditional_type_node
+                }
+                NodeDataRead::TypeOperatorNode(_) => Self::visit_each_child_type_operator_node,
+                NodeDataRead::InferTypeNode(_) => Self::visit_each_child_infer_type_node,
+                NodeDataRead::ArrayTypeNode(_) => Self::visit_each_child_array_type_node,
+                NodeDataRead::IndexedAccessTypeNode(_) => {
                     Self::visit_each_child_indexed_access_type_node
                 }
-                NodeData::TypeReferenceNode(_) => Self::visit_each_child_type_reference_node,
-                NodeData::ExpressionWithTypeArguments(_) => {
+                NodeDataRead::TypeReferenceNode(_) => Self::visit_each_child_type_reference_node,
+                NodeDataRead::ExpressionWithTypeArguments(_) => {
                     Self::visit_each_child_expression_with_type_arguments
                 }
-                NodeData::LiteralTypeNode(_) => Self::visit_each_child_literal_type_node,
-                NodeData::TypePredicateNode(_) => Self::visit_each_child_type_predicate_node,
-                NodeData::ImportAttribute(_) => Self::visit_each_child_import_attribute,
-                NodeData::ImportAttributes(_) => Self::visit_each_child_import_attributes,
-                NodeData::TypeQueryNode(_) => Self::visit_each_child_type_query_node,
-                NodeData::MappedTypeNode(_) => Self::visit_each_child_mapped_type_node,
-                NodeData::TypeLiteralNode(_) => Self::visit_each_child_type_literal_node,
-                NodeData::TupleTypeNode(_) => Self::visit_each_child_tuple_type_node,
-                NodeData::NamedTupleMember(_) => Self::visit_each_child_named_tuple_member,
-                NodeData::OptionalTypeNode(_) => Self::visit_each_child_optional_type_node,
-                NodeData::RestTypeNode(_) => Self::visit_each_child_rest_type_node,
-                NodeData::ParenthesizedTypeNode(_) => {
+                NodeDataRead::LiteralTypeNode(_) => Self::visit_each_child_literal_type_node,
+                NodeDataRead::TypePredicateNode(_) => Self::visit_each_child_type_predicate_node,
+                NodeDataRead::ImportAttribute(_) => Self::visit_each_child_import_attribute,
+                NodeDataRead::ImportAttributes(_) => Self::visit_each_child_import_attributes,
+                NodeDataRead::TypeQueryNode(_) => Self::visit_each_child_type_query_node,
+                NodeDataRead::MappedTypeNode(_) => Self::visit_each_child_mapped_type_node,
+                NodeDataRead::TypeLiteralNode(_) => Self::visit_each_child_type_literal_node,
+                NodeDataRead::TupleTypeNode(_) => Self::visit_each_child_tuple_type_node,
+                NodeDataRead::NamedTupleMember(_) => Self::visit_each_child_named_tuple_member,
+                NodeDataRead::OptionalTypeNode(_) => Self::visit_each_child_optional_type_node,
+                NodeDataRead::RestTypeNode(_) => Self::visit_each_child_rest_type_node,
+                NodeDataRead::ParenthesizedTypeNode(_) => {
                     Self::visit_each_child_parenthesized_type_node
                 }
-                NodeData::FunctionTypeNode(_) => Self::visit_each_child_function_type_node,
-                NodeData::ConstructorTypeNode(_) => Self::visit_each_child_constructor_type_node,
-                NodeData::TemplateLiteralTypeNode(_) => {
+                NodeDataRead::FunctionTypeNode(_) => Self::visit_each_child_function_type_node,
+                NodeDataRead::ConstructorTypeNode(_) => {
+                    Self::visit_each_child_constructor_type_node
+                }
+                NodeDataRead::TemplateLiteralTypeNode(_) => {
                     Self::visit_each_child_template_literal_type_node
                 }
-                NodeData::TemplateLiteralTypeSpan(_) => {
+                NodeDataRead::TemplateLiteralTypeSpan(_) => {
                     Self::visit_each_child_template_literal_type_span
                 }
-                NodeData::SyntheticExpression(_) => {
+                NodeDataRead::SyntheticExpression(_) => {
                     panic!("SyntheticExpression transformation requires checker-owned Type")
                 }
-                NodeData::PartiallyEmittedExpression(_) => {
+                NodeDataRead::PartiallyEmittedExpression(_) => {
                     Self::visit_each_child_partially_emitted_expression
                 }
-                NodeData::JsxElement(_) => Self::visit_each_child_jsx_element,
-                NodeData::JsxAttributes(_) => Self::visit_each_child_jsx_attributes,
-                NodeData::JsxNamespacedName(_) => Self::visit_each_child_jsx_namespaced_name,
-                NodeData::JsxOpeningElement(_) => Self::visit_each_child_jsx_opening_element,
-                NodeData::JsxSelfClosingElement(_) => {
+                NodeDataRead::JsxElement(_) => Self::visit_each_child_jsx_element,
+                NodeDataRead::JsxAttributes(_) => Self::visit_each_child_jsx_attributes,
+                NodeDataRead::JsxNamespacedName(_) => Self::visit_each_child_jsx_namespaced_name,
+                NodeDataRead::JsxOpeningElement(_) => Self::visit_each_child_jsx_opening_element,
+                NodeDataRead::JsxSelfClosingElement(_) => {
                     Self::visit_each_child_jsx_self_closing_element
                 }
-                NodeData::JsxFragment(_) => Self::visit_each_child_jsx_fragment,
-                NodeData::JsxAttribute(_) => Self::visit_each_child_jsx_attribute,
-                NodeData::JsxSpreadAttribute(_) => Self::visit_each_child_jsx_spread_attribute,
-                NodeData::JsxClosingElement(_) => Self::visit_each_child_jsx_closing_element,
-                NodeData::JsxExpression(_) => Self::visit_each_child_jsx_expression,
-                NodeData::SyntaxList(_) => Self::visit_each_child_syntax_list,
-                NodeData::JSDoc(_) => Self::visit_each_child_js_doc,
-                NodeData::JSDocTypeExpression(_) => Self::visit_each_child_js_doc_type_expression,
-                NodeData::JSDocNonNullableType(_) => {
+                NodeDataRead::JsxFragment(_) => Self::visit_each_child_jsx_fragment,
+                NodeDataRead::JsxAttribute(_) => Self::visit_each_child_jsx_attribute,
+                NodeDataRead::JsxSpreadAttribute(_) => Self::visit_each_child_jsx_spread_attribute,
+                NodeDataRead::JsxClosingElement(_) => Self::visit_each_child_jsx_closing_element,
+                NodeDataRead::JsxExpression(_) => Self::visit_each_child_jsx_expression,
+                NodeDataRead::SyntaxList(_) => Self::visit_each_child_syntax_list,
+                NodeDataRead::JSDoc(_) => Self::visit_each_child_js_doc,
+                NodeDataRead::JSDocTypeExpression(_) => {
+                    Self::visit_each_child_js_doc_type_expression
+                }
+                NodeDataRead::JSDocNonNullableType(_) => {
                     Self::visit_each_child_js_doc_non_nullable_type
                 }
-                NodeData::JSDocNullableType(_) => Self::visit_each_child_js_doc_nullable_type,
-                NodeData::JSDocVariadicType(_) => Self::visit_each_child_js_doc_variadic_type,
-                NodeData::JSDocOptionalType(_) => Self::visit_each_child_js_doc_optional_type,
-                NodeData::JSDocTypeTag(_) => Self::visit_each_child_js_doc_type_tag,
-                NodeData::JSDocUnknownTag(_) => Self::visit_each_child_js_doc_unknown_tag,
-                NodeData::JSDocTemplateTag(_) => Self::visit_each_child_js_doc_template_tag,
-                NodeData::JSDocReturnTag(_) => Self::visit_each_child_js_doc_return_tag,
-                NodeData::JSDocPublicTag(_) => Self::visit_each_child_js_doc_public_tag,
-                NodeData::JSDocPrivateTag(_) => Self::visit_each_child_js_doc_private_tag,
-                NodeData::JSDocProtectedTag(_) => Self::visit_each_child_js_doc_protected_tag,
-                NodeData::JSDocReadonlyTag(_) => Self::visit_each_child_js_doc_readonly_tag,
-                NodeData::JSDocOverrideTag(_) => Self::visit_each_child_js_doc_override_tag,
-                NodeData::JSDocDeprecatedTag(_) => Self::visit_each_child_js_doc_deprecated_tag,
-                NodeData::JSDocSeeTag(_) => Self::visit_each_child_js_doc_see_tag,
-                NodeData::JSDocImplementsTag(_) => Self::visit_each_child_js_doc_implements_tag,
-                NodeData::JSDocAugmentsTag(_) => Self::visit_each_child_js_doc_augments_tag,
-                NodeData::JSDocSatisfiesTag(_) => Self::visit_each_child_js_doc_satisfies_tag,
-                NodeData::JSDocThrowsTag(_) => Self::visit_each_child_js_doc_throws_tag,
-                NodeData::JSDocThisTag(_) => Self::visit_each_child_js_doc_this_tag,
-                NodeData::JSDocImportTag(_) => Self::visit_each_child_js_doc_import_tag,
-                NodeData::JSDocCallbackTag(_) => Self::visit_each_child_js_doc_callback_tag,
-                NodeData::JSDocOverloadTag(_) => Self::visit_each_child_js_doc_overload_tag,
-                NodeData::JSDocTypedefTag(_) => Self::visit_each_child_js_doc_typedef_tag,
-                NodeData::JSDocSignature(_) => Self::visit_each_child_js_doc_signature,
-                NodeData::JSDocNameReference(_) => Self::visit_each_child_js_doc_name_reference,
-                NodeData::SourceFile(_) => Self::visit_each_child_source_file,
-                NodeData::ModuleDeclaration(_) => Self::visit_each_child_module_declaration,
-                NodeData::ImportEqualsDeclaration(_) => {
+                NodeDataRead::JSDocNullableType(_) => Self::visit_each_child_js_doc_nullable_type,
+                NodeDataRead::JSDocVariadicType(_) => Self::visit_each_child_js_doc_variadic_type,
+                NodeDataRead::JSDocOptionalType(_) => Self::visit_each_child_js_doc_optional_type,
+                NodeDataRead::JSDocTypeTag(_) => Self::visit_each_child_js_doc_type_tag,
+                NodeDataRead::JSDocUnknownTag(_) => Self::visit_each_child_js_doc_unknown_tag,
+                NodeDataRead::JSDocTemplateTag(_) => Self::visit_each_child_js_doc_template_tag,
+                NodeDataRead::JSDocReturnTag(_) => Self::visit_each_child_js_doc_return_tag,
+                NodeDataRead::JSDocPublicTag(_) => Self::visit_each_child_js_doc_public_tag,
+                NodeDataRead::JSDocPrivateTag(_) => Self::visit_each_child_js_doc_private_tag,
+                NodeDataRead::JSDocProtectedTag(_) => Self::visit_each_child_js_doc_protected_tag,
+                NodeDataRead::JSDocReadonlyTag(_) => Self::visit_each_child_js_doc_readonly_tag,
+                NodeDataRead::JSDocOverrideTag(_) => Self::visit_each_child_js_doc_override_tag,
+                NodeDataRead::JSDocDeprecatedTag(_) => Self::visit_each_child_js_doc_deprecated_tag,
+                NodeDataRead::JSDocSeeTag(_) => Self::visit_each_child_js_doc_see_tag,
+                NodeDataRead::JSDocImplementsTag(_) => Self::visit_each_child_js_doc_implements_tag,
+                NodeDataRead::JSDocAugmentsTag(_) => Self::visit_each_child_js_doc_augments_tag,
+                NodeDataRead::JSDocSatisfiesTag(_) => Self::visit_each_child_js_doc_satisfies_tag,
+                NodeDataRead::JSDocThrowsTag(_) => Self::visit_each_child_js_doc_throws_tag,
+                NodeDataRead::JSDocThisTag(_) => Self::visit_each_child_js_doc_this_tag,
+                NodeDataRead::JSDocImportTag(_) => Self::visit_each_child_js_doc_import_tag,
+                NodeDataRead::JSDocCallbackTag(_) => Self::visit_each_child_js_doc_callback_tag,
+                NodeDataRead::JSDocOverloadTag(_) => Self::visit_each_child_js_doc_overload_tag,
+                NodeDataRead::JSDocTypedefTag(_) => Self::visit_each_child_js_doc_typedef_tag,
+                NodeDataRead::JSDocSignature(_) => Self::visit_each_child_js_doc_signature,
+                NodeDataRead::JSDocNameReference(_) => Self::visit_each_child_js_doc_name_reference,
+                NodeDataRead::SourceFile(_) => Self::visit_each_child_source_file,
+                NodeDataRead::ModuleDeclaration(_) => Self::visit_each_child_module_declaration,
+                NodeDataRead::ImportEqualsDeclaration(_) => {
                     Self::visit_each_child_import_equals_declaration
                 }
-                NodeData::ExportDeclaration(_) => Self::visit_each_child_export_declaration,
-                NodeData::ImportTypeNode(_) => Self::visit_each_child_import_type_node,
-                NodeData::ImportClause(_) => Self::visit_each_child_import_clause,
-                NodeData::ImportSpecifier(_) => Self::visit_each_child_import_specifier,
-                NodeData::JSDocLink(_) => Self::visit_each_child_js_doc_link,
-                NodeData::JSDocLinkPlain(_) => Self::visit_each_child_js_doc_link_plain,
-                NodeData::JSDocLinkCode(_) => Self::visit_each_child_js_doc_link_code,
-                NodeData::TypeParameterDeclaration(_) => {
+                NodeDataRead::ExportDeclaration(_) => Self::visit_each_child_export_declaration,
+                NodeDataRead::ImportTypeNode(_) => Self::visit_each_child_import_type_node,
+                NodeDataRead::ImportClause(_) => Self::visit_each_child_import_clause,
+                NodeDataRead::ImportSpecifier(_) => Self::visit_each_child_import_specifier,
+                NodeDataRead::JSDocLink(_) => Self::visit_each_child_js_doc_link,
+                NodeDataRead::JSDocLinkPlain(_) => Self::visit_each_child_js_doc_link_plain,
+                NodeDataRead::JSDocLinkCode(_) => Self::visit_each_child_js_doc_link_code,
+                NodeDataRead::TypeParameterDeclaration(_) => {
                     Self::visit_each_child_type_parameter_declaration
                 }
-                NodeData::SyntheticReferenceExpression(_) => {
+                NodeDataRead::SyntheticReferenceExpression(_) => {
                     Self::visit_each_child_synthetic_reference_expression
                 }
-                NodeData::JSDocTypeLiteral(_) => Self::visit_each_child_js_doc_type_literal,
-                NodeData::JSDocParameterOrPropertyTag(_) => {
+                NodeDataRead::JSDocTypeLiteral(_) => Self::visit_each_child_js_doc_type_literal,
+                NodeDataRead::JSDocParameterOrPropertyTag(_) => {
                     Self::visit_each_child_js_doc_parameter_or_property_tag
                 }
                 _ => return original_id,

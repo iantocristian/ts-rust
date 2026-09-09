@@ -1,5 +1,13 @@
 # S07 CPU diagnosis
 
+The adapters below preserve the original S07 published-file binding path. S07-bis
+now uses consuming parse → bind → publish on eligible files, so these adapters
+must not be used to attribute the current production path without updating and
+revalidating them. The first compact-storage diagnosis instead samples the exact
+frozen normal benchmark executable; see its
+[result record](../../../docs/S07-bis-compact-storage.md). That capture has no
+explicit phase wrappers and makes no exact exclusive phase-attribution claim.
+
 These adapters profile the frozen parse-and-bind workload at one and eight
 workers. They retain the benchmark's per-file parse → publish → bind order,
 bounded round-robin queues, and all completed file roots through the endpoint.

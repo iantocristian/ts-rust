@@ -461,7 +461,7 @@ fn emit_children(
 fn emit_predicate(code: &mut String, scope: &mut BTreeSet<String>, name: &str, kinds: &[&str]) {
     mapped(code, scope, "", &format!("Is{name}"));
     code.push_str(&format!(
-        "pub fn is_{}(node: &Node) -> bool {{ matches!(node.kind().known(), Some({})) }}\n",
+        "pub fn is_{}(node: &(impl NodeAccess + ?Sized)) -> bool {{ matches!(node.kind().known(), Some({})) }}\n",
         snake(name),
         kinds
             .iter()
@@ -591,16 +591,15 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
         let name = string(node, "name")?;
         if !flag(node, "handWritten") && name != "SyntheticExpression" {
             factory.push_str(&format!(
-                "                NodeData::{name}(_) => Self::clone_{},\n",
+                "                NodeDataRead::{name}(_) => Self::clone_{},\n",
                 snake(name)
             ));
         }
     }
     factory.push_str("                _ => return None,\n            }\n        };\n        Some(clone(self, original_id))\n    }\n}\nimpl<T: Factory + ?Sized> FactoryMethods for T {}\n");
     transform.push_str("    fn visit_each_child_generated(&mut self, original_id: NodeId) -> NodeId {\n        let visit: fn(&mut Self, NodeId) -> NodeId = {\n            let original = self.node(original_id);\n            match original.data() {\n");
-    runtime.push_str("impl Node {\n");
     mapped(&mut runtime, &mut scope, "Node", "ForEachChild");
-    runtime.push_str("    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match self.kind().known() {\n");
+    runtime.push_str("pub fn for_each_child_generated(node: &(impl NodeAccess + ?Sized), visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match node.kind().known() {\n");
     for node in nodes {
         let name = string(node, "name")?;
         let child = members(node)?.iter().any(|m| flag(m, "child"));
@@ -615,17 +614,17 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
                 .collect::<Vec<_>>()
                 .join(" | ")
         );
-        runtime.push_str(&format!("            {pattern} => self.data().as_{}().expect(\"{name} kind requires {name} payload\").for_each_child(visitor),\n",snake(name)));
+        runtime.push_str(&format!("            {pattern} => node.data_source().as_{}().expect(\"{name} kind requires {name} payload\").for_each_child(visitor),\n",snake(name)));
         if name == "SyntheticExpression" {
-            transform.push_str(&format!("                NodeData::{name}(_) => panic!(\"SyntheticExpression transformation requires checker-owned Type\"),\n"));
+            transform.push_str(&format!("                NodeDataRead::{name}(_) => panic!(\"SyntheticExpression transformation requires checker-owned Type\"),\n"));
         } else {
             transform.push_str(&format!(
-                "                NodeData::{name}(_) => Self::visit_each_child_{},\n",
+                "                NodeDataRead::{name}(_) => Self::visit_each_child_{},\n",
                 snake(name)
             ));
         }
     }
-    runtime.push_str("            _ => ControlFlow::Continue(()),\n        }\n    }\n}\n");
+    runtime.push_str("            _ => ControlFlow::Continue(()),\n        }\n}\nimpl Node {\n    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> { for_each_child_generated(self, visitor) }\n}\nimpl NodeRead<'_> {\n    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> { for_each_child_generated(self, visitor) }\n}\n");
     transform.push_str("                _ => return original_id,\n            }\n        };\n        visit(self, original_id)\n    }\n}\nimpl<T: VisitContext + ?Sized> VisitorMethods for T {}\n");
     runtime.push_str(&format!("impl NodeData {{\n    pub fn declaration_name_generated(&self) -> Option<NodeId> {{\n        match self {{\n{names}            _ => None,\n        }}\n    }}\n}}\n"));
     runtime.push_str("impl NodeData {\n    /// Validate every stored identity, including fields omitted by Go child visitors.\n    pub fn validate_references<E>(&self, mut node: impl FnMut(NodeId) -> Result<(), E>, mut list: impl FnMut(NodeListId) -> Result<(), E>, mut raw: impl FnMut(NodeSlice) -> Result<(), E>, mut text: impl FnMut(TextSlice) -> Result<(), E>) -> Result<(), E> {\n        match self {\n");

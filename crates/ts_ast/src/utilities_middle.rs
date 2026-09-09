@@ -2,8 +2,9 @@
 //! Graph reads validate owner-qualified IDs; pure predicates inspect the open
 //! kind header, and source nil dereferences remain explicit contract panics.
 
+use crate::NodeAccess;
 use crate::{
-    modifier_flags, token_flags, AstView, JsString, Node, NodeData, NodeId, NodeKind, NodeListId,
+    modifier_flags, token_flags, AstView, JsString, NodeDataRead, NodeId, NodeKind, NodeListId,
     NodeRead, NodeSlice, Pragma, SourceFileState, SyntaxKind as K,
 };
 use std::borrow::Cow;
@@ -19,57 +20,57 @@ fn list_nodes(view: AstView<'_>, list: Option<NodeListId>) -> Result<NodeSlice, 
 }
 
 // port: tsc/internal/ast/utilities.go:IsJSDocLinkLike
-pub fn is_js_doc_link_like(node: &Node) -> bool {
+pub fn is_js_doc_link_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::JSDocLink | K::JSDocLinkCode | K::JSDocLinkPlain)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsJSDocTag
-pub fn is_js_doc_tag(node: &Node) -> bool {
+pub fn is_js_doc_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     (K::FirstJSDocTagNode as i16..=K::LastJSDocTagNode as i16).contains(&node.kind().raw())
 }
 // port: tsc/internal/ast/utilities.go:IsQuestionToken
-pub fn is_question_token(node: Option<&Node>) -> bool {
+pub fn is_question_token(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| node.kind() == K::QuestionToken)
 }
 // port: tsc/internal/ast/utilities.go:IsJSDocNode
-pub fn is_js_doc_node(node: &Node) -> bool {
+pub fn is_js_doc_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     (K::FirstJSDocNode as i16..=K::LastJSDocNode as i16).contains(&node.kind().raw())
 }
 // port: tsc/internal/ast/utilities.go:IsNonWhitespaceToken
-pub fn is_non_whitespace_token(node: &Node) -> bool {
+pub fn is_non_whitespace_token(node: &(impl NodeAccess + ?Sized)) -> bool {
     crate::is_token_kind(node.kind()) && !is_whitespace_only_jsx_text(node)
 }
 // port: tsc/internal/ast/utilities.go:IsWhitespaceOnlyJsxText
-pub fn is_whitespace_only_jsx_text(node: &Node) -> bool {
+pub fn is_whitespace_only_jsx_text(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.kind() == K::JsxText
         && node
-            .data()
+            .data_source()
             .as_jsx_text()
             .expect("JsxText payload")
-            .contains_only_trivia_white_spaces
+            .contains_only_trivia_white_spaces()
 }
 // port: tsc/internal/ast/utilities.go:IsPropertyAccessOrQualifiedName
-pub fn is_property_access_or_qualified_name(node: &Node) -> bool {
+pub fn is_property_access_or_qualified_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::PropertyAccessExpression | K::QualifiedName)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsBreakOrContinueStatement
-pub fn is_break_or_continue_statement(node: &Node) -> bool {
+pub fn is_break_or_continue_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::BreakStatement | K::ContinueStatement)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsParameterLike
-pub fn is_parameter_like(node: &Node) -> bool {
+pub fn is_parameter_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(K::Parameter | K::TypeParameter))
 }
 // port: tsc/internal/ast/utilities.go:NodeHasKind
-pub fn node_has_kind(node: Option<&Node>, kind: NodeKind) -> bool {
+pub fn node_has_kind(node: Option<&(impl NodeAccess + ?Sized)>, kind: NodeKind) -> bool {
     node.is_some_and(|node| node.kind() == kind)
 }
 // port: tsc/internal/ast/utilities.go:IsContextualKeyword
@@ -81,7 +82,7 @@ pub fn is_parameter_property_modifier(kind: NodeKind) -> bool {
     crate::modifier_to_flag(kind) & modifier_flags::PARAMETER_PROPERTY_MODIFIER != 0
 }
 // port: tsc/internal/ast/utilities.go:HasTypeArguments
-pub fn has_type_arguments(node: &Node) -> bool {
+pub fn has_type_arguments(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -98,14 +99,14 @@ pub fn has_type_arguments(node: &Node) -> bool {
     )
 }
 // port: tsc/internal/ast/utilities.go:IsTypeReferenceType
-pub fn is_type_reference_type(node: &Node) -> bool {
+pub fn is_type_reference_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::TypeReference | K::ExpressionWithTypeArguments)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsVariableLike
-pub fn is_variable_like(node: &Node) -> bool {
+pub fn is_variable_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -121,7 +122,7 @@ pub fn is_variable_like(node: &Node) -> bool {
     )
 }
 // port: tsc/internal/ast/utilities.go:HasInitializer
-pub fn has_initializer(node: &Node) -> bool {
+pub fn has_initializer(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -139,25 +140,25 @@ pub fn has_initializer(node: &Node) -> bool {
     ) && node.initializer().is_some()
 }
 // port: tsc/internal/ast/utilities.go:IsVariableParameterOrProperty
-pub fn is_variable_parameter_or_property(node: &Node) -> bool {
+pub fn is_variable_parameter_or_property(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::VariableDeclaration | K::Parameter | K::PropertySignature | K::PropertyDeclaration)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsObjectTypeDeclaration
-pub fn is_object_type_declaration(node: &Node) -> bool {
+pub fn is_object_type_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ClassDeclaration | K::ClassExpression | K::InterfaceDeclaration | K::TypeLiteral)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsTypeKeywordToken
-pub fn is_type_keyword_token(node: &Node) -> bool {
+pub fn is_type_keyword_token(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.kind() == K::TypeKeyword
 }
 // port: tsc/internal/ast/utilities.go:IsResolutionModeOverrideHost
-pub fn is_resolution_mode_override_host(node: Option<&Node>) -> bool {
+pub fn is_resolution_mode_override_host(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| {
         matches!(
             node.kind().known(),
@@ -171,7 +172,7 @@ pub fn is_resolution_mode_override_host(node: Option<&Node>) -> bool {
     })
 }
 // port: tsc/internal/ast/utilities.go:IsStringTextContainingNode
-pub fn is_string_text_containing_node(node: &Node) -> bool {
+pub fn is_string_text_containing_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.kind() == K::StringLiteral || is_template_literal_kind(node.kind())
 }
 // port: tsc/internal/ast/utilities.go:IsTemplateLiteralKind
@@ -179,11 +180,11 @@ pub fn is_template_literal_kind(kind: NodeKind) -> bool {
     (K::FirstTemplateToken as i16..=K::LastTemplateToken as i16).contains(&kind.raw())
 }
 // port: tsc/internal/ast/utilities.go:IsTemplateLiteralToken
-pub fn is_template_literal_token(node: &Node) -> bool {
+pub fn is_template_literal_token(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_template_literal_kind(node.kind())
 }
 // port: tsc/internal/ast/utilities.go:IsLateVisibilityPaintedStatement
-pub fn is_late_visibility_painted_statement(node: &Node) -> bool {
+pub fn is_late_visibility_painted_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -202,21 +203,21 @@ pub fn is_late_visibility_painted_statement(node: &Node) -> bool {
     )
 }
 // port: tsc/internal/ast/utilities.go:IsJsxOpeningLikeElement
-pub fn is_jsx_opening_like_element(node: &Node) -> bool {
+pub fn is_jsx_opening_like_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::JsxOpeningElement | K::JsxSelfClosingElement)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsCallOrNewExpression
-pub fn is_call_or_new_expression(node: &Node) -> bool {
+pub fn is_call_or_new_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::CallExpression | K::NewExpression)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsInitializedProperty
-pub fn is_initialized_property(node: &Node) -> bool {
+pub fn is_initialized_property(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.kind() == K::PropertyDeclaration && node.initializer().is_some()
 }
 // port: tsc/internal/ast/utilities.go:IsTrivia
@@ -255,14 +256,14 @@ pub fn has_comment(kind: NodeKind) -> bool {
     )
 }
 // port: tsc/internal/ast/utilities.go:IsDeclarationBindingElement
-pub fn is_declaration_binding_element(node: &Node) -> bool {
+pub fn is_declaration_binding_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::VariableDeclaration | K::Parameter | K::BindingElement)
     )
 }
 // port: tsc/internal/ast/utilities.go:IsJsxCallLike
-pub fn is_jsx_call_like(node: &Node) -> bool {
+pub fn is_jsx_call_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::JsxOpeningElement | K::JsxSelfClosingElement | K::JsxOpeningFragment)
@@ -312,7 +313,10 @@ pub fn create_modifiers_from_modifier_flags(
     (!nodes.is_empty()).then_some(nodes)
 }
 // port: tsc/internal/ast/utilities.go:CompareNodePositions
-pub fn compare_node_positions(left: &Node, right: &Node) -> i64 {
+pub fn compare_node_positions(
+    left: &(impl NodeAccess + ?Sized),
+    right: &(impl NodeAccess + ?Sized),
+) -> i64 {
     let start = i64::from(left.pos()) - i64::from(right.pos());
     if start != 0 {
         start
@@ -329,7 +333,7 @@ pub fn index_of_node(
     let (mut low, mut high) = (0, nodes.len());
     while low < high {
         let middle = low + (high - low) / 2;
-        if compare_node_positions(&*required(view, nodes[middle])?, &*required(view, target)?) < 0 {
+        if compare_node_positions(&required(view, nodes[middle])?, &required(view, target)?) < 0 {
             low = middle + 1;
         } else {
             high = middle;
@@ -337,7 +341,7 @@ pub fn index_of_node(
     }
     Ok(
         if low < nodes.len()
-            && compare_node_positions(&*required(view, nodes[low])?, &*required(view, target)?) == 0
+            && compare_node_positions(&required(view, nodes[low])?, &required(view, target)?) == 0
         {
             low as i64
         } else {
@@ -346,14 +350,14 @@ pub fn index_of_node(
     )
 }
 // port: tsc/internal/ast/utilities.go:IsUnterminatedLiteral
-pub fn is_unterminated_literal(node: &Node) -> bool {
+pub fn is_unterminated_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     if crate::is_literal_kind(node.kind()) {
         let flags = match node.data() {
-            NodeData::StringLiteral(data) => data.token_flags,
-            NodeData::NumericLiteral(data) => data.token_flags,
-            NodeData::BigIntLiteral(data) => data.token_flags,
-            NodeData::RegularExpressionLiteral(data) => data.token_flags,
-            NodeData::NoSubstitutionTemplateLiteral(data) => data.token_flags,
+            NodeDataRead::StringLiteral(data) => data.token_flags(),
+            NodeDataRead::NumericLiteral(data) => data.token_flags(),
+            NodeDataRead::BigIntLiteral(data) => data.token_flags(),
+            NodeDataRead::RegularExpressionLiteral(data) => data.token_flags(),
+            NodeDataRead::NoSubstitutionTemplateLiteral(data) => data.token_flags(),
             _ => panic!("LiteralLike payload"),
         };
         if flags & token_flags::UNTERMINATED != 0 {
@@ -364,60 +368,66 @@ pub fn is_unterminated_literal(node: &Node) -> bool {
         return false;
     }
     let flags = match node.data() {
-        NodeData::NoSubstitutionTemplateLiteral(data) => data.template_flags,
-        NodeData::TemplateHead(data) => data.template_flags,
-        NodeData::TemplateMiddle(data) => data.template_flags,
-        NodeData::TemplateTail(data) => data.template_flags,
+        NodeDataRead::NoSubstitutionTemplateLiteral(data) => data.template_flags(),
+        NodeDataRead::TemplateHead(data) => data.template_flags(),
+        NodeDataRead::TemplateMiddle(data) => data.template_flags(),
+        NodeDataRead::TemplateTail(data) => data.template_flags(),
         _ => panic!("TemplateLiteralLike payload"),
     };
     flags & token_flags::UNTERMINATED != 0
 }
 // port: tsc/internal/ast/utilities.go:IsSuperCall
-pub fn is_super_call(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_super_call(view: AstView<'_>, node: &(impl NodeAccess + ?Sized)) -> Result<bool, Error> {
     Ok(node.kind() == K::CallExpression
         && required(view, node.expression())?.kind() == K::SuperKeyword)
 }
 // port: tsc/internal/ast/utilities.go:IsInternalModuleImportEqualsDeclaration
 pub fn is_internal_module_import_equals_declaration(
     view: AstView<'_>,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
 ) -> Result<bool, Error> {
     Ok(node.kind() == K::ImportEqualsDeclaration
         && required(
             view,
-            node.data()
+            node.data_source()
                 .as_import_equals_declaration()
                 .expect("ImportEqualsDeclaration payload")
-                .module_reference,
+                .module_reference(),
         )?
         .kind()
             != K::ExternalModuleReference)
 }
 // port: tsc/internal/ast/utilities.go:IsConstTypeReference
-pub fn is_const_type_reference(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_const_type_reference(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if node.kind() != K::TypeReference {
         return Ok(false);
     }
     let data = node
-        .data()
+        .data_source()
         .as_type_reference_node()
         .expect("TypeReference payload");
     if !view
-        .node_slice(list_nodes(view, data.type_arguments)?)?
+        .node_slice(list_nodes(view, data.type_arguments())?)?
         .is_empty()
     {
         return Ok(false);
     }
-    let name = data.type_name.expect("nil const type name");
+    let name = data.type_name().expect("nil const type name");
     Ok(view.node(name)?.kind() == K::Identifier && view.node_text(name)?.as_bytes() == b"const")
 }
 // port: tsc/internal/ast/utilities.go:IsConstAssertion
-pub fn is_const_assertion(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_const_assertion(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if matches!(
         node.kind().known(),
         Some(K::AsExpression | K::TypeAssertionExpression)
     ) {
-        is_const_type_reference(view, &*required(view, node.type_node())?)
+        is_const_type_reference(view, &required(view, node.type_node())?)
     } else {
         Ok(false)
     }
@@ -436,12 +446,11 @@ pub fn get_first_identifier(view: AstView<'_>, mut id: NodeId) -> Result<NodeId,
         let node = view.node(id)?;
         id = match node.kind().known() {
             Some(K::Identifier) => return Ok(id),
-            Some(K::QualifiedName) => {
-                node.data()
-                    .as_qualified_name()
-                    .expect("QualifiedName payload")
-                    .left
-            }
+            Some(K::QualifiedName) => node
+                .data_source()
+                .as_qualified_name()
+                .expect("QualifiedName payload")
+                .left(),
             Some(K::PropertyAccessExpression) => node.expression(),
             _ => panic!("Unhandled case in GetFirstIdentifier"),
         }
@@ -461,10 +470,10 @@ pub fn get_namespace_declaration_node(
             };
             let clause = view.node(clause)?;
             let binding = clause
-                .data()
+                .data_source()
                 .as_import_clause()
                 .expect("ImportClause payload")
-                .named_bindings;
+                .named_bindings();
             Ok(match binding {
                 Some(id) if view.node(id)?.kind() == K::NamespaceImport => Some(id),
                 _ => None,
@@ -473,10 +482,10 @@ pub fn get_namespace_declaration_node(
         Some(K::ImportEqualsDeclaration) => Ok(Some(id)),
         Some(K::ExportDeclaration) => {
             let clause = node
-                .data()
+                .data_source()
                 .as_export_declaration()
                 .expect("ExportDeclaration payload")
-                .export_clause;
+                .export_clause();
             Ok(match clause {
                 Some(id) if view.node(id)?.kind() == K::NamespaceExport => Some(id),
                 _ => None,
@@ -490,7 +499,10 @@ pub fn module_export_name_is_default(view: AstView<'_>, id: NodeId) -> Result<bo
     Ok(view.node_text(id)?.as_bytes() == b"default")
 }
 // port: tsc/internal/ast/utilities.go:IsDefaultImport
-pub fn is_default_import(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_default_import(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if matches!(
         node.kind().known(),
         Some(K::ImportDeclaration | K::JSImportDeclaration)
@@ -498,17 +510,20 @@ pub fn is_default_import(view: AstView<'_>, node: &Node) -> Result<bool, Error> 
         if let Some(clause) = node.import_clause() {
             return Ok(view
                 .node(clause)?
-                .data()
+                .data_source()
                 .as_import_clause()
                 .expect("ImportClause payload")
-                .name
+                .name()
                 .is_some());
         }
     }
     Ok(false)
 }
 // port: tsc/internal/ast/utilities.go:IsCallLikeExpression
-pub fn is_call_like_expression(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_call_like_expression(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     Ok(match node.kind().known() {
         Some(
             K::JsxOpeningElement
@@ -522,10 +537,10 @@ pub fn is_call_like_expression(view: AstView<'_>, node: &Node) -> Result<bool, E
         Some(K::BinaryExpression) => {
             required(
                 view,
-                node.data()
+                node.data_source()
                     .as_binary_expression()
                     .expect("BinaryExpression payload")
-                    .operator_token,
+                    .operator_token(),
             )?
             .kind()
                 == K::InstanceOfKeyword
@@ -536,7 +551,7 @@ pub fn is_call_like_expression(view: AstView<'_>, node: &Node) -> Result<bool, E
 // port: tsc/internal/ast/utilities.go:IsCallLikeOrFunctionLikeExpression
 pub fn is_call_like_or_function_like_expression(
     view: AstView<'_>,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
 ) -> Result<bool, Error> {
     Ok(is_call_like_expression(view, node)?
         || matches!(
@@ -595,10 +610,10 @@ pub fn is_argument_expression_of_element_access(
     let parent = view.node(parent)?;
     Ok(parent.kind() == K::ElementAccessExpression
         && parent
-            .data()
+            .data_source()
             .as_element_access_expression()
             .expect("ElementAccessExpression payload")
-            .argument_expression
+            .argument_expression()
             == Some(id))
 }
 // port: tsc/internal/ast/utilities.go:ClimbPastPropertyAccess
@@ -625,7 +640,9 @@ pub fn climb_past_property_or_element_access(
     )
 }
 // port: tsc/internal/ast/utilities.go:selectExpressionOfCallOrNewExpressionOrDecorator
-pub fn select_expression_of_call_or_new_expression_or_decorator(node: &Node) -> Option<NodeId> {
+pub fn select_expression_of_call_or_new_expression_or_decorator(
+    node: &(impl NodeAccess + ?Sized),
+) -> Option<NodeId> {
     if matches!(
         node.kind().known(),
         Some(K::CallExpression | K::NewExpression | K::Decorator)
@@ -636,18 +653,22 @@ pub fn select_expression_of_call_or_new_expression_or_decorator(node: &Node) -> 
     }
 }
 // port: tsc/internal/ast/utilities.go:selectTagOfTaggedTemplateExpression
-pub fn select_tag_of_tagged_template_expression(node: &Node) -> Option<NodeId> {
+pub fn select_tag_of_tagged_template_expression(
+    node: &(impl NodeAccess + ?Sized),
+) -> Option<NodeId> {
     if node.kind() == K::TaggedTemplateExpression {
-        node.data()
+        node.data_source()
             .as_tagged_template_expression()
             .expect("TaggedTemplateExpression payload")
-            .tag
+            .tag()
     } else {
         None
     }
 }
 // port: tsc/internal/ast/utilities.go:selectTagNameOfJsxOpeningLikeElement
-pub fn select_tag_name_of_jsx_opening_like_element(node: &Node) -> Option<NodeId> {
+pub fn select_tag_name_of_jsx_opening_like_element(
+    node: &(impl NodeAccess + ?Sized),
+) -> Option<NodeId> {
     if is_jsx_opening_like_element(node) {
         node.tag_name()
     } else {
@@ -663,10 +684,10 @@ pub fn is_right_side_of_qualified_name_or_property_access(
     Ok(match parent.kind().known() {
         Some(K::QualifiedName) => {
             parent
-                .data()
+                .data_source()
                 .as_qualified_name()
                 .expect("QualifiedName payload")
-                .right
+                .right()
                 == Some(id)
         }
         Some(K::PropertyAccessExpression | K::MetaProperty) => parent.name() == Some(id),
@@ -674,9 +695,12 @@ pub fn is_right_side_of_qualified_name_or_property_access(
     })
 }
 // port: tsc/internal/ast/utilities.go:HasQuestionToken
-pub fn has_question_token(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn has_question_token(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     Ok(match node.question_token(view)? {
-        Some(id) => is_question_token(Some(&*view.node(id)?)),
+        Some(id) => is_question_token(Some(&view.node(id)?)),
         None => false,
     })
 }
@@ -686,22 +710,24 @@ pub fn get_invoked_expression(view: AstView<'_>, id: NodeId) -> Result<Option<No
     Ok(match node.kind().known() {
         Some(K::TaggedTemplateExpression) => select_tag_of_tagged_template_expression(&node),
         Some(K::JsxOpeningElement | K::JsxSelfClosingElement) => node.tag_name(),
-        Some(K::BinaryExpression) => {
-            node.data()
-                .as_binary_expression()
-                .expect("BinaryExpression payload")
-                .right
-        }
+        Some(K::BinaryExpression) => node
+            .data_source()
+            .as_binary_expression()
+            .expect("BinaryExpression payload")
+            .right(),
         Some(K::JsxOpeningFragment) => Some(id),
         _ => node.expression(),
     })
 }
 // port: tsc/internal/ast/utilities.go:HasDecorators
-pub fn has_decorators(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn has_decorators(view: AstView<'_>, node: &(impl NodeAccess + ?Sized)) -> Result<bool, Error> {
     Ok(node.modifier_flags(view)? & modifier_flags::DECORATOR != 0)
 }
 // port: tsc/internal/ast/utilities.go:IsJSDocSingleCommentNode
-pub fn is_js_doc_single_comment_node(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_js_doc_single_comment_node(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if !has_comment(node.kind()) {
         return Ok(false);
     }
@@ -719,7 +745,7 @@ pub fn is_js_doc_single_comment_node_list(
         return Ok(false);
     };
     let nodes = view.node_slice(view.list(list)?.nodes())?;
-    let Some(&first) = nodes.first() else {
+    let Some(first) = nodes.first() else {
         return Ok(false);
     };
     let Some(parent) = required(view, first)?.parent() else {
@@ -743,39 +769,41 @@ pub fn is_js_doc_single_comment_node_comment(
     if !is_js_doc_single_comment_node(view, &parent)? {
         return Ok(false);
     }
-    Ok(view.node_slice(
-        view.list(parent.comment_list().expect("single comment list"))?
-            .nodes(),
-    )?[0]
+    Ok(view
+        .node_slice(
+            view.list(parent.comment_list().expect("single comment list"))?
+                .nodes(),
+        )?
+        .at(0)
         == Some(id))
 }
 // port: tsc/internal/ast/utilities.go:IsRequireCall
 pub fn is_require_call(
     view: AstView<'_>,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
     string_literal_argument: bool,
 ) -> Result<bool, Error> {
     if node.kind() != K::CallExpression {
         return Ok(false);
     }
     let call = node
-        .data()
+        .data_source()
         .as_call_expression()
         .expect("CallExpression payload");
-    let expression = call.expression.expect("nil require expression");
+    let expression = call.expression().expect("nil require expression");
     if view.node(expression)?.kind() != K::Identifier
         || view.node_text(expression)?.as_bytes() != b"require"
     {
         return Ok(false);
     }
-    let arguments = view.list(call.arguments.expect("nil CallExpression arguments"))?;
+    let arguments = view.list(call.arguments().expect("nil CallExpression arguments"))?;
     let arguments = view.node_slice(arguments.nodes())?;
     if arguments.len() != 1 {
         return Ok(false);
     }
     Ok(!string_literal_argument
         || matches!(
-            required(view, arguments[0])?.kind().known(),
+            required(view, arguments.at(0))?.kind().known(),
             Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral)
         ))
 }

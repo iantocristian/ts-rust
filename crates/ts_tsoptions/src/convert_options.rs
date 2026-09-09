@@ -4,7 +4,7 @@ use crate::{
     OptionDeclaration, OptionKind, TsConfigSourceFile, COMPILER_OPTIONS,
 };
 use std::borrow::Cow;
-use ts_ast::{Diagnostic, NodeData, NodeId};
+use ts_ast::{Diagnostic, NodeDataRead, NodeId};
 use ts_core::{CompilerOptions, Tristate};
 use ts_diagnostics::{self as d, Message};
 use ts_jsstring::JsString;
@@ -199,14 +199,16 @@ fn convert_list(
         if let (Some(config), Some(node)) = (syntax.config, syntax.value) {
             let view = config.file.view();
             let node = view.node(node).expect("config list expression");
-            let NodeData::ArrayLiteralExpression(data) = node.data() else {
+            let NodeDataRead::ArrayLiteralExpression(data) = node.data() else {
                 panic!("array option syntax requires an array expression")
             };
             let list = view
-                .list(data.elements.expect("nonempty array list"))
+                .list(data.elements().expect("nonempty array list"))
                 .expect("config array list");
-            element_syntax.value =
-                view.node_slice(list.nodes()).expect("config array slice")[index];
+            element_syntax.value = view
+                .node_slice(list.nodes())
+                .expect("config array slice")
+                .at(index);
         }
         let (converted, mut diagnostics) = convert_json_option(
             option.element.expect("list element declaration"),

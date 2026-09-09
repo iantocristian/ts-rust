@@ -682,7 +682,7 @@ impl AstBuilder {
             let node = view
                 .node(original)
                 .expect("original source file belongs to factory");
-            let NodeData::SourceFile(data) = node.data() else {
+            let crate::NodeDataRead::SourceFile(data) = node.data() else {
                 panic!("source-file payload required");
             };
             let state = view
@@ -691,7 +691,7 @@ impl AstBuilder {
             (
                 state.parse_options.clone(),
                 state.text.clone(),
-                data.clone(),
+                data.to_owned(),
             )
         };
         let updated = self.new_source_file(options, text, data.statements, data.end_of_file_token);
@@ -721,10 +721,10 @@ impl AstBuilder {
             let node = view
                 .node(original)
                 .expect("original source file belongs to factory");
-            let NodeData::SourceFile(data) = node.data() else {
+            let crate::NodeDataRead::SourceFile(data) = node.data() else {
                 panic!("source-file payload required");
             };
-            if statements == data.statements && end_of_file_token == data.end_of_file_token {
+            if statements == data.statements() && end_of_file_token == data.end_of_file_token() {
                 return original;
             }
             let state = view

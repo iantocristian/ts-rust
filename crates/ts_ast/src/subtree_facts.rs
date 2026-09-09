@@ -1,6 +1,7 @@
 //! Pinned subtree facts, scope exclusions, and immutable atomic cache semantics.
+use crate::NodeAccess;
 use crate::{modifier_flags as m, node_flags, token_flags};
-use crate::{AstView, Node, NodeData, NodeId, NodeKind, NodeListId, SubtreeContext, SyntaxKind};
+use crate::{AstView, NodeDataRead, NodeId, NodeKind, NodeListId, SubtreeContext, SyntaxKind};
 
 pub type SubtreeFacts = u32;
 pub mod subtree_flags {
@@ -84,7 +85,7 @@ impl Facts<'_> {
         }
     }
     // port: tsc/internal/ast/ast.go:CompositeBase.subtreeFactsWorker
-    fn cached(&mut self, node: &Node) -> u32 {
+    fn cached(&mut self, node: &(impl NodeAccess + ?Sized)) -> u32 {
         let mut facts = node.cached_subtree_facts();
         if facts & COMPUTED == 0 {
             facts |= self.compute(node) | COMPUTED;
@@ -111,14 +112,14 @@ impl Facts<'_> {
         if node.kind() != SyntaxKind::Identifier {
             return false;
         }
-        let NodeData::Identifier(data) = node.data() else {
+        let NodeDataRead::Identifier(data) = node.data() else {
             panic!("invalid Identifier payload")
         };
-        data.text.as_bytes() == b"this"
+        data.text() == b"this"
     }
     #[allow(clippy::match_same_arms)] // Keep each pinned override independently auditable.
-    fn compute(&mut self, node: &Node) -> u32 {
-        use NodeData as D;
+    fn compute(&mut self, node: &(impl NodeAccess + ?Sized)) -> u32 {
+        use NodeDataRead as D;
         use SyntaxKind as K;
         if node.data().is_type_syntax() {
             return type_syntax_facts();
@@ -130,24 +131,24 @@ impl Facts<'_> {
             // port: tsc/internal/ast/ast.go:PrivateIdentifier.computeSubtreeFacts
             D::PrivateIdentifier(_) => CLASS_FIELDS,
             // port: tsc/internal/ast/ast.go:Decorator.computeSubtreeFacts
-            D::Decorator(d) => self.propagate_node(d.expression) | TYPE_SCRIPT | DECORATORS,
+            D::Decorator(d) => self.propagate_node(d.expression()) | TYPE_SCRIPT | DECORATORS,
             // port: tsc/internal/ast/ast.go:ReturnStatement.computeSubtreeFacts
             D::ReturnStatement(d) => {
-                self.propagate_node(d.expression) | FOR_AWAIT_OR_ASYNC_GENERATOR
+                self.propagate_node(d.expression()) | FOR_AWAIT_OR_ASYNC_GENERATOR
             }
             // port: tsc/internal/ast/ast.go:VariableDeclaration.computeSubtreeFacts
             D::VariableDeclaration(d) => {
-                self.propagate_node(d.name)
-                    | eraseable_node(d.exclamation_token)
-                    | eraseable_node(d.r#type)
-                    | self.propagate_node(d.initializer)
+                self.propagate_node(d.name())
+                    | eraseable_node(d.exclamation_token())
+                    | eraseable_node(d.r#type())
+                    | self.propagate_node(d.initializer())
             }
             // port: tsc/internal/ast/ast.go:BindingElement.computeSubtreeFacts
             D::BindingElement(d) => {
-                self.propagate_node(d.property_name)
-                    | self.propagate_node(d.name)
-                    | self.propagate_node(d.initializer)
-                    | (if d.dot_dot_dot_token.is_some() {
+                self.propagate_node(d.property_name())
+                    | self.propagate_node(d.name())
+                    | self.propagate_node(d.initializer())
+                    | (if d.dot_dot_dot_token().is_some() {
                         REST_OR_SPREAD
                     } else {
                         NONE
@@ -155,14 +156,14 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:EnumMember.computeSubtreeFacts
             D::EnumMember(d) => {
-                self.propagate_node(d.name) | self.propagate_node(d.initializer) | TYPE_SCRIPT
+                self.propagate_node(d.name()) | self.propagate_node(d.initializer()) | TYPE_SCRIPT
             }
             // port: tsc/internal/ast/ast.go:ExportAssignment.computeSubtreeFacts
             D::ExportAssignment(d) => {
-                self.propagate_modifiers(d.modifiers)
-                    | self.propagate_node(d.r#type)
-                    | self.propagate_node(d.expression)
-                    | (if d.is_export_equals {
+                self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.r#type())
+                    | self.propagate_node(d.expression())
+                    | (if d.is_export_equals() {
                         TYPE_SCRIPT
                     } else {
                         NONE
@@ -170,24 +171,26 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:ExportDeclaration.computeSubtreeFacts
             D::ExportDeclaration(d) => {
-                self.propagate_modifiers(d.modifiers)
-                    | self.propagate_node(d.export_clause)
-                    | self.propagate_node(d.module_specifier)
-                    | self.propagate_node(d.attributes)
-                    | (if d.is_type_only { TYPE_SCRIPT } else { NONE })
+                self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.export_clause())
+                    | self.propagate_node(d.module_specifier())
+                    | self.propagate_node(d.attributes())
+                    | (if d.is_type_only() { TYPE_SCRIPT } else { NONE })
             }
             // port: tsc/internal/ast/ast.go:PropertyDeclaration.computeSubtreeFacts
             D::PropertyDeclaration(d) => {
-                self.propagate_modifiers(d.modifiers)
-                    | self.propagate_node(d.name)
-                    | eraseable_node(d.postfix_token)
-                    | eraseable_node(d.r#type)
-                    | self.propagate_node(d.initializer)
+                self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.name())
+                    | eraseable_node(d.postfix_token())
+                    | eraseable_node(d.r#type())
+                    | self.propagate_node(d.initializer())
                     | CLASS_FIELDS
             }
             // port: tsc/internal/ast/ast.go:ClassStaticBlockDeclaration.computeSubtreeFacts
             D::ClassStaticBlockDeclaration(d) => {
-                self.propagate_modifiers(d.modifiers) | self.propagate_node(d.body) | CLASS_FIELDS
+                self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.body())
+                    | CLASS_FIELDS
             }
             // port: tsc/internal/ast/ast.go:BigIntLiteral.computeSubtreeFacts
             D::BigIntLiteral(_) => NONE,
@@ -195,111 +198,116 @@ impl Facts<'_> {
             D::Identifier(_) => IDENTIFIER,
             // port: tsc/internal/ast/ast.go:YieldExpression.computeSubtreeFacts
             D::YieldExpression(d) => {
-                self.propagate_node(d.expression) | FOR_AWAIT_OR_ASYNC_GENERATOR
+                self.propagate_node(d.expression()) | FOR_AWAIT_OR_ASYNC_GENERATOR
             }
             // port: tsc/internal/ast/ast.go:AsExpression.computeSubtreeFacts
-            D::AsExpression(d) => self.propagate_node(d.expression) | TYPE_SCRIPT,
+            D::AsExpression(d) => self.propagate_node(d.expression()) | TYPE_SCRIPT,
             // port: tsc/internal/ast/ast.go:SatisfiesExpression.computeSubtreeFacts
-            D::SatisfiesExpression(d) => self.propagate_node(d.expression) | TYPE_SCRIPT,
+            D::SatisfiesExpression(d) => self.propagate_node(d.expression()) | TYPE_SCRIPT,
             // port: tsc/internal/ast/ast.go:NewExpression.computeSubtreeFacts
             D::NewExpression(d) => {
-                self.propagate_node(d.expression)
-                    | eraseable_list(d.type_arguments)
-                    | self.propagate_list(d.arguments)
+                self.propagate_node(d.expression())
+                    | eraseable_list(d.type_arguments())
+                    | self.propagate_list(d.arguments())
             }
             // port: tsc/internal/ast/ast.go:MetaProperty.computeSubtreeFacts
-            D::MetaProperty(d) => self.propagate_node(d.name) & !IDENTIFIER,
+            D::MetaProperty(d) => self.propagate_node(d.name()) & !IDENTIFIER,
             // port: tsc/internal/ast/ast.go:NonNullExpression.computeSubtreeFacts
-            D::NonNullExpression(d) => self.propagate_node(d.expression) | TYPE_SCRIPT,
+            D::NonNullExpression(d) => self.propagate_node(d.expression()) | TYPE_SCRIPT,
             // port: tsc/internal/ast/ast.go:SpreadElement.computeSubtreeFacts
-            D::SpreadElement(d) => self.propagate_node(d.expression) | REST_OR_SPREAD,
+            D::SpreadElement(d) => self.propagate_node(d.expression()) | REST_OR_SPREAD,
             // port: tsc/internal/ast/ast.go:TaggedTemplateExpression.computeSubtreeFacts
             D::TaggedTemplateExpression(d) => {
-                self.propagate_node(d.tag)
-                    | self.propagate_node(d.question_dot_token)
-                    | eraseable_list(d.type_arguments)
-                    | self.propagate_node(d.template)
+                self.propagate_node(d.tag())
+                    | self.propagate_node(d.question_dot_token())
+                    | eraseable_list(d.type_arguments())
+                    | self.propagate_node(d.template())
             }
             // port: tsc/internal/ast/ast.go:SpreadAssignment.computeSubtreeFacts
             D::SpreadAssignment(d) => {
-                self.propagate_node(d.expression) | ES_OBJECT_REST_OR_SPREAD | OBJECT_REST_OR_SPREAD
+                self.propagate_node(d.expression())
+                    | ES_OBJECT_REST_OR_SPREAD
+                    | OBJECT_REST_OR_SPREAD
             }
             // port: tsc/internal/ast/ast.go:PropertyAssignment.computeSubtreeFacts
             D::PropertyAssignment(d) => {
-                self.propagate_node(d.name)
-                    | self.propagate_node(d.r#type)
-                    | self.propagate_node(d.initializer)
+                self.propagate_node(d.name())
+                    | self.propagate_node(d.r#type())
+                    | self.propagate_node(d.initializer())
             }
             // port: tsc/internal/ast/ast.go:ShorthandPropertyAssignment.computeSubtreeFacts
             D::ShorthandPropertyAssignment(d) => {
-                self.propagate_node(d.name)
-                    | self.propagate_node(d.r#type)
-                    | self.propagate_node(d.object_assignment_initializer)
+                self.propagate_node(d.name())
+                    | self.propagate_node(d.r#type())
+                    | self.propagate_node(d.object_assignment_initializer())
                     | TYPE_SCRIPT
             }
             // port: tsc/internal/ast/ast.go:AwaitExpression.computeSubtreeFacts
             D::AwaitExpression(d) => {
-                self.propagate_node(d.expression) | AWAIT | ANY_AWAIT | FOR_AWAIT_OR_ASYNC_GENERATOR
+                self.propagate_node(d.expression())
+                    | AWAIT
+                    | ANY_AWAIT
+                    | FOR_AWAIT_OR_ASYNC_GENERATOR
             }
             // port: tsc/internal/ast/ast.go:TypeAssertion.computeSubtreeFacts
-            D::TypeAssertion(d) => self.propagate_node(d.expression) | TYPE_SCRIPT,
+            D::TypeAssertion(d) => self.propagate_node(d.expression()) | TYPE_SCRIPT,
             // port: tsc/internal/ast/ast.go:ExpressionWithTypeArguments.computeSubtreeFacts
             D::ExpressionWithTypeArguments(d) => {
-                self.propagate_node(d.expression) | eraseable_list(d.type_arguments)
+                self.propagate_node(d.expression()) | eraseable_list(d.type_arguments())
             }
             // port: tsc/internal/ast/ast.go:JsxElement.computeSubtreeFacts
             D::JsxElement(d) => {
-                self.propagate_node(d.opening_element)
-                    | self.propagate_list(d.children)
-                    | self.propagate_node(d.closing_element)
+                self.propagate_node(d.opening_element())
+                    | self.propagate_list(d.children())
+                    | self.propagate_node(d.closing_element())
                     | JSX
             }
             // port: tsc/internal/ast/ast.go:JsxAttributes.computeSubtreeFacts
-            D::JsxAttributes(d) => self.propagate_list(d.properties) | JSX,
+            D::JsxAttributes(d) => self.propagate_list(d.properties()) | JSX,
             // port: tsc/internal/ast/ast.go:JsxNamespacedName.computeSubtreeFacts
             D::JsxNamespacedName(d) => {
-                self.propagate_node(d.namespace) | self.propagate_node(d.name) | JSX
+                self.propagate_node(d.namespace()) | self.propagate_node(d.name()) | JSX
             }
             // port: tsc/internal/ast/ast.go:JsxOpeningElement.computeSubtreeFacts
             D::JsxOpeningElement(d) => {
-                self.propagate_node(d.tag_name)
-                    | eraseable_list(d.type_arguments)
-                    | self.propagate_node(d.attributes)
+                self.propagate_node(d.tag_name())
+                    | eraseable_list(d.type_arguments())
+                    | self.propagate_node(d.attributes())
                     | JSX
             }
             // port: tsc/internal/ast/ast.go:JsxSelfClosingElement.computeSubtreeFacts
             D::JsxSelfClosingElement(d) => {
-                self.propagate_node(d.tag_name)
-                    | eraseable_list(d.type_arguments)
-                    | self.propagate_node(d.attributes)
+                self.propagate_node(d.tag_name())
+                    | eraseable_list(d.type_arguments())
+                    | self.propagate_node(d.attributes())
                     | JSX
             }
             // port: tsc/internal/ast/ast.go:JsxFragment.computeSubtreeFacts
-            D::JsxFragment(d) => self.propagate_list(d.children) | JSX,
+            D::JsxFragment(d) => self.propagate_list(d.children()) | JSX,
             // port: tsc/internal/ast/ast.go:JsxOpeningFragment.computeSubtreeFacts
             D::JsxOpeningFragment(_) => JSX,
             // port: tsc/internal/ast/ast.go:JsxClosingFragment.computeSubtreeFacts
             D::JsxClosingFragment(_) => JSX,
             // port: tsc/internal/ast/ast.go:JsxAttribute.computeSubtreeFacts
             D::JsxAttribute(d) => {
-                self.propagate_node(d.name) | self.propagate_node(d.initializer) | JSX
+                self.propagate_node(d.name()) | self.propagate_node(d.initializer()) | JSX
             }
             // port: tsc/internal/ast/ast.go:JsxSpreadAttribute.computeSubtreeFacts
-            D::JsxSpreadAttribute(d) => self.propagate_node(d.expression) | JSX,
+            D::JsxSpreadAttribute(d) => self.propagate_node(d.expression()) | JSX,
             // port: tsc/internal/ast/ast.go:JsxClosingElement.computeSubtreeFacts
-            D::JsxClosingElement(d) => self.propagate_node(d.tag_name) | JSX,
+            D::JsxClosingElement(d) => self.propagate_node(d.tag_name()) | JSX,
             // port: tsc/internal/ast/ast.go:JsxExpression.computeSubtreeFacts
-            D::JsxExpression(d) => self.propagate_node(d.expression) | JSX,
+            D::JsxExpression(d) => self.propagate_node(d.expression()) | JSX,
             // port: tsc/internal/ast/ast.go:JsxText.computeSubtreeFacts
             D::JsxText(_) => JSX,
             // port: tsc/internal/ast/ast.go:SourceFile.computeSubtreeFacts
-            D::SourceFile(d) => self.propagate_list(d.statements),
+            D::SourceFile(d) => self.propagate_list(d.statements()),
             // port: tsc/internal/ast/ast.go:ForInOrOfStatement.computeSubtreeFacts
             D::ForInOrOfStatement(d) => {
-                self.propagate_node(d.initializer)
-                    | self.propagate_node(d.expression)
-                    | self.propagate_node(d.statement)
-                    | (if d.await_modifier.is_some() {
+                self.propagate_node(d.initializer())
+                    | self.propagate_node(d.expression())
+                    | self.propagate_node(d.statement())
+                    | (if d.await_modifier().is_some() {
                         FOR_AWAIT_OR_ASYNC_GENERATOR
                     } else {
                         NONE
@@ -307,7 +315,7 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:VariableDeclarationList.computeSubtreeFacts
             D::VariableDeclarationList(d) => {
-                self.propagate_list(d.declarations)
+                self.propagate_list(d.declarations())
                     | (if node.flags() & node_flags::USING != 0 {
                         USING
                     } else {
@@ -365,9 +373,9 @@ impl Facts<'_> {
             },
             // port: tsc/internal/ast/ast.go:CatchClause.computeSubtreeFacts
             D::CatchClause(d) => {
-                self.propagate_node(d.variable_declaration)
-                    | self.propagate_node(d.block)
-                    | if d.variable_declaration.is_none() {
+                self.propagate_node(d.variable_declaration())
+                    | self.propagate_node(d.block())
+                    | if d.variable_declaration().is_none() {
                         MISSING_CATCH_CLAUSE_VARIABLE
                     } else {
                         NONE
@@ -375,197 +383,205 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:VariableStatement.computeSubtreeFacts
             D::VariableStatement(d) => {
-                if self.modifier_flags(d.modifiers) & m::AMBIENT != 0 {
+                if self.modifier_flags(d.modifiers()) & m::AMBIENT != 0 {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers) | self.propagate_node(d.declaration_list)
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.declaration_list())
                 }
             }
             // port: tsc/internal/ast/ast.go:BindingPattern.computeSubtreeFacts
             D::BindingPattern(d) => match node.kind().known() {
                 Some(K::ObjectBindingPattern) => {
-                    self.list_with(d.elements, Self::object_binding_element)
+                    self.list_with(d.elements(), Self::object_binding_element)
                 }
-                Some(K::ArrayBindingPattern) => self.list_with(d.elements, Self::binding_element),
+                Some(K::ArrayBindingPattern) => self.list_with(d.elements(), Self::binding_element),
                 _ => NONE,
             },
             // port: tsc/internal/ast/ast.go:ParameterDeclaration.computeSubtreeFacts
             D::ParameterDeclaration(d) => {
-                if d.name.is_some_and(|id| self.is_this_identifier(id)) {
+                if d.name().is_some_and(|id| self.is_this_identifier(id)) {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.name)
-                        | eraseable_node(d.question_token)
-                        | eraseable_node(d.r#type)
-                        | self.propagate_node(d.initializer)
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.name())
+                        | eraseable_node(d.question_token())
+                        | eraseable_node(d.r#type())
+                        | self.propagate_node(d.initializer())
                 }
             }
             // port: tsc/internal/ast/ast.go:FunctionDeclaration.computeSubtreeFacts
             D::FunctionDeclaration(d) => {
-                if d.body.is_none() || self.modifier_flags(d.modifiers) & m::AMBIENT != 0 {
+                if d.body().is_none() || self.modifier_flags(d.modifiers()) & m::AMBIENT != 0 {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.asterisk_token)
-                        | self.propagate_node(d.name)
-                        | eraseable_list(d.type_parameters)
-                        | self.propagate_list(d.parameters)
-                        | eraseable_node(d.r#type)
-                        | eraseable_node(d.full_signature)
-                        | self.propagate_node(d.body)
-                        | async_facts(self.modifier_flags(d.modifiers), d.asterisk_token.is_some())
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.asterisk_token())
+                        | self.propagate_node(d.name())
+                        | eraseable_list(d.type_parameters())
+                        | self.propagate_list(d.parameters())
+                        | eraseable_node(d.r#type())
+                        | eraseable_node(d.full_signature())
+                        | self.propagate_node(d.body())
+                        | async_facts(
+                            self.modifier_flags(d.modifiers()),
+                            d.asterisk_token().is_some(),
+                        )
                 }
             }
             D::ClassDeclaration(d) => self.class(
-                d.modifiers,
-                d.name,
-                d.type_parameters,
-                d.heritage_clauses,
-                d.members,
+                d.modifiers(),
+                d.name(),
+                d.type_parameters(),
+                d.heritage_clauses(),
+                d.members(),
             ),
             D::ClassExpression(d) => self.class(
-                d.modifiers,
-                d.name,
-                d.type_parameters,
-                d.heritage_clauses,
-                d.members,
+                d.modifiers(),
+                d.name(),
+                d.type_parameters(),
+                d.heritage_clauses(),
+                d.members(),
             ),
             // port: tsc/internal/ast/ast.go:HeritageClause.computeSubtreeFacts
-            D::HeritageClause(d) => match d.token.known() {
-                Some(K::ExtendsKeyword) => self.propagate_list(d.types),
+            D::HeritageClause(d) => match d.token().known() {
+                Some(K::ExtendsKeyword) => self.propagate_list(d.types()),
                 Some(K::ImplementsKeyword) => TYPE_SCRIPT,
                 _ => NONE,
             },
             // port: tsc/internal/ast/ast.go:EnumDeclaration.computeSubtreeFacts
             D::EnumDeclaration(d) => {
-                if self.modifier_flags(d.modifiers) & m::AMBIENT != 0 {
+                if self.modifier_flags(d.modifiers()) & m::AMBIENT != 0 {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.name)
-                        | self.propagate_list(d.members)
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.name())
+                        | self.propagate_list(d.members())
                         | TYPE_SCRIPT
                 }
             }
             // port: tsc/internal/ast/ast.go:ModuleDeclaration.computeSubtreeFacts
             D::ModuleDeclaration(d) => {
-                if self.modifier_flags(d.modifiers) & m::AMBIENT != 0 {
+                if self.modifier_flags(d.modifiers()) & m::AMBIENT != 0 {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.name)
-                        | self.propagate_node(d.body)
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.name())
+                        | self.propagate_node(d.body())
                         | TYPE_SCRIPT
                 }
             }
             // port: tsc/internal/ast/ast.go:ImportEqualsDeclaration.computeSubtreeFacts
             D::ImportEqualsDeclaration(d) => {
-                if d.is_type_only || self.kind(d.module_reference) != K::ExternalModuleReference {
+                if d.is_type_only() || self.kind(d.module_reference()) != K::ExternalModuleReference
+                {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.name)
-                        | self.propagate_node(d.module_reference)
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.name())
+                        | self.propagate_node(d.module_reference())
                 }
             }
             // port: tsc/internal/ast/ast.go:ImportSpecifier.computeSubtreeFacts
             D::ImportSpecifier(d) => {
-                if d.is_type_only {
+                if d.is_type_only() {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_node(d.property_name) | self.propagate_node(d.name)
+                    self.propagate_node(d.property_name()) | self.propagate_node(d.name())
                 }
             }
             // port: tsc/internal/ast/ast.go:ImportClause.computeSubtreeFacts
             D::ImportClause(d) => {
-                if d.phase_modifier == K::TypeKeyword {
+                if d.phase_modifier() == K::TypeKeyword {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_node(d.name) | self.propagate_node(d.named_bindings)
+                    self.propagate_node(d.name()) | self.propagate_node(d.named_bindings())
                 }
             }
             // port: tsc/internal/ast/ast.go:ExportSpecifier.computeSubtreeFacts
             D::ExportSpecifier(d) => {
-                if d.is_type_only {
+                if d.is_type_only() {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_node(d.property_name) | self.propagate_node(d.name)
+                    self.propagate_node(d.property_name()) | self.propagate_node(d.name())
                 }
             }
             // port: tsc/internal/ast/ast.go:ConstructorDeclaration.computeSubtreeFacts
             D::ConstructorDeclaration(d) => {
-                if d.body.is_none() {
+                if d.body().is_none() {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | eraseable_list(d.type_parameters)
-                        | self.propagate_list(d.parameters)
-                        | eraseable_node(d.r#type)
-                        | eraseable_node(d.full_signature)
-                        | self.propagate_node(d.body)
+                    self.propagate_modifiers(d.modifiers())
+                        | eraseable_list(d.type_parameters())
+                        | self.propagate_list(d.parameters())
+                        | eraseable_node(d.r#type())
+                        | eraseable_node(d.full_signature())
+                        | self.propagate_node(d.body())
                 }
             }
             D::GetAccessorDeclaration(d) => self.accessor(
-                d.modifiers,
-                d.name,
-                d.type_parameters,
-                d.parameters,
-                d.r#type,
-                d.full_signature,
-                d.body,
+                d.modifiers(),
+                d.name(),
+                d.type_parameters(),
+                d.parameters(),
+                d.r#type(),
+                d.full_signature(),
+                d.body(),
             ),
             D::SetAccessorDeclaration(d) => self.accessor(
-                d.modifiers,
-                d.name,
-                d.type_parameters,
-                d.parameters,
-                d.r#type,
-                d.full_signature,
-                d.body,
+                d.modifiers(),
+                d.name(),
+                d.type_parameters(),
+                d.parameters(),
+                d.r#type(),
+                d.full_signature(),
+                d.body(),
             ),
             // port: tsc/internal/ast/ast.go:MethodDeclaration.computeSubtreeFacts
             D::MethodDeclaration(d) => {
-                if d.body.is_none() {
+                if d.body().is_none() {
                     TYPE_SCRIPT
                 } else {
-                    self.propagate_modifiers(d.modifiers)
-                        | self.propagate_node(d.asterisk_token)
-                        | self.propagate_node(d.name)
-                        | eraseable_node(d.postfix_token)
-                        | eraseable_list(d.type_parameters)
-                        | self.propagate_list(d.parameters)
-                        | self.propagate_node(d.body)
-                        | eraseable_node(d.r#type)
-                        | eraseable_node(d.full_signature)
-                        | async_facts(self.modifier_flags(d.modifiers), d.asterisk_token.is_some())
+                    self.propagate_modifiers(d.modifiers())
+                        | self.propagate_node(d.asterisk_token())
+                        | self.propagate_node(d.name())
+                        | eraseable_node(d.postfix_token())
+                        | eraseable_list(d.type_parameters())
+                        | self.propagate_list(d.parameters())
+                        | self.propagate_node(d.body())
+                        | eraseable_node(d.r#type())
+                        | eraseable_node(d.full_signature())
+                        | async_facts(
+                            self.modifier_flags(d.modifiers()),
+                            d.asterisk_token().is_some(),
+                        )
                 }
             }
             // port: tsc/internal/ast/ast.go:NoSubstitutionTemplateLiteral.computeSubtreeFacts
-            D::NoSubstitutionTemplateLiteral(d) => template(d.template_flags),
+            D::NoSubstitutionTemplateLiteral(d) => template(d.template_flags()),
             // port: tsc/internal/ast/ast.go:TemplateHead.computeSubtreeFacts
-            D::TemplateHead(d) => template(d.template_flags),
+            D::TemplateHead(d) => template(d.template_flags()),
             // port: tsc/internal/ast/ast.go:TemplateMiddle.computeSubtreeFacts
-            D::TemplateMiddle(d) => template(d.template_flags),
+            D::TemplateMiddle(d) => template(d.template_flags()),
             // port: tsc/internal/ast/ast.go:TemplateTail.computeSubtreeFacts
-            D::TemplateTail(d) => template(d.template_flags),
+            D::TemplateTail(d) => template(d.template_flags()),
             // port: tsc/internal/ast/ast.go:BinaryExpression.computeSubtreeFacts
             D::BinaryExpression(d) => {
-                let mut facts = self.propagate_modifiers(d.modifiers)
-                    | self.propagate_node(d.left)
-                    | self.propagate_node(d.r#type)
-                    | self.propagate_node(d.operator_token)
-                    | self.propagate_node(d.right);
-                let operator = self.kind(d.operator_token);
-                if operator == K::InKeyword && self.kind(d.left) == K::PrivateIdentifier {
+                let mut facts = self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.left())
+                    | self.propagate_node(d.r#type())
+                    | self.propagate_node(d.operator_token())
+                    | self.propagate_node(d.right());
+                let operator = self.kind(d.operator_token());
+                if operator == K::InKeyword && self.kind(d.left()) == K::PrivateIdentifier {
                     facts |= CLASS_FIELDS | PRIVATE_IDENTIFIER_IN_EXPRESSION;
                 }
                 if operator == K::EqualsToken
                     && matches!(
-                        self.kind(d.left).known(),
+                        self.kind(d.left()).known(),
                         Some(K::ObjectLiteralExpression | K::ArrayLiteralExpression)
                     )
-                    && self.contains_object_rest_or_spread(d.left.expect("binary left"))
+                    && self.contains_object_rest_or_spread(d.left().expect("binary left"))
                 {
                     facts |= OBJECT_REST_OR_SPREAD;
                 }
@@ -573,13 +589,13 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:ArrowFunction.computeSubtreeFacts
             D::ArrowFunction(d) => {
-                self.propagate_modifiers(d.modifiers)
-                    | eraseable_list(d.type_parameters)
-                    | self.propagate_list(d.parameters)
-                    | eraseable_node(d.r#type)
-                    | eraseable_node(d.full_signature)
-                    | self.propagate_node(d.body)
-                    | if self.modifier_flags(d.modifiers) & m::ASYNC != 0 {
+                self.propagate_modifiers(d.modifiers())
+                    | eraseable_list(d.type_parameters())
+                    | self.propagate_list(d.parameters())
+                    | eraseable_node(d.r#type())
+                    | eraseable_node(d.full_signature())
+                    | self.propagate_node(d.body())
+                    | if self.modifier_flags(d.modifiers()) & m::ASYNC != 0 {
                         ANY_AWAIT
                     } else {
                         NONE
@@ -587,35 +603,38 @@ impl Facts<'_> {
             }
             // port: tsc/internal/ast/ast.go:FunctionExpression.computeSubtreeFacts
             D::FunctionExpression(d) => {
-                self.propagate_modifiers(d.modifiers)
-                    | self.propagate_node(d.asterisk_token)
-                    | self.propagate_node(d.name)
-                    | eraseable_list(d.type_parameters)
-                    | self.propagate_list(d.parameters)
-                    | eraseable_node(d.r#type)
-                    | eraseable_node(d.full_signature)
-                    | self.propagate_node(d.body)
-                    | async_facts(self.modifier_flags(d.modifiers), d.asterisk_token.is_some())
+                self.propagate_modifiers(d.modifiers())
+                    | self.propagate_node(d.asterisk_token())
+                    | self.propagate_node(d.name())
+                    | eraseable_list(d.type_parameters())
+                    | self.propagate_list(d.parameters())
+                    | eraseable_node(d.r#type())
+                    | eraseable_node(d.full_signature())
+                    | self.propagate_node(d.body())
+                    | async_facts(
+                        self.modifier_flags(d.modifiers()),
+                        d.asterisk_token().is_some(),
+                    )
             }
             // port: tsc/internal/ast/ast.go:PropertyAccessExpression.computeSubtreeFacts
             D::PropertyAccessExpression(d) => {
-                let private = if self.kind(d.name) == K::Identifier {
+                let private = if self.kind(d.name()) == K::Identifier {
                     NONE
                 } else {
                     PRIVATE_IDENTIFIER_IN_EXPRESSION
                 };
-                self.propagate_node(d.expression)
-                    | self.propagate_node(d.question_dot_token)
-                    | self.propagate_node(d.name)
+                self.propagate_node(d.expression())
+                    | self.propagate_node(d.question_dot_token())
+                    | self.propagate_node(d.name())
                     | private
             }
             // port: tsc/internal/ast/ast.go:CallExpression.computeSubtreeFacts
             D::CallExpression(d) => {
-                self.propagate_node(d.expression)
-                    | self.propagate_node(d.question_dot_token)
-                    | eraseable_list(d.type_arguments)
-                    | self.propagate_list(d.arguments)
-                    | if self.kind(d.expression) == K::ImportKeyword {
+                self.propagate_node(d.expression())
+                    | self.propagate_node(d.question_dot_token())
+                    | eraseable_list(d.type_arguments())
+                    | self.propagate_list(d.arguments())
+                    | if self.kind(d.expression()) == K::ImportKeyword {
                         DYNAMIC_IMPORT
                     } else {
                         NONE
@@ -696,7 +715,7 @@ impl Facts<'_> {
         let nodes = view.list(list).expect("subtree list").nodes();
         let nodes = view.node_slice(nodes).expect("subtree list backing");
         let mut facts = NONE;
-        for &node in &*nodes {
+        for node in nodes.iter() {
             facts |= propagate(self, node);
         }
         facts
@@ -754,7 +773,7 @@ impl SubtreeContext for Facts<'_> {
             return propagate_type_syntax();
         }
         let facts = self.facts(id);
-        use NodeData as D;
+        use NodeDataRead as D;
         let function = COMPUTED | LEXICAL_THIS | LEXICAL_SUPER | AWAIT | OBJECT_REST_OR_SPREAD;
         let property = COMPUTED | LEXICAL_THIS | LEXICAL_SUPER;
         match node.data() {
@@ -779,12 +798,12 @@ impl SubtreeContext for Facts<'_> {
             // port: tsc/internal/ast/ast.go:ConstructorDeclaration.propagateSubtreeFacts
             D::ConstructorDeclaration(_) => facts & !function,
             // port: tsc/internal/ast/ast.go:AccessorDeclarationBase.propagateSubtreeFacts
-            D::GetAccessorDeclaration(d) => facts & !function | self.propagate_node(d.name),
-            D::SetAccessorDeclaration(d) => facts & !function | self.propagate_node(d.name),
+            D::GetAccessorDeclaration(d) => facts & !function | self.propagate_node(d.name()),
+            D::SetAccessorDeclaration(d) => facts & !function | self.propagate_node(d.name()),
             // port: tsc/internal/ast/ast.go:MethodDeclaration.propagateSubtreeFacts
-            D::MethodDeclaration(d) => facts & !function | self.propagate_node(d.name),
+            D::MethodDeclaration(d) => facts & !function | self.propagate_node(d.name()),
             // port: tsc/internal/ast/ast.go:PropertyDeclaration.propagateSubtreeFacts
-            D::PropertyDeclaration(d) => facts & !property | self.propagate_node(d.name),
+            D::PropertyDeclaration(d) => facts & !property | self.propagate_node(d.name()),
             // port: tsc/internal/ast/ast.go:ArrowFunction.propagateSubtreeFacts
             D::ArrowFunction(_) => facts & !(COMPUTED | AWAIT | OBJECT_REST_OR_SPREAD),
             // port: tsc/internal/ast/ast.go:AsExpression.propagateSubtreeFacts
@@ -840,7 +859,7 @@ impl Facts<'_> {
                 let elements = self.elements_of_pattern(id);
                 let view = self.view;
                 let elements = view.node_slice(elements).expect("assignment elements");
-                for &element in &*elements {
+                for element in elements.iter() {
                     if let Some(target) = self.target_of_element(element) {
                         if is_assignment_pattern(self.kind(Some(target))) {
                             if self.facts(target) & OBJECT_REST_OR_SPREAD != 0 {
@@ -862,24 +881,21 @@ impl Facts<'_> {
     fn elements_of_pattern(&self, id: NodeId) -> crate::NodeSlice {
         let node = self.view.node(id).expect("binding or assignment pattern");
         let list = match node.kind().known() {
-            Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => {
-                node.data()
-                    .as_binding_pattern()
-                    .expect("BindingPattern payload")
-                    .elements
-            }
-            Some(SyntaxKind::ArrayLiteralExpression) => {
-                node.data()
-                    .as_array_literal_expression()
-                    .expect("ArrayLiteralExpression payload")
-                    .elements
-            }
-            Some(SyntaxKind::ObjectLiteralExpression) => {
-                node.data()
-                    .as_object_literal_expression()
-                    .expect("ObjectLiteralExpression payload")
-                    .properties
-            }
+            Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => node
+                .data_source()
+                .as_binding_pattern()
+                .expect("BindingPattern payload")
+                .elements(),
+            Some(SyntaxKind::ArrayLiteralExpression) => node
+                .data_source()
+                .as_array_literal_expression()
+                .expect("ArrayLiteralExpression payload")
+                .elements(),
+            Some(SyntaxKind::ObjectLiteralExpression) => node
+                .data_source()
+                .as_object_literal_expression()
+                .expect("ObjectLiteralExpression payload")
+                .properties(),
             _ => return crate::NodeSlice::empty(),
         };
         list.map_or_else(crate::NodeSlice::empty, |list| {
@@ -894,10 +910,10 @@ impl Facts<'_> {
                 return is_left_hand_side_expression_kind(node.kind());
             }
             id = node
-                .data()
+                .data_source()
                 .as_partially_emitted_expression()
                 .expect("PartiallyEmittedExpression payload")
-                .expression
+                .expression()
                 .expect("nil partially emitted expression");
         }
     }
@@ -915,36 +931,36 @@ impl Facts<'_> {
                     | K::ShorthandPropertyAssignment,
                 ) => node.data().declaration_name_generated(),
                 Some(K::PropertyAssignment) => self.target_of_element(
-                    node.data()
+                    node.data_source()
                         .as_property_assignment()
                         .expect("PropertyAssignment payload")
-                        .initializer,
+                        .initializer(),
                 ),
                 Some(K::SpreadAssignment) => self.target_of_element(
-                    node.data()
+                    node.data_source()
                         .as_spread_assignment()
                         .expect("SpreadAssignment payload")
-                        .expression,
+                        .expression(),
                 ),
                 Some(K::MethodDeclaration | K::GetAccessor | K::SetAccessor) => None,
                 Some(K::BinaryExpression) => {
                     let data = node
-                        .data()
+                        .data_source()
                         .as_binary_expression()
                         .expect("BinaryExpression payload");
-                    if self.kind(data.operator_token) == K::EqualsToken
-                        && self.is_left_hand_side(data.left)
+                    if self.kind(data.operator_token()) == K::EqualsToken
+                        && self.is_left_hand_side(data.left())
                     {
-                        self.target_of_element(data.left)
+                        self.target_of_element(data.left())
                     } else {
                         Some(id)
                     }
                 }
                 Some(K::SpreadElement) => self.target_of_element(
-                    node.data()
+                    node.data_source()
                         .as_spread_element()
                         .expect("SpreadElement payload")
-                        .expression,
+                        .expression(),
                 ),
                 _ => Some(id),
             }

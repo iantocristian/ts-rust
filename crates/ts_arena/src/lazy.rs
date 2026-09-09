@@ -2,7 +2,7 @@ use crate::{
     arena::Arena,
     counters::Track,
     ids::{allocate_slot, next_arena},
-    ArenaId, AuxId, Counters, Error, NodeId, NodeRecord,
+    ArenaId, AuxId, Counters, Error, NodeId, NodeParentRecord, NodeRecord, StorageOwner,
 };
 use std::{
     collections::BTreeMap,
@@ -14,6 +14,7 @@ const PAGE_SIZE: usize = 256;
 fn assert_not_initializing(id: ArenaId) {
     crate::InitializationGuard::assert_inactive(id, crate::InitializationDomain::Lazy, 0);
 }
+
 struct InitializerGuard {
     _guard: crate::InitializationGuard,
 }
@@ -156,6 +157,7 @@ pub struct StorageTransaction<'a, N: NodeRecord> {
     core: &'a Arena<N>,
     core_auxiliary: &'a Arena<N::Aux>,
     source: &'a ts_jsstring::SourceText,
+    store: &'a N::Store,
 }
 impl<N: NodeRecord> StorageTransaction<'_, N> {
     /// Physical file owning both this transaction's core and lazy arenas.
@@ -166,6 +168,17 @@ impl<N: NodeRecord> StorageTransaction<'_, N> {
     /// lock. Reading it here cannot reenter the lazy directory.
     pub fn source(&self) -> &ts_jsstring::SourceText {
         self.source
+    }
+    /// Immutable core payload storage is borrowed before the lazy publication
+    /// lock is acquired. Transaction reads do not route through that lock.
+    pub fn store(&self) -> &N::Store {
+        self.store
+    }
+    pub fn core_auxiliary_arena(&self) -> ArenaId {
+        self.core_auxiliary.id
+    }
+    pub fn lazy_auxiliary_arena(&self) -> ArenaId {
+        self.auxiliary.pages.id
     }
     pub fn staged_nodes(&self) -> impl Iterator<Item = &N> {
         self.nodes.pending.iter()
@@ -209,6 +222,22 @@ impl<N: NodeRecord> StorageTransaction<'_, N> {
         }
         self.auxiliary.get_mut(id.slot())
     }
+    /// Split exclusive access to two records staged by this transaction. Core,
+    /// previously published and failed-attempt records remain immutable.
+    pub fn node_and_aux_mut(
+        &mut self,
+        node: NodeId,
+        auxiliary: AuxId,
+    ) -> Result<(&mut N, &mut N::Aux), Error> {
+        if node.arena() != self.nodes.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        let node = self.nodes.get_mut(node.slot())?;
+        if auxiliary.arena() != self.auxiliary.pages.id {
+            return Err(Error::WrongOwner);
+        }
+        Ok((node, self.auxiliary.get_mut(auxiliary.slot())?))
+    }
     fn publish(self, roots: &[NodeId]) -> Result<(), Error> {
         for id in roots {
             if id.arena() != self.nodes.pages.id || self.nodes.index(id.slot()).is_err() {
@@ -219,6 +248,22 @@ impl<N: NodeRecord> StorageTransaction<'_, N> {
         self.auxiliary.publish();
         self.nodes.publish();
         Ok(())
+    }
+    fn publish_token(self, node: N) -> NodeId {
+        let Staging {
+            pages,
+            base,
+            pending,
+        } = self.nodes;
+        // Reserve before the publication point. Keeping the returned header
+        // separate avoids allocating a staging Vec for full-record tokens.
+        let slot = pages.reserve();
+        self.auxiliary.publish();
+        for (index, value) in pending.into_iter().enumerate() {
+            pages.initialize((base + index + 1) as u32, value);
+        }
+        pages.initialize(slot, node);
+        NodeId::new(pages.id, slot)
     }
 }
 
@@ -319,15 +364,15 @@ impl<N: NodeRecord> LazyArena<N> {
         state.jsdoc.insert((source, parent), roots);
         Ok(())
     }
-    pub(crate) fn jsdoc(
+    pub(crate) fn jsdoc<S>(
         &self,
         source: Option<NodeId>,
         parent: NodeId,
-        core: &Arena<N>,
-        core_auxiliary: &Arena<N::Aux>,
-        source_text: &ts_jsstring::SourceText,
+        owner: &StorageOwner<N, S>,
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<Arc<[NodeId]>, Error> {
+        let source_text = owner.source_text();
+        let store = owner.store();
         if let Some(ids) = self.read().jsdoc.get(&(source, parent)) {
             return Ok(ids.clone());
         }
@@ -343,9 +388,10 @@ impl<N: NodeRecord> LazyArena<N> {
             let mut transaction = StorageTransaction {
                 nodes: Staging::new(pages),
                 auxiliary: Staging::new(auxiliary),
-                core,
-                core_auxiliary,
+                core: &owner.core,
+                core_auxiliary: &owner.auxiliary,
                 source: source_text,
+                store,
             };
             let roots = initialize(&mut transaction)?;
             transaction.publish(&roots)?;
@@ -379,14 +425,47 @@ impl<N: NodeRecord> LazyArena<N> {
             })
             .transpose()
     }
-    pub(crate) fn token(
+    pub(crate) fn token<S>(
         &self,
         key: TokenKey,
         kind: u32,
         reparsed: bool,
-        source_len: usize,
+        owner: &StorageOwner<N, S>,
         initialize: impl FnOnce() -> N,
+    ) -> Result<NodeId, Error>
+    where
+        N: NodeParentRecord,
+    {
+        self.token_prepared_with(
+            key,
+            kind,
+            reparsed,
+            owner,
+            |_, _| Ok(initialize()),
+            |node| node.set_storage_parent(Some(key.parent)),
+        )
+    }
+    pub(crate) fn token_prepared<S>(
+        &self,
+        key: TokenKey,
+        kind: u32,
+        reparsed: bool,
+        owner: &StorageOwner<N, S>,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>, NodeId) -> Result<N, Error>,
     ) -> Result<NodeId, Error> {
+        self.token_prepared_with(key, kind, reparsed, owner, initialize, |_| {})
+    }
+    fn token_prepared_with<S>(
+        &self,
+        key: TokenKey,
+        kind: u32,
+        reparsed: bool,
+        owner: &StorageOwner<N, S>,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>, NodeId) -> Result<N, Error>,
+        finish_header: impl FnOnce(&mut N),
+    ) -> Result<NodeId, Error> {
+        let source_text = owner.source_text();
+        let store = owner.store();
         if let Some(id) = Self::cached_token(&self.read(), key, kind)? {
             return Ok(id);
         }
@@ -397,22 +476,33 @@ impl<N: NodeRecord> LazyArena<N> {
         if reparsed {
             return Err(Error::ReparsedParent);
         }
-        if key.start > key.end || key.end > source_len {
+        if key.start > key.end || key.end > owner.source().len() {
             return Err(Error::InvalidTokenRange);
         }
         let result = catch_unwind(AssertUnwindSafe(|| {
             let _initializer = InitializerGuard::enter(self.id);
-            let mut node = initialize();
+            let LazyState {
+                pages, auxiliary, ..
+            } = &mut *state;
+            let mut transaction = StorageTransaction {
+                nodes: Staging::new(pages),
+                auxiliary: Staging::new(auxiliary),
+                core: &owner.core,
+                core_auxiliary: &owner.auxiliary,
+                source: source_text,
+                store,
+            };
+            let mut node = initialize(&mut transaction, key.parent)?;
             if node.storage_kind() != kind {
                 return Err(Error::TokenKindMismatch {
                     cached: node.storage_kind(),
                     requested: kind,
                 });
             }
-            node.set_storage_parent(Some(key.parent));
-            let slot = state.pages.reserve();
-            state.pages.initialize(slot, node);
-            let id = NodeId::new(self.id, slot);
+            // Full-record wrappers preserve kind validation before their parent
+            // setter. Prepared compact headers already contain their link.
+            finish_header(&mut node);
+            let id = transaction.publish_token(node);
             state.tokens.insert(key, CachedToken { id, kind });
             Ok(id)
         }));
@@ -421,5 +511,363 @@ impl<N: NodeRecord> LazyArena<N> {
             Ok(result) => result,
             Err(panic) => resume_unwind(panic),
         }
+    }
+}
+
+#[cfg(test)]
+mod prepared_token_tests {
+    use super::*;
+    use crate::StorageBuilder;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    struct Payload {
+        value: u32,
+        dropped: Arc<AtomicUsize>,
+    }
+    impl Drop for Payload {
+        fn drop(&mut self) {
+            self.dropped.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    // Deliberately has no NodeParentRecord implementation: its parent is
+    // prepared together with the auxiliary payload by the owner-aware callback.
+    struct Header {
+        kind: u32,
+        parent: Option<NodeId>,
+        payload: Option<AuxId>,
+        reparsed: bool,
+    }
+    impl Header {
+        fn new(kind: u32) -> Self {
+            Self {
+                kind,
+                parent: None,
+                payload: None,
+                reparsed: false,
+            }
+        }
+    }
+    impl NodeRecord for Header {
+        type Aux = Payload;
+        type Store = Vec<u8>;
+        fn storage_kind(&self) -> u32 {
+            self.kind
+        }
+        fn storage_reparsed(&self) -> bool {
+            self.reparsed
+        }
+    }
+
+    #[test]
+    fn prepared_token_rolls_back_payloads_and_ids_before_retry() {
+        let dropped = Arc::new(AtomicUsize::new(0));
+        let counters = Counters::new();
+        let baseline = counters.snapshot();
+        {
+            let mut builder = StorageBuilder::<Header>::new(Arc::from(&b"abc"[..]), &counters);
+            let parent = builder.push(Header::new(1));
+            let owner = builder.finish();
+            let key = TokenKey {
+                parent,
+                start: 0,
+                end: 1,
+            };
+            let mut failed_ids = Vec::new();
+            for failure in 0..3 {
+                let mut staged = None;
+                let result = catch_unwind(AssertUnwindSafe(|| {
+                    owner.try_token_prepared(key, 2, |transaction, selected_parent| {
+                        assert_eq!(selected_parent, parent);
+                        let auxiliary = transaction.push_aux(Payload {
+                            value: 5,
+                            dropped: dropped.clone(),
+                        });
+                        let node = transaction.push(Header::new(3));
+                        staged = Some((node, auxiliary));
+                        match failure {
+                            0 => Err(Error::InvalidGraph),
+                            1 => panic!("partial token initializer"),
+                            _ => Ok(Header::new(99)),
+                        }
+                    })
+                }));
+                match failure {
+                    0 => assert!(matches!(result, Ok(Err(Error::InvalidGraph)))),
+                    1 => assert!(result.is_err()),
+                    _ => assert!(matches!(
+                        result,
+                        Ok(Err(Error::TokenKindMismatch {
+                            cached: 99,
+                            requested: 2
+                        }))
+                    )),
+                }
+                let (node, auxiliary) = staged.unwrap();
+                assert!(matches!(owner.node(node), Err(Error::InvalidSlot)));
+                assert!(matches!(
+                    owner.view().aux(auxiliary),
+                    Err(Error::InvalidSlot)
+                ));
+                failed_ids.push((node, auxiliary));
+                assert_eq!(dropped.load(Ordering::Relaxed), failure + 1);
+            }
+            let token = owner
+                .try_token_prepared(key, 2, |transaction, selected_parent| {
+                    let auxiliary = transaction.push_aux(Payload {
+                        value: 7,
+                        dropped: dropped.clone(),
+                    });
+                    Ok(Header {
+                        parent: Some(selected_parent),
+                        payload: Some(auxiliary),
+                        ..Header::new(2)
+                    })
+                })
+                .unwrap()
+                .retain();
+            assert_eq!(token.parent, Some(parent));
+            let auxiliary = token.payload.unwrap();
+            assert_eq!(owner.view().aux(auxiliary).unwrap().value, 7);
+            for (node, failed_auxiliary) in failed_ids {
+                assert_ne!(node, token.id());
+                assert_ne!(failed_auxiliary, auxiliary);
+                assert!(matches!(owner.node(node), Err(Error::InvalidSlot)));
+                assert!(matches!(
+                    owner.view().aux(failed_auxiliary),
+                    Err(Error::InvalidSlot)
+                ));
+            }
+            assert_eq!(
+                owner
+                    .try_token_prepared(key, 2, |_, _| panic!("cache hit"))
+                    .unwrap()
+                    .id(),
+                token.id()
+            );
+            assert!(matches!(
+                owner.try_token_prepared(key, 3, |_, _| panic!("kind checked before callback")),
+                Err(Error::TokenKindMismatch {
+                    cached: 2,
+                    requested: 3
+                })
+            ));
+            drop(owner);
+            assert_eq!(token.owner().view().aux(auxiliary).unwrap().value, 7);
+            assert_eq!(dropped.load(Ordering::Relaxed), 3);
+        }
+        assert_eq!(dropped.load(Ordering::Relaxed), 4);
+        assert_eq!(counters.snapshot(), baseline);
+    }
+
+    #[test]
+    fn prepared_token_context_selects_imported_owner_and_checks_staged_mutation() {
+        let dropped = Arc::new(AtomicUsize::new(0));
+        let counters = Counters::new();
+        let mut builder = StorageBuilder::<Header>::new(Arc::from(&b"abc"[..]), &counters);
+        let parent = builder.push(Header::new(1));
+        let reparsed = builder.push(Header {
+            reparsed: true,
+            ..Header::new(1)
+        });
+        let core_aux = builder.push_aux(Payload {
+            value: 1,
+            dropped: dropped.clone(),
+        });
+        let (store, source) = builder.store_and_source_mut();
+        store.extend_from_slice(source.as_bytes());
+        let (node, store, source) = builder.node_store_and_source_mut(parent).unwrap();
+        node.payload = Some(core_aux);
+        assert_eq!(store, source.as_bytes());
+        let foreign_builder = StorageBuilder::<Header>::new(Arc::from(&b"x"[..]), &counters);
+        let foreign = NodeId::from_parts(foreign_builder.id().arena(), parent.slot()).unwrap();
+        assert!(matches!(
+            builder.node_store_and_source_mut(foreign),
+            Err(Error::WrongOwner)
+        ));
+        let owner = builder.finish();
+        let mut importer = StorageBuilder::<Header>::new(Arc::from(&b""[..]), &counters);
+        importer.retain_file(owner.clone());
+        let importer = importer.finish();
+        assert!(matches!(
+            importer.view().try_token_prepared(
+                TokenKey {
+                    parent: foreign,
+                    start: 0,
+                    end: 0
+                },
+                2,
+                |_, _| panic!("foreign parent rejected before callback")
+            ),
+            Err(Error::WrongOwner)
+        ));
+        assert!(matches!(
+            importer.view().try_token_prepared(
+                TokenKey {
+                    parent,
+                    start: 0,
+                    end: 4
+                },
+                2,
+                |_, _| panic!("range rejected before callback")
+            ),
+            Err(Error::InvalidTokenRange)
+        ));
+        assert!(matches!(
+            importer.view().try_token_prepared(
+                TokenKey {
+                    parent: reparsed,
+                    start: 0,
+                    end: 4
+                },
+                2,
+                |_, _| panic!("reparsed checked before range and callback")
+            ),
+            Err(Error::ReparsedParent)
+        ));
+        let mut staged_node = None;
+        let token = importer
+            .view()
+            .try_token_prepared(
+                TokenKey {
+                    parent,
+                    start: 1,
+                    end: 3,
+                },
+                2,
+                |transaction, selected_parent| {
+                    assert_eq!(selected_parent, parent);
+                    assert_eq!(transaction.owner_id(), owner.id());
+                    assert_eq!(transaction.source().as_bytes(), b"abc");
+                    assert_eq!(transaction.store(), b"abc");
+                    assert_eq!(transaction.core_auxiliary_arena(), core_aux.arena());
+                    assert_eq!(
+                        transaction.lazy_auxiliary_arena(),
+                        owner.lazy_auxiliary_arena()
+                    );
+                    let auxiliary = transaction.push_aux(Payload {
+                        value: 2,
+                        dropped: dropped.clone(),
+                    });
+                    let node = transaction.push(Header::new(4));
+                    staged_node = Some(node);
+                    let missing_node = NodeId::from_parts(node.arena(), u32::MAX).unwrap();
+                    let missing_aux = AuxId::from_parts(auxiliary.arena(), u32::MAX).unwrap();
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(missing_node, auxiliary),
+                        Err(Error::InvalidSlot)
+                    ));
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(node, missing_aux),
+                        Err(Error::InvalidSlot)
+                    ));
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(parent, auxiliary),
+                        Err(Error::WrongOwner)
+                    ));
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(node, core_aux),
+                        Err(Error::WrongOwner)
+                    ));
+                    let (header, payload) = transaction.node_and_aux_mut(node, auxiliary)?;
+                    header.parent = Some(parent);
+                    header.payload = Some(auxiliary);
+                    payload.value = 9;
+                    assert_eq!(transaction.node(node)?.parent, Some(parent));
+                    assert_eq!(transaction.aux(auxiliary)?.value, 9);
+                    Ok(Header {
+                        parent: Some(parent),
+                        payload: Some(auxiliary),
+                        ..Header::new(2)
+                    })
+                },
+            )
+            .unwrap();
+        assert_eq!(token.parent, Some(parent));
+        assert_eq!(owner.view().aux(token.payload.unwrap()).unwrap().value, 9);
+        assert_eq!(dropped.load(Ordering::Relaxed), 0);
+        let prior_aux = token.payload.unwrap();
+        owner
+            .try_token_prepared(
+                TokenKey {
+                    parent,
+                    start: 0,
+                    end: 1,
+                },
+                2,
+                |transaction, _| {
+                    let auxiliary = transaction.push_aux(Payload {
+                        value: 3,
+                        dropped: dropped.clone(),
+                    });
+                    let node = transaction.push(Header::new(4));
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(staged_node.unwrap(), auxiliary),
+                        Err(Error::InvalidSlot)
+                    ));
+                    assert!(matches!(
+                        transaction.node_and_aux_mut(node, prior_aux),
+                        Err(Error::InvalidSlot)
+                    ));
+                    Ok(Header::new(2))
+                },
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn full_record_token_checks_kind_before_assigning_parent() {
+        struct Full {
+            kind: u32,
+            writes: Arc<AtomicUsize>,
+        }
+        impl NodeRecord for Full {
+            type Aux = ();
+            type Store = ();
+            fn storage_kind(&self) -> u32 {
+                self.kind
+            }
+            fn storage_reparsed(&self) -> bool {
+                false
+            }
+        }
+        impl NodeParentRecord for Full {
+            fn set_storage_parent(&mut self, parent: Option<NodeId>) {
+                assert!(parent.is_some());
+                self.writes.fetch_add(1, Ordering::Relaxed);
+            }
+        }
+        let writes = Arc::new(AtomicUsize::new(0));
+        let mut builder = StorageBuilder::<Full>::new(Arc::from(&b"x"[..]), &Counters::new());
+        let parent = builder.push(Full {
+            kind: 1,
+            writes: writes.clone(),
+        });
+        let owner = builder.finish();
+        let key = TokenKey {
+            parent,
+            start: 0,
+            end: 1,
+        };
+        assert!(matches!(
+            owner.try_token_record(key, 2, || Full {
+                kind: 3,
+                writes: writes.clone()
+            }),
+            Err(Error::TokenKindMismatch {
+                cached: 3,
+                requested: 2
+            })
+        ));
+        assert_eq!(writes.load(Ordering::Relaxed), 0);
+        owner
+            .try_token_record(key, 2, || Full {
+                kind: 2,
+                writes: writes.clone(),
+            })
+            .unwrap();
+        assert_eq!(writes.load(Ordering::Relaxed), 1);
+        owner.try_token_record(key, 2, || panic!("cached")).unwrap();
+        assert_eq!(writes.load(Ordering::Relaxed), 1);
     }
 }

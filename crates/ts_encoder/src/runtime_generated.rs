@@ -3,7 +3,7 @@
 // upstream: tsc/internal/api/encoder/encoder_generated.go
 // upstream: tsc/internal/api/encoder/decoder_generated.go
 use crate::{decoder::Decoder, string_table::StringTable, walk::Edge, DataType};
-use ts_ast::{AstView, FactoryMethods, Node, NodeId, NodeKind, SyntaxKind};
+use ts_ast::{AstView, FactoryMethods, NodeAccess, NodeId, NodeKind, SyntaxKind};
 // upstream: tsc/internal/api/encoder/encoder_generated.go:getNodeDataType
 pub(crate) fn data_type(kind: NodeKind) -> DataType {
     match kind.known() {
@@ -33,21 +33,21 @@ pub(crate) fn data_type(kind: NodeKind) -> DataType {
 // upstream: tsc/internal/api/encoder/encoder_generated.go:getNodeCommonData
 // port: tsc/internal/api/encoder/encoder.go:boolToByte
 // boolToByte is represented by u32::from(bool), preserving its exact 0/1 values.
-pub(crate) fn common_data(node: &Node) -> u32 {
+pub(crate) fn common_data(node: &(impl NodeAccess + ?Sized)) -> u32 {
     match node.kind().known() {
         Some(SyntaxKind::Block) => {
             let n = node
-                .data()
+                .data_source()
                 .as_block()
                 .expect("Block payload required by Go kind dispatch");
-            u32::from(n.multi_line) << 24
+            u32::from(n.multi_line()) << 24
         }
         Some(SyntaxKind::HeritageClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_heritage_clause()
                 .expect("HeritageClause payload required by Go kind dispatch");
-            let token = match n.token.known() {
+            let token = match n.token().known() {
                 Some(SyntaxKind::ImplementsKeyword) => 1u32,
                 _ => 0,
             };
@@ -55,24 +55,24 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::ExportAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_assignment()
                 .expect("ExportAssignment payload required by Go kind dispatch");
-            u32::from(n.is_export_equals) << 24
+            u32::from(n.is_export_equals()) << 24
         }
         Some(SyntaxKind::ExportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_specifier()
                 .expect("ExportSpecifier payload required by Go kind dispatch");
-            u32::from(n.is_type_only) << 24
+            u32::from(n.is_type_only()) << 24
         }
         Some(SyntaxKind::PrefixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_prefix_unary_expression()
                 .expect("PrefixUnaryExpression payload required by Go kind dispatch");
-            let operator = match n.operator.known() {
+            let operator = match n.operator().known() {
                 Some(SyntaxKind::MinusToken) => 1u32,
                 Some(SyntaxKind::TildeToken) => 2u32,
                 Some(SyntaxKind::ExclamationToken) => 3u32,
@@ -84,10 +84,10 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::PostfixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_postfix_unary_expression()
                 .expect("PostfixUnaryExpression payload required by Go kind dispatch");
-            let operator = match n.operator.known() {
+            let operator = match n.operator().known() {
                 Some(SyntaxKind::MinusMinusToken) => 1u32,
                 _ => 0,
             };
@@ -95,10 +95,10 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::MetaProperty) => {
             let n = node
-                .data()
+                .data_source()
                 .as_meta_property()
                 .expect("MetaProperty payload required by Go kind dispatch");
-            let keyword_token = match n.keyword_token.known() {
+            let keyword_token = match n.keyword_token().known() {
                 Some(SyntaxKind::NewKeyword) => 1u32,
                 _ => 0,
             };
@@ -106,24 +106,24 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::ArrayLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .expect("ArrayLiteralExpression payload required by Go kind dispatch");
-            u32::from(n.multi_line) << 24
+            u32::from(n.multi_line()) << 24
         }
         Some(SyntaxKind::ObjectLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_object_literal_expression()
                 .expect("ObjectLiteralExpression payload required by Go kind dispatch");
-            u32::from(n.multi_line) << 24
+            u32::from(n.multi_line()) << 24
         }
         Some(SyntaxKind::TypeOperator) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_operator_node()
                 .expect("TypeOperatorNode payload required by Go kind dispatch");
-            let operator = match n.operator.known() {
+            let operator = match n.operator().known() {
                 Some(SyntaxKind::ReadonlyKeyword) => 1u32,
                 Some(SyntaxKind::UniqueKeyword) => 2u32,
                 _ => 0,
@@ -132,14 +132,14 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::ImportAttributes) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_attributes()
                 .expect("ImportAttributes payload required by Go kind dispatch");
-            let token = match n.token.known() {
+            let token = match n.token().known() {
                 Some(SyntaxKind::AssertKeyword) => 1u32,
                 _ => 0,
             };
-            (u32::from(n.multi_line) << 24) | (token << 25)
+            (u32::from(n.multi_line()) << 24) | (token << 25)
         }
         // port: tsc/internal/api/encoder/encoder.go:getNodeCommonData_SyntheticExpression
         Some(SyntaxKind::SyntheticExpression) => {
@@ -147,17 +147,17 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::JsxText) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_text()
                 .expect("JsxText payload required by Go kind dispatch");
-            u32::from(n.contains_only_trivia_white_spaces) << 24
+            u32::from(n.contains_only_trivia_white_spaces()) << 24
         }
         Some(SyntaxKind::ModuleDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_module_declaration()
                 .expect("ModuleDeclaration payload required by Go kind dispatch");
-            let keyword = match n.keyword.known() {
+            let keyword = match n.keyword().known() {
                 Some(SyntaxKind::NamespaceKeyword) => 1u32,
                 _ => 0,
             };
@@ -165,31 +165,31 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::ImportEqualsDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_equals_declaration()
                 .expect("ImportEqualsDeclaration payload required by Go kind dispatch");
-            u32::from(n.is_type_only) << 24
+            u32::from(n.is_type_only()) << 24
         }
         Some(SyntaxKind::ExportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_declaration()
                 .expect("ExportDeclaration payload required by Go kind dispatch");
-            u32::from(n.is_type_only) << 24
+            u32::from(n.is_type_only()) << 24
         }
         Some(SyntaxKind::ImportType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_type_node()
                 .expect("ImportTypeNode payload required by Go kind dispatch");
-            u32::from(n.is_type_of) << 24
+            u32::from(n.is_type_of()) << 24
         }
         Some(SyntaxKind::ImportClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_clause()
                 .expect("ImportClause payload required by Go kind dispatch");
-            let phase_modifier = match n.phase_modifier.known() {
+            let phase_modifier = match n.phase_modifier().known() {
                 Some(SyntaxKind::TypeKeyword) => 1u32,
                 Some(SyntaxKind::DeferKeyword) => 2u32,
                 _ => 0,
@@ -198,24 +198,24 @@ pub(crate) fn common_data(node: &Node) -> u32 {
         }
         Some(SyntaxKind::ImportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_specifier()
                 .expect("ImportSpecifier payload required by Go kind dispatch");
-            u32::from(n.is_type_only) << 24
+            u32::from(n.is_type_only()) << 24
         }
         Some(SyntaxKind::JSDocTypeLiteral) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_literal()
                 .expect("JSDocTypeLiteral payload required by Go kind dispatch");
-            u32::from(n.is_array_type) << 24
+            u32::from(n.is_array_type()) << 24
         }
         Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_parameter_or_property_tag()
                 .expect("JSDocParameterOrPropertyTag payload required by Go kind dispatch");
-            (u32::from(n.is_bracketed) << 24) | (u32::from(n.is_name_first) << 25)
+            (u32::from(n.is_bracketed()) << 24) | (u32::from(n.is_name_first()) << 25)
         }
         _ => 0,
     }
@@ -223,235 +223,235 @@ pub(crate) fn common_data(node: &Node) -> u32 {
 // upstream: tsc/internal/api/encoder/encoder_generated.go:getChildrenPropertyMask
 // port: tsc/internal/api/encoder/encoder.go:hasModifiers
 // hasModifiers is the optional-list nonempty predicate used below.
-pub(crate) fn child_mask(view: AstView<'_>, node: &Node) -> u32 {
+pub(crate) fn child_mask(view: AstView<'_>, node: &(impl NodeAccess + ?Sized)) -> u32 {
     match node.kind().known() {
         Some(SyntaxKind::QualifiedName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_qualified_name()
                 .expect("QualifiedName payload required by Go kind dispatch");
-            u32::from(n.left.is_some()) | (u32::from(n.right.is_some()) << 1)
+            u32::from(n.left().is_some()) | (u32::from(n.right().is_some()) << 1)
         }
         Some(SyntaxKind::ComputedPropertyName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_computed_property_name()
                 .expect("ComputedPropertyName payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::Decorator) => {
             let n = node
-                .data()
+                .data_source()
                 .as_decorator()
                 .expect("Decorator payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::IfStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_if_statement()
                 .expect("IfStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
-                | (u32::from(n.then_statement.is_some()) << 1)
-                | (u32::from(n.else_statement.is_some()) << 2)
+            u32::from(n.expression().is_some())
+                | (u32::from(n.then_statement().is_some()) << 1)
+                | (u32::from(n.else_statement().is_some()) << 2)
         }
         Some(SyntaxKind::DoStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_do_statement()
                 .expect("DoStatement payload required by Go kind dispatch");
-            u32::from(n.statement.is_some()) | (u32::from(n.expression.is_some()) << 1)
+            u32::from(n.statement().is_some()) | (u32::from(n.expression().is_some()) << 1)
         }
         Some(SyntaxKind::WhileStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_while_statement()
                 .expect("WhileStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.statement.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.statement().is_some()) << 1)
         }
         Some(SyntaxKind::ForStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_for_statement()
                 .expect("ForStatement payload required by Go kind dispatch");
-            u32::from(n.initializer.is_some())
-                | (u32::from(n.condition.is_some()) << 1)
-                | (u32::from(n.incrementor.is_some()) << 2)
-                | (u32::from(n.statement.is_some()) << 3)
+            u32::from(n.initializer().is_some())
+                | (u32::from(n.condition().is_some()) << 1)
+                | (u32::from(n.incrementor().is_some()) << 2)
+                | (u32::from(n.statement().is_some()) << 3)
         }
         Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_for_in_or_of_statement()
                 .expect("ForInOrOfStatement payload required by Go kind dispatch");
-            u32::from(n.await_modifier.is_some())
-                | (u32::from(n.initializer.is_some()) << 1)
-                | (u32::from(n.expression.is_some()) << 2)
-                | (u32::from(n.statement.is_some()) << 3)
+            u32::from(n.await_modifier().is_some())
+                | (u32::from(n.initializer().is_some()) << 1)
+                | (u32::from(n.expression().is_some()) << 2)
+                | (u32::from(n.statement().is_some()) << 3)
         }
         Some(SyntaxKind::BreakStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_break_statement()
                 .expect("BreakStatement payload required by Go kind dispatch");
-            u32::from(n.label.is_some())
+            u32::from(n.label().is_some())
         }
         Some(SyntaxKind::ContinueStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_continue_statement()
                 .expect("ContinueStatement payload required by Go kind dispatch");
-            u32::from(n.label.is_some())
+            u32::from(n.label().is_some())
         }
         Some(SyntaxKind::ReturnStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_return_statement()
                 .expect("ReturnStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::WithStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_with_statement()
                 .expect("WithStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.statement.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.statement().is_some()) << 1)
         }
         Some(SyntaxKind::SwitchStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_switch_statement()
                 .expect("SwitchStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.case_block.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.case_block().is_some()) << 1)
         }
         Some(SyntaxKind::CaseBlock) => {
             let n = node
-                .data()
+                .data_source()
                 .as_case_block()
                 .expect("CaseBlock payload required by Go kind dispatch");
-            u32::from(n.clauses.is_some())
+            u32::from(n.clauses().is_some())
         }
         Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_case_or_default_clause()
                 .expect("CaseOrDefaultClause payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.statements.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.statements().is_some()) << 1)
         }
         Some(SyntaxKind::ThrowStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_throw_statement()
                 .expect("ThrowStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::TryStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_try_statement()
                 .expect("TryStatement payload required by Go kind dispatch");
-            u32::from(n.try_block.is_some())
-                | (u32::from(n.catch_clause.is_some()) << 1)
-                | (u32::from(n.finally_block.is_some()) << 2)
+            u32::from(n.try_block().is_some())
+                | (u32::from(n.catch_clause().is_some()) << 1)
+                | (u32::from(n.finally_block().is_some()) << 2)
         }
         Some(SyntaxKind::CatchClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_catch_clause()
                 .expect("CatchClause payload required by Go kind dispatch");
-            u32::from(n.variable_declaration.is_some()) | (u32::from(n.block.is_some()) << 1)
+            u32::from(n.variable_declaration().is_some()) | (u32::from(n.block().is_some()) << 1)
         }
         Some(SyntaxKind::LabeledStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_labeled_statement()
                 .expect("LabeledStatement payload required by Go kind dispatch");
-            u32::from(n.label.is_some()) | (u32::from(n.statement.is_some()) << 1)
+            u32::from(n.label().is_some()) | (u32::from(n.statement().is_some()) << 1)
         }
         Some(SyntaxKind::ExpressionStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_expression_statement()
                 .expect("ExpressionStatement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::Block) => {
             let n = node
-                .data()
+                .data_source()
                 .as_block()
                 .expect("Block payload required by Go kind dispatch");
-            u32::from(n.statements.is_some())
+            u32::from(n.statements().is_some())
         }
         Some(SyntaxKind::VariableStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_statement()
                 .expect("VariableStatement payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.declaration_list.is_some()) << 1)
+            })) | (u32::from(n.declaration_list().is_some()) << 1)
         }
         Some(SyntaxKind::VariableDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_declaration()
                 .expect("VariableDeclaration payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
-                | (u32::from(n.exclamation_token.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
-                | (u32::from(n.initializer.is_some()) << 3)
+            u32::from(n.name().is_some())
+                | (u32::from(n.exclamation_token().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
+                | (u32::from(n.initializer().is_some()) << 3)
         }
         Some(SyntaxKind::VariableDeclarationList) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_declaration_list()
                 .expect("VariableDeclarationList payload required by Go kind dispatch");
-            u32::from(n.declarations.is_some())
+            u32::from(n.declarations().is_some())
         }
         Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binding_pattern()
                 .expect("BindingPattern payload required by Go kind dispatch");
-            u32::from(n.elements.is_some())
+            u32::from(n.elements().is_some())
         }
         Some(SyntaxKind::Parameter) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parameter_declaration()
                 .expect("ParameterDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.dot_dot_dot_token.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.question_token.is_some()) << 3)
-                | (u32::from(n.r#type.is_some()) << 4)
-                | (u32::from(n.initializer.is_some()) << 5)
+            })) | (u32::from(n.dot_dot_dot_token().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.question_token().is_some()) << 3)
+                | (u32::from(n.r#type().is_some()) << 4)
+                | (u32::from(n.initializer().is_some()) << 5)
         }
         Some(SyntaxKind::BindingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binding_element()
                 .expect("BindingElement payload required by Go kind dispatch");
-            u32::from(n.dot_dot_dot_token.is_some())
-                | (u32::from(n.property_name.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.initializer.is_some()) << 3)
+            u32::from(n.dot_dot_dot_token().is_some())
+                | (u32::from(n.property_name().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.initializer().is_some()) << 3)
         }
         Some(SyntaxKind::MissingDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_missing_declaration()
                 .expect("MissingDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
@@ -461,1558 +461,1562 @@ pub(crate) fn child_mask(view: AstView<'_>, node: &Node) -> u32 {
         }
         Some(SyntaxKind::FunctionDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_declaration()
                 .expect("FunctionDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.asterisk_token.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.type_parameters.is_some()) << 3)
-                | (u32::from(n.parameters.is_some()) << 4)
-                | (u32::from(n.r#type.is_some()) << 5)
-                | (u32::from(n.body.is_some()) << 6)
+            })) | (u32::from(n.asterisk_token().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.type_parameters().is_some()) << 3)
+                | (u32::from(n.parameters().is_some()) << 4)
+                | (u32::from(n.r#type().is_some()) << 5)
+                | (u32::from(n.body().is_some()) << 6)
         }
         Some(SyntaxKind::ClassDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_declaration()
                 .expect("ClassDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.heritage_clauses.is_some()) << 3)
-                | (u32::from(n.members.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.heritage_clauses().is_some()) << 3)
+                | (u32::from(n.members().is_some()) << 4)
         }
         Some(SyntaxKind::ClassExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_expression()
                 .expect("ClassExpression payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.heritage_clauses.is_some()) << 3)
-                | (u32::from(n.members.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.heritage_clauses().is_some()) << 3)
+                | (u32::from(n.members().is_some()) << 4)
         }
         Some(SyntaxKind::HeritageClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_heritage_clause()
                 .expect("HeritageClause payload required by Go kind dispatch");
-            u32::from(n.types.is_some())
+            u32::from(n.types().is_some())
         }
         Some(SyntaxKind::InterfaceDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_interface_declaration()
                 .expect("InterfaceDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.heritage_clauses.is_some()) << 3)
-                | (u32::from(n.members.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.heritage_clauses().is_some()) << 3)
+                | (u32::from(n.members().is_some()) << 4)
         }
         Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_alias_declaration()
                 .expect("TypeAliasDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
         }
         Some(SyntaxKind::EnumMember) => {
             let n = node
-                .data()
+                .data_source()
                 .as_enum_member()
                 .expect("EnumMember payload required by Go kind dispatch");
-            u32::from(n.name.is_some()) | (u32::from(n.initializer.is_some()) << 1)
+            u32::from(n.name().is_some()) | (u32::from(n.initializer().is_some()) << 1)
         }
         Some(SyntaxKind::EnumDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_enum_declaration()
                 .expect("EnumDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.members.is_some()) << 2)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.members().is_some()) << 2)
         }
         Some(SyntaxKind::ModuleBlock) => {
             let n = node
-                .data()
+                .data_source()
                 .as_module_block()
                 .expect("ModuleBlock payload required by Go kind dispatch");
-            u32::from(n.statements.is_some())
+            u32::from(n.statements().is_some())
         }
         Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_declaration()
                 .expect("ImportDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.import_clause.is_some()) << 1)
-                | (u32::from(n.module_specifier.is_some()) << 2)
-                | (u32::from(n.attributes.is_some()) << 3)
+            })) | (u32::from(n.import_clause().is_some()) << 1)
+                | (u32::from(n.module_specifier().is_some()) << 2)
+                | (u32::from(n.attributes().is_some()) << 3)
         }
         Some(SyntaxKind::ExternalModuleReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_external_module_reference()
                 .expect("ExternalModuleReference payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::NamespaceImport) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_import()
                 .expect("NamespaceImport payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::NamedImports) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_imports()
                 .expect("NamedImports payload required by Go kind dispatch");
-            u32::from(n.elements.is_some())
+            u32::from(n.elements().is_some())
         }
         Some(SyntaxKind::ExportAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_assignment()
                 .expect("ExportAssignment payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.r#type.is_some()) << 1)
-                | (u32::from(n.expression.is_some()) << 2)
+            })) | (u32::from(n.r#type().is_some()) << 1)
+                | (u32::from(n.expression().is_some()) << 2)
         }
         Some(SyntaxKind::NamespaceExportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_export_declaration()
                 .expect("NamespaceExportDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
+            })) | (u32::from(n.name().is_some()) << 1)
         }
         Some(SyntaxKind::NamespaceExport) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_export()
                 .expect("NamespaceExport payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::NamedExports) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_exports()
                 .expect("NamedExports payload required by Go kind dispatch");
-            u32::from(n.elements.is_some())
+            u32::from(n.elements().is_some())
         }
         Some(SyntaxKind::ExportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_specifier()
                 .expect("ExportSpecifier payload required by Go kind dispatch");
-            u32::from(n.property_name.is_some()) | (u32::from(n.name.is_some()) << 1)
+            u32::from(n.property_name().is_some()) | (u32::from(n.name().is_some()) << 1)
         }
         Some(SyntaxKind::CallSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_call_signature_declaration()
                 .expect("CallSignatureDeclaration payload required by Go kind dispatch");
-            u32::from(n.type_parameters.is_some())
-                | (u32::from(n.parameters.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            u32::from(n.type_parameters().is_some())
+                | (u32::from(n.parameters().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::ConstructSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_construct_signature_declaration()
                 .expect("ConstructSignatureDeclaration payload required by Go kind dispatch");
-            u32::from(n.type_parameters.is_some())
-                | (u32::from(n.parameters.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            u32::from(n.type_parameters().is_some())
+                | (u32::from(n.parameters().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::Constructor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_constructor_declaration()
                 .expect("ConstructorDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.type_parameters.is_some()) << 1)
-                | (u32::from(n.parameters.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.body.is_some()) << 4)
+            })) | (u32::from(n.type_parameters().is_some()) << 1)
+                | (u32::from(n.parameters().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.body().is_some()) << 4)
         }
         Some(SyntaxKind::GetAccessor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_get_accessor_declaration()
                 .expect("GetAccessorDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.parameters.is_some()) << 3)
-                | (u32::from(n.r#type.is_some()) << 4)
-                | (u32::from(n.body.is_some()) << 5)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.parameters().is_some()) << 3)
+                | (u32::from(n.r#type().is_some()) << 4)
+                | (u32::from(n.body().is_some()) << 5)
         }
         Some(SyntaxKind::SetAccessor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_set_accessor_declaration()
                 .expect("SetAccessorDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.parameters.is_some()) << 3)
-                | (u32::from(n.r#type.is_some()) << 4)
-                | (u32::from(n.body.is_some()) << 5)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.parameters().is_some()) << 3)
+                | (u32::from(n.r#type().is_some()) << 4)
+                | (u32::from(n.body().is_some()) << 5)
         }
         Some(SyntaxKind::IndexSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_index_signature_declaration()
                 .expect("IndexSignatureDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.parameters.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            })) | (u32::from(n.parameters().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::MethodSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_method_signature_declaration()
                 .expect("MethodSignatureDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.postfix_token.is_some()) << 2)
-                | (u32::from(n.type_parameters.is_some()) << 3)
-                | (u32::from(n.parameters.is_some()) << 4)
-                | (u32::from(n.r#type.is_some()) << 5)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.postfix_token().is_some()) << 2)
+                | (u32::from(n.type_parameters().is_some()) << 3)
+                | (u32::from(n.parameters().is_some()) << 4)
+                | (u32::from(n.r#type().is_some()) << 5)
         }
         Some(SyntaxKind::MethodDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_method_declaration()
                 .expect("MethodDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.asterisk_token.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.postfix_token.is_some()) << 3)
-                | (u32::from(n.type_parameters.is_some()) << 4)
-                | (u32::from(n.parameters.is_some()) << 5)
-                | (u32::from(n.r#type.is_some()) << 6)
-                | (u32::from(n.body.is_some()) << 7)
+            })) | (u32::from(n.asterisk_token().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.postfix_token().is_some()) << 3)
+                | (u32::from(n.type_parameters().is_some()) << 4)
+                | (u32::from(n.parameters().is_some()) << 5)
+                | (u32::from(n.r#type().is_some()) << 6)
+                | (u32::from(n.body().is_some()) << 7)
         }
         Some(SyntaxKind::PropertySignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_signature_declaration()
                 .expect("PropertySignatureDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.postfix_token.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.initializer.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.postfix_token().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.initializer().is_some()) << 4)
         }
         Some(SyntaxKind::PropertyDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_declaration()
                 .expect("PropertyDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.postfix_token.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.initializer.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.postfix_token().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.initializer().is_some()) << 4)
         }
         Some(SyntaxKind::ClassStaticBlockDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_static_block_declaration()
                 .expect("ClassStaticBlockDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.body.is_some()) << 1)
+            })) | (u32::from(n.body().is_some()) << 1)
         }
         Some(SyntaxKind::BinaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("BinaryExpression payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.left.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
-                | (u32::from(n.operator_token.is_some()) << 3)
-                | (u32::from(n.right.is_some()) << 4)
+            })) | (u32::from(n.left().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
+                | (u32::from(n.operator_token().is_some()) << 3)
+                | (u32::from(n.right().is_some()) << 4)
         }
         Some(SyntaxKind::PrefixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_prefix_unary_expression()
                 .expect("PrefixUnaryExpression payload required by Go kind dispatch");
-            u32::from(n.operand.is_some())
+            u32::from(n.operand().is_some())
         }
         Some(SyntaxKind::PostfixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_postfix_unary_expression()
                 .expect("PostfixUnaryExpression payload required by Go kind dispatch");
-            u32::from(n.operand.is_some())
+            u32::from(n.operand().is_some())
         }
         Some(SyntaxKind::YieldExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_yield_expression()
                 .expect("YieldExpression payload required by Go kind dispatch");
-            u32::from(n.asterisk_token.is_some()) | (u32::from(n.expression.is_some()) << 1)
+            u32::from(n.asterisk_token().is_some()) | (u32::from(n.expression().is_some()) << 1)
         }
         Some(SyntaxKind::ArrowFunction) => {
             let n = node
-                .data()
+                .data_source()
                 .as_arrow_function()
                 .expect("ArrowFunction payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.type_parameters.is_some()) << 1)
-                | (u32::from(n.parameters.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.equals_greater_than_token.is_some()) << 4)
-                | (u32::from(n.body.is_some()) << 5)
+            })) | (u32::from(n.type_parameters().is_some()) << 1)
+                | (u32::from(n.parameters().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.equals_greater_than_token().is_some()) << 4)
+                | (u32::from(n.body().is_some()) << 5)
         }
         Some(SyntaxKind::FunctionExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_expression()
                 .expect("FunctionExpression payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.asterisk_token.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.type_parameters.is_some()) << 3)
-                | (u32::from(n.parameters.is_some()) << 4)
-                | (u32::from(n.r#type.is_some()) << 5)
-                | (u32::from(n.body.is_some()) << 6)
+            })) | (u32::from(n.asterisk_token().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.type_parameters().is_some()) << 3)
+                | (u32::from(n.parameters().is_some()) << 4)
+                | (u32::from(n.r#type().is_some()) << 5)
+                | (u32::from(n.body().is_some()) << 6)
         }
         Some(SyntaxKind::AsExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_as_expression()
                 .expect("AsExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.r#type.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.r#type().is_some()) << 1)
         }
         Some(SyntaxKind::SatisfiesExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_satisfies_expression()
                 .expect("SatisfiesExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.r#type.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.r#type().is_some()) << 1)
         }
         Some(SyntaxKind::ConditionalExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_conditional_expression()
                 .expect("ConditionalExpression payload required by Go kind dispatch");
-            u32::from(n.condition.is_some())
-                | (u32::from(n.question_token.is_some()) << 1)
-                | (u32::from(n.when_true.is_some()) << 2)
-                | (u32::from(n.colon_token.is_some()) << 3)
-                | (u32::from(n.when_false.is_some()) << 4)
+            u32::from(n.condition().is_some())
+                | (u32::from(n.question_token().is_some()) << 1)
+                | (u32::from(n.when_true().is_some()) << 2)
+                | (u32::from(n.colon_token().is_some()) << 3)
+                | (u32::from(n.when_false().is_some()) << 4)
         }
         Some(SyntaxKind::PropertyAccessExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_access_expression()
                 .expect("PropertyAccessExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
-                | (u32::from(n.question_dot_token.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
+            u32::from(n.expression().is_some())
+                | (u32::from(n.question_dot_token().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
         }
         Some(SyntaxKind::ElementAccessExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_element_access_expression()
                 .expect("ElementAccessExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
-                | (u32::from(n.question_dot_token.is_some()) << 1)
-                | (u32::from(n.argument_expression.is_some()) << 2)
+            u32::from(n.expression().is_some())
+                | (u32::from(n.question_dot_token().is_some()) << 1)
+                | (u32::from(n.argument_expression().is_some()) << 2)
         }
         Some(SyntaxKind::CallExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_call_expression()
                 .expect("CallExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
-                | (u32::from(n.question_dot_token.is_some()) << 1)
-                | (u32::from(n.type_arguments.is_some()) << 2)
-                | (u32::from(n.arguments.is_some()) << 3)
+            u32::from(n.expression().is_some())
+                | (u32::from(n.question_dot_token().is_some()) << 1)
+                | (u32::from(n.type_arguments().is_some()) << 2)
+                | (u32::from(n.arguments().is_some()) << 3)
         }
         Some(SyntaxKind::NewExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_new_expression()
                 .expect("NewExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
-                | (u32::from(n.type_arguments.is_some()) << 1)
-                | (u32::from(n.arguments.is_some()) << 2)
+            u32::from(n.expression().is_some())
+                | (u32::from(n.type_arguments().is_some()) << 1)
+                | (u32::from(n.arguments().is_some()) << 2)
         }
         Some(SyntaxKind::MetaProperty) => {
             let n = node
-                .data()
+                .data_source()
                 .as_meta_property()
                 .expect("MetaProperty payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::NonNullExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_non_null_expression()
                 .expect("NonNullExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::SpreadElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_spread_element()
                 .expect("SpreadElement payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::TemplateExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_expression()
                 .expect("TemplateExpression payload required by Go kind dispatch");
-            u32::from(n.head.is_some()) | (u32::from(n.template_spans.is_some()) << 1)
+            u32::from(n.head().is_some()) | (u32::from(n.template_spans().is_some()) << 1)
         }
         Some(SyntaxKind::TemplateSpan) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_span()
                 .expect("TemplateSpan payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.literal.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.literal().is_some()) << 1)
         }
         Some(SyntaxKind::TaggedTemplateExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_tagged_template_expression()
                 .expect("TaggedTemplateExpression payload required by Go kind dispatch");
-            u32::from(n.tag.is_some())
-                | (u32::from(n.question_dot_token.is_some()) << 1)
-                | (u32::from(n.type_arguments.is_some()) << 2)
-                | (u32::from(n.template.is_some()) << 3)
+            u32::from(n.tag().is_some())
+                | (u32::from(n.question_dot_token().is_some()) << 1)
+                | (u32::from(n.type_arguments().is_some()) << 2)
+                | (u32::from(n.template().is_some()) << 3)
         }
         Some(SyntaxKind::ParenthesizedExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parenthesized_expression()
                 .expect("ParenthesizedExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::ArrayLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .expect("ArrayLiteralExpression payload required by Go kind dispatch");
-            u32::from(n.elements.is_some())
+            u32::from(n.elements().is_some())
         }
         Some(SyntaxKind::ObjectLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_object_literal_expression()
                 .expect("ObjectLiteralExpression payload required by Go kind dispatch");
-            u32::from(n.properties.is_some())
+            u32::from(n.properties().is_some())
         }
         Some(SyntaxKind::SpreadAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_spread_assignment()
                 .expect("SpreadAssignment payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::PropertyAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_assignment()
                 .expect("PropertyAssignment payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.postfix_token.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.initializer.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.postfix_token().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.initializer().is_some()) << 4)
         }
         Some(SyntaxKind::ShorthandPropertyAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_shorthand_property_assignment()
                 .expect("ShorthandPropertyAssignment payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.postfix_token.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
-                | (u32::from(n.equals_token.is_some()) << 4)
-                | (u32::from(n.object_assignment_initializer.is_some()) << 5)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.postfix_token().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
+                | (u32::from(n.equals_token().is_some()) << 4)
+                | (u32::from(n.object_assignment_initializer().is_some()) << 5)
         }
         Some(SyntaxKind::DeleteExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_delete_expression()
                 .expect("DeleteExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::TypeOfExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_of_expression()
                 .expect("TypeOfExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::VoidExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_void_expression()
                 .expect("VoidExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::AwaitExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_await_expression()
                 .expect("AwaitExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::TypeAssertionExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_assertion()
                 .expect("TypeAssertion payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some()) | (u32::from(n.expression.is_some()) << 1)
+            u32::from(n.r#type().is_some()) | (u32::from(n.expression().is_some()) << 1)
         }
         Some(SyntaxKind::UnionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_union_type_node()
                 .expect("UnionTypeNode payload required by Go kind dispatch");
-            u32::from(n.types.is_some())
+            u32::from(n.types().is_some())
         }
         Some(SyntaxKind::IntersectionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_intersection_type_node()
                 .expect("IntersectionTypeNode payload required by Go kind dispatch");
-            u32::from(n.types.is_some())
+            u32::from(n.types().is_some())
         }
         Some(SyntaxKind::ConditionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_conditional_type_node()
                 .expect("ConditionalTypeNode payload required by Go kind dispatch");
-            u32::from(n.check_type.is_some())
-                | (u32::from(n.extends_type.is_some()) << 1)
-                | (u32::from(n.true_type.is_some()) << 2)
-                | (u32::from(n.false_type.is_some()) << 3)
+            u32::from(n.check_type().is_some())
+                | (u32::from(n.extends_type().is_some()) << 1)
+                | (u32::from(n.true_type().is_some()) << 2)
+                | (u32::from(n.false_type().is_some()) << 3)
         }
         Some(SyntaxKind::TypeOperator) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_operator_node()
                 .expect("TypeOperatorNode payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::InferType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_infer_type_node()
                 .expect("InferTypeNode payload required by Go kind dispatch");
-            u32::from(n.type_parameter.is_some())
+            u32::from(n.type_parameter().is_some())
         }
         Some(SyntaxKind::ArrayType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_array_type_node()
                 .expect("ArrayTypeNode payload required by Go kind dispatch");
-            u32::from(n.element_type.is_some())
+            u32::from(n.element_type().is_some())
         }
         Some(SyntaxKind::IndexedAccessType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_indexed_access_type_node()
                 .expect("IndexedAccessTypeNode payload required by Go kind dispatch");
-            u32::from(n.object_type.is_some()) | (u32::from(n.index_type.is_some()) << 1)
+            u32::from(n.object_type().is_some()) | (u32::from(n.index_type().is_some()) << 1)
         }
         Some(SyntaxKind::TypeReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_reference_node()
                 .expect("TypeReferenceNode payload required by Go kind dispatch");
-            u32::from(n.type_name.is_some()) | (u32::from(n.type_arguments.is_some()) << 1)
+            u32::from(n.type_name().is_some()) | (u32::from(n.type_arguments().is_some()) << 1)
         }
         Some(SyntaxKind::ExpressionWithTypeArguments) => {
             let n = node
-                .data()
+                .data_source()
                 .as_expression_with_type_arguments()
                 .expect("ExpressionWithTypeArguments payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.type_arguments.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.type_arguments().is_some()) << 1)
         }
         Some(SyntaxKind::LiteralType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_literal_type_node()
                 .expect("LiteralTypeNode payload required by Go kind dispatch");
-            u32::from(n.literal.is_some())
+            u32::from(n.literal().is_some())
         }
         Some(SyntaxKind::TypePredicate) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_predicate_node()
                 .expect("TypePredicateNode payload required by Go kind dispatch");
-            u32::from(n.asserts_modifier.is_some())
-                | (u32::from(n.parameter_name.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            u32::from(n.asserts_modifier().is_some())
+                | (u32::from(n.parameter_name().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::ImportAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_attribute()
                 .expect("ImportAttribute payload required by Go kind dispatch");
-            u32::from(n.name.is_some()) | (u32::from(n.value.is_some()) << 1)
+            u32::from(n.name().is_some()) | (u32::from(n.value().is_some()) << 1)
         }
         Some(SyntaxKind::ImportAttributes) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_attributes()
                 .expect("ImportAttributes payload required by Go kind dispatch");
-            u32::from(n.attributes.is_some())
+            u32::from(n.attributes().is_some())
         }
         Some(SyntaxKind::TypeQuery) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_query_node()
                 .expect("TypeQueryNode payload required by Go kind dispatch");
-            u32::from(n.expr_name.is_some()) | (u32::from(n.type_arguments.is_some()) << 1)
+            u32::from(n.expr_name().is_some()) | (u32::from(n.type_arguments().is_some()) << 1)
         }
         Some(SyntaxKind::MappedType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_mapped_type_node()
                 .expect("MappedTypeNode payload required by Go kind dispatch");
-            u32::from(n.readonly_token.is_some())
-                | (u32::from(n.type_parameter.is_some()) << 1)
-                | (u32::from(n.name_type.is_some()) << 2)
-                | (u32::from(n.question_token.is_some()) << 3)
-                | (u32::from(n.r#type.is_some()) << 4)
-                | (u32::from(n.members.is_some()) << 5)
+            u32::from(n.readonly_token().is_some())
+                | (u32::from(n.type_parameter().is_some()) << 1)
+                | (u32::from(n.name_type().is_some()) << 2)
+                | (u32::from(n.question_token().is_some()) << 3)
+                | (u32::from(n.r#type().is_some()) << 4)
+                | (u32::from(n.members().is_some()) << 5)
         }
         Some(SyntaxKind::TypeLiteral) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_literal_node()
                 .expect("TypeLiteralNode payload required by Go kind dispatch");
-            u32::from(n.members.is_some())
+            u32::from(n.members().is_some())
         }
         Some(SyntaxKind::TupleType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_tuple_type_node()
                 .expect("TupleTypeNode payload required by Go kind dispatch");
-            u32::from(n.elements.is_some())
+            u32::from(n.elements().is_some())
         }
         Some(SyntaxKind::NamedTupleMember) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_tuple_member()
                 .expect("NamedTupleMember payload required by Go kind dispatch");
-            u32::from(n.dot_dot_dot_token.is_some())
-                | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.question_token.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
+            u32::from(n.dot_dot_dot_token().is_some())
+                | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.question_token().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
         }
         Some(SyntaxKind::OptionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_optional_type_node()
                 .expect("OptionalTypeNode payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::RestType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_rest_type_node()
                 .expect("RestTypeNode payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::ParenthesizedType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parenthesized_type_node()
                 .expect("ParenthesizedTypeNode payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::FunctionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_type_node()
                 .expect("FunctionTypeNode payload required by Go kind dispatch");
-            u32::from(n.type_parameters.is_some())
-                | (u32::from(n.parameters.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            u32::from(n.type_parameters().is_some())
+                | (u32::from(n.parameters().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::ConstructorType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_constructor_type_node()
                 .expect("ConstructorTypeNode payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.type_parameters.is_some()) << 1)
-                | (u32::from(n.parameters.is_some()) << 2)
-                | (u32::from(n.r#type.is_some()) << 3)
+            })) | (u32::from(n.type_parameters().is_some()) << 1)
+                | (u32::from(n.parameters().is_some()) << 2)
+                | (u32::from(n.r#type().is_some()) << 3)
         }
         Some(SyntaxKind::TemplateLiteralType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_literal_type_node()
                 .expect("TemplateLiteralTypeNode payload required by Go kind dispatch");
-            u32::from(n.head.is_some()) | (u32::from(n.template_spans.is_some()) << 1)
+            u32::from(n.head().is_some()) | (u32::from(n.template_spans().is_some()) << 1)
         }
         Some(SyntaxKind::TemplateLiteralTypeSpan) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_literal_type_span()
                 .expect("TemplateLiteralTypeSpan payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some()) | (u32::from(n.literal.is_some()) << 1)
+            u32::from(n.r#type().is_some()) | (u32::from(n.literal().is_some()) << 1)
         }
         Some(SyntaxKind::SyntheticExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_synthetic_expression()
                 .expect("SyntheticExpression payload required by Go kind dispatch");
-            u32::from(n.tuple_name_source.is_some())
+            u32::from(n.tuple_name_source().is_some())
         }
         Some(SyntaxKind::PartiallyEmittedExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_partially_emitted_expression()
                 .expect("PartiallyEmittedExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::JsxElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_element()
                 .expect("JsxElement payload required by Go kind dispatch");
-            u32::from(n.opening_element.is_some())
-                | (u32::from(n.children.is_some()) << 1)
-                | (u32::from(n.closing_element.is_some()) << 2)
+            u32::from(n.opening_element().is_some())
+                | (u32::from(n.children().is_some()) << 1)
+                | (u32::from(n.closing_element().is_some()) << 2)
         }
         Some(SyntaxKind::JsxAttributes) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_attributes()
                 .expect("JsxAttributes payload required by Go kind dispatch");
-            u32::from(n.properties.is_some())
+            u32::from(n.properties().is_some())
         }
         Some(SyntaxKind::JsxNamespacedName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_namespaced_name()
                 .expect("JsxNamespacedName payload required by Go kind dispatch");
-            u32::from(n.namespace.is_some()) | (u32::from(n.name.is_some()) << 1)
+            u32::from(n.namespace().is_some()) | (u32::from(n.name().is_some()) << 1)
         }
         Some(SyntaxKind::JsxOpeningElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_opening_element()
                 .expect("JsxOpeningElement payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_arguments.is_some()) << 1)
-                | (u32::from(n.attributes.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_arguments().is_some()) << 1)
+                | (u32::from(n.attributes().is_some()) << 2)
         }
         Some(SyntaxKind::JsxSelfClosingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_self_closing_element()
                 .expect("JsxSelfClosingElement payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_arguments.is_some()) << 1)
-                | (u32::from(n.attributes.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_arguments().is_some()) << 1)
+                | (u32::from(n.attributes().is_some()) << 2)
         }
         Some(SyntaxKind::JsxFragment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_fragment()
                 .expect("JsxFragment payload required by Go kind dispatch");
-            u32::from(n.opening_fragment.is_some())
-                | (u32::from(n.children.is_some()) << 1)
-                | (u32::from(n.closing_fragment.is_some()) << 2)
+            u32::from(n.opening_fragment().is_some())
+                | (u32::from(n.children().is_some()) << 1)
+                | (u32::from(n.closing_fragment().is_some()) << 2)
         }
         Some(SyntaxKind::JsxAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_attribute()
                 .expect("JsxAttribute payload required by Go kind dispatch");
-            u32::from(n.name.is_some()) | (u32::from(n.initializer.is_some()) << 1)
+            u32::from(n.name().is_some()) | (u32::from(n.initializer().is_some()) << 1)
         }
         Some(SyntaxKind::JsxSpreadAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_spread_attribute()
                 .expect("JsxSpreadAttribute payload required by Go kind dispatch");
-            u32::from(n.expression.is_some())
+            u32::from(n.expression().is_some())
         }
         Some(SyntaxKind::JsxClosingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_closing_element()
                 .expect("JsxClosingElement payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
+            u32::from(n.tag_name().is_some())
         }
         Some(SyntaxKind::JsxExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_expression()
                 .expect("JsxExpression payload required by Go kind dispatch");
-            u32::from(n.dot_dot_dot_token.is_some()) | (u32::from(n.expression.is_some()) << 1)
+            u32::from(n.dot_dot_dot_token().is_some()) | (u32::from(n.expression().is_some()) << 1)
         }
         Some(SyntaxKind::SyntaxList) => {
             let n = node
-                .data()
+                .data_source()
                 .as_syntax_list()
                 .expect("SyntaxList payload required by Go kind dispatch");
-            u32::from(!n.children.is_empty())
+            u32::from(!n.children().is_empty())
         }
         Some(SyntaxKind::JSDoc) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc()
                 .expect("JSDoc payload required by Go kind dispatch");
-            u32::from(n.comment.is_some()) | (u32::from(n.tags.is_some()) << 1)
+            u32::from(n.comment().is_some()) | (u32::from(n.tags().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocTypeExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_expression()
                 .expect("JSDocTypeExpression payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::JSDocNonNullableType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_non_nullable_type()
                 .expect("JSDocNonNullableType payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::JSDocNullableType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_nullable_type()
                 .expect("JSDocNullableType payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::JSDocVariadicType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_variadic_type()
                 .expect("JSDocVariadicType payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::JSDocOptionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_optional_type()
                 .expect("JSDocOptionalType payload required by Go kind dispatch");
-            u32::from(n.r#type.is_some())
+            u32::from(n.r#type().is_some())
         }
         Some(SyntaxKind::JSDocTypeTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_tag()
                 .expect("JSDocTypeTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocUnknownTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_unknown_tag()
                 .expect("JSDocUnknownTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocTemplateTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_template_tag()
                 .expect("JSDocTemplateTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.constraint.is_some()) << 1)
-                | (u32::from(n.type_parameters.is_some()) << 2)
-                | (u32::from(n.comment.is_some()) << 3)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.constraint().is_some()) << 1)
+                | (u32::from(n.type_parameters().is_some()) << 2)
+                | (u32::from(n.comment().is_some()) << 3)
         }
         Some(SyntaxKind::JSDocReturnTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_return_tag()
                 .expect("JSDocReturnTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocPublicTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_public_tag()
                 .expect("JSDocPublicTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocPrivateTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_private_tag()
                 .expect("JSDocPrivateTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocProtectedTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_protected_tag()
                 .expect("JSDocProtectedTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocReadonlyTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_readonly_tag()
                 .expect("JSDocReadonlyTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocOverrideTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_override_tag()
                 .expect("JSDocOverrideTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocDeprecatedTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_deprecated_tag()
                 .expect("JSDocDeprecatedTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some()) | (u32::from(n.comment.is_some()) << 1)
+            u32::from(n.tag_name().is_some()) | (u32::from(n.comment().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocSeeTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_see_tag()
                 .expect("JSDocSeeTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.name_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.name_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocImplementsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_implements_tag()
                 .expect("JSDocImplementsTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.class_name.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.class_name().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocAugmentsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_augments_tag()
                 .expect("JSDocAugmentsTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.class_name.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.class_name().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocSatisfiesTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_satisfies_tag()
                 .expect("JSDocSatisfiesTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocThrowsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_throws_tag()
                 .expect("JSDocThrowsTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocThisTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_this_tag()
                 .expect("JSDocThisTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocImportTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_import_tag()
                 .expect("JSDocImportTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.import_clause.is_some()) << 1)
-                | (u32::from(n.module_specifier.is_some()) << 2)
-                | (u32::from(n.attributes.is_some()) << 3)
-                | (u32::from(n.comment.is_some()) << 4)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.import_clause().is_some()) << 1)
+                | (u32::from(n.module_specifier().is_some()) << 2)
+                | (u32::from(n.attributes().is_some()) << 3)
+                | (u32::from(n.comment().is_some()) << 4)
         }
         Some(SyntaxKind::JSDocCallbackTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_callback_tag()
                 .expect("JSDocCallbackTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.comment.is_some()) << 3)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.comment().is_some()) << 3)
         }
         Some(SyntaxKind::JSDocOverloadTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_overload_tag()
                 .expect("JSDocOverloadTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.comment.is_some()) << 2)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.comment().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocTypedefTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_typedef_tag()
                 .expect("JSDocTypedefTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.type_expression.is_some()) << 1)
-                | (u32::from(n.name.is_some()) << 2)
-                | (u32::from(n.comment.is_some()) << 3)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.type_expression().is_some()) << 1)
+                | (u32::from(n.name().is_some()) << 2)
+                | (u32::from(n.comment().is_some()) << 3)
         }
         Some(SyntaxKind::JSDocSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_signature()
                 .expect("JSDocSignature payload required by Go kind dispatch");
-            u32::from(n.type_parameters.is_some())
-                | (u32::from(n.parameters.is_some()) << 1)
-                | (u32::from(n.r#type.is_some()) << 2)
+            u32::from(n.type_parameters().is_some())
+                | (u32::from(n.parameters().is_some()) << 1)
+                | (u32::from(n.r#type().is_some()) << 2)
         }
         Some(SyntaxKind::JSDocNameReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_name_reference()
                 .expect("JSDocNameReference payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::SourceFile) => {
             let n = node
-                .data()
+                .data_source()
                 .as_source_file()
                 .expect("SourceFile payload required by Go kind dispatch");
-            u32::from(n.statements.is_some()) | (u32::from(n.end_of_file_token.is_some()) << 1)
+            u32::from(n.statements().is_some()) | (u32::from(n.end_of_file_token().is_some()) << 1)
         }
         Some(SyntaxKind::ModuleDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_module_declaration()
                 .expect("ModuleDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.attributes.is_some()) << 2)
-                | (u32::from(n.body.is_some()) << 3)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.attributes().is_some()) << 2)
+                | (u32::from(n.body().is_some()) << 3)
         }
         Some(SyntaxKind::ImportEqualsDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_equals_declaration()
                 .expect("ImportEqualsDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.module_reference.is_some()) << 2)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.module_reference().is_some()) << 2)
         }
         Some(SyntaxKind::ExportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_declaration()
                 .expect("ExportDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.export_clause.is_some()) << 1)
-                | (u32::from(n.module_specifier.is_some()) << 2)
-                | (u32::from(n.attributes.is_some()) << 3)
+            })) | (u32::from(n.export_clause().is_some()) << 1)
+                | (u32::from(n.module_specifier().is_some()) << 2)
+                | (u32::from(n.attributes().is_some()) << 3)
         }
         Some(SyntaxKind::ImportType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_type_node()
                 .expect("ImportTypeNode payload required by Go kind dispatch");
-            u32::from(n.argument.is_some())
-                | (u32::from(n.attributes.is_some()) << 1)
-                | (u32::from(n.qualifier.is_some()) << 2)
-                | (u32::from(n.type_arguments.is_some()) << 3)
+            u32::from(n.argument().is_some())
+                | (u32::from(n.attributes().is_some()) << 1)
+                | (u32::from(n.qualifier().is_some()) << 2)
+                | (u32::from(n.type_arguments().is_some()) << 3)
         }
         Some(SyntaxKind::ImportClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_clause()
                 .expect("ImportClause payload required by Go kind dispatch");
-            u32::from(n.name.is_some()) | (u32::from(n.named_bindings.is_some()) << 1)
+            u32::from(n.name().is_some()) | (u32::from(n.named_bindings().is_some()) << 1)
         }
         Some(SyntaxKind::ImportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_specifier()
                 .expect("ImportSpecifier payload required by Go kind dispatch");
-            u32::from(n.property_name.is_some()) | (u32::from(n.name.is_some()) << 1)
+            u32::from(n.property_name().is_some()) | (u32::from(n.name().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocLink) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link()
                 .expect("JSDocLink payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::JSDocLinkPlain) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_plain()
                 .expect("JSDocLinkPlain payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::JSDocLinkCode) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_code()
                 .expect("JSDocLinkCode payload required by Go kind dispatch");
-            u32::from(n.name.is_some())
+            u32::from(n.name().is_some())
         }
         Some(SyntaxKind::TypeParameter) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_parameter_declaration()
                 .expect("TypeParameterDeclaration payload required by Go kind dispatch");
-            u32::from(n.modifiers.is_some_and(|id| {
+            u32::from(n.modifiers().is_some_and(|id| {
                 !view
                     .list(id)
                     .expect("owned modifier list")
                     .nodes()
                     .is_empty()
-            })) | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.constraint.is_some()) << 2)
-                | (u32::from(n.expression.is_some()) << 3)
-                | (u32::from(n.default_type.is_some()) << 4)
+            })) | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.constraint().is_some()) << 2)
+                | (u32::from(n.expression().is_some()) << 3)
+                | (u32::from(n.default_type().is_some()) << 4)
         }
         Some(SyntaxKind::SyntheticReferenceExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_synthetic_reference_expression()
                 .expect("SyntheticReferenceExpression payload required by Go kind dispatch");
-            u32::from(n.expression.is_some()) | (u32::from(n.this_arg.is_some()) << 1)
+            u32::from(n.expression().is_some()) | (u32::from(n.this_arg().is_some()) << 1)
         }
         Some(SyntaxKind::JSDocTypeLiteral) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_literal()
                 .expect("JSDocTypeLiteral payload required by Go kind dispatch");
-            u32::from(!n.js_doc_property_tags.is_empty())
+            u32::from(!n.js_doc_property_tags().is_empty())
         }
         Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_parameter_or_property_tag()
                 .expect("JSDocParameterOrPropertyTag payload required by Go kind dispatch");
-            u32::from(n.tag_name.is_some())
-                | (u32::from(n.name.is_some()) << 1)
-                | (u32::from(n.type_expression.is_some()) << 2)
-                | (u32::from(n.comment.is_some()) << 3)
+            u32::from(n.tag_name().is_some())
+                | (u32::from(n.name().is_some()) << 1)
+                | (u32::from(n.type_expression().is_some()) << 2)
+                | (u32::from(n.comment().is_some()) << 3)
         }
         _ => 0,
     }
 }
-pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
+pub(crate) fn children(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+    edges: &mut Vec<Edge>,
+) {
     match node.kind().known() {
         Some(SyntaxKind::QualifiedName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_qualified_name()
                 .expect("QualifiedName payload required by Go kind dispatch");
-            if let Some(id) = n.left {
+            if let Some(id) = n.left() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.right {
+            if let Some(id) = n.right() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ComputedPropertyName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_computed_property_name()
                 .expect("ComputedPropertyName payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::Decorator) => {
             let n = node
-                .data()
+                .data_source()
                 .as_decorator()
                 .expect("Decorator payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::IfStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_if_statement()
                 .expect("IfStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.then_statement {
+            if let Some(id) = n.then_statement() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.else_statement {
+            if let Some(id) = n.else_statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::DoStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_do_statement()
                 .expect("DoStatement payload required by Go kind dispatch");
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::WhileStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_while_statement()
                 .expect("WhileStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ForStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_for_statement()
                 .expect("ForStatement payload required by Go kind dispatch");
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.condition {
+            if let Some(id) = n.condition() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.incrementor {
+            if let Some(id) = n.incrementor() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_for_in_or_of_statement()
                 .expect("ForInOrOfStatement payload required by Go kind dispatch");
-            if let Some(id) = n.await_modifier {
+            if let Some(id) = n.await_modifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::BreakStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_break_statement()
                 .expect("BreakStatement payload required by Go kind dispatch");
-            if let Some(id) = n.label {
+            if let Some(id) = n.label() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ContinueStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_continue_statement()
                 .expect("ContinueStatement payload required by Go kind dispatch");
-            if let Some(id) = n.label {
+            if let Some(id) = n.label() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ReturnStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_return_statement()
                 .expect("ReturnStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::WithStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_with_statement()
                 .expect("WithStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SwitchStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_switch_statement()
                 .expect("SwitchStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.case_block {
+            if let Some(id) = n.case_block() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::CaseBlock) => {
             let n = node
-                .data()
+                .data_source()
                 .as_case_block()
                 .expect("CaseBlock payload required by Go kind dispatch");
-            if let Some(id) = n.clauses {
+            if let Some(id) = n.clauses() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_case_or_default_clause()
                 .expect("CaseOrDefaultClause payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statements {
+            if let Some(id) = n.statements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ThrowStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_throw_statement()
                 .expect("ThrowStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TryStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_try_statement()
                 .expect("TryStatement payload required by Go kind dispatch");
-            if let Some(id) = n.try_block {
+            if let Some(id) = n.try_block() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.catch_clause {
+            if let Some(id) = n.catch_clause() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.finally_block {
+            if let Some(id) = n.finally_block() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::CatchClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_catch_clause()
                 .expect("CatchClause payload required by Go kind dispatch");
-            if let Some(id) = n.variable_declaration {
+            if let Some(id) = n.variable_declaration() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.block {
+            if let Some(id) = n.block() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::LabeledStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_labeled_statement()
                 .expect("LabeledStatement payload required by Go kind dispatch");
-            if let Some(id) = n.label {
+            if let Some(id) = n.label() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.statement {
+            if let Some(id) = n.statement() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ExpressionStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_expression_statement()
                 .expect("ExpressionStatement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::Block) => {
             let n = node
-                .data()
+                .data_source()
                 .as_block()
                 .expect("Block payload required by Go kind dispatch");
-            if let Some(id) = n.statements {
+            if let Some(id) = n.statements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::VariableStatement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_statement()
                 .expect("VariableStatement payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2022,52 +2026,52 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.declaration_list {
+            if let Some(id) = n.declaration_list() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::VariableDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_declaration()
                 .expect("VariableDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.exclamation_token {
+            if let Some(id) = n.exclamation_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::VariableDeclarationList) => {
             let n = node
-                .data()
+                .data_source()
                 .as_variable_declaration_list()
                 .expect("VariableDeclarationList payload required by Go kind dispatch");
-            if let Some(id) = n.declarations {
+            if let Some(id) = n.declarations() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binding_pattern()
                 .expect("BindingPattern payload required by Go kind dispatch");
-            if let Some(id) = n.elements {
+            if let Some(id) = n.elements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::Parameter) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parameter_declaration()
                 .expect("ParameterDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2077,46 +2081,46 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.dot_dot_dot_token {
+            if let Some(id) = n.dot_dot_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_token {
+            if let Some(id) = n.question_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::BindingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binding_element()
                 .expect("BindingElement payload required by Go kind dispatch");
-            if let Some(id) = n.dot_dot_dot_token {
+            if let Some(id) = n.dot_dot_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.property_name {
+            if let Some(id) = n.property_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::MissingDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_missing_declaration()
                 .expect("MissingDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2129,10 +2133,10 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
         }
         Some(SyntaxKind::FunctionDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_declaration()
                 .expect("FunctionDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2142,34 +2146,34 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.asterisk_token {
+            if let Some(id) = n.asterisk_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ClassDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_declaration()
                 .expect("ClassDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2179,25 +2183,25 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.heritage_clauses {
+            if let Some(id) = n.heritage_clauses() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ClassExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_expression()
                 .expect("ClassExpression payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2207,34 +2211,34 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.heritage_clauses {
+            if let Some(id) = n.heritage_clauses() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::HeritageClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_heritage_clause()
                 .expect("HeritageClause payload required by Go kind dispatch");
-            if let Some(id) = n.types {
+            if let Some(id) = n.types() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::InterfaceDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_interface_declaration()
                 .expect("InterfaceDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2244,25 +2248,25 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.heritage_clauses {
+            if let Some(id) = n.heritage_clauses() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_alias_declaration()
                 .expect("TypeAliasDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2272,34 +2276,34 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::EnumMember) => {
             let n = node
-                .data()
+                .data_source()
                 .as_enum_member()
                 .expect("EnumMember payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::EnumDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_enum_declaration()
                 .expect("EnumDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2309,28 +2313,28 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ModuleBlock) => {
             let n = node
-                .data()
+                .data_source()
                 .as_module_block()
                 .expect("ModuleBlock payload required by Go kind dispatch");
-            if let Some(id) = n.statements {
+            if let Some(id) = n.statements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_declaration()
                 .expect("ImportDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2340,49 +2344,49 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.import_clause {
+            if let Some(id) = n.import_clause() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.module_specifier {
+            if let Some(id) = n.module_specifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ExternalModuleReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_external_module_reference()
                 .expect("ExternalModuleReference payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NamespaceImport) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_import()
                 .expect("NamespaceImport payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NamedImports) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_imports()
                 .expect("NamedImports payload required by Go kind dispatch");
-            if let Some(id) = n.elements {
+            if let Some(id) = n.elements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ExportAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_assignment()
                 .expect("ExportAssignment payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2392,19 +2396,19 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NamespaceExportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_export_declaration()
                 .expect("NamespaceExportDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2414,76 +2418,76 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NamespaceExport) => {
             let n = node
-                .data()
+                .data_source()
                 .as_namespace_export()
                 .expect("NamespaceExport payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NamedExports) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_exports()
                 .expect("NamedExports payload required by Go kind dispatch");
-            if let Some(id) = n.elements {
+            if let Some(id) = n.elements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ExportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_specifier()
                 .expect("ExportSpecifier payload required by Go kind dispatch");
-            if let Some(id) = n.property_name {
+            if let Some(id) = n.property_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::CallSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_call_signature_declaration()
                 .expect("CallSignatureDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ConstructSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_construct_signature_declaration()
                 .expect("ConstructSignatureDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::Constructor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_constructor_declaration()
                 .expect("ConstructorDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2493,28 +2497,28 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::GetAccessor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_get_accessor_declaration()
                 .expect("GetAccessorDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2524,31 +2528,31 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SetAccessor) => {
             let n = node
-                .data()
+                .data_source()
                 .as_set_accessor_declaration()
                 .expect("SetAccessorDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2558,31 +2562,31 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::IndexSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_index_signature_declaration()
                 .expect("IndexSignatureDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2592,19 +2596,19 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::MethodSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_method_signature_declaration()
                 .expect("MethodSignatureDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2614,28 +2618,28 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::MethodDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_method_declaration()
                 .expect("MethodDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2645,37 +2649,37 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.asterisk_token {
+            if let Some(id) = n.asterisk_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PropertySignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_signature_declaration()
                 .expect("PropertySignatureDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2685,25 +2689,25 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PropertyDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_declaration()
                 .expect("PropertyDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2713,25 +2717,25 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ClassStaticBlockDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_class_static_block_declaration()
                 .expect("ClassStaticBlockDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2741,16 +2745,16 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::BinaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("BinaryExpression payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2760,55 +2764,55 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.left {
+            if let Some(id) = n.left() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.operator_token {
+            if let Some(id) = n.operator_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.right {
+            if let Some(id) = n.right() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PrefixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_prefix_unary_expression()
                 .expect("PrefixUnaryExpression payload required by Go kind dispatch");
-            if let Some(id) = n.operand {
+            if let Some(id) = n.operand() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PostfixUnaryExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_postfix_unary_expression()
                 .expect("PostfixUnaryExpression payload required by Go kind dispatch");
-            if let Some(id) = n.operand {
+            if let Some(id) = n.operand() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::YieldExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_yield_expression()
                 .expect("YieldExpression payload required by Go kind dispatch");
-            if let Some(id) = n.asterisk_token {
+            if let Some(id) = n.asterisk_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ArrowFunction) => {
             let n = node
-                .data()
+                .data_source()
                 .as_arrow_function()
                 .expect("ArrowFunction payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2818,31 +2822,31 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.equals_greater_than_token {
+            if let Some(id) = n.equals_greater_than_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::FunctionExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_expression()
                 .expect("FunctionExpression payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -2852,247 +2856,247 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.asterisk_token {
+            if let Some(id) = n.asterisk_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.full_signature {
+            if let Some(id) = n.full_signature() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::AsExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_as_expression()
                 .expect("AsExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SatisfiesExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_satisfies_expression()
                 .expect("SatisfiesExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ConditionalExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_conditional_expression()
                 .expect("ConditionalExpression payload required by Go kind dispatch");
-            if let Some(id) = n.condition {
+            if let Some(id) = n.condition() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_token {
+            if let Some(id) = n.question_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.when_true {
+            if let Some(id) = n.when_true() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.colon_token {
+            if let Some(id) = n.colon_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.when_false {
+            if let Some(id) = n.when_false() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PropertyAccessExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_access_expression()
                 .expect("PropertyAccessExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_dot_token {
+            if let Some(id) = n.question_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ElementAccessExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_element_access_expression()
                 .expect("ElementAccessExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_dot_token {
+            if let Some(id) = n.question_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.argument_expression {
+            if let Some(id) = n.argument_expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::CallExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_call_expression()
                 .expect("CallExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_dot_token {
+            if let Some(id) = n.question_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.arguments {
+            if let Some(id) = n.arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::NewExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_new_expression()
                 .expect("NewExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.arguments {
+            if let Some(id) = n.arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::MetaProperty) => {
             let n = node
-                .data()
+                .data_source()
                 .as_meta_property()
                 .expect("MetaProperty payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::NonNullExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_non_null_expression()
                 .expect("NonNullExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SpreadElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_spread_element()
                 .expect("SpreadElement payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TemplateExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_expression()
                 .expect("TemplateExpression payload required by Go kind dispatch");
-            if let Some(id) = n.head {
+            if let Some(id) = n.head() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.template_spans {
+            if let Some(id) = n.template_spans() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TemplateSpan) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_span()
                 .expect("TemplateSpan payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.literal {
+            if let Some(id) = n.literal() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TaggedTemplateExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_tagged_template_expression()
                 .expect("TaggedTemplateExpression payload required by Go kind dispatch");
-            if let Some(id) = n.tag {
+            if let Some(id) = n.tag() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_dot_token {
+            if let Some(id) = n.question_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.template {
+            if let Some(id) = n.template() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ParenthesizedExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parenthesized_expression()
                 .expect("ParenthesizedExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ArrayLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_array_literal_expression()
                 .expect("ArrayLiteralExpression payload required by Go kind dispatch");
-            if let Some(id) = n.elements {
+            if let Some(id) = n.elements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ObjectLiteralExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_object_literal_expression()
                 .expect("ObjectLiteralExpression payload required by Go kind dispatch");
-            if let Some(id) = n.properties {
+            if let Some(id) = n.properties() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::SpreadAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_spread_assignment()
                 .expect("SpreadAssignment payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PropertyAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_property_assignment()
                 .expect("PropertyAssignment payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -3102,25 +3106,25 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ShorthandPropertyAssignment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_shorthand_property_assignment()
                 .expect("ShorthandPropertyAssignment payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -3130,334 +3134,334 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.postfix_token {
+            if let Some(id) = n.postfix_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.equals_token {
+            if let Some(id) = n.equals_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.object_assignment_initializer {
+            if let Some(id) = n.object_assignment_initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::DeleteExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_delete_expression()
                 .expect("DeleteExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypeOfExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_of_expression()
                 .expect("TypeOfExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::VoidExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_void_expression()
                 .expect("VoidExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::AwaitExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_await_expression()
                 .expect("AwaitExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypeAssertionExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_assertion()
                 .expect("TypeAssertion payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::UnionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_union_type_node()
                 .expect("UnionTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.types {
+            if let Some(id) = n.types() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::IntersectionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_intersection_type_node()
                 .expect("IntersectionTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.types {
+            if let Some(id) = n.types() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ConditionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_conditional_type_node()
                 .expect("ConditionalTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.check_type {
+            if let Some(id) = n.check_type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.extends_type {
+            if let Some(id) = n.extends_type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.true_type {
+            if let Some(id) = n.true_type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.false_type {
+            if let Some(id) = n.false_type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypeOperator) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_operator_node()
                 .expect("TypeOperatorNode payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::InferType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_infer_type_node()
                 .expect("InferTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.type_parameter {
+            if let Some(id) = n.type_parameter() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ArrayType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_array_type_node()
                 .expect("ArrayTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.element_type {
+            if let Some(id) = n.element_type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::IndexedAccessType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_indexed_access_type_node()
                 .expect("IndexedAccessTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.object_type {
+            if let Some(id) = n.object_type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.index_type {
+            if let Some(id) = n.index_type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypeReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_reference_node()
                 .expect("TypeReferenceNode payload required by Go kind dispatch");
-            if let Some(id) = n.type_name {
+            if let Some(id) = n.type_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ExpressionWithTypeArguments) => {
             let n = node
-                .data()
+                .data_source()
                 .as_expression_with_type_arguments()
                 .expect("ExpressionWithTypeArguments payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::LiteralType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_literal_type_node()
                 .expect("LiteralTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.literal {
+            if let Some(id) = n.literal() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypePredicate) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_predicate_node()
                 .expect("TypePredicateNode payload required by Go kind dispatch");
-            if let Some(id) = n.asserts_modifier {
+            if let Some(id) = n.asserts_modifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.parameter_name {
+            if let Some(id) = n.parameter_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ImportAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_attribute()
                 .expect("ImportAttribute payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.value {
+            if let Some(id) = n.value() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ImportAttributes) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_attributes()
                 .expect("ImportAttributes payload required by Go kind dispatch");
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TypeQuery) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_query_node()
                 .expect("TypeQueryNode payload required by Go kind dispatch");
-            if let Some(id) = n.expr_name {
+            if let Some(id) = n.expr_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::MappedType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_mapped_type_node()
                 .expect("MappedTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.readonly_token {
+            if let Some(id) = n.readonly_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameter {
+            if let Some(id) = n.type_parameter() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name_type {
+            if let Some(id) = n.name_type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_token {
+            if let Some(id) = n.question_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TypeLiteral) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_literal_node()
                 .expect("TypeLiteralNode payload required by Go kind dispatch");
-            if let Some(id) = n.members {
+            if let Some(id) = n.members() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TupleType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_tuple_type_node()
                 .expect("TupleTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.elements {
+            if let Some(id) = n.elements() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::NamedTupleMember) => {
             let n = node
-                .data()
+                .data_source()
                 .as_named_tuple_member()
                 .expect("NamedTupleMember payload required by Go kind dispatch");
-            if let Some(id) = n.dot_dot_dot_token {
+            if let Some(id) = n.dot_dot_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.question_token {
+            if let Some(id) = n.question_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::OptionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_optional_type_node()
                 .expect("OptionalTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::RestType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_rest_type_node()
                 .expect("RestTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ParenthesizedType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_parenthesized_type_node()
                 .expect("ParenthesizedTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::FunctionType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_function_type_node()
                 .expect("FunctionTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ConstructorType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_constructor_type_node()
                 .expect("ConstructorTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -3467,588 +3471,587 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TemplateLiteralType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_literal_type_node()
                 .expect("TemplateLiteralTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.head {
+            if let Some(id) = n.head() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.template_spans {
+            if let Some(id) = n.template_spans() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::TemplateLiteralTypeSpan) => {
             let n = node
-                .data()
+                .data_source()
                 .as_template_literal_type_span()
                 .expect("TemplateLiteralTypeSpan payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.literal {
+            if let Some(id) = n.literal() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SyntheticExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_synthetic_expression()
                 .expect("SyntheticExpression payload required by Go kind dispatch");
-            if let Some(id) = n.tuple_name_source {
+            if let Some(id) = n.tuple_name_source() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::PartiallyEmittedExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_partially_emitted_expression()
                 .expect("PartiallyEmittedExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_element()
                 .expect("JsxElement payload required by Go kind dispatch");
-            if let Some(id) = n.opening_element {
+            if let Some(id) = n.opening_element() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.children {
+            if let Some(id) = n.children() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.closing_element {
+            if let Some(id) = n.closing_element() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxAttributes) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_attributes()
                 .expect("JsxAttributes payload required by Go kind dispatch");
-            if let Some(id) = n.properties {
+            if let Some(id) = n.properties() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JsxNamespacedName) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_namespaced_name()
                 .expect("JsxNamespacedName payload required by Go kind dispatch");
-            if let Some(id) = n.namespace {
+            if let Some(id) = n.namespace() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxOpeningElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_opening_element()
                 .expect("JsxOpeningElement payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxSelfClosingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_self_closing_element()
                 .expect("JsxSelfClosingElement payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxFragment) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_fragment()
                 .expect("JsxFragment payload required by Go kind dispatch");
-            if let Some(id) = n.opening_fragment {
+            if let Some(id) = n.opening_fragment() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.children {
+            if let Some(id) = n.children() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.closing_fragment {
+            if let Some(id) = n.closing_fragment() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_attribute()
                 .expect("JsxAttribute payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.initializer {
+            if let Some(id) = n.initializer() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxSpreadAttribute) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_spread_attribute()
                 .expect("JsxSpreadAttribute payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxClosingElement) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_closing_element()
                 .expect("JsxClosingElement payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JsxExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_expression()
                 .expect("JsxExpression payload required by Go kind dispatch");
-            if let Some(id) = n.dot_dot_dot_token {
+            if let Some(id) = n.dot_dot_dot_token() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SyntaxList) => {
             let n = node
-                .data()
+                .data_source()
                 .as_syntax_list()
                 .expect("SyntaxList payload required by Go kind dispatch");
             edges.extend(
-                view.node_slice(n.children)
+                view.node_slice(n.children())
                     .expect("owned raw children")
                     .iter()
                     .flatten()
-                    .copied()
                     .map(Edge::Node),
             );
         }
         Some(SyntaxKind::JSDoc) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc()
                 .expect("JSDoc payload required by Go kind dispatch");
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.tags {
+            if let Some(id) = n.tags() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocTypeExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_expression()
                 .expect("JSDocTypeExpression payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocNonNullableType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_non_nullable_type()
                 .expect("JSDocNonNullableType payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocNullableType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_nullable_type()
                 .expect("JSDocNullableType payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocVariadicType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_variadic_type()
                 .expect("JSDocVariadicType payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocOptionalType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_optional_type()
                 .expect("JSDocOptionalType payload required by Go kind dispatch");
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocTypeTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_tag()
                 .expect("JSDocTypeTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocUnknownTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_unknown_tag()
                 .expect("JSDocUnknownTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocTemplateTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_template_tag()
                 .expect("JSDocTemplateTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.constraint {
+            if let Some(id) = n.constraint() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocReturnTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_return_tag()
                 .expect("JSDocReturnTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocPublicTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_public_tag()
                 .expect("JSDocPublicTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocPrivateTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_private_tag()
                 .expect("JSDocPrivateTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocProtectedTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_protected_tag()
                 .expect("JSDocProtectedTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocReadonlyTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_readonly_tag()
                 .expect("JSDocReadonlyTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocOverrideTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_override_tag()
                 .expect("JSDocOverrideTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocDeprecatedTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_deprecated_tag()
                 .expect("JSDocDeprecatedTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocSeeTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_see_tag()
                 .expect("JSDocSeeTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name_expression {
+            if let Some(id) = n.name_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocImplementsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_implements_tag()
                 .expect("JSDocImplementsTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.class_name {
+            if let Some(id) = n.class_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocAugmentsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_augments_tag()
                 .expect("JSDocAugmentsTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.class_name {
+            if let Some(id) = n.class_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocSatisfiesTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_satisfies_tag()
                 .expect("JSDocSatisfiesTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocThrowsTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_throws_tag()
                 .expect("JSDocThrowsTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocThisTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_this_tag()
                 .expect("JSDocThisTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocImportTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_import_tag()
                 .expect("JSDocImportTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.import_clause {
+            if let Some(id) = n.import_clause() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.module_specifier {
+            if let Some(id) = n.module_specifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocCallbackTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_callback_tag()
                 .expect("JSDocCallbackTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocOverloadTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_overload_tag()
                 .expect("JSDocOverloadTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocTypedefTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_typedef_tag()
                 .expect("JSDocTypedefTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::JSDocSignature) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_signature()
                 .expect("JSDocSignature payload required by Go kind dispatch");
-            if let Some(id) = n.type_parameters {
+            if let Some(id) = n.type_parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.parameters {
+            if let Some(id) = n.parameters() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.r#type {
+            if let Some(id) = n.r#type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocNameReference) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_name_reference()
                 .expect("JSDocNameReference payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SourceFile) => {
             let n = node
-                .data()
+                .data_source()
                 .as_source_file()
                 .expect("SourceFile payload required by Go kind dispatch");
-            if let Some(id) = n.statements {
+            if let Some(id) = n.statements() {
                 edges.push(Edge::List(id));
             }
-            if let Some(id) = n.end_of_file_token {
+            if let Some(id) = n.end_of_file_token() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ModuleDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_module_declaration()
                 .expect("ModuleDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -4058,22 +4061,22 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.body {
+            if let Some(id) = n.body() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ImportEqualsDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_equals_declaration()
                 .expect("ImportEqualsDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -4083,19 +4086,19 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.module_reference {
+            if let Some(id) = n.module_reference() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ExportDeclaration) => {
             let n = node
-                .data()
+                .data_source()
                 .as_export_declaration()
                 .expect("ExportDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -4105,91 +4108,91 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.export_clause {
+            if let Some(id) = n.export_clause() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.module_specifier {
+            if let Some(id) = n.module_specifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ImportType) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_type_node()
                 .expect("ImportTypeNode payload required by Go kind dispatch");
-            if let Some(id) = n.argument {
+            if let Some(id) = n.argument() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.attributes {
+            if let Some(id) = n.attributes() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.qualifier {
+            if let Some(id) = n.qualifier() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_arguments {
+            if let Some(id) = n.type_arguments() {
                 edges.push(Edge::List(id));
             }
         }
         Some(SyntaxKind::ImportClause) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_clause()
                 .expect("ImportClause payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.named_bindings {
+            if let Some(id) = n.named_bindings() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::ImportSpecifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_import_specifier()
                 .expect("ImportSpecifier payload required by Go kind dispatch");
-            if let Some(id) = n.property_name {
+            if let Some(id) = n.property_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocLink) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link()
                 .expect("JSDocLink payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocLinkPlain) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_plain()
                 .expect("JSDocLinkPlain payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocLinkCode) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_code()
                 .expect("JSDocLinkCode payload required by Go kind dispatch");
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::TypeParameter) => {
             let n = node
-                .data()
+                .data_source()
                 .as_type_parameter_declaration()
                 .expect("TypeParameterDeclaration payload required by Go kind dispatch");
-            if let Some(id) = n.modifiers {
+            if let Some(id) = n.modifiers() {
                 if !view
                     .list(id)
                     .expect("owned modifier list")
@@ -4199,60 +4202,59 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
                     edges.push(Edge::List(id));
                 }
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.constraint {
+            if let Some(id) = n.constraint() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.default_type {
+            if let Some(id) = n.default_type() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::SyntheticReferenceExpression) => {
             let n = node
-                .data()
+                .data_source()
                 .as_synthetic_reference_expression()
                 .expect("SyntheticReferenceExpression payload required by Go kind dispatch");
-            if let Some(id) = n.expression {
+            if let Some(id) = n.expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.this_arg {
+            if let Some(id) = n.this_arg() {
                 edges.push(Edge::Node(id));
             }
         }
         Some(SyntaxKind::JSDocTypeLiteral) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_type_literal()
                 .expect("JSDocTypeLiteral payload required by Go kind dispatch");
             edges.extend(
-                view.node_slice(n.js_doc_property_tags)
+                view.node_slice(n.js_doc_property_tags())
                     .expect("owned raw children")
                     .iter()
                     .flatten()
-                    .copied()
                     .map(Edge::Node),
             );
         }
         Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_parameter_or_property_tag()
                 .expect("JSDocParameterOrPropertyTag payload required by Go kind dispatch");
-            if let Some(id) = n.tag_name {
+            if let Some(id) = n.tag_name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.name {
+            if let Some(id) = n.name() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.type_expression {
+            if let Some(id) = n.type_expression() {
                 edges.push(Edge::Node(id));
             }
-            if let Some(id) = n.comment {
+            if let Some(id) = n.comment() {
                 edges.push(Edge::List(id));
             }
         }
@@ -4260,35 +4262,39 @@ pub(crate) fn children(view: AstView<'_>, node: &Node, edges: &mut Vec<Edge>) {
     }
 }
 // upstream: tsc/internal/api/encoder/encoder_generated.go:recordNodeStrings
-pub(crate) fn record_string(view: AstView<'_>, node: &Node, table: &mut StringTable<'_>) -> u32 {
+pub(crate) fn record_string(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+    table: &mut StringTable<'_>,
+) -> u32 {
     match node.kind().known() {
         Some(SyntaxKind::Identifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_identifier()
                 .expect("Identifier payload required by Go kind dispatch");
-            table.add(n.text.as_bytes(), node.kind(), node.pos(), node.end())
+            table.add(n.text(), node.kind(), node.pos(), node.end())
         }
         Some(SyntaxKind::PrivateIdentifier) => {
             let n = node
-                .data()
+                .data_source()
                 .as_private_identifier()
                 .expect("PrivateIdentifier payload required by Go kind dispatch");
-            table.add(n.text.as_bytes(), node.kind(), node.pos(), node.end())
+            table.add(n.text(), node.kind(), node.pos(), node.end())
         }
         Some(SyntaxKind::JsxText) => {
             let n = node
-                .data()
+                .data_source()
                 .as_jsx_text()
                 .expect("JsxText payload required by Go kind dispatch");
-            table.add(n.text.as_bytes(), node.kind(), node.pos(), node.end())
+            table.add(n.text(), node.kind(), node.pos(), node.end())
         }
         Some(SyntaxKind::JSDocText) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_text()
                 .expect("JSDocText payload required by Go kind dispatch");
-            let parts = view.text_slice(n.text).expect("owned text fragments");
+            let parts = view.text_slice(n.text()).expect("owned text fragments");
             let text: Vec<u8> = parts
                 .iter()
                 .flat_map(|part| part.as_bytes().iter().copied())
@@ -4297,10 +4303,10 @@ pub(crate) fn record_string(view: AstView<'_>, node: &Node, table: &mut StringTa
         }
         Some(SyntaxKind::JSDocLink) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link()
                 .expect("JSDocLink payload required by Go kind dispatch");
-            let parts = view.text_slice(n.text).expect("owned text fragments");
+            let parts = view.text_slice(n.text()).expect("owned text fragments");
             let text: Vec<u8> = parts
                 .iter()
                 .flat_map(|part| part.as_bytes().iter().copied())
@@ -4309,10 +4315,10 @@ pub(crate) fn record_string(view: AstView<'_>, node: &Node, table: &mut StringTa
         }
         Some(SyntaxKind::JSDocLinkPlain) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_plain()
                 .expect("JSDocLinkPlain payload required by Go kind dispatch");
-            let parts = view.text_slice(n.text).expect("owned text fragments");
+            let parts = view.text_slice(n.text()).expect("owned text fragments");
             let text: Vec<u8> = parts
                 .iter()
                 .flat_map(|part| part.as_bytes().iter().copied())
@@ -4321,10 +4327,10 @@ pub(crate) fn record_string(view: AstView<'_>, node: &Node, table: &mut StringTa
         }
         Some(SyntaxKind::JSDocLinkCode) => {
             let n = node
-                .data()
+                .data_source()
                 .as_js_doc_link_code()
                 .expect("JSDocLinkCode payload required by Go kind dispatch");
-            let parts = view.text_slice(n.text).expect("owned text fragments");
+            let parts = view.text_slice(n.text()).expect("owned text fragments");
             let text: Vec<u8> = parts
                 .iter()
                 .flat_map(|part| part.as_bytes().iter().copied())

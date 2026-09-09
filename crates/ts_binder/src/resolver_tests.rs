@@ -68,7 +68,7 @@ impl ResolverHost for Host {
     }
     fn binding(&self, node: NodeId) -> Result<Option<NodeBinding>, Error> {
         self.ast(node)?;
-        Ok(self.result().node_binding(node))
+        Ok(self.result().node_binding(self.ast(node)?, node))
     }
     fn symbol(&self, id: SymbolId) -> Result<&Symbol, Error> {
         if id.arena() == self.transient.id() {
@@ -115,7 +115,7 @@ impl ChildVisitor for Find<'_> {
         self.visit_node_slice(self.view.list(id).unwrap().nodes())
     }
     fn visit_node_slice(&mut self, slice: NodeSlice) -> ControlFlow<()> {
-        for &id in self.view.node_slice(slice).unwrap().iter().flatten() {
+        for id in self.view.node_slice(slice).unwrap().iter().flatten() {
             self.visit_node(id)?;
         }
         ControlFlow::Continue(())

@@ -563,6 +563,10 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<BTreeMap<PathBuf, String
         ("kinds_generated.rs", kinds_code),
         ("data_generated.rs", data),
         ("accessors_generated.rs", accessors),
+        (
+            "compact_generated.rs",
+            super::ast_compact::emit(nodes, pin)?,
+        ),
         ("node_read_generated.rs", super::ast_read::emit(nodes, pin)?),
         ("visitors_generated.rs", visitors),
     ]
@@ -699,7 +703,7 @@ mod tests {
             "kinds": [{"name": "Unknown", "value": 0}],
             "markers": [], "kindAliases": [],
             "nodes": [{"name": "Token", "kinds": ["Unknown"], "members": [],
-                "handWritten": false, "handWrittenVisitor": false,
+                "handWritten": false, "handWrittenVisitor": false, "baseTypes": [],
                 "fields": [member("Flags", &json!({"kind":"primitive","name":"NodeFlags"}))]}]
         })
     }

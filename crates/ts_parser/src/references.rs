@@ -49,13 +49,7 @@ impl Parser<'_, AstBuilder> {
     /// port: tsc/internal/ast/parseoptions.go:isFileProbablyExternalModule
     fn is_file_probably_external_module(&self, root: NodeId) -> Option<NodeId> {
         let statements = self.source_statements(root);
-        for node in self
-            .factory
-            .read_nodes(statements)
-            .iter()
-            .flatten()
-            .copied()
-        {
+        for node in self.factory.read_nodes(statements).iter().flatten() {
             if self.is_an_external_module_indicator_node(node) {
                 return Some(node);
             }
@@ -73,10 +67,10 @@ impl Parser<'_, AstBuilder> {
         match node.kind().known() {
             Some(K::ImportEqualsDeclaration) => {
                 let reference = node
-                    .data()
+                    .data_source()
                     .as_import_equals_declaration()
                     .expect("import-equals payload")
-                    .module_reference
+                    .module_reference()
                     .expect("parsed module reference");
                 self.factory.node(reference).kind() == K::ExternalModuleReference
             }
@@ -116,7 +110,11 @@ impl Parser<'_, AstBuilder> {
         let mut collected = CollectedReferences::default();
         let statements = self.source_statements(root);
         for i in 0..statements.len() {
-            let node = self.factory.read_nodes(statements)[i].expect("source statement");
+            let node = self
+                .factory
+                .read_nodes(statements)
+                .at(i)
+                .expect("source statement");
             self.collect_module_references(root, node, false, &mut collected);
         }
         let flags = self.factory.node(root).flags();
@@ -217,12 +215,15 @@ impl Parser<'_, AstBuilder> {
             }
             let (name, body, keyword, modifiers) = {
                 let data = self.factory.node(node);
-                let module = data.data().as_module_declaration().expect("module payload");
+                let module = data
+                    .data_source()
+                    .as_module_declaration()
+                    .expect("module payload");
                 (
-                    module.name.expect("parsed module name"),
-                    module.body,
-                    module.keyword,
-                    module.modifiers,
+                    module.name().expect("parsed module name"),
+                    module.body(),
+                    module.keyword(),
+                    module.modifiers(),
                 )
             };
             if self.factory.node(name).kind() != K::StringLiteral && keyword != K::GlobalKeyword {
@@ -254,14 +255,18 @@ impl Parser<'_, AstBuilder> {
                     let statements = self
                         .factory
                         .node(body)
-                        .data()
+                        .data_source()
                         .as_module_block()
                         .expect("ambient module body is a block")
-                        .statements;
+                        .statements();
                     if let Some(statements) = statements {
                         let nodes = self.factory.read_list(statements).nodes();
                         for i in 0..nodes.len() {
-                            let node = self.factory.read_nodes(nodes)[i].expect("module statement");
+                            let node = self
+                                .factory
+                                .read_nodes(nodes)
+                                .at(i)
+                                .expect("module statement");
                             self.collect_module_references(root, node, true, collected);
                         }
                     }
@@ -273,10 +278,10 @@ impl Parser<'_, AstBuilder> {
         let list = self
             .factory
             .node(root)
-            .data()
+            .data_source()
             .as_source_file()
             .expect("source payload")
-            .statements
+            .statements()
             .expect("source statements");
         self.factory.read_list(list).nodes()
     }
@@ -333,7 +338,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                 self.visit_node_slice(self.factory.read_list(list).nodes())
             }
             fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
-                for node in self.factory.read_nodes(nodes).iter().flatten().copied() {
+                for node in self.factory.read_nodes(nodes).iter().flatten() {
                     self.visit_node(node)?;
                 }
                 ControlFlow::Continue(())
@@ -377,10 +382,10 @@ impl<F: ParserFactory> Parser<'_, F> {
     fn is_import_meta(&self, node: NodeId) -> bool {
         let node = self.factory.node(node);
         node.kind() == K::MetaProperty && {
-            let meta = node.data().as_meta_property().expect("meta payload");
-            meta.keyword_token == K::ImportKeyword
+            let meta = node.data_source().as_meta_property().expect("meta payload");
+            meta.keyword_token() == K::ImportKeyword
                 && self
-                    .reference_name_text(meta.name.expect("meta name"))
+                    .reference_name_text(meta.name().expect("meta name"))
                     .as_bytes()
                     == b"meta"
         }
@@ -389,49 +394,45 @@ impl<F: ParserFactory> Parser<'_, F> {
         let node = self.factory.node(node);
         match node.kind().known() {
             Some(K::Identifier) => node
-                .data()
+                .data_source()
                 .as_identifier()
                 .expect("identifier payload")
-                .text
-                .clone(),
+                .text_owned(),
             Some(K::StringLiteral) => node
-                .data()
+                .data_source()
                 .as_string_literal()
                 .expect("string payload")
-                .text
-                .clone(),
+                .text_owned(),
             _ => panic!("module name is neither identifier nor string literal"),
         }
     }
     fn static_external_module_name(&self, node: NodeId) -> Option<NodeId> {
         let node = self.factory.node(node);
         match node.kind().known() {
-            Some(K::ImportDeclaration | K::JSImportDeclaration) => {
-                node.data()
-                    .as_import_declaration()
-                    .expect("import payload")
-                    .module_specifier
-            }
-            Some(K::ExportDeclaration) => {
-                node.data()
-                    .as_export_declaration()
-                    .expect("export payload")
-                    .module_specifier
-            }
+            Some(K::ImportDeclaration | K::JSImportDeclaration) => node
+                .data_source()
+                .as_import_declaration()
+                .expect("import payload")
+                .module_specifier(),
+            Some(K::ExportDeclaration) => node
+                .data_source()
+                .as_export_declaration()
+                .expect("export payload")
+                .module_specifier(),
             Some(K::ImportEqualsDeclaration) => {
                 let reference = self.factory.node(
-                    node.data()
+                    node.data_source()
                         .as_import_equals_declaration()
                         .expect("import-equals payload")
-                        .module_reference
+                        .module_reference()
                         .expect("module reference"),
                 );
                 if reference.kind() == K::ExternalModuleReference {
                     reference
-                        .data()
+                        .data_source()
                         .as_external_module_reference()
                         .expect("external reference payload")
-                        .expression
+                        .expression()
                 } else {
                     None
                 }
@@ -449,15 +450,14 @@ impl<F: ParserFactory> Parser<'_, F> {
         let args = self
             .factory
             .node(node)
-            .data()
+            .data_source()
             .as_call_expression()
             .expect("call payload")
-            .arguments;
+            .arguments();
         args.and_then(|list| {
             self.factory
                 .read_nodes(self.factory.read_list(list).nodes())
                 .first()
-                .copied()
                 .flatten()
         })
     }
@@ -466,25 +466,31 @@ impl<F: ParserFactory> Parser<'_, F> {
         if node.kind() != K::CallExpression {
             return false;
         }
-        let call = node.data().as_call_expression().expect("call payload");
-        let expression = self.factory.node(call.expression.expect("call target"));
+        let call = node
+            .data_source()
+            .as_call_expression()
+            .expect("call payload");
+        let expression = self.factory.node(call.expression().expect("call target"));
         if expression.kind() != K::Identifier
             || expression
-                .data()
+                .data_source()
                 .as_identifier()
                 .expect("identifier payload")
-                .text
-                .as_bytes()
+                .text()
                 != b"require"
         {
             return false;
         }
-        let nodes = call.arguments.map_or(NodeSlice::empty(), |list| {
+        let nodes = call.arguments().map_or(NodeSlice::empty(), |list| {
             self.factory.read_list(list).nodes()
         });
         nodes.len() == 1
-            && self
-                .is_string_literal_like(self.factory.read_nodes(nodes)[0].expect("parsed argument"))
+            && self.is_string_literal_like(
+                self.factory
+                    .read_nodes(nodes)
+                    .at(0)
+                    .expect("parsed argument"),
+            )
     }
     /// port: tsc/internal/ast/utilities.go:IsImportCall
     fn is_import_call(&self, node: NodeId) -> bool {
@@ -493,18 +499,21 @@ impl<F: ParserFactory> Parser<'_, F> {
             return false;
         }
         let expression = self.factory.node(
-            node.data()
+            node.data_source()
                 .as_call_expression()
                 .expect("call payload")
-                .expression
+                .expression()
                 .expect("call target"),
         );
         expression.kind() == K::ImportKeyword
             || expression.kind() == K::MetaProperty && {
-                let meta = expression.data().as_meta_property().expect("meta payload");
-                meta.keyword_token == K::ImportKeyword
+                let meta = expression
+                    .data_source()
+                    .as_meta_property()
+                    .expect("meta payload");
+                meta.keyword_token() == K::ImportKeyword
                     && self
-                        .reference_name_text(meta.name.expect("meta name"))
+                        .reference_name_text(meta.name().expect("meta name"))
                         .as_bytes()
                         == b"defer"
             }
@@ -515,19 +524,19 @@ impl<F: ParserFactory> Parser<'_, F> {
             return None;
         }
         let argument = node
-            .data()
+            .data_source()
             .as_import_type_node()
             .expect("import type payload")
-            .argument?;
+            .argument()?;
         let argument = self.factory.node(argument);
         if argument.kind() != K::LiteralType {
             return None;
         }
         argument
-            .data()
+            .data_source()
             .as_literal_type_node()
             .expect("literal type payload")
-            .literal
+            .literal()
             .filter(|&literal| self.factory.node(literal).kind() == K::StringLiteral)
     }
 }

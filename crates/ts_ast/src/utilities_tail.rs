@@ -2,7 +2,8 @@
 //! Graph reads borrow their owner. Invalid ownership returns `Error`; missing
 //! required Go edges and incompatible kind/payload pairs remain contract panics.
 
-use crate::{node_flags, AstView, Node, NodeId, NodeKind, NodeListId, SyntaxKind as K};
+use crate::NodeAccess;
+use crate::{node_flags, AstView, NodeId, NodeKind, NodeListId, SyntaxKind as K};
 use ts_arena::Error;
 
 fn required(id: Option<NodeId>) -> NodeId {
@@ -17,30 +18,36 @@ fn list_empty(view: AstView<'_>, list: Option<NodeListId>) -> Result<bool, Error
 }
 
 // port: tsc/internal/ast/utilities.go:IsEmptyObjectLiteral
-pub fn is_empty_object_literal(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_empty_object_literal(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if node.kind() != K::ObjectLiteralExpression {
         return Ok(false);
     }
     list_empty(
         view,
-        node.data()
+        node.data_source()
             .as_object_literal_expression()
             .expect("ObjectLiteralExpression payload")
-            .properties,
+            .properties(),
     )
 }
 
 // port: tsc/internal/ast/utilities.go:IsEmptyArrayLiteral
-pub fn is_empty_array_literal(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_empty_array_literal(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if node.kind() != K::ArrayLiteralExpression {
         return Ok(false);
     }
     list_empty(
         view,
-        node.data()
+        node.data_source()
             .as_array_literal_expression()
             .expect("ArrayLiteralExpression payload")
-            .elements,
+            .elements(),
     )
 }
 
@@ -51,18 +58,16 @@ pub fn get_rest_indicator_of_binding_or_assignment_element(
 ) -> Result<Option<NodeId>, Error> {
     let node = view.node(id)?;
     Ok(match node.kind().known() {
-        Some(K::Parameter) => {
-            node.data()
-                .as_parameter_declaration()
-                .expect("Parameter payload")
-                .dot_dot_dot_token
-        }
-        Some(K::BindingElement) => {
-            node.data()
-                .as_binding_element()
-                .expect("BindingElement payload")
-                .dot_dot_dot_token
-        }
+        Some(K::Parameter) => node
+            .data_source()
+            .as_parameter_declaration()
+            .expect("Parameter payload")
+            .dot_dot_dot_token(),
+        Some(K::BindingElement) => node
+            .data_source()
+            .as_binding_element()
+            .expect("BindingElement payload")
+            .dot_dot_dot_token(),
         Some(K::SpreadElement | K::SpreadAssignment) => Some(id),
         _ => None,
     })
@@ -129,19 +134,19 @@ pub fn get_next_js_doc_comment_location(
         ) => Ok(Some(parent)),
         Some(K::VariableDeclarationList) => {
             let list = node
-                .data()
+                .data_source()
                 .as_variable_declaration_list()
                 .expect("VariableDeclarationList payload")
-                .declarations
+                .declarations()
                 .expect("nil declarations in GetNextJSDocCommentLocation");
-            Ok((view.node_slice(view.list(list)?.nodes())?[0] == Some(id)).then_some(parent))
+            Ok((view.node_slice(view.list(list)?.nodes())?.at(0) == Some(id)).then_some(parent))
         }
         _ => Ok(None),
     }
 }
 
 // port: tsc/internal/ast/utilities.go:IsImportOrImportEqualsDeclaration
-pub fn is_import_or_import_equals_declaration(node: &Node) -> bool {
+pub fn is_import_or_import_equals_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ImportDeclaration | K::ImportEqualsDeclaration)
@@ -151,7 +156,7 @@ pub fn is_import_or_import_equals_declaration(node: &Node) -> bool {
 // port: tsc/internal/ast/utilities.go:IsPrimitiveLiteralValue
 pub fn is_primitive_literal_value(
     view: AstView<'_>,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
     include_big_int: bool,
 ) -> Result<bool, Error> {
     Ok(match node.kind().known() {
@@ -165,13 +170,13 @@ pub fn is_primitive_literal_value(
         Some(K::BigIntLiteral) => include_big_int,
         Some(K::PrefixUnaryExpression) => {
             let data = node
-                .data()
+                .data_source()
                 .as_prefix_unary_expression()
                 .expect("PrefixUnaryExpression payload");
-            if data.operator == K::MinusToken || data.operator == K::PlusToken {
-                let kind = view.node(required(data.operand))?.kind();
+            if data.operator() == K::MinusToken || data.operator() == K::PlusToken {
+                let kind = view.node(required(data.operand()))?.kind();
                 kind == K::NumericLiteral
-                    || (data.operator == K::MinusToken
+                    || (data.operator() == K::MinusToken
                         && include_big_int
                         && kind == K::BigIntLiteral)
             } else {
@@ -183,7 +188,7 @@ pub fn is_primitive_literal_value(
 }
 
 // port: tsc/internal/ast/utilities.go:HasInferredType
-pub fn has_inferred_type(node: &Node) -> bool {
+pub fn has_inferred_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -232,23 +237,18 @@ pub fn get_rest_parameter_element_type(
     };
     let node = view.node(id)?;
     Ok(match node.kind().known() {
-        Some(K::ArrayType) => {
-            node.data()
-                .as_array_type_node()
-                .expect("ArrayType payload")
-                .element_type
-        }
+        Some(K::ArrayType) => node
+            .data_source()
+            .as_array_type_node()
+            .expect("ArrayType payload")
+            .element_type(),
         Some(K::TypeReference) => match node
-            .data()
+            .data_source()
             .as_type_reference_node()
             .expect("TypeReference payload")
-            .type_arguments
+            .type_arguments()
         {
-            Some(list) => view
-                .node_slice(view.list(list)?.nodes())?
-                .first()
-                .copied()
-                .flatten(),
+            Some(list) => view.node_slice(view.list(list)?.nodes())?.first().flatten(),
             None => None,
         },
         _ => None,
@@ -280,30 +280,30 @@ pub fn tag_names_are_equivalent(
             Some(K::ThisKeyword) => return Ok(true),
             Some(K::JsxNamespacedName) => {
                 let left = left
-                    .data()
+                    .data_source()
                     .as_jsx_namespaced_name()
                     .expect("JsxNamespacedName payload");
                 let right = right
-                    .data()
+                    .data_source()
                     .as_jsx_namespaced_name()
                     .expect("JsxNamespacedName payload");
-                return Ok(text_equal(view, left.namespace, right.namespace)?
-                    && text_equal(view, left.name, right.name)?);
+                return Ok(text_equal(view, left.namespace(), right.namespace())?
+                    && text_equal(view, left.name(), right.name())?);
             }
             Some(K::PropertyAccessExpression) => {
                 let left = left
-                    .data()
+                    .data_source()
                     .as_property_access_expression()
                     .expect("PropertyAccessExpression payload");
                 let right = right
-                    .data()
+                    .data_source()
                     .as_property_access_expression()
                     .expect("PropertyAccessExpression payload");
-                if !text_equal(view, left.name, right.name)? {
+                if !text_equal(view, left.name(), right.name())? {
                     return Ok(false);
                 }
-                lhs = required(left.expression);
-                rhs = required(right.expression);
+                lhs = required(left.expression());
+                rhs = required(right.expression());
             }
             _ => panic!("Unhandled case in TagNamesAreEquivalent"),
         }
@@ -337,102 +337,106 @@ pub fn is_argument_of_element_access_expression(
     let parent = view.node(parent)?;
     Ok(parent.kind() == K::ElementAccessExpression
         && parent
-            .data()
+            .data_source()
             .as_element_access_expression()
             .expect("ElementAccessExpression payload")
-            .argument_expression
+            .argument_expression()
             == Some(id))
 }
 
 // port: tsc/internal/ast/utilities.go:IsExpandoPropertyDeclaration
-pub fn is_expando_property_declaration(node: Option<&Node>) -> bool {
+pub fn is_expando_property_declaration(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| node.kind() == K::BinaryExpression)
 }
 
 // port: tsc/internal/ast/utilities.go:IsSuperProperty
-pub fn is_super_property(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_super_property(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     let expression = match node.kind().known() {
-        Some(K::PropertyAccessExpression) => {
-            node.data()
-                .as_property_access_expression()
-                .expect("PropertyAccessExpression payload")
-                .expression
-        }
-        Some(K::ElementAccessExpression) => {
-            node.data()
-                .as_element_access_expression()
-                .expect("ElementAccessExpression payload")
-                .expression
-        }
+        Some(K::PropertyAccessExpression) => node
+            .data_source()
+            .as_property_access_expression()
+            .expect("PropertyAccessExpression payload")
+            .expression(),
+        Some(K::ElementAccessExpression) => node
+            .data_source()
+            .as_element_access_expression()
+            .expect("ElementAccessExpression payload")
+            .expression(),
         _ => return Ok(false),
     };
     Ok(view.node(required(expression))?.kind() == K::SuperKeyword)
 }
 
 // port: tsc/internal/ast/utilities.go:IsNamedEvaluationSource
-pub fn is_named_evaluation_source(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_named_evaluation_source(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     let (name, initializer, rest) = match node.kind().known() {
         Some(K::PropertyAssignment) => {
             return Ok(!is_proto_setter(
-                &*view.node(required(
-                    node.data()
+                &view.node(required(
+                    node.data_source()
                         .as_property_assignment()
                         .expect("PropertyAssignment payload")
-                        .name,
+                        .name(),
                 ))?,
             ))
         }
         Some(K::ShorthandPropertyAssignment) => {
             return Ok(node
-                .data()
+                .data_source()
                 .as_shorthand_property_assignment()
                 .expect("ShorthandPropertyAssignment payload")
-                .object_assignment_initializer
+                .object_assignment_initializer()
                 .is_some())
         }
         Some(K::VariableDeclaration) => {
             let data = node
-                .data()
+                .data_source()
                 .as_variable_declaration()
                 .expect("VariableDeclaration payload");
-            (data.name, data.initializer, None)
+            (data.name(), data.initializer(), None)
         }
         Some(K::Parameter) => {
             let data = node
-                .data()
+                .data_source()
                 .as_parameter_declaration()
                 .expect("Parameter payload");
-            (data.name, data.initializer, data.dot_dot_dot_token)
+            (data.name(), data.initializer(), data.dot_dot_dot_token())
         }
         Some(K::BindingElement) => {
             let data = node
-                .data()
+                .data_source()
                 .as_binding_element()
                 .expect("BindingElement payload");
-            (data.name, data.initializer, data.dot_dot_dot_token)
+            (data.name(), data.initializer(), data.dot_dot_dot_token())
         }
         Some(K::PropertyDeclaration) => {
             return Ok(node
-                .data()
+                .data_source()
                 .as_property_declaration()
                 .expect("PropertyDeclaration payload")
-                .initializer
+                .initializer()
                 .is_some())
         }
         Some(K::BinaryExpression) => {
             let data = node
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("BinaryExpression payload");
             return Ok(matches!(
-                view.node(required(data.operator_token))?.kind().known(),
+                view.node(required(data.operator_token()))?.kind().known(),
                 Some(
                     K::EqualsToken
                         | K::AmpersandAmpersandEqualsToken
                         | K::BarBarEqualsToken
                         | K::QuestionQuestionEqualsToken
                 )
-            ) && view.node(required(data.left))?.kind() == K::Identifier);
+            ) && view.node(required(data.left()))?.kind() == K::Identifier);
         }
         Some(K::ExportAssignment) => return Ok(true),
         _ => return Ok(false),
@@ -443,37 +447,36 @@ pub fn is_named_evaluation_source(view: AstView<'_>, node: &Node) -> Result<bool
 }
 
 // port: tsc/internal/ast/utilities.go:IsProtoSetter
-pub fn is_proto_setter(node: &Node) -> bool {
+pub fn is_proto_setter(node: &(impl NodeAccess + ?Sized)) -> bool {
     let text = match node.kind().known() {
-        Some(K::Identifier) => {
-            &node
-                .data()
-                .as_identifier()
-                .expect("Identifier payload")
-                .text
-        }
-        Some(K::StringLiteral) => {
-            &node
-                .data()
-                .as_string_literal()
-                .expect("StringLiteral payload")
-                .text
-        }
+        Some(K::Identifier) => node
+            .data_source()
+            .as_identifier()
+            .expect("Identifier payload")
+            .text(),
+        Some(K::StringLiteral) => node
+            .data_source()
+            .as_string_literal()
+            .expect("StringLiteral payload")
+            .text(),
         _ => return false,
     };
-    text.as_bytes() == b"__proto__"
+    text == b"__proto__"
 }
 
 // port: tsc/internal/ast/utilities.go:IsStringLiteralLikeType
-pub fn is_string_literal_like_type(view: AstView<'_>, node: &Node) -> Result<bool, Error> {
+pub fn is_string_literal_like_type(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<bool, Error> {
     if node.kind() != K::LiteralType {
         return Ok(false);
     }
     let literal = node
-        .data()
+        .data_source()
         .as_literal_type_node()
         .expect("LiteralType payload")
-        .literal;
+        .literal();
     Ok(matches!(
         view.node(required(literal))?.kind().known(),
         Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral)

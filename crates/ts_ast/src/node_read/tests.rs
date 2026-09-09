@@ -56,6 +56,40 @@ fn imported_records_keep_their_physical_owner_source_and_edges() {
 }
 
 #[test]
+fn core_reads_preserve_owner_before_slot_validation() {
+    let counters = Counters::new();
+    let foreign = AstBuilder::new(
+        SourceText::from_loaded_bytes(b"foreign".as_slice()),
+        &counters,
+    );
+    let mut builder = AstBuilder::new(
+        SourceText::from_loaded_bytes(b"local".as_slice()),
+        &counters,
+    );
+    let root = builder.new_identifier(JsString::from_bytes(b"local".as_slice()));
+    let parsed = builder.complete(root).unwrap();
+    let wrong_owner = NodeId::from_parts(foreign.view().0.id().arena(), u32::MAX).unwrap();
+    let wrong_slot = NodeId::from_parts(root.arena(), u32::MAX).unwrap();
+    assert!(matches!(
+        parsed.core_node_read(wrong_owner),
+        Err(Error::WrongOwner)
+    ));
+    assert!(matches!(
+        parsed.core_node_read(wrong_slot),
+        Err(Error::InvalidSlot)
+    ));
+    let file = parsed.publish_unbound();
+    assert!(matches!(
+        file.view().node(wrong_owner),
+        Err(Error::WrongOwner)
+    ));
+    assert!(matches!(
+        file.view().node(wrong_slot),
+        Err(Error::InvalidSlot)
+    ));
+}
+
+#[test]
 fn transaction_and_retained_lazy_reads_keep_identity_through_owner_disposal() {
     let counters = Counters::new();
     let before = counters.snapshot();
@@ -292,7 +326,11 @@ fn payload_views_preserve_shape_dispatch_lists_and_owned_text() {
     assert_eq!(function_read.body(), None);
     let list = view.list(function_read.parameters().unwrap()).unwrap();
     assert_eq!(
-        &*view.node_slice(list.nodes()).unwrap(),
+        &view
+            .node_slice(list.nodes())
+            .unwrap()
+            .iter()
+            .collect::<Vec<_>>(),
         &[Some(name), None]
     );
     let text = view.node_text(name).unwrap();

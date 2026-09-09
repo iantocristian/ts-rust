@@ -1,6 +1,7 @@
 use crate::{
     arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, Counters, Error,
-    FileId, NodeId, NodeRecord, StorageHandle, StorageRead, StorageTransaction, SymbolId,
+    FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle, StorageRead, StorageTransaction,
+    SymbolId,
 };
 use std::{
     collections::HashMap,
@@ -26,6 +27,7 @@ impl<N, S> RetainedImport<N, S> for StorageHandle<N, S>
 where
     N: NodeRecord + Send + Sync,
     N::Aux: Send + Sync,
+    N::Store: Send + Sync,
     S: Send + Sync,
 {
     fn owner(&self) -> &StorageOwner<N, S> {
@@ -55,6 +57,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
                 core: Arena::new(counters),
                 symbols: Arena::new(counters),
                 auxiliary: Arena::new(counters),
+                store: N::Store::default(),
                 lazy: LazyArena::new(counters),
                 source,
                 position_map: OnceLock::new(),
@@ -74,6 +77,32 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn view(&self) -> StorageView<'_, N, S> {
         self.owner.view()
     }
+    pub fn store(&self) -> &N::Store {
+        &self.owner.store
+    }
+    pub fn store_mut(&mut self) -> &mut N::Store {
+        &mut self.owner.store
+    }
+    pub fn store_and_source_mut(&mut self) -> (&mut N::Store, &SourceText) {
+        (&mut self.owner.store, &self.owner.source)
+    }
+    /// Borrow a checked core header and its payload storage exclusively together.
+    pub fn node_and_store_mut(&mut self, id: NodeId) -> Result<(&mut N, &mut N::Store), Error> {
+        Ok((
+            self.owner.core.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+        ))
+    }
+    pub fn node_store_and_source_mut(
+        &mut self,
+        id: NodeId,
+    ) -> Result<(&mut N, &mut N::Store, &SourceText), Error> {
+        Ok((
+            self.owner.core.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+            &self.owner.source,
+        ))
+    }
     /// Retain a previously published file and its complete mapped bundle.
     /// Imports are flattened and deduplicated at this explicit ownership boundary;
     /// ordinary lookup only borrows the selected owner. Published-only inputs
@@ -82,6 +111,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
         if self.owner.imported_arenas.contains_key(&file.core.id) {
@@ -199,6 +229,7 @@ pub struct StorageOwner<N: NodeRecord, S = ()> {
     pub(crate) core: Arena<N>,
     pub(crate) symbols: Arena<S>,
     pub(crate) auxiliary: Arena<N::Aux>,
+    pub(crate) store: N::Store,
     pub(crate) lazy: LazyArena<N>,
     source: SourceText,
     position_map: OnceLock<PositionMap>,
@@ -228,6 +259,7 @@ impl<N: NodeRecord, S> StorageOwner<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
         if self.imported_arenas.contains_key(&file.core.id) {
@@ -274,6 +306,9 @@ impl<N: NodeRecord, S> StorageOwner<N, S> {
     }
     pub fn source_text(&self) -> &SourceText {
         &self.source
+    }
+    pub fn store(&self) -> &N::Store {
+        &self.store
     }
     pub fn position_map(&self) -> &PositionMap {
         self.position_map
@@ -411,6 +446,9 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn source(self) -> &'a SourceText {
         self.owner.source_text()
     }
+    pub fn store(self) -> &'a N::Store {
+        &self.owner.store
+    }
     pub fn position_map(self) -> &'a PositionMap {
         self.owner.position_map()
     }
@@ -419,6 +457,9 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     }
     pub fn lazy_auxiliary_arena(self) -> ArenaId {
         self.owner.lazy_auxiliary_arena()
+    }
+    pub fn auxiliary_arena(self) -> ArenaId {
+        self.owner.auxiliary_arena()
     }
     pub fn node(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         self.for_arena(id.arena())?.node_here(id)
@@ -438,6 +479,12 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     }
     pub fn aux(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
         self.for_arena(id.arena())?.aux_here(id)
+    }
+    /// Resolve an auxiliary record and its physical owner in one routing step.
+    /// The returned view borrows the original retention context.
+    pub fn aux_with_owner(self, id: AuxId) -> Result<(StorageRead<'a, N::Aux>, Self), Error> {
+        let owner = self.for_arena(id.arena())?;
+        Ok((owner.aux_here(id)?, owner))
     }
     fn aux_here(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
         if id.arena() == self.owner.auxiliary.id {
@@ -471,14 +518,10 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<Arc<[NodeId]>, Error> {
         let selected = self.for_node_owner(parent)?;
-        selected.owner.lazy.jsdoc(
-            None,
-            parent,
-            &selected.owner.core,
-            &selected.owner.auxiliary,
-            selected.owner.source_text(),
-            initialize,
-        )
+        selected
+            .owner
+            .lazy
+            .jsdoc(None, parent, selected.owner, initialize)
     }
     /// Initialize in the selected source's storage on the calling thread. The
     /// parent must belong to that owner; the source key is independent of it.
@@ -490,28 +533,47 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     ) -> Result<Arc<[NodeId]>, Error> {
         let selected = self.for_node_owner(source)?;
         selected.node_here(parent)?;
-        selected.owner.lazy.jsdoc(
-            Some(source),
-            parent,
-            &selected.owner.core,
-            &selected.owner.auxiliary,
-            selected.owner.source_text(),
-            initialize,
-        )
+        selected
+            .owner
+            .lazy
+            .jsdoc(Some(source), parent, selected.owner, initialize)
     }
     pub fn try_token_record(
         self,
         key: crate::TokenKey,
         kind: u32,
         initialize: impl FnOnce() -> N,
-    ) -> Result<StorageRead<'a, N>, Error> {
+    ) -> Result<StorageRead<'a, N>, Error>
+    where
+        N: NodeParentRecord,
+    {
         let selected = self.for_node_owner(key.parent)?;
         let parent = selected.node(key.parent)?;
         let id = selected.owner.lazy.token(
             key,
             kind,
             parent.storage_reparsed(),
-            selected.owner.source().len(),
+            selected.owner,
+            initialize,
+        )?;
+        self.node(id)
+    }
+    /// Initialize a token and its auxiliary payload under the same publication
+    /// lock. The callback prepares the parent link with its owner context; a
+    /// cache hit skips it, and an error or panic publishes none of its staging.
+    pub fn try_token_prepared(
+        self,
+        key: crate::TokenKey,
+        kind: u32,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>, NodeId) -> Result<N, Error>,
+    ) -> Result<StorageRead<'a, N>, Error> {
+        let selected = self.for_node_owner(key.parent)?;
+        let parent = selected.node(key.parent)?;
+        let id = selected.owner.lazy.token_prepared(
+            key,
+            kind,
+            parent.storage_reparsed(),
+            selected.owner,
             initialize,
         )?;
         self.node(id)

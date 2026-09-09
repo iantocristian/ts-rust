@@ -1,5 +1,5 @@
 use super::*;
-use crate::{AstBuilder, Factory, FactoryMethods, TokenData};
+use crate::{AstBuilder, Factory, FactoryMethods, Node, NodeData, TokenData};
 use std::collections::BTreeMap;
 use ts_arena::Counters;
 use ts_core::TextRange;
@@ -84,9 +84,9 @@ fn graph_flags_slice_identity_and_position_search_match_pinned_go() {
     emit(
         "nullable",
         &[
-            b(is_question_token(None)),
-            b(node_has_kind(None, K::Unknown.into())),
-            b(is_resolution_mode_override_host(None)),
+            b(is_question_token(None::<&crate::Node>)),
+            b(node_has_kind(None::<&crate::Node>, K::Unknown.into())),
+            b(is_resolution_mode_override_host(None::<&crate::Node>)),
             b(is_plain_js_file(None, Tristate::UNKNOWN)),
         ],
     );
@@ -272,10 +272,13 @@ fn graph_flags_slice_identity_and_position_search_match_pinned_go() {
         ],
     );
     let super_token = f.new_token(K::SuperKeyword.into());
-    let NodeData::CallExpression(data) = f.node_mut(call).unwrap().data_mut() else {
-        panic!("call")
-    };
-    data.expression = Some(super_token);
+    {
+        let mut node = f.node_mut(call).unwrap();
+        let NodeData::CallExpression(data) = node.data_mut() else {
+            panic!("call")
+        };
+        data.expression = Some(super_token);
+    }
     emit(
         "call/super",
         &[
@@ -295,10 +298,13 @@ fn graph_flags_slice_identity_and_position_search_match_pinned_go() {
         ],
     );
     let args = list(&mut f, vec![Some(ordinary)]);
-    let NodeData::TypeReferenceNode(data) = f.node_mut(typ).unwrap().data_mut() else {
-        panic!("type")
-    };
-    data.type_arguments = Some(args);
+    {
+        let mut node = f.node_mut(typ).unwrap();
+        let NodeData::TypeReferenceNode(data) = node.data_mut() else {
+            panic!("type")
+        };
+        data.type_arguments = Some(args);
+    }
     emit(
         "const/arguments",
         &[

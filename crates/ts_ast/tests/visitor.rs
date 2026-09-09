@@ -2,7 +2,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use ts_arena::Counters;
 use ts_ast::{
     deep_clone_node, deep_clone_reparse, modifier_flags, node_flags, AstBuilder, ChildRole,
-    Factory, FactoryMethods, JsString, NodeData, NodeId, NodeSlice, NodeVisitor, NodeVisitorHooks,
+    Factory, FactoryMethods, JsString, NodeId, NodeSlice, NodeVisitor, NodeVisitorHooks,
     RuntimeFactory, SyntaxKind, VisitContext,
 };
 use ts_core::TextRange;
@@ -42,7 +42,7 @@ fn slice_visits_nil_and_flattens_replacements_then_honors_disabled_callback() {
     assert!(changed);
     assert_eq!(calls.get(), 3);
     assert_eq!(
-        &*v.factory().read_nodes(result),
+        &v.factory().read_nodes(result).iter().collect::<Vec<_>>(),
         &[Some(c), None, Some(c), None, Some(c)]
     );
     let (nil, changed) = v.visit_slice(NodeSlice::empty());
@@ -85,7 +85,13 @@ fn private_embedded_fallback_lifts_nil_while_public_path_and_token_skip_general_
     assert_eq!(v.visit_embedded_statement(Some(token)), Some(token));
     let block =
         VisitContext::visit_node(&mut v, Some(token), ChildRole::EmbeddedStatement).unwrap();
-    let list = v.node(block).data().as_block().unwrap().statements.unwrap();
+    let list = v
+        .node(block)
+        .data_source()
+        .as_block()
+        .unwrap()
+        .statements()
+        .unwrap();
     assert!(v.factory().read_list(list).nodes().is_empty());
     v.visit = Some(&remove);
     assert_eq!(v.visit_embedded_statement(Some(token)), None);
@@ -155,10 +161,10 @@ fn deep_clone_retains_imports_and_preserves_trailing_comma_with_synthetic_locati
     let data = destination.node(cloned);
     assert_eq!(data.range(), TextRange::new(-1, -1));
     let list = data
-        .data()
+        .data_source()
         .as_array_literal_expression()
         .unwrap()
-        .elements
+        .elements()
         .unwrap();
     drop(data);
     assert_eq!(
@@ -169,7 +175,8 @@ fn deep_clone_retains_imports_and_preserves_trailing_comma_with_synthetic_locati
     let cloned_child = destination
         .view()
         .node_slice(destination.view().list(list).unwrap().nodes())
-        .unwrap()[0]
+        .unwrap()
+        .at(0)
         .unwrap();
     assert_ne!(child, cloned_child);
     assert_eq!(
@@ -182,15 +189,16 @@ fn deep_clone_retains_imports_and_preserves_trailing_comma_with_synthetic_locati
     assert_ne!(destination.node(reparsed).flags() & node_flags::REPARSED, 0);
     let list = destination
         .node(reparsed)
-        .data()
+        .data_source()
         .as_array_literal_expression()
         .unwrap()
-        .elements
+        .elements()
         .unwrap();
     let child = destination
         .view()
         .node_slice(destination.view().list(list).unwrap().nodes())
-        .unwrap()[0]
+        .unwrap()
+        .at(0)
         .unwrap();
     assert_eq!(destination.node(child).parent(), Some(reparsed));
 }
@@ -225,7 +233,7 @@ fn deep_clone_grows_a_small_native_stack() {
             assert_ne!(cloned, root);
             assert!(matches!(
                 b.node(cloned).data(),
-                NodeData::ParenthesizedExpression(_)
+                ts_ast::NodeDataRead::ParenthesizedExpression(_)
             ));
         })
         .unwrap()

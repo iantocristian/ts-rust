@@ -28,11 +28,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                 if self
                     .factory
                     .node(name)
-                    .data()
+                    .data_source()
                     .as_identifier()
                     .expect("meta property identifier")
-                    .text
-                    .as_bytes()
+                    .text()
                     == b"defer"
                 {
                     if matches!(
@@ -211,13 +210,13 @@ impl<F: ParserFactory> Parser<'_, F> {
     fn expression_with_type_arguments(&self, node: NodeId) -> (NodeId, Option<NodeListId>) {
         let node = self.factory.node(node);
         let data = node
-            .data()
+            .data_source()
             .as_expression_with_type_arguments()
             .expect("instantiation has expression/type arguments payload");
         (
-            data.expression
+            data.expression()
                 .expect("parsed instantiation has expression"),
-            data.type_arguments,
+            data.type_arguments(),
         )
     }
     /// port: tsc/internal/parser/parser.go:Parser.isStartOfOptionalPropertyOrElementAccessChain
@@ -289,8 +288,8 @@ impl<F: ParserFactory> Parser<'_, F> {
             if self.factory.node(expression).flags() & node_flags::OPTIONAL_CHAIN != 0 {
                 while self.factory.node(node).kind() == SyntaxKind::NonNullExpression {
                     let next = self.non_null_expression(node);
-                    let data = self.factory.node_mut(node);
-                    data.set_flags(data.flags() | node_flags::OPTIONAL_CHAIN);
+                    self.factory
+                        .add_node_flags(node, node_flags::OPTIONAL_CHAIN);
                     node = next;
                 }
                 return true;
@@ -301,10 +300,10 @@ impl<F: ParserFactory> Parser<'_, F> {
     fn non_null_expression(&self, node: NodeId) -> NodeId {
         self.factory
             .node(node)
-            .data()
+            .data_source()
             .as_non_null_expression()
             .expect("non-null payload")
-            .expression
+            .expression()
             .expect("parsed non-null expression")
     }
     /// port: tsc/internal/parser/parser.go:Parser.parseElementAccessExpressionRest
@@ -472,13 +471,17 @@ impl<F: ParserFactory> Parser<'_, F> {
         result: NodeId,
     ) {
         if let Some(expression) = expression {
-            self.factory.node_mut(expression).set_parent(Some(result));
+            self.factory.set_node_parent(expression, Some(result));
         }
         if let Some(types) = types {
             let nodes = self.factory.read_list(types).nodes();
             for i in 0..nodes.len() {
-                let node = self.factory.read_nodes(nodes)[i].expect("parsed type argument exists");
-                self.factory.node_mut(node).set_parent(Some(result));
+                let node = self
+                    .factory
+                    .read_nodes(nodes)
+                    .at(i)
+                    .expect("parsed type argument exists");
+                self.factory.set_node_parent(node, Some(result));
             }
         }
     }

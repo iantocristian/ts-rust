@@ -33,7 +33,7 @@ pub fn get_text_of_node_from_source_text(
     include_trivia: bool,
 ) -> Result<JsString, Error> {
     let node = id.map(|id| view.node(id)).transpose()?;
-    if ts_ast::node_is_missing(node.as_deref()) {
+    if ts_ast::node_is_missing(node.as_ref()) {
         return Ok(JsString::default());
     }
     let node = node.expect("nil source-text node");
@@ -49,10 +49,10 @@ pub fn get_text_of_node_from_source_text(
     if node.flags() & node_flags::REPARSER_TRANSFORMED_LITERAL != 0 {
         if node.kind() == K::StringLiteral {
             let flags = node
-                .data()
+                .data_source()
                 .as_string_literal()
                 .expect("StringLiteral payload")
-                .token_flags;
+                .token_flags();
             let quote = if flags & token_flags::SINGLE_QUOTE != 0 {
                 b'\''
             } else {
@@ -190,10 +190,10 @@ fn find_originating_jsdoc_satisfies_tag(
 ) -> Result<Option<NodeId>, Error> {
     let node = view.node(id)?;
     let typ = node
-        .data()
+        .data_source()
         .as_satisfies_expression()
         .expect("SatisfiesExpression payload")
-        .r#type
+        .r#type()
         .expect("nil satisfies target type");
     let target = view.node(typ)?;
     if target.flags() & node_flags::REPARSED == 0 {
@@ -210,7 +210,12 @@ fn find_originating_jsdoc_satisfies_tag(
         if let Some(roots) = view.source_eager_jsdoc(source, id)? {
             for &doc in roots.iter() {
                 let node = view.node(doc)?;
-                if let Some(tags) = node.data().as_js_doc().expect("JSDoc payload").tags {
+                if let Some(tags) = node
+                    .data_source()
+                    .as_js_doc()
+                    .expect("JSDoc payload")
+                    .tags()
+                {
                     for tag in view.node_slice(view.list(tags)?.nodes())?.iter() {
                         let tag = tag.expect("nil JSDoc tag");
                         let node = view.node(tag)?;
@@ -221,10 +226,10 @@ fn find_originating_jsdoc_satisfies_tag(
                             first = Some(tag);
                         }
                         if let Some(expression) = node
-                            .data()
+                            .data_source()
                             .as_js_doc_satisfies_tag()
                             .expect("JSDocSatisfiesTag payload")
-                            .type_expression
+                            .type_expression()
                         {
                             if let Some(typ) = view.node(expression)?.type_node() {
                                 if view.node(typ)?.range() == target.range() {
@@ -308,10 +313,10 @@ pub fn get_error_range_for_node(
                 );
             }
             let expression = node
-                .data()
+                .data_source()
                 .as_satisfies_expression()
                 .expect("SatisfiesExpression payload")
-                .expression
+                .expression()
                 .expect("nil satisfies expression");
             return get_range_of_token_at_position(
                 view,

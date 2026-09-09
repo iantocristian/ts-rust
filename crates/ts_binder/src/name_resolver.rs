@@ -5,8 +5,8 @@ use ts_arena::{Error, SymbolId};
 use ts_ast::{
     internal_symbol_names as names, modifier_flags as modifiers, node_flags, symbol_flags as flags,
     utilities as u, utilities_middle as middle, AstView, ChildVisitor, JsString, NodeBinding,
-    NodeData, NodeId, NodeKind, NodeListId, NodeRead, NodeSlice, Symbol, SymbolFlags, SymbolTable,
-    SymbolTableId, SyntaxKind as K,
+    NodeDataRead, NodeId, NodeKind, NodeListId, NodeRead, NodeSlice, Symbol, SymbolFlags,
+    SymbolTable, SymbolTableId, SyntaxKind as K,
 };
 use ts_core::{ScriptTarget, Tristate};
 use ts_diagnostics::{self as diagnostics, Message};
@@ -161,7 +161,7 @@ impl NameResolver {
         let name_is_const = name == b"const";
         'search: while let Some(mut current) = location {
             if name_is_const
-                && middle::is_const_assertion(host.ast(current)?, &*host.node(current)?)?
+                && middle::is_const_assertion(host.ast(current)?, &host.node(current)?)?
             {
                 return Ok(None);
             }
@@ -175,8 +175,8 @@ impl NameResolver {
                 current = required(host.node(current)?.parent());
             }
             let module_attributes = match host.node(current)?.data() {
-                NodeData::ModuleDeclaration(data) => {
-                    data.attributes.is_some() && last_location == data.attributes
+                NodeDataRead::ModuleDeclaration(data) => {
+                    data.attributes().is_some() && last_location == data.attributes()
                 }
                 _ => false,
             };
@@ -188,7 +188,7 @@ impl NameResolver {
                     let mut use_result = true;
                     if module_attributes {
                         use_result = false;
-                    } else if u::is_function_like(Some(&*host.node(current)?))
+                    } else if u::is_function_like(Some(&host.node(current)?))
                         && last_location.is_some()
                         && last_location != host.node(current)?.body()
                     {
@@ -230,10 +230,10 @@ impl NameResolver {
                         use_result = last_location
                             == host
                                 .node(current)?
-                                .data()
+                                .data_source()
                                 .as_conditional_type_node()
                                 .expect("ConditionalType payload")
-                                .true_type;
+                                .true_type();
                     }
                     if use_result {
                         break 'search;
@@ -255,7 +255,7 @@ impl NameResolver {
                             let exports = host.symbol(module_symbol)?.exports;
                             let external = kind(host, current)? == K::SourceFile
                                 || host.node(current)?.flags() & node_flags::AMBIENT != 0
-                                    && !u::is_global_scope_augmentation(&*host.node(current)?);
+                                    && !u::is_global_scope_augmentation(&host.node(current)?);
                             let mut pure_alias = false;
                             if external {
                                 result = table_entry(host, exports, names::DEFAULT)?;
@@ -402,14 +402,14 @@ impl NameResolver {
                     if kind(host, parent)? == K::HeritageClause
                         && host
                             .node(parent)?
-                            .data()
+                            .data_source()
                             .as_heritage_clause()
                             .expect("HeritageClause payload")
-                            .token
+                            .token()
                             == K::ExtendsKeyword
                     {
                         let container = required(host.node(parent)?.parent());
-                        if u::is_class_like(&*host.node(container)?) {
+                        if u::is_class_like(&host.node(container)?) {
                             let symbol = required_symbol(Self::get_symbol_of_declaration(
                                 host, hooks, container,
                             )?);
@@ -433,7 +433,7 @@ impl NameResolver {
                 Some(K::ComputedPropertyName) => {
                     let parent = required(host.node(current)?.parent());
                     let grandparent = required(host.node(parent)?.parent());
-                    if u::is_class_like(&*host.node(grandparent)?)
+                    if u::is_class_like(&host.node(grandparent)?)
                         || kind(host, grandparent)? == K::InterfaceDeclaration
                     {
                         let symbol = required_symbol(Self::get_symbol_of_declaration(
@@ -484,7 +484,7 @@ impl NameResolver {
                         }
                     }
                     if let Some(parent) = host.node(current)?.parent() {
-                        if u::is_class_element(&*host.node(parent)?)
+                        if u::is_class_element(&host.node(parent)?)
                             || kind(host, parent)? == K::ClassDeclaration
                         {
                             current = parent;
@@ -496,7 +496,7 @@ impl NameResolver {
                         let node = host.node(current)?;
                         if (Some(last) == node.initializer()
                             || Some(last) == node.name()
-                                && u::is_binding_pattern(&*host.node(last)?))
+                                && u::is_binding_pattern(&host.node(last)?))
                             && (kind(host, current)? == K::Parameter
                                 || u::is_part_of_parameter_declaration(
                                     host.ast(current)?,
@@ -512,10 +512,10 @@ impl NameResolver {
                     if meaning & flags::TYPE_PARAMETER != 0 {
                         let parameter = required(
                             host.node(current)?
-                                .data()
+                                .data_source()
                                 .as_infer_type_node()
                                 .expect("InferType payload")
-                                .type_parameter,
+                                .type_parameter(),
                         );
                         if node_name_equals(host, parameter, name)? {
                             result = node_symbol(host, parameter)?;
@@ -526,10 +526,10 @@ impl NameResolver {
                 Some(K::ExportSpecifier) => {
                     let property = host
                         .node(current)?
-                        .data()
+                        .data_source()
                         .as_export_specifier()
                         .expect("ExportSpecifier payload")
-                        .property_name;
+                        .property_name();
                     if last_location.is_some() && last_location == property {
                         let parent = required(host.node(current)?.parent());
                         let grandparent = required(host.node(parent)?.parent());
@@ -569,10 +569,9 @@ impl NameResolver {
         }
         if result.is_none() {
             if let Some(original) = original_location {
-                if u::is_in_js_file(Some(&*host.node(original)?)) {
+                if u::is_in_js_file(Some(&host.node(original)?)) {
                     if let Some(parent) = host.node(original)?.parent() {
-                        if middle::is_require_call(host.ast(parent)?, &*host.node(parent)?, false)?
-                        {
+                        if middle::is_require_call(host.ast(parent)?, &host.node(parent)?, false)? {
                             return Ok(self.require_symbol);
                         }
                     }
@@ -628,7 +627,7 @@ impl NameResolver {
                         let view = host.ast(location)?;
                         let parameters = host.node(location)?.parameters(view)?;
                         let mut requires = false;
-                        for &parameter in &*view.node_slice(parameters)? {
+                        for parameter in view.node_slice(parameters)?.iter() {
                             if self.requires_scope_change(host, required(parameter))? {
                                 requires = true;
                                 break;
@@ -648,10 +647,10 @@ impl NameResolver {
         let (name, initializer) = {
             let n = host.node(node)?;
             let d = n
-                .data()
+                .data_source()
                 .as_parameter_declaration()
                 .expect("ParameterDeclaration payload");
-            (d.name, d.initializer)
+            (d.name(), d.initializer())
         };
         Ok(self.requires_scope_change_worker(host, required(name))?
             || initializer
@@ -690,10 +689,10 @@ impl NameResolver {
                     }
                     if node.kind() == K::BindingElement
                         && node
-                            .data()
+                            .data_source()
                             .as_binding_element()
                             .expect("BindingElement payload")
-                            .dot_dot_dot_token
+                            .dot_dot_dot_token()
                             .is_some()
                         && kind(host, required(node.parent()))? == K::ObjectBindingPattern
                     {
@@ -795,7 +794,7 @@ impl ChildVisitor for ScopeVisitor<'_> {
     fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
         match self.view.node_slice(nodes) {
             Ok(nodes) => {
-                for &node in nodes.iter().flatten() {
+                for node in nodes.iter().flatten() {
                     self.visit_node(node)?;
                 }
                 ControlFlow::Continue(())
@@ -861,8 +860,8 @@ fn get_is_deferred_context(
         return Ok(false);
     }
     let asterisk = match node.data() {
-        NodeData::ArrowFunction(data) => data.asterisk_token,
-        NodeData::FunctionExpression(data) => data.asterisk_token,
+        NodeDataRead::ArrowFunction(data) => data.asterisk_token(),
+        NodeDataRead::FunctionExpression(data) => data.asterisk_token(),
         _ => unreachable!(),
     };
     if asterisk.is_some() || node.modifier_flags(host.ast(location)?)? & modifiers::ASYNC != 0 {

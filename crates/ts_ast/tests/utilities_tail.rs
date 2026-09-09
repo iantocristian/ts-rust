@@ -302,7 +302,7 @@ fn matches_pinned_go_tail_utility_observations() {
     );
     emit(
         "expando/nil".into(),
-        u::is_expando_property_declaration(None),
+        u::is_expando_property_declaration(None::<&ts_ast::NodeRead<'_>>),
     );
     let super_node = f.new_token(K::SuperKeyword.into());
     let nodes = [
