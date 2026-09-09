@@ -183,10 +183,15 @@ The different preceding batch cannot prove this component's isolated saving.
 Any next storage change needs current retained/growth attribution before a
 family's total bytes are treated as removable; do not reopen field tracing or
 a row-policy matrix to rescue the verdict.
-The next bounded [name/table attribution](S07-bis-name-table-attribution.md)
-measures only current canonical-name and table backing storage/growth, using one
-allocation-enabled workload run and a tiny counter calibration. No table rewrite
-is proposed until those counts establish useful removable cost.
+The bounded [name/table attribution](S07-bis-name-table-attribution.md) is now
+complete after calibration and one full allocation run. Its five backings request
+143.318 MB, retain 85.842 MB and replace 57.476 MB through growth. Even the
+unattainable exact-element/no-growth bound saves only 98.124 MB against the
+roughly 209 MB request deficit. End canonical-name/hash-backing tuning as the
+next primary gate-closing direction; smaller measured components remain available
+for a justified future combination. Table arenas and owned-string backing costs
+are not inferred from logical counts. No timing retry, control change or gate
+promotion follows from this diagnostic.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
