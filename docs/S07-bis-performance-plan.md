@@ -192,6 +192,14 @@ next primary gate-closing direction; smaller measured components remain availabl
 for a justified future combination. Table arenas and owned-string backing costs
 are not inferred from logical counts. No timing retry, control change or gate
 promotion follows from this diagnostic.
+A [single native sample of the current shared-text binary](S07-bis-post-text-cpu.md)
+now attributes 2.288 / 2.528 s of sampled worker CPU to parse/bind-publication.
+Keyword lookup is 57 ms and no sampled UTF-8 validation has a slice caller;
+remaining work is distributed across reads, construction, parenting and binding.
+The broad groups include required work and overlap. End this diagnostic pass
+without another profiling or small-lookup loop. No substantial next rewrite is
+selected solely from those inclusive totals; a concrete removable mechanism is
+still needed. This does not change the paired screen or final gates.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
