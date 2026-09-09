@@ -16,7 +16,6 @@ impl Binder<'_, '_> {
         let assignment = self
             .table(exports)
             .get(names::ASSIGNMENT_DECLARATION)
-            .copied()
             .flatten()
             .unwrap_or_else(|| {
                 let symbol = self.new_symbol(
@@ -29,13 +28,13 @@ impl Binder<'_, '_> {
                 );
                 symbol
             });
-        let declarations = self.s(assignment).declarations;
+        let declarations = self.s(assignment).declarations();
         let declarations = checked(
             self.builder
                 .declarations_mut()
                 .append(declarations, Some(node)),
         );
-        self.sm(assignment).declarations = declarations;
+        self.set_symbol_declarations(assignment, declarations);
     }
     // port: tsc/internal/binder/binder.go:Binder.bindModuleExportsAssignment
     pub fn bind_module_exports_assignment(&mut self, node: NodeId) {
@@ -94,10 +93,9 @@ impl Binder<'_, '_> {
                 let name = self.get_declaration_name(node);
                 if self
                     .table(table)
-                    .get(&name)
-                    .copied()
+                    .get(name.as_bytes())
                     .flatten()
-                    .is_none_or(|existing| self.s(existing).flags & sf::ASSIGNMENT != 0)
+                    .is_none_or(|existing| self.s(existing).flags() & sf::ASSIGNMENT != 0)
                 {
                     self.declare_symbol(
                         table,
@@ -165,7 +163,7 @@ impl Binder<'_, '_> {
     // port: tsc/internal/binder/binder.go:getInitializerSymbol
     pub fn get_initializer_symbol(&self, symbol: Option<SymbolId>) -> Option<SymbolId> {
         let symbol = symbol?;
-        let declaration = self.s(symbol).value_declaration?;
+        let declaration = self.s(symbol).value_declaration()?;
         let kind = self.n(declaration).kind();
         if kind == K::FunctionDeclaration
             || a::is_in_js_file(Some(&self.n(declaration))) && kind == K::ClassDeclaration
@@ -276,18 +274,21 @@ impl Binder<'_, '_> {
                 if let Some(name) =
                     checked(a::get_element_or_property_access_name(self.view(), node))
                 {
-                    return self.table(table).get(&self.text(name)).copied().flatten();
+                    return self.table(table).get(self.text(name).as_bytes()).flatten();
                 }
             }
             return None;
         }
         let symbol = self.lookup_entity(expression, container);
         if let Some(symbol) = self.get_initializer_symbol(symbol) {
-            if let Some(exports) = self.s(symbol).exports {
+            if let Some(exports) = self.s(symbol).exports() {
                 if let Some(name) =
                     checked(a::get_element_or_property_access_name(self.view(), node))
                 {
-                    return self.table(exports).get(&self.text(name)).copied().flatten();
+                    return self
+                        .table(exports)
+                        .get(self.text(name).as_bytes())
+                        .flatten();
                 }
             }
         }
@@ -296,18 +297,18 @@ impl Binder<'_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.lookupName
     pub fn lookup_name(&self, name: &[u8], container: NodeId) -> Option<SymbolId> {
         if let Some(table) = self.locals(container) {
-            if let Some(local) = self.table(table).get(name).copied().flatten() {
-                return self.s(local).export_symbol.or(Some(local));
+            if let Some(local) = self.table(table).get(name).flatten() {
+                return self.s(local).export_symbol().or(Some(local));
             }
         }
         self.symbol(container)
-            .and_then(|symbol| self.s(symbol).exports)
-            .and_then(|table| self.table(table).get(name).copied().flatten())
+            .and_then(|symbol| self.s(symbol).exports())
+            .and_then(|table| self.table(table).get(name).flatten())
     }
     // port: tsc/internal/binder/binder.go:Binder.declareCommonJSVariable
     pub fn declare_common_js_variable(&mut self, name: JsString) {
         let locals = self.ensure_locals(self.file);
-        if self.table(locals).get(&name).copied().flatten().is_some() {
+        if self.table(locals).get(name.as_bytes()).flatten().is_some() {
             return;
         }
         let symbol = self.new_symbol(
@@ -316,21 +317,21 @@ impl Binder<'_, '_> {
         );
         let declarations = self.new_single_declaration(Some(self.file));
         let source = self.file;
-        self.sm(symbol).declarations = declarations;
-        self.sm(symbol).value_declaration = Some(source);
+        self.set_symbol_declarations(symbol, declarations);
+        self.set_symbol_value_declaration(symbol, Some(source));
         if name.as_bytes() == b"module" {
             let exports = self.new_symbol(
                 sf::MODULE_EXPORTS | sf::PROPERTY,
                 JsString::from_bytes(&b"exports"[..]),
             );
-            self.sm(exports).declarations = declarations;
-            self.sm(exports).value_declaration = Some(source);
-            self.sm(exports).parent = Some(symbol);
+            self.set_symbol_declarations(exports, declarations);
+            self.set_symbol_value_declaration(exports, Some(source));
+            self.set_symbol_parent(exports, Some(symbol));
             let table = self.builder.tables_mut().alloc(SymbolTable::from([(
                 JsString::from_bytes(&b"exports"[..]),
                 Some(exports),
             )]));
-            self.sm(symbol).members = Some(table);
+            self.set_symbol_members(symbol, Some(table));
         }
         self.table_mut(locals).insert(name, Some(symbol));
     }

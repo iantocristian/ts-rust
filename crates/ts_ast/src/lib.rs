@@ -6,9 +6,14 @@
 mod accessors_generated;
 mod bind_result;
 mod flow;
+mod symbol_access;
 pub mod symbol_flags;
+mod symbol_store;
+mod symbol_tables;
 mod symbols;
 pub use flow::*;
+pub use symbol_access::{SymbolAccess, SymbolRef};
+pub use symbol_store::{SymbolMut, SymbolRead, SymbolsMut, SymbolsRead};
 pub use symbols::*;
 mod binder_helpers;
 pub use binder_helpers::*;

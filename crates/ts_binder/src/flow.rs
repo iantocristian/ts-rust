@@ -3,28 +3,34 @@
 use crate::{need, Binder};
 use ts_ast::{
     flow_flags as F, utilities as u, FlowData, FlowId, FlowList, FlowListId, FlowNode,
-    FlowReduceLabelData, FlowSwitchClauseData, NodeId, SyntaxKind as K,
+    FlowNodeRead, FlowReduceLabelData, FlowSwitchClauseData, NodeId, SyntaxKind as K,
 };
 
 impl Binder<'_, '_> {
-    pub(crate) fn flow(&self, id: FlowId) -> &FlowNode {
+    pub(crate) fn flow(&self, id: FlowId) -> FlowNodeRead<'_> {
         self.builder
             .flows()
             .get(id)
             .expect("binder flow belongs to result")
     }
-    pub(crate) fn flow_mut(&mut self, id: FlowId) -> &mut FlowNode {
+    pub(crate) fn set_flow_data(&mut self, id: FlowId, value: Option<FlowData>) {
         self.builder
             .flows_mut()
-            .get_mut(id)
-            .expect("binder flow belongs to result")
+            .set_node(id, value)
+            .expect("binder flow belongs to result");
+    }
+    pub(crate) fn set_flow_antecedents(&mut self, id: FlowId, value: Option<FlowListId>) {
+        self.builder
+            .flows_mut()
+            .set_antecedents(id, value)
+            .expect("binder flow belongs to result");
     }
     pub(crate) fn flow_list(&self, id: FlowListId) -> FlowList {
-        *self
-            .builder
+        self.builder
             .flow_lists()
             .get(id)
             .expect("binder flow list belongs to result")
+            .to_owned()
     }
     // port: tsc/internal/binder/binder.go:Binder.newFlowNode
     pub(crate) fn new_flow_node(&mut self, flags: u32) -> FlowId {
@@ -72,7 +78,7 @@ impl Binder<'_, '_> {
         antecedent: FlowId,
         expression: Option<NodeId>,
     ) -> FlowId {
-        if self.flow(antecedent).flags & F::UNREACHABLE != 0 {
+        if self.flow(antecedent).flags() & F::UNREACHABLE != 0 {
             return antecedent;
         }
         let Some(expression) = expression else {
@@ -171,8 +177,12 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:setFlowNodeReferenced
     pub(crate) fn set_flow_node_referenced(&mut self, flow: FlowId) {
-        let flow = self.flow_mut(flow);
-        flow.flags |= if flow.flags & F::REFERENCED == 0 {
+        let flags = self
+            .builder
+            .flows_mut()
+            .flags_mut(flow)
+            .expect("binder flow belongs to result");
+        *flags |= if *flags & F::REFERENCED == 0 {
             F::REFERENCED
         } else {
             F::SHARED
@@ -180,11 +190,11 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.addAntecedent
     pub(crate) fn add_antecedent(&mut self, label: FlowId, antecedent: FlowId) {
-        if self.flow(antecedent).flags & F::UNREACHABLE != 0 {
+        if self.flow(antecedent).flags() & F::UNREACHABLE != 0 {
             return;
         }
         let mut last = None;
-        let mut list = self.flow(label).antecedents;
+        let mut list = self.flow(label).antecedents();
         while let Some(id) = list {
             let entry = self.flow_list(id);
             if entry.flow == Some(antecedent) {
@@ -197,17 +207,16 @@ impl Binder<'_, '_> {
         if let Some(last) = last {
             self.builder
                 .flow_lists_mut()
-                .get_mut(last)
-                .expect("retained flow list")
-                .next = Some(new);
+                .set_next(last, Some(new))
+                .expect("retained flow list");
         } else {
-            self.flow_mut(label).antecedents = Some(new);
+            self.set_flow_antecedents(label, Some(new));
         }
         self.set_flow_node_referenced(antecedent);
     }
     // port: tsc/internal/binder/binder.go:Binder.finishFlowLabel
     pub(crate) fn finish_flow_label(&self, label: FlowId) -> FlowId {
-        let Some(list) = self.flow(label).antecedents else {
+        let Some(list) = self.flow(label).antecedents() else {
             return need(self.unreachable_flow);
         };
         let list = self.flow_list(list);
@@ -250,24 +259,24 @@ mod tests {
             let first = b.create_branch_label();
             assert_eq!(b.finish_flow_label(first), unreachable);
             b.add_antecedent(first, unreachable);
-            assert!(b.flow(first).antecedents.is_none());
+            assert!(b.flow(first).antecedents().is_none());
             b.add_antecedent(first, start);
-            let original = b.flow(first).antecedents.unwrap();
-            assert_eq!(b.flow(start).flags, F::START | F::REFERENCED);
+            let original = b.flow(first).antecedents().unwrap();
+            assert_eq!(b.flow(start).flags(), F::START | F::REFERENCED);
             assert_eq!(b.finish_flow_label(first), start);
             b.add_antecedent(first, start);
-            assert_eq!(b.flow(first).antecedents, Some(original));
-            assert_eq!(b.flow(start).flags, F::START | F::REFERENCED);
+            assert_eq!(b.flow(first).antecedents(), Some(original));
+            assert_eq!(b.flow(start).flags(), F::START | F::REFERENCED);
             let second = b.create_branch_label();
             b.add_antecedent(second, start);
-            assert_eq!(b.flow(start).flags, F::START | F::REFERENCED | F::SHARED);
+            assert_eq!(b.flow(start).flags(), F::START | F::REFERENCED | F::SHARED);
             let other = b.new_flow_node(F::START);
             b.add_antecedent(first, other);
             assert_eq!(b.finish_flow_label(first), first);
             let next = b.flow_list(original).next.unwrap();
             assert_eq!(b.flow_list(next).flow, Some(other));
             assert_eq!(b.flow_list(next).next, None);
-            let tail = b.flow(second).antecedents;
+            let tail = b.flow(second).antecedents();
             assert_eq!(b.combine_flow_lists(None, tail), tail);
             let copied = b.combine_flow_lists(Some(original), tail).unwrap();
             assert_ne!(copied, original);
@@ -293,31 +302,31 @@ mod tests {
             b.current_exception_target = Some(exception);
             let mutation = b.create_flow_mutation(F::ASSIGNMENT, start, source);
             assert!(b.has_flow_effects);
-            assert_eq!(b.flow(mutation).node, Some(FlowData::Ast(source)));
-            assert_eq!(b.flow(mutation).antecedent, Some(start));
+            assert_eq!(b.flow(mutation).node(), Some(FlowData::Ast(source)));
+            assert_eq!(b.flow(mutation).antecedent(), Some(start));
             assert_eq!(b.finish_flow_label(exception), mutation);
             b.has_flow_effects = false;
             let call = b.create_flow_call(mutation, source);
             assert!(b.has_flow_effects);
             assert_eq!(b.finish_flow_label(exception), mutation); // Calls do not append exception antecedents.
             let switch = b.create_flow_switch_clause(call, source, i64::from(i32::MAX) + 1, -1);
-            let Some(FlowData::SwitchClause(data)) = b.flow(switch).node else {
+            let Some(FlowData::SwitchClause(data)) = b.flow(switch).node() else {
                 panic!("switch payload")
             };
             assert_eq!(
                 (data.switch_statement, data.clause_start, data.clause_end),
                 (Some(source), i32::MIN, -1)
             );
-            let antecedents = b.flow(exception).antecedents;
+            let antecedents = b.flow(exception).antecedents();
             let reduce = b.create_reduce_label(exception, antecedents, switch);
-            let Some(FlowData::ReduceLabel(data)) = b.flow(reduce).node else {
+            let Some(FlowData::ReduceLabel(data)) = b.flow(reduce).node() else {
                 panic!("reduce payload")
             };
             assert_eq!(
                 (data.target, data.antecedents),
                 (Some(exception), antecedents)
             );
-            assert_eq!(b.flow(reduce).antecedent, Some(switch));
+            assert_eq!(b.flow(reduce).antecedent(), Some(switch));
             Ok(())
         })
         .unwrap();
@@ -378,8 +387,8 @@ mod tests {
             );
             let condition = b.create_flow_condition(F::TRUE_CONDITION, start, Some(name));
             assert_eq!(
-                b.flow(condition),
-                &FlowNode::new_ex(F::TRUE_CONDITION, Some(FlowData::Ast(name)), Some(start))
+                b.flow(condition).to_owned(),
+                FlowNode::new_ex(F::TRUE_CONDITION, Some(FlowData::Ast(name)), Some(start))
             );
             Ok(())
         })

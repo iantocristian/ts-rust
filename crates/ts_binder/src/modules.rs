@@ -75,13 +75,13 @@ impl Binder<'_, '_> {
             if state != a::ModuleInstanceState::NonInstantiated {
                 let symbol = need(self.symbol(node));
                 let constant_only =
-                    self.s(symbol).flags & (sf::FUNCTION | sf::CLASS | sf::REGULAR_ENUM) == 0
+                    self.s(symbol).flags() & (sf::FUNCTION | sf::CLASS | sf::REGULAR_ENUM) == 0
                         && state == a::ModuleInstanceState::ConstEnumOnly
                         && !self.not_const_enum_only_modules.contains(&symbol);
                 if constant_only {
-                    self.sm(symbol).flags |= sf::CONST_ENUM_ONLY_MODULE;
+                    *self.symbol_flags_mut(symbol) |= sf::CONST_ENUM_ONLY_MODULE;
                 } else {
-                    self.sm(symbol).flags &= !sf::CONST_ENUM_ONLY_MODULE;
+                    *self.symbol_flags_mut(symbol) &= !sf::CONST_ENUM_ONLY_MODULE;
                     self.not_const_enum_only_modules.insert(symbol);
                 }
             }
@@ -274,27 +274,22 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindCommonJSTypeExports
     pub fn bind_common_js_type_exports(&mut self, module: SymbolId) {
-        let Some(exports) = self.s(module).exports else {
+        let Some(exports) = self.s(module).exports() else {
             return;
         };
-        let Some(export_equals) = self
-            .table(exports)
-            .get(names::EXPORT_EQUALS)
-            .copied()
-            .flatten()
-        else {
+        let Some(export_equals) = self.table(exports).get(names::EXPORT_EQUALS).flatten() else {
             return;
         };
-        let values: Vec<_> = self.table(exports).values().copied().collect();
+        let values: Vec<_> = self.table(exports).iter().map(|(_, value)| value).collect();
         for symbol in values {
             let symbol = need(symbol);
-            if self.s(symbol).name.as_bytes() != names::EXPORT_EQUALS
-                && self.s(symbol).flags & (sf::TYPE | sf::NAMESPACE) != 0
+            if self.s(symbol).name_bytes() != names::EXPORT_EQUALS
+                && self.s(symbol).flags() & (sf::TYPE | sf::NAMESPACE) != 0
             {
-                let name = self.s(symbol).name.clone();
+                let name = self.s(symbol).name_to_owned();
                 let target = self.ensure_exports(export_equals);
                 self.table_mut(target).insert(name, Some(symbol));
-                self.sm(export_equals).flags |= sf::NAMESPACE_MODULE;
+                *self.symbol_flags_mut(export_equals) |= sf::NAMESPACE_MODULE;
             }
         }
     }

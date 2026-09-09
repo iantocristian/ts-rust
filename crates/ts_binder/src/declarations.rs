@@ -12,26 +12,44 @@ impl Binder<'_, '_> {
         self.symbol_count = self.symbol_count.wrapping_add(1);
         self.builder.symbols_mut().push(Symbol::new(flags, name))
     }
-    pub fn s(&self, id: SymbolId) -> &Symbol {
+    pub fn s(&self, id: SymbolId) -> a::SymbolRead<'_> {
         checked(self.builder.symbols().get(id))
     }
-    pub fn sm(&mut self, id: SymbolId) -> &mut Symbol {
-        checked(self.builder.symbols_mut().get_mut(id))
+    pub fn symbol_flags_mut(&mut self, id: SymbolId) -> &mut u32 {
+        checked(self.builder.symbols_mut().flags_mut(id))
+    }
+    pub fn set_symbol_declarations(&mut self, id: SymbolId, value: a::DeclarationSlice) {
+        checked(self.builder.symbols_mut().set_declarations(id, value));
+    }
+    pub fn set_symbol_value_declaration(&mut self, id: SymbolId, value: Option<NodeId>) {
+        checked(self.builder.symbols_mut().set_value_declaration(id, value));
+    }
+    pub fn set_symbol_members(&mut self, id: SymbolId, value: Option<SymbolTableId>) {
+        checked(self.builder.symbols_mut().set_members(id, value));
+    }
+    pub fn set_symbol_exports(&mut self, id: SymbolId, value: Option<SymbolTableId>) {
+        checked(self.builder.symbols_mut().set_exports(id, value));
+    }
+    pub fn set_symbol_parent(&mut self, id: SymbolId, value: Option<SymbolId>) {
+        checked(self.builder.symbols_mut().set_parent(id, value));
+    }
+    pub fn set_symbol_export_symbol(&mut self, id: SymbolId, value: Option<SymbolId>) {
+        checked(self.builder.symbols_mut().set_export_symbol(id, value));
     }
     pub fn ensure_exports(&mut self, symbol: SymbolId) -> SymbolTableId {
-        if let Some(table) = self.s(symbol).exports {
+        if let Some(table) = self.s(symbol).exports() {
             return table;
         }
         let table = self.builder.tables_mut().alloc(SymbolTable::new());
-        self.sm(symbol).exports = Some(table);
+        self.set_symbol_exports(symbol, Some(table));
         table
     }
     pub fn ensure_members(&mut self, symbol: SymbolId) -> SymbolTableId {
-        if let Some(table) = self.s(symbol).members {
+        if let Some(table) = self.s(symbol).members() {
             return table;
         }
         let table = self.builder.tables_mut().alloc(SymbolTable::new());
-        self.sm(symbol).members = Some(table);
+        self.set_symbol_members(symbol, Some(table));
         table
     }
     // port: tsc/internal/binder/binder.go:Binder.declareSymbol
@@ -77,9 +95,9 @@ impl Binder<'_, '_> {
         let mut symbol;
         if name.as_bytes() == names::MISSING {
             symbol = self.new_symbol(sf::NONE, JsString::from_bytes(names::MISSING));
-        } else if let Some(existing) = self.table(table).get(&name).copied().flatten() {
+        } else if let Some(existing) = self.table(table).get(name.as_bytes()).flatten() {
             symbol = existing;
-            let flags = self.s(symbol).flags;
+            let flags = self.s(symbol).flags();
             if replaceable && flags & sf::REPLACEABLE_BY_METHOD == 0 {
                 return symbol;
             }
@@ -100,9 +118,12 @@ impl Binder<'_, '_> {
                         message = d::Enum_declarations_can_only_merge_with_namespace_or_other_enum_declarations;
                         needs_name = false;
                     }
-                    let declarations =
-                        checked(self.builder.declarations().get(self.s(symbol).declarations))
-                            .to_vec();
+                    let declarations = checked(
+                        self.builder
+                            .declarations()
+                            .get(self.s(symbol).declarations()),
+                    )
+                    .to_vec();
                     let multiple_defaults = !declarations.is_empty()
                         && (default_export
                             || self.n(node).kind() == K::ExportAssignment
@@ -186,7 +207,7 @@ impl Binder<'_, '_> {
                     self.add_diagnostic(diagnostic);
                     if flags & sf::ACCESSOR != 0 && flags & sf::ACCESSOR != includes & sf::ACCESSOR
                     {
-                        self.sm(symbol).flags |= sf::ACCESSOR;
+                        *self.symbol_flags_mut(symbol) |= sf::ACCESSOR;
                     }
                     symbol = self.new_symbol(sf::NONE, name);
                 }
@@ -195,15 +216,15 @@ impl Binder<'_, '_> {
             symbol = self.new_symbol(sf::NONE, name.clone());
             self.table_mut(table).insert(name, Some(symbol));
             if replaceable {
-                self.sm(symbol).flags |= sf::REPLACEABLE_BY_METHOD;
+                *self.symbol_flags_mut(symbol) |= sf::REPLACEABLE_BY_METHOD;
             }
         }
         self.add_declaration_to_symbol(symbol, node, includes);
-        if self.s(symbol).parent.is_none() {
-            self.sm(symbol).parent = parent;
+        if self.s(symbol).parent().is_none() {
+            self.set_symbol_parent(symbol, parent);
         } else {
             assert_eq!(
-                self.s(symbol).parent,
+                self.s(symbol).parent(),
                 parent,
                 "Existing symbol parent should match new one"
             );
@@ -263,7 +284,7 @@ impl Binder<'_, '_> {
                     return JsString::from_bytes(names::MISSING);
                 };
                 return get_symbol_name_for_private_identifier(
-                    self.s(need(self.symbol(class))),
+                    &self.s(need(self.symbol(class))),
                     self.text(name).as_bytes(),
                 );
             }
@@ -323,9 +344,9 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.addDeclarationToSymbol
     pub fn add_declaration_to_symbol(&mut self, symbol: SymbolId, node: NodeId, flags: u32) {
-        self.sm(symbol).flags |= flags;
+        *self.symbol_flags_mut(symbol) |= flags;
         self.set_node_symbol(node, Some(symbol));
-        let declarations = self.s(symbol).declarations;
+        let declarations = self.s(symbol).declarations();
         let declarations = if declarations.is_nil() {
             self.new_single_declaration(Some(node))
         } else {
@@ -335,12 +356,12 @@ impl Binder<'_, '_> {
                     .append_if_unique(declarations, Some(node)),
             )
         };
-        self.sm(symbol).declarations = declarations;
-        let existing = self.s(symbol).flags;
+        self.set_symbol_declarations(symbol, declarations);
+        let existing = self.s(symbol).flags();
         if existing & sf::CONST_ENUM_ONLY_MODULE != 0
             && existing & (sf::FUNCTION | sf::CLASS | sf::REGULAR_ENUM) != 0
         {
-            self.sm(symbol).flags &= !sf::CONST_ENUM_ONLY_MODULE;
+            *self.symbol_flags_mut(symbol) &= !sf::CONST_ENUM_ONLY_MODULE;
             self.not_const_enum_only_modules.insert(symbol);
         }
         if flags & sf::VALUE != 0 {
@@ -349,23 +370,26 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.newSingleDeclaration
     pub fn new_single_declaration(&mut self, node: Option<NodeId>) -> a::DeclarationSlice {
-        checked(self.builder.declarations_mut().alloc(vec![node]))
+        checked(self.builder.declarations_mut().alloc_one(node))
     }
     // port: tsc/internal/binder/binder.go:SetValueDeclaration
     pub fn set_value_declaration(&mut self, symbol: SymbolId, node: NodeId) {
-        let previous = self.s(symbol).value_declaration;
+        let previous = self.s(symbol).value_declaration();
         if previous.is_none_or(|previous| {
             is_assignment_declaration(&self.n(previous))
                 && !is_assignment_declaration(&self.n(node))
                 || self.n(previous).kind() != self.n(node).kind()
                     && is_effective_module_declaration(&self.n(previous))
         }) {
-            self.sm(symbol).value_declaration = Some(node);
+            self.set_symbol_value_declaration(symbol, Some(node));
         }
     }
 }
 // port: tsc/internal/binder/binder.go:GetSymbolNameForPrivateIdentifier
-pub fn get_symbol_name_for_private_identifier(symbol: &Symbol, description: &[u8]) -> JsString {
+pub fn get_symbol_name_for_private_identifier(
+    symbol: &(impl a::SymbolAccess + ?Sized),
+    description: &[u8],
+) -> JsString {
     let id = a::runtime_symbol_id(symbol) as isize;
     JsString::from_bytes(
         [
@@ -437,7 +461,7 @@ impl Binder<'_, '_> {
             let table = self.ensure_locals(container);
             let local = self.declare_symbol(table, None, node, export_kind, excludes);
             let exported = self.declare_symbol(exports, Some(parent), node, flags, excludes);
-            self.sm(local).export_symbol = Some(exported);
+            self.set_symbol_export_symbol(local, Some(exported));
             self.set_node_local_symbol(node, Some(local));
             return local;
         }

@@ -14,7 +14,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         let saved_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << kind as u8;
         let mut outer_reparse_list = std::mem::take(&mut self.reparse_list);
-        let mut list = Vec::with_capacity(16);
+        let mut list = Vec::new();
         while !self.is_list_terminator(kind) {
             if self.is_list_element(kind, false) {
                 let element = parse_element(self, list.len());
@@ -62,7 +62,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         let pos = self.node_pos();
         let saved_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << kind as u8;
-        let mut list = Vec::with_capacity(16);
+        let mut list = Vec::new();
         loop {
             if self.is_list_element(kind, false) {
                 let start = self.node_pos();

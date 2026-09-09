@@ -383,7 +383,10 @@ fn binding_publishes_staged_headers_symbols_and_source_metadata_without_changing
         .unwrap()
         .symbol
         .unwrap();
-    assert_eq!(bound.symbol(symbol).unwrap().value_declaration, Some(child));
+    assert_eq!(
+        bound.symbol(symbol).unwrap().value_declaration(),
+        Some(child)
+    );
     assert_eq!(
         file.bind_with(source, |_| panic!("must not replay binding"))
             .unwrap()
@@ -545,7 +548,7 @@ fn binding_mapped_members_initialize_independently_and_retained_symbols_keep_the
                 .unwrap()
                 .symbol(id)
                 .unwrap()
-                .value_declaration,
+                .value_declaration(),
             Some(child_a)
         );
         third
@@ -561,7 +564,10 @@ fn binding_mapped_members_initialize_independently_and_retained_symbols_keep_the
     };
     assert_ne!(counters.snapshot(), before);
     assert_eq!(retained.0.node().flags(), node_flags::UNREACHABLE);
-    assert_eq!(retained.1.value_declaration, Some(retained.0.id()));
+    assert_eq!(
+        retained.1.symbol().value_declaration(),
+        Some(retained.0.id())
+    );
     let sibling = retained.1.file().parsed_file();
     assert!(sibling.is_bound(retained.2).unwrap());
     assert!(sibling
@@ -595,8 +601,10 @@ fn binding_rejects_foreign_symbol_flow_and_ast_edges_before_publication() {
                 1 => builder.binding_mut(child)?.symbol = Some(foreign_symbol),
                 2 => builder.binding_mut(child)?.flow_node = Some(foreign_flow),
                 3 => {
-                    let mut symbol = Symbol::default();
-                    symbol.value_declaration = Some(foreign_node);
+                    let symbol = Symbol {
+                        value_declaration: Some(foreign_node),
+                        ..Symbol::default()
+                    };
                     builder.symbols_mut().push(symbol);
                 }
                 4 => {

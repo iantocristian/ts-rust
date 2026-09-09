@@ -369,6 +369,7 @@ dependencies = [
 name = "ts_ast"
 version = "0.1.0"
 dependencies = [
+ "hashbrown",
  "stacker",
  "ts_arena",
  "ts_core",

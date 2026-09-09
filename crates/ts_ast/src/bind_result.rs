@@ -3,13 +3,14 @@
 use crate::compact::binding::{BindingArenas, BindingWrite};
 use crate::flow::{FlowId, FlowLists, FlowNodes};
 use crate::node_map::NodeMap;
-use crate::symbols::{DeclarationLists, Symbol, SymbolTableId, SymbolTables};
+use crate::symbol_store::{SymbolRead, Symbols, SymbolsMut, SymbolsRead};
+use crate::symbols::{DeclarationLists, SymbolTableId, SymbolTables};
 use crate::{AstFile, AstView, Diagnostic, Node, NodeId, NodeRead, ParsedFile, SourceFileRead};
 use std::{
     panic::{catch_unwind, resume_unwind, AssertUnwindSafe},
     sync::OnceLock,
 };
-use ts_arena::{Error, InitializationDomain, InitializationGuard, SymbolArena, SymbolId};
+use ts_arena::{Error, InitializationDomain, InitializationGuard, SymbolId};
 
 /// Fields absent from the parsed syntax representation, indexed by stable NodeId.
 #[derive(Clone, Copy, Debug, Default)]
@@ -38,7 +39,7 @@ pub struct BindResult {
     nodes: NodeMap<Node>,
     bindings: NodeMap<NodeBinding>,
     flow_bindings: NodeMap<FlowId>,
-    pub(crate) symbols: SymbolArena<Symbol>,
+    pub(crate) symbols: Symbols,
     pub(crate) tables: SymbolTables,
     pub(crate) declarations: DeclarationLists,
     pub(crate) flows: FlowNodes,
@@ -73,14 +74,14 @@ impl BindResult {
             crate::AstStorageData::SourceFiles(files) => files.len() > 1,
             _ => unreachable!("validated source map"),
         };
-        Self {
+        let mut result = Self {
             source,
             multiple_sources,
             direct_nodes: false,
             nodes: NodeMap::default(),
             bindings: NodeMap::default(),
             flow_bindings: NodeMap::default(),
-            symbols: SymbolArena::new(counters),
+            symbols: Symbols::new(counters),
             tables: SymbolTables::new(counters),
             declarations: DeclarationLists::new(counters),
             flows: FlowNodes::new(counters),
@@ -93,7 +94,18 @@ impl BindResult {
             diagnostics: Vec::new(),
             symbol_count: 0,
             pattern_ambient_modules: Vec::new(),
-        }
+        };
+        result.symbols.initialize_reference_arenas(
+            source.arena(),
+            result.tables.id(),
+            result.declarations.id(),
+        );
+        result.tables.configure_symbols(result.symbols.id());
+        result
+            .flows
+            .initialize_reference_arenas(source.arena(), result.flow_lists.id());
+        result.flow_lists.initialize_flow_arena(result.flows.id());
+        result
     }
     pub fn source(&self) -> NodeId {
         self.source
@@ -114,8 +126,8 @@ impl BindResult {
                 .flatten()
         })
     }
-    pub fn symbols(&self) -> &SymbolArena<Symbol> {
-        &self.symbols
+    pub fn symbols(&self) -> SymbolsRead<'_> {
+        self.symbols.read(&self.tables)
     }
     pub fn tables(&self) -> &SymbolTables {
         &self.tables
@@ -456,7 +468,7 @@ impl BindBuilder<'_> {
         match write {
             BindingWrite::Symbol(value) | BindingWrite::LocalSymbol(value) => {
                 if let Some(value) = value {
-                    self.result.symbols.get(value)?;
+                    self.result.symbols().get(value)?;
                 }
             }
             BindingWrite::Locals(value) => {
@@ -531,11 +543,11 @@ impl BindBuilder<'_> {
                 ..inline
             }))
     }
-    pub fn symbols(&self) -> &SymbolArena<Symbol> {
-        &self.result.symbols
+    pub fn symbols(&self) -> SymbolsRead<'_> {
+        self.result.symbols()
     }
-    pub fn symbols_mut(&mut self) -> &mut SymbolArena<Symbol> {
-        &mut self.result.symbols
+    pub fn symbols_mut(&mut self) -> SymbolsMut<'_> {
+        self.result.symbols.write(&mut self.result.tables)
     }
     pub fn tables(&self) -> &SymbolTables {
         &self.result.tables
@@ -595,26 +607,29 @@ impl BindBuilder<'_> {
         Ok(())
     }
     fn validate_symbol_graph(&self) -> Result<(), Error> {
-        for (_, symbol) in self.result.symbols.iter() {
-            self.result.declarations.get(symbol.declarations)?;
-            if let Some(node) = symbol.value_declaration {
+        for (_, symbol) in self.result.symbols().iter() {
+            self.result.declarations.get(symbol.declarations())?;
+            if let Some(node) = symbol.value_declaration() {
                 self.parsed_view().node(node)?;
             }
-            for table in [symbol.members, symbol.exports].into_iter().flatten() {
+            for table in [symbol.members(), symbol.exports()].into_iter().flatten() {
                 self.result.tables.get(table)?;
             }
-            for symbol in [symbol.parent, symbol.export_symbol].into_iter().flatten() {
-                self.result.symbols.get(symbol)?;
+            for symbol in [symbol.parent(), symbol.export_symbol()]
+                .into_iter()
+                .flatten()
+            {
+                self.result.symbols().get(symbol)?;
             }
         }
         for (_, nodes) in self.result.declarations.iter() {
-            for &node in nodes.iter().flatten() {
+            for node in nodes.iter().flatten() {
                 self.parsed_view().node(node)?;
             }
         }
         for (_, table) in self.result.tables.iter() {
-            for &symbol in table.values().flatten() {
-                self.result.symbols.get(symbol)?;
+            for symbol in table.iter().filter_map(|(_, symbol)| symbol) {
+                self.result.symbols().get(symbol)?;
             }
         }
         Ok(())
@@ -622,13 +637,13 @@ impl BindBuilder<'_> {
     fn validate_flow_graph(&self) -> Result<(), Error> {
         use crate::FlowData;
         for (_, flow) in self.result.flows.iter() {
-            if let Some(antecedent) = flow.antecedent {
+            if let Some(antecedent) = flow.antecedent() {
                 self.result.flows.get(antecedent)?;
             }
-            if let Some(list) = flow.antecedents {
+            if let Some(list) = flow.antecedents() {
                 self.result.flow_lists.get(list)?;
             }
-            match flow.node {
+            match flow.node() {
                 Some(FlowData::Ast(node)) => {
                     self.parsed_view().node(node)?;
                 }
@@ -649,10 +664,10 @@ impl BindBuilder<'_> {
             }
         }
         for (_, list) in self.result.flow_lists.iter() {
-            if let Some(flow) = list.flow {
+            if let Some(flow) = list.flow() {
                 self.result.flows.get(flow)?;
             }
-            if let Some(next) = list.next {
+            if let Some(next) = list.next() {
                 self.result.flow_lists.get(next)?;
             }
         }
@@ -671,7 +686,7 @@ impl BindBuilder<'_> {
         for (id, binding) in self.result.cold_bindings() {
             self.validate_write_owner(id)?;
             for symbol in [binding.symbol, binding.local_symbol].into_iter().flatten() {
-                self.result.symbols.get(symbol)?;
+                self.result.symbols().get(symbol)?;
             }
             if let Some(table) = binding.locals {
                 self.result.tables.get(table)?;
@@ -699,7 +714,7 @@ impl BindBuilder<'_> {
         }
         for module in &self.result.pattern_ambient_modules {
             if let Some(symbol) = module.symbol {
-                self.result.symbols.get(symbol)?;
+                self.result.symbols().get(symbol)?;
             }
         }
         self.validate_symbol_graph()?;
@@ -743,8 +758,8 @@ impl<'a> BoundView<'a> {
     pub fn source_file(self) -> Result<SourceFileRead<'a>, Error> {
         self.ast.source_file(self.result.source)
     }
-    pub fn symbol(self, id: SymbolId) -> Result<&'a Symbol, Error> {
-        self.result.symbols.get(id)
+    pub fn symbol(self, id: SymbolId) -> Result<SymbolRead<'a>, Error> {
+        self.result.symbols().get(id)
     }
 }
 
@@ -838,9 +853,8 @@ impl RetainedSymbol {
         &self.file
     }
 }
-impl std::ops::Deref for RetainedSymbol {
-    type Target = Symbol;
-    fn deref(&self) -> &Symbol {
+impl RetainedSymbol {
+    pub fn symbol(&self) -> SymbolRead<'_> {
         self.file
             .view()
             .symbol(self.id)
@@ -927,9 +941,8 @@ impl CompletedSymbol {
         &self.file
     }
 }
-impl std::ops::Deref for CompletedSymbol {
-    type Target = Symbol;
-    fn deref(&self) -> &Symbol {
+impl CompletedSymbol {
+    pub fn symbol(&self) -> SymbolRead<'_> {
         self.file.view().symbol(self.id).expect("retained symbol")
     }
 }

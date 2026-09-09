@@ -189,7 +189,7 @@ fn completed_nodes_and_symbols_retain_storage_and_preassigned_identity() {
     let node = completed.retain_node(statement).unwrap();
     let symbol_id = completed.view().result().symbols().iter().next().unwrap().0;
     let symbol = completed.retain_symbol(symbol_id).unwrap();
-    let name = symbol.name.clone();
+    let name = symbol.symbol().name_to_owned();
     drop(completed);
     assert_eq!(node.node().kind(), SyntaxKind::ExpressionStatement);
     assert_eq!(ts_ast::runtime_node_id(&node.node()), identity);
@@ -202,7 +202,7 @@ fn completed_nodes_and_symbols_retain_storage_and_preassigned_identity() {
         .is_some());
     assert!(counters.snapshot().allocations > baseline.allocations);
     drop(node);
-    assert_eq!(symbol.name, name);
+    assert_eq!(symbol.symbol().name_bytes(), name.as_bytes());
     assert!(symbol.file().view().node(source).is_ok());
     drop(symbol);
     assert_eq!(counters.snapshot(), baseline);

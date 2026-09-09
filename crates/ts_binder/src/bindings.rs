@@ -74,28 +74,24 @@ impl Binder<'_, '_> {
             JsString::from_bytes(&b"prototype"[..]),
         );
         let table = self.ensure_exports(symbol);
-        if let Some(previous) = self
-            .table(table)
-            .get(b"prototype".as_slice())
-            .copied()
-            .flatten()
-        {
+        if let Some(previous) = self.table(table).get(b"prototype".as_slice()).flatten() {
             let declaration = need(
                 checked(
                     self.builder
                         .declarations()
-                        .get(self.s(previous).declarations),
-                )[0],
+                        .get(self.s(previous).declarations()),
+                )
+                .at(0),
             );
             self.error_on_node(
                 declaration,
                 d::Duplicate_identifier_0,
-                vec![self.s(prototype).name.clone()],
+                vec![self.s(prototype).name_to_owned()],
             );
         }
         self.table_mut(table)
             .insert(JsString::from_bytes(&b"prototype"[..]), Some(prototype));
-        self.sm(prototype).parent = Some(symbol);
+        self.set_symbol_parent(prototype, Some(symbol));
     }
     // port: tsc/internal/binder/binder.go:Binder.bindFunctionOrConstructorType
     pub fn bind_function_or_constructor_type(&mut self, node: NodeId) {
@@ -103,12 +99,12 @@ impl Binder<'_, '_> {
         self.add_declaration_to_symbol(symbol, node, sf::SIGNATURE);
         let type_literal = self.new_symbol(sf::TYPE_LITERAL, JsString::from_bytes(names::TYPE));
         self.add_declaration_to_symbol(type_literal, node, sf::TYPE_LITERAL);
-        let name = self.s(symbol).name.clone();
+        let name = self.s(symbol).name_to_owned();
         let table = self
             .builder
             .tables_mut()
             .alloc(SymbolTable::from([(name, Some(symbol))]));
-        self.sm(type_literal).members = Some(table);
+        self.set_symbol_members(type_literal, Some(table));
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEnumDeclaration
     pub fn bind_enum_declaration(&mut self, node: NodeId) {
@@ -233,7 +229,7 @@ impl Binder<'_, '_> {
     pub fn bind_anonymous_declaration(&mut self, node: NodeId, flags: u32, name: JsString) {
         let symbol = self.new_symbol(flags, name);
         if flags & (sf::ENUM_MEMBER | sf::CLASS_MEMBER) != 0 {
-            self.sm(symbol).parent = self.symbol(need(self.container));
+            self.set_symbol_parent(symbol, self.symbol(need(self.container)));
         }
         self.add_declaration_to_symbol(symbol, node, flags);
     }

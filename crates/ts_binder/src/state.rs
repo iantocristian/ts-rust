@@ -147,13 +147,13 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             .node_locals(node)
             .expect("binder node is retained")
     }
-    pub fn table(&self, table: SymbolTableId) -> &SymbolTable {
+    pub fn table(&self, table: SymbolTableId) -> ts_ast::SymbolTableRead<'_> {
         self.builder
             .tables()
             .get(table)
             .expect("binder symbol table belongs to result")
     }
-    pub fn table_mut(&mut self, table: SymbolTableId) -> &mut SymbolTable {
+    pub fn table_mut(&mut self, table: SymbolTableId) -> ts_ast::SymbolTableMut<'_> {
         self.builder
             .tables_mut()
             .get_mut(table)

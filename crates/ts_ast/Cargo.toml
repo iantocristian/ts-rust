@@ -10,6 +10,7 @@ publish.workspace = true
 layout-profile = []
 
 [dependencies]
+hashbrown = { version = "=0.17.1", default-features = false }
 stacker = "=0.1.25"
 ts_core = { path = "../ts_core", version = "0.1.0" }
 ts_diagnostics = { path = "../ts_diagnostics", version = "0.1.0" }

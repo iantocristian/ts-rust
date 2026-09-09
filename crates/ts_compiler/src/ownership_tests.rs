@@ -64,9 +64,9 @@ fn shared_bound_file_retains_identity_until_the_final_response_drops() {
     assert_eq!(local(second.files()[0].bound(), b"value"), symbol);
     drop(second);
     cache.prune();
-    assert_eq!(retained.name.as_bytes(), b"value");
+    assert_eq!(retained.symbol().name_bytes(), b"value");
     assert_eq!(local(retained.file(), b"value"), symbol);
-    let declaration = retained.value_declaration.unwrap();
+    let declaration = retained.symbol().value_declaration().unwrap();
     assert!(retained.file().view().node(declaration).is_ok());
     assert_eq!(counters.snapshot(), baseline);
     drop(retained);
@@ -104,7 +104,7 @@ fn retained_snapshot_edit_answers_concurrently_and_rejects_old_new_id_crossing()
             );
             queried.wait();
             ready.wait();
-            assert_eq!(response.name.as_bytes(), b"before");
+            assert_eq!(response.symbol().name_bytes(), b"before");
         });
         let edited = snapshot(b"const after = 2;", &mut cache, &counters);
         let new_file = edited.files()[0].bound();

@@ -109,7 +109,7 @@ impl ReferenceResolver {
             return Ok(None);
         };
         match hooks.get_parent_of_symbol(symbol)? {
-            Hook::Absent => Ok(host.symbol(symbol)?.parent),
+            Hook::Absent => Ok(host.symbol(symbol)?.parent()),
             Hook::Value(value) => Ok(value),
         }
     }
@@ -210,7 +210,7 @@ impl ReferenceResolver {
         host: &dyn ResolverHost,
         symbol: SymbolId,
     ) -> Result<Option<NodeId>, Error> {
-        for &declaration in host.declarations(symbol)?.iter().rev() {
+        for declaration in host.declarations(symbol)?.iter().rev() {
             let node = required(declaration);
             if ts_ast::is_alias_symbol_declaration(host.ast(node)?, node)? {
                 return Ok(Some(node));
@@ -231,8 +231,8 @@ impl ReferenceResolver {
             return Ok(value);
         }
         let data = host.symbol(symbol)?;
-        if data.flags & flags::EXPORT_VALUE != 0 {
-            if let Some(exported) = data.export_symbol {
+        if data.flags() & flags::EXPORT_VALUE != 0 {
+            if let Some(exported) = data.export_symbol() {
                 symbol = exported;
             }
         }
@@ -259,12 +259,13 @@ impl ReferenceResolver {
         if let Some(mut symbol) =
             self.get_referenced_value_symbol(host, hooks, node, start_in_container)?
         {
-            if host.symbol(symbol)?.flags & flags::EXPORT_VALUE != 0 {
-                let exported = Self::get_merged_symbol(hooks, host.symbol(symbol)?.export_symbol)?;
+            if host.symbol(symbol)?.flags() & flags::EXPORT_VALUE != 0 {
+                let exported =
+                    Self::get_merged_symbol(hooks, host.symbol(symbol)?.export_symbol())?;
                 // The source only dereferences the optional merged export when
                 // prefixLocals is false. A present hook may return nil.
                 if !prefix_locals {
-                    let exported_flags = host.symbol(required_symbol(exported))?.flags;
+                    let exported_flags = host.symbol(required_symbol(exported))?.flags();
                     if exported_flags & flags::EXPORT_HAS_LOCAL != 0
                         && exported_flags & flags::VARIABLE == 0
                     {
@@ -278,8 +279,8 @@ impl ReferenceResolver {
             }
             if let Some(parent_symbol) = Self::get_parent_of_symbol(host, hooks, Some(symbol))? {
                 let parent_data = host.symbol(parent_symbol)?;
-                if parent_data.flags & flags::VALUE_MODULE != 0 {
-                    if let Some(declaration) = parent_data.value_declaration {
+                if parent_data.flags() & flags::VALUE_MODULE != 0 {
+                    if let Some(declaration) = parent_data.value_declaration() {
                         if kind(host, declaration)? == K::SourceFile {
                             return Ok((Some(declaration) == source_file(host, Some(node))?)
                                 .then_some(declaration));
@@ -310,7 +311,7 @@ impl ReferenceResolver {
         node: NodeId,
     ) -> Result<Option<NodeId>, Error> {
         if let Some(symbol) = self.get_referenced_value_symbol(host, hooks, node, false)? {
-            if ts_ast::is_non_local_alias(Some(host.symbol(symbol)?), flags::VALUE)
+            if ts_ast::is_non_local_alias(Some(&host.symbol(symbol)?), flags::VALUE)
                 && !Self::is_type_only_alias_declaration(host, hooks, Some(symbol))?
             {
                 return Self::get_declaration_of_alias_symbol(host, symbol);
@@ -331,7 +332,7 @@ impl ReferenceResolver {
                 hooks,
                 Some(symbol),
             )?);
-            return Ok(host.symbol(symbol)?.value_declaration);
+            return Ok(host.symbol(symbol)?.value_declaration());
         }
         Ok(None)
     }
@@ -350,7 +351,7 @@ impl ReferenceResolver {
                 hooks,
                 Some(symbol),
             )?);
-            for &declaration in host.declarations(symbol)? {
+            for declaration in host.declarations(symbol)?.iter() {
                 let id = required(declaration);
                 if matches!(
                     kind(host, id)?.known(),
@@ -415,6 +416,6 @@ impl ReferenceResolver {
             hooks,
             Some(symbol),
         )?);
-        Ok(host.symbol(symbol)?.value_declaration)
+        Ok(host.symbol(symbol)?.value_declaration())
     }
 }

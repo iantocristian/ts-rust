@@ -265,43 +265,43 @@ impl Binder<'_, '_> {
         if statement.finally_block.is_some() {
             let finally = self.create_branch_label();
             let exceptions_and_returns = self.combine_flow_lists(
-                self.flow(exception).antecedents,
-                self.flow(returned).antecedents,
+                self.flow(exception).antecedents(),
+                self.flow(returned).antecedents(),
             );
             let all =
-                self.combine_flow_lists(self.flow(normal).antecedents, exceptions_and_returns);
-            self.flow_mut(finally).antecedents = all;
+                self.combine_flow_lists(self.flow(normal).antecedents(), exceptions_and_returns);
+            self.set_flow_antecedents(finally, all);
             self.current_flow = Some(finally);
             self.bind(statement.finally_block);
-            if self.flow(need(self.current_flow)).flags & F::UNREACHABLE != 0 {
+            if self.flow(need(self.current_flow)).flags() & F::UNREACHABLE != 0 {
                 self.current_flow = self.unreachable_flow;
             } else {
                 if let Some(target) = self
                     .current_return_target
-                    .filter(|_| self.flow(returned).antecedents.is_some())
+                    .filter(|_| self.flow(returned).antecedents().is_some())
                 {
                     let reduced = self.create_reduce_label(
                         finally,
-                        self.flow(returned).antecedents,
+                        self.flow(returned).antecedents(),
                         need(self.current_flow),
                     );
                     self.add_antecedent(target, reduced);
                 }
                 if let Some(target) = self
                     .current_exception_target
-                    .filter(|_| self.flow(exception).antecedents.is_some())
+                    .filter(|_| self.flow(exception).antecedents().is_some())
                 {
                     let reduced = self.create_reduce_label(
                         finally,
-                        self.flow(exception).antecedents,
+                        self.flow(exception).antecedents(),
                         need(self.current_flow),
                     );
                     self.add_antecedent(target, reduced);
                 }
-                self.current_flow = if self.flow(normal).antecedents.is_some() {
+                self.current_flow = if self.flow(normal).antecedents().is_some() {
                     Some(self.create_reduce_label(
                         finally,
-                        self.flow(normal).antecedents,
+                        self.flow(normal).antecedents(),
                         need(self.current_flow),
                     ))
                 } else {
@@ -379,7 +379,7 @@ impl Binder<'_, '_> {
             let clause = need(self.syntax_node(clauses, index));
             self.bind(Some(clause));
             fallthrough = self.current_flow;
-            if self.flow(need(self.current_flow)).flags & F::UNREACHABLE == 0
+            if self.flow(need(self.current_flow)).flags() & F::UNREACHABLE == 0
                 && index != clauses.len() - 1
             {
                 self.set_node_fallthrough_flow(clause, self.current_flow);

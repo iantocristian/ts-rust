@@ -27,17 +27,33 @@ pub(crate) struct EdgePages {
 }
 
 impl EdgePages {
+    pub(crate) const fn empty() -> Self {
+        Self {
+            pages: Vec::new(),
+            len: 0,
+            escapes: BTreeMap::new(),
+        }
+    }
+
     pub(crate) fn append(
         &mut self,
         owner: ArenaId,
         nodes: &[Option<NodeId>],
+    ) -> Result<CompactNodes, Error> {
+        self.append_iter(owner, nodes.iter().copied())
+    }
+
+    pub(crate) fn append_iter(
+        &mut self,
+        owner: ArenaId,
+        nodes: impl ExactSizeIterator<Item = Option<NodeId>>,
     ) -> Result<CompactNodes, Error> {
         let len = u32::try_from(nodes.len()).map_err(|_| Error::InvalidSlot)?;
         self.len
             .checked_add(nodes.len())
             .ok_or(Error::InvalidSlot)?;
         let start = self.len;
-        for &node in nodes {
+        for node in nodes {
             let index = self.len;
             if index.is_multiple_of(PAGE_WORDS) {
                 self.pages.push(Box::new([0; PAGE_WORDS]));
@@ -100,8 +116,8 @@ impl EdgePages {
     }
 
     /// Change one existing cell without replacing any copied backing header.
-    /// Callers must validate the new ID against the owner's retained graph.
-    #[allow(dead_code)] // Syntax currently mutates list headers, not existing edge cells.
+    /// Encoding records identity only; the enclosing graph keeps its own
+    /// validation boundary for newly written references.
     pub(crate) fn set(
         &mut self,
         owner: ArenaId,

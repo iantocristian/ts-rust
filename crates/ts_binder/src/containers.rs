@@ -262,7 +262,7 @@ impl Binder<'_, '_> {
                         | C::IS_OBJECT_LITERAL_OR_CLASS_EXPRESSION_METHOD_OR_ACCESSOR)
                     != 0
                 {
-                    self.flow_mut(start).node = Some(FlowData::Ast(node));
+                    self.set_flow_data(start, Some(FlowData::Ast(node)));
                 }
             }
             self.current_return_target =
@@ -280,7 +280,7 @@ impl Binder<'_, '_> {
             self.bind_children(node);
             let mut node_flags =
                 self.n(node).flags() & !(N::REACHABILITY_AND_EMIT_FLAGS | N::CONTAINS_THIS);
-            if self.flow(need(self.current_flow)).flags & F::UNREACHABLE == 0
+            if self.flow(need(self.current_flow)).flags() & F::UNREACHABLE == 0
                 && flags & C::IS_FUNCTION_LIKE != 0
                 && has_body_data(&self.n(node))
             {

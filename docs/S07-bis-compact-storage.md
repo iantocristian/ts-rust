@@ -355,3 +355,52 @@ escapes, flow flags versus payload tags, declaration capacity aliasing and name
 bytes. Run affected tests and complete graphs before the next fixed screen.
 The new combined result must satisfy the existing CPU and memory rules; neither
 model arithmetic nor independent category savings authorize promotion.
+
+
+### CP4 implementation and review
+
+The combined implementation is present. Stored symbols are **56 bytes**,
+including their existing per-symbol `AtomicU64` runtime identity; no sparse-ID
+saving is claimed. Their names refer to the same canonical byte pool used by
+symbol tables. Ordinary table entries are eight bytes; a table that receives a
+foreign symbol or a name index beyond its compact domain converts to full-ID
+entries. Full public symbol slots remain representable. The pool uses eight-byte
+range descriptors, with rare full-`usize` range escapes, and stores each selected
+byte sequence once per owner. Owned `JsString` reconstruction is explicit and
+reserved for actual owning consumers and cold unrestricted edits.
+
+Flows use the tested 20-byte layout and eight-byte list cells. Synthetic
+switch/reduce payloads currently use cold slot-keyed maps, whose overhead must
+be included in measurement. Narrow flow and symbol setters resolve the receiver
+once before changing encoding state. Declaration backings share 256-word pages
+with stable descriptors; singleton append avoids a temporary Vec. Both parser
+list builders now use ordinary empty-vector growth instead of reserving sixteen
+entries eagerly. Published/lazy compatibility still passes through its existing
+owner checks.
+
+Resolvers use semantic symbol/table/declaration readers, including owned
+transient symbols where appropriate. Retained symbols retain the exact binding
+owner and expose scoped symbol reads. The graph observer preserves byte sorting,
+reference identities, private-name canonicalization and full declaration
+capacity visibility. These API changes do not relax graph comparisons.
+
+Focused tests and the affected library suites pass: 106 AST, 28 binder, 25 parser
+and 12 compiler tests. Fourteen arena/AST ownership doctests include new symbol
+and name-pool lifetime checks. Independent review caught a public-supertrait leak
+of the runtime-ID atomic; the fix exposes only controlled assign/observe
+operations, with a compile-fail regression against direct atomic access. The
+follow-up review found no further issue. Workspace all-target/all-feature Clippy
+and Rust 1.96 compilation pass. Pinned generation, observer drift, formatting
+and offline dependency bans/licenses/sources checks also pass. Broader E3 instrumentation and fresh Go-relative
+acceptance remain prerequisites for promotion, after a promising fixed screen.
+
+A supplementary native CPU sample of the preceding thin paged candidate has
+6,251 ms of worker samples: actual entry-frame unions attribute 3,467 ms to
+parse, 2,767 ms to bind, no overlap and 17 ms to neither. These are sampled CPU
+weights, not phase elapsed times; 1,179 ms of other/main-thread work is excluded.
+The AST-access union is 1,205 ms, while full borrowed payload reconstruction is
+132 ms inclusive. Exact completion validation is 352 ms and construction-edge
+validation 167 ms with no overlap. These overlapping categories must not be
+summed; the source/sample does not establish that all access or allocation work
+is removable. They support the integrated storage/traffic work without another
+field trace or lookup-only trial.
