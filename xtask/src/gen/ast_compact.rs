@@ -369,6 +369,13 @@ fn emit_binding_operations(code: &mut String, nodes: &[Value]) -> Result<(), Str
             ));
         }
         code.push_str("            _ => None,\n        }\n    }\n");
+        if matches!(field.name, "symbol" | "locals") {
+            code.push_str(&format!("\n    /// Read a stored binding word without decoding its owner namespace.\n    /// Zero remains Some(0); unsupported shapes return None.\n    pub(crate) fn local_{}_word(&self, shape: u16, ordinal: u32) -> Option<u32> {{\n        match shape {{\n", field.name));
+            for (shape, node) in &eligible {
+                code.push_str(&format!("            {shape} => Some(self.{}.as_ref().expect(\"compact shape directory\").get(ordinal).expect(\"compact payload ordinal\").{}),\n", snake(string(node, "name")?), field.name));
+            }
+            code.push_str("            _ => None,\n        }\n    }\n");
+        }
         let setter = if field.name == "flow_node" {
             code.push_str("\n    #[inline]\n    pub(crate) fn set_flow_node(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {\n        self.set_local_flow_node(shape, ordinal, word)\n    }\n");
             "set_local_flow_node".into()

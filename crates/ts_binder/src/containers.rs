@@ -169,6 +169,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
             .expect("retained syntax slice")
             .at(index)
     }
+    #[cfg(test)]
     pub(crate) fn syntax_nodes(&self, list: Option<NodeListId>) -> ts_ast::NodeSliceRead<'_> {
         let parsed = self.parsed_view();
         let nodes = list.map_or_else(NodeSlice::empty, |list| {
@@ -340,7 +341,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
         let saved_pattern = self.in_assignment_pattern;
         self.in_assignment_pattern = false;
         if self.same_flow(self.current_flow, self.unreachable_flow) {
-            self.set_flow_node(node, None);
+            self.set_target_flow(target, None);
             if ts_ast::is_potentially_executable_node(self.view(), node)
                 .expect("retained executable node")
             {
@@ -352,46 +353,46 @@ impl<'scope> Binder<'_, 'scope, '_> {
         }
         let kind = self.node_kind(target);
         if kind.raw() >= K::FirstStatement as i16 && kind.raw() <= K::LastStatement as i16 {
-            self.set_flow_node(node, self.current_flow);
+            self.set_target_flow(target, self.current_flow);
         }
         match kind.known() {
-            Some(K::WhileStatement) => self.bind_while_statement(node),
-            Some(K::DoStatement) => self.bind_do_statement(node),
-            Some(K::ForStatement) => self.bind_for_statement(node),
+            Some(K::WhileStatement) => self.bind_while_statement(target),
+            Some(K::DoStatement) => self.bind_do_statement(target),
+            Some(K::ForStatement) => self.bind_for_statement(target),
             Some(K::ForInStatement | K::ForOfStatement) => {
-                self.bind_for_in_or_for_of_statement(node);
+                self.bind_for_in_or_for_of_statement(target);
             }
-            Some(K::IfStatement) => self.bind_if_statement(node),
-            Some(K::ReturnStatement) => self.bind_return_statement(node),
-            Some(K::ThrowStatement) => self.bind_throw_statement(node),
-            Some(K::BreakStatement) => self.bind_break_statement(node),
-            Some(K::ContinueStatement) => self.bind_continue_statement(node),
-            Some(K::TryStatement) => self.bind_try_statement(node),
-            Some(K::SwitchStatement) => self.bind_switch_statement(node),
-            Some(K::CaseBlock) => self.bind_case_block(node),
-            Some(K::CaseClause | K::DefaultClause) => self.bind_case_or_default_clause(node),
-            Some(K::ExpressionStatement) => self.bind_expression_statement(node),
-            Some(K::LabeledStatement) => self.bind_labeled_statement(node),
-            Some(K::PrefixUnaryExpression) => self.bind_prefix_unary_expression_flow(node),
-            Some(K::PostfixUnaryExpression) => self.bind_postfix_unary_expression_flow(node),
+            Some(K::IfStatement) => self.bind_if_statement(target),
+            Some(K::ReturnStatement) => self.bind_return_statement(target),
+            Some(K::ThrowStatement) => self.bind_throw_statement(target),
+            Some(K::BreakStatement) => self.bind_break_statement(target),
+            Some(K::ContinueStatement) => self.bind_continue_statement(target),
+            Some(K::TryStatement) => self.bind_try_statement(target),
+            Some(K::SwitchStatement) => self.bind_switch_statement(target),
+            Some(K::CaseBlock) => self.bind_case_block(target),
+            Some(K::CaseClause | K::DefaultClause) => self.bind_case_or_default_clause(target),
+            Some(K::ExpressionStatement) => self.bind_expression_statement(target),
+            Some(K::LabeledStatement) => self.bind_labeled_statement(target),
+            Some(K::PrefixUnaryExpression) => self.bind_prefix_unary_expression_flow(target),
+            Some(K::PostfixUnaryExpression) => self.bind_postfix_unary_expression_flow(target),
             Some(K::BinaryExpression) => {
                 if ts_ast::is_destructuring_assignment(self.view(), node)
                     .expect("retained destructuring expression")
                 {
                     self.in_assignment_pattern = saved_pattern;
-                    self.bind_destructuring_assignment_flow(node);
+                    self.bind_destructuring_assignment_flow(target);
                     return;
                 }
-                self.bind_binary_expression_flow(node);
+                self.bind_binary_expression_flow(target);
             }
-            Some(K::DeleteExpression) => self.bind_delete_expression_flow(node),
-            Some(K::ConditionalExpression) => self.bind_conditional_expression_flow(node),
-            Some(K::VariableDeclaration) => self.bind_variable_declaration_flow(node),
+            Some(K::DeleteExpression) => self.bind_delete_expression_flow(target),
+            Some(K::ConditionalExpression) => self.bind_conditional_expression_flow(target),
+            Some(K::VariableDeclaration) => self.bind_variable_declaration_flow(target),
             Some(K::PropertyAccessExpression | K::ElementAccessExpression) => {
-                self.bind_access_expression_flow(node);
+                self.bind_access_expression_flow(target);
             }
-            Some(K::CallExpression) => self.bind_call_expression_flow(node),
-            Some(K::NonNullExpression) => self.bind_non_null_expression_flow(node),
+            Some(K::CallExpression) => self.bind_call_expression_flow(target),
+            Some(K::NonNullExpression) => self.bind_non_null_expression_flow(target),
             Some(K::SourceFile) => {
                 if let BindingNode::Local(node) = target {
                     self.bind_local_source_children(node);
@@ -417,8 +418,8 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 }
                 self.bind_each_statement_functions_first(need(self.n(node).statement_list()));
             }
-            Some(K::BindingElement) => self.bind_binding_element_flow(node),
-            Some(K::Parameter) => self.bind_parameter_flow(node),
+            Some(K::BindingElement) => self.bind_binding_element_flow(target),
+            Some(K::Parameter) => self.bind_parameter_flow(target),
             Some(
                 K::ObjectLiteralExpression
                 | K::ArrayLiteralExpression
@@ -433,9 +434,6 @@ impl<'scope> Binder<'_, 'scope, '_> {
         self.in_assignment_pattern = saved_pattern;
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachChild
-    pub(crate) fn bind_each_child(&mut self, node: NodeId) {
-        self.bind_each_child_target(self.binding_node(node));
-    }
     pub(crate) fn bind_each_child_target(&mut self, target: BindingNode<'scope>) {
         let node = match target {
             BindingNode::Local(node) => return self.bind_local_children(node),
@@ -451,37 +449,6 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 .expect("binder syntax is retained"),
         );
         let _ = children.visit(self);
-    }
-    // port: tsc/internal/binder/binder.go:Binder.bindEach
-    pub(crate) fn bind_each(&mut self, nodes: NodeSlice) {
-        if let Backend::Local(local) = &self.builder {
-            if let Ok(nodes) = local.import_slice(nodes) {
-                let edges = local.edges(nodes);
-                self.bind_local_edges(edges);
-                return;
-            }
-        }
-        for index in 0..nodes.len() {
-            self.bind(self.syntax_node(nodes, index));
-        }
-    }
-    // port: tsc/internal/binder/binder.go:Binder.bindNodeList
-    pub(crate) fn bind_node_list(&mut self, list: Option<NodeListId>) {
-        if let Some(list) = list {
-            if let Backend::Local(local) = &self.builder {
-                if let Ok(list) = local.import_list(list) {
-                    let edges = local.edges(local.list(list));
-                    self.bind_local_edges(edges);
-                    return;
-                }
-            }
-            let nodes = self.syntax_slice(Some(list));
-            self.bind_each(nodes);
-        }
-    }
-    // port: tsc/internal/binder/binder.go:Binder.bindModifiers
-    pub(crate) fn bind_modifiers(&mut self, list: Option<NodeListId>) {
-        self.bind_node_list(list);
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachStatementFunctionsFirst
     pub(crate) fn bind_each_statement_functions_first(&mut self, statements: NodeListId) {
@@ -507,9 +474,17 @@ impl<'scope> Binder<'_, 'scope, '_> {
     }
     // port: tsc/internal/binder/binder.go:setFlowNode
     pub(crate) fn set_flow_node(&mut self, node: NodeId, flow: Option<BindingFlow<'scope>>) {
-        if self.try_set_target_flow(self.binding_node(node), flow) {
+        self.set_target_flow(self.binding_node(node), flow);
+    }
+    pub(crate) fn set_target_flow(
+        &mut self,
+        target: BindingNode<'scope>,
+        flow: Option<BindingFlow<'scope>>,
+    ) {
+        if self.try_set_target_flow(target, flow) {
             return;
         }
+        let node = self.node_id(target);
         if has_flow_node_data(&self.n(node)) {
             let flow = flow.map(|flow| self.flow_id(flow));
             self.builder

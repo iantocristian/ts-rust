@@ -7,7 +7,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use ts_arena::Counters;
 use ts_jsstring::SourceText;
 
-fn outcome(operation: impl FnOnce() -> bool) -> Result<bool, String> {
+fn outcome<T>(operation: impl FnOnce() -> T) -> Result<T, String> {
     catch_unwind(AssertUnwindSafe(operation)).map_err(|error| {
         error
             .downcast_ref::<String>()
@@ -19,6 +19,249 @@ fn outcome(operation: impl FnOnce() -> bool) -> Result<bool, String> {
             })
             .expect("source helper panics have string payloads")
     })
+}
+
+#[test]
+fn semantic_getters_share_kind_shape_and_nil_contracts() {
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let name = build.new_identifier(JsString::from_bytes(b"name".as_slice()));
+    let annotation = build.new_token(K::NumberKeyword.into());
+    let initializer = build.new_token(K::NullKeyword.into());
+    let backing = build.node_slice(vec![Some(name), None]).unwrap();
+    let list = build
+        .new_list(ts_core::TextRange::new(0, 0), backing)
+        .unwrap();
+    let function = build.new_function_declaration_data(
+        K::Unknown.into(),
+        crate::FunctionDeclarationData {
+            modifiers: Some(list),
+            type_parameters: None,
+            parameters: Some(list),
+            r#type: Some(annotation),
+            full_signature: None,
+            asterisk_token: None,
+            body: Some(name),
+            name: Some(name),
+        },
+    );
+    let parameter = build.new_parameter_declaration_data(
+        K::Parameter.into(),
+        crate::ParameterDeclarationData {
+            modifiers: None,
+            dot_dot_dot_token: None,
+            name: Some(name),
+            question_token: None,
+            r#type: Some(annotation),
+            initializer: Some(initializer),
+        },
+    );
+    let mut nodes = vec![function, parameter, name];
+    for kind in [
+        K::Unknown,
+        K::CallExpression,
+        K::PropertyAccessExpression,
+        K::PropertyDeclaration,
+        K::Parameter,
+        K::FunctionDeclaration,
+        K::Block,
+        K::DefaultClause,
+        K::CaseClause,
+        K::ForOfStatement,
+        K::BinaryExpression,
+        K::JSDocParameterTag,
+    ] {
+        nodes.push(build.new_token(kind.into()));
+    }
+    in_local_scope(build, |local| {
+        for node in nodes {
+            let read = local.node(local.import_node(node).unwrap());
+            let public = local.general_node(node).unwrap();
+            macro_rules! node_fields {
+                ($($getter:ident),*) => {$(
+                    assert_eq!(outcome(|| read.$getter().map(|node| local.node_id(node))),
+                               outcome(|| public.$getter()), stringify!($getter));
+                )*};
+            }
+            macro_rules! list_fields {
+                ($($getter:ident),*) => {$(
+                    assert_eq!(outcome(|| read.$getter()),
+                               outcome(|| public.$getter().map(|list| local.import_list(list).unwrap())),
+                               stringify!($getter));
+                )*};
+            }
+            node_fields!(
+                name,
+                body,
+                expression,
+                type_node,
+                initializer,
+                property_name,
+                label,
+                attributes,
+                statement,
+                postfix_token,
+                question_dot_token,
+                module_specifier,
+                import_clause,
+                tag_name,
+                type_expression,
+                class_name
+            );
+            list_fields!(
+                modifiers,
+                parameter_list,
+                argument_list,
+                type_argument_list,
+                type_parameter_list,
+                member_list,
+                statement_list,
+                comment_list,
+                children_list,
+                property_list,
+                element_list
+            );
+        }
+        let read = local.node(local.import_node(function).unwrap());
+        assert_eq!(read.body().map(|node| local.node_id(node)), Some(name));
+        assert_eq!(
+            read.type_node().map(|node| local.node_id(node)),
+            Some(annotation)
+        );
+        assert_eq!(
+            read.parameter_list(),
+            Some(local.import_list(list).unwrap())
+        );
+        assert_eq!(
+            local
+                .node(local.import_node(parameter).unwrap())
+                .initializer()
+                .map(|node| local.node_id(node)),
+            Some(initializer)
+        );
+    });
+}
+
+#[test]
+fn locals_container_predicate_includes_source_roles_without_inline_locals_storage() {
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let switch = build.new_switch_statement(None, None);
+    let attempt = build.new_try_statement(None, None, None);
+    let block = build.new_block(None, false);
+    let token_block = build.new_token(K::Block.into());
+    in_local_scope(build, |local| {
+        for (node, expected) in [
+            (switch, true),
+            (attempt, true),
+            (block, true),
+            (token_block, false),
+        ] {
+            assert_eq!(
+                local
+                    .node(local.import_node(node).unwrap())
+                    .is_locals_container(),
+                expected
+            );
+            assert_eq!(
+                crate::is_locals_container(&local.general_node(node).unwrap()),
+                expected
+            );
+        }
+    });
+}
+
+#[test]
+fn shared_optional_logical_and_text_helpers_preserve_selected_reads() {
+    use crate::{node_flags as nf, utilities as u};
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let identifier = build.new_identifier(JsString::from_bytes(b"push".as_slice()));
+    let keyword = build.new_token(K::ThisKeyword.into());
+    let operator = build.new_token(K::QuestionQuestionToken.into());
+    let logical =
+        build.new_binary_expression(None, Some(identifier), None, Some(operator), Some(keyword));
+    let wrapper = build.new_parenthesized_expression(Some(logical));
+    let negated = build.new_prefix_unary_expression(K::ExclamationToken.into(), Some(wrapper));
+    let unselected_nil = build.new_prefix_unary_expression(K::PlusToken.into(), None);
+    let nil_binary = build.new_binary_expression(None, None, None, None, None);
+    let nil_parenthesized = build.new_parenthesized_expression(None);
+    let access = build.new_property_access_expression(
+        Some(identifier),
+        None,
+        Some(identifier),
+        nf::OPTIONAL_CHAIN,
+    );
+    let root = build.new_property_access_expression(
+        Some(access),
+        Some(operator),
+        Some(identifier),
+        nf::OPTIONAL_CHAIN,
+    );
+    build.node_mut(identifier).unwrap().set_parent(Some(access));
+    build.node_mut(access).unwrap().set_parent(Some(root));
+    let wrong_shape = build.new_token(K::PropertyAccessExpression.into());
+    let unselected_shape = build.new_token(K::NonNullExpression.into());
+    for node in [wrong_shape, unselected_shape] {
+        build.node_mut(node).unwrap().set_flags(nf::OPTIONAL_CHAIN);
+    }
+    let nodes = [
+        identifier,
+        keyword,
+        logical,
+        wrapper,
+        negated,
+        unselected_nil,
+        nil_binary,
+        nil_parenthesized,
+        access,
+        root,
+        wrong_shape,
+        unselected_shape,
+    ];
+    in_local_scope(build, |local| {
+        for node in nodes {
+            let id = local.import_node(node).unwrap();
+            macro_rules! view_helpers {
+                ($($helper:ident),*) => {$(
+                    assert_eq!(outcome(|| local.$helper(id)), outcome(|| u::$helper(local.view(), node).unwrap()), stringify!($helper));
+                )*};
+            }
+            view_helpers!(
+                is_outermost_optional_chain,
+                is_expression_of_optional_chain_root,
+                is_logical_expression,
+                is_logical_or_coalescing_assignment_expression,
+                is_nullish_coalesce
+            );
+            assert_eq!(
+                outcome(|| local.is_optional_chain(id)),
+                outcome(|| u::is_optional_chain(&local.general_node(node).unwrap()))
+            );
+            assert_eq!(
+                outcome(|| local.is_optional_chain_root(id)),
+                outcome(|| u::is_optional_chain_root(&local.general_node(node).unwrap()))
+            );
+            assert_eq!(
+                outcome(|| local.is_dotted_name(id)),
+                outcome(|| crate::is_dotted_name(local.view(), node).unwrap())
+            );
+            assert_eq!(
+                outcome(|| local.node_id(local.skip_parentheses(id))),
+                outcome(|| crate::skip_parentheses(local.view(), node).unwrap())
+            );
+            assert_eq!(
+                outcome(|| local.is_push_or_unshift_identifier(id)),
+                outcome(|| crate::is_push_or_unshift_identifier(local.view(), node).unwrap())
+            );
+        }
+        assert!(local.is_logical_expression(local.import_node(negated).unwrap()));
+        assert!(!local.is_logical_expression(local.import_node(unselected_nil).unwrap()));
+        assert!(!local.is_optional_chain_root(local.import_node(unselected_shape).unwrap()));
+        assert!(local.is_push_or_unshift_identifier(local.import_node(identifier).unwrap()));
+        assert_eq!(
+            outcome(|| local.is_logical_expression(local.import_node(nil_binary).unwrap())),
+            Err("nil node in source AST utility".to_owned())
+        );
+        assert_eq!(outcome(|| local.is_optional_chain_root(local.import_node(wrong_shape).unwrap())), Err("interface conversion: ast.nodeData is *ast.Token, not *ast.PropertyAccessExpression".to_owned()));
+    });
 }
 
 fn in_local_scope(build: AstBuilder, operation: impl for<'scope> FnOnce(LocalBind<'scope, '_>)) {

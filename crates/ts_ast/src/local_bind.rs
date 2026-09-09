@@ -13,9 +13,13 @@ type Brand<'scope> = PhantomData<fn(&'scope ()) -> &'scope ()>;
 mod compatibility;
 #[path = "local_bind_state.rs"]
 mod state;
+#[path = "local_bind_state_nodes.rs"]
+mod state_nodes;
 pub use state::{BindFlowList, BindSymbol, BindTable};
 #[path = "local_bind_helpers.rs"]
 mod helpers;
+#[path = "local_bind_semantics.rs"]
+mod semantics;
 
 macro_rules! local_identity {
     ($name:ident) => {
@@ -197,8 +201,20 @@ impl BindBuilder<'_> {
             return None;
         }
         let result = &mut self.result;
-        result.used_local_scope = true;
-        Some(parsed.with_local_core(|core| operation(LocalBind { core, result })))
+        parsed.with_local_core(|core| {
+            // Public checked builders can replace whole result arenas between
+            // callbacks. Inline words still name their original namespaces.
+            let arenas = crate::compact::binding::BindingArenas {
+                symbols: result.symbols.id(),
+                tables: result.tables.id(),
+                flows: result.flows.id(),
+            };
+            if !core.store().binding_arenas_match(arenas) {
+                return None;
+            }
+            result.used_local_scope = true;
+            Some(operation(LocalBind { core, result }))
+        })
     }
 }
 

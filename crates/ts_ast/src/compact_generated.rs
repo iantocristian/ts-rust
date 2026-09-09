@@ -19538,6 +19538,446 @@ impl AstPayloadStore {
         }
     }
 
+    /// Read a stored binding word without decoding its owner namespace.
+    /// Zero remains Some(0); unsupported shapes return None.
+    pub(crate) fn local_symbol_word(&self, shape: u16, ordinal: u32) -> Option<u32> {
+        match shape {
+            27 => Some(
+                self.variable_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            30 => Some(
+                self.parameter_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            31 => Some(
+                self.binding_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            32 => Some(
+                self.missing_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            33 => Some(
+                self.function_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            34 => Some(
+                self.class_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            35 => Some(
+                self.class_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            37 => Some(
+                self.interface_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            38 => Some(
+                self.type_alias_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            39 => Some(
+                self.enum_member
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            40 => Some(
+                self.enum_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            44 => Some(
+                self.import_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            46 => Some(
+                self.namespace_import
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            48 => Some(
+                self.export_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            49 => Some(
+                self.namespace_export_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            50 => Some(
+                self.namespace_export
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            52 => Some(
+                self.export_specifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            53 => Some(
+                self.call_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            54 => Some(
+                self.construct_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            55 => Some(
+                self.constructor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            56 => Some(
+                self.get_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            57 => Some(
+                self.set_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            58 => Some(
+                self.index_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            59 => Some(
+                self.method_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            60 => Some(
+                self.method_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            61 => Some(
+                self.property_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            62 => Some(
+                self.property_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            63 => Some(
+                self.semicolon_class_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            64 => Some(
+                self.class_static_block_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            71 => Some(
+                self.no_substitution_template_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            72 => Some(
+                self.binary_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            76 => Some(
+                self.arrow_function
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            77 => Some(
+                self.function_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            83 => Some(
+                self.call_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            93 => Some(
+                self.object_literal_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            94 => Some(
+                self.spread_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            95 => Some(
+                self.property_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            96 => Some(
+                self.shorthand_property_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            118 => Some(
+                self.mapped_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            119 => Some(
+                self.type_literal_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            121 => Some(
+                self.named_tuple_member
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            125 => Some(
+                self.function_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            126 => Some(
+                self.constructor_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            135 => Some(
+                self.jsx_attributes
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            142 => Some(
+                self.jsx_attribute
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            175 => Some(
+                self.js_doc_signature
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            177 => Some(
+                self.source_file
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            178 => Some(
+                self.module_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            179 => Some(
+                self.import_equals_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            180 => Some(
+                self.export_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            182 => Some(
+                self.import_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            183 => Some(
+                self.import_specifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            188 => Some(
+                self.type_parameter_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            190 => Some(
+                self.js_doc_type_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .symbol,
+            ),
+            _ => None,
+        }
+    }
+
     /// Narrow binding writes do not modify syntax edges or its validation proof.
     pub(crate) fn set_symbol(&mut self, shape: u16, ordinal: u32, word: u32) -> bool {
         match shape {
@@ -20644,6 +21084,230 @@ impl AstPayloadStore {
             175 => Some(FieldKey::new(175, ordinal, 32770)),
             177 => Some(FieldKey::new(177, ordinal, 32770)),
             178 => Some(FieldKey::new(178, ordinal, 32770)),
+            _ => None,
+        }
+    }
+
+    /// Read a stored binding word without decoding its owner namespace.
+    /// Zero remains Some(0); unsupported shapes return None.
+    pub(crate) fn local_locals_word(&self, shape: u16, ordinal: u32) -> Option<u32> {
+        match shape {
+            10 => Some(
+                self.for_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            11 => Some(
+                self.for_in_or_of_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            17 => Some(
+                self.case_block
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            21 => Some(
+                self.catch_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            25 => Some(
+                self.block
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            33 => Some(
+                self.function_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            34 => Some(
+                self.class_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            35 => Some(
+                self.class_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            38 => Some(
+                self.type_alias_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            53 => Some(
+                self.call_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            54 => Some(
+                self.construct_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            55 => Some(
+                self.constructor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            56 => Some(
+                self.get_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            57 => Some(
+                self.set_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            58 => Some(
+                self.index_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            59 => Some(
+                self.method_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            60 => Some(
+                self.method_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            64 => Some(
+                self.class_static_block_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            76 => Some(
+                self.arrow_function
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            77 => Some(
+                self.function_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            105 => Some(
+                self.conditional_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            118 => Some(
+                self.mapped_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            125 => Some(
+                self.function_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            126 => Some(
+                self.constructor_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            175 => Some(
+                self.js_doc_signature
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            177 => Some(
+                self.source_file
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
+            178 => Some(
+                self.module_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal")
+                    .locals,
+            ),
             _ => None,
         }
     }

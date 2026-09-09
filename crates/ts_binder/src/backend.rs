@@ -144,3 +144,9 @@ impl Backend<'_, '_, '_> {
         }
     }
 }
+
+/// Distinguishes a local nil/value from a required checked compatibility path.
+pub(crate) enum ScopedValue<T> {
+    Local(Option<T>),
+    Checked,
+}

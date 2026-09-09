@@ -106,34 +106,16 @@ pub fn node_is_present(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:SkipParentheses
-pub fn skip_parentheses(view: AstView<'_>, mut id: NodeId) -> Result<NodeId, Error> {
-    while view.node(id)?.kind() == K::ParenthesizedExpression {
-        id = view
-            .node(id)?
-            .expression()
-            .expect("nil parenthesized expression");
-    }
-    Ok(id)
+pub fn skip_parentheses(view: AstView<'_>, id: NodeId) -> Result<NodeId, Error> {
+    crate::syntax_helpers::skip_parentheses(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:SkipPartiallyEmittedExpressions
-pub fn skip_partially_emitted_expressions(
-    view: AstView<'_>,
-    mut id: NodeId,
-) -> Result<NodeId, Error> {
-    while view.node(id)?.kind() == K::PartiallyEmittedExpression {
-        id = view
-            .node(id)?
-            .expression()
-            .expect("nil partially emitted expression");
-    }
-    Ok(id)
+pub fn skip_partially_emitted_expressions(view: AstView<'_>, id: NodeId) -> Result<NodeId, Error> {
+    crate::syntax_helpers::skip_partially_emitted_expressions(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsLeftHandSideExpression
 pub fn is_left_hand_side_expression(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    Ok(crate::is_left_hand_side_expression_kind(
-        view.node(skip_partially_emitted_expressions(view, id)?)?
-            .kind(),
-    ))
+    crate::syntax_helpers::is_left_hand_side_expression(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsAssignmentExpression
 pub fn is_assignment_expression(
@@ -269,10 +251,11 @@ pub(crate) fn identifier_name_role(kind: crate::NodeKind) -> IdentifierNameRole 
 }
 /// port: tsc/internal/ast/utilities.go:IsPushOrUnshiftIdentifier
 pub fn is_push_or_unshift_identifier(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    Ok(matches!(
-        view.node_text(id)?.as_bytes(),
-        b"push" | b"unshift"
-    ))
+    Ok(is_push_or_unshift_text(view.node_text(id)?.as_bytes()))
+}
+
+pub(crate) fn is_push_or_unshift_text(bytes: &[u8]) -> bool {
+    matches!(bytes, b"push" | b"unshift")
 }
 
 /// port: tsc/internal/ast/utilities.go:IsExportsIdentifier
@@ -290,31 +273,10 @@ pub fn is_entity_name_expression(view: AstView<'_>, id: NodeId) -> Result<bool, 
 /// port: tsc/internal/ast/utilities.go:IsEntityNameExpressionEx
 pub fn is_entity_name_expression_ex(
     view: AstView<'_>,
-    mut id: NodeId,
+    id: NodeId,
     allow_js: bool,
 ) -> Result<bool, Error> {
-    loop {
-        let node = view.node(id)?;
-        match node.kind().known() {
-            Some(K::Identifier) => return Ok(true),
-            Some(K::PropertyAccessExpression) => {
-                if required(view, node.name())?.kind() != K::Identifier {
-                    return Ok(false);
-                }
-            }
-            Some(K::ThisKeyword) if allow_js => return Ok(true),
-            Some(K::ElementAccessExpression) if allow_js => {
-                if !crate::utilities::is_string_or_numeric_literal_like(&required(
-                    view,
-                    payload!(node, ElementAccessExpression).argument_expression(),
-                )?) {
-                    return Ok(false);
-                }
-            }
-            _ => return Ok(false),
-        }
-        id = node.expression().expect("nil entity-name expression");
-    }
+    crate::syntax_helpers::is_entity_name_expression(&view, id, allow_js)
 }
 /// port: tsc/internal/ast/utilities.go:IsPropertyAccessEntityNameExpression
 pub fn is_property_access_entity_name_expression(
@@ -350,19 +312,8 @@ pub fn is_element_access_entity_name_expression(
         )?)
 }
 /// port: tsc/internal/ast/utilities.go:IsDottedName
-pub fn is_dotted_name(view: AstView<'_>, mut id: NodeId) -> Result<bool, Error> {
-    loop {
-        let node = view.node(id)?;
-        match node.kind().known() {
-            Some(K::Identifier | K::ThisKeyword | K::SuperKeyword | K::MetaProperty) => {
-                return Ok(true);
-            }
-            Some(K::PropertyAccessExpression | K::ParenthesizedExpression) => {
-                id = node.expression().expect("nil dotted-name expression");
-            }
-            _ => return Ok(false),
-        }
-    }
+pub fn is_dotted_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
+    crate::syntax_helpers::is_dotted_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsLiteralLikeElementAccess
 pub fn is_literal_like_element_access(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {

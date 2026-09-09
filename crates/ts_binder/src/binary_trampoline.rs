@@ -1,7 +1,7 @@
 //! Explicit continuations for ordinary binary-expression evaluation. Logical and
 //! destructuring forms retain their own branch semantics under the bind guard.
 use crate::{backend::Backend, need, target::BindingNode, Binder};
-use ts_ast::{flow_flags as F, node_flags as N, NodeId, SyntaxKind as K};
+use ts_ast::{flow_flags as F, node_flags as N, SyntaxKind as K};
 
 struct Exit<'scope> {
     node: BindingNode<'scope>,
@@ -27,9 +27,6 @@ struct BinaryOperands<'scope> {
 }
 
 impl<'scope> Binder<'_, 'scope, '_> {
-    pub(crate) fn bind_binary_expression_trampoline(&mut self, node: NodeId) {
-        self.bind_binary_expression_target(self.binding_node(node));
-    }
     pub(crate) fn bind_binary_expression_target(&mut self, node: BindingNode<'scope>) {
         let expression = self.binary_operands(node);
         let left = expression.left;
@@ -105,7 +102,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
         let expression = self.binary_operands(node);
         self.bind_binary_child(expression.r#type);
         if self.node_kind(need(expression.operator_token)) == K::CommaToken {
-            self.maybe_bind_expression_flow_if_call(self.node_id(need(expression.left)));
+            self.maybe_bind_expression_flow_if_call(need(expression.left));
         }
         self.bind_binary_child(expression.operator_token);
     }
@@ -113,22 +110,22 @@ impl<'scope> Binder<'_, 'scope, '_> {
         let expression = self.binary_operands(node);
         let operator = self.node_kind(need(expression.operator_token));
         if operator == K::CommaToken {
-            self.maybe_bind_expression_flow_if_call(self.node_id(need(expression.right)));
+            self.maybe_bind_expression_flow_if_call(need(expression.right));
         }
         if ts_ast::is_assignment_operator(operator)
             && !ts_ast::is_assignment_target(self.view(), self.node_id(node))
                 .expect("retained assignment")
         {
-            self.bind_assignment_target_flow(self.node_id(need(expression.left)));
+            self.bind_assignment_target_flow(need(expression.left));
             if operator == K::EqualsToken
                 && self.node_kind(need(expression.left)) == K::ElementAccessExpression
             {
                 let target = self.binary_element_expression(need(expression.left));
-                if self.is_narrowable_operand(self.node_id(target)) {
+                if self.is_narrowable_operand(target) {
                     self.current_flow = Some(self.create_flow_mutation(
                         F::ARRAY_MUTATION,
                         need(self.current_flow),
-                        self.node_id(node),
+                        node,
                     ));
                 }
             }

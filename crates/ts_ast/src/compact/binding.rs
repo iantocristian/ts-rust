@@ -12,6 +12,14 @@ pub(crate) struct BindingArenas {
 }
 
 impl CoreStore {
+    pub(crate) fn binding_arenas_match(&self, arenas: BindingArenas) -> bool {
+        self.binding_arenas == Some(arenas)
+    }
+
+    pub(crate) fn has_binding_overrides(&self) -> bool {
+        !self.binding_overrides.is_empty()
+    }
+
     pub(crate) fn initialize_binding(&mut self, arenas: BindingArenas) {
         assert!(
             self.binding_arenas.is_none(),

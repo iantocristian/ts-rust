@@ -278,42 +278,17 @@ pub fn get_exports<'a>(
 mod declaration_lists;
 pub use declaration_lists::{DeclarationLists, DeclarationRead, DeclarationSlice};
 
+macro_rules! locals_shape {
+    ($node:expr; $($variant:ident),*) => {
+        matches!($node.data(), $(NodeDataRead::$variant(_))|*)
+    };
+}
+
 /// The source tests the payload's promoted LocalsContainerData method, even for
 /// an open kind/payload mismatch. Token(SourceFile) therefore has no locals.
 // port: tsc/internal/ast/ast.go:IsLocalsContainer
 pub fn is_locals_container(node: &(impl NodeAccess + ?Sized)) -> bool {
-    matches!(
-        node.data(),
-        NodeDataRead::SourceFile(_)
-            | NodeDataRead::ForStatement(_)
-            | NodeDataRead::ForInOrOfStatement(_)
-            | NodeDataRead::SwitchStatement(_)
-            | NodeDataRead::CaseBlock(_)
-            | NodeDataRead::TryStatement(_)
-            | NodeDataRead::CatchClause(_)
-            | NodeDataRead::Block(_)
-            | NodeDataRead::FunctionDeclaration(_)
-            | NodeDataRead::ClassDeclaration(_)
-            | NodeDataRead::ClassExpression(_)
-            | NodeDataRead::TypeAliasDeclaration(_)
-            | NodeDataRead::CallSignatureDeclaration(_)
-            | NodeDataRead::ConstructSignatureDeclaration(_)
-            | NodeDataRead::ConstructorDeclaration(_)
-            | NodeDataRead::GetAccessorDeclaration(_)
-            | NodeDataRead::SetAccessorDeclaration(_)
-            | NodeDataRead::IndexSignatureDeclaration(_)
-            | NodeDataRead::MethodSignatureDeclaration(_)
-            | NodeDataRead::MethodDeclaration(_)
-            | NodeDataRead::ClassStaticBlockDeclaration(_)
-            | NodeDataRead::ArrowFunction(_)
-            | NodeDataRead::FunctionExpression(_)
-            | NodeDataRead::ConditionalTypeNode(_)
-            | NodeDataRead::MappedTypeNode(_)
-            | NodeDataRead::FunctionTypeNode(_)
-            | NodeDataRead::ConstructorTypeNode(_)
-            | NodeDataRead::JSDocSignature(_)
-            | NodeDataRead::ModuleDeclaration(_)
-    )
+    crate::node_semantics::locals_container_shapes!(locals_shape, node)
 }
 
 #[cfg(test)]

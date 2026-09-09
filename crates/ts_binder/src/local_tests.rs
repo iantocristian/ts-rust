@@ -65,15 +65,18 @@ fn narrowable_receivers_preserve_checked_interface_conversion_panics() {
                 // even though the source also admits the new local capability.
                 let checked_failure = {
                     let binder = Binder::new(builder);
-                    catch_unwind(AssertUnwindSafe(|| binder.is_narrowable_reference(node)))
-                        .unwrap_err()
+                    catch_unwind(AssertUnwindSafe(|| {
+                        binder.is_narrowable_reference(binder.binding_node(node))
+                    }))
+                    .unwrap_err()
                 };
                 assert_eq!(panic_message(&*checked_failure), expected);
                 builder
                     .with_local_scope(|local| {
                         let node = local.import_node(node).unwrap();
+                        let binder = Binder::from_backend(crate::backend::Backend::Local(local));
                         let local_failure = catch_unwind(AssertUnwindSafe(|| {
-                            crate::local::is_narrowable_reference(&local, node)
+                            binder.is_narrowable_reference(crate::target::BindingNode::Local(node))
                         }))
                         .unwrap_err();
                         assert_eq!(panic_message(&*local_failure), expected);
@@ -251,4 +254,28 @@ fn parsed_contextual_keywords_preserve_diagnostics_and_error_flags_across_backen
             "{name}: diagnostics"
         );
     }
+}
+
+#[test]
+fn scoped_and_checked_node_aliases_share_identity_and_live_flags() {
+    parse(b"let value = 1;")
+        .bind_and_publish(|builder| {
+            let raw = builder.source();
+            builder
+                .with_local_scope(|local| {
+                    let node = local.import_node(raw).unwrap();
+                    let mut binder = Binder::from_backend(crate::backend::Backend::Local(local));
+                    let local = crate::target::BindingNode::Local(node);
+                    let checked = crate::target::BindingNode::Checked(raw);
+                    assert!(binder.same_node(Some(local), Some(checked)));
+                    assert!(binder.same_node(Some(checked), Some(local)));
+                    assert!(!binder.same_node(Some(local), None));
+                    let flags = binder.node_flags(local) | ts_ast::node_flags::THIS_NODE_HAS_ERROR;
+                    binder.set_binding_flags(local, flags);
+                    assert_eq!(binder.node_flags(checked), flags);
+                })
+                .expect("parsed source admits local scope");
+            Ok(())
+        })
+        .unwrap();
 }

@@ -1,10 +1,14 @@
 # S07-bis: local binding access and current allocation traffic
 
-Status: [local dispatch, lists and flow state implemented](S07-bis-local-bind-migration.md),
-following the [first local-scope milestone](S07-bis-local-bind-milestone.md).
-Binder-wide migration and combined screening remain open. This supersedes the standalone experiment
-sequence in [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic
-counterexamples remain applicable; those changes are components of this design.
+Status: the [selected binding/declaration/expression/statement slice is implemented](S07-bis-local-bind-completion.md),
+including scoped syntax/list and symbol/table consumers, after the
+[dispatch/list/flow milestone](S07-bis-local-bind-migration.md) and
+[first local scope](S07-bis-local-bind-milestone.md). Final validation and the
+combined screen are pending; explicit shared-helper, diagnostics, lazy and
+public-reference boundaries remain. This is not a claim that the entire binder
+is facade-free. This supersedes the standalone experiment sequence in
+[the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic counterexamples
+remain applicable; those changes are components of this design.
 
 The [current allocation attribution](S07-bis-allocation-traffic.md) is complete:
 225.443 MB of 333.733 MB traffic is assigned to observed backings; 108.289 MB
@@ -126,7 +130,12 @@ documentation. Build the complete local-view combination and any separately
 justified memory component with fresh isolated artifacts. Use the primary plan's
 one fixed eight-warmup/56-sample schedule at one/eight workers, keeping every
 result and applying the combined-tradeoff rules. No standalone flow/source-fact
-screen precedes it; no historical component percentages are added.
+screen precedes it; no historical component percentages are added. A CPU
+regression in a memory component is not an automatic retention veto while its
+named dependent CPU work is integrated. Promotion judges the actual combination
+across all gate distances, with the existing noise tolerances; a weighted score
+cannot waive a final gate. Component diagnostics explain costs and do not decide
+promotion independently.
 
 Keep parse versus bind attribution alongside the resulting pipeline assessment:
 a binder win does not prove that parsing or either complete CPU mode meets Go.
@@ -136,3 +145,29 @@ contract or fails to improve the complete result enough, record that result and
 replan explicitly. Do not silently continue a succession of small candidates.
 Final CPU and memory gates remain in S07-bis and require fresh Go-relative
 evidence; neither is promised by this plan.
+
+
+### Current evidence and cost ledger
+
+The selected completion record inventories the shared getter/helper algorithms
+and remaining general boundaries. Its final validation fields deliberately stay
+pending until the exact source has passed the required checks. Earlier graph or
+instrumentation results retain their original source scope.
+
+| Item | Established evidence / outstanding measurement |
+| --- | --- |
+| Accepted control | CP1 remains unchanged. The compact/local implementation remains the experimental candidate. |
+| Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Final validation is pending. |
+| Earlier migration native profile | [One untimed capture](S07-bis-local-bind-migration-cpu.md), no rebuild or paired screen. Remaining general helper/validation callers were identified; it does not measure this later source or establish CPU improvement. |
+| Continuations and temporary observations | Earlier selected binary: `Step` 24 bytes, alignment 8; `Exit` 24 bytes. Final artifact layout, peak capacity, tuple/adapter stack costs and request traffic must be charged; no saving is assumed. |
+| Allocation mechanism evidence | [Frozen attribution](S07-bis-allocation-traffic.md): 333.733 MB traffic, 108.289 MB unclassified. No new memory policy or whole-candidate saving has been measured. |
+| Final graph/ownership/toolchain validation | Pending for the completion source, with failed checks retained. Previous milestone passes are not carried forward as fresh evidence. |
+| Both CPU modes, allocation and RSS | One combined fixed screen pending, against CP1 with all four Go-relative gate distances reported. No result or control switch is implied by implementation completion. |
+| Parse versus bind | Matched phase elapsed attribution pending alongside the combined screen; native sampled CPU is a separate diagnostic. |
+
+The fixed schedule remains eight warmup executions and 56 recorded executions
+across the normal/allocation binaries, both worker counts and both variants.
+Freeze and hash-check the selected compiler artifacts and their source/configuration
+before measuring. Report all rows, failures and all metric distances. Do not
+launch another small screening sequence or silently lengthen an inconclusive
+batch. The next promotion decision belongs to this complete combination.

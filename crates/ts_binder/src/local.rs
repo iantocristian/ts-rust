@@ -3,10 +3,7 @@ use crate::need;
 use crate::{backend::Backend, Binder};
 use std::ops::ControlFlow;
 use ts_ast::local_bind::{BindEdges, BindList, BindSlice, LocalChildVisitor};
-use ts_ast::{
-    local_bind::{BindNode, LocalBind},
-    SyntaxKind as K,
-};
+use ts_ast::{local_bind::BindNode, SyntaxKind as K};
 
 #[derive(Clone, Copy)]
 enum Child<'scope> {
@@ -177,72 +174,4 @@ impl<'scope> Binder<'_, 'scope, '_> {
             }
         }
     }
-}
-
-// port: tsc/internal/binder/binder.go:isNarrowableReference
-pub(crate) fn is_narrowable_reference<'scope>(
-    local: &LocalBind<'scope, '_>,
-    node: BindNode<'scope>,
-) -> bool {
-    let read = local.node(node);
-    match read.kind().known() {
-        Some(K::Identifier | K::ThisKeyword | K::SuperKeyword | K::MetaProperty) => true,
-        Some(K::PropertyAccessExpression) => is_narrowable_reference(
-            local,
-            need(
-                read.as_property_access_expression()
-                    .map(|data| data.expression())
-                    .unwrap_or_else(|| incompatible_expression(local, node)),
-            ),
-        ),
-        Some(K::ParenthesizedExpression) => is_narrowable_reference(
-            local,
-            need(
-                read.as_parenthesized_expression()
-                    .map(|data| data.expression())
-                    .unwrap_or_else(|| incompatible_expression(local, node)),
-            ),
-        ),
-        Some(K::NonNullExpression) => is_narrowable_reference(
-            local,
-            need(
-                read.as_non_null_expression()
-                    .map(|data| data.expression())
-                    .unwrap_or_else(|| incompatible_expression(local, node)),
-            ),
-        ),
-        Some(K::ElementAccessExpression) => {
-            let access = read
-                .as_element_access_expression()
-                .expect("binder syntax payload");
-            let argument = need(access.argument_expression());
-            let kind = local.node(argument).kind();
-            matches!(
-                kind.known(),
-                Some(K::StringLiteral | K::NumericLiteral | K::NoSubstitutionTemplateLiteral)
-            ) || local.is_entity_name_expression(argument)
-                && is_narrowable_reference(local, need(access.expression()))
-        }
-        Some(K::BinaryExpression) => {
-            let binary = read.as_binary_expression().expect("binder syntax payload");
-            let operator = local.node(need(binary.operator_token())).kind();
-            operator == K::CommaToken && is_narrowable_reference(local, need(binary.right()))
-                || ts_ast::is_assignment_operator(operator)
-                    && local.is_left_hand_side_expression(need(binary.left()))
-        }
-        _ => false,
-    }
-}
-
-// Preserve the public interface-conversion failure for a constructed kind/shape
-// mismatch. This checked boundary is absent from matching typed receiver reads.
-fn incompatible_expression<'scope>(
-    local: &LocalBind<'scope, '_>,
-    node: BindNode<'scope>,
-) -> Option<BindNode<'scope>> {
-    local
-        .general_node(local.node_id(node))
-        .expect("binder node is retained")
-        .expression()
-        .map(|node| local.import_node(node).expect("validated local expression"))
 }

@@ -1,5 +1,9 @@
 //! Flow identities remain scoped while the private binder creates and links them.
-use crate::{backend::Backend, target::BindingNode, Binder};
+use crate::{
+    backend::{Backend, ScopedValue},
+    target::BindingNode,
+    Binder,
+};
 use ts_ast::{
     local_bind::{BindFlow, BindFlowList},
     FlowData, FlowId, FlowList, FlowListId, FlowNode, FlowNodeRead,
@@ -246,11 +250,6 @@ impl<'scope> Binder<'_, 'scope, '_> {
         );
         true
     }
-}
-
-enum ScopedValue<T> {
-    Local(Option<T>),
-    Checked,
 }
 
 fn local_flow(value: Option<BindingFlow<'_>>) -> ScopedValue<BindFlow<'_>> {

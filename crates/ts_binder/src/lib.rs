@@ -4,6 +4,8 @@ mod local;
 #[cfg(test)]
 mod local_tests;
 mod state;
+mod symbol_access;
+mod table_access;
 mod target;
 pub use state::ContainerFlags;
 pub(crate) use state::{ActiveLabel, Binder};

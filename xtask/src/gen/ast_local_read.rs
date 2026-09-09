@@ -9,6 +9,22 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
     let mut code = header(pin, "ast_generated.go");
     code.push_str("use crate::compact::FieldKey;\n#[allow(clippy::wildcard_imports)] // Every concrete typed row is selected below.\nuse crate::compact_generated::*;\nuse crate::local_bind::{BindContext, BindList, BindNode, BindRead, BindSlice, BindTextSlice, LocalChildVisitor};\nuse crate::{NodeKind, SyntaxKind};\nuse std::marker::PhantomData;\nuse std::ops::ControlFlow;\n\n");
     let mut accessors = String::from("impl<'scope, 'read> BindRead<'scope, 'read> {\n");
+    code.push_str("#[allow(non_upper_case_globals)] // Match concrete schema names in shared shape selectors.\npub(crate) mod shapes {\n");
+    for (shape, node) in nodes.iter().enumerate() {
+        code.push_str(&format!(
+            "    pub(crate) const {}: u16 = {shape};\n",
+            string(node, "name")?
+        ));
+    }
+    code.push_str("}\n\n");
+    accessors.push_str("    pub(crate) fn payload_name(&self) -> &'static str {\n        match self.header.actual_shape() {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        accessors.push_str(&format!("            shapes::{name} => \"{name}\",\n"));
+    }
+    accessors.push_str(
+        "            _ => unreachable!(\"validated local payload shape\"),\n        }\n    }\n",
+    );
     let mut flow_shapes = Vec::new();
     for (shape, node) in nodes.iter().enumerate() {
         let name = string(node, "name")?;

@@ -73,7 +73,7 @@ macro_rules! state_identity {
             brand: Brand<'scope>,
         }
         impl $name<'_> {
-            fn from_slot(slot: u32) -> Self {
+            pub(super) fn from_slot(slot: u32) -> Self {
                 Self {
                     word: NonZeroU32::new(slot).expect("allocated nonzero binding slot"),
                     brand: PhantomData,
@@ -85,6 +85,16 @@ macro_rules! state_identity {
 state_identity!(BindSymbol);
 state_identity!(BindTable);
 state_identity!(BindFlowList);
+impl BindSymbol<'_> {
+    pub(super) fn slot(self) -> u32 {
+        self.word.get()
+    }
+}
+impl BindTable<'_> {
+    pub(super) fn slot(self) -> u32 {
+        self.word.get()
+    }
+}
 
 impl<'scope> LocalBind<'scope, '_> {
     pub fn import_symbol(&self, id: SymbolId) -> Result<BindSymbol<'scope>, Error> {
