@@ -10,6 +10,14 @@ text-processing combinations have completed their screens. The latest uses
 same-screen CP1. This remains experimental: the one-worker CPU upper confidence
 bound is 1.056, and final S07 gates remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
+
+The [current allocation traffic diagnostic](S07-bis-allocation-traffic.md) is
+complete. It attributes 225.443 MB of the 333.733 MB freed/superseded requests,
+leaving 108.289 MB unclassified. No individual measured family establishes the
+remaining 209 MB request saving, and this diagnostic supplies no RSS or CPU
+acceptance. The selected [local binder implementation](S07-bis-local-bind-plan.md)
+continues without another memory diagnostic as a prerequisite.
+
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
 Review: [independent plan findings and amendments](S07-bis-plan-review.md).

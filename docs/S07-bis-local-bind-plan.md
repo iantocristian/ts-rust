@@ -4,6 +4,14 @@ Status: selected for implementation. This supersedes the standalone experiment
 sequence in [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic
 counterexamples remain applicable; those changes are components of this design.
 
+The [current allocation attribution](S07-bis-allocation-traffic.md) is complete:
+225.443 MB of 333.733 MB traffic is assigned to observed backings; 108.289 MB
+remains unclassified. Typed-row directory and text-entry growth are the largest
+newly observed mechanisms. Even eliminating both replacements completely would
+save at most 125.378 MB, below the roughly 209 MB request deficit, without proving
+any RSS saving. No single memory rewrite is selected from those ceilings. The
+local binder implementation proceeds; attribution is no longer its prerequisite.
+
 ## Decision and limits
 
 The main CPU candidate is a local binder view over the existing compact storage.
