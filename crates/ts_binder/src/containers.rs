@@ -1,75 +1,33 @@
 //! Binding scope transitions and allocation-free syntax-child traversal.
+use crate::flow_access::BindingFlow;
+use crate::{backend::Backend, target::BindingNode};
 use crate::{need, Binder, ContainerFlags as C};
 use std::ops::ControlFlow;
 use ts_arena::Error;
 use ts_ast::{
     flow_flags as F, modifier_flags, node_flags as N, symbol_flags as S, utilities as u, AstView,
-    ChildVisitor, FlowData, FlowId, JsString, NodeAccess, NodeDataRead, NodeId, NodeListId,
-    NodeSlice, SyntaxKind as K,
+    ChildVisitor, FlowData, JsString, NodeAccess, NodeDataRead, NodeId, NodeListId, NodeSlice,
+    SyntaxKind as K,
 };
 
 // port: tsc/internal/binder/binder.go:GetContainerFlags
 pub fn get_container_flags(view: AstView<'_>, id: NodeId) -> Result<C, Error> {
+    use crate::container_classification::{container_rule, ContainerRule};
     let node = view.node(id)?;
-    let function =
-        C::IS_CONTAINER | C::IS_CONTROL_FLOW_CONTAINER | C::HAS_LOCALS | C::IS_FUNCTION_LIKE;
-    Ok(C(match node.kind().known() {
-        Some(
-            K::ClassExpression
-            | K::ClassDeclaration
-            | K::EnumDeclaration
-            | K::ObjectLiteralExpression
-            | K::TypeLiteral
-            | K::JsxAttributes,
-        ) => C::IS_CONTAINER,
-        Some(K::InterfaceDeclaration) => C::IS_CONTAINER | C::IS_INTERFACE,
-        Some(
-            K::ModuleDeclaration
-            | K::TypeAliasDeclaration
-            | K::JSTypeAliasDeclaration
-            | K::MappedType
-            | K::IndexSignature,
-        ) => C::IS_CONTAINER | C::HAS_LOCALS,
-        Some(K::SourceFile) => C::IS_CONTAINER | C::IS_CONTROL_FLOW_CONTAINER | C::HAS_LOCALS,
-        Some(K::GetAccessor | K::SetAccessor | K::MethodDeclaration) => {
-            function
-                | C::IS_THIS_CONTAINER
-                | if u::is_object_literal_or_class_expression_method_or_accessor(view, id)? {
-                    C::IS_OBJECT_LITERAL_OR_CLASS_EXPRESSION_METHOD_OR_ACCESSOR
-                } else {
-                    0
-                }
+    let rule = container_rule(node.kind());
+    let fact = match rule {
+        ContainerRule::Fixed(flags) => return Ok(C(flags)),
+        ContainerRule::MethodParent => {
+            u::is_object_literal_or_class_expression_method_or_accessor(view, id)?
         }
-        Some(K::Constructor | K::FunctionDeclaration | K::ClassStaticBlockDeclaration) => {
-            function | C::IS_THIS_CONTAINER
-        }
-        Some(
-            K::MethodSignature
-            | K::CallSignature
-            | K::FunctionType
-            | K::ConstructSignature
-            | K::ConstructorType,
-        ) => function | C::PROPAGATES_THIS_KEYWORD,
-        Some(K::FunctionExpression) => function | C::IS_FUNCTION_EXPRESSION | C::IS_THIS_CONTAINER,
-        Some(K::ArrowFunction) => function | C::IS_FUNCTION_EXPRESSION | C::PROPAGATES_THIS_KEYWORD,
-        Some(K::ModuleBlock) => C::IS_CONTROL_FLOW_CONTAINER,
-        Some(K::PropertyDeclaration) if node.initializer().is_some() => {
-            C::IS_CONTROL_FLOW_CONTAINER | C::IS_THIS_CONTAINER
-        }
-        Some(
-            K::CatchClause | K::ForStatement | K::ForInStatement | K::ForOfStatement | K::CaseBlock,
-        ) => C::IS_BLOCK_SCOPED_CONTAINER | C::HAS_LOCALS,
-        Some(K::Block) => {
+        ContainerRule::PropertyInitializer => node.initializer().is_some(),
+        ContainerRule::BlockParent => {
             let parent = view.node(need(node.parent()))?;
-            if u::is_function_like(Some(&parent)) || parent.kind() == K::ClassStaticBlockDeclaration
-            {
-                0
-            } else {
-                C::IS_BLOCK_SCOPED_CONTAINER | C::HAS_LOCALS
-            }
+            u::is_function_like_kind(parent.kind())
+                || parent.kind() == K::ClassStaticBlockDeclaration
         }
-        _ => C::NONE,
-    }))
+    };
+    Ok(rule.flags(fact))
 }
 
 // FlowNodeData is a payload interface. Open SyntaxKind values can disagree with
@@ -194,7 +152,7 @@ impl ChildVisitor for ImmediateChildren {
     }
 }
 
-impl Binder<'_, '_, '_> {
+impl<'scope> Binder<'_, 'scope, '_> {
     pub(crate) fn syntax_slice(&self, list: Option<NodeListId>) -> NodeSlice {
         let parsed = self.parsed_view();
         let nodes = list.map_or_else(NodeSlice::empty, |list| {
@@ -219,7 +177,8 @@ impl Binder<'_, '_, '_> {
         parsed.node_slice(nodes).expect("retained syntax slice")
     }
     // port: tsc/internal/binder/binder.go:Binder.bindContainer
-    pub(crate) fn bind_container(&mut self, node: NodeId, flags: C) {
+    pub(crate) fn bind_container_target(&mut self, target: BindingNode<'scope>, flags: C) {
+        let node = self.node_id(target);
         let flags = flags.0;
         let saved_container = self.container;
         let saved_this = self.this_container;
@@ -253,7 +212,7 @@ impl Binder<'_, '_, '_> {
                 && ts_ast::get_immediately_invoked_function_expression(self.view(), node)
                     .expect("retained IIFE")
                     .is_some()
-                || self.n(node).kind() == K::ClassStaticBlockDeclaration;
+                || self.node_kind(target) == K::ClassStaticBlockDeclaration;
             if !immediately_invoked {
                 let start = self.new_flow_node(F::START);
                 self.current_flow = Some(start);
@@ -266,7 +225,7 @@ impl Binder<'_, '_, '_> {
                 }
             }
             self.current_return_target =
-                if immediately_invoked || self.n(node).kind() == K::Constructor {
+                if immediately_invoked || self.node_kind(target) == K::Constructor {
                     Some(self.new_flow_node(F::BRANCH_LABEL))
                 } else {
                     None
@@ -277,9 +236,9 @@ impl Binder<'_, '_, '_> {
             self.active_label_list = None;
             self.has_explicit_return = false;
             self.seen_this_keyword = false;
-            self.bind_children(node);
+            self.bind_children_target(target);
             let mut node_flags =
-                self.n(node).flags() & !(N::REACHABILITY_AND_EMIT_FLAGS | N::CONTAINS_THIS);
+                self.node_flags(target) & !(N::REACHABILITY_AND_EMIT_FLAGS | N::CONTAINS_THIS);
             if self.flow(need(self.current_flow)).flags() & F::UNREACHABLE == 0
                 && flags & C::IS_FUNCTION_LIKE != 0
                 && has_body_data(&self.n(node))
@@ -296,15 +255,15 @@ impl Binder<'_, '_, '_> {
             if self.seen_this_keyword {
                 node_flags |= N::CONTAINS_THIS;
             }
-            if self.n(node).kind() == K::SourceFile {
+            if self.node_kind(target) == K::SourceFile {
                 node_flags |= self.emit_flags;
             }
-            self.set_flags(node, node_flags);
-            if let Some(target) = self.current_return_target {
-                self.add_antecedent(target, need(self.current_flow));
-                self.current_flow = Some(self.finish_flow_label(target));
+            self.set_binding_flags(target, node_flags);
+            if let Some(return_target) = self.current_return_target {
+                self.add_antecedent(return_target, need(self.current_flow));
+                self.current_flow = Some(self.finish_flow_label(return_target));
                 if matches!(
-                    self.n(node).kind().known(),
+                    self.node_kind(target).known(),
                     Some(K::Constructor | K::ClassStaticBlockDeclaration)
                 ) {
                     self.set_return_flow_node(node, self.current_flow);
@@ -327,18 +286,20 @@ impl Binder<'_, '_, '_> {
         } else if flags & C::IS_INTERFACE != 0 {
             let saved_seen_this = self.seen_this_keyword;
             self.seen_this_keyword = false;
-            self.bind_children(node);
+            self.bind_children_target(target);
             let flags = if self.seen_this_keyword {
-                self.n(node).flags() | N::CONTAINS_THIS
+                self.node_flags(target) | N::CONTAINS_THIS
             } else {
-                self.n(node).flags() & !N::CONTAINS_THIS
+                self.node_flags(target) & !N::CONTAINS_THIS
             };
-            self.set_flags(node, flags);
+            self.set_binding_flags(target, flags);
             self.seen_this_keyword = saved_seen_this;
         } else {
-            self.bind_children(node);
+            self.bind_children_target(target);
         }
-        if self.n(node).kind() == K::SourceFile && u::is_in_js_file(Some(&self.n(node))) {
+        if self.node_kind(target) == K::SourceFile
+            && self.node_flags(target) & N::JAVA_SCRIPT_FILE != 0
+        {
             let statements = self.syntax_slice(Some(need(self.n(node).statement_list())));
             for index in 0..statements.len() {
                 let statement = need(self.syntax_node(statements, index));
@@ -361,7 +322,7 @@ impl Binder<'_, '_, '_> {
                 self.declare_common_js_variable(JsString::from_bytes(b"exports".as_slice()));
             }
         }
-        if self.n(node).kind() == K::SourceFile
+        if self.node_kind(target) == K::SourceFile
             && u::is_external_or_common_js_module(
                 &self.view().source_file(node).expect("source file"),
             )
@@ -374,21 +335,22 @@ impl Binder<'_, '_, '_> {
         self.block_scope_container = saved_block;
     }
     // port: tsc/internal/binder/binder.go:Binder.bindChildren
-    pub(crate) fn bind_children(&mut self, node: NodeId) {
+    pub(crate) fn bind_children_target(&mut self, target: BindingNode<'scope>) {
+        let node = self.node_id(target);
         let saved_pattern = self.in_assignment_pattern;
         self.in_assignment_pattern = false;
-        if self.current_flow == self.unreachable_flow {
+        if self.same_flow(self.current_flow, self.unreachable_flow) {
             self.set_flow_node(node, None);
             if ts_ast::is_potentially_executable_node(self.view(), node)
                 .expect("retained executable node")
             {
-                self.set_flags(node, self.n(node).flags() | N::UNREACHABLE);
+                self.set_binding_flags(target, self.node_flags(target) | N::UNREACHABLE);
             }
-            self.bind_each_child(node);
+            self.bind_each_child_target(target);
             self.in_assignment_pattern = saved_pattern;
             return;
         }
-        let kind = self.n(node).kind();
+        let kind = self.node_kind(target);
         if kind.raw() >= K::FirstStatement as i16 && kind.raw() <= K::LastStatement as i16 {
             self.set_flow_node(node, self.current_flow);
         }
@@ -431,6 +393,11 @@ impl Binder<'_, '_, '_> {
             Some(K::CallExpression) => self.bind_call_expression_flow(node),
             Some(K::NonNullExpression) => self.bind_non_null_expression_flow(node),
             Some(K::SourceFile) => {
+                if let BindingNode::Local(node) = target {
+                    self.bind_local_source_children(node);
+                    self.in_assignment_pattern = saved_pattern;
+                    return;
+                }
                 let n = self.n(node);
                 let source = n
                     .data_source()
@@ -443,6 +410,11 @@ impl Binder<'_, '_, '_> {
                 self.bind(eof);
             }
             Some(K::Block | K::ModuleBlock) => {
+                if let BindingNode::Local(node) = target {
+                    self.bind_local_block_children(node);
+                    self.in_assignment_pattern = saved_pattern;
+                    return;
+                }
                 self.bind_each_statement_functions_first(need(self.n(node).statement_list()));
             }
             Some(K::BindingElement) => self.bind_binding_element_flow(node),
@@ -454,17 +426,21 @@ impl Binder<'_, '_, '_> {
                 | K::SpreadElement,
             ) => {
                 self.in_assignment_pattern = saved_pattern;
-                self.bind_each_child(node);
+                self.bind_each_child_target(target);
             }
-            _ => self.bind_each_child(node),
+            _ => self.bind_each_child_target(target),
         }
         self.in_assignment_pattern = saved_pattern;
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachChild
     pub(crate) fn bind_each_child(&mut self, node: NodeId) {
-        if self.try_bind_local_children(node) {
-            return;
-        }
+        self.bind_each_child_target(self.binding_node(node));
+    }
+    pub(crate) fn bind_each_child_target(&mut self, target: BindingNode<'scope>) {
+        let node = match target {
+            BindingNode::Local(node) => return self.bind_local_children(node),
+            BindingNode::Checked(node) => node,
+        };
         // Binding changes flags and binding fields, not these syntax edges or
         // their order. Copy only the immediate descriptors before recursively
         // mutating the exclusive owner; list elements are read when visited.
@@ -478,6 +454,13 @@ impl Binder<'_, '_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEach
     pub(crate) fn bind_each(&mut self, nodes: NodeSlice) {
+        if let Backend::Local(local) = &self.builder {
+            if let Ok(nodes) = local.import_slice(nodes) {
+                let edges = local.edges(nodes);
+                self.bind_local_edges(edges);
+                return;
+            }
+        }
         for index in 0..nodes.len() {
             self.bind(self.syntax_node(nodes, index));
         }
@@ -485,6 +468,13 @@ impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindNodeList
     pub(crate) fn bind_node_list(&mut self, list: Option<NodeListId>) {
         if let Some(list) = list {
+            if let Backend::Local(local) = &self.builder {
+                if let Ok(list) = local.import_list(list) {
+                    let edges = local.edges(local.list(list));
+                    self.bind_local_edges(edges);
+                    return;
+                }
+            }
             let nodes = self.syntax_slice(Some(list));
             self.bind_each(nodes);
         }
@@ -495,6 +485,12 @@ impl Binder<'_, '_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEachStatementFunctionsFirst
     pub(crate) fn bind_each_statement_functions_first(&mut self, statements: NodeListId) {
+        if let Backend::Local(local) = &self.builder {
+            if let Ok(statements) = local.import_list(statements) {
+                self.bind_local_statements_functions_first(statements);
+                return;
+            }
+        }
         let nodes = self.syntax_slice(Some(statements));
         for index in 0..nodes.len() {
             let node = self.syntax_node(nodes, index);
@@ -510,18 +506,19 @@ impl Binder<'_, '_, '_> {
         }
     }
     // port: tsc/internal/binder/binder.go:setFlowNode
-    pub(crate) fn set_flow_node(&mut self, node: NodeId, flow: Option<FlowId>) {
-        if self.builder.try_set_local_flow(node, flow) {
+    pub(crate) fn set_flow_node(&mut self, node: NodeId, flow: Option<BindingFlow<'scope>>) {
+        if self.try_set_target_flow(self.binding_node(node), flow) {
             return;
         }
         if has_flow_node_data(&self.n(node)) {
+            let flow = flow.map(|flow| self.flow_id(flow));
             self.builder
                 .set_node_flow(node, flow)
                 .expect("binder flow and target belong to result");
         }
     }
     // port: tsc/internal/binder/binder.go:setReturnFlowNode
-    pub(crate) fn set_return_flow_node(&mut self, node: NodeId, flow: Option<FlowId>) {
+    pub(crate) fn set_return_flow_node(&mut self, node: NodeId, flow: Option<BindingFlow<'scope>>) {
         match self.n(node).kind().known() {
             Some(K::Constructor) => {
                 self.n(node)

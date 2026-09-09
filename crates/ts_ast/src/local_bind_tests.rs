@@ -525,6 +525,96 @@ fn raw_imports_reject_foreign_owners_before_slots_in_each_namespace() {
 }
 
 #[test]
+fn list_imports_validate_owner_kind_and_empty_ranges_before_minting_handles() {
+    let counters = Counters::new();
+    let (parsed, source, child) = simple(&counters);
+    let (foreign, foreign_source, _) = simple(&counters);
+    let foreign = foreign.publish_unbound();
+    let foreign_list = foreign
+        .view()
+        .node(foreign_source)
+        .unwrap()
+        .statement_list()
+        .unwrap();
+    parsed
+        .bind_and_publish(|builder| {
+            let list = builder.node(source)?.statement_list().unwrap();
+            let nodes = builder.parsed_view().list(list)?.nodes();
+            let empty = nodes.slice(1..1)?;
+            builder
+                .with_local_scope(|mut local| {
+                    let imported = local.import_list(list)?;
+                    let imported_nodes = local.list(imported);
+                    let edges = local.edges(imported_nodes);
+                    assert_eq!(edges.len(), 1);
+                    assert_eq!(
+                        local.edge(edges, 0).map(|node| local.node_id(node)),
+                        Some(child)
+                    );
+                    // Narrow mutation cannot invalidate a previously resolved range.
+                    local.set_flags(local.import_node(child)?, node_flags::UNREACHABLE);
+                    assert_eq!(
+                        local.edge(edges, 0).map(|node| local.node_id(node)),
+                        Some(child)
+                    );
+                    for slice in [NodeSlice::empty(), NodeSlice::missing(), empty, nodes] {
+                        let scoped = local.import_slice(slice)?;
+                        assert_eq!(scoped.is_nil(), slice.is_nil());
+                        assert_eq!(scoped.len(), slice.len());
+                        assert_eq!(local.edges(scoped).len(), slice.len());
+                    }
+                    assert_eq!(local.import_list(foreign_list), Err(Error::WrongOwner));
+                    let wrong_owner =
+                        ts_arena::AuxId::from_parts(foreign_list.0.arena(), u32::MAX).unwrap();
+                    assert_eq!(
+                        local.import_list(NodeListId(wrong_owner)),
+                        Err(Error::WrongOwner)
+                    );
+                    let invalid_slot =
+                        ts_arena::AuxId::from_parts(list.0.arena(), u32::MAX).unwrap();
+                    assert_eq!(
+                        local.import_list(NodeListId(invalid_slot)),
+                        Err(Error::InvalidSlot)
+                    );
+                    assert_eq!(
+                        local.import_list(NodeListId(nodes.backing.unwrap())),
+                        Err(Error::InvalidGraph)
+                    );
+                    for slice in [
+                        NodeSlice {
+                            backing: Some(wrong_owner),
+                            start: 0,
+                            len: 0,
+                        },
+                        NodeSlice {
+                            backing: Some(invalid_slot),
+                            start: 0,
+                            len: 0,
+                        },
+                        NodeSlice {
+                            backing: Some(list.0),
+                            start: 0,
+                            len: 0,
+                        },
+                        NodeSlice {
+                            start: 2,
+                            len: 0,
+                            ..nodes
+                        },
+                    ] {
+                        let expected = local.parsed_view().node_slice(slice).err();
+                        assert_eq!(local.import_slice(slice).err(), expected);
+                        assert!(expected.is_some());
+                    }
+                    Ok::<_, Error>(())
+                })
+                .expect("core list fixture")?;
+            Ok(())
+        })
+        .unwrap();
+}
+
+#[test]
 fn published_and_multiple_source_owners_do_not_invoke_local_callback() {
     let counters = Counters::new();
     let (parsed, source, _) = simple(&counters);

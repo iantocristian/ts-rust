@@ -2,7 +2,7 @@
 use crate::need;
 use crate::{backend::Backend, Binder};
 use std::ops::ControlFlow;
-use ts_ast::local_bind::{BindList, BindSlice, LocalChildVisitor};
+use ts_ast::local_bind::{BindEdges, BindList, BindSlice, LocalChildVisitor};
 use ts_ast::{
     local_bind::{BindNode, LocalBind},
     SyntaxKind as K,
@@ -46,19 +46,16 @@ impl<'scope> Binder<'_, 'scope, '_> {
             let read = local.node(node);
             let flags = read.flags();
             if read.kind() == K::Identifier && read.as_identifier().is_some() {
-                let Backend::Local(local) = &mut self.builder else {
-                    unreachable!("local binder scope");
-                };
-                if let Ok(flow) = self
-                    .current_flow
-                    .map(|flow| local.import_flow(flow))
-                    .transpose()
+                if !self
+                    .try_set_target_flow(crate::target::BindingNode::Local(node), self.current_flow)
                 {
-                    assert!(local.set_flow(node, flow), "Identifier flow field");
-                } else {
+                    let flow = self.current_flow.map(|flow| self.flow_id(flow));
+                    let Backend::Local(local) = &mut self.builder else {
+                        unreachable!("local binder scope");
+                    };
                     let id = local.node_id(node);
                     local
-                        .general_set_node_flow(id, self.current_flow)
+                        .general_set_node_flow(id, flow)
                         .expect("binder flow and target belong to result");
                 }
                 self.check_local_contextual_identifier(node);
@@ -74,18 +71,13 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 }
                 return false;
             }
-            // Remaining dispatch migration is explicit. This is one shared
-            // algorithm, and no second traversal precedes it.
-            self.bind_worker(Some(local.node_id(node)))
+            self.bind_worker_target(crate::target::BindingNode::Local(node))
         })
     }
 
-    pub(crate) fn try_bind_local_children(&mut self, node: ts_ast::NodeId) -> bool {
+    pub(crate) fn bind_local_children(&mut self, node: BindNode<'scope>) {
         let Backend::Local(local) = &self.builder else {
-            return false;
-        };
-        let Ok(node) = local.import_node(node) else {
-            return false;
+            unreachable!("local binder scope");
         };
         let mut children = Children {
             entries: [None; 9],
@@ -108,18 +100,82 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 Child::Node(_) => unreachable!(),
             };
             let edges = local.edges(slice);
+            if self.bind_local_edges(edges) {
+                return;
+            }
+        }
+    }
+
+    pub(crate) fn bind_local_edges(&mut self, edges: BindEdges<'scope>) -> bool {
+        for index in 0..edges.len() {
+            let Backend::Local(local) = &self.builder else {
+                unreachable!("local binder scope");
+            };
+            if let Some(node) = local.edge(edges, index) {
+                if self.bind_local_entry(node) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub(crate) fn bind_local_source_children(&mut self, node: BindNode<'scope>) {
+        let Backend::Local(local) = &self.builder else {
+            unreachable!("local binder scope");
+        };
+        let source = local
+            .node(node)
+            .as_source_file()
+            .expect("SourceFile payload");
+        let statements = source.statements();
+        let eof = source.end_of_file_token();
+        self.bind_local_statements_functions_first(need(statements));
+        if let Some(eof) = eof {
+            self.bind_local_entry(eof);
+        }
+    }
+
+    pub(crate) fn bind_local_block_children(&mut self, node: BindNode<'scope>) {
+        let Backend::Local(local) = &self.builder else {
+            unreachable!("local binder scope");
+        };
+        let read = local.node(node);
+        let statements = match read.kind().known() {
+            Some(K::Block) => read.as_block().map(|data| data.statements()),
+            Some(K::ModuleBlock) => read.as_module_block().map(|data| data.statements()),
+            _ => unreachable!("block child dispatch"),
+        }
+        .unwrap_or_else(|| {
+            // Constructed kind/shape mismatches preserve the checked accessor's
+            // interface-conversion failure rather than a new local panic.
+            local
+                .general_node(local.node_id(node))
+                .expect("binder node is retained")
+                .statement_list()
+                .map(|list| local.import_list(list).expect("validated block list"))
+        });
+        self.bind_local_statements_functions_first(need(statements));
+    }
+
+    pub(crate) fn bind_local_statements_functions_first(&mut self, statements: BindList<'scope>) {
+        let Backend::Local(local) = &self.builder else {
+            unreachable!("local binder scope");
+        };
+        let edges = local.edges(local.list(statements));
+        // Both passes borrow the same resolved, immutable edge range. A narrow
+        // binding write can change flags, but cannot alter statement membership.
+        for functions in [true, false] {
             for index in 0..edges.len() {
                 let Backend::Local(local) = &self.builder else {
                     unreachable!("local binder scope");
                 };
-                if let Some(node) = local.edge(edges, index) {
-                    if self.bind_local_entry(node) {
-                        return true;
-                    }
+                let node = need(local.edge(edges, index));
+                if (local.node(node).kind() == K::FunctionDeclaration) == functions {
+                    self.bind_local_entry(node);
                 }
             }
         }
-        true
     }
 }
 
@@ -161,13 +217,10 @@ pub(crate) fn is_narrowable_reference<'scope>(
                 .expect("binder syntax payload");
             let argument = need(access.argument_expression());
             let kind = local.node(argument).kind();
-            // These general helper boundaries are temporary migration work;
-            // recursive receiver reads above and below remain local.
             matches!(
                 kind.known(),
                 Some(K::StringLiteral | K::NumericLiteral | K::NoSubstitutionTemplateLiteral)
-            ) || ts_ast::is_entity_name_expression(local.view(), local.node_id(argument))
-                .expect("retained element name")
+            ) || local.is_entity_name_expression(argument)
                 && is_narrowable_reference(local, need(access.expression()))
         }
         Some(K::BinaryExpression) => {
@@ -175,11 +228,7 @@ pub(crate) fn is_narrowable_reference<'scope>(
             let operator = local.node(need(binary.operator_token())).kind();
             operator == K::CommaToken && is_narrowable_reference(local, need(binary.right()))
                 || ts_ast::is_assignment_operator(operator)
-                    && ts_ast::is_left_hand_side_expression(
-                        local.view(),
-                        local.node_id(need(binary.left())),
-                    )
-                    .expect("retained assignment target")
+                    && local.is_left_hand_side_expression(need(binary.left()))
         }
         _ => false,
     }

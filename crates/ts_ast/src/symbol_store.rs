@@ -236,6 +236,15 @@ impl<'a> SymbolsRead<'a> {
             tables: self.tables,
         })
     }
+    #[inline]
+    pub(crate) fn get_slot(self, slot: u32) -> Result<SymbolRead<'a>, Error> {
+        Ok(SymbolRead {
+            row: self.store.rows.get_slot(slot)?,
+            slot,
+            store: self.store,
+            tables: self.tables,
+        })
+    }
     pub fn iter(self) -> impl Iterator<Item = (SymbolId, SymbolRead<'a>)> {
         self.store.rows.iter().map(move |(id, row)| {
             (
@@ -464,11 +473,31 @@ impl<'a> SymbolsMut<'a> {
     pub fn check_flags_mut(self, id: SymbolId) -> Result<&'a mut u32, Error> {
         Ok(&mut self.store.rows.get_mut(id)?.check_flags)
     }
+    #[inline]
+    pub(crate) fn flags_slot_mut(self, slot: u32) -> Result<&'a mut u32, Error> {
+        Ok(&mut self.store.rows.get_slot_mut(slot)?.flags)
+    }
+    #[inline]
+    pub(crate) fn check_flags_slot_mut(self, slot: u32) -> Result<&'a mut u32, Error> {
+        Ok(&mut self.store.rows.get_slot_mut(slot)?.check_flags)
+    }
     pub fn set_declarations(self, id: SymbolId, value: DeclarationSlice) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_declarations_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_declarations_slot(
+        self,
+        slot: u32,
+        value: DeclarationSlice,
+    ) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::Declarations,
             value
                 .backing_id()
@@ -482,10 +511,22 @@ impl<'a> SymbolsMut<'a> {
         Ok(())
     }
     pub fn set_value_declaration(self, id: SymbolId, value: Option<NodeId>) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_value_declaration_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_value_declaration_slot(
+        self,
+        slot: u32,
+        value: Option<NodeId>,
+    ) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::ValueDeclaration,
             value.map(|id| (id.arena(), id.slot(), Escape::Node(id))),
         );
@@ -493,10 +534,22 @@ impl<'a> SymbolsMut<'a> {
         Ok(())
     }
     pub fn set_members(self, id: SymbolId, value: Option<SymbolTableId>) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_members_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_members_slot(
+        self,
+        slot: u32,
+        value: Option<SymbolTableId>,
+    ) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::Members,
             value.map(|id| (id.arena(), id.slot(), Escape::Table(id))),
         );
@@ -504,10 +557,22 @@ impl<'a> SymbolsMut<'a> {
         Ok(())
     }
     pub fn set_exports(self, id: SymbolId, value: Option<SymbolTableId>) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_exports_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_exports_slot(
+        self,
+        slot: u32,
+        value: Option<SymbolTableId>,
+    ) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::Exports,
             value.map(|id| (id.arena(), id.slot(), Escape::Table(id))),
         );
@@ -515,10 +580,18 @@ impl<'a> SymbolsMut<'a> {
         Ok(())
     }
     pub fn set_parent(self, id: SymbolId, value: Option<SymbolId>) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_parent_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_parent_slot(self, slot: u32, value: Option<SymbolId>) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::Parent,
             value.map(|id| (id.arena(), id.slot(), Escape::Symbol(id))),
         );
@@ -526,10 +599,22 @@ impl<'a> SymbolsMut<'a> {
         Ok(())
     }
     pub fn set_export_symbol(self, id: SymbolId, value: Option<SymbolId>) -> Result<(), Error> {
-        let row = self.store.rows.get_mut(id)?;
+        if id.arena() != self.store.rows.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_export_symbol_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_export_symbol_slot(
+        self,
+        slot: u32,
+        value: Option<SymbolId>,
+    ) -> Result<(), Error> {
+        let arena = self.store.rows.id();
+        let row = self.store.rows.get_slot_mut(slot)?;
         let word = self.store.references.encode(
-            id.arena(),
-            id.slot(),
+            arena,
+            slot,
             Field::ExportSymbol,
             value.map(|id| (id.arena(), id.slot(), Escape::Symbol(id))),
         );

@@ -102,8 +102,7 @@ impl Binder<'_, '_, '_> {
         let name = self.s(symbol).name_to_owned();
         let table = self
             .builder
-            .tables_mut()
-            .alloc(SymbolTable::from([(name, Some(symbol))]));
+            .alloc_table(SymbolTable::from([(name, Some(symbol))]));
         self.set_symbol_members(type_literal, Some(table));
     }
     // port: tsc/internal/binder/binder.go:Binder.bindEnumDeclaration

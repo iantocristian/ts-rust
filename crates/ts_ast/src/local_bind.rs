@@ -11,6 +11,11 @@ type Brand<'scope> = PhantomData<fn(&'scope ()) -> &'scope ()>;
 
 #[path = "local_bind_compatibility.rs"]
 mod compatibility;
+#[path = "local_bind_state.rs"]
+mod state;
+pub use state::{BindFlowList, BindSymbol, BindTable};
+#[path = "local_bind_helpers.rs"]
+mod helpers;
 
 macro_rules! local_identity {
     ($name:ident) => {
@@ -211,6 +216,29 @@ impl<'scope> LocalBind<'scope, '_> {
         let local = self.core.check(node)?;
         Ok(BindNode::from_word(local.slot()).expect("checked nonzero node slot"))
     }
+    /// Import a core list at a checked boundary. Lazy or foreign backing stays
+    /// on the general path even when initialization created it after entry.
+    pub fn import_list(&self, list: crate::NodeListId) -> Result<BindList<'scope>, Error> {
+        if list.0.arena() != self.core.auxiliary_arena() {
+            return Err(Error::WrongOwner);
+        }
+        let _ = self.parsed_view().list(list)?;
+        Ok(BindList::from_word(list.0.slot()).expect("checked nonzero list slot"))
+    }
+    pub fn import_slice(&self, slice: crate::NodeSlice) -> Result<BindSlice<'scope>, Error> {
+        if slice
+            .backing
+            .is_some_and(|backing| backing.arena() != self.core.auxiliary_arena())
+        {
+            return Err(Error::WrongOwner);
+        }
+        let _ = self.parsed_view().node_slice(slice)?;
+        Ok(self.context().node_slice(CompactSlice {
+            backing: slice.backing.map_or(0, ts_arena::AuxId::slot),
+            start: slice.start,
+            len: slice.len,
+        }))
+    }
     pub fn source(&self) -> BindNode<'scope> {
         self.import_node(self.result.source)
             .expect("validated local source")
@@ -283,11 +311,6 @@ impl<'scope> LocalBind<'scope, '_> {
     }
     pub fn import_flow(&self, flow: FlowId) -> Result<BindFlow<'scope>, Error> {
         self.result.flows.get(flow)?;
-        // MAX is the physical encoding's escape sentinel. The public checked
-        // writer handles such an identity without truncation.
-        if flow.slot() == u32::MAX {
-            return Err(Error::InvalidSlot);
-        }
         Ok(BindFlow::from_word(flow.slot()).expect("checked nonzero flow slot"))
     }
     pub fn flow_id(&self, flow: BindFlow<'scope>) -> FlowId {
@@ -320,7 +343,9 @@ impl<'scope> LocalBind<'scope, '_> {
             .core
             .check_slot(node.word.get())
             .expect("validated local node");
-        if self.core.store().has_link_escapes() {
+        if self.core.store().has_link_escapes()
+            || flow.is_some_and(|flow| flow.word.get() == u32::MAX)
+        {
             let id = self.node_id(node);
             let raw_flow = flow.map(|flow| self.flow_id(flow));
             let auxiliary = self.core.auxiliary_arena();

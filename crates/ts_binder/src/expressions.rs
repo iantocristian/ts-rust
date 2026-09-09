@@ -1,6 +1,7 @@
 //! Expression evaluation order and narrowing predicates from the pinned binder.
+use crate::flow_access::BindingFlow;
 use crate::{need, Binder};
-use ts_ast::{flow_flags as F, node_flags, utilities as u, FlowId, NodeId, SyntaxKind as K};
+use ts_ast::{flow_flags as F, node_flags, utilities as u, NodeId, SyntaxKind as K};
 
 // These payloads contain only non-owning identities and scalar fields. Snapshot
 // their fields before mutating binding storage, without retaining AST owners.
@@ -15,7 +16,7 @@ macro_rules! payload {
 }
 pub(crate) use payload;
 
-impl Binder<'_, '_, '_> {
+impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindAssignmentTargetFlow
     pub(crate) fn bind_assignment_target_flow(&mut self, node: NodeId) {
         match self.n(node).kind().known() {
@@ -167,8 +168,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_logical_like_expression(
         &mut self,
         node: NodeId,
-        true_target: FlowId,
-        false_target: FlowId,
+        true_target: BindingFlow<'scope>,
+        false_target: BindingFlow<'scope>,
     ) {
         let expression = payload!(self, node, as_binary_expression);
         let operator = self.n(need(expression.operator_token)).kind();
@@ -306,8 +307,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_optional_chain(
         &mut self,
         node: NodeId,
-        true_target: FlowId,
-        false_target: FlowId,
+        true_target: BindingFlow<'scope>,
+        false_target: BindingFlow<'scope>,
     ) {
         let pre_chain = if u::is_optional_chain_root(&self.n(node)) {
             Some(self.create_branch_label())
@@ -341,8 +342,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_optional_expression(
         &mut self,
         node: NodeId,
-        true_target: FlowId,
-        false_target: FlowId,
+        true_target: BindingFlow<'scope>,
+        false_target: BindingFlow<'scope>,
     ) {
         self.do_with_conditional_branches(Self::bind, Some(node), true_target, false_target);
         if !u::is_optional_chain(&self.n(node))
@@ -452,7 +453,8 @@ impl Binder<'_, '_, '_> {
         }
         let entry = self.current_flow;
         self.bind(node);
-        if entry == self.unreachable_flow || entry == self.current_flow {
+        if self.same_flow(entry, self.unreachable_flow) || self.same_flow(entry, self.current_flow)
+        {
             return;
         }
         let exit = self.create_branch_label();

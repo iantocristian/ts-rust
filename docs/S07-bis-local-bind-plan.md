@@ -1,7 +1,8 @@
 # S07-bis: local binding access and current allocation traffic
 
-Status: [first implementation milestone complete](S07-bis-local-bind-milestone.md);
-binder-wide migration and combined screening remain open. This supersedes the standalone experiment
+Status: [local dispatch, lists and flow state implemented](S07-bis-local-bind-migration.md),
+following the [first local-scope milestone](S07-bis-local-bind-milestone.md).
+Binder-wide migration and combined screening remain open. This supersedes the standalone experiment
 sequence in [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic
 counterexamples remain applicable; those changes are components of this design.
 

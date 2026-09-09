@@ -85,6 +85,36 @@ fn narrowable_receivers_preserve_checked_interface_conversion_panics() {
     }
 }
 
+#[test]
+fn local_block_dispatch_preserves_checked_payload_failures() {
+    for kind in [SyntaxKind::Block, SyntaxKind::ModuleBlock] {
+        let (parsed, node) = malformed_receiver(kind);
+        parsed
+            .bind_and_publish(|builder| {
+                let checked_failure = {
+                    let mut binder = Binder::new(builder);
+                    binder.current_flow = Some(binder.new_flow_node(ts_ast::flow_flags::START));
+                    catch_unwind(AssertUnwindSafe(|| binder.bind(Some(node)))).unwrap_err()
+                };
+                builder
+                    .with_local_scope(|local| {
+                        let mut binder =
+                            Binder::from_backend(crate::backend::Backend::Local(local));
+                        binder.current_flow = Some(binder.new_flow_node(ts_ast::flow_flags::START));
+                        let local_failure =
+                            catch_unwind(AssertUnwindSafe(|| binder.bind(Some(node)))).unwrap_err();
+                        assert_eq!(
+                            panic_message(&*local_failure),
+                            panic_message(&*checked_failure)
+                        );
+                    })
+                    .expect("constructed block admits local access");
+                Ok(())
+            })
+            .unwrap();
+    }
+}
+
 fn parse(bytes: &[u8]) -> ParsedFile {
     ts_parser::parse_source_file_with_counters(
         SourceText::from_loaded_bytes(bytes),

@@ -137,7 +137,7 @@ impl Binder<'_, '_, '_> {
             let table = if let Some(table) = self.builder.result().global_exports() {
                 table
             } else {
-                let table = self.builder.tables_mut().alloc(SymbolTable::new());
+                let table = self.builder.alloc_table(SymbolTable::new());
                 self.builder.set_global_exports(Some(table));
                 table
             };

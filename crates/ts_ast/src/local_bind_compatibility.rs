@@ -6,7 +6,7 @@ use crate::symbol_store::{SymbolsMut, SymbolsRead};
 use crate::{
     AstView, BindResult, DeclarationLists, Diagnostic, FlowData, FlowId, FlowList, FlowListId,
     FlowLists, FlowNode, FlowNodes, NodeBinding, NodeId, NodeRead, PatternAmbientModule, SymbolId,
-    SymbolTableId, SymbolTables,
+    SymbolTable, SymbolTableId, SymbolTableMut, SymbolTables,
 };
 use ts_arena::Error;
 
@@ -196,8 +196,11 @@ impl LocalBind<'_, '_> {
     pub fn tables(&self) -> &SymbolTables {
         &self.result.tables
     }
-    pub fn tables_mut(&mut self) -> &mut SymbolTables {
-        &mut self.result.tables
+    pub fn alloc_table(&mut self, value: SymbolTable) -> SymbolTableId {
+        self.result.tables.alloc(value)
+    }
+    pub fn table_mut(&mut self, id: SymbolTableId) -> Result<SymbolTableMut<'_>, Error> {
+        self.result.tables.get_mut(id)
     }
     pub fn declarations(&self) -> &DeclarationLists {
         &self.result.declarations

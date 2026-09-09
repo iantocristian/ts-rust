@@ -343,6 +343,22 @@ impl SymbolTables {
             symbols: &mut self.symbols,
         })
     }
+    #[inline]
+    pub(crate) fn get_slot(&self, slot: u32) -> Result<SymbolTableRead<'_>, Error> {
+        Ok(SymbolTableRead {
+            table: self.tables.get_slot(slot)?,
+            names: &self.names,
+            symbols: self.symbols,
+        })
+    }
+    #[inline]
+    pub(crate) fn get_slot_mut(&mut self, slot: u32) -> Result<SymbolTableMut<'_>, Error> {
+        Ok(SymbolTableMut {
+            table: self.tables.get_slot_mut(slot)?,
+            names: &mut self.names,
+            symbols: &mut self.symbols,
+        })
+    }
     pub fn iter(&self) -> impl Iterator<Item = (SymbolTableId, SymbolTableRead<'_>)> {
         self.tables.iter().map(|(id, table)| {
             (

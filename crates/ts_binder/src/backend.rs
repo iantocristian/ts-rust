@@ -5,7 +5,7 @@ use ts_ast::local_bind::LocalBind;
 use ts_ast::{
     AstView, BindBuilder, BindResult, DeclarationLists, Diagnostic, FlowData, FlowId, FlowList,
     FlowListId, FlowLists, FlowNode, FlowNodes, NodeId, NodeRead, PatternAmbientModule, SymbolId,
-    SymbolTableId, SymbolTables, SymbolsMut, SymbolsRead,
+    SymbolTable, SymbolTableId, SymbolTableMut, SymbolTables, SymbolsMut, SymbolsRead,
 };
 
 pub(crate) enum Backend<'build, 'scope, 'ast> {
@@ -35,26 +35,6 @@ macro_rules! write_services {
 }
 
 impl Backend<'_, '_, '_> {
-    pub fn try_set_local_flow(&mut self, node: NodeId, flow: Option<FlowId>) -> bool {
-        let Self::Local(local) = self else {
-            return false;
-        };
-        let Ok(node) = local.import_node(node) else {
-            return false;
-        };
-        if !local.node(node).has_flow_node() {
-            return true;
-        }
-        let Ok(flow) = flow.map(|flow| local.import_flow(flow)).transpose() else {
-            // Full-width escapes and invalid raw IDs retain checked handling.
-            return false;
-        };
-        assert!(
-            local.set_flow(node, flow),
-            "generated flow capability and writer agree"
-        );
-        true
-    }
     pub fn source(&self) -> NodeId {
         match self {
             Self::Checked(builder) => builder.source(),
@@ -100,13 +80,24 @@ impl Backend<'_, '_, '_> {
         fn set_node_end_flow(node: NodeId, value: Option<FlowId>) -> Result<(), Error>;
         fn set_node_fallthrough_flow(node: NodeId, value: Option<FlowId>) -> Result<(), Error>;
         fn symbols_mut() -> SymbolsMut<'_>;
-        fn tables_mut() -> &mut SymbolTables;
         fn declarations_mut() -> &mut DeclarationLists;
         fn pattern_ambient_modules_mut() -> &mut Vec<PatternAmbientModule>;
         fn diagnostics_mut() -> &mut Vec<Diagnostic>;
         fn set_symbol_count(count: isize) -> ();
         fn set_common_js_module_indicator(node: Option<NodeId>) -> ();
         fn set_global_exports(table: Option<SymbolTableId>) -> ();
+    }
+    pub fn alloc_table(&mut self, value: SymbolTable) -> SymbolTableId {
+        match self {
+            Self::Checked(builder) => builder.tables_mut().alloc(value),
+            Self::Local(builder) => builder.alloc_table(value),
+        }
+    }
+    pub fn table_mut(&mut self, id: SymbolTableId) -> Result<SymbolTableMut<'_>, Error> {
+        match self {
+            Self::Checked(builder) => builder.tables_mut().get_mut(id),
+            Self::Local(builder) => builder.table_mut(id),
+        }
     }
     pub fn push_flow(&mut self, flow: FlowNode) -> FlowId {
         match self {

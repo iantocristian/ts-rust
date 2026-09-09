@@ -153,6 +153,14 @@ impl FlowNodes {
             slot: id.slot(),
         })
     }
+    #[inline]
+    pub(crate) fn get_slot(&self, slot: u32) -> Result<FlowNodeRead<'_>, Error> {
+        Ok(FlowNodeRead {
+            record: self.records.get_slot(slot)?,
+            owner: self,
+            slot,
+        })
+    }
     /// Compatibility for unrestricted edits. Production binding uses narrow setters.
     pub fn get_mut(&mut self, id: FlowId) -> Result<FlowNodeMut<'_>, Error> {
         let value = self.get(id)?.to_owned();
@@ -182,25 +190,54 @@ impl FlowNodes {
     pub fn flags_mut(&mut self, id: FlowId) -> Result<&mut FlowFlags, Error> {
         Ok(&mut self.records.get_mut(id.0)?.flags)
     }
+    #[inline]
+    pub(crate) fn flags_slot_mut(&mut self, slot: u32) -> Result<&mut FlowFlags, Error> {
+        Ok(&mut self.records.get_slot_mut(slot)?.flags)
+    }
     pub fn set_node(&mut self, id: FlowId, node: Option<FlowData>) -> Result<(), Error> {
-        let record = self.records.get_mut(id.0)?;
-        let (tag, word) = pack_data(id.slot(), node, &mut self.references, &mut self.outlined);
+        if id.arena() != self.records.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_node_slot(id.slot(), node)
+    }
+    #[inline]
+    pub(crate) fn set_node_slot(&mut self, slot: u32, node: Option<FlowData>) -> Result<(), Error> {
+        let record = self.records.get_slot_mut(slot)?;
+        let (tag, word) = pack_data(slot, node, &mut self.references, &mut self.outlined);
         record.tag = tag;
         record.node = word;
         Ok(())
     }
     pub fn set_antecedent(&mut self, id: FlowId, value: Option<FlowId>) -> Result<(), Error> {
-        let record = self.records.get_mut(id.0)?;
-        record.antecedent = self
-            .references
-            .encode_flow(FieldKey::new(id.slot(), 1), value);
+        if id.arena() != self.records.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_antecedent_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_antecedent_slot(
+        &mut self,
+        slot: u32,
+        value: Option<FlowId>,
+    ) -> Result<(), Error> {
+        let record = self.records.get_slot_mut(slot)?;
+        record.antecedent = self.references.encode_flow(FieldKey::new(slot, 1), value);
         Ok(())
     }
     pub fn set_antecedents(&mut self, id: FlowId, value: Option<FlowListId>) -> Result<(), Error> {
-        let record = self.records.get_mut(id.0)?;
-        record.antecedents = self
-            .references
-            .encode_list(FieldKey::new(id.slot(), 2), value);
+        if id.arena() != self.records.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_antecedents_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_antecedents_slot(
+        &mut self,
+        slot: u32,
+        value: Option<FlowListId>,
+    ) -> Result<(), Error> {
+        let record = self.records.get_slot_mut(slot)?;
+        record.antecedents = self.references.encode_list(FieldKey::new(slot, 2), value);
         Ok(())
     }
 }
@@ -388,6 +425,14 @@ impl FlowLists {
             slot: id.slot(),
         })
     }
+    #[inline]
+    pub(crate) fn get_slot(&self, slot: u32) -> Result<FlowListRead<'_>, Error> {
+        Ok(FlowListRead {
+            record: self.records.get_slot(slot)?,
+            owner: self,
+            slot,
+        })
+    }
     pub fn get_mut(&mut self, id: FlowListId) -> Result<FlowListMut<'_>, Error> {
         let value = self.get(id)?.to_owned();
         Ok(FlowListMut {
@@ -409,17 +454,31 @@ impl FlowLists {
         })
     }
     pub fn set_flow(&mut self, id: FlowListId, value: Option<FlowId>) -> Result<(), Error> {
-        let record = self.records.get_mut(id.0)?;
-        record.flow = self
-            .references
-            .encode_flow(FieldKey::new(id.slot(), 0), value);
+        if id.arena() != self.records.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_flow_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_flow_slot(&mut self, slot: u32, value: Option<FlowId>) -> Result<(), Error> {
+        let record = self.records.get_slot_mut(slot)?;
+        record.flow = self.references.encode_flow(FieldKey::new(slot, 0), value);
         Ok(())
     }
     pub fn set_next(&mut self, id: FlowListId, value: Option<FlowListId>) -> Result<(), Error> {
-        let record = self.records.get_mut(id.0)?;
-        record.next = self
-            .references
-            .encode_list(FieldKey::new(id.slot(), 1), value);
+        if id.arena() != self.records.id() {
+            return Err(Error::WrongOwner);
+        }
+        self.set_next_slot(id.slot(), value)
+    }
+    #[inline]
+    pub(crate) fn set_next_slot(
+        &mut self,
+        slot: u32,
+        value: Option<FlowListId>,
+    ) -> Result<(), Error> {
+        let record = self.records.get_slot_mut(slot)?;
+        record.next = self.references.encode_list(FieldKey::new(slot, 1), value);
         Ok(())
     }
 }

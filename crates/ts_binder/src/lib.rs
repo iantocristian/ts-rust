@@ -4,6 +4,7 @@ mod local;
 #[cfg(test)]
 mod local_tests;
 mod state;
+mod target;
 pub use state::ContainerFlags;
 pub(crate) use state::{ActiveLabel, Binder};
 
@@ -24,6 +25,7 @@ pub(crate) fn checked<T>(result: Result<T, ts_arena::Error>) -> T {
 
 mod binary_trampoline;
 mod bindings;
+mod container_classification;
 mod containers;
 mod declarations;
 mod diagnostics;
@@ -31,6 +33,7 @@ mod dispatch;
 mod expando;
 mod expressions;
 mod flow;
+mod flow_access;
 mod modules;
 pub mod name_resolver;
 mod recursion;

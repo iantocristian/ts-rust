@@ -64,8 +64,12 @@ pub fn is_class_element(node: &(impl NodeAccess + ?Sized)) -> bool {
 
 /// port: tsc/internal/ast/utilities.go:IsMethodOrAccessor
 pub fn is_method_or_accessor(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_method_or_accessor_kind(node.kind())
+}
+
+pub fn is_method_or_accessor_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(K::MethodDeclaration | K::GetAccessor | K::SetAccessor)
     )
 }
@@ -862,10 +866,14 @@ pub fn is_object_literal_or_class_expression_method_or_accessor(
 ) -> Result<bool, Error> {
     let n = view.node(node)?;
     Ok(is_method_or_accessor(&n)
-        && matches!(
-            view.node(required(n.parent()))?.kind().known(),
-            Some(K::ObjectLiteralExpression | K::ClassExpression)
-        ))
+        && is_object_literal_or_class_expression_kind(view.node(required(n.parent()))?.kind()))
+}
+
+pub fn is_object_literal_or_class_expression_kind(kind: NodeKind) -> bool {
+    matches!(
+        kind.known(),
+        Some(K::ObjectLiteralExpression | K::ClassExpression)
+    )
 }
 /// port: tsc/internal/ast/utilities.go:IsFunctionOrModuleBlock
 pub fn is_function_or_module_block(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {

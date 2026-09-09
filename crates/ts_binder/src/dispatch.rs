@@ -1,55 +1,59 @@
+use crate::target::BindingNode;
 use crate::{ast as a, checked, Binder};
 use ts_ast::{
     internal_symbol_names as names, node_flags as nf, symbol_flags as sf, JsString, NodeId,
     SyntaxKind as K,
 };
 
-impl Binder<'_, '_, '_> {
+impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bind
     pub fn bind(&mut self, node: Option<NodeId>) -> bool {
-        if node.is_none() {
-            return false;
-        }
-        if let crate::backend::Backend::Local(local) = &self.builder {
-            if let Ok(node) = local.import_node(node.expect("nonnull bind input")) {
-                return self.bind_local_entry(node);
-            }
-        }
-        crate::recursion::guarded(|| self.bind_worker(node))
-    }
-    pub(crate) fn bind_worker(&mut self, node: Option<NodeId>) -> bool {
         let Some(node) = node else {
             return false;
         };
-        let kind = self.bind_node_head(node);
-        let mut has_error = self.n(node).flags() & nf::THIS_NODE_HAS_ERROR != 0;
+        self.bind_target(self.binding_node(node))
+    }
+    pub(crate) fn bind_target(&mut self, node: BindingNode<'scope>) -> bool {
+        match node {
+            BindingNode::Local(node) => self.bind_local_entry(node),
+            BindingNode::Checked(_) => crate::recursion::guarded(|| self.bind_worker_target(node)),
+        }
+    }
+    pub(crate) fn bind_worker_target(&mut self, node: BindingNode<'scope>) -> bool {
+        let kind = self.bind_target_head(node);
+        // Head binding may have changed the flags; read them after that phase.
+        let mut has_error = self.node_flags(node) & nf::THIS_NODE_HAS_ERROR != 0;
         if kind.raw() > K::LastToken as i16 {
             let saved = self.seen_parse_error;
             self.seen_parse_error = false;
-            let flags = checked(crate::get_container_flags(self.view(), node));
+            let flags = self.container_flags(node);
             if flags.0 == 0 {
-                self.bind_children(node);
+                self.bind_children_target(node);
             } else {
-                self.bind_container(node, flags);
+                self.bind_container_target(node, flags);
             }
             has_error |= self.seen_parse_error;
             self.seen_parse_error = saved;
         }
-        self.bind_node_error(node, has_error);
+        self.bind_target_error(node, has_error);
         false
     }
-    pub(crate) fn bind_node_error(&mut self, node: NodeId, has_error: bool) {
+    pub(crate) fn bind_target_error(&mut self, node: BindingNode<'scope>, has_error: bool) {
         if has_error {
-            self.set_flags(
+            self.set_binding_flags(
                 node,
-                self.n(node).flags() | nf::THIS_NODE_OR_ANY_SUB_NODES_HAS_ERROR,
+                self.node_flags(node) | nf::THIS_NODE_OR_ANY_SUB_NODES_HAS_ERROR,
             );
             self.seen_parse_error = true;
         }
     }
     // Shared entry phase for ordinary binding and binary continuations.
-    pub(crate) fn bind_node_head(&mut self, node: NodeId) -> ts_ast::NodeKind {
-        let kind = self.n(node).kind();
+    pub(crate) fn bind_target_head(&mut self, node: BindingNode<'scope>) -> ts_ast::NodeKind {
+        let kind = self.node_kind(node);
+        self.bind_node_head_known(self.node_id(node), kind);
+        kind
+    }
+    fn bind_node_head_known(&mut self, node: NodeId, kind: ts_ast::NodeKind) {
         match kind.known() {
             Some(K::Identifier) => {
                 self.set_flow_node(node, self.current_flow);
@@ -213,6 +217,5 @@ impl Binder<'_, '_, '_> {
             }
             _ => {}
         }
-        kind
     }
 }

@@ -1,69 +1,37 @@
 //! Control-flow graph construction from the pinned binder. Links are checked,
 //! non-owning identities in the private binding result.
+use crate::flow_access::{BindingFlow, BindingFlowList};
 use crate::{need, Binder};
 use ts_ast::{
-    flow_flags as F, utilities as u, FlowData, FlowId, FlowList, FlowListId, FlowNode,
-    FlowNodeRead, FlowReduceLabelData, FlowSwitchClauseData, NodeId, SyntaxKind as K,
+    flow_flags as F, utilities as u, FlowData, FlowReduceLabelData, FlowSwitchClauseData, NodeId,
+    SyntaxKind as K,
 };
 
-impl Binder<'_, '_, '_> {
-    pub(crate) fn flow(&self, id: FlowId) -> FlowNodeRead<'_> {
-        self.builder
-            .flows()
-            .get(id)
-            .expect("binder flow belongs to result")
-    }
-    pub(crate) fn set_flow_data(&mut self, id: FlowId, value: Option<FlowData>) {
-        self.builder
-            .set_flow_data(id, value)
-            .expect("binder flow belongs to result");
-    }
-    pub(crate) fn set_flow_antecedents(&mut self, id: FlowId, value: Option<FlowListId>) {
-        self.builder
-            .set_flow_antecedents(id, value)
-            .expect("binder flow belongs to result");
-    }
-    pub(crate) fn flow_list(&self, id: FlowListId) -> FlowList {
-        self.builder
-            .flow_lists()
-            .get(id)
-            .expect("binder flow list belongs to result")
-            .to_owned()
-    }
+impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.newFlowNode
-    pub(crate) fn new_flow_node(&mut self, flags: u32) -> FlowId {
-        self.builder.push_flow(FlowNode::new(flags))
-    }
-    // port: tsc/internal/binder/binder.go:Binder.newFlowNodeEx
-    pub(crate) fn new_flow_node_ex(
-        &mut self,
-        flags: u32,
-        node: Option<FlowData>,
-        antecedent: Option<FlowId>,
-    ) -> FlowId {
-        self.builder
-            .push_flow(FlowNode::new_ex(flags, node, antecedent))
+    pub(crate) fn new_flow_node(&mut self, flags: u32) -> BindingFlow<'scope> {
+        self.new_flow_node_ex(flags, None, None)
     }
     // port: tsc/internal/binder/binder.go:Binder.createLoopLabel
-    pub(crate) fn create_loop_label(&mut self) -> FlowId {
+    pub(crate) fn create_loop_label(&mut self) -> BindingFlow<'scope> {
         self.new_flow_node(F::LOOP_LABEL)
     }
     // port: tsc/internal/binder/binder.go:Binder.createBranchLabel
-    pub(crate) fn create_branch_label(&mut self) -> FlowId {
+    pub(crate) fn create_branch_label(&mut self) -> BindingFlow<'scope> {
         self.new_flow_node(F::BRANCH_LABEL)
     }
     // port: tsc/internal/binder/binder.go:Binder.createReduceLabel
     pub(crate) fn create_reduce_label(
         &mut self,
-        target: FlowId,
-        antecedents: Option<FlowListId>,
-        antecedent: FlowId,
-    ) -> FlowId {
+        target: BindingFlow<'scope>,
+        antecedents: Option<BindingFlowList<'scope>>,
+        antecedent: BindingFlow<'scope>,
+    ) -> BindingFlow<'scope> {
         self.new_flow_node_ex(
             F::REDUCE_LABEL,
             Some(FlowData::ReduceLabel(FlowReduceLabelData::new(
-                Some(target),
-                antecedents,
+                Some(self.flow_id(target)),
+                antecedents.map(|list| self.flow_list_id(list)),
             ))),
             Some(antecedent),
         )
@@ -72,9 +40,9 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn create_flow_condition(
         &mut self,
         flags: u32,
-        antecedent: FlowId,
+        antecedent: BindingFlow<'scope>,
         expression: Option<NodeId>,
-    ) -> FlowId {
+    ) -> BindingFlow<'scope> {
         if self.flow(antecedent).flags() & F::UNREACHABLE != 0 {
             return antecedent;
         }
@@ -105,9 +73,9 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn create_flow_mutation(
         &mut self,
         flags: u32,
-        antecedent: FlowId,
+        antecedent: BindingFlow<'scope>,
         node: NodeId,
-    ) -> FlowId {
+    ) -> BindingFlow<'scope> {
         self.set_flow_node_referenced(antecedent);
         self.has_flow_effects = true;
         let result = self.new_flow_node_ex(flags, Some(FlowData::Ast(node)), Some(antecedent));
@@ -119,11 +87,11 @@ impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.createFlowSwitchClause
     pub(crate) fn create_flow_switch_clause(
         &mut self,
-        antecedent: FlowId,
+        antecedent: BindingFlow<'scope>,
         statement: NodeId,
         start: i64,
         end: i64,
-    ) -> FlowId {
+    ) -> BindingFlow<'scope> {
         self.set_flow_node_referenced(antecedent);
         self.new_flow_node_ex(
             F::SWITCH_CLAUSE,
@@ -136,35 +104,28 @@ impl Binder<'_, '_, '_> {
         )
     }
     // port: tsc/internal/binder/binder.go:Binder.createFlowCall
-    pub(crate) fn create_flow_call(&mut self, antecedent: FlowId, node: NodeId) -> FlowId {
+    pub(crate) fn create_flow_call(
+        &mut self,
+        antecedent: BindingFlow<'scope>,
+        node: NodeId,
+    ) -> BindingFlow<'scope> {
         self.set_flow_node_referenced(antecedent);
         self.has_flow_effects = true;
         self.new_flow_node_ex(F::CALL, Some(FlowData::Ast(node)), Some(antecedent))
     }
-    // port: tsc/internal/binder/binder.go:Binder.newFlowList
-    pub(crate) fn new_flow_list(
-        &mut self,
-        head: Option<FlowId>,
-        tail: Option<FlowListId>,
-    ) -> FlowListId {
-        self.builder.push_flow_list(FlowList {
-            flow: head,
-            next: tail,
-        })
-    }
     // port: tsc/internal/binder/binder.go:Binder.combineFlowLists
     pub(crate) fn combine_flow_lists(
         &mut self,
-        head: Option<FlowListId>,
-        tail: Option<FlowListId>,
-    ) -> Option<FlowListId> {
+        head: Option<BindingFlowList<'scope>>,
+        tail: Option<BindingFlowList<'scope>>,
+    ) -> Option<BindingFlowList<'scope>> {
         crate::recursion::guarded(|| self.combine_flow_lists_worker(head, tail))
     }
     fn combine_flow_lists_worker(
         &mut self,
-        head: Option<FlowListId>,
-        tail: Option<FlowListId>,
-    ) -> Option<FlowListId> {
+        head: Option<BindingFlowList<'scope>>,
+        tail: Option<BindingFlowList<'scope>>,
+    ) -> Option<BindingFlowList<'scope>> {
         let Some(head) = head else {
             return tail;
         };
@@ -173,11 +134,8 @@ impl Binder<'_, '_, '_> {
         Some(self.new_flow_list(head.flow, rest))
     }
     // port: tsc/internal/binder/binder.go:setFlowNodeReferenced
-    pub(crate) fn set_flow_node_referenced(&mut self, flow: FlowId) {
-        let flags = self
-            .builder
-            .flow_flags_mut(flow)
-            .expect("binder flow belongs to result");
+    pub(crate) fn set_flow_node_referenced(&mut self, flow: BindingFlow<'scope>) {
+        let flags = self.flow_flags_mut(flow);
         *flags |= if *flags & F::REFERENCED == 0 {
             F::REFERENCED
         } else {
@@ -185,15 +143,19 @@ impl Binder<'_, '_, '_> {
         };
     }
     // port: tsc/internal/binder/binder.go:Binder.addAntecedent
-    pub(crate) fn add_antecedent(&mut self, label: FlowId, antecedent: FlowId) {
+    pub(crate) fn add_antecedent(
+        &mut self,
+        label: BindingFlow<'scope>,
+        antecedent: BindingFlow<'scope>,
+    ) {
         if self.flow(antecedent).flags() & F::UNREACHABLE != 0 {
             return;
         }
         let mut last = None;
-        let mut list = self.flow(label).antecedents();
+        let mut list = self.flow_antecedents(label);
         while let Some(id) = list {
             let entry = self.flow_list(id);
-            if entry.flow == Some(antecedent) {
+            if self.same_flow(entry.flow, Some(antecedent)) {
                 return;
             }
             last = Some(id);
@@ -201,17 +163,15 @@ impl Binder<'_, '_, '_> {
         }
         let new = self.new_flow_list(Some(antecedent), None);
         if let Some(last) = last {
-            self.builder
-                .set_flow_list_next(last, Some(new))
-                .expect("retained flow list");
+            self.set_flow_list_next(last, Some(new));
         } else {
             self.set_flow_antecedents(label, Some(new));
         }
         self.set_flow_node_referenced(antecedent);
     }
     // port: tsc/internal/binder/binder.go:Binder.finishFlowLabel
-    pub(crate) fn finish_flow_label(&self, label: FlowId) -> FlowId {
-        let Some(list) = self.flow(label).antecedents() else {
+    pub(crate) fn finish_flow_label(&self, label: BindingFlow<'scope>) -> BindingFlow<'scope> {
+        let Some(list) = self.flow_antecedents(label) else {
             return need(self.unreachable_flow);
         };
         let list = self.flow_list(list);
@@ -226,7 +186,7 @@ impl Binder<'_, '_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ts_ast::{AstFile, SourceFileParseOptions};
+    use ts_ast::{AstFile, FlowNode, SourceFileParseOptions};
     use ts_core::ScriptKind;
     use ts_jsstring::SourceText;
 
@@ -254,13 +214,13 @@ mod tests {
             let first = b.create_branch_label();
             assert_eq!(b.finish_flow_label(first), unreachable);
             b.add_antecedent(first, unreachable);
-            assert!(b.flow(first).antecedents().is_none());
+            assert!(b.flow_antecedents(first).is_none());
             b.add_antecedent(first, start);
-            let original = b.flow(first).antecedents().unwrap();
+            let original = b.flow_antecedents(first).unwrap();
             assert_eq!(b.flow(start).flags(), F::START | F::REFERENCED);
             assert_eq!(b.finish_flow_label(first), start);
             b.add_antecedent(first, start);
-            assert_eq!(b.flow(first).antecedents(), Some(original));
+            assert_eq!(b.flow_antecedents(first), Some(original));
             assert_eq!(b.flow(start).flags(), F::START | F::REFERENCED);
             let second = b.create_branch_label();
             b.add_antecedent(second, start);
@@ -271,7 +231,7 @@ mod tests {
             let next = b.flow_list(original).next.unwrap();
             assert_eq!(b.flow_list(next).flow, Some(other));
             assert_eq!(b.flow_list(next).next, None);
-            let tail = b.flow(second).antecedents();
+            let tail = b.flow_antecedents(second);
             assert_eq!(b.combine_flow_lists(None, tail), tail);
             let copied = b.combine_flow_lists(Some(original), tail).unwrap();
             assert_ne!(copied, original);
@@ -298,7 +258,7 @@ mod tests {
             let mutation = b.create_flow_mutation(F::ASSIGNMENT, start, source);
             assert!(b.has_flow_effects);
             assert_eq!(b.flow(mutation).node(), Some(FlowData::Ast(source)));
-            assert_eq!(b.flow(mutation).antecedent(), Some(start));
+            assert_eq!(b.flow_antecedent(mutation), Some(start));
             assert_eq!(b.finish_flow_label(exception), mutation);
             b.has_flow_effects = false;
             let call = b.create_flow_call(mutation, source);
@@ -312,16 +272,19 @@ mod tests {
                 (data.switch_statement, data.clause_start, data.clause_end),
                 (Some(source), i32::MIN, -1)
             );
-            let antecedents = b.flow(exception).antecedents();
+            let antecedents = b.flow_antecedents(exception);
             let reduce = b.create_reduce_label(exception, antecedents, switch);
             let Some(FlowData::ReduceLabel(data)) = b.flow(reduce).node() else {
                 panic!("reduce payload")
             };
             assert_eq!(
                 (data.target, data.antecedents),
-                (Some(exception), antecedents)
+                (
+                    Some(b.flow_id(exception)),
+                    antecedents.map(|list| b.flow_list_id(list))
+                )
             );
-            assert_eq!(b.flow(reduce).antecedent(), Some(switch));
+            assert_eq!(b.flow_antecedent(reduce), Some(switch));
             Ok(())
         })
         .unwrap();
@@ -383,7 +346,11 @@ mod tests {
             let condition = b.create_flow_condition(F::TRUE_CONDITION, start, Some(name));
             assert_eq!(
                 b.flow(condition).to_owned(),
-                FlowNode::new_ex(F::TRUE_CONDITION, Some(FlowData::Ast(name)), Some(start))
+                FlowNode::new_ex(
+                    F::TRUE_CONDITION,
+                    Some(FlowData::Ast(name)),
+                    Some(b.flow_id(start))
+                )
             );
             Ok(())
         })

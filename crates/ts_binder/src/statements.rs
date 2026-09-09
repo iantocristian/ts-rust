@@ -1,10 +1,15 @@
 //! Statement control-flow and label handling from the pinned binder.
+use crate::flow_access::BindingFlow;
 use crate::{expressions::payload, need, ActiveLabel, Binder};
-use ts_ast::{flow_flags as F, node_flags, FlowId, JsString, NodeId, SyntaxKind as K};
+use ts_ast::{flow_flags as F, node_flags, JsString, NodeId, SyntaxKind as K};
 
-impl Binder<'_, '_, '_> {
+impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.setContinueTarget
-    pub(crate) fn set_continue_target(&mut self, mut node: NodeId, target: FlowId) -> FlowId {
+    pub(crate) fn set_continue_target(
+        &mut self,
+        mut node: NodeId,
+        target: BindingFlow<'scope>,
+    ) -> BindingFlow<'scope> {
         let mut label = self.active_label_list;
         while let Some(index) = label {
             let parent = need(self.n(node).parent());
@@ -22,8 +27,8 @@ impl Binder<'_, '_, '_> {
         &mut self,
         action: fn(&mut Self, Option<NodeId>) -> bool,
         value: Option<NodeId>,
-        true_target: FlowId,
-        false_target: FlowId,
+        true_target: BindingFlow<'scope>,
+        false_target: BindingFlow<'scope>,
     ) {
         let saved_true = self.current_true_target;
         let saved_false = self.current_false_target;
@@ -37,8 +42,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_condition(
         &mut self,
         node: Option<NodeId>,
-        true_target: FlowId,
-        false_target: FlowId,
+        true_target: BindingFlow<'scope>,
+        false_target: BindingFlow<'scope>,
     ) {
         self.do_with_conditional_branches(Self::bind, node, true_target, false_target);
         if node.is_none_or(|node| {
@@ -59,8 +64,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_iterative_statement(
         &mut self,
         node: Option<NodeId>,
-        break_target: FlowId,
-        continue_target: FlowId,
+        break_target: BindingFlow<'scope>,
+        continue_target: BindingFlow<'scope>,
     ) {
         let saved_break = self.current_break_target;
         let saved_continue = self.current_continue_target;
@@ -106,7 +111,7 @@ impl Binder<'_, '_, '_> {
         self.bind(statement.initializer);
         // Preserve the source's early exit: an unreachable initializer must not
         // leave a loop graph with only its cyclic incrementor antecedent.
-        if self.current_flow == self.unreachable_flow {
+        if self.same_flow(self.current_flow, self.unreachable_flow) {
             self.bind(statement.condition);
             self.bind(statement.statement);
             self.bind(statement.incrementor);
@@ -132,7 +137,7 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_for_in_or_for_of_statement(&mut self, node: NodeId) {
         let statement = payload!(self, node, as_for_in_or_of_statement);
         self.bind(statement.expression);
-        if self.current_flow == self.unreachable_flow {
+        if self.same_flow(self.current_flow, self.unreachable_flow) {
             self.bind(statement.initializer);
             self.bind(statement.statement);
             return;
@@ -205,8 +210,8 @@ impl Binder<'_, '_, '_> {
     pub(crate) fn bind_break_or_continue_statement(
         &mut self,
         label: Option<NodeId>,
-        current: Option<FlowId>,
-        target: fn(&ActiveLabel) -> Option<FlowId>,
+        current: Option<BindingFlow<'scope>>,
+        target: fn(&ActiveLabel<'scope>) -> Option<BindingFlow<'scope>>,
     ) {
         self.bind(label);
         if let Some(label) = label {
@@ -230,7 +235,7 @@ impl Binder<'_, '_, '_> {
         None
     }
     // port: tsc/internal/binder/binder.go:Binder.bindBreakOrContinueFlow
-    pub(crate) fn bind_break_or_continue_flow(&mut self, target: Option<FlowId>) {
+    pub(crate) fn bind_break_or_continue_flow(&mut self, target: Option<BindingFlow<'scope>>) {
         if let Some(target) = target {
             self.add_antecedent(target, need(self.current_flow));
             self.current_flow = self.unreachable_flow;
@@ -265,11 +270,11 @@ impl Binder<'_, '_, '_> {
         if statement.finally_block.is_some() {
             let finally = self.create_branch_label();
             let exceptions_and_returns = self.combine_flow_lists(
-                self.flow(exception).antecedents(),
-                self.flow(returned).antecedents(),
+                self.flow_antecedents(exception),
+                self.flow_antecedents(returned),
             );
             let all =
-                self.combine_flow_lists(self.flow(normal).antecedents(), exceptions_and_returns);
+                self.combine_flow_lists(self.flow_antecedents(normal), exceptions_and_returns);
             self.set_flow_antecedents(finally, all);
             self.current_flow = Some(finally);
             self.bind(statement.finally_block);
@@ -278,30 +283,30 @@ impl Binder<'_, '_, '_> {
             } else {
                 if let Some(target) = self
                     .current_return_target
-                    .filter(|_| self.flow(returned).antecedents().is_some())
+                    .filter(|_| self.flow_antecedents(returned).is_some())
                 {
                     let reduced = self.create_reduce_label(
                         finally,
-                        self.flow(returned).antecedents(),
+                        self.flow_antecedents(returned),
                         need(self.current_flow),
                     );
                     self.add_antecedent(target, reduced);
                 }
                 if let Some(target) = self
                     .current_exception_target
-                    .filter(|_| self.flow(exception).antecedents().is_some())
+                    .filter(|_| self.flow_antecedents(exception).is_some())
                 {
                     let reduced = self.create_reduce_label(
                         finally,
-                        self.flow(exception).antecedents(),
+                        self.flow_antecedents(exception),
                         need(self.current_flow),
                     );
                     self.add_antecedent(target, reduced);
                 }
-                self.current_flow = if self.flow(normal).antecedents().is_some() {
+                self.current_flow = if self.flow_antecedents(normal).is_some() {
                     Some(self.create_reduce_label(
                         finally,
-                        self.flow(normal).antecedents(),
+                        self.flow_antecedents(normal),
                         need(self.current_flow),
                     ))
                 } else {
@@ -356,7 +361,7 @@ impl Binder<'_, '_, '_> {
                 .is_empty()
                 && index + 1 < clauses.len()
             {
-                if fallthrough == self.unreachable_flow {
+                if self.same_flow(fallthrough, self.unreachable_flow) {
                     self.current_flow = self.pre_switch_case_flow;
                 }
                 self.bind(self.syntax_node(clauses, index));

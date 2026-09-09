@@ -1,6 +1,7 @@
+use crate::flow_access::BindingFlow;
 use std::collections::HashSet;
 use ts_ast::{
-    AstView, BindBuilder, FlowId, JsString, NodeId, NodeRead, SymbolId, SymbolTable, SymbolTableId,
+    AstView, BindBuilder, JsString, NodeId, NodeRead, SymbolId, SymbolTable, SymbolTableId,
 };
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -25,10 +26,10 @@ pub(crate) struct ExpandoAssignmentInfo {
     pub block_scope_container: Option<NodeId>,
 }
 #[derive(Debug)]
-pub(crate) struct ActiveLabel {
+pub(crate) struct ActiveLabel<'scope> {
     pub next: Option<usize>,
-    pub break_target: Option<FlowId>,
-    pub continue_target: Option<FlowId>,
+    pub break_target: Option<BindingFlow<'scope>>,
+    pub continue_target: Option<BindingFlow<'scope>>,
     pub name: JsString,
     pub referenced: bool,
 }
@@ -36,21 +37,21 @@ pub(crate) struct ActiveLabel {
 pub(crate) struct Binder<'build, 'scope, 'ast> {
     pub builder: crate::backend::Backend<'build, 'scope, 'ast>,
     pub file: NodeId,
-    pub unreachable_flow: Option<FlowId>,
+    pub unreachable_flow: Option<BindingFlow<'scope>>,
     pub container: Option<NodeId>,
     pub this_container: Option<NodeId>,
     pub block_scope_container: Option<NodeId>,
     pub last_container: Option<NodeId>,
-    pub current_flow: Option<FlowId>,
-    pub current_break_target: Option<FlowId>,
-    pub current_continue_target: Option<FlowId>,
-    pub current_return_target: Option<FlowId>,
-    pub current_true_target: Option<FlowId>,
-    pub current_false_target: Option<FlowId>,
-    pub current_exception_target: Option<FlowId>,
-    pub pre_switch_case_flow: Option<FlowId>,
+    pub current_flow: Option<BindingFlow<'scope>>,
+    pub current_break_target: Option<BindingFlow<'scope>>,
+    pub current_continue_target: Option<BindingFlow<'scope>>,
+    pub current_return_target: Option<BindingFlow<'scope>>,
+    pub current_true_target: Option<BindingFlow<'scope>>,
+    pub current_false_target: Option<BindingFlow<'scope>>,
+    pub current_exception_target: Option<BindingFlow<'scope>>,
+    pub pre_switch_case_flow: Option<BindingFlow<'scope>>,
     pub active_label_list: Option<usize>,
-    pub labels: Vec<ActiveLabel>,
+    pub labels: Vec<ActiveLabel<'scope>>,
     pub emit_flags: u32,
     pub seen_this_keyword: bool,
     pub has_explicit_return: bool,
@@ -135,17 +136,20 @@ impl<'build, 'scope, 'ast> Binder<'build, 'scope, 'ast> {
             .set_node_next_container(id, value)
             .expect("binder writes its own file");
     }
-    pub fn set_node_end_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+    pub fn set_node_end_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
         self.builder
             .set_node_end_flow(id, value)
             .expect("binder writes its own file");
     }
-    pub fn set_node_return_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+    pub fn set_node_return_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
         self.builder
             .set_node_return_flow(id, value)
             .expect("binder writes its own file");
     }
-    pub fn set_node_fallthrough_flow(&mut self, id: NodeId, value: Option<FlowId>) {
+    pub fn set_node_fallthrough_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
         self.builder
             .set_node_fallthrough_flow(id, value)
             .expect("binder writes its own file");
@@ -168,8 +172,7 @@ impl<'build, 'scope, 'ast> Binder<'build, 'scope, 'ast> {
     }
     pub fn table_mut(&mut self, table: SymbolTableId) -> ts_ast::SymbolTableMut<'_> {
         self.builder
-            .tables_mut()
-            .get_mut(table)
+            .table_mut(table)
             .expect("binder symbol table belongs to result")
     }
     // port: tsc/internal/ast/utilities.go:GetLocals
@@ -181,7 +184,7 @@ impl<'build, 'scope, 'ast> Binder<'build, 'scope, 'ast> {
             ts_ast::is_locals_container(&self.n(node)),
             "locals-container payload required"
         );
-        let table = self.builder.tables_mut().alloc(SymbolTable::new());
+        let table = self.builder.alloc_table(SymbolTable::new());
         self.set_node_locals(node, Some(table));
         table
     }

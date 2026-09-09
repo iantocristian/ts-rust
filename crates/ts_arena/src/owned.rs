@@ -29,6 +29,18 @@ macro_rules! owned_arena {
             pub fn get_mut(&mut self, id: $id) -> Result<&mut T, Error> {
                 self.0.get_mut(id.arena(), id.slot())
             }
+            /// Resolve an index relative to this arena, retaining safe bounds checks.
+            /// Call `get` when importing a full identity from another context.
+            #[inline]
+            pub fn get_slot(&self, slot: u32) -> Result<&T, Error> {
+                self.0.get_slot(slot)
+            }
+            /// Mutably resolve an index relative to this arena. This does not
+            /// establish that an externally supplied identity belongs here.
+            #[inline]
+            pub fn get_slot_mut(&mut self, slot: u32) -> Result<&mut T, Error> {
+                self.0.get_slot_mut(slot)
+            }
             pub fn iter(&self) -> impl Iterator<Item = ($id, &T)> {
                 self.0
                     .values()
@@ -52,6 +64,23 @@ owned_arena!(SymbolArena, SymbolId);
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn relative_slots_retain_bounds_checks_and_values_across_growth() {
+        let counters = Counters::new();
+        let mut arena = OwnedArena::new(&counters);
+        let first = arena.push(7);
+        for value in 0..600 {
+            arena.push(value);
+        }
+        *arena.get_slot_mut(first.slot()).unwrap() = 42;
+        assert_eq!(arena.get(first), Ok(&42));
+        assert_eq!(arena.get_slot(first.slot()), Ok(&42));
+        assert_eq!(arena.get_slot(0), Err(Error::InvalidSlot));
+        assert_eq!(arena.get_slot(u32::MAX), Err(Error::InvalidSlot));
+        assert_eq!(arena.get_slot_mut(u32::MAX), Err(Error::InvalidSlot));
+        assert_eq!(arena.get_slot(602), Err(Error::InvalidSlot));
+    }
 
     #[test]
     fn owned_arenas_reject_foreign_and_unpublished_slots_and_never_recycle() {

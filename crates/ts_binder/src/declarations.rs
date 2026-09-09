@@ -40,7 +40,7 @@ impl Binder<'_, '_, '_> {
         if let Some(table) = self.s(symbol).exports() {
             return table;
         }
-        let table = self.builder.tables_mut().alloc(SymbolTable::new());
+        let table = self.builder.alloc_table(SymbolTable::new());
         self.set_symbol_exports(symbol, Some(table));
         table
     }
@@ -48,7 +48,7 @@ impl Binder<'_, '_, '_> {
         if let Some(table) = self.s(symbol).members() {
             return table;
         }
-        let table = self.builder.tables_mut().alloc(SymbolTable::new());
+        let table = self.builder.alloc_table(SymbolTable::new());
         self.set_symbol_members(symbol, Some(table));
         table
     }
