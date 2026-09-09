@@ -21,18 +21,21 @@ class OwnershipScope(unittest.TestCase):
         self.manifest = load_cases(Path(__file__).resolve().parents[2])
         self.modes = {mode: {suite: True for suite in (*COMMON, *GROUPS)} for mode in MODES}
 
-    def test_inventory_keeps_existing_cases_and_adds_both_consuming_suites(self):
-        self.assertEqual(self.manifest["version"], 2)
-        self.assertEqual(len(self.manifest["common"]["binding_publication"]["cases"]), 14)
+    def test_inventory_keeps_existing_cases_and_explicitly_includes_local_scope_suites(self):
+        self.assertEqual(self.manifest["version"], 3)
+        self.assertEqual(len(self.manifest["common"]["binding_publication"]["cases"]), 17)
         self.assertTrue({
             "bind_tests::exclusive_node_reads_observe_mutations_and_reject_unretained_owners",
             "bind_tests::exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots",
         }.issubset(self.manifest["common"]["binding_publication"]["cases"]))
         self.assertEqual(len(self.manifest["common"]["exclusive_binding"]["cases"]), 10)
-        self.assertEqual(len(self.manifest["common"]["core_validation_proof"]["cases"]), 3)
+        self.assertEqual(len(self.manifest["common"]["core_validation_proof"]["cases"]), 9)
+        for name, count in (("local_ast", 10), ("local_ast_core", 17), ("local_binder", 6),
+                            ("local_flow_ids", 2), ("local_symbol_ids", 3)):
+            self.assertEqual(len(self.manifest["common"][name]["cases"]), count)
         report = {"metrics": {}}
         publish_metrics(report, self.modes, self.manifest)
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 29)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 76)
 
     def test_missing_or_retargeted_common_inventory_is_rejected(self):
         for name in COMMON:
@@ -43,6 +46,10 @@ class OwnershipScope(unittest.TestCase):
         legacy = copy.deepcopy(self.manifest)
         legacy["version"] = 1
         legacy["common"] = legacy["common"]["binding_publication"]
+        with self.assertRaises(ValueError):
+            validate_manifest(legacy)
+        legacy = copy.deepcopy(self.manifest)
+        legacy["version"] = 2
         with self.assertRaises(ValueError):
             validate_manifest(legacy)
         retargeted = copy.deepcopy(self.manifest)
@@ -62,6 +69,77 @@ class OwnershipScope(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_manifest(manifest)
 
+    def test_skips_must_be_declared_and_cannot_exclude_an_inventoried_case(self):
+        for skips in (None, "local_bind_tests::", [False], [""], ["bind_tests::"],
+                      ["local_bind_tests::", "local_bind_tests::"], [],
+                      ["local_bind_tests::", "unrelated::"]):
+            manifest = copy.deepcopy(self.manifest)
+            manifest["common"]["binding_publication"]["skip"] = skips
+            with self.subTest(skips=skips), self.assertRaises(ValueError):
+                validate_manifest(manifest)
+        manifest = copy.deepcopy(self.manifest)
+        del manifest["common"]["binding_publication"]["skip"]
+        with self.assertRaises(ValueError):
+            validate_manifest(manifest)
+
+    def test_substring_collision_is_executed_in_its_own_group_without_hiding_new_extras(self):
+        suites = {**self.manifest["common"], **self.manifest["groups"]}
+        inventories = {}
+        for suite in suites.values():
+            inventories.setdefault(suite["package"], []).extend(suite["cases"])
+        calls = {}
+
+        def invoke(root, args, env):
+            package = args[args.index("--package") + 1]
+            filter_value = args[args.index("--") - 1]
+            skips = [args[index + 1] for index, value in enumerate(args) if value == "--skip"]
+            exact = "--exact" in args
+            cases = sorted(name for name in inventories[package]
+                           if (name == filter_value if exact else filter_value in name)
+                           and not any(skip in name for skip in skips))
+            calls[filter_value] = cases
+            return suite_output(cases)
+
+        with redirect_stderr(io.StringIO()):
+            result = measure(Path("."), invoke, ["cargo"], [], {}, self.manifest, "debug")
+        self.assertTrue(all(result.values()))
+        self.assertEqual(calls["bind_tests::"], self.manifest["common"]["binding_publication"]["cases"])
+        self.assertEqual(calls["local_bind_tests::"], self.manifest["common"]["local_ast"]["cases"])
+        inventories["ts_ast"].append("unreviewed_bind_tests::unexpected")
+        with redirect_stderr(io.StringIO()):
+            result = measure(Path("."), invoke, ["cargo"], [], {}, self.manifest, "debug")
+        self.assertFalse(result["binding_publication"])
+        self.assertTrue(result["local_ast"])
+
+    def test_local_scope_outcomes_reject_missing_duplicate_failed_and_extra_cases(self):
+        suites = {**self.manifest["common"], **self.manifest["groups"]}
+        affected = self.manifest["common"]["local_ast_core"]
+        cases = affected["cases"]
+        for change in ("missing", "duplicate", "failed", "extra"):
+            def invoke(root, args, env):
+                selected = args[args.index("--") - 1]
+                suite = next(suite for suite in suites.values() if suite["filter"] == selected)
+                if suite != affected:
+                    return suite_output(suite["cases"])
+                if change == "missing":
+                    return suite_output(cases[1:])
+                if change == "duplicate":
+                    return suite_output(cases + cases[:1])
+                if change == "extra":
+                    return suite_output(cases + [affected["filter"] + "unreviewed::new_test"])
+                return suite_output(cases).replace(b" ... ok", b" ... FAILED", 1)
+
+            with self.subTest(change=change), redirect_stderr(io.StringIO()):
+                modes = copy.deepcopy(self.modes)
+                modes["miri"] = measure(Path("."), invoke, ["cargo", "+nightly-test", "miri"],
+                                        ["--target", "native"], {}, self.manifest, "miri")
+                self.assertFalse(modes["miri"]["local_ast_core"])
+                report = {"metrics": {}}
+                publish_metrics(report, modes, self.manifest)
+                self.assertFalse(report["metrics"]["shared_bound_file"])
+                self.assertFalse(report["metrics"]["retained_snapshot_edit"])
+                self.assertEqual(report["metrics"]["program_ownership_tests"], 59)
+
     def test_all_suites_execute_in_every_mode_with_unchanged_instrumentation_arguments(self):
         suites = {**self.manifest["common"], **self.manifest["groups"]}
         calls = []
@@ -72,6 +150,8 @@ class OwnershipScope(unittest.TestCase):
             self.assertEqual(args[args.index("--package") + 1], suite["package"])
             self.assertIn("--test-threads=1", args)
             self.assertEqual("--exact" in args, suite["exact"])
+            skips = [args[index + 1] for index, argument in enumerate(args) if argument == "--skip"]
+            self.assertEqual(skips, suite["skip"])
             calls.append((suite_name, args, env))
             return suite_output(suite["cases"])
 
@@ -83,12 +163,12 @@ class OwnershipScope(unittest.TestCase):
             for mode, prefix, options in variants:
                 environment = {"mode": mode}
                 modes[mode] = measure(Path("."), invoke, prefix, options, environment, self.manifest, mode)
-                for _, args, env in calls[-5:]:
+                for _, args, env in calls[-len(suites):]:
                     self.assertEqual(args[:len(prefix)], prefix)
                     self.assertEqual(env, environment)
                     self.assertTrue(all(argument in args for argument in options))
         self.assertEqual(modes, self.modes)
-        self.assertEqual(len(calls), 20)
+        self.assertEqual(len(calls), len(suites) * 4)
         self.assertTrue(all(sum(name == called for called, _, _ in calls) == 4 for name in suites))
 
     def test_failed_new_suite_keeps_other_observations_but_blocks_both_groups(self):
@@ -113,7 +193,7 @@ class OwnershipScope(unittest.TestCase):
         self.assertFalse(report["metrics"]["shared_bound_file"])
         self.assertFalse(report["metrics"]["retained_snapshot_edit"])
         self.assertFalse(report["metrics"]["shared_bound_file_miri"])
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 19)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 66)
 
     def test_each_common_suite_is_required_in_each_mode(self):
         for mode in MODES:
@@ -152,7 +232,7 @@ class OwnershipScope(unittest.TestCase):
                     publish_metrics(report, modes, self.manifest)
                     self.assertFalse(report["metrics"]["shared_bound_file"])
                     self.assertFalse(report["metrics"]["retained_snapshot_edit"])
-                    self.assertEqual(report["metrics"]["program_ownership_tests"], 15)
+                    self.assertEqual(report["metrics"]["program_ownership_tests"], 59)
 
     def test_old_two_group_success_shape_and_nonboolean_observations_fail(self):
         old = {mode: {group: True for group in GROUPS} for mode in MODES}

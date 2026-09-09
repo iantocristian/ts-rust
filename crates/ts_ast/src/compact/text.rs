@@ -201,6 +201,14 @@ mod tests {
         assert_eq!(pool.bytes(first, first_word, 6, &source), b"a");
         let owned = pool.owned(second, second_word, -1, &source);
         assert_eq!(owned.as_bytes(), b"\xed\xa0\x80\xff");
+        assert_eq!(
+            owned.as_bytes().as_ptr(),
+            pool.bytes(second, second_word, -1, &source).as_ptr()
+        );
+        assert_eq!(
+            owned.validity(),
+            pool.pooled(second, second_word).validity()
+        );
         pool.release(first, first_word);
         pool.release(second, second_word);
         assert!(pool.extended.is_empty());

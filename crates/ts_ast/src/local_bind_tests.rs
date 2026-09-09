@@ -111,19 +111,22 @@ fn assert_empty_binding(binding: Option<NodeBinding>) {
 }
 
 #[test]
-fn typed_text_borrows_cover_raw_escaped_synthetic_and_malformed_bytes() {
+fn typed_text_borrows_and_owned_values_share_raw_and_exceptional_backings() {
     let source_text = SourceText::from_loaded_bytes(b"raw \\u0061 #private".as_slice());
+    let source_start = source_text.as_bytes().as_ptr();
     let mut build = AstBuilder::new(source_text.clone(), &Counters::new());
     let raw = build.new_identifier(text(b"raw"));
     build.set_node_range(raw, TextRange::new(0, 3));
     let escaped = build.new_identifier(text(b"a"));
     build.set_node_range(escaped, TextRange::new(4, 10));
     let synthetic = build.new_identifier(text(b"factory"));
+    let wtf8 = build.new_identifier(text(b"\xed\xa0\x80"));
     let malformed = build.new_identifier(text(b"\xed\xa0\x80\xff"));
     let private = build.new_private_identifier(text(b"#private"));
     build.set_node_range(private, TextRange::new(11, 19));
-    let roots = [raw, escaped, synthetic, malformed, private];
+    let roots = [raw, escaped, synthetic, wtf8, malformed, private];
     let (parsed, source) = finish(build, source_text, &roots);
+    let mut retained = Vec::new();
     let completed = parsed
         .bind_and_publish(|builder| {
             builder
@@ -133,11 +136,23 @@ fn typed_text_borrows_cover_raw_escaped_synthetic_and_malformed_bytes() {
                         (raw, b"raw".as_slice()),
                         (escaped, b"a"),
                         (synthetic, b"factory"),
+                        (wtf8, b"\xed\xa0\x80"),
                         (malformed, b"\xed\xa0\x80\xff"),
                     ] {
                         let node = local.import_node(id)?;
                         let read = local.node(node);
-                        assert_eq!(read.as_identifier().unwrap().text(), bytes);
+                        let identifier = read.as_identifier().unwrap();
+                        assert_eq!(identifier.text(), bytes);
+                        let owned = identifier.text_owned();
+                        let checked = local.view().node_text(id)?.into_js_string();
+                        assert_eq!(owned.as_bytes(), bytes);
+                        assert_eq!(owned.validity(), checked.validity());
+                        assert_eq!(owned.as_bytes().as_ptr(), identifier.text().as_ptr());
+                        assert_eq!(owned.as_bytes().as_ptr(), checked.as_bytes().as_ptr());
+                        if id == raw {
+                            assert_eq!(owned.as_bytes().as_ptr(), source_start);
+                        }
+                        retained.push((owned, bytes));
                         assert!(read.as_private_identifier().is_none());
                         assert_eq!(read.parent().map(|id| local.node_id(id)), Some(source));
                         assert_eq!(read.kind(), SyntaxKind::Identifier);
@@ -145,14 +160,14 @@ fn typed_text_borrows_cover_raw_escaped_synthetic_and_malformed_bytes() {
                     assert_eq!(local.node(local.import_node(raw)?).pos(), 0);
                     assert_eq!(local.node(local.import_node(raw)?).end(), 3);
                     assert_eq!(local.node(local.import_node(synthetic)?).pos(), -1);
-                    assert_eq!(
-                        local
-                            .node(local.import_node(private)?)
-                            .as_private_identifier()
-                            .unwrap()
-                            .text(),
-                        b"#private"
-                    );
+                    let private = local
+                        .node(local.import_node(private)?)
+                        .as_private_identifier()
+                        .unwrap();
+                    let owned = private.text_owned();
+                    assert_eq!(owned.as_bytes(), b"#private");
+                    assert_eq!(owned.as_bytes().as_ptr(), private.text().as_ptr());
+                    retained.push((owned, b"#private".as_slice()));
                     Ok::<_, Error>(())
                 })
                 .expect("validated factory source enters local binding")?;
@@ -170,6 +185,11 @@ fn typed_text_borrows_cover_raw_escaped_synthetic_and_malformed_bytes() {
             .text(),
         b"a"
     );
+    drop(completed);
+    for (owned, bytes) in retained {
+        assert_eq!(owned.as_bytes(), bytes);
+        assert_eq!(owned.validity(), text(bytes).validity());
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

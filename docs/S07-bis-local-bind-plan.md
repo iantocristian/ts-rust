@@ -3,8 +3,10 @@
 Status: the [selected binding/declaration/expression/statement slice is implemented](S07-bis-local-bind-completion.md),
 including scoped syntax/list and symbol/table consumers, after the
 [dispatch/list/flow milestone](S07-bis-local-bind-migration.md) and
-[first local scope](S07-bis-local-bind-milestone.md). Final validation and the
-combined screen are pending; explicit shared-helper, diagnostics, lazy and
+[first local scope](S07-bis-local-bind-milestone.md). Its combined screen qualifies
+for review, but the full ownership capture rejects stale test inventories. The
+[owned-text and inventory repair](S07-bis-local-text-repair.md) is implemented;
+its final validation and new combined screen are pending. Explicit shared-helper, diagnostics, lazy and
 public-reference boundaries remain. This is not a claim that the entire binder
 is facade-free. This supersedes the standalone experiment sequence in
 [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic counterexamples

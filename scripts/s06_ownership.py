@@ -18,7 +18,7 @@ def load_cases(root):
     cases = strict_json_loads((Path(root) / CASE_MANIFEST).read_bytes())
     if (not isinstance(cases, list) or not cases
             or any(not isinstance(name, str) or re.fullmatch(
-                r"storage_tests::storage_[a-z0-9_]+", name) is None for name in cases)
+                r"storage_tests::[a-z0-9_]+", name) is None for name in cases)
             or cases != sorted(set(cases))):
         raise ValueError("AST ownership inventory must be nonempty, sorted, unique exact test names")
     return cases

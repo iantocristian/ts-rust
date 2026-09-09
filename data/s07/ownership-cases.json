@@ -12,6 +12,9 @@
         "bind_tests::binding_rejects_foreign_symbol_flow_and_ast_edges_before_publication",
         "bind_tests::bound_mapped_reads_and_retention_select_the_target_sources_completed_overlay",
         "bind_tests::bound_same_arena_sources_route_independently_and_reject_ambiguous_retention",
+        "bind_tests::exclusive_binding_observes_and_retains_writes_to_new_same_owner_lazy_nodes",
+        "bind_tests::exclusive_inline_bindings_preserve_presence_ids_and_shape_changes",
+        "bind_tests::exclusive_legacy_binding_mut_keeps_foreign_id_validation_deferred",
         "bind_tests::exclusive_node_reads_observe_mutations_and_reject_unretained_owners",
         "bind_tests::exclusive_node_reads_route_new_lazy_records_and_reject_failed_slots",
         "bind_tests::factory_copies_select_each_retained_logical_sources_completed_binding",
@@ -19,17 +22,27 @@
       ],
       "exact": false,
       "filter": "bind_tests::",
-      "package": "ts_ast"
+      "package": "ts_ast",
+      "skip": [
+        "local_bind_tests::"
+      ]
     },
     "core_validation_proof": {
       "cases": [
+        "storage::validation_proof_tests::clean_completion_still_checks_final_parents_and_mutable_metadata_in_order",
+        "storage::validation_proof_tests::construction_errors_and_narrow_list_edits_preserve_the_edge_proof",
+        "storage::validation_proof_tests::hooks_and_imports_keep_full_completion_validation",
+        "storage::validation_proof_tests::lazy_initializers_keep_staged_validation_and_disable_core_only_completion",
         "storage::validation_proof_tests::narrow_flag_writes_do_not_restore_a_dirty_core_proof",
         "storage::validation_proof_tests::narrow_flag_writes_preserve_the_completed_core_proof",
-        "storage::validation_proof_tests::narrow_flag_writes_reject_foreign_owners_without_changing_the_proof"
+        "storage::validation_proof_tests::narrow_flag_writes_reject_foreign_owners_without_changing_the_proof",
+        "storage::validation_proof_tests::unrestricted_list_edits_force_backing_validation_and_rejected_edits_stay_clean",
+        "storage::validation_proof_tests::unrestricted_node_edits_force_the_original_scan_and_never_restore_the_proof"
       ],
       "exact": false,
       "filter": "storage::validation_proof_tests::",
-      "package": "ts_ast"
+      "package": "ts_ast",
+      "skip": []
     },
     "exclusive_binding": {
       "cases": [
@@ -46,7 +59,86 @@
       ],
       "exact": false,
       "filter": "exclusive_tests::",
-      "package": "ts_binder"
+      "package": "ts_binder",
+      "skip": []
+    },
+    "local_ast": {
+      "cases": [
+        "local_bind_tests::a_lazy_node_created_inside_the_scope_still_crosses_a_checked_boundary",
+        "local_bind_tests::child_kind_dispatch_and_shape_selected_names_match_constructed_mismatches",
+        "local_bind_tests::flow_writes_preserve_public_presence_and_flags_without_invalidating_syntax",
+        "local_bind_tests::foreign_edges_and_unrestricted_mutation_keep_the_checked_backend",
+        "local_bind_tests::identifier_name_failures_preserve_nil_parent_and_interface_conversion_messages",
+        "local_bind_tests::list_imports_validate_owner_kind_and_empty_ranges_before_minting_handles",
+        "local_bind_tests::local_children_match_general_order_and_preserve_slice_nil_elements_and_subranges",
+        "local_bind_tests::published_and_multiple_source_owners_do_not_invoke_local_callback",
+        "local_bind_tests::raw_imports_reject_foreign_owners_before_slots_in_each_namespace",
+        "local_bind_tests::typed_text_borrows_and_owned_values_share_raw_and_exceptional_backings"
+      ],
+      "exact": false,
+      "filter": "local_bind_tests::",
+      "package": "ts_ast",
+      "skip": []
+    },
+    "local_ast_core": {
+      "cases": [
+        "bind_result::local_bind::compatibility::tests::compatibility_checks_target_before_value_and_does_not_mutate_on_errors",
+        "bind_result::local_bind::compatibility::tests::compatibility_promotes_flow_only_bindings_and_keeps_cleared_records",
+        "bind_result::local_bind::compatibility::tests::compatibility_routes_lazy_nodes_created_after_scope_entry",
+        "bind_result::local_bind::compatibility::tests::scope_selection_records_actual_callback_entry_not_in_place_binding",
+        "bind_result::local_bind::helpers::tests::entity_names_preserve_name_first_failures_and_shape_independence",
+        "bind_result::local_bind::helpers::tests::kind_predicates_preserve_open_kinds_and_token_payloads",
+        "bind_result::local_bind::helpers::tests::left_hand_side_skips_only_partially_emitted_wrappers",
+        "bind_result::local_bind::helpers::tests::locals_container_predicate_includes_source_roles_without_inline_locals_storage",
+        "bind_result::local_bind::helpers::tests::semantic_getters_share_kind_shape_and_nil_contracts",
+        "bind_result::local_bind::helpers::tests::shared_optional_logical_and_text_helpers_preserve_selected_reads",
+        "bind_result::local_bind::state::tests::compatibility_escapes_remain_raw_until_import_and_narrow_writes_clear_them",
+        "bind_result::local_bind::state::tests::future_raw_flow_is_importable_only_after_its_slot_is_allocated",
+        "bind_result::local_bind::state::tests::scoped_state_survives_growth_and_narrow_mutation",
+        "bind_result::local_bind::state::tests::state_imports_check_owner_before_slot_without_mutation",
+        "bind_result::local_bind::state_nodes::tests::reentry_rejects_replaced_binding_namespaces_without_aliasing_inline_links",
+        "bind_result::local_bind::state_nodes::tests::scoped_symbol_writes_keep_inline_presence_and_materialized_precedence",
+        "bind_result::local_bind::state_nodes::tests::unsupported_shapes_promote_flow_records_and_keep_explicit_empty_bindings"
+      ],
+      "exact": false,
+      "filter": "bind_result::local_bind::",
+      "package": "ts_ast",
+      "skip": []
+    },
+    "local_binder": {
+      "cases": [
+        "local_tests::local_block_dispatch_preserves_checked_payload_failures",
+        "local_tests::narrowable_receivers_preserve_checked_interface_conversion_panics",
+        "local_tests::parsed_contextual_keywords_preserve_diagnostics_and_error_flags_across_backends",
+        "local_tests::scoped_and_checked_node_aliases_share_identity_and_live_flags",
+        "local_tests::target_text_preserves_checked_kind_shape_failures",
+        "local_tests::target_text_shares_core_and_lazy_backings"
+      ],
+      "exact": false,
+      "filter": "local_tests::",
+      "package": "ts_binder",
+      "skip": []
+    },
+    "local_flow_ids": {
+      "cases": [
+        "flow_access::tests::checked_and_local_flow_aliases_compare_equal_and_do_not_duplicate_antecedents",
+        "flow_access::tests::escaped_links_survive_reading_their_parent_and_fail_only_on_dereference"
+      ],
+      "exact": false,
+      "filter": "flow_access::tests::",
+      "package": "ts_binder",
+      "skip": []
+    },
+    "local_symbol_ids": {
+      "cases": [
+        "symbol_access::tests::declaration_and_infer_payload_failures_keep_their_named_messages",
+        "symbol_access::tests::declaration_merges_keep_local_symbols_and_tables_and_canonical_parent_identity",
+        "symbol_access::tests::tombstones_and_foreign_symbol_links_keep_their_deferred_failure_boundary"
+      ],
+      "exact": false,
+      "filter": "symbol_access::tests::",
+      "package": "ts_binder",
+      "skip": []
     }
   },
   "groups": {
@@ -56,7 +148,8 @@
       ],
       "exact": true,
       "filter": "ownership_tests::retained_snapshot_edit_answers_concurrently_and_rejects_old_new_id_crossing",
-      "package": "ts_compiler"
+      "package": "ts_compiler",
+      "skip": []
     },
     "shared_bound_file": {
       "cases": [
@@ -64,8 +157,9 @@
       ],
       "exact": true,
       "filter": "ownership_tests::shared_bound_file_retains_identity_until_the_final_response_drops",
-      "package": "ts_compiler"
+      "package": "ts_compiler",
+      "skip": []
     }
   },
-  "version": 2
+  "version": 3
 }

@@ -136,6 +136,11 @@ impl<'scope, 'read> BindContext<'scope, 'read> {
     pub(crate) fn text(self, key: FieldKey, word: u32, end: i32) -> &'read [u8] {
         self.store.local_text(key, word, end, self.source)
     }
+
+    #[inline]
+    pub(crate) fn text_owned(self, key: FieldKey, word: u32, end: i32) -> crate::JsString {
+        self.store.local_text_owned(key, word, end, self.source)
+    }
 }
 
 /// Direct header and generated typed payload reads; no owned/stored facade.

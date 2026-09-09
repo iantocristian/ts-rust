@@ -60,13 +60,22 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
             code.push_str(&format!("}}\nimpl<'scope> {read}<'scope, '_> {{\n"));
         }
         let mut names = BTreeSet::from(["for_each_child".to_owned()]);
-        for (index, (field, typ)) in fields.iter().zip(&types).enumerate() {
+        for (field, typ) in fields.iter().zip(&types) {
             let field_name = snake(string(field, "name")?);
             if !names.insert(field_name.clone()) {
                 return Err(format!(
                     "AST local read: duplicate or reserved method {name}.{field_name}"
                 ));
             }
+            if typ == "JsString" {
+                let owned = super::ast_read::owned_method(&field_name);
+                if !names.insert(owned.clone()) {
+                    return Err(format!("AST local read: duplicate method {name}.{owned}"));
+                }
+            }
+        }
+        for (index, (field, typ)) in fields.iter().zip(&types).enumerate() {
+            let field_name = snake(string(field, "name")?);
             let (output, value) = match typ.as_str() {
                 "NodeId" => (
                     "Option<BindNode<'scope>>".to_owned(),
@@ -100,6 +109,11 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
                 code.push_str("        let ordinal = self.ordinal;\n");
             }
             code.push_str(&format!("        {value}\n    }}\n"));
+            if typ == "JsString" {
+                let owned_method = super::ast_read::owned_method(&field_name);
+                let key = super::ast_compact::field_key(shape, index);
+                code.push_str(&format!("    /// Retain the source or exceptional text backing beyond this borrow.\n    #[inline]\n    pub fn {owned_method}(&self) -> crate::JsString {{\n        let ordinal = self.ordinal;\n        self.context.text_owned({key}, self.row.{field_name}, self.end)\n    }}\n"));
+            }
         }
         super::ast_read::emit_children(&mut code, node, "LocalChildVisitor<'scope>")?;
         code.push_str("}\n\n");
@@ -173,6 +187,32 @@ mod tests {
         assert!(emit(nodes, "test")
             .unwrap_err()
             .contains("reserved method Identifier.for_each_child"));
+    }
+
+    #[test]
+    fn owned_text_method_collisions_are_rejected_in_both_field_orders() {
+        for owned_first in [false, true] {
+            let mut schema = schema();
+            let nodes = schema["nodes"].as_array_mut().unwrap();
+            let identifier = nodes
+                .iter_mut()
+                .find(|node| node["name"] == "Identifier")
+                .unwrap();
+            let fields = identifier["fields"].as_array_mut().unwrap();
+            let mut owned = fields
+                .iter()
+                .find(|field| field["name"] == "Text")
+                .unwrap()
+                .clone();
+            owned["name"] = Value::String("TextOwned".into());
+            if owned_first {
+                fields.insert(0, owned);
+            } else {
+                fields.push(owned);
+            }
+            let error = emit(nodes, "test").unwrap_err();
+            assert!(error.contains("Identifier.text_owned"), "{error}");
+        }
     }
 
     #[test]

@@ -108,6 +108,17 @@ impl CoreStore {
         self.text.bytes(key, word, end, source)
     }
 
+    #[inline]
+    pub(crate) fn local_text_owned(
+        &self,
+        key: FieldKey,
+        word: u32,
+        end: i32,
+        source: &SourceText,
+    ) -> JsString {
+        self.text.owned(key, word, end, source)
+    }
+
     pub(crate) fn has_link_escapes(&self) -> bool {
         !self.links.is_empty()
     }

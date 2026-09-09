@@ -236,6 +236,13 @@ impl<'scope, 'read> LocalIdentifierRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(1, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(1, ordinal, 0), self.row.text, self.end)
+    }
     pub fn for_each_child(&self, visitor: &mut impl LocalChildVisitor<'scope>) -> ControlFlow<()> {
         let _ = visitor;
         ControlFlow::Continue(())
@@ -256,6 +263,13 @@ impl<'scope, 'read> LocalPrivateIdentifierRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(2, ordinal, 0), self.row.text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(2, ordinal, 0), self.row.text, self.end)
     }
     pub fn for_each_child(&self, visitor: &mut impl LocalChildVisitor<'scope>) -> ControlFlow<()> {
         let _ = visitor;
@@ -2265,6 +2279,13 @@ impl<'scope, 'read> LocalStringLiteralRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(67, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(67, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -2289,6 +2310,13 @@ impl<'scope, 'read> LocalNumericLiteralRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(68, ordinal, 0), self.row.text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(68, ordinal, 0), self.row.text, self.end)
     }
     #[inline]
     pub fn token_flags(&self) -> i32 {
@@ -2315,6 +2343,13 @@ impl<'scope, 'read> LocalBigIntLiteralRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(69, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(69, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -2339,6 +2374,13 @@ impl<'scope, 'read> LocalRegularExpressionLiteralRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(70, ordinal, 0), self.row.text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(70, ordinal, 0), self.row.text, self.end)
     }
     #[inline]
     pub fn token_flags(&self) -> i32 {
@@ -2365,6 +2407,13 @@ impl<'scope, 'read> LocalNoSubstitutionTemplateLiteralRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(71, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(71, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -2374,6 +2423,13 @@ impl<'scope, 'read> LocalNoSubstitutionTemplateLiteralRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(71, ordinal, 2), self.row.raw_text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn raw_text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(71, ordinal, 2), self.row.raw_text, self.end)
     }
     #[inline]
     pub fn template_flags(&self) -> i32 {
@@ -3978,6 +4034,13 @@ impl<'scope, 'read> LocalTemplateHeadRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(127, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(127, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -3987,6 +4050,13 @@ impl<'scope, 'read> LocalTemplateHeadRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(127, ordinal, 2), self.row.raw_text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn raw_text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(127, ordinal, 2), self.row.raw_text, self.end)
     }
     #[inline]
     pub fn template_flags(&self) -> i32 {
@@ -4013,6 +4083,13 @@ impl<'scope, 'read> LocalTemplateMiddleRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(128, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(128, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -4022,6 +4099,13 @@ impl<'scope, 'read> LocalTemplateMiddleRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(128, ordinal, 2), self.row.raw_text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn raw_text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(128, ordinal, 2), self.row.raw_text, self.end)
     }
     #[inline]
     pub fn template_flags(&self) -> i32 {
@@ -4048,6 +4132,13 @@ impl<'scope, 'read> LocalTemplateTailRead<'scope, 'read> {
         self.context
             .text(FieldKey::new(129, ordinal, 0), self.row.text, self.end)
     }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(129, ordinal, 0), self.row.text, self.end)
+    }
     #[inline]
     pub fn token_flags(&self) -> i32 {
         self.row.token_flags
@@ -4057,6 +4148,13 @@ impl<'scope, 'read> LocalTemplateTailRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(129, ordinal, 2), self.row.raw_text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn raw_text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(129, ordinal, 2), self.row.raw_text, self.end)
     }
     #[inline]
     pub fn template_flags(&self) -> i32 {
@@ -4469,6 +4567,13 @@ impl<'scope, 'read> LocalJsxTextRead<'scope, 'read> {
         let ordinal = self.ordinal;
         self.context
             .text(FieldKey::new(146, ordinal, 0), self.row.text, self.end)
+    }
+    /// Retain the source or exceptional text backing beyond this borrow.
+    #[inline]
+    pub fn text_owned(&self) -> crate::JsString {
+        let ordinal = self.ordinal;
+        self.context
+            .text_owned(FieldKey::new(146, ordinal, 0), self.row.text, self.end)
     }
     #[inline]
     pub fn token_flags(&self) -> i32 {

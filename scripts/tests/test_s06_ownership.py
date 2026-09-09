@@ -14,8 +14,17 @@ from test_s04_ownership import fixture, ast_suite_output, successful_invoke
 
 
 class AstOwnershipProducerTests(unittest.TestCase):
+    def test_inventory_names_the_storage_module_without_a_function_prefix_convention(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            fixture(root)
+            cases = ["storage_tests::borrowed_node_slice_rejection", "storage_tests::storage_owner"]
+            (root / s06_ownership.CASE_MANIFEST).write_text(json.dumps(cases))
+            self.assertEqual(s06_ownership.load_cases(root), cases)
+
     def test_inventory_requires_sorted_unique_nonempty_exact_names(self):
-        for cases in ([], ["other::test"], [False], ["storage_tests::storage_b", "storage_tests::storage_a"],
+        for cases in ([], ["other::test"], ["not_storage_tests::owner"], ["storage_tests::"],
+                      ["storage_tests::nested::owner"], [False], ["storage_tests::storage_b", "storage_tests::storage_a"],
                       ["storage_tests::storage_a"] * 2):
             with self.subTest(cases=cases), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp)

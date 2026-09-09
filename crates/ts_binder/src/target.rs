@@ -242,7 +242,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 let read = local.node(node);
                 if read.kind() == ts_ast::SyntaxKind::Identifier {
                     if let Some(identifier) = read.as_identifier() {
-                        return ts_ast::JsString::from_bytes(identifier.text());
+                        return identifier.text_owned();
                     }
                 }
                 self.text(local.node_id(node))

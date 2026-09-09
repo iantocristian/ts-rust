@@ -5,8 +5,9 @@ now qualifies for review: one/eight-worker CPU ratios are 0.859609 / 0.837626
 against same-screen CP1, with upper 95% bounds 0.880953 / 0.854378. Allocation is
 2.302 GB and peak RSS 2.320 GB. Full workload graphs, scoped instrumentation and
 the full binder producer pass. E3 rejects stale inventories despite all executed
-tests passing. The next revision repairs those inventories/filter and an
-introduced owned-text copy. CP1 remains the accepted control. Earlier rejected or
+tests passing. The [next revision](S07-bis-local-text-repair.md) repairs those
+inventories/filter and an introduced owned-text copy; implementation is complete
+and final checks are running. CP1 remains the accepted control. Earlier rejected or
 unpromoted compact experiments below keep their original dispositions. Final
 S07 CPU and memory gates remain open.
 Date: 2026-09-10. Work branch: `codex/s07-bis`.

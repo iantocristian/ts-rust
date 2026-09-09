@@ -44,15 +44,16 @@ def program_manifest():
     # Minimal independent S07 suites keep these legacy producer tests focused on
     # their S04/S06 failures without bypassing S07 inventory/output validation.
     return {
-        "version": 2,
+        "version": 3,
         "common": {
             name: {"package": package, "filter": prefix, "exact": False,
+                   "skip": ownership.s07_ownership.SKIPS.get(name, []),
                    "cases": [prefix + "publication"]}
             for name, (package, prefix) in ownership.s07_ownership.COMMON.items()
         },
         "groups": {
             name: {"package": "ts_compiler", "filter": f"ownership_tests::{name}",
-                   "exact": True, "cases": [f"ownership_tests::{name}"]}
+                   "exact": True, "skip": [], "cases": [f"ownership_tests::{name}"]}
             for name in ownership.s07_ownership.GROUPS
         },
     }
@@ -106,7 +107,8 @@ class OwnershipProducerTests(unittest.TestCase):
         self.assertFalse(report["metrics"]["retained_snapshot_edit"])
         self.assertFalse(report["metrics"]["shared_bound_file_miri"])
         self.assertTrue(report["metrics"]["shared_bound_file_address_sanitizer"])
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 4)
+        self.assertEqual(report["metrics"]["program_ownership_tests"],
+                         len(ownership.s07_ownership.COMMON) + len(ownership.s07_ownership.GROUPS) - 1)
 
     def test_failed_validation_proof_suite_cannot_leave_sanitizer_metrics_passing(self):
         def invoke(root, args, env=None):
@@ -123,7 +125,8 @@ class OwnershipProducerTests(unittest.TestCase):
         self.assertFalse(report["metrics"]["shared_bound_file"])
         self.assertFalse(report["metrics"]["retained_snapshot_edit"])
         self.assertTrue(report["metrics"]["miri"])
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 4)
+        self.assertEqual(report["metrics"]["program_ownership_tests"],
+                         len(ownership.s07_ownership.COMMON) + len(ownership.s07_ownership.GROUPS) - 1)
 
     def test_duplicate_and_nonfinite_json_cannot_hide_failed_measurements(self):
         for text in ('{"live_owner_delta":2,"live_owner_delta":0}',

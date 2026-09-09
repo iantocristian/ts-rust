@@ -6,8 +6,8 @@ use std::{
 };
 use ts_arena::Counters;
 use ts_ast::{
-    AstBuilder, AstView, ChildVisitor, Diagnostic, FactoryMethods, JsString, NodeId, NodeListId,
-    NodeSlice, ParsedFile, SourceFileParseOptions, SyntaxKind,
+    AstBuilder, AstView, ChildVisitor, Diagnostic, Factory, FactoryMethods, JsString, NodeId,
+    NodeListId, NodeSlice, ParsedFile, SourceFileParseOptions, SyntaxKind,
 };
 use ts_core::{ScriptKind, TextRange};
 use ts_jsstring::SourceText;
@@ -41,6 +41,102 @@ fn malformed_receiver(kind: SyntaxKind) -> (ParsedFile, NodeId) {
     );
     build.node_mut(node).unwrap().set_parent(Some(source));
     (build.complete(source).unwrap(), node)
+}
+
+#[test]
+fn target_text_preserves_checked_kind_shape_failures() {
+    for (kind, payload) in [
+        (SyntaxKind::Identifier, "Identifier"),
+        (SyntaxKind::PrivateIdentifier, "PrivateIdentifier"),
+        (SyntaxKind::StringLiteral, "StringLiteral"),
+    ] {
+        let (parsed, node) = malformed_receiver(kind);
+        let expected =
+            format!("interface conversion: ast.nodeData is *ast.Token, not *ast.{payload}");
+        parsed
+            .bind_and_publish(|builder| {
+                let checked_failure = {
+                    let binder = Binder::new(builder);
+                    catch_unwind(AssertUnwindSafe(|| {
+                        binder.target_text(crate::target::BindingNode::Checked(node))
+                    }))
+                    .unwrap_err()
+                };
+                assert_eq!(panic_message(&*checked_failure), expected);
+                builder
+                    .with_local_scope(|local| {
+                        let node = local.import_node(node).unwrap();
+                        let binder = Binder::from_backend(crate::backend::Backend::Local(local));
+                        let local_failure = catch_unwind(AssertUnwindSafe(|| {
+                            binder.target_text(crate::target::BindingNode::Local(node))
+                        }))
+                        .unwrap_err();
+                        assert_eq!(panic_message(&*local_failure), expected);
+                    })
+                    .expect("constructed text receiver admits local access");
+                Ok(())
+            })
+            .unwrap();
+    }
+}
+
+#[test]
+fn target_text_shares_core_and_lazy_backings() {
+    let source_text = SourceText::from_loaded_bytes(b"raw \\u0061".as_slice());
+    let mut build = AstBuilder::new(source_text.clone(), &Counters::new());
+    let raw = build.new_identifier(JsString::from_bytes(b"raw".as_slice()));
+    build.set_node_range(raw, TextRange::new(0, 3));
+    let escaped = build.new_identifier(JsString::from_bytes(b"a".as_slice()));
+    build.set_node_range(escaped, TextRange::new(4, 10));
+    let source = build.new_source_file(
+        SourceFileParseOptions {
+            file_name: JsString::from_bytes(b"/local-owned-text.ts".as_slice()),
+            ..Default::default()
+        },
+        source_text,
+        None,
+        None,
+    );
+    for node in [raw, escaped] {
+        build.node_mut(node).unwrap().set_parent(Some(source));
+    }
+    let parsed = build.complete(source).unwrap();
+    let mut retained = Vec::new();
+    let completed = parsed
+        .bind_and_publish(|builder| {
+            builder
+                .with_local_scope(|local| {
+                    let lazy = local.view().source_jsdoc(source, raw, |transaction| {
+                        let lazy =
+                            transaction.new_identifier(JsString::from_bytes(b"lazy".as_slice()));
+                        transaction.node_mut(lazy)?.set_parent(Some(raw));
+                        Ok(vec![lazy])
+                    })?[0];
+                    let binder = Binder::from_backend(crate::backend::Backend::Local(local));
+                    for (node, bytes) in
+                        [(raw, b"raw".as_slice()), (escaped, b"a"), (lazy, b"lazy")]
+                    {
+                        let target = binder.binding_node(node);
+                        assert_eq!(
+                            matches!(target, crate::target::BindingNode::Checked(_)),
+                            node == lazy
+                        );
+                        let checked = binder.text(node);
+                        let owned = binder.target_text(target);
+                        assert_eq!(owned.as_bytes(), bytes);
+                        assert_eq!(owned.validity(), checked.validity());
+                        assert_eq!(owned.as_bytes().as_ptr(), checked.as_bytes().as_ptr());
+                        retained.push((owned, bytes));
+                    }
+                    Ok(())
+                })
+                .expect("fresh core admits local access")
+        })
+        .unwrap();
+    drop(completed);
+    for (owned, bytes) in retained {
+        assert_eq!(owned.as_bytes(), bytes);
+    }
 }
 
 #[test]
