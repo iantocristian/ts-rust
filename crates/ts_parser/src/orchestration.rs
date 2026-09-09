@@ -89,7 +89,7 @@ impl Parser<'_, AstBuilder> {
             "Expected end of file token from scanner."
         );
         statements.append(&mut self.reparse_list);
-        let list = self.new_node_list(TextRange::new(pos, end), statements);
+        let list = self.new_parsed_node_list(TextRange::new(pos, end), statements);
         let mut root = self.factory.new_source_file(
             self.opts.clone(),
             self.source_owner.clone(),

@@ -256,6 +256,14 @@ impl<'src, F: ParserFactory> Parser<'src, F> {
         )
     }
 
+    pub(crate) fn new_parsed_node_list(
+        &mut self,
+        loc: TextRange,
+        nodes: crate::list_buffer::ListBuffer,
+    ) -> NodeListId {
+        let nodes = self.factory.finish_list_buffer(nodes);
+        self.factory.alloc_list(loc, nodes)
+    }
     /// port: tsc/internal/parser/parser.go:Parser.newNodeList
     pub(crate) fn new_node_list(&mut self, loc: TextRange, nodes: Vec<NodeId>) -> NodeListId {
         let nodes = if nodes.is_empty() {

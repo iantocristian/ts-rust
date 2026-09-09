@@ -16,8 +16,8 @@
       "S04_RUSTUP_HOME": ""
     },
     "host": "macos-aarch64",
-    "revision": "c7a71d40b703cc553b0d1e96f803ec11e23e8201",
-    "source_sha256": "a653d4d538cfdbef16d58a569a183313f901ccdb9eaadb63ba6930c5fa165f7c",
+    "revision": "967f2f49b79b8dc6f61479f52c83ffdf5a92dc6b",
+    "source_sha256": "80bd0989e0e2e1aa25d8facb84b3bb6cae6cd74af97803497997a55e51901735",
     "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
     "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1"
   },

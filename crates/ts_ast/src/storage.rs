@@ -238,12 +238,17 @@ impl AstBuilder {
     }
     #[allow(clippy::needless_pass_by_value)] // Construction transfers and releases its temporary vector.
     pub fn node_slice(&mut self, nodes: Vec<Option<NodeId>>) -> Result<NodeSlice, Error> {
+        self.node_slice_from_slice(&nodes)
+    }
+    /// Copy borrowed edges after validating every ID. An empty input receives
+    /// an allocated-empty backing identity, just like the consuming constructor.
+    pub fn node_slice_from_slice(&mut self, nodes: &[Option<NodeId>]) -> Result<NodeSlice, Error> {
         for &id in nodes.iter().flatten() {
             self.view().node(id)?;
         }
         let len = checked_len(nodes.len())?;
         let owner = self.id().arena();
-        let compact = self.storage.store_mut().edges.append(owner, &nodes)?;
+        let compact = self.storage.store_mut().edges.append(owner, nodes)?;
         let backing = self.push_auxiliary(AstStorageData::CompactNodes(compact));
         Ok(NodeSlice {
             backing: Some(backing),

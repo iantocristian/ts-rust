@@ -76,5 +76,36 @@ small-buffer matrix if its remaining opportunity is too small.
 
 Independent plan review found no material issue with the private factory opt-in,
 borrowed constructor, ordering obligations or conditional accounting. Its concrete
-append-reservation note is incorporated above. Implementation and measurement
-remain pending until the parent/auxiliary combined result is recorded.
+append-reservation note is incorporated above. The parent/auxiliary combined
+result is now recorded separately; this implementation follows that checkpoint.
+
+## Implementation record
+
+The private ListBuffer uses four inline optional-ID slots for AstBuilder and
+preserves heap construction for custom/lazy factories. BorrowedFactory forwards
+both starting and finishing. Inline values finish through the checked borrowed
+AstBuilder constructor; spilled values retain the existing consuming Vec path.
+The two parser list functions and source completion use the buffer, with EOF,
+reparse append, context restoration and abort ordering preserved. A known-length
+append reserves once for its suffix. No RuntimeFactory method, generator,
+generated file, dependency, unsafe code or traversal method changes.
+
+Independent implementation review found no substantive issue. AST128, parser34,
+binder28 and compiler12 library tests pass, as do AST29 and encoder5 integration
+tests, AST13 doctests, workspace Clippy, formatting and declared Rust1.96 checking.
+The first test fixture lacked its required absolute filename and its first
+Clippy run found a lossless cast in that fixture; both were corrected and the
+original failed outputs remain retained. Pinned generated-source validation
+from the preceding candidate still applies to those unchanged files; no S03
+frontend rerun is claimed. Instrumentation and the frozen combined capture are
+recorded as they complete; these checks do not establish a performance win.
+
+Scoped instrumentation passes: strict-provenance Miri runs the two borrowed-edge
+AST tests and all eight new parser factory/buffer/list tests; AddressSanitizer
+runs all 128 AST library tests and those eight parser tests. An initial full
+parser Miri selection reached the unchanged 6,000-level native stack-growth
+stress test and was stopped deliberately. Its incomplete log, command and reason
+are preserved; no full-parser Miri pass is claimed. Native full-parser coverage
+already includes those stress cases. Status regeneration, validation and
+committed-context checking pass. The reviewed implementation is ready for its
+frozen full-graph comparison and fixed combined screen.

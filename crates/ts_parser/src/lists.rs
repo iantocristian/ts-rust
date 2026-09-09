@@ -4,17 +4,21 @@ use ts_ast::{JsString, NodeId, NodeListId, SyntaxKind};
 use ts_core::TextRange;
 use ts_diagnostics as diagnostics;
 
+#[cfg(test)]
+#[path = "lists_tests.rs"]
+mod tests;
+
 impl<F: ParserFactory> Parser<'_, F> {
     /// port: tsc/internal/parser/parser.go:Parser.parseListIndex
     pub(crate) fn parse_list_index(
         &mut self,
         kind: ParsingContext,
         mut parse_element: impl FnMut(&mut Self, usize) -> NodeId,
-    ) -> Vec<NodeId> {
+    ) -> crate::list_buffer::ListBuffer {
         let saved_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << kind as u8;
         let mut outer_reparse_list = std::mem::take(&mut self.reparse_list);
-        let mut list = Vec::new();
+        let mut list = self.factory.start_list_buffer();
         while !self.is_list_terminator(kind) {
             if self.is_list_element(kind, false) {
                 let element = parse_element(self, list.len());
@@ -51,7 +55,7 @@ impl<F: ParserFactory> Parser<'_, F> {
     ) -> NodeListId {
         let pos = self.node_pos();
         let nodes = self.parse_list_index(kind, |parser, _| parse_element(parser));
-        self.new_node_list(TextRange::new(pos, self.node_pos()), nodes)
+        self.new_parsed_node_list(TextRange::new(pos, self.node_pos()), nodes)
     }
     /// port: tsc/internal/parser/parser.go:Parser.parseDelimitedList
     pub(crate) fn parse_delimited_list<N: Into<Option<NodeId>>>(
@@ -62,7 +66,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         let pos = self.node_pos();
         let saved_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << kind as u8;
-        let mut list = Vec::new();
+        let mut list = self.factory.start_list_buffer();
         loop {
             if self.is_list_element(kind, false) {
                 let start = self.node_pos();
@@ -104,7 +108,7 @@ impl<F: ParserFactory> Parser<'_, F> {
             }
         }
         self.parsing_contexts = saved_contexts;
-        Some(self.new_node_list(TextRange::new(pos, self.node_pos()), list))
+        Some(self.new_parsed_node_list(TextRange::new(pos, self.node_pos()), list))
     }
     /// port: tsc/internal/parser/parser.go:Parser.parseBracketedList
     pub(crate) fn parse_bracketed_list<N: Into<Option<NodeId>>>(

@@ -85,6 +85,84 @@ fn node_slice_values_preserve_nil_bounds_and_bidirectional_iteration() {
 }
 
 #[test]
+fn borrowed_node_slices_copy_nil_edges_and_keep_allocated_empty_identity() {
+    let mut build = builder(&Counters::new());
+    let first = build.new_token(SyntaxKind::Unknown.into());
+    let last = build.new_token(SyntaxKind::EndOfFile.into());
+    let mut input = [Some(first), None, Some(last)];
+    let borrowed = build.node_slice_from_slice(&input).unwrap();
+    let consumed = build.node_slice(input.to_vec()).unwrap();
+    input[0] = Some(last);
+    for slice in [borrowed, consumed] {
+        assert_eq!(
+            build
+                .view()
+                .node_slice(slice)
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>(),
+            vec![Some(first), None, Some(last)]
+        );
+    }
+    assert_eq!(input[0], Some(last));
+    let first_empty = build.node_slice_from_slice(&[]).unwrap();
+    let second_empty = build.node_slice_from_slice(&[]).unwrap();
+    for slice in [first_empty, second_empty] {
+        assert!(slice.is_empty());
+        assert!(!slice.is_nil());
+        assert!(slice.backing_id().is_some());
+        assert!(build.view().node_slice(slice).unwrap().is_empty());
+    }
+    assert_ne!(first_empty.backing_id(), second_empty.backing_id());
+    assert!(NodeSlice::empty().is_nil());
+}
+
+#[test]
+fn borrowed_node_slice_rejection_preserves_error_order_and_inserts_nothing() {
+    let mut build = builder(&Counters::new());
+    let local = build.new_token(SyntaxKind::Unknown.into());
+    let missing = NodeId::from_parts(local.arena(), u32::MAX).unwrap();
+    let mut foreign = builder(&Counters::new());
+    let foreign_node = foreign.new_token(SyntaxKind::Unknown.into());
+    let foreign_missing = NodeId::from_parts(foreign_node.arena(), u32::MAX).unwrap();
+    let prefix = build.node_slice_from_slice(&[Some(local), None]).unwrap();
+    let count_before = build.storage.view().core_auxiliary().count();
+    for (nodes, error) in [
+        (
+            [Some(local), Some(missing), Some(foreign_node)],
+            Error::InvalidSlot,
+        ),
+        (
+            [Some(local), Some(foreign_node), Some(missing)],
+            Error::WrongOwner,
+        ),
+        (
+            [Some(local), None, Some(foreign_missing)],
+            Error::WrongOwner,
+        ),
+    ] {
+        assert_eq!(build.node_slice_from_slice(&nodes), Err(error));
+        assert_eq!(build.storage.view().core_auxiliary().count(), count_before);
+    }
+    let next = build.node_slice_from_slice(&[Some(local)]).unwrap();
+    assert_eq!(
+        next.backing_id().unwrap().slot(),
+        prefix.backing_id().unwrap().slot() + 1
+    );
+    let crate::auxiliary::AuxValue::CompactNodes(backing) = build
+        .view()
+        .auxiliary(next.backing_id().unwrap())
+        .unwrap()
+        .value()
+    else {
+        panic!("borrowed slice uses compact edge storage");
+    };
+    assert_eq!(backing.start, 2, "failed inputs must not append edge words");
+    assert_eq!(build.view().node_slice(prefix).unwrap().at(0), Some(local));
+    assert_eq!(build.view().node_slice(prefix).unwrap().at(1), None);
+}
+
+#[test]
 fn compact_syntax_backings_span_pages_and_keep_imported_and_lazy_context() {
     let counters = Counters::new();
     let before = counters.snapshot();
