@@ -731,3 +731,73 @@ of requests across represented successful backings, with actual coverage and CPU
 effect unmeasured. This does not close the remaining gates by itself. Build it
 into the coherent candidate and measure once; keep the row policy, avoid another
 traversal experiment, and record the remaining CPU deficit explicitly.
+
+### Inline parser-list combined screen: request traffic lower, CPU still slower
+
+Frozen revision `03f9aa3`, manifest
+`c4eb05e07d2df5aafabd3e8849a0da36dabecad49586763878f980e25fc8cb88`,
+adds inline buffers for short eager-parser lists to the preceding combination.
+Normal executable SHA:
+`ef4149e8bee81dc5a40d182bb0dc8d1a11e731f08415c24abca41c254d862236`.
+All 13,094 graphs match Go in both worker modes, with 13,094 in-place binds and
+zero fallbacks. All eight warmups and 56 measured runs complete. Receipt replay
+and independent raw-observation/statistics verification pass.
+
+| Metric | One worker: candidate / CP1 | Ratio | Eight workers: candidate / CP1 | Ratio |
+| --- | ---: | ---: | ---: | ---: |
+| Wall | 5.386969 / 4.747851 s | 1.1346 | 1.204690 / 1.136668 s | 1.0598 |
+| Allocated | 2.244182 / 4.642569 GB | 0.4834 | 2.244184 / 4.642571 GB | 0.4834 |
+| Peak RSS | 2.318565 / 4.506714 GB | 0.5145 | 2.321908 / 4.509204 GB | 0.5149 |
+
+CPU upper 95% ratios are **1.1623 / 1.1460**, with lower bounds 1.1116 / 1.0293.
+Timing relative MAD is 0.78% / 1.18% for the candidate and 1.63% / 2.01% for
+CP1. The whole combination saves 2.398 GB of requests and about 2.188 GB RSS
+against its same-screen control, while adding 639 ms / 68 ms wall time.
+The runner records `regressing_or_uncertain`; both timing intervals remain
+above parity. The combination remains **experimental, not promoted**; CP1 is
+still the retained control.
+
+Allocation is about 86.59 MB below the preceding auxiliary capture, consistent
+with removing short temporary buffers. This is a cross-capture difference,
+not an isolated component measurement. Peak RSS is essentially unchanged.
+Separate candidate wall medians do not establish the list change's CPU effect.
+The measured combination still contains substantial CPU and memory tradeoffs;
+they are retained for further work without changing any final gate.
+
+| Remaining distance to historical Go-derived limits | One worker | Eight workers |
+| --- | ---: | ---: |
+| Wall above limit | 2.449 s (1.834× limit) | 0.571 s (1.900× limit) |
+| Allocated above limit | 208.956 MB | 208.417 MB |
+| Peak RSS above limit | 109.617 MB | 104.863 MB |
+
+These are historical planning distances, not fresh paired Go acceptance.
+Both CPU modes and both memory gates remain open. The request reduction does
+not by itself qualify the combination, nor can savings from separate screens
+be added to forecast another result.
+
+Validation passes 128 AST, 34 parser, 28 binder and 12 compiler library tests;
+29 AST and five encoder integration tests; 13 AST doctests; workspace Clippy,
+declared Rust 1.96 checking and formatting. Generated source and emitters are
+unchanged. Scoped strict-provenance Miri passes two borrowed-edge AST tests and
+the eight new parser tests; AddressSanitizer passes all 128 AST tests and those
+eight parser tests. The initially broad full-parser Miri run was deliberately
+stopped at its unchanged 6,000-level native stack-growth stress test; its log and
+interruption reason are retained, and it is not claimed as passing. Independent
+plan, implementation and screen reviews found no actionable issue. Scoped
+instrumentation is not fresh complete ownership-producer evidence.
+
+The [review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-parser-lists/README.md)
+retains 458 files, including frozen sources/binaries, graphs, every raw sample,
+receipt, generator inputs and successful/failed development checks. Every member
+was read back and hash-verified. Unchanged CP1/helpers and the earlier census
+remain pinned through their prior archives.
+
+The next diagnostic uses this exact frozen source, with one small driver patch:
+normal-build elapsed parsing versus consuming binding/publication, and allocator
+counters before the pipeline and while all bound files are retained. It measures
+cumulative requested bytes, live requested bytes and freed or superseded requests;
+it does not identify storage domains or equate live requests with RSS. Keep it
+separate from this complete screen, validate full work counts and the input
+digest, and choose further work from its result. Reconstructing semantic nodes
+through the obsolete census driver would add observer allocations and alter the
+publication path, so that driver is not used.

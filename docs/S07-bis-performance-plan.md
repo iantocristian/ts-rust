@@ -4,8 +4,9 @@ Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. All 192 compact shapes and the
 borrowed facade are implemented; their completed screens reduce memory
 but fail CPU non-regression. The vector policy was rejected. Compact binding
-storage, construction/access and parent/auxiliary combinations have completed
-their screens. The latest uses 2.331 GB allocated / 2.322 GB RSS, with CPU ratios 1.119 / 1.070
+storage, construction/access, parent/auxiliary and inline parser-list combinations
+have completed their screens. The latest uses 2.244 GB allocated / 2.322 GB RSS,
+with CPU ratios 1.135 / 1.060
 against same-screen CP1. This remains experimental: CPU confidence bounds fail
 non-regression, and final S07 gates remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
@@ -147,6 +148,18 @@ The next bounded combination follows the reviewed
 [parser list construction plan](S07-bis-parser-list-plan.md), removing short
 temporary buffers without changing traversal or the row policy. Its conditional
 request opportunity is useful but insufficient for gate closure by itself.
+
+The inline parser-list combination is now complete and verified: 5.387 / 1.205 s
+against same-screen CP1 at 4.748 / 1.137 s, CPU upper 95% ratios 1.162 / 1.146,
+allocation 2.244 GB and peak RSS 2.322 GB. All workload graphs match in both
+modes. The historical request deficit is now about 209 MB; RSS still needs
+105–110 MB, and both CPU modes remain slower. Preserve this experimental result.
+Before choosing another storage change, run one narrow diagnostic from the exact
+frozen source: normal-binary parse versus consuming-bind/publication elapsed
+time, and allocation-binary requested bytes still live at the retained endpoint
+versus cumulative requests. Reuse the existing allocator counters; do not rebuild
+the obsolete physical census adapter or claim current RSS from live requests.
+This diagnostic selects subsequent work and cannot promote the candidate.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
