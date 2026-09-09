@@ -21,6 +21,9 @@ mod clone;
 mod compact;
 mod compact_generated;
 pub(crate) use compact_generated::AstPayloadStore;
+pub(crate) mod auxiliary;
+#[cfg(test)]
+mod auxiliary_tests;
 mod data_generated;
 mod diagnostic;
 mod diagnostic_order;
@@ -28,6 +31,7 @@ mod factory;
 mod factory_generated;
 mod jsdoc;
 mod kinds_generated;
+pub use auxiliary::StoredAux;
 mod lists;
 pub mod modifier_flags;
 mod node_access;
@@ -288,6 +292,7 @@ mod tests;
 
 impl ts_arena::NodeRecord for Node {
     type Aux = AstStorageData;
+    type CoreAux = AstStorageData;
     type Store = compact::CoreStore;
     fn storage_kind(&self) -> u32 {
         u32::from(self.kind.raw() as u16)

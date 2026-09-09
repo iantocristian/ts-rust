@@ -59,6 +59,7 @@ enum FullReference {
 #[derive(Default)]
 pub struct CoreStore {
     pub(crate) payloads: crate::AstPayloadStore,
+    pub(crate) auxiliary: crate::auxiliary::AuxStore,
     links: HashMap<FieldKey, FullReference>,
     text: text::TextPool,
     pub(crate) edges: lists::EdgePages,
@@ -262,6 +263,7 @@ impl StoredNode {
 }
 impl ts_arena::NodeRecord for StoredNode {
     type Aux = AstStorageData;
+    type CoreAux = crate::StoredAux;
     type Store = CoreStore;
     fn storage_kind(&self) -> u32 {
         u32::from(self.kind.raw() as u16)

@@ -3,6 +3,9 @@ use crate::NodeId;
 /// The storage operations that inspect syntax metadata use this single record
 /// interface. Concrete AST records own their header; storage adds no wrapper.
 pub trait NodeRecord {
+    /// Core auxiliary records can use owner-relative storage independently of
+    /// the full values staged under the lazy publication lock.
+    type CoreAux;
     type Aux;
     /// Exclusive per-owner payload storage, published with its record headers.
     type Store: Default;
@@ -37,6 +40,7 @@ impl<T> Node<T> {
 }
 
 impl<T> NodeRecord for Node<T> {
+    type CoreAux = ();
     type Aux = ();
     type Store = ();
     fn storage_kind(&self) -> u32 {

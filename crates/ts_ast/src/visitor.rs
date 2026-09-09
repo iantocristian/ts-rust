@@ -41,7 +41,7 @@ pub trait RuntimeFactory: Factory {
     }
     // port: tsc/internal/ast/ast.go:ModifierList.Clone
     fn clone_modifier_list_header(&mut self, original: NodeListId) -> NodeListId {
-        let original = self.read_list(original).clone();
+        let original = self.read_list(original).to_owned();
         let new = self.alloc_list(original.loc(), original.nodes());
         *self.mutable_list(new) = original;
         new

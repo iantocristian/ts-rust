@@ -30,7 +30,8 @@ pub use node::{Node, NodeParentRecord, NodeRecord};
 pub use node_slots::NodeSlots;
 pub use owned::{OwnedArena, SymbolArena};
 pub use refs::{
-    CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead, StorageSymbolRef,
+    AuxiliaryRead, CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead,
+    StorageSymbolRef,
 };
 pub use scope::{LocalNode, StorageLocalArena, StorageScope};
 pub use scratch::ScratchOwner;

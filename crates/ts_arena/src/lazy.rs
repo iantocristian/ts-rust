@@ -2,7 +2,8 @@ use crate::{
     arena::Arena,
     counters::Track,
     ids::{allocate_slot, next_arena},
-    ArenaId, AuxId, Counters, Error, NodeId, NodeParentRecord, NodeRecord, StorageOwner,
+    ArenaId, AuxId, AuxiliaryRead, Counters, Error, NodeId, NodeParentRecord, NodeRecord,
+    StorageOwner, StorageRead,
 };
 use std::{
     collections::BTreeMap,
@@ -155,7 +156,7 @@ pub struct StorageTransaction<'a, N: NodeRecord> {
     nodes: Staging<'a, N>,
     auxiliary: Staging<'a, N::Aux>,
     core: &'a Arena<N>,
-    core_auxiliary: &'a Arena<N::Aux>,
+    core_auxiliary: &'a Arena<N::CoreAux>,
     source: &'a ts_jsstring::SourceText,
     store: &'a N::Store,
 }
@@ -201,14 +202,28 @@ impl<N: NodeRecord> StorageTransaction<'_, N> {
         }
         self.nodes.get(id.slot())
     }
-    pub fn aux(&self, id: AuxId) -> Result<&N::Aux, Error> {
+    /// Core records borrow the existing owner; staged and published lazy values
+    /// borrow this transaction's already locked pages without locking again.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{AuxId, AuxiliaryRead, Node, StorageTransaction};
+    /// fn escape<'a>(transaction: &StorageTransaction<'_, Node<()>>, id: AuxId) -> AuxiliaryRead<'a, Node<()>> {
+    ///     transaction.aux(id).unwrap()
+    /// }
+    /// ```
+    pub fn aux(&self, id: AuxId) -> Result<AuxiliaryRead<'_, N>, Error> {
         if id.arena() == self.core_auxiliary.id {
-            return self.core_auxiliary.get_slot(id.slot());
+            return self
+                .core_auxiliary
+                .get_slot(id.slot())
+                .map(AuxiliaryRead::Core);
         }
         if id.arena() != self.auxiliary.pages.id {
             return Err(Error::WrongOwner);
         }
-        self.auxiliary.get(id.slot())
+        self.auxiliary
+            .get(id.slot())
+            .map(|value| AuxiliaryRead::Lazy(StorageRead::borrowed(value)))
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
         if id.arena() != self.nodes.pages.id {
@@ -549,6 +564,7 @@ mod prepared_token_tests {
         }
     }
     impl NodeRecord for Header {
+        type CoreAux = u32;
         type Aux = Payload;
         type Store = Vec<u8>;
         fn storage_kind(&self) -> u32 {
@@ -556,6 +572,13 @@ mod prepared_token_tests {
         }
         fn storage_reparsed(&self) -> bool {
             self.reparsed
+        }
+    }
+
+    fn auxiliary_value(value: AuxiliaryRead<'_, Header>) -> u32 {
+        match value {
+            AuxiliaryRead::Core(value) => *value,
+            AuxiliaryRead::Lazy(value) => value.value,
         }
     }
 
@@ -628,7 +651,7 @@ mod prepared_token_tests {
                 .retain();
             assert_eq!(token.parent, Some(parent));
             let auxiliary = token.payload.unwrap();
-            assert_eq!(owner.view().aux(auxiliary).unwrap().value, 7);
+            assert_eq!(auxiliary_value(owner.view().aux(auxiliary).unwrap()), 7);
             for (node, failed_auxiliary) in failed_ids {
                 assert_ne!(node, token.id());
                 assert_ne!(failed_auxiliary, auxiliary);
@@ -653,7 +676,10 @@ mod prepared_token_tests {
                 })
             ));
             drop(owner);
-            assert_eq!(token.owner().view().aux(auxiliary).unwrap().value, 7);
+            assert_eq!(
+                auxiliary_value(token.owner().view().aux(auxiliary).unwrap()),
+                7
+            );
             assert_eq!(dropped.load(Ordering::Relaxed), 3);
         }
         assert_eq!(dropped.load(Ordering::Relaxed), 4);
@@ -670,10 +696,15 @@ mod prepared_token_tests {
             reparsed: true,
             ..Header::new(1)
         });
-        let core_aux = builder.push_aux(Payload {
-            value: 1,
-            dropped: dropped.clone(),
-        });
+        let core_aux = builder.push_aux(1);
+        let (core_value, store) = builder.aux_and_store_mut(core_aux).unwrap();
+        *core_value = 7;
+        assert!(store.is_empty());
+        let missing_core_aux = AuxId::from_parts(core_aux.arena(), u32::MAX).unwrap();
+        assert!(matches!(
+            builder.aux_and_store_mut(missing_core_aux),
+            Err(Error::InvalidSlot)
+        ));
         let (store, source) = builder.store_and_source_mut();
         store.extend_from_slice(source.as_bytes());
         let (node, store, source) = builder.node_store_and_source_mut(parent).unwrap();
@@ -681,6 +712,12 @@ mod prepared_token_tests {
         assert_eq!(store, source.as_bytes());
         let foreign_builder = StorageBuilder::<Header>::new(Arc::from(&b"x"[..]), &counters);
         let foreign = NodeId::from_parts(foreign_builder.id().arena(), parent.slot()).unwrap();
+        let foreign_aux =
+            AuxId::from_parts(foreign_builder.view().auxiliary_arena(), u32::MAX).unwrap();
+        assert!(matches!(
+            builder.aux_and_store_mut(foreign_aux),
+            Err(Error::WrongOwner)
+        ));
         assert!(matches!(
             builder.node_store_and_source_mut(foreign),
             Err(Error::WrongOwner)
@@ -689,6 +726,17 @@ mod prepared_token_tests {
         let mut importer = StorageBuilder::<Header>::new(Arc::from(&b""[..]), &counters);
         importer.retain_file(owner.clone());
         let importer = importer.finish();
+        let (read, selected) = importer.view().aux_with_owner(core_aux).unwrap();
+        assert!(matches!(read, AuxiliaryRead::Core(&7)));
+        assert_eq!(selected.id(), owner.id());
+        assert!(matches!(
+            importer.view().aux(missing_core_aux),
+            Err(Error::InvalidSlot)
+        ));
+        assert!(matches!(
+            importer.view().aux(foreign_aux),
+            Err(Error::WrongOwner)
+        ));
         assert!(matches!(
             importer.view().try_token_prepared(
                 TokenKey {
@@ -741,6 +789,23 @@ mod prepared_token_tests {
                     assert_eq!(transaction.source().as_bytes(), b"abc");
                     assert_eq!(transaction.store(), b"abc");
                     assert_eq!(transaction.core_auxiliary_arena(), core_aux.arena());
+                    assert!(matches!(
+                        transaction.aux(core_aux)?,
+                        AuxiliaryRead::Core(&7)
+                    ));
+                    // Ordinary core reads remain available under the lazy lock.
+                    assert!(matches!(
+                        owner.view().aux(core_aux)?,
+                        AuxiliaryRead::Core(&7)
+                    ));
+                    assert!(matches!(
+                        transaction.aux(missing_core_aux),
+                        Err(Error::InvalidSlot)
+                    ));
+                    assert!(matches!(
+                        transaction.aux(foreign_aux),
+                        Err(Error::WrongOwner)
+                    ));
                     assert_eq!(
                         transaction.lazy_auxiliary_arena(),
                         owner.lazy_auxiliary_arena()
@@ -774,7 +839,13 @@ mod prepared_token_tests {
                     header.payload = Some(auxiliary);
                     payload.value = 9;
                     assert_eq!(transaction.node(node)?.parent, Some(parent));
-                    assert_eq!(transaction.aux(auxiliary)?.value, 9);
+                    match transaction.aux(auxiliary)? {
+                        AuxiliaryRead::Lazy(value) => {
+                            assert_eq!(value.value, 9);
+                            assert!(value.as_borrowed().is_some());
+                        }
+                        AuxiliaryRead::Core(_) => panic!("staged auxiliary uses full lazy storage"),
+                    }
                     Ok(Header {
                         parent: Some(parent),
                         payload: Some(auxiliary),
@@ -784,7 +855,18 @@ mod prepared_token_tests {
             )
             .unwrap();
         assert_eq!(token.parent, Some(parent));
-        assert_eq!(owner.view().aux(token.payload.unwrap()).unwrap().value, 9);
+        let (read, selected) = importer
+            .view()
+            .aux_with_owner(token.payload.unwrap())
+            .unwrap();
+        match read {
+            AuxiliaryRead::Lazy(value) => {
+                assert_eq!(value.value, 9);
+                assert!(value.as_borrowed().is_none());
+            }
+            AuxiliaryRead::Core(_) => panic!("published lazy auxiliary keeps its page guard"),
+        }
+        assert_eq!(selected.id(), owner.id());
         assert_eq!(dropped.load(Ordering::Relaxed), 0);
         let prior_aux = token.payload.unwrap();
         owner
@@ -796,6 +878,15 @@ mod prepared_token_tests {
                 },
                 2,
                 |transaction, _| {
+                    match transaction.aux(prior_aux)? {
+                        AuxiliaryRead::Lazy(value) => {
+                            assert_eq!(value.value, 9);
+                            assert!(value.as_borrowed().is_some());
+                        }
+                        AuxiliaryRead::Core(_) => {
+                            panic!("prior lazy auxiliary remains full storage")
+                        }
+                    }
                     let auxiliary = transaction.push_aux(Payload {
                         value: 3,
                         dropped: dropped.clone(),
@@ -822,6 +913,7 @@ mod prepared_token_tests {
             writes: Arc<AtomicUsize>,
         }
         impl NodeRecord for Full {
+            type CoreAux = ();
             type Aux = ();
             type Store = ();
             fn storage_kind(&self) -> u32 {

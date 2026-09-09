@@ -326,6 +326,22 @@ impl<N: NodeRecord, S> StorageHandle<N, S> {
 pub struct StorageRead<'a, T> {
     value: ReadLocation<'a, T>,
 }
+
+/// A scoped auxiliary read preserves the distinction between compact core data
+/// and full lazy values. Consumers decode core records using their selected
+/// physical owner's store; a lazy guard keeps its own published page alive.
+///
+/// ```compile_fail
+/// use ts_arena::{AuxId, AuxiliaryRead, Node, StorageBuilder};
+/// fn escape(builder: StorageBuilder<Node<()>>, id: AuxId) -> AuxiliaryRead<'static, Node<()>> {
+///     let owner = builder.finish();
+///     owner.view().aux(id).unwrap()
+/// }
+/// ```
+pub enum AuxiliaryRead<'a, N: NodeRecord> {
+    Core(&'a N::CoreAux),
+    Lazy(StorageRead<'a, N::Aux>),
+}
 enum ReadLocation<'a, T> {
     Borrowed(&'a T),
     Lazy(LazyRecord<T>),

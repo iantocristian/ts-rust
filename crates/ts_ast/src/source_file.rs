@@ -11,7 +11,7 @@ use crate::{
     SourceNodeSliceRead, SourceTextSlice, SourceTextSliceRead,
 };
 use std::{collections::BTreeMap, ops::Deref, sync::OnceLock};
-use ts_arena::{Error, StorageRead};
+use ts_arena::Error;
 use ts_core::{LanguageVariant, ScriptKind, TextRange, Tristate};
 use ts_jsstring::{PositionMap, SourceText};
 
@@ -443,15 +443,15 @@ impl Deref for OriginalFileName<'_> {
 }
 
 pub struct SourceFileRead<'a> {
-    record: StorageRead<'a, AstStorageData>,
+    record: crate::auxiliary::AuxRead<'a>,
     node: NodeId,
     view: AstView<'a>,
 }
 impl Deref for SourceFileRead<'_> {
     type Target = SourceFileState;
     fn deref(&self) -> &Self::Target {
-        match &*self.record {
-            AstStorageData::SourceFiles(files) => &files[&self.node],
+        match self.record.full() {
+            Some(AstStorageData::SourceFiles(files)) => &files[&self.node],
             _ => unreachable!("validated source-file frame"),
         }
     }
@@ -468,7 +468,7 @@ impl<'a> SourceFileRead<'a> {
     pub(crate) fn state_ref(&self) -> &'a SourceFileState {
         match self
             .record
-            .as_borrowed()
+            .full_borrowed()
             .expect("source-file states are published core records")
         {
             AstStorageData::SourceFiles(files) => &files[&self.node],
@@ -577,9 +577,9 @@ impl<'a> AstView<'a> {
         let owner = self.for_node_owner(node)?;
         let owner = AstView(owner.0.owner_retention()?, self.1);
         let map = owner.file_info().source_files.ok_or(Error::InvalidGraph)?;
-        let record = owner.0.aux(map)?;
+        let record = owner.auxiliary(map)?;
         match record
-            .as_borrowed()
+            .full_borrowed()
             .expect("source maps are published core records")
         {
             AstStorageData::SourceFiles(files) if files.contains_key(&node) => {
@@ -609,7 +609,7 @@ impl AstBuilder {
             .file_info()
             .source_files
             .ok_or(Error::InvalidGraph)?;
-        match self.storage.aux_mut(map)? {
+        match self.auxiliary_mut(map)? {
             AstStorageData::SourceFiles(files) => files.get_mut(&node).ok_or(Error::InvalidGraph),
             _ => Err(Error::InvalidGraph),
         }
@@ -644,9 +644,7 @@ impl AstBuilder {
         let map = if let Some(map) = self.view().file_info().source_files {
             map
         } else {
-            let map = self
-                .storage
-                .push_aux(AstStorageData::SourceFiles(BTreeMap::new()));
+            let map = self.push_auxiliary(AstStorageData::SourceFiles(BTreeMap::new()));
             self.frame_mut().source_files = Some(map);
             map
         };
@@ -660,8 +658,7 @@ impl AstBuilder {
             }),
         );
         match self
-            .storage
-            .aux_mut(map)
+            .auxiliary_mut(map)
             .expect("source-file map is mutable core storage")
         {
             AstStorageData::SourceFiles(files) => {

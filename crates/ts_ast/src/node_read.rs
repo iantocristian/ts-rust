@@ -85,7 +85,12 @@ impl<'a> NodeRead<'a> {
             .expect("lazy payload slot");
         Self {
             record: ReadRecord::Lazy {
-                record: owner.aux(aux).expect("published lazy payload"),
+                record: crate::auxiliary::AuxRead::resolved(
+                    owner.aux(aux).expect("published lazy payload"),
+                    owner,
+                )
+                .into_full()
+                .expect("lazy payload is full"),
                 owner: owner.physical_owner(),
             },
             id,

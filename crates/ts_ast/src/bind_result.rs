@@ -66,12 +66,12 @@ impl BindResult {
             .file_info()
             .source_files
             .expect("binding source has a source map");
-        let multiple_sources = match &*view
-            .0
-            .aux(source_map)
+        let multiple_sources = match view
+            .auxiliary(source_map)
             .expect("binding source map is retained")
+            .full()
         {
-            crate::AstStorageData::SourceFiles(files) => files.len() > 1,
+            Some(crate::AstStorageData::SourceFiles(files)) => files.len() > 1,
             _ => unreachable!("validated source map"),
         };
         let mut result = Self {

@@ -1,7 +1,7 @@
 use crate::{
-    arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, Counters, Error,
-    FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle, StorageRead, StorageTransaction,
-    SymbolId,
+    arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, AuxiliaryRead,
+    Counters, Error, FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle, StorageRead,
+    StorageTransaction, SymbolId,
 };
 use std::{
     collections::HashMap,
@@ -33,7 +33,7 @@ impl<N> CoreNodesMut<'_, N> {
 
 /// Read-only construction data paired with an exclusive core-record borrow.
 pub struct CoreDataRead<'a, N: NodeRecord> {
-    auxiliary: &'a Arena<N::Aux>,
+    auxiliary: &'a Arena<N::CoreAux>,
     store: &'a N::Store,
     source: &'a SourceText,
 }
@@ -41,7 +41,7 @@ impl<'a, N: NodeRecord> CoreDataRead<'a, N> {
     pub fn auxiliary_arena(&self) -> ArenaId {
         self.auxiliary.id
     }
-    pub fn auxiliary(&self, id: AuxId) -> Result<&'a N::Aux, Error> {
+    pub fn auxiliary(&self, id: AuxId) -> Result<&'a N::CoreAux, Error> {
         self.auxiliary.get(id.arena(), id.slot())
     }
     pub fn store(&self) -> &'a N::Store {
@@ -63,6 +63,7 @@ impl<N, S> RetainedImport<N, S> for StorageHandle<N, S>
 where
     N: NodeRecord + Send + Sync,
     N::Aux: Send + Sync,
+    N::CoreAux: Send + Sync,
     N::Store: Send + Sync,
     S: Send + Sync,
 {
@@ -171,6 +172,17 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
             &self.owner.source,
         ))
     }
+    /// Resolve a core auxiliary record before exposing either mutable part.
+    /// Failed owner or slot checks leave the payload store unborrowed.
+    pub fn aux_and_store_mut(
+        &mut self,
+        id: AuxId,
+    ) -> Result<(&mut N::CoreAux, &mut N::Store), Error> {
+        Ok((
+            self.owner.auxiliary.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+        ))
+    }
     /// Retain a previously published file and its complete mapped bundle.
     /// Imports are flattened and deduplicated at this explicit ownership boundary;
     /// ordinary lookup only borrows the selected owner. Published-only inputs
@@ -179,6 +191,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::CoreAux: Send + Sync + 'static,
         N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
@@ -218,7 +231,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn push(&mut self, node: N) -> NodeId {
         NodeId::new(self.owner.core.id, self.owner.core.push(node))
     }
-    pub fn push_aux(&mut self, value: N::Aux) -> AuxId {
+    pub fn push_aux(&mut self, value: N::CoreAux) -> AuxId {
         AuxId::new(self.owner.auxiliary.id, self.owner.auxiliary.push(value))
     }
     pub fn push_symbol(&mut self, symbol: S) -> SymbolId {
@@ -236,7 +249,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
         self.owner.core.get_mut(id.arena(), id.slot())
     }
-    pub fn aux_mut(&mut self, id: AuxId) -> Result<&mut N::Aux, Error> {
+    pub fn aux_mut(&mut self, id: AuxId) -> Result<&mut N::CoreAux, Error> {
         self.owner.auxiliary.get_mut(id.arena(), id.slot())
     }
     pub fn symbol_mut(&mut self, id: SymbolId) -> Result<&mut S, Error> {
@@ -296,7 +309,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
 pub struct StorageOwner<N: NodeRecord, S = ()> {
     pub(crate) core: Arena<N>,
     pub(crate) symbols: Arena<S>,
-    pub(crate) auxiliary: Arena<N::Aux>,
+    pub(crate) auxiliary: Arena<N::CoreAux>,
     pub(crate) store: N::Store,
     pub(crate) lazy: LazyArena<N>,
     source: SourceText,
@@ -327,6 +340,7 @@ impl<N: NodeRecord, S> StorageOwner<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::CoreAux: Send + Sync + 'static,
         N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
@@ -498,7 +512,7 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn core_nodes(self) -> impl Iterator<Item = &'a N> {
         self.owner.core.values()
     }
-    pub fn core_auxiliary(self) -> impl Iterator<Item = &'a N::Aux> {
+    pub fn core_auxiliary(self) -> impl Iterator<Item = &'a N::CoreAux> {
         self.owner.auxiliary.values()
     }
     pub fn id(self) -> FileId {
@@ -566,22 +580,24 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             Ok(StorageRead::lazy(self.owner.lazy.node(id)?))
         }
     }
-    pub fn aux(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
+    pub fn aux(self, id: AuxId) -> Result<AuxiliaryRead<'a, N>, Error> {
         self.for_arena(id.arena())?.aux_here(id)
     }
     /// Resolve an auxiliary record and its physical owner in one routing step.
     /// The returned view borrows the original retention context.
-    pub fn aux_with_owner(self, id: AuxId) -> Result<(StorageRead<'a, N::Aux>, Self), Error> {
+    pub fn aux_with_owner(self, id: AuxId) -> Result<(AuxiliaryRead<'a, N>, Self), Error> {
         let owner = self.for_arena(id.arena())?;
         Ok((owner.aux_here(id)?, owner))
     }
-    fn aux_here(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
+    fn aux_here(self, id: AuxId) -> Result<AuxiliaryRead<'a, N>, Error> {
         if id.arena() == self.owner.auxiliary.id {
-            Ok(StorageRead::borrowed(
+            Ok(AuxiliaryRead::Core(
                 self.owner.auxiliary.get_slot(id.slot())?,
             ))
         } else {
-            Ok(StorageRead::lazy(self.owner.lazy.aux(id)?))
+            Ok(AuxiliaryRead::Lazy(StorageRead::lazy(
+                self.owner.lazy.aux(id)?,
+            )))
         }
     }
     /// Cache-only lookup. It never invokes a parser or allocates nodes.

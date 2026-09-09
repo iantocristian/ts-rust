@@ -1,9 +1,10 @@
+use crate::auxiliary::AuxRead;
 use crate::{JsString, NodeId};
 use std::{
     ops::{Deref, Range},
     sync::Arc,
 };
-use ts_arena::{AuxId, Error, StorageRead};
+use ts_arena::{AuxId, Error};
 use ts_core::TextRange;
 
 /// An immutable list identity. The referenced header remains mutable only while
@@ -160,24 +161,40 @@ pub enum AstStorageData {
     SourceFiles(std::collections::BTreeMap<NodeId, crate::SourceFileState>),
 }
 
-pub struct NodeListRead<'a>(pub(crate) StorageRead<'a, AstStorageData>);
-impl Deref for NodeListRead<'_> {
-    type Target = NodeList;
-    fn deref(&self) -> &NodeList {
-        match &*self.0 {
-            AstStorageData::List(list) => list,
-            _ => unreachable!("validated list record"),
-        }
+/// A semantic list header retains its borrowed owner or lazy publication guard.
+///
+/// ```compile_fail
+/// use ts_ast::{AstFile, NodeListId, NodeListRead};
+/// fn escape(file: &AstFile, list: NodeListId) -> NodeListRead<'static> {
+///     file.view().list(list).unwrap()
+/// }
+/// ```
+pub struct NodeListRead<'a>(pub(crate) AuxRead<'a>);
+impl NodeListRead<'_> {
+    pub fn to_owned(&self) -> NodeList {
+        self.0.list().expect("validated list record")
+    }
+    pub fn loc(&self) -> TextRange {
+        self.to_owned().loc()
+    }
+    pub fn nodes(&self) -> NodeSlice {
+        self.to_owned().nodes()
+    }
+    pub fn modifier_flags(&self) -> u32 {
+        self.to_owned().modifier_flags()
+    }
+    pub fn is_missing(&self) -> bool {
+        self.to_owned().is_missing()
     }
 }
 impl std::fmt::Debug for NodeListRead<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.deref().fmt(f)
+        self.to_owned().fmt(f)
     }
 }
 
 pub struct NodeSliceRead<'a> {
-    pub(crate) record: Option<StorageRead<'a, AstStorageData>>,
+    pub(crate) record: Option<AuxRead<'a>>,
     pub(crate) compact: Option<(&'a crate::compact::lists::EdgePages, ts_arena::ArenaId)>,
     pub(crate) start: usize,
     pub(crate) len: usize,
@@ -186,8 +203,8 @@ impl NodeSliceRead<'_> {
     fn values(&self) -> &[Option<NodeId>] {
         match &self.record {
             None => &[],
-            Some(record) => match &**record {
-                AstStorageData::Nodes(nodes) => &nodes[self.start..self.start + self.len],
+            Some(record) => match record.full() {
+                Some(AstStorageData::Nodes(nodes)) => &nodes[self.start..self.start + self.len],
                 _ => unreachable!("validated node slice record"),
             },
         }
@@ -313,8 +330,16 @@ impl ExactSizeIterator for NodeSliceIter<'_> {
 }
 impl std::iter::FusedIterator for NodeSliceIter<'_> {}
 
+/// Text references cannot escape the read that holds their lazy backing guard.
+///
+/// ```compile_fail
+/// use ts_ast::{AstFile, JsString, TextSlice};
+/// fn escape<'a>(file: &'a AstFile, text: TextSlice) -> &'a [JsString] {
+///     &file.view().text_slice(text).unwrap()
+/// }
+/// ```
 pub struct TextSliceRead<'a> {
-    pub(crate) record: Option<StorageRead<'a, AstStorageData>>,
+    pub(crate) record: Option<AuxRead<'a>>,
     pub(crate) start: usize,
     pub(crate) len: usize,
 }
@@ -323,8 +348,8 @@ impl Deref for TextSliceRead<'_> {
     fn deref(&self) -> &Self::Target {
         match &self.record {
             None => &[],
-            Some(record) => match &**record {
-                AstStorageData::Text(text) => &text[self.start..self.start + self.len],
+            Some(record) => match record.full() {
+                Some(AstStorageData::Text(text)) => &text[self.start..self.start + self.len],
                 _ => unreachable!("validated text slice record"),
             },
         }

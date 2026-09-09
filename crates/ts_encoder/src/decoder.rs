@@ -230,7 +230,7 @@ impl<'a> Decoder<'a> {
             .view()
             .list(list)
             .expect("decoded list owner")
-            .clone();
+            .to_owned();
         Some(
             self.factory
                 .new_list(list.loc(), list.nodes())

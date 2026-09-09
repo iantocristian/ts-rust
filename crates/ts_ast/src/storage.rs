@@ -1,3 +1,4 @@
+use crate::auxiliary::{AuxRead, AuxValue};
 use crate::compact::{CompactContext, FieldKey, StoredNode};
 use crate::NodeMut;
 use crate::{
@@ -45,8 +46,13 @@ impl AstBuilder {
         counters: &Counters,
         hooks: Option<Arc<dyn FactoryHooks>>,
     ) -> Self {
-        let mut storage = StorageBuilder::from_source_text(source, counters);
-        let frame = storage.push_aux(AstStorageData::File(FileInfo::default()));
+        let mut storage = StorageBuilder::<StoredNode>::from_source_text(source, counters);
+        let auxiliary = storage.view().auxiliary_arena();
+        let record = storage
+            .store_mut()
+            .auxiliary
+            .push(AstStorageData::File(FileInfo::default()), auxiliary);
+        let frame = storage.push_aux(record);
         storage
             .set_metadata(frame)
             .expect("new file frame belongs to core storage");
@@ -57,6 +63,15 @@ impl AstBuilder {
             frame,
             construction_edges_valid,
         }
+    }
+    pub(crate) fn push_auxiliary(&mut self, value: AstStorageData) -> AuxId {
+        let owner = self.storage.view().auxiliary_arena();
+        let record = self.storage.store_mut().auxiliary.push(value, owner);
+        self.storage.push_aux(record)
+    }
+    pub(crate) fn auxiliary_mut(&mut self, id: AuxId) -> Result<&mut AstStorageData, Error> {
+        let (record, store) = self.storage.aux_and_store_mut(id)?;
+        store.auxiliary.full_mut(record)
     }
     pub fn view(&self) -> AstView<'_> {
         AstView(self.storage.view(), None)
@@ -210,7 +225,7 @@ impl AstBuilder {
         Ok(())
     }
     pub(crate) fn frame_mut(&mut self) -> &mut FileInfo {
-        match self.storage.aux_mut(self.frame).expect("core file frame") {
+        match self.auxiliary_mut(self.frame).expect("core file frame") {
             AstStorageData::File(info) => info,
             _ => unreachable!("file frame record kind"),
         }
@@ -229,7 +244,7 @@ impl AstBuilder {
         let len = checked_len(nodes.len())?;
         let owner = self.id().arena();
         let compact = self.storage.store_mut().edges.append(owner, &nodes)?;
-        let backing = self.storage.push_aux(AstStorageData::CompactNodes(compact));
+        let backing = self.push_auxiliary(AstStorageData::CompactNodes(compact));
         Ok(NodeSlice {
             backing: Some(backing),
             start: 0,
@@ -238,9 +253,7 @@ impl AstBuilder {
     }
     pub fn text_slice(&mut self, text: Vec<JsString>) -> Result<TextSlice, Error> {
         let len = checked_len(text.len())?;
-        let backing = self
-            .storage
-            .push_aux(AstStorageData::Text(text.into_boxed_slice()));
+        let backing = self.push_auxiliary(AstStorageData::Text(text.into_boxed_slice()));
         Ok(TextSlice {
             backing: Some(backing),
             start: 0,
@@ -249,55 +262,44 @@ impl AstBuilder {
     }
     pub fn new_list(&mut self, loc: TextRange, nodes: NodeSlice) -> Result<NodeListId, Error> {
         self.view().node_slice(nodes)?;
-        Ok(NodeListId(
-            self.storage
-                .push_aux(AstStorageData::List(NodeList::new(loc, nodes))),
-        ))
+        Ok(NodeListId(self.push_auxiliary(AstStorageData::List(
+            NodeList::new(loc, nodes),
+        ))))
     }
     pub fn clone_list(&mut self, list: NodeListId) -> Result<NodeListId, Error> {
-        let header = self.view().list(list)?.clone();
+        let header = self.view().list(list)?.to_owned();
         Ok(NodeListId(
-            self.storage.push_aux(AstStorageData::List(header)),
+            self.push_auxiliary(AstStorageData::List(header)),
         ))
     }
     pub fn list_mut(&mut self, id: NodeListId) -> Result<&mut NodeList, Error> {
-        match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => {
-                self.construction_edges_valid = false;
-                Ok(list)
-            }
-            _ => Err(Error::InvalidGraph),
-        }
+        let owner = self.storage.view().auxiliary_arena();
+        let (record, store) = self.storage.aux_and_store_mut(id.0)?;
+        let list = store.auxiliary.list_mut(record, owner)?;
+        self.construction_edges_valid = false;
+        Ok(list)
     }
     pub fn set_list_nodes(&mut self, id: NodeListId, nodes: NodeSlice) -> Result<(), Error> {
         self.view().node_slice(nodes)?;
-        match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => list.set_nodes(nodes),
-            _ => return Err(Error::InvalidGraph),
-        }
-        Ok(())
+        let owner = self.storage.view().auxiliary_arena();
+        let (record, store) = self.storage.aux_and_store_mut(id.0)?;
+        store.auxiliary.set_nodes(record, nodes, owner)
     }
     /// Location and cached modifier flags cannot change syntax edges.
     pub fn set_list_location(&mut self, id: NodeListId, loc: TextRange) -> Result<(), Error> {
-        match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => list.set_loc(loc),
-            _ => return Err(Error::InvalidGraph),
-        }
-        Ok(())
+        let (record, store) = self.storage.aux_and_store_mut(id.0)?;
+        store.auxiliary.set_location(record, loc)
     }
     pub fn set_list_modifier_flags(&mut self, id: NodeListId, flags: u32) -> Result<(), Error> {
-        match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => list.set_modifier_flags(flags),
-            _ => return Err(Error::InvalidGraph),
-        }
-        Ok(())
+        let (record, store) = self.storage.aux_and_store_mut(id.0)?;
+        store.auxiliary.set_flags(record, flags)
     }
     pub fn mark_list_missing(&mut self, id: NodeListId) -> Result<(), Error> {
-        match self.storage.aux_mut(id.0)? {
-            AstStorageData::List(list) => list.set_missing(true),
-            _ => return Err(Error::InvalidGraph),
-        }
-        Ok(())
+        let owner = self.storage.view().auxiliary_arena();
+        let (record, store) = self.storage.aux_and_store_mut(id.0)?;
+        store
+            .auxiliary
+            .set_nodes(record, NodeSlice::missing(), owner)
     }
     pub fn seed_jsdoc(&mut self, parent: NodeId, roots: Vec<NodeId>) -> Result<(), Error> {
         self.storage.seed_jsdoc(parent, roots)
@@ -339,15 +341,19 @@ impl crate::ChildVisitor for CoreParents<'_> {
         std::ops::ControlFlow::Continue(())
     }
     fn visit_list(&mut self, list: NodeListId) -> std::ops::ControlFlow<()> {
-        let header = list_read(StorageRead::borrowed(
-            self.data.auxiliary(list.0).expect("factory list"),
-        ))
+        let header = list_read(AuxRead::Core {
+            record: self.data.auxiliary(list.0).expect("factory list"),
+            store: self.data.store(),
+            owner: self.data.auxiliary_arena(),
+        })
         .expect("factory list");
         self.visit_node_slice(header.nodes())
     }
     fn visit_node_slice(&mut self, nodes: NodeSlice) -> std::ops::ControlFlow<()> {
-        let record = nodes.backing.map(|backing| {
-            StorageRead::borrowed(self.data.auxiliary(backing).expect("factory slice"))
+        let record = nodes.backing.map(|backing| AuxRead::Core {
+            record: self.data.auxiliary(backing).expect("factory slice"),
+            store: self.data.store(),
+            owner: self.data.auxiliary_arena(),
         });
         let values = node_slice_read(
             nodes,
@@ -514,8 +520,8 @@ impl AstFile {
             None
         } else {
             let aux = AuxId::from_parts(owner.lazy_auxiliary_arena(), record.ordinal)?;
-            match &*owner.aux(aux)? {
-                AstStorageData::FallbackNode(node) => Some(node.clone()),
+            match AuxRead::resolved(owner.aux(aux)?, owner).full() {
+                Some(AstStorageData::FallbackNode(node)) => Some(node.clone()),
                 _ => return Err(Error::InvalidGraph),
             }
         };
@@ -682,15 +688,19 @@ impl<'a> AstView<'a> {
             }
         }
     }
+    pub(crate) fn auxiliary(self, id: AuxId) -> Result<AuxRead<'a>, Error> {
+        let (record, owner) = self.0.aux_with_owner(id)?;
+        Ok(AuxRead::resolved(record, owner))
+    }
     pub fn file_info(self) -> FileInfo {
         let id = self.0.metadata().expect("AST storage has a file frame");
-        match &*self.0.aux(id).expect("core file frame") {
-            AstStorageData::File(info) => *info,
+        match self.auxiliary(id).expect("core file frame").full() {
+            Some(AstStorageData::File(info)) => *info,
             _ => unreachable!("file frame record kind"),
         }
     }
     pub fn list(self, id: NodeListId) -> Result<NodeListRead<'a>, Error> {
-        list_read(self.0.aux(id.0)?)
+        list_read(self.auxiliary(id.0)?)
     }
     // port: tsc/internal/ast/ast.go:NodeList.HasTrailingComma
     pub fn list_has_trailing_comma(self, id: NodeListId) -> Result<bool, Error> {
@@ -707,7 +717,7 @@ impl<'a> AstView<'a> {
             Some(id) => {
                 let (record, owner) = self.0.aux_with_owner(id)?;
                 (
-                    Some(record),
+                    Some(AuxRead::resolved(record, owner)),
                     Some((&owner.store().edges, owner.id().arena())),
                 )
             }
@@ -716,7 +726,7 @@ impl<'a> AstView<'a> {
         node_slice_read(nodes, record, compact)
     }
     pub fn text_slice(self, text: TextSlice) -> Result<TextSliceRead<'a>, Error> {
-        text_slice_read(text, text.backing.map(|id| self.0.aux(id)).transpose()?)
+        text_slice_read(text, text.backing.map(|id| self.auxiliary(id)).transpose()?)
     }
     pub fn eager_jsdoc(self, parent: NodeId) -> Result<Option<JSDocRoots>, Error> {
         Ok(self.0.eager_jsdoc(parent)?.map(JSDocRoots::from_shared))
@@ -787,6 +797,21 @@ impl<'a> AstView<'a> {
     /// Parent links and source metadata can change after construction and are
     /// always checked in the original node/auxiliary order. Only immutable or
     /// narrowly updated syntax edges can carry their construction proof here.
+    fn validate_backing(self, backing: crate::compact::lists::CompactNodes) -> Result<(), Error> {
+        let edges = &self.0.store().edges;
+        let end = backing
+            .start
+            .checked_add(backing.len as usize)
+            .ok_or(Error::InvalidGraph)?;
+        let range = backing.start..end;
+        if !edges.valid_range(range.clone()) {
+            return Err(Error::InvalidGraph);
+        }
+        for node in edges.iter(self.0.id().arena(), range).flatten() {
+            self.node(node)?;
+        }
+        Ok(())
+    }
     fn validate_core_with_construction_edges(self, checked: bool) -> Result<(), Error> {
         let context = CompactContext {
             nodes: self.0.id().arena(),
@@ -813,7 +838,27 @@ impl<'a> AstView<'a> {
                 )?;
             }
         }
-        for value in self.0.core_auxiliary() {
+        for record in self.0.core_auxiliary() {
+            let value = self
+                .0
+                .store()
+                .auxiliary
+                .value(record, self.0.auxiliary_arena());
+            let value = match value {
+                AuxValue::List(list) => {
+                    if !checked {
+                        self.node_slice(list.nodes())?;
+                    }
+                    continue;
+                }
+                AuxValue::CompactNodes(backing) => {
+                    if !checked {
+                        self.validate_backing(backing)?;
+                    }
+                    continue;
+                }
+                AuxValue::Full(value) => value,
+            };
             match value {
                 AstStorageData::List(list) => {
                     if !checked {
@@ -851,7 +896,10 @@ impl<'a> AstView<'a> {
                         self.node(root)?;
                     }
                     if let Some(map) = info.source_files {
-                        if !matches!(&*self.0.aux(map)?, AstStorageData::SourceFiles(_)) {
+                        if !matches!(
+                            self.auxiliary(map)?.full(),
+                            Some(AstStorageData::SourceFiles(_))
+                        ) {
                             return Err(Error::InvalidGraph);
                         }
                     }
@@ -881,8 +929,8 @@ impl AstTransaction<'_, '_> {
             Ok(NodeRead::transaction_core(id, header, self.storage))
         } else {
             let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), header.ordinal)?;
-            match self.storage.aux(aux)? {
-                AstStorageData::FallbackNode(node) => Ok(NodeRead::owned(
+            match self.auxiliary(aux)?.full_borrowed() {
+                Some(AstStorageData::FallbackNode(node)) => Ok(NodeRead::owned(
                     id,
                     node,
                     self.storage.owner_id(),
@@ -914,26 +962,25 @@ impl AstTransaction<'_, '_> {
         header.ordinal = aux.slot();
         header
     }
+    fn auxiliary(&self, id: AuxId) -> Result<AuxRead<'_>, Error> {
+        Ok(AuxRead::with_store(
+            self.storage.aux(id)?,
+            self.storage.store(),
+            self.storage.core_auxiliary_arena(),
+        ))
+    }
     pub fn list(&self, id: NodeListId) -> Result<NodeListRead<'_>, Error> {
-        list_read(StorageRead::borrowed(self.storage.aux(id.0)?))
+        list_read(self.auxiliary(id.0)?)
     }
     pub fn node_slice_read(&self, nodes: NodeSlice) -> Result<NodeSliceRead<'_>, Error> {
         node_slice_read(
             nodes,
-            nodes
-                .backing
-                .map(|id| self.storage.aux(id).map(StorageRead::borrowed))
-                .transpose()?,
+            nodes.backing.map(|id| self.auxiliary(id)).transpose()?,
             Some((&self.storage.store().edges, self.storage.owner_id().arena())),
         )
     }
     pub fn text_slice_read(&self, text: TextSlice) -> Result<TextSliceRead<'_>, Error> {
-        text_slice_read(
-            text,
-            text.backing
-                .map(|id| self.storage.aux(id).map(StorageRead::borrowed))
-                .transpose()?,
-        )
+        text_slice_read(text, text.backing.map(|id| self.auxiliary(id)).transpose()?)
     }
     pub fn node_slice(&mut self, nodes: Vec<Option<NodeId>>) -> Result<NodeSlice, Error> {
         for &id in nodes.iter().flatten() {
@@ -1000,7 +1047,10 @@ impl AstTransaction<'_, '_> {
     fn validate_staged(&self) -> Result<(), Error> {
         for header in self.storage.staged_nodes() {
             let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), header.ordinal)?;
-            if !matches!(self.storage.aux(aux)?, AstStorageData::FallbackNode(_)) {
+            if !matches!(
+                self.auxiliary(aux)?.full(),
+                Some(AstStorageData::FallbackNode(_))
+            ) {
                 return Err(Error::InvalidGraph);
             }
         }
@@ -1036,15 +1086,13 @@ impl AstTransaction<'_, '_> {
 fn checked_len(len: usize) -> Result<u32, Error> {
     u32::try_from(len).map_err(|_| Error::InvalidSlot)
 }
-fn list_read(record: StorageRead<'_, AstStorageData>) -> Result<NodeListRead<'_>, Error> {
-    if !matches!(&*record, AstStorageData::List(_)) {
-        return Err(Error::InvalidGraph);
-    }
+fn list_read(record: AuxRead<'_>) -> Result<NodeListRead<'_>, Error> {
+    record.list()?;
     Ok(NodeListRead(record))
 }
 fn node_slice_read<'a>(
     nodes: NodeSlice,
-    record: Option<StorageRead<'a, AstStorageData>>,
+    record: Option<AuxRead<'a>>,
     compact: Option<(&'a crate::compact::lists::EdgePages, ts_arena::ArenaId)>,
 ) -> Result<NodeSliceRead<'a>, Error> {
     let mut start = nodes.start as usize;
@@ -1052,12 +1100,18 @@ fn node_slice_read<'a>(
     let mut selected_compact = None;
     match &record {
         None if len == 0 && (start == 0 || nodes.is_missing()) => {}
-        Some(record) => match &**record {
-            AstStorageData::Nodes(values)
+        Some(record) => match record.value() {
+            AuxValue::Full(AstStorageData::Nodes(values))
                 if start
                     .checked_add(len)
                     .is_some_and(|end| end <= values.len()) => {}
-            AstStorageData::CompactNodes(backing) => {
+            value @ (AuxValue::CompactNodes(_)
+            | AuxValue::Full(AstStorageData::CompactNodes(_))) => {
+                let backing = match value {
+                    AuxValue::CompactNodes(value) => value,
+                    AuxValue::Full(AstStorageData::CompactNodes(value)) => *value,
+                    _ => unreachable!(),
+                };
                 let (edges, owner) = compact.ok_or(Error::InvalidGraph)?;
                 if start
                     .checked_add(len)
@@ -1088,14 +1142,14 @@ fn node_slice_read<'a>(
 }
 fn text_slice_read(
     text: TextSlice,
-    record: Option<StorageRead<'_, AstStorageData>>,
+    record: Option<AuxRead<'_>>,
 ) -> Result<TextSliceRead<'_>, Error> {
     let start = text.start as usize;
     let len = text.len();
     match &record {
         None if len == 0 && start == 0 => {}
-        Some(record) => match &**record {
-            AstStorageData::Text(values)
+        Some(record) => match record.full() {
+            Some(AstStorageData::Text(values))
                 if start
                     .checked_add(len)
                     .is_some_and(|end| end <= values.len()) => {}

@@ -98,12 +98,12 @@ fn compact_syntax_backings_span_pages_and_keep_imported_and_lazy_context() {
         let empty = dependency.node_slice(Vec::new()).unwrap();
         assert!(!empty.is_nil());
         assert!(matches!(
-            &*dependency
-                .storage
+            dependency
                 .view()
-                .aux(crossing.backing.unwrap())
-                .unwrap(),
-            AstStorageData::CompactNodes(_)
+                .auxiliary(crossing.backing.unwrap())
+                .unwrap()
+                .value(),
+            crate::auxiliary::AuxValue::CompactNodes(_)
         ));
         let lazy_root = dependency.new_identifier(JsString::from_bytes(b"lazy parent".as_slice()));
         let dependency = dependency.complete(child).unwrap().publish_unbound();
@@ -124,7 +124,8 @@ fn compact_syntax_backings_span_pages_and_keep_imported_and_lazy_context() {
                 transaction.node_mut(root)?.set_parent(Some(lazy_root));
                 assert!(matches!(
                     transaction.storage.aux(nodes.backing.unwrap())?,
-                    AstStorageData::Nodes(_)
+                    ts_arena::AuxiliaryRead::Lazy(record)
+                        if matches!(&*record, AstStorageData::Nodes(_))
                 ));
                 Ok(vec![root])
             })
