@@ -179,10 +179,22 @@ def build_rust(instrumented=False):
     args = ["cargo", "+"+stable, "build", "--release", "--locked", "--package", "ts_bench", "--bin", "ts-bench", "--target", host, "--message-format=json-render-diagnostics", *release_configuration(env)]
     if instrumented:
         args.extend(["--features", "allocation"])
-    executable = rust_executable(command(args, cwd=ROOT, env=env), ROOT / "crates/ts_bench/Cargo.toml", instrumented)
     destination = CACHE / "s07-benchmark" / ("rust-benchmark-allocation" if instrumented else "rust-benchmark")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(executable, destination)
+    # Diagnostic checkouts can share package identities and a target directory.
+    # Cargo may then report a fresh artifact whose dep-info still names that
+    # other checkout. A source snapshot does not prove those bytes were built.
+    # Use an empty target directory for each measured executable, overriding
+    # both caller output/intermediate configuration; retain registry caches.
+    (ROOT / "target").mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="s07-native-build-", dir=ROOT / "target") as temporary:
+        build_directory = Path(temporary).resolve()
+        args.extend(["--target-dir", str(build_directory),
+                     "--config", "build.build-dir=" + json.dumps(str(build_directory))])
+        executable = rust_executable(command(args, cwd=ROOT, env=env), ROOT / "crates/ts_bench/Cargo.toml", instrumented)
+        if not executable.resolve().is_relative_to(build_directory):
+            raise ValueError("Cargo benchmark artifact escaped its isolated build directory")
+        shutil.copyfile(executable, destination)
     destination.chmod(0o755)
     return destination, env
 

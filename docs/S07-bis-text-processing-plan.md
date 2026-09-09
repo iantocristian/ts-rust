@@ -114,3 +114,24 @@ These scoped instrumentation runs do not claim the complete ownership producer.
 The coherent candidate still needs its frozen graph check and fixed paired
 performance screen. No speedup or performance admission is claimed from the
 passing correctness checks.
+
+## Build provenance correction before timing
+
+The first freeze for `aa6a5f6` is invalid: Cargo returned the exact normal and
+allocation binaries from the preceding `03f9aa3` phase/live diagnostic. Its
+reported manifest pointed at the working checkout, while the executable's
+retained dep-info named the diagnostic source tree. The diagnostic had shared
+`CARGO_TARGET_DIR` with the workspace. Snapshotting current source and validating
+Cargo's selected artifact were insufficient to detect that reused output.
+
+No performance samples were collected from this freeze. Its bundle, logs and
+interrupted graph attempt are retained as an invalid build, not correctness or
+performance evidence for the keyword/slice implementation. Benchmark executable
+builds now use a fresh temporary target directory, overriding configured or
+environment output/intermediate paths while preserving registry caches. Both
+`--target-dir` and `build.build-dir` point at the empty directory. The executable must
+resolve inside that directory, is copied before cleanup, and receives the same
+native profile checks. A real Cargo regression fixture checks the isolation.
+The corrected freeze uses a new output directory and repeats full graphs before
+the single fixed timing schedule; this is a build-defect retry, not extra timing
+samples selected for a favorable result.
