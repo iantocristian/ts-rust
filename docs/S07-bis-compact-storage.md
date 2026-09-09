@@ -229,4 +229,50 @@ and 25 parser library tests pass, including the newly added validator regression
 and raw/cooked contextual-keyword fixture. Eleven arena/AST ownership doctests,
 workspace all-feature/all-target Clippy, Rust 1.96 all-target compilation,
 generation/observer drift and formatting pass. These are correctness and size
-checks; this third candidate's CPU and whole-pipeline costs are still unmeasured.
+checks. Its frozen full-workload graph comparison and fixed screen have now
+completed, with all 13,094 files binding in place and zero fallbacks in both
+worker modes. Receipt verification passes; all eight warmups and 56 samples
+remain intact.
+
+
+## Thin-owner result and one row-allocation trial
+
+| Metric | Same-screen CP1 | Thin-owner candidate | Candidate/control |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 4.909 s | 6.411 s | 1.306 |
+| Eight-worker wall | 1.380 s | 1.802 s | 1.306 |
+| Allocated bytes, worse median | 4.643 GB | 3.185 GB | 0.686 |
+| Peak RSS, worse median | 4.509 GB | 2.837 GB | 0.629 |
+
+Candidate manifest:
+`5a96a275e555e3156520d02c90b02866a55f2323ac080cb8e4cde1e48a8a2750`.
+The [third review archive](../tools/s07/performance-experiments/results/2026-09-09-compact-thin/README.md)
+retains the frozen sources/binaries, complete graph streams and all measurements.
+Both CPU modes still fail: upper 95% bootstrap ratios are 1.374 and 1.337,
+with relative MAD below 2% for both variants. **Not promoted; CP1 remains the
+control.** Both variants are slower in this capture than the preceding one;
+compare their same-screen ratios, not candidate medians across captures.
+
+| Metric | Thin-owner candidate | Historical same-mode limit | Remaining reduction |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 6.410711 s | 2.937627 s | 3.473084 s |
+| Eight-worker wall | 1.802183 s | 0.633963 s | 1.168220 s |
+| One-worker allocation | 3.184524 GB | 2.035226 GB | 1.149298 GB |
+| Eight-worker allocation | 3.184527 GB | 2.035767 GB | 1.148760 GB |
+| One-worker peak RSS | 2.834350 GB | 2.208948 GB | 0.625402 GB |
+| Eight-worker peak RSS | 2.837283 GB | 2.217045 GB | 0.620238 GB |
+
+Test one allocation-policy change next: an ordinary `Vec<T>` for each populated
+shape, replacing four-row boxed pages. Row references borrow the owner; exclusive
+mutable construction cannot grow storage while those references are usable.
+Published core rows never grow, and lazy payloads use separate storage. Stable
+addresses during exclusive growth were an internal test condition, not a public
+requirement. Preserve ordinal bounds, atomic facts and every owner/lazy lifetime
+check. Keep normal vector growth, without workload-specific reserves or sizing.
+
+This candidate can remove the page directory and per-four-row allocations, but
+vector growth adds requests and capacity slack. Measure both costs with the same
+full graph comparison and fixed pipeline screen against CP1. No page-size matrix,
+field trace or replay harness is added. If it also fails, reassess the integrated
+representation's remaining costs before any further policy tuning. Memory savings
+alone do not qualify a CPU-regressing implementation for promotion.
