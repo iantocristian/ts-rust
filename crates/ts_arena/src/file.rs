@@ -436,6 +436,12 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn id(self) -> FileId {
         self.owner.id()
     }
+    /// Borrow the selected physical owner without cloning a retaining handle.
+    /// The borrow keeps this view's lifetime; it does not inherit the caller's
+    /// wider routing capability for other bundle members or imported owners.
+    pub fn physical_owner(self) -> &'a StorageOwner<N, S> {
+        self.owner
+    }
     pub fn metadata(self) -> Option<AuxId> {
         self.owner.metadata
     }

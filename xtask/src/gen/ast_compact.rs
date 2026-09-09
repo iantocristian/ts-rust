@@ -3,7 +3,7 @@
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-use super::ast::{array, fields, header, rust_type, snake, string};
+use super::ast::{array, fields, header, nullable, rust_type, snake, string};
 
 fn has_facts(node: &Value) -> Result<bool, String> {
     Ok(array(node, "baseTypes")?
@@ -118,7 +118,7 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
         );
     }
     let mut code = header(pin, "ast_generated.go");
-    code.push_str("#[allow(clippy::wildcard_imports)] // Generated storage consumes every schema payload.\nuse crate::*;\nuse crate::compact::{CompactContext, CompactSlice, FieldKey, PackingContext, RowPages};\nuse std::sync::atomic::{AtomicU32, Ordering};\n\n");
+    code.push_str("#[allow(clippy::wildcard_imports)] // Generated storage consumes every schema payload.\nuse crate::*;\nuse crate::compact::{CompactContext, CompactSlice, FieldKey, PackingContext, RowPages, StoredNode};\nuse std::sync::atomic::{AtomicU32, Ordering};\n\n");
     for node in nodes {
         let name = string(node, "name")?;
         if fields(node)?.len() >= 0x8000 {
@@ -245,16 +245,14 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
     code.push_str(
         "            _ => panic!(\"compact payload replacement shape\"),\n        }\n    }\n",
     );
+    emit_reference_validation(&mut code, nodes)?;
     emit_text_operations(&mut code, nodes)?;
     emit_facts_operations(&mut code, nodes)?;
     emit_binding_operations(&mut code, nodes)?;
     code.push_str("\n    pub(crate) fn is_identifier_text(shape: u16, field: u16) -> bool {\n");
     let mut identifier_fields = BTreeMap::<usize, Vec<usize>>::new();
     for (shape, node) in nodes.iter().enumerate() {
-        if matches!(
-            node["name"].as_str(),
-            Some("Identifier" | "PrivateIdentifier")
-        ) {
+        if identifier_text(node) {
             for (index, field) in fields(node)?.iter().enumerate() {
                 if field["name"] == "Text" {
                     identifier_fields.entry(index).or_default().push(shape);
@@ -368,13 +366,87 @@ fn emit_binding_operations(code: &mut String, nodes: &[Value]) -> Result<(), Str
     Ok(())
 }
 
+fn emit_reference_validation(code: &mut String, nodes: &[Value]) -> Result<(), String> {
+    code.push_str("\n    /// Validate every stored reference in schema field order without constructing\n    /// a semantic payload enum. Parent edges remain the caller's preceding check.\n    pub(crate) fn validate_references<E>(&self, header: &StoredNode, context: CompactContext<'_>, mut node: impl FnMut(NodeId) -> Result<(), E>, mut list: impl FnMut(NodeListId) -> Result<(), E>, mut raw: impl FnMut(NodeSlice) -> Result<(), E>, mut text: impl FnMut(TextSlice) -> Result<(), E>) -> Result<(), E> {\n        let ordinal = header.ordinal;\n        match header.actual_shape() {\n");
+    let mut empty_shapes = Vec::new();
+    for (shape, definition) in nodes.iter().enumerate() {
+        if !has_row(definition)? {
+            empty_shapes.push(shape.to_string());
+            continue;
+        }
+        let mut references = Vec::new();
+        for (index, field) in fields(definition)?.into_iter().enumerate() {
+            let typ = rust_type(&field["type"])?;
+            let (codec, callback) = match typ.as_str() {
+                "NodeId" => ("node", "node"),
+                "NodeListId" => ("list", "list"),
+                "NodeSlice" => ("node_slice", "raw"),
+                "TextSlice" => ("text_slice", "text"),
+                _ => continue,
+            };
+            references.push((index, field, codec, callback));
+        }
+        let binding = if references.is_empty() { "_" } else { "row" };
+        code.push_str(&format!("            {shape} => {{\n                let {binding} = self.{}.as_ref().expect(\"compact shape directory\").get(ordinal).expect(\"compact payload ordinal\");\n", snake(string(definition,"name")?)));
+        for (index, field, codec, callback) in references {
+            let member = snake(string(field, "name")?);
+            let key = field_key(shape, index);
+            let decoded = format!("context.decode_{codec}({key}, row.{member})");
+            if nullable(field)? {
+                code.push_str(&format!(
+                    "                if let Some(id) = {decoded} {{ {callback}(id)?; }}\n"
+                ));
+            } else {
+                code.push_str(&format!("                {callback}({decoded})?;\n"));
+            }
+        }
+        code.push_str("            }\n");
+    }
+    if !empty_shapes.is_empty() {
+        code.push_str(&format!(
+            "            {} => {{}},\n",
+            empty_shapes.join(" | ")
+        ));
+    }
+    code.push_str(
+        "            _ => panic!(\"compact payload shape\"),\n        }\n        Ok(())\n    }\n",
+    );
+    Ok(())
+}
+
+fn identifier_text(node: &Value) -> bool {
+    matches!(
+        node["name"].as_str(),
+        Some("Identifier" | "PrivateIdentifier")
+    )
+}
+
 fn emit_text_operations(code: &mut String, nodes: &[Value]) -> Result<(), String> {
+    let shapes = nodes
+        .iter()
+        .enumerate()
+        .filter(|(_, node)| identifier_text(node))
+        .map(|(shape, _)| shape.to_string())
+        .collect::<Vec<_>>();
+    code.push_str(
+        "\n    #[inline]\n    pub(crate) fn has_source_relative_text(shape: u16) -> bool {\n",
+    );
+    if shapes.is_empty() {
+        code.push_str("        let _ = shape;\n        false\n");
+    } else {
+        code.push_str(&format!(
+            "        matches!(shape, {})\n",
+            shapes.join(" | ")
+        ));
+    }
+    code.push_str("    }\n");
     for (method, signature) in [
         ("release_text", "shape: u16, ordinal: u32, context: &mut PackingContext<'_>"),
         ("change_text_end", "shape: u16, ordinal: u32, old_end: i32, new_end: i32, context: &mut PackingContext<'_>"),
     ] {
         code.push_str(&format!("\n    pub(crate) fn {method}(&mut self, {signature}) {{\n        match shape {{\n"));
         for (shape,node) in nodes.iter().enumerate() {
+            if method == "change_text_end" && !identifier_text(node) { continue; }
             let mut texts = Vec::new();
             for (index,field) in fields(node)?.iter().enumerate() {
                 if rust_type(&field["type"])? == "JsString" {

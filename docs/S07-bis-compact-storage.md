@@ -216,3 +216,17 @@ borrow scoped to that lookup and release it before diagnostic mutation. Leave
 declaration-name ownership and the S04 string contract intact. Ordinary borrowed
 compact text reads already avoid classification. This caller change belongs
 to the combined repair, not a separate claimed CPU win.
+
+The thin physical-owner implementation is complete. A build-artifact size check
+measures `NodeRead` at 40 bytes (previously 56) and `NodeDataSource` at 16 bytes.
+Core and transaction reads borrow their selected physical owner/transaction;
+lazy reads retain their publication guard. No source clone, owner retention or
+wider import permission is added. Direct row validation preserves parent-first
+and schema callback order, including nil handling and immediate error return.
+
+Independent review finds no actionable ownership issue. The 89 AST, 28 binder
+and 25 parser library tests pass, including the newly added validator regression
+and raw/cooked contextual-keyword fixture. Eleven arena/AST ownership doctests,
+workspace all-feature/all-target Clippy, Rust 1.96 all-target compilation,
+generation/observer drift and formatting pass. These are correctness and size
+checks; this third candidate's CPU and whole-pipeline costs are still unmeasured.

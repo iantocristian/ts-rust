@@ -106,6 +106,11 @@ fn consuming_and_published_entries_have_identical_complete_graphs() {
             b"let \\u0061 = 1; const x = '\xff'; a++;",
         ),
         (
+            "borrowed and cooked contextual keyword checks",
+            ScriptKind::TS,
+            b"'use strict'; let \\u0069mplements = 1; implements; const value = 1; value;",
+        ),
+        (
             "JSX and empty child lists",
             ScriptKind::TSX,
             b"const element = <div><span />{items.map(x => <b>{x}</b>)}</div>; function empty() {}",

@@ -1,7 +1,7 @@
 //! Checked semantic reads borrow their physical owner and its compact payloads.
 use crate::compact::{CompactContext, FieldKey, StoredNode};
 use crate::{AstStorageData, Node, NodeDataRead, NodeDataSource, NodeId};
-use ts_arena::{AuxId, FileId, StorageRead, StorageView};
+use ts_arena::{AuxId, FileId, StorageOwner, StorageRead, StorageTransaction, StorageView};
 use ts_jsstring::SourceText;
 
 /// A node read borrows its physical owner. Lazy payload references cannot outlive
@@ -25,27 +25,31 @@ use ts_jsstring::SourceText;
 pub struct NodeRead<'a> {
     record: ReadRecord<'a>,
     id: NodeId,
-    owner_id: FileId,
 }
 enum ReadRecord<'a> {
     Core {
         header: &'a StoredNode,
-        context: CompactContext<'a>,
+        owner: &'a StorageOwner<StoredNode>,
+    },
+    TransactionCore {
+        header: &'a StoredNode,
+        owner: &'a StorageTransaction<'a, StoredNode>,
     },
     Owned {
         node: &'a Node,
         source: &'a SourceText,
+        owner_id: FileId,
     },
     Lazy {
         record: StorageRead<'a, AstStorageData>,
-        source: &'a SourceText,
+        owner: &'a StorageOwner<StoredNode>,
     },
 }
 impl std::fmt::Debug for NodeRead<'_> {
     fn fmt(&self, out: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         out.debug_struct("NodeRead")
             .field("id", &self.id)
-            .field("owner_id", &self.owner_id)
+            .field("owner_id", &self.owner_id())
             .field("kind", &self.kind())
             .field("shape", &self.data().name())
             .finish_non_exhaustive()
@@ -61,16 +65,10 @@ impl<'a> NodeRead<'a> {
         if id.arena() == owner.id().arena() {
             Self::core(
                 id,
-                owner.id(),
                 record
                     .as_borrowed()
                     .expect("core headers borrow their owner"),
-                CompactContext {
-                    nodes: owner.id().arena(),
-                    auxiliary: owner.auxiliary_arena(),
-                    source: owner.source(),
-                    store: owner.store(),
-                },
+                owner.physical_owner(),
             )
         } else {
             Self::resolved_lazy(id, record, owner)
@@ -88,23 +86,30 @@ impl<'a> NodeRead<'a> {
         Self {
             record: ReadRecord::Lazy {
                 record: owner.aux(aux).expect("published lazy payload"),
-                source: owner.source(),
+                owner: owner.physical_owner(),
             },
             id,
-            owner_id: owner.id(),
         }
     }
     #[inline]
     pub(crate) fn core(
         id: NodeId,
-        owner_id: FileId,
         header: &'a StoredNode,
-        context: CompactContext<'a>,
+        owner: &'a StorageOwner<StoredNode>,
     ) -> Self {
         Self {
-            record: ReadRecord::Core { header, context },
+            record: ReadRecord::Core { header, owner },
             id,
-            owner_id,
+        }
+    }
+    pub(crate) fn transaction_core(
+        id: NodeId,
+        header: &'a StoredNode,
+        owner: &'a StorageTransaction<'a, StoredNode>,
+    ) -> Self {
+        Self {
+            record: ReadRecord::TransactionCore { header, owner },
+            id,
         }
     }
     pub(crate) fn owned(
@@ -114,35 +119,53 @@ impl<'a> NodeRead<'a> {
         source: &'a SourceText,
     ) -> Self {
         Self {
-            record: ReadRecord::Owned { node, source },
+            record: ReadRecord::Owned {
+                node,
+                source,
+                owner_id,
+            },
             id,
-            owner_id,
         }
     }
     pub fn id(&self) -> NodeId {
         self.id
     }
     pub fn owner_id(&self) -> FileId {
-        self.owner_id
+        match self.record {
+            ReadRecord::Core { owner, .. } | ReadRecord::Lazy { owner, .. } => owner.id(),
+            ReadRecord::TransactionCore { owner, .. } => owner.owner_id(),
+            ReadRecord::Owned { owner_id, .. } => owner_id,
+        }
     }
     pub fn source(&self) -> &'a SourceText {
         match self.record {
-            ReadRecord::Core { context, .. } => context.source,
-            ReadRecord::Owned { source, .. } | ReadRecord::Lazy { source, .. } => source,
+            ReadRecord::Core { owner, .. } | ReadRecord::Lazy { owner, .. } => owner.source_text(),
+            ReadRecord::TransactionCore { owner, .. } => owner.source(),
+            ReadRecord::Owned { source, .. } => source,
         }
     }
     /// A directly borrowed read can retain its owner's lifetime. A directory
     /// resolved lazy read must stay bounded by its publication guard instead.
     pub fn as_borrowed(&self) -> Option<Self> {
         let record = match self.record {
-            ReadRecord::Core { header, context } => ReadRecord::Core { header, context },
-            ReadRecord::Owned { node, source } => ReadRecord::Owned { node, source },
+            ReadRecord::Core { header, owner } => ReadRecord::Core { header, owner },
+            ReadRecord::TransactionCore { header, owner } => {
+                ReadRecord::TransactionCore { header, owner }
+            }
+            ReadRecord::Owned {
+                node,
+                source,
+                owner_id,
+            } => ReadRecord::Owned {
+                node,
+                source,
+                owner_id,
+            },
             ReadRecord::Lazy { .. } => return None,
         };
         Some(Self {
             record,
             id: self.id,
-            owner_id: self.owner_id,
         })
     }
     fn owned_record(&self) -> Option<&Node> {
@@ -152,14 +175,43 @@ impl<'a> NodeRead<'a> {
                 AstStorageData::FallbackNode(node) => Some(node),
                 _ => unreachable!("lazy header names its owned payload"),
             },
-            ReadRecord::Core { .. } => None,
+            ReadRecord::Core { .. } | ReadRecord::TransactionCore { .. } => None,
+        }
+    }
+    #[inline]
+    fn core_header(&self) -> Option<&'a StoredNode> {
+        match self.record {
+            ReadRecord::Core { header, .. } | ReadRecord::TransactionCore { header, .. } => {
+                Some(header)
+            }
+            _ => None,
+        }
+    }
+    /// Assemble decode context only when a compact field is actually requested.
+    #[inline]
+    pub(crate) fn compact_context(&self) -> CompactContext<'_> {
+        match self.record {
+            ReadRecord::Core { owner, .. } => CompactContext {
+                nodes: owner.id().arena(),
+                auxiliary: owner.auxiliary_arena(),
+                source: owner.source_text(),
+                store: owner.store(),
+            },
+            ReadRecord::TransactionCore { owner, .. } => CompactContext {
+                nodes: owner.owner_id().arena(),
+                auxiliary: owner.core_auxiliary_arena(),
+                source: owner.source(),
+                store: owner.store(),
+            },
+            _ => unreachable!("compact decode requires a core header"),
         }
     }
     /// Explicit construction copy used by unrestricted exclusive edits and cold
     /// published overlays; ordinary payload reads never reconstruct a node.
     pub(crate) fn to_owned_preserving_identity(&self) -> Node {
-        let facts = match self.record {
-            ReadRecord::Core { context, .. } => context
+        let facts = match self.core_header() {
+            Some(_) => self
+                .compact_context()
                 .store
                 .parked_facts(self.id.slot())
                 .unwrap_or_else(|| self.cached_subtree_facts()),
@@ -182,34 +234,34 @@ impl<'a> NodeRead<'a> {
         node
     }
     pub fn kind(&self) -> crate::NodeKind {
-        match self.record {
-            ReadRecord::Core { header, .. } => header.kind,
+        match self.core_header() {
+            Some(header) => header.kind,
             _ => self.owned_record().unwrap().kind(),
         }
     }
     pub fn parent(&self) -> Option<NodeId> {
-        match self.record {
-            ReadRecord::Core { header, context } => {
-                context.decode_node(FieldKey::parent(self.id.slot()), header.parent)
-            }
+        match self.core_header() {
+            Some(header) => self
+                .compact_context()
+                .decode_node(FieldKey::parent(self.id.slot()), header.parent),
             _ => self.owned_record().unwrap().parent(),
         }
     }
     pub fn flags(&self) -> u32 {
-        match self.record {
-            ReadRecord::Core { header, .. } => header.flags,
+        match self.core_header() {
+            Some(header) => header.flags,
             _ => self.owned_record().unwrap().flags(),
         }
     }
     pub fn pos(&self) -> i32 {
-        match self.record {
-            ReadRecord::Core { header, .. } => header.pos,
+        match self.core_header() {
+            Some(header) => header.pos,
             _ => self.owned_record().unwrap().pos(),
         }
     }
     pub fn end(&self) -> i32 {
-        match self.record {
-            ReadRecord::Core { header, .. } => header.end,
+        match self.core_header() {
+            Some(header) => header.end,
             _ => self.owned_record().unwrap().end(),
         }
     }
@@ -217,49 +269,56 @@ impl<'a> NodeRead<'a> {
         ts_core::TextRange::new(i64::from(self.pos()), i64::from(self.end()))
     }
     pub fn data(&self) -> NodeDataRead<'_> {
-        match self.record {
-            ReadRecord::Core { header, context } => context.store.payloads.read(
-                header.actual_shape(),
-                header.ordinal,
-                context,
-                header.end,
-            ),
+        match self.core_header() {
+            Some(header) => {
+                let context = self.compact_context();
+                context.store.payloads.read(
+                    header.actual_shape(),
+                    header.ordinal,
+                    context,
+                    header.end,
+                )
+            }
             _ => NodeDataRead::from_owned(self.owned_record().unwrap().data()),
         }
     }
     pub fn data_source(&self) -> NodeDataSource<'_> {
-        match &self.record {
-            ReadRecord::Core { header, context } => NodeDataSource::from_stored(header, context),
+        match self.core_header() {
+            Some(header) => NodeDataSource::from_stored(header, self),
             _ => NodeDataSource::from_owned(self.owned_record().unwrap().data()),
         }
     }
     pub(crate) fn inline_binding(&self) -> Option<crate::NodeBinding> {
-        match self.record {
-            ReadRecord::Core { header, context } => {
+        match self.core_header() {
+            Some(header) => {
+                let context = self.compact_context();
                 context.store.node_binding(header, self.id.slot(), context)
             }
             _ => None,
         }
     }
     pub(crate) fn inline_symbol(&self) -> Option<crate::SymbolId> {
-        match self.record {
-            ReadRecord::Core { header, context } => {
+        match self.core_header() {
+            Some(header) => {
+                let context = self.compact_context();
                 context.store.node_symbol(header, self.id.slot(), context)
             }
             _ => None,
         }
     }
     pub(crate) fn inline_locals(&self) -> Option<crate::SymbolTableId> {
-        match self.record {
-            ReadRecord::Core { header, context } => {
+        match self.core_header() {
+            Some(header) => {
+                let context = self.compact_context();
                 context.store.node_locals(header, self.id.slot(), context)
             }
             _ => None,
         }
     }
     pub(crate) fn inline_flow(&self) -> Option<crate::FlowId> {
-        match self.record {
-            ReadRecord::Core { header, context } => {
+        match self.core_header() {
+            Some(header) => {
+                let context = self.compact_context();
                 context.store.node_flow(header, self.id.slot(), context)
             }
             _ => None,
@@ -272,8 +331,9 @@ impl<'a> NodeRead<'a> {
         self.for_each_child_generated(visitor)
     }
     pub(crate) fn cached_subtree_facts(&self) -> u32 {
-        match self.record {
-            ReadRecord::Core { header, context } => context
+        match self.core_header() {
+            Some(header) => self
+                .compact_context()
                 .store
                 .payloads
                 .cached_subtree_facts(header.actual_shape(), header.ordinal),
@@ -281,8 +341,8 @@ impl<'a> NodeRead<'a> {
         }
     }
     pub(crate) fn store_subtree_facts(&self, facts: u32) {
-        match self.record {
-            ReadRecord::Core { header, context } => context.store.payloads.store_subtree_facts(
+        match self.core_header() {
+            Some(header) => self.compact_context().store.payloads.store_subtree_facts(
                 header.actual_shape(),
                 header.ordinal,
                 facts,
@@ -323,14 +383,17 @@ impl crate::NodeAccess for NodeRead<'_> {
         self.store_subtree_facts(facts);
     }
     fn existing_runtime_id(&self) -> u64 {
-        match self.record {
-            ReadRecord::Core { context, .. } => context.store.existing_runtime_id(self.id.slot()),
+        match self.core_header() {
+            Some(_) => self
+                .compact_context()
+                .store
+                .existing_runtime_id(self.id.slot()),
             _ => crate::runtime_id::owned_existing_runtime_node_id(self.owned_record().unwrap()),
         }
     }
     fn runtime_id(&self) -> u64 {
-        match self.record {
-            ReadRecord::Core { context, .. } => context.store.runtime_id(self.id.slot()),
+        match self.core_header() {
+            Some(_) => self.compact_context().store.runtime_id(self.id.slot()),
             _ => crate::runtime_id::owned_runtime_node_id(self.owned_record().unwrap()),
         }
     }

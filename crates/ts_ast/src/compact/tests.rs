@@ -174,3 +174,162 @@ fn escape_overwrites_clear_only_the_changed_field_for_every_reference_namespace(
     );
     assert_eq!(context.encode_node(retained_key, None), 0);
 }
+
+#[test]
+fn stored_validation_preserves_all_reference_kinds_order_and_first_error() {
+    use std::cell::RefCell;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    enum Visit {
+        Node(NodeId),
+        List(NodeListId),
+        Raw(NodeSlice),
+        Text(TextSlice),
+    }
+
+    let counters = Counters::new();
+    let owner = AstBuilder::new(SourceText::default(), &counters);
+    let foreign = AstBuilder::new(SourceText::default(), &counters);
+    let nodes = owner.id().arena();
+    let auxiliary = owner.view().0.auxiliary_arena();
+    let left = NodeId::from_parts(nodes, 1).unwrap();
+    let typ = NodeId::from_parts(foreign.id().arena(), u32::MAX).unwrap();
+    let operator = NodeId::from_parts(nodes, 3).unwrap();
+    let right = NodeId::from_parts(nodes, 4).unwrap();
+    let modifiers = NodeListId(AuxId::from_parts(auxiliary, 1).unwrap());
+    let raw = NodeSlice {
+        backing: Some(AuxId::from_parts(auxiliary, u32::MAX).unwrap()),
+        start: 2,
+        len: 3,
+    };
+    let text = TextSlice {
+        backing: Some(AuxId::from_parts(foreign.view().0.auxiliary_arena(), 5).unwrap()),
+        start: 1,
+        len: 2,
+    };
+    // BinaryExpression.type is deliberately outside child traversal. Completion
+    // still validates it in schema field order, before operator_token and right.
+    let cases = [
+        (
+            NodeData::BinaryExpression(Box::new(crate::BinaryExpressionData {
+                modifiers: Some(modifiers),
+                left: Some(left),
+                r#type: Some(typ),
+                operator_token: Some(operator),
+                right: Some(right),
+            })),
+            vec![
+                Visit::List(modifiers),
+                Visit::Node(left),
+                Visit::Node(typ),
+                Visit::Node(operator),
+                Visit::Node(right),
+            ],
+        ),
+        (
+            NodeData::BinaryExpression(Box::new(crate::BinaryExpressionData {
+                modifiers: None,
+                left: None,
+                r#type: Some(typ),
+                operator_token: None,
+                right: Some(right),
+            })),
+            vec![Visit::Node(typ), Visit::Node(right)],
+        ),
+        (
+            NodeData::SyntaxList(crate::SyntaxListData { children: raw }),
+            vec![Visit::Raw(raw)],
+        ),
+        (
+            NodeData::JSDocLink(crate::JSDocLinkData {
+                text,
+                name: Some(left),
+            }),
+            vec![Visit::Text(text), Visit::Node(left)],
+        ),
+        (
+            NodeData::SyntaxList(crate::SyntaxListData {
+                children: NodeSlice::default(),
+            }),
+            vec![Visit::Raw(NodeSlice::default())],
+        ),
+        (
+            NodeData::JSDocLink(crate::JSDocLinkData {
+                text: TextSlice::default(),
+                name: None,
+            }),
+            vec![Visit::Text(TextSlice::default())],
+        ),
+    ];
+    let source = SourceText::default();
+    let mut store = CoreStore::default();
+    for (data, expected) in cases {
+        let (shape, ordinal) = {
+            let (payloads, mut context) = store.packing_parts(nodes, auxiliary, &source, -1);
+            payloads.insert(data, &mut context)
+        };
+        let header = StoredNode {
+            // Neither unrelated kind nor the binding-presence bit selects rows.
+            kind: SyntaxKind::Unknown.into(),
+            shape: shape | 0x8000,
+            flags: 0,
+            pos: -1,
+            end: -1,
+            parent: 0,
+            ordinal,
+        };
+        let context = CompactContext {
+            nodes,
+            auxiliary,
+            source: &source,
+            store: &store,
+        };
+        for stop in 1..=expected.len() + 1 {
+            for direct in [false, true] {
+                let visits = RefCell::new(Vec::new());
+                let observe = |visit| {
+                    let mut visits = visits.borrow_mut();
+                    visits.push(visit);
+                    if visits.len() == stop {
+                        Err(stop)
+                    } else {
+                        Ok(())
+                    }
+                };
+                let result = if direct {
+                    store.payloads.validate_references(
+                        &header,
+                        context,
+                        |id| observe(Visit::Node(id)),
+                        |id| observe(Visit::List(id)),
+                        |slice| observe(Visit::Raw(slice)),
+                        |slice| observe(Visit::Text(slice)),
+                    )
+                } else {
+                    store
+                        .payloads
+                        .read(shape, ordinal, context, -1)
+                        .validate_references(
+                            |id| observe(Visit::Node(id)),
+                            |id| observe(Visit::List(id)),
+                            |slice| observe(Visit::Raw(slice)),
+                            |slice| observe(Visit::Text(slice)),
+                        )
+                };
+                assert_eq!(
+                    visits.into_inner(),
+                    expected[..stop.min(expected.len())],
+                    "shape {shape}, direct {direct}, stop {stop}"
+                );
+                assert_eq!(
+                    result,
+                    if stop <= expected.len() {
+                        Err(stop)
+                    } else {
+                        Ok(())
+                    }
+                );
+            }
+        }
+    }
+}

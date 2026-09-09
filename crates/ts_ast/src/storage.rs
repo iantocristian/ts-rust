@@ -1,9 +1,9 @@
 use crate::compact::{CompactContext, FieldKey, StoredNode};
+use crate::NodeMut;
 use crate::{
     AstStorageData, FactoryHooks, FileInfo, JSDocRoots, JsString, Node, NodeData, NodeId, NodeList,
     NodeListId, NodeListRead, NodeRead, NodeSlice, NodeSliceRead, TextSlice, TextSliceRead,
 };
-use crate::{NodeDataRead, NodeMut};
 use std::sync::Arc;
 use ts_arena::{
     AuxId, Counters, Error, StorageBuilder, StorageHandle, StorageRead, StorageTransaction,
@@ -106,7 +106,9 @@ impl AstBuilder {
         let auxiliary = self.storage.view().auxiliary_arena();
         let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
         let new_end = range.end() as i32;
-        if header.end != new_end {
+        if header.end != new_end
+            && crate::AstPayloadStore::has_source_relative_text(header.actual_shape())
+        {
             let (payloads, mut context) =
                 store.packing_parts(id.arena(), auxiliary, source, new_end);
             payloads.change_text_end(
@@ -265,17 +267,7 @@ impl ParsedFile {
     pub(crate) fn core_node_read(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
         let record = self.builder.storage.core_node(id)?;
         let owner = self.builder.storage.view();
-        Ok(NodeRead::core(
-            id,
-            owner.id(),
-            record,
-            CompactContext {
-                nodes: owner.id().arena(),
-                auxiliary: owner.auxiliary_arena(),
-                source: owner.source(),
-                store: owner.store(),
-            },
-        ))
+        Ok(NodeRead::core(id, record, owner.physical_owner()))
     }
     pub(crate) fn set_node_flags(&mut self, id: NodeId, flags: u32) -> Result<(), Error> {
         self.builder.storage.node_mut(id)?.set_flags(flags);
@@ -631,25 +623,29 @@ impl<'a> AstView<'a> {
             |slice| self.text_slice(slice).map(|_| ()),
         )
     }
-    fn validate_read_data(self, data: NodeDataRead<'_>) -> Result<(), Error> {
-        data.validate_references(
-            |id| self.node(id).map(|_| ()),
-            |id| self.list(id).map(|_| ()),
-            |slice| self.node_slice(slice).map(|_| ()),
-            |slice| self.text_slice(slice).map(|_| ()),
-        )
-    }
     fn validate_core(self) -> Result<(), Error> {
+        let context = CompactContext {
+            nodes: self.0.id().arena(),
+            auxiliary: self.0.auxiliary_arena(),
+            source: self.source(),
+            store: self.0.store(),
+        };
         for (index, header) in self.0.core_nodes().enumerate() {
             let id = NodeId::from_parts(
                 self.0.id().arena(),
                 u32::try_from(index + 1).map_err(|_| Error::InvalidSlot)?,
             )?;
-            let node = NodeRead::resolved(id, &StorageRead::borrowed(header), self.0);
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = context.decode_node(FieldKey::parent(id.slot()), header.parent) {
                 self.node(parent)?;
             }
-            self.validate_read_data(node.data())?;
+            context.store.payloads.validate_references(
+                header,
+                context,
+                |id| self.node(id).map(|_| ()),
+                |id| self.list(id).map(|_| ()),
+                |slice| self.node_slice(slice).map(|_| ()),
+                |slice| self.text_slice(slice).map(|_| ()),
+            )?;
         }
         for value in self.0.core_auxiliary() {
             match value {
@@ -710,17 +706,7 @@ impl AstTransaction<'_, '_> {
     pub fn node(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
         let header = self.storage.node(id)?;
         if id.arena() == self.storage.owner_id().arena() {
-            Ok(NodeRead::core(
-                id,
-                self.storage.owner_id(),
-                header,
-                CompactContext {
-                    nodes: self.storage.owner_id().arena(),
-                    auxiliary: self.storage.core_auxiliary_arena(),
-                    source: self.storage.source(),
-                    store: self.storage.store(),
-                },
-            ))
+            Ok(NodeRead::transaction_core(id, header, self.storage))
         } else {
             let aux = AuxId::from_parts(self.storage.lazy_auxiliary_arena(), header.ordinal)?;
             match self.storage.aux(aux)? {

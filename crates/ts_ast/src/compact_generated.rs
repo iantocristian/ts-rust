@@ -2,7 +2,9 @@
 // Upstream: 1f70213d4922b434345f639b441681e470c7cfc1
 // upstream: tsc/internal/ast/ast_generated.go
 
-use crate::compact::{CompactContext, CompactSlice, FieldKey, PackingContext, RowPages};
+use crate::compact::{
+    CompactContext, CompactSlice, FieldKey, PackingContext, RowPages, StoredNode,
+};
 #[allow(clippy::wildcard_imports)] // Generated storage consumes every schema payload.
 use crate::*;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -10649,6 +10651,3278 @@ impl AstPayloadStore {
         }
     }
 
+    /// Validate every stored reference in schema field order without constructing
+    /// a semantic payload enum. Parent edges remain the caller's preceding check.
+    pub(crate) fn validate_references<E>(
+        &self,
+        header: &StoredNode,
+        context: CompactContext<'_>,
+        mut node: impl FnMut(NodeId) -> Result<(), E>,
+        mut list: impl FnMut(NodeListId) -> Result<(), E>,
+        mut raw: impl FnMut(NodeSlice) -> Result<(), E>,
+        mut text: impl FnMut(TextSlice) -> Result<(), E>,
+    ) -> Result<(), E> {
+        let ordinal = header.ordinal;
+        match header.actual_shape() {
+            1 => {
+                let _ = self
+                    .identifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            2 => {
+                let _ = self
+                    .private_identifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            3 => {
+                let row = self
+                    .qualified_name
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(3, ordinal, 0), row.left) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(3, ordinal, 1), row.right) {
+                    node(id)?;
+                }
+            }
+            4 => {
+                let row = self
+                    .computed_property_name
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(4, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            5 => {
+                let row = self
+                    .decorator
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(5, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            6 => {
+                let _ = self
+                    .empty_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            7 => {
+                let row = self
+                    .if_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(7, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(7, ordinal, 1), row.then_statement)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(7, ordinal, 2), row.else_statement)
+                {
+                    node(id)?;
+                }
+            }
+            8 => {
+                let row = self
+                    .do_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(8, ordinal, 0), row.statement) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(8, ordinal, 1), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            9 => {
+                let row = self
+                    .while_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(9, ordinal, 0), row.statement) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(9, ordinal, 1), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            10 => {
+                let row = self
+                    .for_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(10, ordinal, 0), row.statement)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(10, ordinal, 1), row.initializer)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(10, ordinal, 2), row.condition)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(10, ordinal, 3), row.incrementor)
+                {
+                    node(id)?;
+                }
+            }
+            11 => {
+                let row = self
+                    .for_in_or_of_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(11, ordinal, 0), row.await_modifier)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(11, ordinal, 1), row.initializer)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(11, ordinal, 2), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(11, ordinal, 3), row.statement)
+                {
+                    node(id)?;
+                }
+            }
+            12 => {
+                let row = self
+                    .break_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(12, ordinal, 0), row.label) {
+                    node(id)?;
+                }
+            }
+            13 => {
+                let row = self
+                    .continue_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(13, ordinal, 0), row.label) {
+                    node(id)?;
+                }
+            }
+            14 => {
+                let row = self
+                    .return_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(14, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            15 => {
+                let row = self
+                    .with_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(15, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(15, ordinal, 1), row.statement)
+                {
+                    node(id)?;
+                }
+            }
+            16 => {
+                let row = self
+                    .switch_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(16, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(16, ordinal, 1), row.case_block)
+                {
+                    node(id)?;
+                }
+            }
+            17 => {
+                let row = self
+                    .case_block
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(17, ordinal, 0), row.clauses) {
+                    list(id)?;
+                }
+            }
+            18 => {
+                let row = self
+                    .case_or_default_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(18, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(18, ordinal, 1), row.statements)
+                {
+                    list(id)?;
+                }
+            }
+            19 => {
+                let row = self
+                    .throw_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(19, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            20 => {
+                let row = self
+                    .try_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(20, ordinal, 0), row.try_block)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(20, ordinal, 1), row.catch_clause)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(20, ordinal, 2), row.finally_block)
+                {
+                    node(id)?;
+                }
+            }
+            21 => {
+                let row = self
+                    .catch_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(21, ordinal, 0), row.variable_declaration)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(21, ordinal, 1), row.block) {
+                    node(id)?;
+                }
+            }
+            22 => {
+                let _ = self
+                    .debugger_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            23 => {
+                let row = self
+                    .labeled_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(23, ordinal, 0), row.label) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(23, ordinal, 1), row.statement)
+                {
+                    node(id)?;
+                }
+            }
+            24 => {
+                let row = self
+                    .expression_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(24, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            25 => {
+                let row = self
+                    .block
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(25, ordinal, 0), row.statements)
+                {
+                    list(id)?;
+                }
+            }
+            26 => {
+                let row = self
+                    .variable_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(26, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(26, ordinal, 1), row.declaration_list)
+                {
+                    node(id)?;
+                }
+            }
+            27 => {
+                let row = self
+                    .variable_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(27, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(27, ordinal, 1), row.exclamation_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(27, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(27, ordinal, 3), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            28 => {
+                let row = self
+                    .variable_declaration_list
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(28, ordinal, 0), row.declarations)
+                {
+                    list(id)?;
+                }
+            }
+            29 => {
+                let row = self
+                    .binding_pattern
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(29, ordinal, 0), row.elements) {
+                    list(id)?;
+                }
+            }
+            30 => {
+                let row = self
+                    .parameter_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(30, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(30, ordinal, 1), row.dot_dot_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(30, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(30, ordinal, 3), row.question_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(30, ordinal, 4), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(30, ordinal, 5), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            31 => {
+                let row = self
+                    .binding_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(31, ordinal, 0), row.dot_dot_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(31, ordinal, 1), row.property_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(31, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(31, ordinal, 3), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            32 => {
+                let row = self
+                    .missing_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(32, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+            }
+            33 => {
+                let row = self
+                    .function_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(33, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(33, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(33, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(33, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(33, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(33, ordinal, 5), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(33, ordinal, 6), row.body) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(33, ordinal, 7), row.name) {
+                    node(id)?;
+                }
+            }
+            34 => {
+                let row = self
+                    .class_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(34, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(34, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(34, ordinal, 2), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(34, ordinal, 3), row.heritage_clauses)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(34, ordinal, 4), row.members) {
+                    list(id)?;
+                }
+            }
+            35 => {
+                let row = self
+                    .class_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(35, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(35, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(35, ordinal, 2), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(35, ordinal, 3), row.heritage_clauses)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(35, ordinal, 4), row.members) {
+                    list(id)?;
+                }
+            }
+            36 => {
+                let row = self
+                    .heritage_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(36, ordinal, 1), row.types) {
+                    list(id)?;
+                }
+            }
+            37 => {
+                let row = self
+                    .interface_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(37, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(37, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(37, ordinal, 2), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(37, ordinal, 3), row.heritage_clauses)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(37, ordinal, 4), row.members) {
+                    list(id)?;
+                }
+            }
+            38 => {
+                let row = self
+                    .type_alias_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(38, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(38, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(38, ordinal, 2), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(38, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+            }
+            39 => {
+                let row = self
+                    .enum_member
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(39, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(39, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(39, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(39, ordinal, 3), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            40 => {
+                let row = self
+                    .enum_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(40, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(40, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(40, ordinal, 2), row.members) {
+                    list(id)?;
+                }
+            }
+            41 => {
+                let row = self
+                    .module_block
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(41, ordinal, 0), row.statements)
+                {
+                    list(id)?;
+                }
+            }
+            42 => {
+                let _ = self
+                    .not_emitted_statement
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            44 => {
+                let row = self
+                    .import_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(44, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(44, ordinal, 1), row.import_clause)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(44, ordinal, 2), row.module_specifier)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(44, ordinal, 3), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            45 => {
+                let row = self
+                    .external_module_reference
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(45, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            46 => {
+                let row = self
+                    .namespace_import
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(46, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+            }
+            47 => {
+                let row = self
+                    .named_imports
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(47, ordinal, 0), row.elements) {
+                    list(id)?;
+                }
+            }
+            48 => {
+                let row = self
+                    .export_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(48, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(48, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(48, ordinal, 3), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            49 => {
+                let row = self
+                    .namespace_export_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(49, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(49, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            50 => {
+                let row = self
+                    .namespace_export
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(50, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+            }
+            51 => {
+                let row = self
+                    .named_exports
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(51, ordinal, 0), row.elements) {
+                    list(id)?;
+                }
+            }
+            52 => {
+                let row = self
+                    .export_specifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(52, ordinal, 1), row.property_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(52, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+            }
+            53 => {
+                let row = self
+                    .call_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(53, ordinal, 0), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(53, ordinal, 1), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(53, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(53, ordinal, 3), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            54 => {
+                let row = self
+                    .construct_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(54, ordinal, 0), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(54, ordinal, 1), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(54, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(54, ordinal, 3), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            55 => {
+                let row = self
+                    .constructor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(55, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(55, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(55, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(55, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(55, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(55, ordinal, 5), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(55, ordinal, 6), row.body) {
+                    node(id)?;
+                }
+            }
+            56 => {
+                let row = self
+                    .get_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(56, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(56, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(56, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(56, ordinal, 3), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(56, ordinal, 4), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(56, ordinal, 5), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(56, ordinal, 6), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(56, ordinal, 7), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(56, ordinal, 8), row.body) {
+                    node(id)?;
+                }
+            }
+            57 => {
+                let row = self
+                    .set_accessor_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(57, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(57, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(57, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(57, ordinal, 3), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(57, ordinal, 4), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(57, ordinal, 5), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(57, ordinal, 6), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(57, ordinal, 7), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(57, ordinal, 8), row.body) {
+                    node(id)?;
+                }
+            }
+            58 => {
+                let row = self
+                    .index_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(58, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(58, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(58, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(58, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(58, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            59 => {
+                let row = self
+                    .method_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(59, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(59, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(59, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(59, ordinal, 3), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(59, ordinal, 4), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(59, ordinal, 5), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(59, ordinal, 6), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            60 => {
+                let row = self
+                    .method_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(60, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(60, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(60, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(60, ordinal, 3), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(60, ordinal, 4), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(60, ordinal, 5), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(60, ordinal, 6), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(60, ordinal, 7), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(60, ordinal, 8), row.body) {
+                    node(id)?;
+                }
+            }
+            61 => {
+                let row = self
+                    .property_signature_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(61, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(61, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(61, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(61, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(61, ordinal, 4), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            62 => {
+                let row = self
+                    .property_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(62, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(62, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(62, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(62, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(62, ordinal, 4), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            63 => {
+                let _ = self
+                    .semicolon_class_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            64 => {
+                let row = self
+                    .class_static_block_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(64, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(64, ordinal, 1), row.body) {
+                    node(id)?;
+                }
+            }
+            66 => {
+                let _ = self
+                    .keyword_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            67 => {
+                let _ = self
+                    .string_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            68 => {
+                let _ = self
+                    .numeric_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            69 => {
+                let _ = self
+                    .big_int_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            70 => {
+                let _ = self
+                    .regular_expression_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            71 => {
+                let _ = self
+                    .no_substitution_template_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            72 => {
+                let row = self
+                    .binary_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(72, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(72, ordinal, 1), row.left) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(72, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(72, ordinal, 3), row.operator_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(72, ordinal, 4), row.right) {
+                    node(id)?;
+                }
+            }
+            73 => {
+                let row = self
+                    .prefix_unary_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(73, ordinal, 1), row.operand) {
+                    node(id)?;
+                }
+            }
+            74 => {
+                let row = self
+                    .postfix_unary_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(74, ordinal, 0), row.operand) {
+                    node(id)?;
+                }
+            }
+            75 => {
+                let row = self
+                    .yield_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(75, ordinal, 0), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(75, ordinal, 1), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            76 => {
+                let row = self
+                    .arrow_function
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(76, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(76, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(76, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(76, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(76, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(76, ordinal, 5), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(76, ordinal, 6), row.body) {
+                    node(id)?;
+                }
+                if let Some(id) = context
+                    .decode_node(FieldKey::new(76, ordinal, 7), row.equals_greater_than_token)
+                {
+                    node(id)?;
+                }
+            }
+            77 => {
+                let row = self
+                    .function_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(77, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(77, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(77, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(77, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(77, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(77, ordinal, 5), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(77, ordinal, 6), row.body) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(77, ordinal, 7), row.name) {
+                    node(id)?;
+                }
+            }
+            78 => {
+                let row = self
+                    .as_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(78, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(78, ordinal, 1), row.r#type) {
+                    node(id)?;
+                }
+            }
+            79 => {
+                let row = self
+                    .satisfies_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(79, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(79, ordinal, 1), row.r#type) {
+                    node(id)?;
+                }
+            }
+            80 => {
+                let row = self
+                    .conditional_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(80, ordinal, 0), row.condition)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(80, ordinal, 1), row.question_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(80, ordinal, 2), row.when_true)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(80, ordinal, 3), row.colon_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(80, ordinal, 4), row.when_false)
+                {
+                    node(id)?;
+                }
+            }
+            81 => {
+                let row = self
+                    .property_access_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(81, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(81, ordinal, 1), row.question_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(81, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+            }
+            82 => {
+                let row = self
+                    .element_access_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(82, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(82, ordinal, 1), row.question_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(82, ordinal, 2), row.argument_expression)
+                {
+                    node(id)?;
+                }
+            }
+            83 => {
+                let row = self
+                    .call_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(83, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(83, ordinal, 1), row.question_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(83, ordinal, 2), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(83, ordinal, 3), row.arguments)
+                {
+                    list(id)?;
+                }
+            }
+            84 => {
+                let row = self
+                    .new_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(84, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(84, ordinal, 1), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(84, ordinal, 2), row.arguments)
+                {
+                    list(id)?;
+                }
+            }
+            85 => {
+                let row = self
+                    .meta_property
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(85, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            86 => {
+                let row = self
+                    .non_null_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(86, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            87 => {
+                let row = self
+                    .spread_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(87, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            88 => {
+                let row = self
+                    .template_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(88, ordinal, 0), row.head) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(88, ordinal, 1), row.template_spans)
+                {
+                    list(id)?;
+                }
+            }
+            89 => {
+                let row = self
+                    .template_span
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(89, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(89, ordinal, 1), row.literal) {
+                    node(id)?;
+                }
+            }
+            90 => {
+                let row = self
+                    .tagged_template_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(90, ordinal, 0), row.tag) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(90, ordinal, 1), row.question_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(90, ordinal, 2), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(90, ordinal, 3), row.template) {
+                    node(id)?;
+                }
+            }
+            91 => {
+                let row = self
+                    .parenthesized_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(91, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            92 => {
+                let row = self
+                    .array_literal_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(92, ordinal, 0), row.elements) {
+                    list(id)?;
+                }
+            }
+            93 => {
+                let row = self
+                    .object_literal_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(93, ordinal, 0), row.properties)
+                {
+                    list(id)?;
+                }
+            }
+            94 => {
+                let row = self
+                    .spread_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(94, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            95 => {
+                let row = self
+                    .property_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(95, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(95, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(95, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(95, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(95, ordinal, 4), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            96 => {
+                let row = self
+                    .shorthand_property_assignment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(96, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(96, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(96, ordinal, 2), row.postfix_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(96, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(96, ordinal, 4), row.equals_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(
+                    FieldKey::new(96, ordinal, 5),
+                    row.object_assignment_initializer,
+                ) {
+                    node(id)?;
+                }
+            }
+            97 => {
+                let row = self
+                    .delete_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(97, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            98 => {
+                let row = self
+                    .type_of_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(98, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            99 => {
+                let row = self
+                    .void_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(99, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            100 => {
+                let row = self
+                    .await_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(100, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            101 => {
+                let row = self
+                    .type_assertion
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(101, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(101, ordinal, 1), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            103 => {
+                let row = self
+                    .union_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(103, ordinal, 0), row.types) {
+                    list(id)?;
+                }
+            }
+            104 => {
+                let row = self
+                    .intersection_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(104, ordinal, 0), row.types) {
+                    list(id)?;
+                }
+            }
+            105 => {
+                let row = self
+                    .conditional_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(105, ordinal, 0), row.check_type)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(105, ordinal, 1), row.extends_type)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(105, ordinal, 2), row.true_type)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(105, ordinal, 3), row.false_type)
+                {
+                    node(id)?;
+                }
+            }
+            106 => {
+                let row = self
+                    .type_operator_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(106, ordinal, 1), row.r#type) {
+                    node(id)?;
+                }
+            }
+            107 => {
+                let row = self
+                    .infer_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(107, ordinal, 0), row.type_parameter)
+                {
+                    node(id)?;
+                }
+            }
+            108 => {
+                let row = self
+                    .array_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(108, ordinal, 0), row.element_type)
+                {
+                    node(id)?;
+                }
+            }
+            109 => {
+                let row = self
+                    .indexed_access_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(109, ordinal, 0), row.object_type)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(109, ordinal, 1), row.index_type)
+                {
+                    node(id)?;
+                }
+            }
+            110 => {
+                let row = self
+                    .type_reference_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(110, ordinal, 0), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(110, ordinal, 1), row.type_name)
+                {
+                    node(id)?;
+                }
+            }
+            111 => {
+                let row = self
+                    .expression_with_type_arguments
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(111, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(111, ordinal, 1), row.type_arguments)
+                {
+                    list(id)?;
+                }
+            }
+            112 => {
+                let row = self
+                    .literal_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(112, ordinal, 0), row.literal) {
+                    node(id)?;
+                }
+            }
+            114 => {
+                let row = self
+                    .type_predicate_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(114, ordinal, 0), row.asserts_modifier)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(114, ordinal, 1), row.parameter_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(114, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+            }
+            115 => {
+                let row = self
+                    .import_attribute
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(115, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(115, ordinal, 1), row.value) {
+                    node(id)?;
+                }
+            }
+            116 => {
+                let row = self
+                    .import_attributes
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(116, ordinal, 1), row.attributes)
+                {
+                    list(id)?;
+                }
+            }
+            117 => {
+                let row = self
+                    .type_query_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(117, ordinal, 0), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(117, ordinal, 1), row.expr_name)
+                {
+                    node(id)?;
+                }
+            }
+            118 => {
+                let row = self
+                    .mapped_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(118, ordinal, 0), row.readonly_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(118, ordinal, 1), row.type_parameter)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(118, ordinal, 2), row.name_type)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(118, ordinal, 3), row.question_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(118, ordinal, 4), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(118, ordinal, 5), row.members) {
+                    list(id)?;
+                }
+            }
+            119 => {
+                let row = self
+                    .type_literal_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(119, ordinal, 0), row.members) {
+                    list(id)?;
+                }
+            }
+            120 => {
+                let row = self
+                    .tuple_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(120, ordinal, 0), row.elements)
+                {
+                    list(id)?;
+                }
+            }
+            121 => {
+                let row = self
+                    .named_tuple_member
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(121, ordinal, 0), row.dot_dot_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(121, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(121, ordinal, 2), row.question_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(121, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+            }
+            122 => {
+                let row = self
+                    .optional_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(122, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            123 => {
+                let row = self
+                    .rest_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(123, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            124 => {
+                let row = self
+                    .parenthesized_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(124, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            125 => {
+                let row = self
+                    .function_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(125, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(125, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(125, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(125, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(125, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            126 => {
+                let row = self
+                    .constructor_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(126, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(126, ordinal, 1), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(126, ordinal, 2), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(126, ordinal, 3), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(126, ordinal, 4), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            127 => {
+                let _ = self
+                    .template_head
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            128 => {
+                let _ = self
+                    .template_middle
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            129 => {
+                let _ = self
+                    .template_tail
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            130 => {
+                let row = self
+                    .template_literal_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(130, ordinal, 0), row.head) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(130, ordinal, 1), row.template_spans)
+                {
+                    list(id)?;
+                }
+            }
+            131 => {
+                let row = self
+                    .template_literal_type_span
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(131, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(131, ordinal, 1), row.literal) {
+                    node(id)?;
+                }
+            }
+            132 => {
+                let row = self
+                    .synthetic_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(132, ordinal, 1), row.tuple_name_source)
+                {
+                    node(id)?;
+                }
+            }
+            133 => {
+                let row = self
+                    .partially_emitted_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(133, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            134 => {
+                let row = self
+                    .jsx_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(134, ordinal, 0), row.opening_element)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(134, ordinal, 1), row.children)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(134, ordinal, 2), row.closing_element)
+                {
+                    node(id)?;
+                }
+            }
+            135 => {
+                let row = self
+                    .jsx_attributes
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(135, ordinal, 0), row.properties)
+                {
+                    list(id)?;
+                }
+            }
+            136 => {
+                let row = self
+                    .jsx_namespaced_name
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(136, ordinal, 0), row.namespace)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(136, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            137 => {
+                let row = self
+                    .jsx_opening_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(137, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(137, ordinal, 1), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(137, ordinal, 2), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            138 => {
+                let row = self
+                    .jsx_self_closing_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(138, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(138, ordinal, 1), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(138, ordinal, 2), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            139 => {
+                let row = self
+                    .jsx_fragment
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(139, ordinal, 0), row.opening_fragment)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(139, ordinal, 1), row.children)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(139, ordinal, 2), row.closing_fragment)
+                {
+                    node(id)?;
+                }
+            }
+            142 => {
+                let row = self
+                    .jsx_attribute
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(142, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(142, ordinal, 1), row.initializer)
+                {
+                    node(id)?;
+                }
+            }
+            143 => {
+                let row = self
+                    .jsx_spread_attribute
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(143, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            144 => {
+                let row = self
+                    .jsx_closing_element
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(144, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+            }
+            145 => {
+                let row = self
+                    .jsx_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(145, ordinal, 0), row.dot_dot_dot_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(145, ordinal, 1), row.expression)
+                {
+                    node(id)?;
+                }
+            }
+            146 => {
+                let _ = self
+                    .jsx_text
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+            }
+            147 => {
+                let row = self
+                    .syntax_list
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                raw(context.decode_node_slice(FieldKey::new(147, ordinal, 0), row.children))?;
+            }
+            148 => {
+                let row = self
+                    .js_doc
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(148, ordinal, 0), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(148, ordinal, 1), row.tags) {
+                    list(id)?;
+                }
+            }
+            149 => {
+                let row = self
+                    .js_doc_type_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(149, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            150 => {
+                let row = self
+                    .js_doc_non_nullable_type
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(150, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            151 => {
+                let row = self
+                    .js_doc_nullable_type
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(151, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            153 => {
+                let row = self
+                    .js_doc_variadic_type
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(153, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            154 => {
+                let row = self
+                    .js_doc_optional_type
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(154, ordinal, 0), row.r#type) {
+                    node(id)?;
+                }
+            }
+            155 => {
+                let row = self
+                    .js_doc_type_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(155, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(155, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(155, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            156 => {
+                let row = self
+                    .js_doc_unknown_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(156, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(156, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            157 => {
+                let row = self
+                    .js_doc_template_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(157, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(157, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(157, ordinal, 2), row.constraint)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(157, ordinal, 3), row.type_parameters)
+                {
+                    list(id)?;
+                }
+            }
+            158 => {
+                let row = self
+                    .js_doc_return_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(158, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(158, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(158, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            159 => {
+                let row = self
+                    .js_doc_public_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(159, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(159, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            160 => {
+                let row = self
+                    .js_doc_private_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(160, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(160, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            161 => {
+                let row = self
+                    .js_doc_protected_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(161, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(161, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            162 => {
+                let row = self
+                    .js_doc_readonly_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(162, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(162, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            163 => {
+                let row = self
+                    .js_doc_override_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(163, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(163, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            164 => {
+                let row = self
+                    .js_doc_deprecated_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(164, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(164, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+            }
+            165 => {
+                let row = self
+                    .js_doc_see_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(165, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(165, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(165, ordinal, 2), row.name_expression)
+                {
+                    node(id)?;
+                }
+            }
+            166 => {
+                let row = self
+                    .js_doc_implements_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(166, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(166, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(166, ordinal, 2), row.class_name)
+                {
+                    node(id)?;
+                }
+            }
+            167 => {
+                let row = self
+                    .js_doc_augments_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(167, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(167, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(167, ordinal, 2), row.class_name)
+                {
+                    node(id)?;
+                }
+            }
+            168 => {
+                let row = self
+                    .js_doc_satisfies_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(168, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(168, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(168, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            169 => {
+                let row = self
+                    .js_doc_throws_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(169, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(169, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(169, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            170 => {
+                let row = self
+                    .js_doc_this_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(170, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(170, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(170, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            171 => {
+                let row = self
+                    .js_doc_import_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(171, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(171, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(171, ordinal, 2), row.import_clause)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(171, ordinal, 3), row.module_specifier)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(171, ordinal, 4), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            172 => {
+                let row = self
+                    .js_doc_callback_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(172, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(172, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(172, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(172, ordinal, 3), row.name) {
+                    node(id)?;
+                }
+            }
+            173 => {
+                let row = self
+                    .js_doc_overload_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(173, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(173, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(173, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            174 => {
+                let row = self
+                    .js_doc_typedef_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(174, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(174, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(174, ordinal, 2), row.type_expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(174, ordinal, 3), row.name) {
+                    node(id)?;
+                }
+            }
+            175 => {
+                let row = self
+                    .js_doc_signature
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(175, ordinal, 0), row.type_parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(175, ordinal, 1), row.parameters)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(175, ordinal, 2), row.r#type) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(175, ordinal, 3), row.full_signature)
+                {
+                    node(id)?;
+                }
+            }
+            176 => {
+                let row = self
+                    .js_doc_name_reference
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(176, ordinal, 0), row.name) {
+                    node(id)?;
+                }
+            }
+            177 => {
+                let row = self
+                    .source_file
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(177, ordinal, 0), row.statements)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(177, ordinal, 1), row.end_of_file_token)
+                {
+                    node(id)?;
+                }
+            }
+            178 => {
+                let row = self
+                    .module_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(178, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(178, ordinal, 1), row.asterisk_token)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(178, ordinal, 2), row.body) {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(178, ordinal, 4), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(178, ordinal, 5), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            179 => {
+                let row = self
+                    .import_equals_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(179, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(179, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(179, ordinal, 3), row.module_reference)
+                {
+                    node(id)?;
+                }
+            }
+            180 => {
+                let row = self
+                    .export_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(180, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(180, ordinal, 2), row.export_clause)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(180, ordinal, 3), row.module_specifier)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(180, ordinal, 4), row.attributes)
+                {
+                    node(id)?;
+                }
+            }
+            181 => {
+                let row = self
+                    .import_type_node
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_list(FieldKey::new(181, ordinal, 0), row.type_arguments)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(181, ordinal, 2), row.argument)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(181, ordinal, 3), row.attributes)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(181, ordinal, 4), row.qualifier)
+                {
+                    node(id)?;
+                }
+            }
+            182 => {
+                let row = self
+                    .import_clause
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(182, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(182, ordinal, 2), row.named_bindings)
+                {
+                    node(id)?;
+                }
+            }
+            183 => {
+                let row = self
+                    .import_specifier
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(183, ordinal, 1), row.property_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(183, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+            }
+            184 => {
+                let row = self
+                    .js_doc_text
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                text(context.decode_text_slice(FieldKey::new(184, ordinal, 0), row.text))?;
+            }
+            185 => {
+                let row = self
+                    .js_doc_link
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                text(context.decode_text_slice(FieldKey::new(185, ordinal, 0), row.text))?;
+                if let Some(id) = context.decode_node(FieldKey::new(185, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            186 => {
+                let row = self
+                    .js_doc_link_plain
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                text(context.decode_text_slice(FieldKey::new(186, ordinal, 0), row.text))?;
+                if let Some(id) = context.decode_node(FieldKey::new(186, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            187 => {
+                let row = self
+                    .js_doc_link_code
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                text(context.decode_text_slice(FieldKey::new(187, ordinal, 0), row.text))?;
+                if let Some(id) = context.decode_node(FieldKey::new(187, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+            }
+            188 => {
+                let row = self
+                    .type_parameter_declaration
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_list(FieldKey::new(188, ordinal, 0), row.modifiers)
+                {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(188, ordinal, 1), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(188, ordinal, 2), row.constraint)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(188, ordinal, 3), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(188, ordinal, 4), row.default_type)
+                {
+                    node(id)?;
+                }
+            }
+            189 => {
+                let row = self
+                    .synthetic_reference_expression
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(189, ordinal, 0), row.expression)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(189, ordinal, 1), row.this_arg)
+                {
+                    node(id)?;
+                }
+            }
+            190 => {
+                let row = self
+                    .js_doc_type_literal
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                raw(context
+                    .decode_node_slice(FieldKey::new(190, ordinal, 0), row.js_doc_property_tags))?;
+            }
+            191 => {
+                let row = self
+                    .js_doc_parameter_or_property_tag
+                    .as_ref()
+                    .expect("compact shape directory")
+                    .get(ordinal)
+                    .expect("compact payload ordinal");
+                if let Some(id) = context.decode_node(FieldKey::new(191, ordinal, 0), row.tag_name)
+                {
+                    node(id)?;
+                }
+                if let Some(id) = context.decode_list(FieldKey::new(191, ordinal, 1), row.comment) {
+                    list(id)?;
+                }
+                if let Some(id) = context.decode_node(FieldKey::new(191, ordinal, 2), row.name) {
+                    node(id)?;
+                }
+                if let Some(id) =
+                    context.decode_node(FieldKey::new(191, ordinal, 4), row.type_expression)
+                {
+                    node(id)?;
+                }
+            }
+            0 | 43 | 65 | 102 | 113 | 140 | 141 | 152 => {}
+            _ => panic!("compact payload shape"),
+        }
+        Ok(())
+    }
+
+    #[inline]
+    pub(crate) fn has_source_relative_text(shape: u16) -> bool {
+        matches!(shape, 1 | 2)
+    }
+
     pub(crate) fn release_text(
         &mut self,
         shape: u16,
@@ -10795,156 +14069,6 @@ impl AstPayloadStore {
                     .expect("compact payload ordinal");
                 row.text = context.change_text_end(
                     FieldKey::new(2, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-            }
-            67 => {
-                let row = self
-                    .string_literal
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(67, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-            }
-            68 => {
-                let row = self
-                    .numeric_literal
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(68, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-            }
-            69 => {
-                let row = self
-                    .big_int_literal
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(69, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-            }
-            70 => {
-                let row = self
-                    .regular_expression_literal
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(70, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-            }
-            71 => {
-                let row = self
-                    .no_substitution_template_literal
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(71, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-                row.raw_text = context.change_text_end(
-                    FieldKey::new(71, ordinal, 2),
-                    row.raw_text,
-                    old_end,
-                    new_end,
-                );
-            }
-            127 => {
-                let row = self
-                    .template_head
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(127, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-                row.raw_text = context.change_text_end(
-                    FieldKey::new(127, ordinal, 2),
-                    row.raw_text,
-                    old_end,
-                    new_end,
-                );
-            }
-            128 => {
-                let row = self
-                    .template_middle
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(128, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-                row.raw_text = context.change_text_end(
-                    FieldKey::new(128, ordinal, 2),
-                    row.raw_text,
-                    old_end,
-                    new_end,
-                );
-            }
-            129 => {
-                let row = self
-                    .template_tail
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(129, ordinal, 0),
-                    row.text,
-                    old_end,
-                    new_end,
-                );
-                row.raw_text = context.change_text_end(
-                    FieldKey::new(129, ordinal, 2),
-                    row.raw_text,
-                    old_end,
-                    new_end,
-                );
-            }
-            146 => {
-                let row = self
-                    .jsx_text
-                    .as_mut()
-                    .expect("compact shape directory")
-                    .get_mut(ordinal)
-                    .expect("compact payload ordinal");
-                row.text = context.change_text_end(
-                    FieldKey::new(146, ordinal, 0),
                     row.text,
                     old_end,
                     new_end,

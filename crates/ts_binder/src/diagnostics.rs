@@ -52,7 +52,10 @@ impl Binder<'_, '_> {
             && self.n(node).flags() & (nf::AMBIENT | nf::JS_DOC) == 0
             && !checked(a::is_identifier_name(self.view(), node))
         {
-            let keyword = ts_scanner::get_identifier_token(self.text(node).as_bytes());
+            let keyword = {
+                let text = self.view().node_text(node).expect("text payload required");
+                ts_scanner::get_identifier_token(text.as_bytes())
+            };
             if keyword == K::Identifier {
                 return;
             }

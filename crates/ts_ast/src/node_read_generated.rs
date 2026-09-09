@@ -20,7 +20,7 @@ enum NodeDataSourceStorage<'a> {
     Owned(&'a NodeData),
     Stored {
         header: &'a StoredNode,
-        context: &'a CompactContext<'a>,
+        node: &'a NodeRead<'a>,
     },
 }
 impl<'a> NodeDataSource<'a> {
@@ -31,24 +31,25 @@ impl<'a> NodeDataSource<'a> {
         }
     }
     #[inline]
-    pub(crate) fn from_stored(header: &'a StoredNode, context: &'a CompactContext<'a>) -> Self {
+    pub(crate) fn from_stored(header: &'a StoredNode, node: &'a NodeRead<'a>) -> Self {
         Self {
-            storage: NodeDataSourceStorage::Stored { header, context },
+            storage: NodeDataSourceStorage::Stored { header, node },
         }
     }
     #[inline]
     pub fn as_token(self) -> Option<TokenDataRead<'a>> {
         match self.storage {
             NodeDataSourceStorage::Owned(data) => data.as_token().map(TokenDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 0 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_token(header.ordinal, *context, header.end),
+                        .read_token(header.ordinal, context, header.end),
                 )
             }
         }
@@ -59,15 +60,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_identifier().map(IdentifierDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 1 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_identifier(header.ordinal, *context, header.end),
+                        .read_identifier(header.ordinal, context, header.end),
                 )
             }
         }
@@ -78,13 +80,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_private_identifier()
                 .map(PrivateIdentifierDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 2 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_private_identifier(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -96,13 +99,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_qualified_name()
                 .map(QualifiedNameDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 3 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_qualified_name(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -114,13 +118,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_computed_property_name()
                 .map(ComputedPropertyNameDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 4 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_computed_property_name(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -132,15 +137,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_decorator().map(DecoratorDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 5 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_decorator(header.ordinal, *context, header.end),
+                        .read_decorator(header.ordinal, context, header.end),
                 )
             }
         }
@@ -151,13 +157,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_empty_statement()
                 .map(EmptyStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 6 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_empty_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -169,15 +176,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_if_statement().map(IfStatementDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 7 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_if_statement(header.ordinal, *context, header.end),
+                        .read_if_statement(header.ordinal, context, header.end),
                 )
             }
         }
@@ -188,15 +196,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_do_statement().map(DoStatementDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 8 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_do_statement(header.ordinal, *context, header.end),
+                        .read_do_statement(header.ordinal, context, header.end),
                 )
             }
         }
@@ -207,13 +216,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_while_statement()
                 .map(WhileStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 9 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_while_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -225,15 +235,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_for_statement()
                 .map(ForStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 10 {
                     return None;
                 }
-                Some(context.store.payloads.read_for_statement(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_for_statement(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -243,13 +255,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_for_in_or_of_statement()
                 .map(ForInOrOfStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 11 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_for_in_or_of_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -261,13 +274,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_break_statement()
                 .map(BreakStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 12 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_break_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -279,13 +293,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_continue_statement()
                 .map(ContinueStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 13 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_continue_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -297,13 +312,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_return_statement()
                 .map(ReturnStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 14 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_return_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -315,13 +331,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_with_statement()
                 .map(WithStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 15 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_with_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -333,13 +350,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_switch_statement()
                 .map(SwitchStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 16 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_switch_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -351,15 +369,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_case_block().map(CaseBlockDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 17 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_case_block(header.ordinal, *context, header.end),
+                        .read_case_block(header.ordinal, context, header.end),
                 )
             }
         }
@@ -370,13 +389,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_case_or_default_clause()
                 .map(CaseOrDefaultClauseDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 18 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_case_or_default_clause(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -388,13 +408,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_throw_statement()
                 .map(ThrowStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 19 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_throw_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -406,15 +427,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_try_statement()
                 .map(TryStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 20 {
                     return None;
                 }
-                Some(context.store.payloads.read_try_statement(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_try_statement(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -424,15 +447,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_catch_clause().map(CatchClauseDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 21 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_catch_clause(header.ordinal, *context, header.end),
+                        .read_catch_clause(header.ordinal, context, header.end),
                 )
             }
         }
@@ -443,13 +467,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_debugger_statement()
                 .map(DebuggerStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 22 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_debugger_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -461,13 +486,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_labeled_statement()
                 .map(LabeledStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 23 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_labeled_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -479,13 +505,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_expression_statement()
                 .map(ExpressionStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 24 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_expression_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -495,15 +522,16 @@ impl<'a> NodeDataSource<'a> {
     pub fn as_block(self) -> Option<BlockDataRead<'a>> {
         match self.storage {
             NodeDataSourceStorage::Owned(data) => data.as_block().map(BlockDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 25 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_block(header.ordinal, *context, header.end),
+                        .read_block(header.ordinal, context, header.end),
                 )
             }
         }
@@ -514,13 +542,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_variable_statement()
                 .map(VariableStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 26 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_variable_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -532,13 +561,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_variable_declaration()
                 .map(VariableDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 27 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_variable_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -550,13 +580,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_variable_declaration_list()
                 .map(VariableDeclarationListDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 28 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_variable_declaration_list(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -568,13 +599,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_binding_pattern()
                 .map(BindingPatternDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 29 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_binding_pattern(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -586,13 +618,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_parameter_declaration()
                 .map(ParameterDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 30 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_parameter_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -604,13 +637,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_binding_element()
                 .map(BindingElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 31 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_binding_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -622,13 +656,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_missing_declaration()
                 .map(MissingDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 32 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_missing_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -640,13 +675,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_function_declaration()
                 .map(FunctionDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 33 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_function_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -658,13 +694,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_class_declaration()
                 .map(ClassDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 34 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_class_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -676,13 +713,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_class_expression()
                 .map(ClassExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 35 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_class_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -694,13 +732,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_heritage_clause()
                 .map(HeritageClauseDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 36 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_heritage_clause(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -712,13 +751,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_interface_declaration()
                 .map(InterfaceDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 37 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_interface_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -730,13 +770,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_alias_declaration()
                 .map(TypeAliasDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 38 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_alias_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -748,15 +789,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_enum_member().map(EnumMemberDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 39 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_enum_member(header.ordinal, *context, header.end),
+                        .read_enum_member(header.ordinal, context, header.end),
                 )
             }
         }
@@ -767,13 +809,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_enum_declaration()
                 .map(EnumDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 40 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_enum_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -785,15 +828,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_module_block().map(ModuleBlockDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 41 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_module_block(header.ordinal, *context, header.end),
+                        .read_module_block(header.ordinal, context, header.end),
                 )
             }
         }
@@ -804,13 +848,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_not_emitted_statement()
                 .map(NotEmittedStatementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 42 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_not_emitted_statement(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -822,13 +867,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_not_emitted_type_element()
                 .map(NotEmittedTypeElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 43 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_not_emitted_type_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -840,13 +886,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_declaration()
                 .map(ImportDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 44 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -858,13 +905,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_external_module_reference()
                 .map(ExternalModuleReferenceDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 45 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_external_module_reference(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -876,13 +924,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_namespace_import()
                 .map(NamespaceImportDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 46 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_namespace_import(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -894,15 +943,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_named_imports()
                 .map(NamedImportsDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 47 {
                     return None;
                 }
-                Some(context.store.payloads.read_named_imports(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_named_imports(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -912,13 +963,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_export_assignment()
                 .map(ExportAssignmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 48 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_export_assignment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -930,13 +982,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_namespace_export_declaration()
                 .map(NamespaceExportDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 49 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_namespace_export_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -948,13 +1001,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_namespace_export()
                 .map(NamespaceExportDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 50 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_namespace_export(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -966,15 +1020,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_named_exports()
                 .map(NamedExportsDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 51 {
                     return None;
                 }
-                Some(context.store.payloads.read_named_exports(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_named_exports(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -984,13 +1040,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_export_specifier()
                 .map(ExportSpecifierDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 52 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_export_specifier(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1002,13 +1059,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_call_signature_declaration()
                 .map(CallSignatureDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 53 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_call_signature_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1022,13 +1080,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_construct_signature_declaration()
                 .map(ConstructSignatureDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 54 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_construct_signature_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1040,13 +1099,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_constructor_declaration()
                 .map(ConstructorDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 55 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_constructor_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1058,13 +1118,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_get_accessor_declaration()
                 .map(GetAccessorDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 56 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_get_accessor_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1076,13 +1137,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_set_accessor_declaration()
                 .map(SetAccessorDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 57 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_set_accessor_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1094,13 +1156,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_index_signature_declaration()
                 .map(IndexSignatureDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 58 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_index_signature_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1112,13 +1175,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_method_signature_declaration()
                 .map(MethodSignatureDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 59 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_method_signature_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1130,13 +1194,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_method_declaration()
                 .map(MethodDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 60 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_method_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1150,13 +1215,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_property_signature_declaration()
                 .map(PropertySignatureDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 61 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_property_signature_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1168,13 +1234,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_property_declaration()
                 .map(PropertyDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 62 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_property_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1186,13 +1253,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_semicolon_class_element()
                 .map(SemicolonClassElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 63 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_semicolon_class_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1206,13 +1274,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_class_static_block_declaration()
                 .map(ClassStaticBlockDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 64 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_class_static_block_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1224,13 +1293,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_omitted_expression()
                 .map(OmittedExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 65 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_omitted_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1242,13 +1312,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_keyword_expression()
                 .map(KeywordExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 66 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_keyword_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1260,13 +1331,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_string_literal()
                 .map(StringLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 67 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_string_literal(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1278,13 +1350,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_numeric_literal()
                 .map(NumericLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 68 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_numeric_literal(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1296,13 +1369,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_big_int_literal()
                 .map(BigIntLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 69 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_big_int_literal(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1314,13 +1388,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_regular_expression_literal()
                 .map(RegularExpressionLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 70 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_regular_expression_literal(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1334,19 +1409,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_no_substitution_template_literal()
                 .map(NoSubstitutionTemplateLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 71 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_no_substitution_template_literal(
-                            header.ordinal,
-                            *context,
-                            header.end,
-                        ),
+                        .read_no_substitution_template_literal(header.ordinal, context, header.end),
                 )
             }
         }
@@ -1357,13 +1429,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_binary_expression()
                 .map(BinaryExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 72 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_binary_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1375,13 +1448,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_prefix_unary_expression()
                 .map(PrefixUnaryExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 73 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_prefix_unary_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1393,13 +1467,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_postfix_unary_expression()
                 .map(PostfixUnaryExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 74 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_postfix_unary_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1411,13 +1486,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_yield_expression()
                 .map(YieldExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 75 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_yield_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1429,13 +1505,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_arrow_function()
                 .map(ArrowFunctionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 76 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_arrow_function(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1447,13 +1524,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_function_expression()
                 .map(FunctionExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 77 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_function_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1465,15 +1543,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_as_expression()
                 .map(AsExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 78 {
                     return None;
                 }
-                Some(context.store.payloads.read_as_expression(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_as_expression(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -1483,13 +1563,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_satisfies_expression()
                 .map(SatisfiesExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 79 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_satisfies_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1501,13 +1582,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_conditional_expression()
                 .map(ConditionalExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 80 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_conditional_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1519,13 +1601,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_property_access_expression()
                 .map(PropertyAccessExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 81 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_property_access_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1537,13 +1620,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_element_access_expression()
                 .map(ElementAccessExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 82 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_element_access_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1555,13 +1639,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_call_expression()
                 .map(CallExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 83 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_call_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1573,13 +1658,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_new_expression()
                 .map(NewExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 84 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_new_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1591,15 +1677,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_meta_property()
                 .map(MetaPropertyDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 85 {
                     return None;
                 }
-                Some(context.store.payloads.read_meta_property(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_meta_property(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -1609,13 +1697,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_non_null_expression()
                 .map(NonNullExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 86 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_non_null_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1627,13 +1716,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_spread_element()
                 .map(SpreadElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 87 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_spread_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1645,13 +1735,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_expression()
                 .map(TemplateExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 88 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_template_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1663,15 +1754,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_span()
                 .map(TemplateSpanDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 89 {
                     return None;
                 }
-                Some(context.store.payloads.read_template_span(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_template_span(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -1681,13 +1774,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_tagged_template_expression()
                 .map(TaggedTemplateExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 90 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_tagged_template_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1699,13 +1793,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_parenthesized_expression()
                 .map(ParenthesizedExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 91 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_parenthesized_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1717,13 +1812,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_array_literal_expression()
                 .map(ArrayLiteralExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 92 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_array_literal_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1735,13 +1831,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_object_literal_expression()
                 .map(ObjectLiteralExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 93 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_object_literal_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1753,13 +1850,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_spread_assignment()
                 .map(SpreadAssignmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 94 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_spread_assignment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1771,13 +1869,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_property_assignment()
                 .map(PropertyAssignmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 95 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_property_assignment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1791,13 +1890,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_shorthand_property_assignment()
                 .map(ShorthandPropertyAssignmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 96 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_shorthand_property_assignment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1809,13 +1909,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_delete_expression()
                 .map(DeleteExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 97 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_delete_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1827,13 +1928,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_of_expression()
                 .map(TypeOfExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 98 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_of_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1845,13 +1947,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_void_expression()
                 .map(VoidExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 99 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_void_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1863,13 +1966,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_await_expression()
                 .map(AwaitExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 100 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_await_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1881,13 +1985,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_assertion()
                 .map(TypeAssertionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 101 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_assertion(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1899,13 +2004,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_keyword_type_node()
                 .map(KeywordTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 102 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_keyword_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1917,13 +2023,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_union_type_node()
                 .map(UnionTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 103 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_union_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1935,13 +2042,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_intersection_type_node()
                 .map(IntersectionTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 104 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_intersection_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1953,13 +2061,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_conditional_type_node()
                 .map(ConditionalTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 105 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_conditional_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1971,13 +2080,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_operator_node()
                 .map(TypeOperatorNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 106 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_operator_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -1989,13 +2099,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_infer_type_node()
                 .map(InferTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 107 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_infer_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2007,13 +2118,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_array_type_node()
                 .map(ArrayTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 108 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_array_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2025,13 +2137,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_indexed_access_type_node()
                 .map(IndexedAccessTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 109 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_indexed_access_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2043,13 +2156,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_reference_node()
                 .map(TypeReferenceNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 110 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_reference_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2063,13 +2177,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_expression_with_type_arguments()
                 .map(ExpressionWithTypeArgumentsDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 111 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_expression_with_type_arguments(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2081,13 +2196,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_literal_type_node()
                 .map(LiteralTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 112 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_literal_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2099,13 +2215,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_this_type_node()
                 .map(ThisTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 113 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_this_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2117,13 +2234,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_predicate_node()
                 .map(TypePredicateNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 114 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_predicate_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2135,13 +2253,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_attribute()
                 .map(ImportAttributeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 115 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_attribute(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2153,13 +2272,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_attributes()
                 .map(ImportAttributesDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 116 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_attributes(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2171,13 +2291,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_query_node()
                 .map(TypeQueryNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 117 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_query_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2189,13 +2310,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_mapped_type_node()
                 .map(MappedTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 118 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_mapped_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2207,13 +2329,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_literal_node()
                 .map(TypeLiteralNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 119 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_literal_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2225,13 +2348,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_tuple_type_node()
                 .map(TupleTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 120 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_tuple_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2243,13 +2367,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_named_tuple_member()
                 .map(NamedTupleMemberDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 121 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_named_tuple_member(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2261,13 +2386,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_optional_type_node()
                 .map(OptionalTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 122 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_optional_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2279,13 +2405,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_rest_type_node()
                 .map(RestTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 123 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_rest_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2297,13 +2424,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_parenthesized_type_node()
                 .map(ParenthesizedTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 124 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_parenthesized_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2315,13 +2443,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_function_type_node()
                 .map(FunctionTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 125 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_function_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2333,13 +2462,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_constructor_type_node()
                 .map(ConstructorTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 126 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_constructor_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2351,15 +2481,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_head()
                 .map(TemplateHeadDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 127 {
                     return None;
                 }
-                Some(context.store.payloads.read_template_head(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_template_head(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -2369,13 +2501,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_middle()
                 .map(TemplateMiddleDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 128 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_template_middle(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2387,15 +2520,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_tail()
                 .map(TemplateTailDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 129 {
                     return None;
                 }
-                Some(context.store.payloads.read_template_tail(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_template_tail(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -2405,13 +2540,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_literal_type_node()
                 .map(TemplateLiteralTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 130 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_template_literal_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2423,13 +2559,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_template_literal_type_span()
                 .map(TemplateLiteralTypeSpanDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 131 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_template_literal_type_span(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2441,13 +2578,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_synthetic_expression()
                 .map(SyntheticExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 132 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_synthetic_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2459,13 +2597,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_partially_emitted_expression()
                 .map(PartiallyEmittedExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 133 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_partially_emitted_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2477,15 +2616,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_jsx_element().map(JsxElementDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 134 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_jsx_element(header.ordinal, *context, header.end),
+                        .read_jsx_element(header.ordinal, context, header.end),
                 )
             }
         }
@@ -2496,13 +2636,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_attributes()
                 .map(JsxAttributesDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 135 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_attributes(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2514,13 +2655,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_namespaced_name()
                 .map(JsxNamespacedNameDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 136 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_namespaced_name(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2532,13 +2674,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_opening_element()
                 .map(JsxOpeningElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 137 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_opening_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2550,13 +2693,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_self_closing_element()
                 .map(JsxSelfClosingElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 138 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_self_closing_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2568,15 +2712,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_jsx_fragment().map(JsxFragmentDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 139 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_jsx_fragment(header.ordinal, *context, header.end),
+                        .read_jsx_fragment(header.ordinal, context, header.end),
                 )
             }
         }
@@ -2587,13 +2732,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_opening_fragment()
                 .map(JsxOpeningFragmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 140 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_opening_fragment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2605,13 +2751,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_closing_fragment()
                 .map(JsxClosingFragmentDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 141 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_closing_fragment(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2623,15 +2770,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_attribute()
                 .map(JsxAttributeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 142 {
                     return None;
                 }
-                Some(context.store.payloads.read_jsx_attribute(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_jsx_attribute(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -2641,13 +2790,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_spread_attribute()
                 .map(JsxSpreadAttributeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 143 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_spread_attribute(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2659,13 +2809,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_closing_element()
                 .map(JsxClosingElementDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 144 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_closing_element(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2677,13 +2828,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_jsx_expression()
                 .map(JsxExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 145 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_jsx_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2695,15 +2847,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_jsx_text().map(JsxTextDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 146 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_jsx_text(header.ordinal, *context, header.end),
+                        .read_jsx_text(header.ordinal, context, header.end),
                 )
             }
         }
@@ -2714,15 +2867,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_syntax_list().map(SyntaxListDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 147 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_syntax_list(header.ordinal, *context, header.end),
+                        .read_syntax_list(header.ordinal, context, header.end),
                 )
             }
         }
@@ -2731,15 +2885,16 @@ impl<'a> NodeDataSource<'a> {
     pub fn as_js_doc(self) -> Option<JSDocDataRead<'a>> {
         match self.storage {
             NodeDataSourceStorage::Owned(data) => data.as_js_doc().map(JSDocDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 148 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_js_doc(header.ordinal, *context, header.end),
+                        .read_js_doc(header.ordinal, context, header.end),
                 )
             }
         }
@@ -2750,13 +2905,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_type_expression()
                 .map(JSDocTypeExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 149 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_type_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2768,13 +2924,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_non_nullable_type()
                 .map(JSDocNonNullableTypeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 150 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_non_nullable_type(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2786,13 +2943,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_nullable_type()
                 .map(JSDocNullableTypeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 151 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_nullable_type(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2804,13 +2962,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_all_type()
                 .map(JSDocAllTypeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 152 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_all_type(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2822,13 +2981,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_variadic_type()
                 .map(JSDocVariadicTypeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 153 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_variadic_type(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2840,13 +3000,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_optional_type()
                 .map(JSDocOptionalTypeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 154 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_optional_type(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2858,13 +3019,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_type_tag()
                 .map(JSDocTypeTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 155 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_type_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2876,13 +3038,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_unknown_tag()
                 .map(JSDocUnknownTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 156 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_unknown_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2894,13 +3057,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_template_tag()
                 .map(JSDocTemplateTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 157 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_template_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2912,13 +3076,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_return_tag()
                 .map(JSDocReturnTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 158 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_return_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2930,13 +3095,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_public_tag()
                 .map(JSDocPublicTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 159 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_public_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2948,13 +3114,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_private_tag()
                 .map(JSDocPrivateTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 160 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_private_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2966,13 +3133,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_protected_tag()
                 .map(JSDocProtectedTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 161 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_protected_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -2984,13 +3152,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_readonly_tag()
                 .map(JSDocReadonlyTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 162 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_readonly_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3002,13 +3171,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_override_tag()
                 .map(JSDocOverrideTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 163 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_override_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3020,13 +3190,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_deprecated_tag()
                 .map(JSDocDeprecatedTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 164 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_deprecated_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3038,13 +3209,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_see_tag()
                 .map(JSDocSeeTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 165 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_see_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3056,13 +3228,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_implements_tag()
                 .map(JSDocImplementsTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 166 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_implements_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3074,13 +3247,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_augments_tag()
                 .map(JSDocAugmentsTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 167 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_augments_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3092,13 +3266,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_satisfies_tag()
                 .map(JSDocSatisfiesTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 168 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_satisfies_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3110,13 +3285,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_throws_tag()
                 .map(JSDocThrowsTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 169 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_throws_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3128,13 +3304,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_this_tag()
                 .map(JSDocThisTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 170 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_this_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3146,13 +3323,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_import_tag()
                 .map(JSDocImportTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 171 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_import_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3164,13 +3342,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_callback_tag()
                 .map(JSDocCallbackTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 172 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_callback_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3182,13 +3361,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_overload_tag()
                 .map(JSDocOverloadTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 173 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_overload_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3200,13 +3380,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_typedef_tag()
                 .map(JSDocTypedefTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 174 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_typedef_tag(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3218,13 +3399,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_signature()
                 .map(JSDocSignatureDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 175 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_signature(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3236,13 +3418,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_name_reference()
                 .map(JSDocNameReferenceDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 176 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_name_reference(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3254,15 +3437,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_source_file().map(SourceFileDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 177 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_source_file(header.ordinal, *context, header.end),
+                        .read_source_file(header.ordinal, context, header.end),
                 )
             }
         }
@@ -3273,13 +3457,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_module_declaration()
                 .map(ModuleDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 178 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_module_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3291,13 +3476,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_equals_declaration()
                 .map(ImportEqualsDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 179 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_equals_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3309,13 +3495,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_export_declaration()
                 .map(ExportDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 180 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_export_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3327,13 +3514,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_type_node()
                 .map(ImportTypeNodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 181 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_type_node(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3345,15 +3533,17 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_clause()
                 .map(ImportClauseDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 182 {
                     return None;
                 }
-                Some(context.store.payloads.read_import_clause(
-                    header.ordinal,
-                    *context,
-                    header.end,
-                ))
+                let context = node.compact_context();
+                Some(
+                    context
+                        .store
+                        .payloads
+                        .read_import_clause(header.ordinal, context, header.end),
+                )
             }
         }
     }
@@ -3363,13 +3553,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_import_specifier()
                 .map(ImportSpecifierDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 183 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_import_specifier(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3381,15 +3572,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_js_doc_text().map(JSDocTextDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 184 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_js_doc_text(header.ordinal, *context, header.end),
+                        .read_js_doc_text(header.ordinal, context, header.end),
                 )
             }
         }
@@ -3400,15 +3592,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => {
                 data.as_js_doc_link().map(JSDocLinkDataRead::from_owned)
             }
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 185 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_js_doc_link(header.ordinal, *context, header.end),
+                        .read_js_doc_link(header.ordinal, context, header.end),
                 )
             }
         }
@@ -3419,13 +3612,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_link_plain()
                 .map(JSDocLinkPlainDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 186 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_link_plain(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3437,13 +3631,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_link_code()
                 .map(JSDocLinkCodeDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 187 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_link_code(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3455,13 +3650,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_type_parameter_declaration()
                 .map(TypeParameterDeclarationDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 188 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_type_parameter_declaration(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3475,13 +3671,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_synthetic_reference_expression()
                 .map(SyntheticReferenceExpressionDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 189 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_synthetic_reference_expression(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3493,13 +3690,14 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_type_literal()
                 .map(JSDocTypeLiteralDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 190 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(context.store.payloads.read_js_doc_type_literal(
                     header.ordinal,
-                    *context,
+                    context,
                     header.end,
                 ))
             }
@@ -3513,19 +3711,16 @@ impl<'a> NodeDataSource<'a> {
             NodeDataSourceStorage::Owned(data) => data
                 .as_js_doc_parameter_or_property_tag()
                 .map(JSDocParameterOrPropertyTagDataRead::from_owned),
-            NodeDataSourceStorage::Stored { header, context } => {
+            NodeDataSourceStorage::Stored { header, node } => {
                 if header.actual_shape() != 191 {
                     return None;
                 }
+                let context = node.compact_context();
                 Some(
                     context
                         .store
                         .payloads
-                        .read_js_doc_parameter_or_property_tag(
-                            header.ordinal,
-                            *context,
-                            header.end,
-                        ),
+                        .read_js_doc_parameter_or_property_tag(header.ordinal, context, header.end),
                 )
             }
         }
