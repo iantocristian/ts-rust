@@ -183,6 +183,10 @@ The different preceding batch cannot prove this component's isolated saving.
 Any next storage change needs current retained/growth attribution before a
 family's total bytes are treated as removable; do not reopen field tracing or
 a row-policy matrix to rescue the verdict.
+The next bounded [name/table attribution](S07-bis-name-table-attribution.md)
+measures only current canonical-name and table backing storage/growth, using one
+allocation-enabled workload run and a tiny counter calibration. No table rewrite
+is proposed until those counts establish useful removable cost.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
