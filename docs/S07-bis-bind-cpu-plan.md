@@ -1,8 +1,9 @@
 # S07-bis: narrow flow writes and immutable source facts
 
-Status: selected for implementation after the
-[bind-only CPU comparison](S07-bis-bind-cpu-comparison.md). The comparison and
-plan are complete; the production changes and screen described below are pending.
+Status: incorporated into [the local-view binder plan](S07-bis-local-bind-plan.md).
+The standalone small-candidate sequence below is retained as its historical
+reference. Its flow-write and source-fact contracts still apply, but there will
+be no separate prerequisite screen before the architectural CPU candidate.
 
 ## Candidate and effort boundary
 

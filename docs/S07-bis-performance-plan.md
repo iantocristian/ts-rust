@@ -217,6 +217,15 @@ all historical results and final gates retain their existing status. These
 sampled costs justify a bounded trial, not a predicted saving or a complete
 demonstrated path to Go CPU parity.
 
+The subsequent review changes the next implementation scope: follow the
+[local binder and traffic-attribution plan](S07-bis-local-bind-plan.md).
+Local handles, typed reads, traversal and narrow writes are the primary CPU
+candidate. The small flow/source-fact changes belong within it and receive no
+separate prerequisite screen. Complete current allocation-family replacement
+attribution without porting the obsolete census. Keep both gates in S07-bis;
+neither a runtime-subtracted Go ratio nor a zero-churn assumption proves they
+will pass. The earlier plans and measured outcomes remain recorded.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,
