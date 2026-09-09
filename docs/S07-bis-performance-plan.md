@@ -201,6 +201,22 @@ without another profiling or small-lookup loop. No substantial next rewrite is
 selected solely from those inclusive totals; a concrete removable mechanism is
 still needed. This does not change the paired screen or final gates.
 
+The subsequent [bind-only Rust/Go comparison](S07-bis-bind-cpu-comparison.md)
+is now complete using those existing samples, with no new capture. Rust's
+2,528 ms bind partition has leading self costs in node-entry dispatch, checked
+reads, contextual identifiers and hashing. Go's three historical bind partitions
+are 730/670/690 ms, mostly sampled at `runtime.madvise`; retain that runtime work
+and the different sampler/denominator limits. The concrete removable mechanisms
+are now named: full-payload decoding for flow capability, repeated generic
+flow-field dispatch, and repeated immutable source-fact reads.
+Implement the reviewed [flow/source-fact combination](S07-bis-bind-cpu-plan.md),
+then run one complete-pipeline screen against CP1. Do not expand stack-guard,
+hashing, facade or trace work to rescue its result. The current compact freeze
+remains an experimental starting point, not an accepted infrastructure control;
+all historical results and final gates retain their existing status. These
+sampled costs justify a bounded trial, not a predicted saving or a complete
+demonstrated path to Go CPU parity.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,

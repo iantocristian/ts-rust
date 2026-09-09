@@ -74,6 +74,11 @@ an isolated speedup by subtracting the earlier sample or change the failed scree
 
 ## Decision
 
+This was the decision at the end of the capture. The subsequent offline
+[bind-only comparison](S07-bis-bind-cpu-comparison.md) now supplies concrete
+flow-write and source-fact mechanisms and selects a bounded combined candidate.
+It reuses this evidence; it does not change the capture or screen verdict.
+
 Do not launch another profiler, per-field trace, row-policy matrix or standalone
 lookup experiment. Immutable source-fact caching remains a possible small
 component, now bounded by the 86 ms contextual source-read subset rather than
