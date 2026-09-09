@@ -198,8 +198,14 @@ impl BindResult {
                 }),
         )
     }
+    /// Exclusive binding wrote this source's core directly. Other physical
+    /// owners and lazy nodes still require their normal binding selection.
+    #[inline]
+    pub(crate) fn reads_core_directly(&self, id: NodeId) -> bool {
+        self.direct_nodes && id.arena() == self.source.arena()
+    }
     pub(crate) fn overlay(&self, id: NodeId) -> Option<&Node> {
-        if self.direct_nodes && id.arena() == self.source.arena() {
+        if self.reads_core_directly(id) {
             None
         } else {
             self.nodes.get(&id)

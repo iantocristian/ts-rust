@@ -101,6 +101,54 @@ fn text_content(member: &Value) -> bool {
             && typ["element"]["name"] == "string")
 }
 
+/// Concrete entry points preserve interception by custom Factory implementations.
+/// The ordinary AstBuilder path selects the checked row without an owned enum.
+fn emit_construction_methods(code: &mut String, nodes: &[Value]) -> Result<(), String> {
+    code.push_str("macro_rules! factory_construction_methods {\n    (defaults) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n            self.new_node(kind, data.into())\n        }}\n"));
+    }
+    code.push_str("    };\n    (builder) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n"));
+        let mut references = Vec::new();
+        for field in fields(node)? {
+            let accessor = match rust_type(&field["type"])?.as_str() {
+                "NodeId" => "node",
+                "NodeListId" => "list",
+                "NodeSlice" => "node_slice",
+                "TextSlice" => "text_slice",
+                _ => continue,
+            };
+            references.push((field, accessor));
+        }
+        if !references.is_empty() {
+            code.push_str("            let view = self.view();\n");
+        }
+        for (field, accessor) in references {
+            let member = snake(string(field, "name")?);
+            if nullable(field)? {
+                code.push_str(&format!("            if let Some(id) = data.{member} {{ view.{accessor}(id).expect(\"factory edges belong to retained storage\"); }}\n"));
+            } else {
+                code.push_str(&format!("            view.{accessor}(data.{member}).expect(\"factory edges belong to retained storage\");\n"));
+            }
+        }
+        code.push_str(&format!("            let created = self.new_typed_node_before_hook(kind, |payloads, context| payloads.insert_{member}(data, context));\n            self.run_create_hook(created);\n            created\n        }}\n"));
+    }
+    code.push_str("    };\n    (forward, $field:tt) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n            self.$field.new_{member}_data(kind, data)\n        }}\n"));
+    }
+    code.push_str("    };\n}\npub(crate) use factory_construction_methods;\n\n");
+    Ok(())
+}
+
 fn emit_new(
     code: &mut String,
     scope: &mut BTreeSet<String>,
@@ -142,12 +190,14 @@ fn emit_new(
     };
     if !ms.iter().any(|m| flags_member(m)) {
         code.push_str(&format!(
-            "        self.new_node({kind}, data.into())\n    }}\n"
+            "        self.new_{}_data({kind}, data)\n    }}\n",
+            snake(name)
         ));
         return Ok(());
     }
     code.push_str(&format!(
-        "        let created = self.new_node({kind}, data.into());\n"
+        "        let created = self.new_{}_data({kind}, data);\n",
+        snake(name)
     ));
     for member in ms.iter().filter(|m| flags_member(m)) {
         let assigned = value(member)?;
@@ -506,6 +556,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
     let mut scope = BTreeSet::new();
     let imports = "#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\nuse std::ops::ControlFlow;\n\n";
     let mut factory = header(pin, "ast_generated.go");
+    emit_construction_methods(&mut factory, nodes)?;
     factory.push_str("#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\n\n/// Pinned generated constructors, identity-preserving updates and shallow clones.\n#[allow(clippy::too_many_arguments)] // Positional factory signatures follow the pinned schema.\npub trait FactoryMethods: Factory {\n");
     let mut transform = header(pin, "ast_generated.go");
     transform.push_str("#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\n\n/// Source-specific visitor hooks. Raw mapping is SameMap, not list flattening.\npub trait VisitContext: Factory {\n    fn visit_node(&mut self, node: Option<NodeId>, role: ChildRole) -> Option<NodeId>;\n    fn visit_list(&mut self, list: Option<NodeListId>, role: ChildRole) -> Option<NodeListId>;\n    fn map_raw_nodes(&mut self, nodes: NodeSlice) -> NodeSlice;\n    fn visit_each_child_source_file(&mut self, node: NodeId) -> NodeId;\n}\n\npub trait VisitorMethods: VisitContext {\n");

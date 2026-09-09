@@ -467,6 +467,21 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn auxiliary_arena(self) -> ArenaId {
         self.owner.auxiliary_arena()
     }
+    /// Borrow only the selected owner's core record. Retained imports and lazy
+    /// identities require general routing through `node` instead.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// fn escaped() -> &'static Node<()> {
+    ///     let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    ///     let id = builder.push(Node::new(0, ()));
+    ///     builder.view().core_node(id).unwrap()
+    /// }
+    /// ```
+    #[inline]
+    pub fn core_node(self, id: NodeId) -> Result<&'a N, Error> {
+        self.owner.core.get(id.arena(), id.slot())
+    }
     pub fn node(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         self.for_arena(id.arena())?.node_here(id)
     }
@@ -627,6 +642,35 @@ mod tests {
 mod construction_tests {
     use super::*;
     use crate::Node;
+
+    #[test]
+    fn selected_core_reads_borrow_and_reject_other_namespaces_before_slots() {
+        let counters = Counters::new();
+        let mut imported = StorageBuilder::<Node<()>>::new(Arc::from(&b"imported"[..]), &counters);
+        let foreign = imported.push(Node::new(1, ()));
+        let mut builder = StorageBuilder::<Node<()>>::new(Arc::from(&b"local"[..]), &counters);
+        let local = builder.push(Node::new(2, ()));
+        builder.retain_file(imported.finish());
+        let view = builder.view();
+        assert!(std::ptr::eq(
+            view.core_node(local).unwrap(),
+            builder.core_node(local).unwrap(),
+        ));
+        let missing = NodeId::from_parts(local.arena(), u32::MAX).unwrap();
+        assert!(matches!(view.core_node(missing), Err(Error::InvalidSlot)));
+        assert!(matches!(view.core_node(foreign), Err(Error::WrongOwner)));
+        let missing_foreign = NodeId::from_parts(foreign.arena(), u32::MAX).unwrap();
+        assert!(matches!(
+            view.core_node(missing_foreign),
+            Err(Error::WrongOwner)
+        ));
+        let lazy = NodeId::from_parts(view.lazy_arena(), 1).unwrap();
+        assert!(matches!(view.core_node(lazy), Err(Error::WrongOwner)));
+        assert_eq!(view.node(foreign).unwrap().kind, 1);
+        let selected = view.for_arena(foreign.arena()).unwrap();
+        assert_eq!(selected.core_node(foreign).unwrap().kind, 1);
+        assert!(matches!(selected.core_node(local), Err(Error::WrongOwner)));
+    }
 
     #[test]
     fn construction_transfers_requested_map_and_lazy_arena_without_reinitializing() {

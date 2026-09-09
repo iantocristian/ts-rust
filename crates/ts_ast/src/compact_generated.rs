@@ -1906,2556 +1906,3730 @@ impl AstPayloadStore {
         context: &mut PackingContext<'_>,
     ) -> (u16, u32) {
         match data {
-            NodeData::Token(_) => (0, 0),
-            NodeData::Identifier(data) => {
-                let rows = self.identifier.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = IdentifierRow {
-                    text: context.encode_text(FieldKey::new(1, ordinal, 0), data.text),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (1, ordinal)
-            }
-            NodeData::PrivateIdentifier(data) => {
-                let rows = self.private_identifier.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PrivateIdentifierRow {
-                    text: context.encode_text(FieldKey::new(2, ordinal, 0), data.text),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (2, ordinal)
-            }
-            NodeData::QualifiedName(data) => {
-                let rows = self.qualified_name.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = QualifiedNameRow {
-                    left: context.encode_node(FieldKey::new(3, ordinal, 0), data.left),
-                    right: context.encode_node(FieldKey::new(3, ordinal, 1), data.right),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (3, ordinal)
-            }
+            NodeData::Token(data) => self.insert_token(data, context),
+            NodeData::Identifier(data) => self.insert_identifier(data, context),
+            NodeData::PrivateIdentifier(data) => self.insert_private_identifier(data, context),
+            NodeData::QualifiedName(data) => self.insert_qualified_name(data, context),
             NodeData::ComputedPropertyName(data) => {
-                let rows = self
-                    .computed_property_name
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ComputedPropertyNameRow {
-                    expression: context.encode_node(FieldKey::new(4, ordinal, 0), data.expression),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (4, ordinal)
+                self.insert_computed_property_name(data, context)
             }
-            NodeData::Decorator(data) => {
-                let rows = self.decorator.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = DecoratorRow {
-                    expression: context.encode_node(FieldKey::new(5, ordinal, 0), data.expression),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (5, ordinal)
-            }
-            NodeData::EmptyStatement(_) => {
-                let rows = self.empty_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = EmptyStatementRow { flow_node: 0 };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (6, ordinal)
-            }
-            NodeData::IfStatement(data) => {
-                let rows = self.if_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = IfStatementRow {
-                    expression: context.encode_node(FieldKey::new(7, ordinal, 0), data.expression),
-                    then_statement: context
-                        .encode_node(FieldKey::new(7, ordinal, 1), data.then_statement),
-                    else_statement: context
-                        .encode_node(FieldKey::new(7, ordinal, 2), data.else_statement),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (7, ordinal)
-            }
-            NodeData::DoStatement(data) => {
-                let rows = self.do_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = DoStatementRow {
-                    statement: context.encode_node(FieldKey::new(8, ordinal, 0), data.statement),
-                    expression: context.encode_node(FieldKey::new(8, ordinal, 1), data.expression),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (8, ordinal)
-            }
-            NodeData::WhileStatement(data) => {
-                let rows = self.while_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = WhileStatementRow {
-                    statement: context.encode_node(FieldKey::new(9, ordinal, 0), data.statement),
-                    expression: context.encode_node(FieldKey::new(9, ordinal, 1), data.expression),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (9, ordinal)
-            }
-            NodeData::ForStatement(data) => {
-                let rows = self.for_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ForStatementRow {
-                    statement: context.encode_node(FieldKey::new(10, ordinal, 0), data.statement),
-                    initializer: context
-                        .encode_node(FieldKey::new(10, ordinal, 1), data.initializer),
-                    condition: context.encode_node(FieldKey::new(10, ordinal, 2), data.condition),
-                    incrementor: context
-                        .encode_node(FieldKey::new(10, ordinal, 3), data.incrementor),
-                    facts: AtomicU32::new(0),
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (10, ordinal)
-            }
-            NodeData::ForInOrOfStatement(data) => {
-                let rows = self
-                    .for_in_or_of_statement
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ForInOrOfStatementRow {
-                    await_modifier: context
-                        .encode_node(FieldKey::new(11, ordinal, 0), data.await_modifier),
-                    initializer: context
-                        .encode_node(FieldKey::new(11, ordinal, 1), data.initializer),
-                    expression: context.encode_node(FieldKey::new(11, ordinal, 2), data.expression),
-                    statement: context.encode_node(FieldKey::new(11, ordinal, 3), data.statement),
-                    facts: AtomicU32::new(0),
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (11, ordinal)
-            }
-            NodeData::BreakStatement(data) => {
-                let rows = self.break_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BreakStatementRow {
-                    label: context.encode_node(FieldKey::new(12, ordinal, 0), data.label),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (12, ordinal)
-            }
-            NodeData::ContinueStatement(data) => {
-                let rows = self.continue_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ContinueStatementRow {
-                    label: context.encode_node(FieldKey::new(13, ordinal, 0), data.label),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (13, ordinal)
-            }
-            NodeData::ReturnStatement(data) => {
-                let rows = self.return_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ReturnStatementRow {
-                    expression: context.encode_node(FieldKey::new(14, ordinal, 0), data.expression),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (14, ordinal)
-            }
-            NodeData::WithStatement(data) => {
-                let rows = self.with_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = WithStatementRow {
-                    expression: context.encode_node(FieldKey::new(15, ordinal, 0), data.expression),
-                    statement: context.encode_node(FieldKey::new(15, ordinal, 1), data.statement),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (15, ordinal)
-            }
-            NodeData::SwitchStatement(data) => {
-                let rows = self.switch_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SwitchStatementRow {
-                    expression: context.encode_node(FieldKey::new(16, ordinal, 0), data.expression),
-                    case_block: context.encode_node(FieldKey::new(16, ordinal, 1), data.case_block),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (16, ordinal)
-            }
-            NodeData::CaseBlock(data) => {
-                let rows = self.case_block.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = CaseBlockRow {
-                    clauses: context.encode_list(FieldKey::new(17, ordinal, 0), data.clauses),
-                    facts: AtomicU32::new(0),
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (17, ordinal)
-            }
+            NodeData::Decorator(data) => self.insert_decorator(data, context),
+            NodeData::EmptyStatement(data) => self.insert_empty_statement(data, context),
+            NodeData::IfStatement(data) => self.insert_if_statement(data, context),
+            NodeData::DoStatement(data) => self.insert_do_statement(data, context),
+            NodeData::WhileStatement(data) => self.insert_while_statement(data, context),
+            NodeData::ForStatement(data) => self.insert_for_statement(data, context),
+            NodeData::ForInOrOfStatement(data) => self.insert_for_in_or_of_statement(data, context),
+            NodeData::BreakStatement(data) => self.insert_break_statement(data, context),
+            NodeData::ContinueStatement(data) => self.insert_continue_statement(data, context),
+            NodeData::ReturnStatement(data) => self.insert_return_statement(data, context),
+            NodeData::WithStatement(data) => self.insert_with_statement(data, context),
+            NodeData::SwitchStatement(data) => self.insert_switch_statement(data, context),
+            NodeData::CaseBlock(data) => self.insert_case_block(data, context),
             NodeData::CaseOrDefaultClause(data) => {
-                let rows = self
-                    .case_or_default_clause
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = CaseOrDefaultClauseRow {
-                    expression: context.encode_node(FieldKey::new(18, ordinal, 0), data.expression),
-                    statements: context.encode_list(FieldKey::new(18, ordinal, 1), data.statements),
-                    facts: AtomicU32::new(0),
-                    fallthrough_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (18, ordinal)
+                self.insert_case_or_default_clause(data, context)
             }
-            NodeData::ThrowStatement(data) => {
-                let rows = self.throw_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ThrowStatementRow {
-                    expression: context.encode_node(FieldKey::new(19, ordinal, 0), data.expression),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (19, ordinal)
-            }
-            NodeData::TryStatement(data) => {
-                let rows = self.try_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TryStatementRow {
-                    try_block: context.encode_node(FieldKey::new(20, ordinal, 0), data.try_block),
-                    catch_clause: context
-                        .encode_node(FieldKey::new(20, ordinal, 1), data.catch_clause),
-                    finally_block: context
-                        .encode_node(FieldKey::new(20, ordinal, 2), data.finally_block),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (20, ordinal)
-            }
-            NodeData::CatchClause(data) => {
-                let rows = self.catch_clause.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = CatchClauseRow {
-                    variable_declaration: context
-                        .encode_node(FieldKey::new(21, ordinal, 0), data.variable_declaration),
-                    block: context.encode_node(FieldKey::new(21, ordinal, 1), data.block),
-                    facts: AtomicU32::new(0),
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (21, ordinal)
-            }
-            NodeData::DebuggerStatement(_) => {
-                let rows = self.debugger_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = DebuggerStatementRow { flow_node: 0 };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (22, ordinal)
-            }
-            NodeData::LabeledStatement(data) => {
-                let rows = self.labeled_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = LabeledStatementRow {
-                    label: context.encode_node(FieldKey::new(23, ordinal, 0), data.label),
-                    statement: context.encode_node(FieldKey::new(23, ordinal, 1), data.statement),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (23, ordinal)
-            }
-            NodeData::ExpressionStatement(data) => {
-                let rows = self
-                    .expression_statement
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExpressionStatementRow {
-                    expression: context.encode_node(FieldKey::new(24, ordinal, 0), data.expression),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (24, ordinal)
-            }
-            NodeData::Block(data) => {
-                let rows = self.block.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BlockRow {
-                    statements: context.encode_list(FieldKey::new(25, ordinal, 0), data.statements),
-                    multi_line: data.multi_line,
-                    facts: AtomicU32::new(0),
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (25, ordinal)
-            }
-            NodeData::VariableStatement(data) => {
-                let rows = self.variable_statement.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = VariableStatementRow {
-                    modifiers: context.encode_list(FieldKey::new(26, ordinal, 0), data.modifiers),
-                    declaration_list: context
-                        .encode_node(FieldKey::new(26, ordinal, 1), data.declaration_list),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (26, ordinal)
-            }
-            NodeData::VariableDeclaration(data) => {
-                let rows = self
-                    .variable_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = VariableDeclarationRow {
-                    name: context.encode_node(FieldKey::new(27, ordinal, 0), data.name),
-                    exclamation_token: context
-                        .encode_node(FieldKey::new(27, ordinal, 1), data.exclamation_token),
-                    r#type: context.encode_node(FieldKey::new(27, ordinal, 2), data.r#type),
-                    initializer: context
-                        .encode_node(FieldKey::new(27, ordinal, 3), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (27, ordinal)
-            }
+            NodeData::ThrowStatement(data) => self.insert_throw_statement(data, context),
+            NodeData::TryStatement(data) => self.insert_try_statement(data, context),
+            NodeData::CatchClause(data) => self.insert_catch_clause(data, context),
+            NodeData::DebuggerStatement(data) => self.insert_debugger_statement(data, context),
+            NodeData::LabeledStatement(data) => self.insert_labeled_statement(data, context),
+            NodeData::ExpressionStatement(data) => self.insert_expression_statement(data, context),
+            NodeData::Block(data) => self.insert_block(data, context),
+            NodeData::VariableStatement(data) => self.insert_variable_statement(data, context),
+            NodeData::VariableDeclaration(data) => self.insert_variable_declaration(data, context),
             NodeData::VariableDeclarationList(data) => {
-                let rows = self
-                    .variable_declaration_list
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = VariableDeclarationListRow {
-                    declarations: context
-                        .encode_list(FieldKey::new(28, ordinal, 0), data.declarations),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (28, ordinal)
+                self.insert_variable_declaration_list(data, context)
             }
-            NodeData::BindingPattern(data) => {
-                let rows = self.binding_pattern.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BindingPatternRow {
-                    elements: context.encode_list(FieldKey::new(29, ordinal, 0), data.elements),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (29, ordinal)
-            }
+            NodeData::BindingPattern(data) => self.insert_binding_pattern(data, context),
             NodeData::ParameterDeclaration(data) => {
-                let rows = self
-                    .parameter_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ParameterDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(30, ordinal, 0), data.modifiers),
-                    dot_dot_dot_token: context
-                        .encode_node(FieldKey::new(30, ordinal, 1), data.dot_dot_dot_token),
-                    name: context.encode_node(FieldKey::new(30, ordinal, 2), data.name),
-                    question_token: context
-                        .encode_node(FieldKey::new(30, ordinal, 3), data.question_token),
-                    r#type: context.encode_node(FieldKey::new(30, ordinal, 4), data.r#type),
-                    initializer: context
-                        .encode_node(FieldKey::new(30, ordinal, 5), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (30, ordinal)
+                self.insert_parameter_declaration(*data, context)
             }
-            NodeData::BindingElement(data) => {
-                let rows = self.binding_element.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BindingElementRow {
-                    dot_dot_dot_token: context
-                        .encode_node(FieldKey::new(31, ordinal, 0), data.dot_dot_dot_token),
-                    property_name: context
-                        .encode_node(FieldKey::new(31, ordinal, 1), data.property_name),
-                    name: context.encode_node(FieldKey::new(31, ordinal, 2), data.name),
-                    initializer: context
-                        .encode_node(FieldKey::new(31, ordinal, 3), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (31, ordinal)
-            }
-            NodeData::MissingDeclaration(data) => {
-                let rows = self
-                    .missing_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = MissingDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(32, ordinal, 0), data.modifiers),
-                    symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (32, ordinal)
-            }
-            NodeData::FunctionDeclaration(data) => {
-                let rows = self
-                    .function_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = FunctionDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(33, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(33, ordinal, 1), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(33, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(33, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(33, ordinal, 4), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(33, ordinal, 5), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(33, ordinal, 6), data.body),
-                    name: context.encode_node(FieldKey::new(33, ordinal, 7), data.name),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    return_flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (33, ordinal)
-            }
-            NodeData::ClassDeclaration(data) => {
-                let rows = self.class_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ClassDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(34, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(34, ordinal, 1), data.name),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(34, ordinal, 2), data.type_parameters),
-                    heritage_clauses: context
-                        .encode_list(FieldKey::new(34, ordinal, 3), data.heritage_clauses),
-                    members: context.encode_list(FieldKey::new(34, ordinal, 4), data.members),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (34, ordinal)
-            }
-            NodeData::ClassExpression(data) => {
-                let rows = self.class_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ClassExpressionRow {
-                    modifiers: context.encode_list(FieldKey::new(35, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(35, ordinal, 1), data.name),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(35, ordinal, 2), data.type_parameters),
-                    heritage_clauses: context
-                        .encode_list(FieldKey::new(35, ordinal, 3), data.heritage_clauses),
-                    members: context.encode_list(FieldKey::new(35, ordinal, 4), data.members),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (35, ordinal)
-            }
-            NodeData::HeritageClause(data) => {
-                let rows = self.heritage_clause.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = HeritageClauseRow {
-                    token: data.token,
-                    types: context.encode_list(FieldKey::new(36, ordinal, 1), data.types),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (36, ordinal)
-            }
+            NodeData::BindingElement(data) => self.insert_binding_element(data, context),
+            NodeData::MissingDeclaration(data) => self.insert_missing_declaration(data, context),
+            NodeData::FunctionDeclaration(data) => self.insert_function_declaration(*data, context),
+            NodeData::ClassDeclaration(data) => self.insert_class_declaration(*data, context),
+            NodeData::ClassExpression(data) => self.insert_class_expression(*data, context),
+            NodeData::HeritageClause(data) => self.insert_heritage_clause(data, context),
             NodeData::InterfaceDeclaration(data) => {
-                let rows = self
-                    .interface_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = InterfaceDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(37, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(37, ordinal, 1), data.name),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(37, ordinal, 2), data.type_parameters),
-                    heritage_clauses: context
-                        .encode_list(FieldKey::new(37, ordinal, 3), data.heritage_clauses),
-                    members: context.encode_list(FieldKey::new(37, ordinal, 4), data.members),
-                    symbol: 0,
-                    local_symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (37, ordinal)
+                self.insert_interface_declaration(*data, context)
             }
             NodeData::TypeAliasDeclaration(data) => {
-                let rows = self
-                    .type_alias_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeAliasDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(38, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(38, ordinal, 1), data.name),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(38, ordinal, 2), data.type_parameters),
-                    r#type: context.encode_node(FieldKey::new(38, ordinal, 3), data.r#type),
-                    symbol: 0,
-                    local_symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (38, ordinal)
+                self.insert_type_alias_declaration(data, context)
             }
-            NodeData::EnumMember(data) => {
-                let rows = self.enum_member.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = EnumMemberRow {
-                    modifiers: context.encode_list(FieldKey::new(39, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(39, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(39, ordinal, 2), data.postfix_token),
-                    initializer: context
-                        .encode_node(FieldKey::new(39, ordinal, 3), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (39, ordinal)
+            NodeData::EnumMember(data) => self.insert_enum_member(data, context),
+            NodeData::EnumDeclaration(data) => self.insert_enum_declaration(data, context),
+            NodeData::ModuleBlock(data) => self.insert_module_block(data, context),
+            NodeData::NotEmittedStatement(data) => self.insert_not_emitted_statement(data, context),
+            NodeData::NotEmittedTypeElement(data) => {
+                self.insert_not_emitted_type_element(data, context)
             }
-            NodeData::EnumDeclaration(data) => {
-                let rows = self.enum_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = EnumDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(40, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(40, ordinal, 1), data.name),
-                    members: context.encode_list(FieldKey::new(40, ordinal, 2), data.members),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (40, ordinal)
-            }
-            NodeData::ModuleBlock(data) => {
-                let rows = self.module_block.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ModuleBlockRow {
-                    statements: context.encode_list(FieldKey::new(41, ordinal, 0), data.statements),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (41, ordinal)
-            }
-            NodeData::NotEmittedStatement(_) => {
-                let rows = self
-                    .not_emitted_statement
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NotEmittedStatementRow { flow_node: 0 };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (42, ordinal)
-            }
-            NodeData::NotEmittedTypeElement(_) => (43, 0),
-            NodeData::ImportDeclaration(data) => {
-                let rows = self.import_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(44, ordinal, 0), data.modifiers),
-                    import_clause: context
-                        .encode_node(FieldKey::new(44, ordinal, 1), data.import_clause),
-                    module_specifier: context
-                        .encode_node(FieldKey::new(44, ordinal, 2), data.module_specifier),
-                    attributes: context.encode_node(FieldKey::new(44, ordinal, 3), data.attributes),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (44, ordinal)
-            }
+            NodeData::ImportDeclaration(data) => self.insert_import_declaration(data, context),
             NodeData::ExternalModuleReference(data) => {
-                let rows = self
-                    .external_module_reference
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExternalModuleReferenceRow {
-                    expression: context.encode_node(FieldKey::new(45, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (45, ordinal)
+                self.insert_external_module_reference(data, context)
             }
-            NodeData::NamespaceImport(data) => {
-                let rows = self.namespace_import.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamespaceImportRow {
-                    name: context.encode_node(FieldKey::new(46, ordinal, 0), data.name),
-                    symbol: 0,
-                    local_symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (46, ordinal)
-            }
-            NodeData::NamedImports(data) => {
-                let rows = self.named_imports.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamedImportsRow {
-                    elements: context.encode_list(FieldKey::new(47, ordinal, 0), data.elements),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (47, ordinal)
-            }
-            NodeData::ExportAssignment(data) => {
-                let rows = self.export_assignment.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExportAssignmentRow {
-                    modifiers: context.encode_list(FieldKey::new(48, ordinal, 0), data.modifiers),
-                    is_export_equals: data.is_export_equals,
-                    r#type: context.encode_node(FieldKey::new(48, ordinal, 2), data.r#type),
-                    expression: context.encode_node(FieldKey::new(48, ordinal, 3), data.expression),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (48, ordinal)
-            }
+            NodeData::NamespaceImport(data) => self.insert_namespace_import(data, context),
+            NodeData::NamedImports(data) => self.insert_named_imports(data, context),
+            NodeData::ExportAssignment(data) => self.insert_export_assignment(data, context),
             NodeData::NamespaceExportDeclaration(data) => {
-                let rows = self
-                    .namespace_export_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamespaceExportDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(49, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(49, ordinal, 1), data.name),
-                    symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (49, ordinal)
+                self.insert_namespace_export_declaration(data, context)
             }
-            NodeData::NamespaceExport(data) => {
-                let rows = self.namespace_export.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamespaceExportRow {
-                    name: context.encode_node(FieldKey::new(50, ordinal, 0), data.name),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (50, ordinal)
-            }
-            NodeData::NamedExports(data) => {
-                let rows = self.named_exports.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamedExportsRow {
-                    elements: context.encode_list(FieldKey::new(51, ordinal, 0), data.elements),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (51, ordinal)
-            }
-            NodeData::ExportSpecifier(data) => {
-                let rows = self.export_specifier.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExportSpecifierRow {
-                    is_type_only: data.is_type_only,
-                    property_name: context
-                        .encode_node(FieldKey::new(52, ordinal, 1), data.property_name),
-                    name: context.encode_node(FieldKey::new(52, ordinal, 2), data.name),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (52, ordinal)
-            }
+            NodeData::NamespaceExport(data) => self.insert_namespace_export(data, context),
+            NodeData::NamedExports(data) => self.insert_named_exports(data, context),
+            NodeData::ExportSpecifier(data) => self.insert_export_specifier(data, context),
             NodeData::CallSignatureDeclaration(data) => {
-                let rows = self
-                    .call_signature_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = CallSignatureDeclarationRow {
-                    type_parameters: context
-                        .encode_list(FieldKey::new(53, ordinal, 0), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(53, ordinal, 1), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(53, ordinal, 2), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(53, ordinal, 3), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (53, ordinal)
+                self.insert_call_signature_declaration(data, context)
             }
             NodeData::ConstructSignatureDeclaration(data) => {
-                let rows = self
-                    .construct_signature_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ConstructSignatureDeclarationRow {
-                    type_parameters: context
-                        .encode_list(FieldKey::new(54, ordinal, 0), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(54, ordinal, 1), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(54, ordinal, 2), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(54, ordinal, 3), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (54, ordinal)
+                self.insert_construct_signature_declaration(data, context)
             }
             NodeData::ConstructorDeclaration(data) => {
-                let rows = self
-                    .constructor_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ConstructorDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(55, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(55, ordinal, 1), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(55, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(55, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(55, ordinal, 4), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(55, ordinal, 5), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(55, ordinal, 6), data.body),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    return_flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (55, ordinal)
+                self.insert_constructor_declaration(*data, context)
             }
             NodeData::GetAccessorDeclaration(data) => {
-                let rows = self
-                    .get_accessor_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = GetAccessorDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(56, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(56, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(56, ordinal, 2), data.postfix_token),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(56, ordinal, 3), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(56, ordinal, 4), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(56, ordinal, 5), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(56, ordinal, 6), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(56, ordinal, 7), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(56, ordinal, 8), data.body),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (56, ordinal)
+                self.insert_get_accessor_declaration(*data, context)
             }
             NodeData::SetAccessorDeclaration(data) => {
-                let rows = self
-                    .set_accessor_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SetAccessorDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(57, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(57, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(57, ordinal, 2), data.postfix_token),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(57, ordinal, 3), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(57, ordinal, 4), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(57, ordinal, 5), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(57, ordinal, 6), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(57, ordinal, 7), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(57, ordinal, 8), data.body),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (57, ordinal)
+                self.insert_set_accessor_declaration(*data, context)
             }
             NodeData::IndexSignatureDeclaration(data) => {
-                let rows = self
-                    .index_signature_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = IndexSignatureDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(58, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(58, ordinal, 1), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(58, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(58, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(58, ordinal, 4), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (58, ordinal)
+                self.insert_index_signature_declaration(*data, context)
             }
             NodeData::MethodSignatureDeclaration(data) => {
-                let rows = self
-                    .method_signature_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = MethodSignatureDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(59, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(59, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(59, ordinal, 2), data.postfix_token),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(59, ordinal, 3), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(59, ordinal, 4), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(59, ordinal, 5), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(59, ordinal, 6), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (59, ordinal)
+                self.insert_method_signature_declaration(*data, context)
             }
-            NodeData::MethodDeclaration(data) => {
-                let rows = self.method_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = MethodDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(60, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(60, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(60, ordinal, 2), data.postfix_token),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(60, ordinal, 3), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(60, ordinal, 4), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(60, ordinal, 5), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(60, ordinal, 6), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(60, ordinal, 7), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(60, ordinal, 8), data.body),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (60, ordinal)
-            }
+            NodeData::MethodDeclaration(data) => self.insert_method_declaration(*data, context),
             NodeData::PropertySignatureDeclaration(data) => {
-                let rows = self
-                    .property_signature_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PropertySignatureDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(61, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(61, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(61, ordinal, 2), data.postfix_token),
-                    r#type: context.encode_node(FieldKey::new(61, ordinal, 3), data.r#type),
-                    initializer: context
-                        .encode_node(FieldKey::new(61, ordinal, 4), data.initializer),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (61, ordinal)
+                self.insert_property_signature_declaration(*data, context)
             }
-            NodeData::PropertyDeclaration(data) => {
-                let rows = self
-                    .property_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PropertyDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(62, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(62, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(62, ordinal, 2), data.postfix_token),
-                    r#type: context.encode_node(FieldKey::new(62, ordinal, 3), data.r#type),
-                    initializer: context
-                        .encode_node(FieldKey::new(62, ordinal, 4), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (62, ordinal)
-            }
-            NodeData::SemicolonClassElement(_) => {
-                let rows = self
-                    .semicolon_class_element
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SemicolonClassElementRow { symbol: 0 };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (63, ordinal)
+            NodeData::PropertyDeclaration(data) => self.insert_property_declaration(*data, context),
+            NodeData::SemicolonClassElement(data) => {
+                self.insert_semicolon_class_element(data, context)
             }
             NodeData::ClassStaticBlockDeclaration(data) => {
-                let rows = self
-                    .class_static_block_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ClassStaticBlockDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(64, ordinal, 0), data.modifiers),
-                    body: context.encode_node(FieldKey::new(64, ordinal, 1), data.body),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    return_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (64, ordinal)
+                self.insert_class_static_block_declaration(data, context)
             }
-            NodeData::OmittedExpression(_) => (65, 0),
-            NodeData::KeywordExpression(_) => {
-                let rows = self.keyword_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = KeywordExpressionRow { flow_node: 0 };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (66, ordinal)
-            }
-            NodeData::StringLiteral(data) => {
-                let rows = self.string_literal.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = StringLiteralRow {
-                    text: context.encode_text(FieldKey::new(67, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (67, ordinal)
-            }
-            NodeData::NumericLiteral(data) => {
-                let rows = self.numeric_literal.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NumericLiteralRow {
-                    text: context.encode_text(FieldKey::new(68, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (68, ordinal)
-            }
-            NodeData::BigIntLiteral(data) => {
-                let rows = self.big_int_literal.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BigIntLiteralRow {
-                    text: context.encode_text(FieldKey::new(69, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (69, ordinal)
-            }
+            NodeData::OmittedExpression(data) => self.insert_omitted_expression(data, context),
+            NodeData::KeywordExpression(data) => self.insert_keyword_expression(data, context),
+            NodeData::StringLiteral(data) => self.insert_string_literal(*data, context),
+            NodeData::NumericLiteral(data) => self.insert_numeric_literal(*data, context),
+            NodeData::BigIntLiteral(data) => self.insert_big_int_literal(*data, context),
             NodeData::RegularExpressionLiteral(data) => {
-                let rows = self
-                    .regular_expression_literal
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = RegularExpressionLiteralRow {
-                    text: context.encode_text(FieldKey::new(70, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (70, ordinal)
+                self.insert_regular_expression_literal(*data, context)
             }
             NodeData::NoSubstitutionTemplateLiteral(data) => {
-                let rows = self
-                    .no_substitution_template_literal
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NoSubstitutionTemplateLiteralRow {
-                    text: context.encode_text(FieldKey::new(71, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                    raw_text: context.encode_text(FieldKey::new(71, ordinal, 2), data.raw_text),
-                    template_flags: data.template_flags,
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (71, ordinal)
+                self.insert_no_substitution_template_literal(*data, context)
             }
-            NodeData::BinaryExpression(data) => {
-                let rows = self.binary_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = BinaryExpressionRow {
-                    modifiers: context.encode_list(FieldKey::new(72, ordinal, 0), data.modifiers),
-                    left: context.encode_node(FieldKey::new(72, ordinal, 1), data.left),
-                    r#type: context.encode_node(FieldKey::new(72, ordinal, 2), data.r#type),
-                    operator_token: context
-                        .encode_node(FieldKey::new(72, ordinal, 3), data.operator_token),
-                    right: context.encode_node(FieldKey::new(72, ordinal, 4), data.right),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (72, ordinal)
-            }
+            NodeData::BinaryExpression(data) => self.insert_binary_expression(*data, context),
             NodeData::PrefixUnaryExpression(data) => {
-                let rows = self
-                    .prefix_unary_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PrefixUnaryExpressionRow {
-                    operator: data.operator,
-                    operand: context.encode_node(FieldKey::new(73, ordinal, 1), data.operand),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (73, ordinal)
+                self.insert_prefix_unary_expression(data, context)
             }
             NodeData::PostfixUnaryExpression(data) => {
-                let rows = self
-                    .postfix_unary_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PostfixUnaryExpressionRow {
-                    operand: context.encode_node(FieldKey::new(74, ordinal, 0), data.operand),
-                    operator: data.operator,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (74, ordinal)
+                self.insert_postfix_unary_expression(data, context)
             }
-            NodeData::YieldExpression(data) => {
-                let rows = self.yield_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = YieldExpressionRow {
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(75, ordinal, 0), data.asterisk_token),
-                    expression: context.encode_node(FieldKey::new(75, ordinal, 1), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (75, ordinal)
-            }
-            NodeData::ArrowFunction(data) => {
-                let rows = self.arrow_function.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ArrowFunctionRow {
-                    modifiers: context.encode_list(FieldKey::new(76, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(76, ordinal, 1), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(76, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(76, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(76, ordinal, 4), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(76, ordinal, 5), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(76, ordinal, 6), data.body),
-                    equals_greater_than_token: context.encode_node(
-                        FieldKey::new(76, ordinal, 7),
-                        data.equals_greater_than_token,
-                    ),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (76, ordinal)
-            }
-            NodeData::FunctionExpression(data) => {
-                let rows = self
-                    .function_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = FunctionExpressionRow {
-                    modifiers: context.encode_list(FieldKey::new(77, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(77, ordinal, 1), data.type_parameters),
-                    parameters: context.encode_list(FieldKey::new(77, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(77, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(77, ordinal, 4), data.full_signature),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(77, ordinal, 5), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(77, ordinal, 6), data.body),
-                    name: context.encode_node(FieldKey::new(77, ordinal, 7), data.name),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    return_flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (77, ordinal)
-            }
-            NodeData::AsExpression(data) => {
-                let rows = self.as_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = AsExpressionRow {
-                    expression: context.encode_node(FieldKey::new(78, ordinal, 0), data.expression),
-                    r#type: context.encode_node(FieldKey::new(78, ordinal, 1), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (78, ordinal)
-            }
-            NodeData::SatisfiesExpression(data) => {
-                let rows = self
-                    .satisfies_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SatisfiesExpressionRow {
-                    expression: context.encode_node(FieldKey::new(79, ordinal, 0), data.expression),
-                    r#type: context.encode_node(FieldKey::new(79, ordinal, 1), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (79, ordinal)
-            }
+            NodeData::YieldExpression(data) => self.insert_yield_expression(data, context),
+            NodeData::ArrowFunction(data) => self.insert_arrow_function(*data, context),
+            NodeData::FunctionExpression(data) => self.insert_function_expression(*data, context),
+            NodeData::AsExpression(data) => self.insert_as_expression(data, context),
+            NodeData::SatisfiesExpression(data) => self.insert_satisfies_expression(data, context),
             NodeData::ConditionalExpression(data) => {
-                let rows = self
-                    .conditional_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ConditionalExpressionRow {
-                    condition: context.encode_node(FieldKey::new(80, ordinal, 0), data.condition),
-                    question_token: context
-                        .encode_node(FieldKey::new(80, ordinal, 1), data.question_token),
-                    when_true: context.encode_node(FieldKey::new(80, ordinal, 2), data.when_true),
-                    colon_token: context
-                        .encode_node(FieldKey::new(80, ordinal, 3), data.colon_token),
-                    when_false: context.encode_node(FieldKey::new(80, ordinal, 4), data.when_false),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (80, ordinal)
+                self.insert_conditional_expression(*data, context)
             }
             NodeData::PropertyAccessExpression(data) => {
-                let rows = self
-                    .property_access_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PropertyAccessExpressionRow {
-                    expression: context.encode_node(FieldKey::new(81, ordinal, 0), data.expression),
-                    question_dot_token: context
-                        .encode_node(FieldKey::new(81, ordinal, 1), data.question_dot_token),
-                    name: context.encode_node(FieldKey::new(81, ordinal, 2), data.name),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (81, ordinal)
+                self.insert_property_access_expression(data, context)
             }
             NodeData::ElementAccessExpression(data) => {
-                let rows = self
-                    .element_access_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ElementAccessExpressionRow {
-                    expression: context.encode_node(FieldKey::new(82, ordinal, 0), data.expression),
-                    question_dot_token: context
-                        .encode_node(FieldKey::new(82, ordinal, 1), data.question_dot_token),
-                    argument_expression: context
-                        .encode_node(FieldKey::new(82, ordinal, 2), data.argument_expression),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (82, ordinal)
+                self.insert_element_access_expression(data, context)
             }
-            NodeData::CallExpression(data) => {
-                let rows = self.call_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = CallExpressionRow {
-                    expression: context.encode_node(FieldKey::new(83, ordinal, 0), data.expression),
-                    question_dot_token: context
-                        .encode_node(FieldKey::new(83, ordinal, 1), data.question_dot_token),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(83, ordinal, 2), data.type_arguments),
-                    arguments: context.encode_list(FieldKey::new(83, ordinal, 3), data.arguments),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (83, ordinal)
-            }
-            NodeData::NewExpression(data) => {
-                let rows = self.new_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NewExpressionRow {
-                    expression: context.encode_node(FieldKey::new(84, ordinal, 0), data.expression),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(84, ordinal, 1), data.type_arguments),
-                    arguments: context.encode_list(FieldKey::new(84, ordinal, 2), data.arguments),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (84, ordinal)
-            }
-            NodeData::MetaProperty(data) => {
-                let rows = self.meta_property.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = MetaPropertyRow {
-                    keyword_token: data.keyword_token,
-                    name: context.encode_node(FieldKey::new(85, ordinal, 1), data.name),
-                    facts: AtomicU32::new(0),
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (85, ordinal)
-            }
-            NodeData::NonNullExpression(data) => {
-                let rows = self
-                    .non_null_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NonNullExpressionRow {
-                    expression: context.encode_node(FieldKey::new(86, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (86, ordinal)
-            }
-            NodeData::SpreadElement(data) => {
-                let rows = self.spread_element.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SpreadElementRow {
-                    expression: context.encode_node(FieldKey::new(87, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (87, ordinal)
-            }
-            NodeData::TemplateExpression(data) => {
-                let rows = self
-                    .template_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateExpressionRow {
-                    head: context.encode_node(FieldKey::new(88, ordinal, 0), data.head),
-                    template_spans: context
-                        .encode_list(FieldKey::new(88, ordinal, 1), data.template_spans),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (88, ordinal)
-            }
-            NodeData::TemplateSpan(data) => {
-                let rows = self.template_span.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateSpanRow {
-                    expression: context.encode_node(FieldKey::new(89, ordinal, 0), data.expression),
-                    literal: context.encode_node(FieldKey::new(89, ordinal, 1), data.literal),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (89, ordinal)
-            }
+            NodeData::CallExpression(data) => self.insert_call_expression(data, context),
+            NodeData::NewExpression(data) => self.insert_new_expression(data, context),
+            NodeData::MetaProperty(data) => self.insert_meta_property(data, context),
+            NodeData::NonNullExpression(data) => self.insert_non_null_expression(data, context),
+            NodeData::SpreadElement(data) => self.insert_spread_element(data, context),
+            NodeData::TemplateExpression(data) => self.insert_template_expression(data, context),
+            NodeData::TemplateSpan(data) => self.insert_template_span(data, context),
             NodeData::TaggedTemplateExpression(data) => {
-                let rows = self
-                    .tagged_template_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TaggedTemplateExpressionRow {
-                    tag: context.encode_node(FieldKey::new(90, ordinal, 0), data.tag),
-                    question_dot_token: context
-                        .encode_node(FieldKey::new(90, ordinal, 1), data.question_dot_token),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(90, ordinal, 2), data.type_arguments),
-                    template: context.encode_node(FieldKey::new(90, ordinal, 3), data.template),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (90, ordinal)
+                self.insert_tagged_template_expression(data, context)
             }
             NodeData::ParenthesizedExpression(data) => {
-                let rows = self
-                    .parenthesized_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ParenthesizedExpressionRow {
-                    expression: context.encode_node(FieldKey::new(91, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (91, ordinal)
+                self.insert_parenthesized_expression(data, context)
             }
             NodeData::ArrayLiteralExpression(data) => {
-                let rows = self
-                    .array_literal_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ArrayLiteralExpressionRow {
-                    elements: context.encode_list(FieldKey::new(92, ordinal, 0), data.elements),
-                    multi_line: data.multi_line,
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (92, ordinal)
+                self.insert_array_literal_expression(data, context)
             }
             NodeData::ObjectLiteralExpression(data) => {
-                let rows = self
-                    .object_literal_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ObjectLiteralExpressionRow {
-                    properties: context.encode_list(FieldKey::new(93, ordinal, 0), data.properties),
-                    multi_line: data.multi_line,
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (93, ordinal)
+                self.insert_object_literal_expression(data, context)
             }
-            NodeData::SpreadAssignment(data) => {
-                let rows = self.spread_assignment.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SpreadAssignmentRow {
-                    expression: context.encode_node(FieldKey::new(94, ordinal, 0), data.expression),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (94, ordinal)
-            }
-            NodeData::PropertyAssignment(data) => {
-                let rows = self
-                    .property_assignment
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PropertyAssignmentRow {
-                    modifiers: context.encode_list(FieldKey::new(95, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(95, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(95, ordinal, 2), data.postfix_token),
-                    r#type: context.encode_node(FieldKey::new(95, ordinal, 3), data.r#type),
-                    initializer: context
-                        .encode_node(FieldKey::new(95, ordinal, 4), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (95, ordinal)
-            }
+            NodeData::SpreadAssignment(data) => self.insert_spread_assignment(data, context),
+            NodeData::PropertyAssignment(data) => self.insert_property_assignment(*data, context),
             NodeData::ShorthandPropertyAssignment(data) => {
-                let rows = self
-                    .shorthand_property_assignment
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ShorthandPropertyAssignmentRow {
-                    modifiers: context.encode_list(FieldKey::new(96, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(96, ordinal, 1), data.name),
-                    postfix_token: context
-                        .encode_node(FieldKey::new(96, ordinal, 2), data.postfix_token),
-                    r#type: context.encode_node(FieldKey::new(96, ordinal, 3), data.r#type),
-                    equals_token: context
-                        .encode_node(FieldKey::new(96, ordinal, 4), data.equals_token),
-                    object_assignment_initializer: context.encode_node(
-                        FieldKey::new(96, ordinal, 5),
-                        data.object_assignment_initializer,
-                    ),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (96, ordinal)
+                self.insert_shorthand_property_assignment(*data, context)
             }
-            NodeData::DeleteExpression(data) => {
-                let rows = self.delete_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = DeleteExpressionRow {
-                    expression: context.encode_node(FieldKey::new(97, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (97, ordinal)
-            }
-            NodeData::TypeOfExpression(data) => {
-                let rows = self.type_of_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeOfExpressionRow {
-                    expression: context.encode_node(FieldKey::new(98, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (98, ordinal)
-            }
-            NodeData::VoidExpression(data) => {
-                let rows = self.void_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = VoidExpressionRow {
-                    expression: context.encode_node(FieldKey::new(99, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (99, ordinal)
-            }
-            NodeData::AwaitExpression(data) => {
-                let rows = self.await_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = AwaitExpressionRow {
-                    expression: context
-                        .encode_node(FieldKey::new(100, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (100, ordinal)
-            }
-            NodeData::TypeAssertion(data) => {
-                let rows = self.type_assertion.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeAssertionRow {
-                    r#type: context.encode_node(FieldKey::new(101, ordinal, 0), data.r#type),
-                    expression: context
-                        .encode_node(FieldKey::new(101, ordinal, 1), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (101, ordinal)
-            }
-            NodeData::KeywordTypeNode(_) => (102, 0),
-            NodeData::UnionTypeNode(data) => {
-                let rows = self.union_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = UnionTypeNodeRow {
-                    types: context.encode_list(FieldKey::new(103, ordinal, 0), data.types),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (103, ordinal)
-            }
+            NodeData::DeleteExpression(data) => self.insert_delete_expression(data, context),
+            NodeData::TypeOfExpression(data) => self.insert_type_of_expression(data, context),
+            NodeData::VoidExpression(data) => self.insert_void_expression(data, context),
+            NodeData::AwaitExpression(data) => self.insert_await_expression(data, context),
+            NodeData::TypeAssertion(data) => self.insert_type_assertion(data, context),
+            NodeData::KeywordTypeNode(data) => self.insert_keyword_type_node(data, context),
+            NodeData::UnionTypeNode(data) => self.insert_union_type_node(data, context),
             NodeData::IntersectionTypeNode(data) => {
-                let rows = self
-                    .intersection_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = IntersectionTypeNodeRow {
-                    types: context.encode_list(FieldKey::new(104, ordinal, 0), data.types),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (104, ordinal)
+                self.insert_intersection_type_node(data, context)
             }
-            NodeData::ConditionalTypeNode(data) => {
-                let rows = self
-                    .conditional_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ConditionalTypeNodeRow {
-                    check_type: context
-                        .encode_node(FieldKey::new(105, ordinal, 0), data.check_type),
-                    extends_type: context
-                        .encode_node(FieldKey::new(105, ordinal, 1), data.extends_type),
-                    true_type: context.encode_node(FieldKey::new(105, ordinal, 2), data.true_type),
-                    false_type: context
-                        .encode_node(FieldKey::new(105, ordinal, 3), data.false_type),
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (105, ordinal)
-            }
-            NodeData::TypeOperatorNode(data) => {
-                let rows = self.type_operator_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeOperatorNodeRow {
-                    operator: data.operator,
-                    r#type: context.encode_node(FieldKey::new(106, ordinal, 1), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (106, ordinal)
-            }
-            NodeData::InferTypeNode(data) => {
-                let rows = self.infer_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = InferTypeNodeRow {
-                    type_parameter: context
-                        .encode_node(FieldKey::new(107, ordinal, 0), data.type_parameter),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (107, ordinal)
-            }
-            NodeData::ArrayTypeNode(data) => {
-                let rows = self.array_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ArrayTypeNodeRow {
-                    element_type: context
-                        .encode_node(FieldKey::new(108, ordinal, 0), data.element_type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (108, ordinal)
-            }
+            NodeData::ConditionalTypeNode(data) => self.insert_conditional_type_node(data, context),
+            NodeData::TypeOperatorNode(data) => self.insert_type_operator_node(data, context),
+            NodeData::InferTypeNode(data) => self.insert_infer_type_node(data, context),
+            NodeData::ArrayTypeNode(data) => self.insert_array_type_node(data, context),
             NodeData::IndexedAccessTypeNode(data) => {
-                let rows = self
-                    .indexed_access_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = IndexedAccessTypeNodeRow {
-                    object_type: context
-                        .encode_node(FieldKey::new(109, ordinal, 0), data.object_type),
-                    index_type: context
-                        .encode_node(FieldKey::new(109, ordinal, 1), data.index_type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (109, ordinal)
+                self.insert_indexed_access_type_node(data, context)
             }
-            NodeData::TypeReferenceNode(data) => {
-                let rows = self
-                    .type_reference_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeReferenceNodeRow {
-                    type_arguments: context
-                        .encode_list(FieldKey::new(110, ordinal, 0), data.type_arguments),
-                    type_name: context.encode_node(FieldKey::new(110, ordinal, 1), data.type_name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (110, ordinal)
-            }
+            NodeData::TypeReferenceNode(data) => self.insert_type_reference_node(data, context),
             NodeData::ExpressionWithTypeArguments(data) => {
-                let rows = self
-                    .expression_with_type_arguments
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExpressionWithTypeArgumentsRow {
-                    expression: context
-                        .encode_node(FieldKey::new(111, ordinal, 0), data.expression),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(111, ordinal, 1), data.type_arguments),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (111, ordinal)
+                self.insert_expression_with_type_arguments(data, context)
             }
-            NodeData::LiteralTypeNode(data) => {
-                let rows = self.literal_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = LiteralTypeNodeRow {
-                    literal: context.encode_node(FieldKey::new(112, ordinal, 0), data.literal),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (112, ordinal)
-            }
-            NodeData::ThisTypeNode(_) => (113, 0),
-            NodeData::TypePredicateNode(data) => {
-                let rows = self
-                    .type_predicate_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypePredicateNodeRow {
-                    asserts_modifier: context
-                        .encode_node(FieldKey::new(114, ordinal, 0), data.asserts_modifier),
-                    parameter_name: context
-                        .encode_node(FieldKey::new(114, ordinal, 1), data.parameter_name),
-                    r#type: context.encode_node(FieldKey::new(114, ordinal, 2), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (114, ordinal)
-            }
-            NodeData::ImportAttribute(data) => {
-                let rows = self.import_attribute.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportAttributeRow {
-                    name: context.encode_node(FieldKey::new(115, ordinal, 0), data.name),
-                    value: context.encode_node(FieldKey::new(115, ordinal, 1), data.value),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (115, ordinal)
-            }
-            NodeData::ImportAttributes(data) => {
-                let rows = self.import_attributes.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportAttributesRow {
-                    token: data.token,
-                    attributes: context
-                        .encode_list(FieldKey::new(116, ordinal, 1), data.attributes),
-                    multi_line: data.multi_line,
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (116, ordinal)
-            }
-            NodeData::TypeQueryNode(data) => {
-                let rows = self.type_query_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeQueryNodeRow {
-                    type_arguments: context
-                        .encode_list(FieldKey::new(117, ordinal, 0), data.type_arguments),
-                    expr_name: context.encode_node(FieldKey::new(117, ordinal, 1), data.expr_name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (117, ordinal)
-            }
-            NodeData::MappedTypeNode(data) => {
-                let rows = self.mapped_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = MappedTypeNodeRow {
-                    readonly_token: context
-                        .encode_node(FieldKey::new(118, ordinal, 0), data.readonly_token),
-                    type_parameter: context
-                        .encode_node(FieldKey::new(118, ordinal, 1), data.type_parameter),
-                    name_type: context.encode_node(FieldKey::new(118, ordinal, 2), data.name_type),
-                    question_token: context
-                        .encode_node(FieldKey::new(118, ordinal, 3), data.question_token),
-                    r#type: context.encode_node(FieldKey::new(118, ordinal, 4), data.r#type),
-                    members: context.encode_list(FieldKey::new(118, ordinal, 5), data.members),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (118, ordinal)
-            }
-            NodeData::TypeLiteralNode(data) => {
-                let rows = self.type_literal_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeLiteralNodeRow {
-                    members: context.encode_list(FieldKey::new(119, ordinal, 0), data.members),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (119, ordinal)
-            }
-            NodeData::TupleTypeNode(data) => {
-                let rows = self.tuple_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TupleTypeNodeRow {
-                    elements: context.encode_list(FieldKey::new(120, ordinal, 0), data.elements),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (120, ordinal)
-            }
-            NodeData::NamedTupleMember(data) => {
-                let rows = self.named_tuple_member.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = NamedTupleMemberRow {
-                    dot_dot_dot_token: context
-                        .encode_node(FieldKey::new(121, ordinal, 0), data.dot_dot_dot_token),
-                    name: context.encode_node(FieldKey::new(121, ordinal, 1), data.name),
-                    question_token: context
-                        .encode_node(FieldKey::new(121, ordinal, 2), data.question_token),
-                    r#type: context.encode_node(FieldKey::new(121, ordinal, 3), data.r#type),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (121, ordinal)
-            }
-            NodeData::OptionalTypeNode(data) => {
-                let rows = self.optional_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = OptionalTypeNodeRow {
-                    r#type: context.encode_node(FieldKey::new(122, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (122, ordinal)
-            }
-            NodeData::RestTypeNode(data) => {
-                let rows = self.rest_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = RestTypeNodeRow {
-                    r#type: context.encode_node(FieldKey::new(123, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (123, ordinal)
-            }
+            NodeData::LiteralTypeNode(data) => self.insert_literal_type_node(data, context),
+            NodeData::ThisTypeNode(data) => self.insert_this_type_node(data, context),
+            NodeData::TypePredicateNode(data) => self.insert_type_predicate_node(data, context),
+            NodeData::ImportAttribute(data) => self.insert_import_attribute(data, context),
+            NodeData::ImportAttributes(data) => self.insert_import_attributes(data, context),
+            NodeData::TypeQueryNode(data) => self.insert_type_query_node(data, context),
+            NodeData::MappedTypeNode(data) => self.insert_mapped_type_node(*data, context),
+            NodeData::TypeLiteralNode(data) => self.insert_type_literal_node(data, context),
+            NodeData::TupleTypeNode(data) => self.insert_tuple_type_node(data, context),
+            NodeData::NamedTupleMember(data) => self.insert_named_tuple_member(data, context),
+            NodeData::OptionalTypeNode(data) => self.insert_optional_type_node(data, context),
+            NodeData::RestTypeNode(data) => self.insert_rest_type_node(data, context),
             NodeData::ParenthesizedTypeNode(data) => {
-                let rows = self
-                    .parenthesized_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ParenthesizedTypeNodeRow {
-                    r#type: context.encode_node(FieldKey::new(124, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (124, ordinal)
+                self.insert_parenthesized_type_node(data, context)
             }
-            NodeData::FunctionTypeNode(data) => {
-                let rows = self.function_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = FunctionTypeNodeRow {
-                    modifiers: context.encode_list(FieldKey::new(125, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(125, ordinal, 1), data.type_parameters),
-                    parameters: context
-                        .encode_list(FieldKey::new(125, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(125, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(125, ordinal, 4), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (125, ordinal)
-            }
+            NodeData::FunctionTypeNode(data) => self.insert_function_type_node(*data, context),
             NodeData::ConstructorTypeNode(data) => {
-                let rows = self
-                    .constructor_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ConstructorTypeNodeRow {
-                    modifiers: context.encode_list(FieldKey::new(126, ordinal, 0), data.modifiers),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(126, ordinal, 1), data.type_parameters),
-                    parameters: context
-                        .encode_list(FieldKey::new(126, ordinal, 2), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(126, ordinal, 3), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(126, ordinal, 4), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (126, ordinal)
+                self.insert_constructor_type_node(*data, context)
             }
-            NodeData::TemplateHead(data) => {
-                let rows = self.template_head.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateHeadRow {
-                    text: context.encode_text(FieldKey::new(127, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                    raw_text: context.encode_text(FieldKey::new(127, ordinal, 2), data.raw_text),
-                    template_flags: data.template_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (127, ordinal)
-            }
-            NodeData::TemplateMiddle(data) => {
-                let rows = self.template_middle.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateMiddleRow {
-                    text: context.encode_text(FieldKey::new(128, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                    raw_text: context.encode_text(FieldKey::new(128, ordinal, 2), data.raw_text),
-                    template_flags: data.template_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (128, ordinal)
-            }
-            NodeData::TemplateTail(data) => {
-                let rows = self.template_tail.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateTailRow {
-                    text: context.encode_text(FieldKey::new(129, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                    raw_text: context.encode_text(FieldKey::new(129, ordinal, 2), data.raw_text),
-                    template_flags: data.template_flags,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (129, ordinal)
-            }
+            NodeData::TemplateHead(data) => self.insert_template_head(*data, context),
+            NodeData::TemplateMiddle(data) => self.insert_template_middle(*data, context),
+            NodeData::TemplateTail(data) => self.insert_template_tail(*data, context),
             NodeData::TemplateLiteralTypeNode(data) => {
-                let rows = self
-                    .template_literal_type_node
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateLiteralTypeNodeRow {
-                    head: context.encode_node(FieldKey::new(130, ordinal, 0), data.head),
-                    template_spans: context
-                        .encode_list(FieldKey::new(130, ordinal, 1), data.template_spans),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (130, ordinal)
+                self.insert_template_literal_type_node(data, context)
             }
             NodeData::TemplateLiteralTypeSpan(data) => {
-                let rows = self
-                    .template_literal_type_span
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TemplateLiteralTypeSpanRow {
-                    r#type: context.encode_node(FieldKey::new(131, ordinal, 0), data.r#type),
-                    literal: context.encode_node(FieldKey::new(131, ordinal, 1), data.literal),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (131, ordinal)
+                self.insert_template_literal_type_span(data, context)
             }
-            NodeData::SyntheticExpression(data) => {
-                let rows = self
-                    .synthetic_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SyntheticExpressionRow {
-                    is_spread: data.is_spread,
-                    tuple_name_source: context
-                        .encode_node(FieldKey::new(132, ordinal, 1), data.tuple_name_source),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (132, ordinal)
-            }
+            NodeData::SyntheticExpression(data) => self.insert_synthetic_expression(data, context),
             NodeData::PartiallyEmittedExpression(data) => {
-                let rows = self
-                    .partially_emitted_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = PartiallyEmittedExpressionRow {
-                    expression: context
-                        .encode_node(FieldKey::new(133, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (133, ordinal)
+                self.insert_partially_emitted_expression(data, context)
             }
-            NodeData::JsxElement(data) => {
-                let rows = self.jsx_element.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxElementRow {
-                    opening_element: context
-                        .encode_node(FieldKey::new(134, ordinal, 0), data.opening_element),
-                    children: context.encode_list(FieldKey::new(134, ordinal, 1), data.children),
-                    closing_element: context
-                        .encode_node(FieldKey::new(134, ordinal, 2), data.closing_element),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (134, ordinal)
-            }
-            NodeData::JsxAttributes(data) => {
-                let rows = self.jsx_attributes.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxAttributesRow {
-                    properties: context
-                        .encode_list(FieldKey::new(135, ordinal, 0), data.properties),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (135, ordinal)
-            }
-            NodeData::JsxNamespacedName(data) => {
-                let rows = self
-                    .jsx_namespaced_name
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxNamespacedNameRow {
-                    namespace: context.encode_node(FieldKey::new(136, ordinal, 0), data.namespace),
-                    name: context.encode_node(FieldKey::new(136, ordinal, 1), data.name),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (136, ordinal)
-            }
-            NodeData::JsxOpeningElement(data) => {
-                let rows = self
-                    .jsx_opening_element
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxOpeningElementRow {
-                    tag_name: context.encode_node(FieldKey::new(137, ordinal, 0), data.tag_name),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(137, ordinal, 1), data.type_arguments),
-                    attributes: context
-                        .encode_node(FieldKey::new(137, ordinal, 2), data.attributes),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (137, ordinal)
-            }
+            NodeData::JsxElement(data) => self.insert_jsx_element(data, context),
+            NodeData::JsxAttributes(data) => self.insert_jsx_attributes(data, context),
+            NodeData::JsxNamespacedName(data) => self.insert_jsx_namespaced_name(data, context),
+            NodeData::JsxOpeningElement(data) => self.insert_jsx_opening_element(data, context),
             NodeData::JsxSelfClosingElement(data) => {
-                let rows = self
-                    .jsx_self_closing_element
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxSelfClosingElementRow {
-                    tag_name: context.encode_node(FieldKey::new(138, ordinal, 0), data.tag_name),
-                    type_arguments: context
-                        .encode_list(FieldKey::new(138, ordinal, 1), data.type_arguments),
-                    attributes: context
-                        .encode_node(FieldKey::new(138, ordinal, 2), data.attributes),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (138, ordinal)
+                self.insert_jsx_self_closing_element(data, context)
             }
-            NodeData::JsxFragment(data) => {
-                let rows = self.jsx_fragment.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxFragmentRow {
-                    opening_fragment: context
-                        .encode_node(FieldKey::new(139, ordinal, 0), data.opening_fragment),
-                    children: context.encode_list(FieldKey::new(139, ordinal, 1), data.children),
-                    closing_fragment: context
-                        .encode_node(FieldKey::new(139, ordinal, 2), data.closing_fragment),
-                    facts: AtomicU32::new(0),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (139, ordinal)
-            }
-            NodeData::JsxOpeningFragment(_) => (140, 0),
-            NodeData::JsxClosingFragment(_) => (141, 0),
-            NodeData::JsxAttribute(data) => {
-                let rows = self.jsx_attribute.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxAttributeRow {
-                    name: context.encode_node(FieldKey::new(142, ordinal, 0), data.name),
-                    initializer: context
-                        .encode_node(FieldKey::new(142, ordinal, 1), data.initializer),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (142, ordinal)
-            }
-            NodeData::JsxSpreadAttribute(data) => {
-                let rows = self
-                    .jsx_spread_attribute
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxSpreadAttributeRow {
-                    expression: context
-                        .encode_node(FieldKey::new(143, ordinal, 0), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (143, ordinal)
-            }
-            NodeData::JsxClosingElement(data) => {
-                let rows = self
-                    .jsx_closing_element
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxClosingElementRow {
-                    tag_name: context.encode_node(FieldKey::new(144, ordinal, 0), data.tag_name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (144, ordinal)
-            }
-            NodeData::JsxExpression(data) => {
-                let rows = self.jsx_expression.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxExpressionRow {
-                    dot_dot_dot_token: context
-                        .encode_node(FieldKey::new(145, ordinal, 0), data.dot_dot_dot_token),
-                    expression: context
-                        .encode_node(FieldKey::new(145, ordinal, 1), data.expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (145, ordinal)
-            }
-            NodeData::JsxText(data) => {
-                let rows = self.jsx_text.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JsxTextRow {
-                    text: context.encode_text(FieldKey::new(146, ordinal, 0), data.text),
-                    token_flags: data.token_flags,
-                    contains_only_trivia_white_spaces: data.contains_only_trivia_white_spaces,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (146, ordinal)
-            }
-            NodeData::SyntaxList(data) => {
-                let rows = self.syntax_list.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SyntaxListRow {
-                    children: context
-                        .encode_node_slice(FieldKey::new(147, ordinal, 0), data.children),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (147, ordinal)
-            }
-            NodeData::JSDoc(data) => {
-                let rows = self.js_doc.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocRow {
-                    comment: context.encode_list(FieldKey::new(148, ordinal, 0), data.comment),
-                    tags: context.encode_list(FieldKey::new(148, ordinal, 1), data.tags),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (148, ordinal)
-            }
+            NodeData::JsxFragment(data) => self.insert_jsx_fragment(data, context),
+            NodeData::JsxOpeningFragment(data) => self.insert_jsx_opening_fragment(data, context),
+            NodeData::JsxClosingFragment(data) => self.insert_jsx_closing_fragment(data, context),
+            NodeData::JsxAttribute(data) => self.insert_jsx_attribute(data, context),
+            NodeData::JsxSpreadAttribute(data) => self.insert_jsx_spread_attribute(data, context),
+            NodeData::JsxClosingElement(data) => self.insert_jsx_closing_element(data, context),
+            NodeData::JsxExpression(data) => self.insert_jsx_expression(data, context),
+            NodeData::JsxText(data) => self.insert_jsx_text(*data, context),
+            NodeData::SyntaxList(data) => self.insert_syntax_list(data, context),
+            NodeData::JSDoc(data) => self.insert_js_doc(data, context),
             NodeData::JSDocTypeExpression(data) => {
-                let rows = self
-                    .js_doc_type_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTypeExpressionRow {
-                    r#type: context.encode_node(FieldKey::new(149, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (149, ordinal)
+                self.insert_js_doc_type_expression(data, context)
             }
             NodeData::JSDocNonNullableType(data) => {
-                let rows = self
-                    .js_doc_non_nullable_type
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocNonNullableTypeRow {
-                    r#type: context.encode_node(FieldKey::new(150, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (150, ordinal)
+                self.insert_js_doc_non_nullable_type(data, context)
             }
-            NodeData::JSDocNullableType(data) => {
-                let rows = self
-                    .js_doc_nullable_type
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocNullableTypeRow {
-                    r#type: context.encode_node(FieldKey::new(151, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (151, ordinal)
-            }
-            NodeData::JSDocAllType(_) => (152, 0),
-            NodeData::JSDocVariadicType(data) => {
-                let rows = self
-                    .js_doc_variadic_type
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocVariadicTypeRow {
-                    r#type: context.encode_node(FieldKey::new(153, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (153, ordinal)
-            }
-            NodeData::JSDocOptionalType(data) => {
-                let rows = self
-                    .js_doc_optional_type
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocOptionalTypeRow {
-                    r#type: context.encode_node(FieldKey::new(154, ordinal, 0), data.r#type),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (154, ordinal)
-            }
-            NodeData::JSDocTypeTag(data) => {
-                let rows = self.js_doc_type_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTypeTagRow {
-                    tag_name: context.encode_node(FieldKey::new(155, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(155, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(155, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (155, ordinal)
-            }
-            NodeData::JSDocUnknownTag(data) => {
-                let rows = self.js_doc_unknown_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocUnknownTagRow {
-                    tag_name: context.encode_node(FieldKey::new(156, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(156, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (156, ordinal)
-            }
-            NodeData::JSDocTemplateTag(data) => {
-                let rows = self
-                    .js_doc_template_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTemplateTagRow {
-                    tag_name: context.encode_node(FieldKey::new(157, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(157, ordinal, 1), data.comment),
-                    constraint: context
-                        .encode_node(FieldKey::new(157, ordinal, 2), data.constraint),
-                    type_parameters: context
-                        .encode_list(FieldKey::new(157, ordinal, 3), data.type_parameters),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (157, ordinal)
-            }
-            NodeData::JSDocReturnTag(data) => {
-                let rows = self.js_doc_return_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocReturnTagRow {
-                    tag_name: context.encode_node(FieldKey::new(158, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(158, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(158, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (158, ordinal)
-            }
-            NodeData::JSDocPublicTag(data) => {
-                let rows = self.js_doc_public_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocPublicTagRow {
-                    tag_name: context.encode_node(FieldKey::new(159, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(159, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (159, ordinal)
-            }
-            NodeData::JSDocPrivateTag(data) => {
-                let rows = self.js_doc_private_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocPrivateTagRow {
-                    tag_name: context.encode_node(FieldKey::new(160, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(160, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (160, ordinal)
-            }
-            NodeData::JSDocProtectedTag(data) => {
-                let rows = self
-                    .js_doc_protected_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocProtectedTagRow {
-                    tag_name: context.encode_node(FieldKey::new(161, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(161, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (161, ordinal)
-            }
-            NodeData::JSDocReadonlyTag(data) => {
-                let rows = self
-                    .js_doc_readonly_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocReadonlyTagRow {
-                    tag_name: context.encode_node(FieldKey::new(162, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(162, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (162, ordinal)
-            }
-            NodeData::JSDocOverrideTag(data) => {
-                let rows = self
-                    .js_doc_override_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocOverrideTagRow {
-                    tag_name: context.encode_node(FieldKey::new(163, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(163, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (163, ordinal)
-            }
-            NodeData::JSDocDeprecatedTag(data) => {
-                let rows = self
-                    .js_doc_deprecated_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocDeprecatedTagRow {
-                    tag_name: context.encode_node(FieldKey::new(164, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(164, ordinal, 1), data.comment),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (164, ordinal)
-            }
-            NodeData::JSDocSeeTag(data) => {
-                let rows = self.js_doc_see_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocSeeTagRow {
-                    tag_name: context.encode_node(FieldKey::new(165, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(165, ordinal, 1), data.comment),
-                    name_expression: context
-                        .encode_node(FieldKey::new(165, ordinal, 2), data.name_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (165, ordinal)
-            }
-            NodeData::JSDocImplementsTag(data) => {
-                let rows = self
-                    .js_doc_implements_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocImplementsTagRow {
-                    tag_name: context.encode_node(FieldKey::new(166, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(166, ordinal, 1), data.comment),
-                    class_name: context
-                        .encode_node(FieldKey::new(166, ordinal, 2), data.class_name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (166, ordinal)
-            }
-            NodeData::JSDocAugmentsTag(data) => {
-                let rows = self
-                    .js_doc_augments_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocAugmentsTagRow {
-                    tag_name: context.encode_node(FieldKey::new(167, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(167, ordinal, 1), data.comment),
-                    class_name: context
-                        .encode_node(FieldKey::new(167, ordinal, 2), data.class_name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (167, ordinal)
-            }
-            NodeData::JSDocSatisfiesTag(data) => {
-                let rows = self
-                    .js_doc_satisfies_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocSatisfiesTagRow {
-                    tag_name: context.encode_node(FieldKey::new(168, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(168, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(168, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (168, ordinal)
-            }
-            NodeData::JSDocThrowsTag(data) => {
-                let rows = self.js_doc_throws_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocThrowsTagRow {
-                    tag_name: context.encode_node(FieldKey::new(169, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(169, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(169, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (169, ordinal)
-            }
-            NodeData::JSDocThisTag(data) => {
-                let rows = self.js_doc_this_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocThisTagRow {
-                    tag_name: context.encode_node(FieldKey::new(170, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(170, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(170, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (170, ordinal)
-            }
-            NodeData::JSDocImportTag(data) => {
-                let rows = self.js_doc_import_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocImportTagRow {
-                    tag_name: context.encode_node(FieldKey::new(171, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(171, ordinal, 1), data.comment),
-                    import_clause: context
-                        .encode_node(FieldKey::new(171, ordinal, 2), data.import_clause),
-                    module_specifier: context
-                        .encode_node(FieldKey::new(171, ordinal, 3), data.module_specifier),
-                    attributes: context
-                        .encode_node(FieldKey::new(171, ordinal, 4), data.attributes),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (171, ordinal)
-            }
-            NodeData::JSDocCallbackTag(data) => {
-                let rows = self
-                    .js_doc_callback_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocCallbackTagRow {
-                    tag_name: context.encode_node(FieldKey::new(172, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(172, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(172, ordinal, 2), data.type_expression),
-                    name: context.encode_node(FieldKey::new(172, ordinal, 3), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (172, ordinal)
-            }
-            NodeData::JSDocOverloadTag(data) => {
-                let rows = self
-                    .js_doc_overload_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocOverloadTagRow {
-                    tag_name: context.encode_node(FieldKey::new(173, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(173, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(173, ordinal, 2), data.type_expression),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (173, ordinal)
-            }
-            NodeData::JSDocTypedefTag(data) => {
-                let rows = self.js_doc_typedef_tag.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTypedefTagRow {
-                    tag_name: context.encode_node(FieldKey::new(174, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(174, ordinal, 1), data.comment),
-                    type_expression: context
-                        .encode_node(FieldKey::new(174, ordinal, 2), data.type_expression),
-                    name: context.encode_node(FieldKey::new(174, ordinal, 3), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (174, ordinal)
-            }
-            NodeData::JSDocSignature(data) => {
-                let rows = self.js_doc_signature.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocSignatureRow {
-                    type_parameters: context
-                        .encode_list(FieldKey::new(175, ordinal, 0), data.type_parameters),
-                    parameters: context
-                        .encode_list(FieldKey::new(175, ordinal, 1), data.parameters),
-                    r#type: context.encode_node(FieldKey::new(175, ordinal, 2), data.r#type),
-                    full_signature: context
-                        .encode_node(FieldKey::new(175, ordinal, 3), data.full_signature),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (175, ordinal)
-            }
-            NodeData::JSDocNameReference(data) => {
-                let rows = self
-                    .js_doc_name_reference
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocNameReferenceRow {
-                    name: context.encode_node(FieldKey::new(176, ordinal, 0), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (176, ordinal)
-            }
-            NodeData::SourceFile(data) => {
-                let rows = self.source_file.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SourceFileRow {
-                    statements: context
-                        .encode_list(FieldKey::new(177, ordinal, 0), data.statements),
-                    end_of_file_token: context
-                        .encode_node(FieldKey::new(177, ordinal, 1), data.end_of_file_token),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (177, ordinal)
-            }
-            NodeData::ModuleDeclaration(data) => {
-                let rows = self.module_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ModuleDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(178, ordinal, 0), data.modifiers),
-                    asterisk_token: context
-                        .encode_node(FieldKey::new(178, ordinal, 1), data.asterisk_token),
-                    body: context.encode_node(FieldKey::new(178, ordinal, 2), data.body),
-                    keyword: data.keyword,
-                    name: context.encode_node(FieldKey::new(178, ordinal, 4), data.name),
-                    attributes: context
-                        .encode_node(FieldKey::new(178, ordinal, 5), data.attributes),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    locals: 0,
-                    next_container: 0,
-                    flow_node: 0,
-                    end_flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (178, ordinal)
-            }
+            NodeData::JSDocNullableType(data) => self.insert_js_doc_nullable_type(data, context),
+            NodeData::JSDocAllType(data) => self.insert_js_doc_all_type(data, context),
+            NodeData::JSDocVariadicType(data) => self.insert_js_doc_variadic_type(data, context),
+            NodeData::JSDocOptionalType(data) => self.insert_js_doc_optional_type(data, context),
+            NodeData::JSDocTypeTag(data) => self.insert_js_doc_type_tag(data, context),
+            NodeData::JSDocUnknownTag(data) => self.insert_js_doc_unknown_tag(data, context),
+            NodeData::JSDocTemplateTag(data) => self.insert_js_doc_template_tag(data, context),
+            NodeData::JSDocReturnTag(data) => self.insert_js_doc_return_tag(data, context),
+            NodeData::JSDocPublicTag(data) => self.insert_js_doc_public_tag(data, context),
+            NodeData::JSDocPrivateTag(data) => self.insert_js_doc_private_tag(data, context),
+            NodeData::JSDocProtectedTag(data) => self.insert_js_doc_protected_tag(data, context),
+            NodeData::JSDocReadonlyTag(data) => self.insert_js_doc_readonly_tag(data, context),
+            NodeData::JSDocOverrideTag(data) => self.insert_js_doc_override_tag(data, context),
+            NodeData::JSDocDeprecatedTag(data) => self.insert_js_doc_deprecated_tag(data, context),
+            NodeData::JSDocSeeTag(data) => self.insert_js_doc_see_tag(data, context),
+            NodeData::JSDocImplementsTag(data) => self.insert_js_doc_implements_tag(data, context),
+            NodeData::JSDocAugmentsTag(data) => self.insert_js_doc_augments_tag(data, context),
+            NodeData::JSDocSatisfiesTag(data) => self.insert_js_doc_satisfies_tag(data, context),
+            NodeData::JSDocThrowsTag(data) => self.insert_js_doc_throws_tag(data, context),
+            NodeData::JSDocThisTag(data) => self.insert_js_doc_this_tag(data, context),
+            NodeData::JSDocImportTag(data) => self.insert_js_doc_import_tag(*data, context),
+            NodeData::JSDocCallbackTag(data) => self.insert_js_doc_callback_tag(data, context),
+            NodeData::JSDocOverloadTag(data) => self.insert_js_doc_overload_tag(data, context),
+            NodeData::JSDocTypedefTag(data) => self.insert_js_doc_typedef_tag(data, context),
+            NodeData::JSDocSignature(data) => self.insert_js_doc_signature(data, context),
+            NodeData::JSDocNameReference(data) => self.insert_js_doc_name_reference(data, context),
+            NodeData::SourceFile(data) => self.insert_source_file(data, context),
+            NodeData::ModuleDeclaration(data) => self.insert_module_declaration(*data, context),
             NodeData::ImportEqualsDeclaration(data) => {
-                let rows = self
-                    .import_equals_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportEqualsDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(179, ordinal, 0), data.modifiers),
-                    is_type_only: data.is_type_only,
-                    name: context.encode_node(FieldKey::new(179, ordinal, 2), data.name),
-                    module_reference: context
-                        .encode_node(FieldKey::new(179, ordinal, 3), data.module_reference),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (179, ordinal)
+                self.insert_import_equals_declaration(data, context)
             }
-            NodeData::ExportDeclaration(data) => {
-                let rows = self.export_declaration.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ExportDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(180, ordinal, 0), data.modifiers),
-                    is_type_only: data.is_type_only,
-                    export_clause: context
-                        .encode_node(FieldKey::new(180, ordinal, 2), data.export_clause),
-                    module_specifier: context
-                        .encode_node(FieldKey::new(180, ordinal, 3), data.module_specifier),
-                    attributes: context
-                        .encode_node(FieldKey::new(180, ordinal, 4), data.attributes),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    flow_node: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (180, ordinal)
-            }
-            NodeData::ImportTypeNode(data) => {
-                let rows = self.import_type_node.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportTypeNodeRow {
-                    type_arguments: context
-                        .encode_list(FieldKey::new(181, ordinal, 0), data.type_arguments),
-                    is_type_of: data.is_type_of,
-                    argument: context.encode_node(FieldKey::new(181, ordinal, 2), data.argument),
-                    attributes: context
-                        .encode_node(FieldKey::new(181, ordinal, 3), data.attributes),
-                    qualifier: context.encode_node(FieldKey::new(181, ordinal, 4), data.qualifier),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (181, ordinal)
-            }
-            NodeData::ImportClause(data) => {
-                let rows = self.import_clause.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportClauseRow {
-                    phase_modifier: data.phase_modifier,
-                    name: context.encode_node(FieldKey::new(182, ordinal, 1), data.name),
-                    named_bindings: context
-                        .encode_node(FieldKey::new(182, ordinal, 2), data.named_bindings),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (182, ordinal)
-            }
-            NodeData::ImportSpecifier(data) => {
-                let rows = self.import_specifier.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = ImportSpecifierRow {
-                    is_type_only: data.is_type_only,
-                    property_name: context
-                        .encode_node(FieldKey::new(183, ordinal, 1), data.property_name),
-                    name: context.encode_node(FieldKey::new(183, ordinal, 2), data.name),
-                    facts: AtomicU32::new(0),
-                    symbol: 0,
-                    local_symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (183, ordinal)
-            }
-            NodeData::JSDocText(data) => {
-                let rows = self.js_doc_text.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTextRow {
-                    text: context.encode_text_slice(FieldKey::new(184, ordinal, 0), data.text),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (184, ordinal)
-            }
-            NodeData::JSDocLink(data) => {
-                let rows = self.js_doc_link.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocLinkRow {
-                    text: context.encode_text_slice(FieldKey::new(185, ordinal, 0), data.text),
-                    name: context.encode_node(FieldKey::new(185, ordinal, 1), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (185, ordinal)
-            }
-            NodeData::JSDocLinkPlain(data) => {
-                let rows = self.js_doc_link_plain.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocLinkPlainRow {
-                    text: context.encode_text_slice(FieldKey::new(186, ordinal, 0), data.text),
-                    name: context.encode_node(FieldKey::new(186, ordinal, 1), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (186, ordinal)
-            }
-            NodeData::JSDocLinkCode(data) => {
-                let rows = self.js_doc_link_code.get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocLinkCodeRow {
-                    text: context.encode_text_slice(FieldKey::new(187, ordinal, 0), data.text),
-                    name: context.encode_node(FieldKey::new(187, ordinal, 1), data.name),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (187, ordinal)
-            }
+            NodeData::ExportDeclaration(data) => self.insert_export_declaration(*data, context),
+            NodeData::ImportTypeNode(data) => self.insert_import_type_node(*data, context),
+            NodeData::ImportClause(data) => self.insert_import_clause(data, context),
+            NodeData::ImportSpecifier(data) => self.insert_import_specifier(data, context),
+            NodeData::JSDocText(data) => self.insert_js_doc_text(data, context),
+            NodeData::JSDocLink(data) => self.insert_js_doc_link(data, context),
+            NodeData::JSDocLinkPlain(data) => self.insert_js_doc_link_plain(data, context),
+            NodeData::JSDocLinkCode(data) => self.insert_js_doc_link_code(data, context),
             NodeData::TypeParameterDeclaration(data) => {
-                let rows = self
-                    .type_parameter_declaration
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = TypeParameterDeclarationRow {
-                    modifiers: context.encode_list(FieldKey::new(188, ordinal, 0), data.modifiers),
-                    name: context.encode_node(FieldKey::new(188, ordinal, 1), data.name),
-                    constraint: context
-                        .encode_node(FieldKey::new(188, ordinal, 2), data.constraint),
-                    expression: context
-                        .encode_node(FieldKey::new(188, ordinal, 3), data.expression),
-                    default_type: context
-                        .encode_node(FieldKey::new(188, ordinal, 4), data.default_type),
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (188, ordinal)
+                self.insert_type_parameter_declaration(*data, context)
             }
             NodeData::SyntheticReferenceExpression(data) => {
-                let rows = self
-                    .synthetic_reference_expression
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = SyntheticReferenceExpressionRow {
-                    expression: context
-                        .encode_node(FieldKey::new(189, ordinal, 0), data.expression),
-                    this_arg: context.encode_node(FieldKey::new(189, ordinal, 1), data.this_arg),
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (189, ordinal)
+                self.insert_synthetic_reference_expression(data, context)
             }
-            NodeData::JSDocTypeLiteral(data) => {
-                let rows = self
-                    .js_doc_type_literal
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocTypeLiteralRow {
-                    js_doc_property_tags: context.encode_node_slice(
-                        FieldKey::new(190, ordinal, 0),
-                        data.js_doc_property_tags,
-                    ),
-                    is_array_type: data.is_array_type,
-                    symbol: 0,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (190, ordinal)
-            }
+            NodeData::JSDocTypeLiteral(data) => self.insert_js_doc_type_literal(data, context),
             NodeData::JSDocParameterOrPropertyTag(data) => {
-                let rows = self
-                    .js_doc_parameter_or_property_tag
-                    .get_or_insert_with(Default::default);
-                let ordinal = rows.len();
-                let row = JSDocParameterOrPropertyTagRow {
-                    tag_name: context.encode_node(FieldKey::new(191, ordinal, 0), data.tag_name),
-                    comment: context.encode_list(FieldKey::new(191, ordinal, 1), data.comment),
-                    name: context.encode_node(FieldKey::new(191, ordinal, 2), data.name),
-                    is_bracketed: data.is_bracketed,
-                    type_expression: context
-                        .encode_node(FieldKey::new(191, ordinal, 4), data.type_expression),
-                    is_name_first: data.is_name_first,
-                };
-                assert_eq!(rows.push(row), ordinal, "compact row identity");
-                (191, ordinal)
+                self.insert_js_doc_parameter_or_property_tag(*data, context)
             }
         }
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_token(
+        &mut self,
+        _data: TokenData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (0, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_identifier(
+        &mut self,
+        data: IdentifierData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.identifier.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = IdentifierRow {
+            text: context.encode_text(FieldKey::new(1, ordinal, 0), data.text),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (1, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_private_identifier(
+        &mut self,
+        data: PrivateIdentifierData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.private_identifier.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PrivateIdentifierRow {
+            text: context.encode_text(FieldKey::new(2, ordinal, 0), data.text),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (2, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_qualified_name(
+        &mut self,
+        data: QualifiedNameData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.qualified_name.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = QualifiedNameRow {
+            left: context.encode_node(FieldKey::new(3, ordinal, 0), data.left),
+            right: context.encode_node(FieldKey::new(3, ordinal, 1), data.right),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (3, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_computed_property_name(
+        &mut self,
+        data: ComputedPropertyNameData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .computed_property_name
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ComputedPropertyNameRow {
+            expression: context.encode_node(FieldKey::new(4, ordinal, 0), data.expression),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (4, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_decorator(
+        &mut self,
+        data: DecoratorData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.decorator.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = DecoratorRow {
+            expression: context.encode_node(FieldKey::new(5, ordinal, 0), data.expression),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (5, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_empty_statement(
+        &mut self,
+        _data: EmptyStatementData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.empty_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = EmptyStatementRow { flow_node: 0 };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (6, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_if_statement(
+        &mut self,
+        data: IfStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.if_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = IfStatementRow {
+            expression: context.encode_node(FieldKey::new(7, ordinal, 0), data.expression),
+            then_statement: context.encode_node(FieldKey::new(7, ordinal, 1), data.then_statement),
+            else_statement: context.encode_node(FieldKey::new(7, ordinal, 2), data.else_statement),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (7, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_do_statement(
+        &mut self,
+        data: DoStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.do_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = DoStatementRow {
+            statement: context.encode_node(FieldKey::new(8, ordinal, 0), data.statement),
+            expression: context.encode_node(FieldKey::new(8, ordinal, 1), data.expression),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (8, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_while_statement(
+        &mut self,
+        data: WhileStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.while_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = WhileStatementRow {
+            statement: context.encode_node(FieldKey::new(9, ordinal, 0), data.statement),
+            expression: context.encode_node(FieldKey::new(9, ordinal, 1), data.expression),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (9, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_for_statement(
+        &mut self,
+        data: ForStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.for_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ForStatementRow {
+            statement: context.encode_node(FieldKey::new(10, ordinal, 0), data.statement),
+            initializer: context.encode_node(FieldKey::new(10, ordinal, 1), data.initializer),
+            condition: context.encode_node(FieldKey::new(10, ordinal, 2), data.condition),
+            incrementor: context.encode_node(FieldKey::new(10, ordinal, 3), data.incrementor),
+            facts: AtomicU32::new(0),
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (10, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_for_in_or_of_statement(
+        &mut self,
+        data: ForInOrOfStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .for_in_or_of_statement
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ForInOrOfStatementRow {
+            await_modifier: context.encode_node(FieldKey::new(11, ordinal, 0), data.await_modifier),
+            initializer: context.encode_node(FieldKey::new(11, ordinal, 1), data.initializer),
+            expression: context.encode_node(FieldKey::new(11, ordinal, 2), data.expression),
+            statement: context.encode_node(FieldKey::new(11, ordinal, 3), data.statement),
+            facts: AtomicU32::new(0),
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (11, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_break_statement(
+        &mut self,
+        data: BreakStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.break_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BreakStatementRow {
+            label: context.encode_node(FieldKey::new(12, ordinal, 0), data.label),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (12, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_continue_statement(
+        &mut self,
+        data: ContinueStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.continue_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ContinueStatementRow {
+            label: context.encode_node(FieldKey::new(13, ordinal, 0), data.label),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (13, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_return_statement(
+        &mut self,
+        data: ReturnStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.return_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ReturnStatementRow {
+            expression: context.encode_node(FieldKey::new(14, ordinal, 0), data.expression),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (14, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_with_statement(
+        &mut self,
+        data: WithStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.with_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = WithStatementRow {
+            expression: context.encode_node(FieldKey::new(15, ordinal, 0), data.expression),
+            statement: context.encode_node(FieldKey::new(15, ordinal, 1), data.statement),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (15, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_switch_statement(
+        &mut self,
+        data: SwitchStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.switch_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SwitchStatementRow {
+            expression: context.encode_node(FieldKey::new(16, ordinal, 0), data.expression),
+            case_block: context.encode_node(FieldKey::new(16, ordinal, 1), data.case_block),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (16, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_case_block(
+        &mut self,
+        data: CaseBlockData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.case_block.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = CaseBlockRow {
+            clauses: context.encode_list(FieldKey::new(17, ordinal, 0), data.clauses),
+            facts: AtomicU32::new(0),
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (17, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_case_or_default_clause(
+        &mut self,
+        data: CaseOrDefaultClauseData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .case_or_default_clause
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = CaseOrDefaultClauseRow {
+            expression: context.encode_node(FieldKey::new(18, ordinal, 0), data.expression),
+            statements: context.encode_list(FieldKey::new(18, ordinal, 1), data.statements),
+            facts: AtomicU32::new(0),
+            fallthrough_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (18, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_throw_statement(
+        &mut self,
+        data: ThrowStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.throw_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ThrowStatementRow {
+            expression: context.encode_node(FieldKey::new(19, ordinal, 0), data.expression),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (19, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_try_statement(
+        &mut self,
+        data: TryStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.try_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TryStatementRow {
+            try_block: context.encode_node(FieldKey::new(20, ordinal, 0), data.try_block),
+            catch_clause: context.encode_node(FieldKey::new(20, ordinal, 1), data.catch_clause),
+            finally_block: context.encode_node(FieldKey::new(20, ordinal, 2), data.finally_block),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (20, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_catch_clause(
+        &mut self,
+        data: CatchClauseData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.catch_clause.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = CatchClauseRow {
+            variable_declaration: context
+                .encode_node(FieldKey::new(21, ordinal, 0), data.variable_declaration),
+            block: context.encode_node(FieldKey::new(21, ordinal, 1), data.block),
+            facts: AtomicU32::new(0),
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (21, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_debugger_statement(
+        &mut self,
+        _data: DebuggerStatementData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.debugger_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = DebuggerStatementRow { flow_node: 0 };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (22, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_labeled_statement(
+        &mut self,
+        data: LabeledStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.labeled_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = LabeledStatementRow {
+            label: context.encode_node(FieldKey::new(23, ordinal, 0), data.label),
+            statement: context.encode_node(FieldKey::new(23, ordinal, 1), data.statement),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (23, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_expression_statement(
+        &mut self,
+        data: ExpressionStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .expression_statement
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExpressionStatementRow {
+            expression: context.encode_node(FieldKey::new(24, ordinal, 0), data.expression),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (24, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_block(
+        &mut self,
+        data: BlockData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.block.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BlockRow {
+            statements: context.encode_list(FieldKey::new(25, ordinal, 0), data.statements),
+            multi_line: data.multi_line,
+            facts: AtomicU32::new(0),
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (25, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_variable_statement(
+        &mut self,
+        data: VariableStatementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.variable_statement.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = VariableStatementRow {
+            modifiers: context.encode_list(FieldKey::new(26, ordinal, 0), data.modifiers),
+            declaration_list: context
+                .encode_node(FieldKey::new(26, ordinal, 1), data.declaration_list),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (26, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_variable_declaration(
+        &mut self,
+        data: VariableDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .variable_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = VariableDeclarationRow {
+            name: context.encode_node(FieldKey::new(27, ordinal, 0), data.name),
+            exclamation_token: context
+                .encode_node(FieldKey::new(27, ordinal, 1), data.exclamation_token),
+            r#type: context.encode_node(FieldKey::new(27, ordinal, 2), data.r#type),
+            initializer: context.encode_node(FieldKey::new(27, ordinal, 3), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (27, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_variable_declaration_list(
+        &mut self,
+        data: VariableDeclarationListData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .variable_declaration_list
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = VariableDeclarationListRow {
+            declarations: context.encode_list(FieldKey::new(28, ordinal, 0), data.declarations),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (28, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_binding_pattern(
+        &mut self,
+        data: BindingPatternData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.binding_pattern.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BindingPatternRow {
+            elements: context.encode_list(FieldKey::new(29, ordinal, 0), data.elements),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (29, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_parameter_declaration(
+        &mut self,
+        data: ParameterDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .parameter_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ParameterDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(30, ordinal, 0), data.modifiers),
+            dot_dot_dot_token: context
+                .encode_node(FieldKey::new(30, ordinal, 1), data.dot_dot_dot_token),
+            name: context.encode_node(FieldKey::new(30, ordinal, 2), data.name),
+            question_token: context.encode_node(FieldKey::new(30, ordinal, 3), data.question_token),
+            r#type: context.encode_node(FieldKey::new(30, ordinal, 4), data.r#type),
+            initializer: context.encode_node(FieldKey::new(30, ordinal, 5), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (30, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_binding_element(
+        &mut self,
+        data: BindingElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.binding_element.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BindingElementRow {
+            dot_dot_dot_token: context
+                .encode_node(FieldKey::new(31, ordinal, 0), data.dot_dot_dot_token),
+            property_name: context.encode_node(FieldKey::new(31, ordinal, 1), data.property_name),
+            name: context.encode_node(FieldKey::new(31, ordinal, 2), data.name),
+            initializer: context.encode_node(FieldKey::new(31, ordinal, 3), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (31, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_missing_declaration(
+        &mut self,
+        data: MissingDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .missing_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = MissingDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(32, ordinal, 0), data.modifiers),
+            symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (32, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_function_declaration(
+        &mut self,
+        data: FunctionDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .function_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = FunctionDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(33, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(33, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(33, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(33, ordinal, 3), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(33, ordinal, 4), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(33, ordinal, 5), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(33, ordinal, 6), data.body),
+            name: context.encode_node(FieldKey::new(33, ordinal, 7), data.name),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            return_flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (33, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_class_declaration(
+        &mut self,
+        data: ClassDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.class_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ClassDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(34, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(34, ordinal, 1), data.name),
+            type_parameters: context
+                .encode_list(FieldKey::new(34, ordinal, 2), data.type_parameters),
+            heritage_clauses: context
+                .encode_list(FieldKey::new(34, ordinal, 3), data.heritage_clauses),
+            members: context.encode_list(FieldKey::new(34, ordinal, 4), data.members),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (34, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_class_expression(
+        &mut self,
+        data: ClassExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.class_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ClassExpressionRow {
+            modifiers: context.encode_list(FieldKey::new(35, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(35, ordinal, 1), data.name),
+            type_parameters: context
+                .encode_list(FieldKey::new(35, ordinal, 2), data.type_parameters),
+            heritage_clauses: context
+                .encode_list(FieldKey::new(35, ordinal, 3), data.heritage_clauses),
+            members: context.encode_list(FieldKey::new(35, ordinal, 4), data.members),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (35, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_heritage_clause(
+        &mut self,
+        data: HeritageClauseData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.heritage_clause.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = HeritageClauseRow {
+            token: data.token,
+            types: context.encode_list(FieldKey::new(36, ordinal, 1), data.types),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (36, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_interface_declaration(
+        &mut self,
+        data: InterfaceDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .interface_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = InterfaceDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(37, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(37, ordinal, 1), data.name),
+            type_parameters: context
+                .encode_list(FieldKey::new(37, ordinal, 2), data.type_parameters),
+            heritage_clauses: context
+                .encode_list(FieldKey::new(37, ordinal, 3), data.heritage_clauses),
+            members: context.encode_list(FieldKey::new(37, ordinal, 4), data.members),
+            symbol: 0,
+            local_symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (37, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_alias_declaration(
+        &mut self,
+        data: TypeAliasDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .type_alias_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeAliasDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(38, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(38, ordinal, 1), data.name),
+            type_parameters: context
+                .encode_list(FieldKey::new(38, ordinal, 2), data.type_parameters),
+            r#type: context.encode_node(FieldKey::new(38, ordinal, 3), data.r#type),
+            symbol: 0,
+            local_symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (38, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_enum_member(
+        &mut self,
+        data: EnumMemberData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.enum_member.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = EnumMemberRow {
+            modifiers: context.encode_list(FieldKey::new(39, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(39, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(39, ordinal, 2), data.postfix_token),
+            initializer: context.encode_node(FieldKey::new(39, ordinal, 3), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (39, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_enum_declaration(
+        &mut self,
+        data: EnumDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.enum_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = EnumDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(40, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(40, ordinal, 1), data.name),
+            members: context.encode_list(FieldKey::new(40, ordinal, 2), data.members),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (40, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_module_block(
+        &mut self,
+        data: ModuleBlockData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.module_block.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ModuleBlockRow {
+            statements: context.encode_list(FieldKey::new(41, ordinal, 0), data.statements),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (41, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_not_emitted_statement(
+        &mut self,
+        _data: NotEmittedStatementData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .not_emitted_statement
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NotEmittedStatementRow { flow_node: 0 };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (42, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_not_emitted_type_element(
+        &mut self,
+        _data: NotEmittedTypeElementData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (43, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_declaration(
+        &mut self,
+        data: ImportDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(44, ordinal, 0), data.modifiers),
+            import_clause: context.encode_node(FieldKey::new(44, ordinal, 1), data.import_clause),
+            module_specifier: context
+                .encode_node(FieldKey::new(44, ordinal, 2), data.module_specifier),
+            attributes: context.encode_node(FieldKey::new(44, ordinal, 3), data.attributes),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (44, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_external_module_reference(
+        &mut self,
+        data: ExternalModuleReferenceData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .external_module_reference
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExternalModuleReferenceRow {
+            expression: context.encode_node(FieldKey::new(45, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (45, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_namespace_import(
+        &mut self,
+        data: NamespaceImportData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.namespace_import.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamespaceImportRow {
+            name: context.encode_node(FieldKey::new(46, ordinal, 0), data.name),
+            symbol: 0,
+            local_symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (46, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_named_imports(
+        &mut self,
+        data: NamedImportsData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.named_imports.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamedImportsRow {
+            elements: context.encode_list(FieldKey::new(47, ordinal, 0), data.elements),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (47, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_export_assignment(
+        &mut self,
+        data: ExportAssignmentData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.export_assignment.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExportAssignmentRow {
+            modifiers: context.encode_list(FieldKey::new(48, ordinal, 0), data.modifiers),
+            is_export_equals: data.is_export_equals,
+            r#type: context.encode_node(FieldKey::new(48, ordinal, 2), data.r#type),
+            expression: context.encode_node(FieldKey::new(48, ordinal, 3), data.expression),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (48, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_namespace_export_declaration(
+        &mut self,
+        data: NamespaceExportDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .namespace_export_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamespaceExportDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(49, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(49, ordinal, 1), data.name),
+            symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (49, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_namespace_export(
+        &mut self,
+        data: NamespaceExportData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.namespace_export.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamespaceExportRow {
+            name: context.encode_node(FieldKey::new(50, ordinal, 0), data.name),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (50, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_named_exports(
+        &mut self,
+        data: NamedExportsData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.named_exports.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamedExportsRow {
+            elements: context.encode_list(FieldKey::new(51, ordinal, 0), data.elements),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (51, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_export_specifier(
+        &mut self,
+        data: ExportSpecifierData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.export_specifier.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExportSpecifierRow {
+            is_type_only: data.is_type_only,
+            property_name: context.encode_node(FieldKey::new(52, ordinal, 1), data.property_name),
+            name: context.encode_node(FieldKey::new(52, ordinal, 2), data.name),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (52, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_call_signature_declaration(
+        &mut self,
+        data: CallSignatureDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .call_signature_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = CallSignatureDeclarationRow {
+            type_parameters: context
+                .encode_list(FieldKey::new(53, ordinal, 0), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(53, ordinal, 1), data.parameters),
+            r#type: context.encode_node(FieldKey::new(53, ordinal, 2), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(53, ordinal, 3), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (53, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_construct_signature_declaration(
+        &mut self,
+        data: ConstructSignatureDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .construct_signature_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ConstructSignatureDeclarationRow {
+            type_parameters: context
+                .encode_list(FieldKey::new(54, ordinal, 0), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(54, ordinal, 1), data.parameters),
+            r#type: context.encode_node(FieldKey::new(54, ordinal, 2), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(54, ordinal, 3), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (54, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_constructor_declaration(
+        &mut self,
+        data: ConstructorDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .constructor_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ConstructorDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(55, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(55, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(55, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(55, ordinal, 3), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(55, ordinal, 4), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(55, ordinal, 5), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(55, ordinal, 6), data.body),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            return_flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (55, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_get_accessor_declaration(
+        &mut self,
+        data: GetAccessorDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .get_accessor_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = GetAccessorDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(56, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(56, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(56, ordinal, 2), data.postfix_token),
+            type_parameters: context
+                .encode_list(FieldKey::new(56, ordinal, 3), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(56, ordinal, 4), data.parameters),
+            r#type: context.encode_node(FieldKey::new(56, ordinal, 5), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(56, ordinal, 6), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(56, ordinal, 7), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(56, ordinal, 8), data.body),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (56, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_set_accessor_declaration(
+        &mut self,
+        data: SetAccessorDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .set_accessor_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SetAccessorDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(57, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(57, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(57, ordinal, 2), data.postfix_token),
+            type_parameters: context
+                .encode_list(FieldKey::new(57, ordinal, 3), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(57, ordinal, 4), data.parameters),
+            r#type: context.encode_node(FieldKey::new(57, ordinal, 5), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(57, ordinal, 6), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(57, ordinal, 7), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(57, ordinal, 8), data.body),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (57, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_index_signature_declaration(
+        &mut self,
+        data: IndexSignatureDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .index_signature_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = IndexSignatureDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(58, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(58, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(58, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(58, ordinal, 3), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(58, ordinal, 4), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (58, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_method_signature_declaration(
+        &mut self,
+        data: MethodSignatureDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .method_signature_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = MethodSignatureDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(59, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(59, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(59, ordinal, 2), data.postfix_token),
+            type_parameters: context
+                .encode_list(FieldKey::new(59, ordinal, 3), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(59, ordinal, 4), data.parameters),
+            r#type: context.encode_node(FieldKey::new(59, ordinal, 5), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(59, ordinal, 6), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (59, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_method_declaration(
+        &mut self,
+        data: MethodDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.method_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = MethodDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(60, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(60, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(60, ordinal, 2), data.postfix_token),
+            type_parameters: context
+                .encode_list(FieldKey::new(60, ordinal, 3), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(60, ordinal, 4), data.parameters),
+            r#type: context.encode_node(FieldKey::new(60, ordinal, 5), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(60, ordinal, 6), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(60, ordinal, 7), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(60, ordinal, 8), data.body),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (60, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_property_signature_declaration(
+        &mut self,
+        data: PropertySignatureDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .property_signature_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PropertySignatureDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(61, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(61, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(61, ordinal, 2), data.postfix_token),
+            r#type: context.encode_node(FieldKey::new(61, ordinal, 3), data.r#type),
+            initializer: context.encode_node(FieldKey::new(61, ordinal, 4), data.initializer),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (61, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_property_declaration(
+        &mut self,
+        data: PropertyDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .property_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PropertyDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(62, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(62, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(62, ordinal, 2), data.postfix_token),
+            r#type: context.encode_node(FieldKey::new(62, ordinal, 3), data.r#type),
+            initializer: context.encode_node(FieldKey::new(62, ordinal, 4), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (62, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_semicolon_class_element(
+        &mut self,
+        _data: SemicolonClassElementData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .semicolon_class_element
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SemicolonClassElementRow { symbol: 0 };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (63, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_class_static_block_declaration(
+        &mut self,
+        data: ClassStaticBlockDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .class_static_block_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ClassStaticBlockDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(64, ordinal, 0), data.modifiers),
+            body: context.encode_node(FieldKey::new(64, ordinal, 1), data.body),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            return_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (64, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_omitted_expression(
+        &mut self,
+        _data: OmittedExpressionData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (65, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_keyword_expression(
+        &mut self,
+        _data: KeywordExpressionData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.keyword_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = KeywordExpressionRow { flow_node: 0 };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (66, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_string_literal(
+        &mut self,
+        data: StringLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.string_literal.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = StringLiteralRow {
+            text: context.encode_text(FieldKey::new(67, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (67, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_numeric_literal(
+        &mut self,
+        data: NumericLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.numeric_literal.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NumericLiteralRow {
+            text: context.encode_text(FieldKey::new(68, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (68, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_big_int_literal(
+        &mut self,
+        data: BigIntLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.big_int_literal.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BigIntLiteralRow {
+            text: context.encode_text(FieldKey::new(69, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (69, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_regular_expression_literal(
+        &mut self,
+        data: RegularExpressionLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .regular_expression_literal
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = RegularExpressionLiteralRow {
+            text: context.encode_text(FieldKey::new(70, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (70, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_no_substitution_template_literal(
+        &mut self,
+        data: NoSubstitutionTemplateLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .no_substitution_template_literal
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NoSubstitutionTemplateLiteralRow {
+            text: context.encode_text(FieldKey::new(71, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+            raw_text: context.encode_text(FieldKey::new(71, ordinal, 2), data.raw_text),
+            template_flags: data.template_flags,
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (71, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_binary_expression(
+        &mut self,
+        data: BinaryExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.binary_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = BinaryExpressionRow {
+            modifiers: context.encode_list(FieldKey::new(72, ordinal, 0), data.modifiers),
+            left: context.encode_node(FieldKey::new(72, ordinal, 1), data.left),
+            r#type: context.encode_node(FieldKey::new(72, ordinal, 2), data.r#type),
+            operator_token: context.encode_node(FieldKey::new(72, ordinal, 3), data.operator_token),
+            right: context.encode_node(FieldKey::new(72, ordinal, 4), data.right),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (72, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_prefix_unary_expression(
+        &mut self,
+        data: PrefixUnaryExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .prefix_unary_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PrefixUnaryExpressionRow {
+            operator: data.operator,
+            operand: context.encode_node(FieldKey::new(73, ordinal, 1), data.operand),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (73, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_postfix_unary_expression(
+        &mut self,
+        data: PostfixUnaryExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .postfix_unary_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PostfixUnaryExpressionRow {
+            operand: context.encode_node(FieldKey::new(74, ordinal, 0), data.operand),
+            operator: data.operator,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (74, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_yield_expression(
+        &mut self,
+        data: YieldExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.yield_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = YieldExpressionRow {
+            asterisk_token: context.encode_node(FieldKey::new(75, ordinal, 0), data.asterisk_token),
+            expression: context.encode_node(FieldKey::new(75, ordinal, 1), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (75, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_arrow_function(
+        &mut self,
+        data: ArrowFunctionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.arrow_function.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ArrowFunctionRow {
+            modifiers: context.encode_list(FieldKey::new(76, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(76, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(76, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(76, ordinal, 3), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(76, ordinal, 4), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(76, ordinal, 5), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(76, ordinal, 6), data.body),
+            equals_greater_than_token: context.encode_node(
+                FieldKey::new(76, ordinal, 7),
+                data.equals_greater_than_token,
+            ),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (76, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_function_expression(
+        &mut self,
+        data: FunctionExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .function_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = FunctionExpressionRow {
+            modifiers: context.encode_list(FieldKey::new(77, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(77, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(77, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(77, ordinal, 3), data.r#type),
+            full_signature: context.encode_node(FieldKey::new(77, ordinal, 4), data.full_signature),
+            asterisk_token: context.encode_node(FieldKey::new(77, ordinal, 5), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(77, ordinal, 6), data.body),
+            name: context.encode_node(FieldKey::new(77, ordinal, 7), data.name),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            return_flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (77, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_as_expression(
+        &mut self,
+        data: AsExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.as_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = AsExpressionRow {
+            expression: context.encode_node(FieldKey::new(78, ordinal, 0), data.expression),
+            r#type: context.encode_node(FieldKey::new(78, ordinal, 1), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (78, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_satisfies_expression(
+        &mut self,
+        data: SatisfiesExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .satisfies_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SatisfiesExpressionRow {
+            expression: context.encode_node(FieldKey::new(79, ordinal, 0), data.expression),
+            r#type: context.encode_node(FieldKey::new(79, ordinal, 1), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (79, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_conditional_expression(
+        &mut self,
+        data: ConditionalExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .conditional_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ConditionalExpressionRow {
+            condition: context.encode_node(FieldKey::new(80, ordinal, 0), data.condition),
+            question_token: context.encode_node(FieldKey::new(80, ordinal, 1), data.question_token),
+            when_true: context.encode_node(FieldKey::new(80, ordinal, 2), data.when_true),
+            colon_token: context.encode_node(FieldKey::new(80, ordinal, 3), data.colon_token),
+            when_false: context.encode_node(FieldKey::new(80, ordinal, 4), data.when_false),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (80, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_property_access_expression(
+        &mut self,
+        data: PropertyAccessExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .property_access_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PropertyAccessExpressionRow {
+            expression: context.encode_node(FieldKey::new(81, ordinal, 0), data.expression),
+            question_dot_token: context
+                .encode_node(FieldKey::new(81, ordinal, 1), data.question_dot_token),
+            name: context.encode_node(FieldKey::new(81, ordinal, 2), data.name),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (81, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_element_access_expression(
+        &mut self,
+        data: ElementAccessExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .element_access_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ElementAccessExpressionRow {
+            expression: context.encode_node(FieldKey::new(82, ordinal, 0), data.expression),
+            question_dot_token: context
+                .encode_node(FieldKey::new(82, ordinal, 1), data.question_dot_token),
+            argument_expression: context
+                .encode_node(FieldKey::new(82, ordinal, 2), data.argument_expression),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (82, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_call_expression(
+        &mut self,
+        data: CallExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.call_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = CallExpressionRow {
+            expression: context.encode_node(FieldKey::new(83, ordinal, 0), data.expression),
+            question_dot_token: context
+                .encode_node(FieldKey::new(83, ordinal, 1), data.question_dot_token),
+            type_arguments: context.encode_list(FieldKey::new(83, ordinal, 2), data.type_arguments),
+            arguments: context.encode_list(FieldKey::new(83, ordinal, 3), data.arguments),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (83, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_new_expression(
+        &mut self,
+        data: NewExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.new_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NewExpressionRow {
+            expression: context.encode_node(FieldKey::new(84, ordinal, 0), data.expression),
+            type_arguments: context.encode_list(FieldKey::new(84, ordinal, 1), data.type_arguments),
+            arguments: context.encode_list(FieldKey::new(84, ordinal, 2), data.arguments),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (84, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_meta_property(
+        &mut self,
+        data: MetaPropertyData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.meta_property.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = MetaPropertyRow {
+            keyword_token: data.keyword_token,
+            name: context.encode_node(FieldKey::new(85, ordinal, 1), data.name),
+            facts: AtomicU32::new(0),
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (85, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_non_null_expression(
+        &mut self,
+        data: NonNullExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .non_null_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NonNullExpressionRow {
+            expression: context.encode_node(FieldKey::new(86, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (86, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_spread_element(
+        &mut self,
+        data: SpreadElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.spread_element.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SpreadElementRow {
+            expression: context.encode_node(FieldKey::new(87, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (87, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_expression(
+        &mut self,
+        data: TemplateExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .template_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateExpressionRow {
+            head: context.encode_node(FieldKey::new(88, ordinal, 0), data.head),
+            template_spans: context.encode_list(FieldKey::new(88, ordinal, 1), data.template_spans),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (88, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_span(
+        &mut self,
+        data: TemplateSpanData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.template_span.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateSpanRow {
+            expression: context.encode_node(FieldKey::new(89, ordinal, 0), data.expression),
+            literal: context.encode_node(FieldKey::new(89, ordinal, 1), data.literal),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (89, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_tagged_template_expression(
+        &mut self,
+        data: TaggedTemplateExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .tagged_template_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TaggedTemplateExpressionRow {
+            tag: context.encode_node(FieldKey::new(90, ordinal, 0), data.tag),
+            question_dot_token: context
+                .encode_node(FieldKey::new(90, ordinal, 1), data.question_dot_token),
+            type_arguments: context.encode_list(FieldKey::new(90, ordinal, 2), data.type_arguments),
+            template: context.encode_node(FieldKey::new(90, ordinal, 3), data.template),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (90, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_parenthesized_expression(
+        &mut self,
+        data: ParenthesizedExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .parenthesized_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ParenthesizedExpressionRow {
+            expression: context.encode_node(FieldKey::new(91, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (91, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_array_literal_expression(
+        &mut self,
+        data: ArrayLiteralExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .array_literal_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ArrayLiteralExpressionRow {
+            elements: context.encode_list(FieldKey::new(92, ordinal, 0), data.elements),
+            multi_line: data.multi_line,
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (92, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_object_literal_expression(
+        &mut self,
+        data: ObjectLiteralExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .object_literal_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ObjectLiteralExpressionRow {
+            properties: context.encode_list(FieldKey::new(93, ordinal, 0), data.properties),
+            multi_line: data.multi_line,
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (93, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_spread_assignment(
+        &mut self,
+        data: SpreadAssignmentData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.spread_assignment.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SpreadAssignmentRow {
+            expression: context.encode_node(FieldKey::new(94, ordinal, 0), data.expression),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (94, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_property_assignment(
+        &mut self,
+        data: PropertyAssignmentData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .property_assignment
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PropertyAssignmentRow {
+            modifiers: context.encode_list(FieldKey::new(95, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(95, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(95, ordinal, 2), data.postfix_token),
+            r#type: context.encode_node(FieldKey::new(95, ordinal, 3), data.r#type),
+            initializer: context.encode_node(FieldKey::new(95, ordinal, 4), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (95, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_shorthand_property_assignment(
+        &mut self,
+        data: ShorthandPropertyAssignmentData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .shorthand_property_assignment
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ShorthandPropertyAssignmentRow {
+            modifiers: context.encode_list(FieldKey::new(96, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(96, ordinal, 1), data.name),
+            postfix_token: context.encode_node(FieldKey::new(96, ordinal, 2), data.postfix_token),
+            r#type: context.encode_node(FieldKey::new(96, ordinal, 3), data.r#type),
+            equals_token: context.encode_node(FieldKey::new(96, ordinal, 4), data.equals_token),
+            object_assignment_initializer: context.encode_node(
+                FieldKey::new(96, ordinal, 5),
+                data.object_assignment_initializer,
+            ),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (96, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_delete_expression(
+        &mut self,
+        data: DeleteExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.delete_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = DeleteExpressionRow {
+            expression: context.encode_node(FieldKey::new(97, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (97, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_of_expression(
+        &mut self,
+        data: TypeOfExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.type_of_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeOfExpressionRow {
+            expression: context.encode_node(FieldKey::new(98, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (98, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_void_expression(
+        &mut self,
+        data: VoidExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.void_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = VoidExpressionRow {
+            expression: context.encode_node(FieldKey::new(99, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (99, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_await_expression(
+        &mut self,
+        data: AwaitExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.await_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = AwaitExpressionRow {
+            expression: context.encode_node(FieldKey::new(100, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (100, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_assertion(
+        &mut self,
+        data: TypeAssertionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.type_assertion.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeAssertionRow {
+            r#type: context.encode_node(FieldKey::new(101, ordinal, 0), data.r#type),
+            expression: context.encode_node(FieldKey::new(101, ordinal, 1), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (101, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_keyword_type_node(
+        &mut self,
+        _data: KeywordTypeNodeData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (102, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_union_type_node(
+        &mut self,
+        data: UnionTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.union_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = UnionTypeNodeRow {
+            types: context.encode_list(FieldKey::new(103, ordinal, 0), data.types),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (103, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_intersection_type_node(
+        &mut self,
+        data: IntersectionTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .intersection_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = IntersectionTypeNodeRow {
+            types: context.encode_list(FieldKey::new(104, ordinal, 0), data.types),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (104, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_conditional_type_node(
+        &mut self,
+        data: ConditionalTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .conditional_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ConditionalTypeNodeRow {
+            check_type: context.encode_node(FieldKey::new(105, ordinal, 0), data.check_type),
+            extends_type: context.encode_node(FieldKey::new(105, ordinal, 1), data.extends_type),
+            true_type: context.encode_node(FieldKey::new(105, ordinal, 2), data.true_type),
+            false_type: context.encode_node(FieldKey::new(105, ordinal, 3), data.false_type),
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (105, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_operator_node(
+        &mut self,
+        data: TypeOperatorNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.type_operator_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeOperatorNodeRow {
+            operator: data.operator,
+            r#type: context.encode_node(FieldKey::new(106, ordinal, 1), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (106, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_infer_type_node(
+        &mut self,
+        data: InferTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.infer_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = InferTypeNodeRow {
+            type_parameter: context
+                .encode_node(FieldKey::new(107, ordinal, 0), data.type_parameter),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (107, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_array_type_node(
+        &mut self,
+        data: ArrayTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.array_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ArrayTypeNodeRow {
+            element_type: context.encode_node(FieldKey::new(108, ordinal, 0), data.element_type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (108, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_indexed_access_type_node(
+        &mut self,
+        data: IndexedAccessTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .indexed_access_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = IndexedAccessTypeNodeRow {
+            object_type: context.encode_node(FieldKey::new(109, ordinal, 0), data.object_type),
+            index_type: context.encode_node(FieldKey::new(109, ordinal, 1), data.index_type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (109, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_reference_node(
+        &mut self,
+        data: TypeReferenceNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .type_reference_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeReferenceNodeRow {
+            type_arguments: context
+                .encode_list(FieldKey::new(110, ordinal, 0), data.type_arguments),
+            type_name: context.encode_node(FieldKey::new(110, ordinal, 1), data.type_name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (110, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_expression_with_type_arguments(
+        &mut self,
+        data: ExpressionWithTypeArgumentsData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .expression_with_type_arguments
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExpressionWithTypeArgumentsRow {
+            expression: context.encode_node(FieldKey::new(111, ordinal, 0), data.expression),
+            type_arguments: context
+                .encode_list(FieldKey::new(111, ordinal, 1), data.type_arguments),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (111, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_literal_type_node(
+        &mut self,
+        data: LiteralTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.literal_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = LiteralTypeNodeRow {
+            literal: context.encode_node(FieldKey::new(112, ordinal, 0), data.literal),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (112, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_this_type_node(
+        &mut self,
+        _data: ThisTypeNodeData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (113, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_predicate_node(
+        &mut self,
+        data: TypePredicateNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .type_predicate_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypePredicateNodeRow {
+            asserts_modifier: context
+                .encode_node(FieldKey::new(114, ordinal, 0), data.asserts_modifier),
+            parameter_name: context
+                .encode_node(FieldKey::new(114, ordinal, 1), data.parameter_name),
+            r#type: context.encode_node(FieldKey::new(114, ordinal, 2), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (114, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_attribute(
+        &mut self,
+        data: ImportAttributeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_attribute.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportAttributeRow {
+            name: context.encode_node(FieldKey::new(115, ordinal, 0), data.name),
+            value: context.encode_node(FieldKey::new(115, ordinal, 1), data.value),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (115, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_attributes(
+        &mut self,
+        data: ImportAttributesData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_attributes.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportAttributesRow {
+            token: data.token,
+            attributes: context.encode_list(FieldKey::new(116, ordinal, 1), data.attributes),
+            multi_line: data.multi_line,
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (116, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_query_node(
+        &mut self,
+        data: TypeQueryNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.type_query_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeQueryNodeRow {
+            type_arguments: context
+                .encode_list(FieldKey::new(117, ordinal, 0), data.type_arguments),
+            expr_name: context.encode_node(FieldKey::new(117, ordinal, 1), data.expr_name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (117, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_mapped_type_node(
+        &mut self,
+        data: MappedTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.mapped_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = MappedTypeNodeRow {
+            readonly_token: context
+                .encode_node(FieldKey::new(118, ordinal, 0), data.readonly_token),
+            type_parameter: context
+                .encode_node(FieldKey::new(118, ordinal, 1), data.type_parameter),
+            name_type: context.encode_node(FieldKey::new(118, ordinal, 2), data.name_type),
+            question_token: context
+                .encode_node(FieldKey::new(118, ordinal, 3), data.question_token),
+            r#type: context.encode_node(FieldKey::new(118, ordinal, 4), data.r#type),
+            members: context.encode_list(FieldKey::new(118, ordinal, 5), data.members),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (118, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_literal_node(
+        &mut self,
+        data: TypeLiteralNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.type_literal_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeLiteralNodeRow {
+            members: context.encode_list(FieldKey::new(119, ordinal, 0), data.members),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (119, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_tuple_type_node(
+        &mut self,
+        data: TupleTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.tuple_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TupleTypeNodeRow {
+            elements: context.encode_list(FieldKey::new(120, ordinal, 0), data.elements),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (120, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_named_tuple_member(
+        &mut self,
+        data: NamedTupleMemberData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.named_tuple_member.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = NamedTupleMemberRow {
+            dot_dot_dot_token: context
+                .encode_node(FieldKey::new(121, ordinal, 0), data.dot_dot_dot_token),
+            name: context.encode_node(FieldKey::new(121, ordinal, 1), data.name),
+            question_token: context
+                .encode_node(FieldKey::new(121, ordinal, 2), data.question_token),
+            r#type: context.encode_node(FieldKey::new(121, ordinal, 3), data.r#type),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (121, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_optional_type_node(
+        &mut self,
+        data: OptionalTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.optional_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = OptionalTypeNodeRow {
+            r#type: context.encode_node(FieldKey::new(122, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (122, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_rest_type_node(
+        &mut self,
+        data: RestTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.rest_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = RestTypeNodeRow {
+            r#type: context.encode_node(FieldKey::new(123, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (123, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_parenthesized_type_node(
+        &mut self,
+        data: ParenthesizedTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .parenthesized_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ParenthesizedTypeNodeRow {
+            r#type: context.encode_node(FieldKey::new(124, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (124, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_function_type_node(
+        &mut self,
+        data: FunctionTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.function_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = FunctionTypeNodeRow {
+            modifiers: context.encode_list(FieldKey::new(125, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(125, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(125, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(125, ordinal, 3), data.r#type),
+            full_signature: context
+                .encode_node(FieldKey::new(125, ordinal, 4), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (125, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_constructor_type_node(
+        &mut self,
+        data: ConstructorTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .constructor_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ConstructorTypeNodeRow {
+            modifiers: context.encode_list(FieldKey::new(126, ordinal, 0), data.modifiers),
+            type_parameters: context
+                .encode_list(FieldKey::new(126, ordinal, 1), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(126, ordinal, 2), data.parameters),
+            r#type: context.encode_node(FieldKey::new(126, ordinal, 3), data.r#type),
+            full_signature: context
+                .encode_node(FieldKey::new(126, ordinal, 4), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (126, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_head(
+        &mut self,
+        data: TemplateHeadData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.template_head.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateHeadRow {
+            text: context.encode_text(FieldKey::new(127, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+            raw_text: context.encode_text(FieldKey::new(127, ordinal, 2), data.raw_text),
+            template_flags: data.template_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (127, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_middle(
+        &mut self,
+        data: TemplateMiddleData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.template_middle.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateMiddleRow {
+            text: context.encode_text(FieldKey::new(128, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+            raw_text: context.encode_text(FieldKey::new(128, ordinal, 2), data.raw_text),
+            template_flags: data.template_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (128, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_tail(
+        &mut self,
+        data: TemplateTailData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.template_tail.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateTailRow {
+            text: context.encode_text(FieldKey::new(129, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+            raw_text: context.encode_text(FieldKey::new(129, ordinal, 2), data.raw_text),
+            template_flags: data.template_flags,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (129, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_literal_type_node(
+        &mut self,
+        data: TemplateLiteralTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .template_literal_type_node
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateLiteralTypeNodeRow {
+            head: context.encode_node(FieldKey::new(130, ordinal, 0), data.head),
+            template_spans: context
+                .encode_list(FieldKey::new(130, ordinal, 1), data.template_spans),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (130, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_template_literal_type_span(
+        &mut self,
+        data: TemplateLiteralTypeSpanData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .template_literal_type_span
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TemplateLiteralTypeSpanRow {
+            r#type: context.encode_node(FieldKey::new(131, ordinal, 0), data.r#type),
+            literal: context.encode_node(FieldKey::new(131, ordinal, 1), data.literal),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (131, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_synthetic_expression(
+        &mut self,
+        data: SyntheticExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .synthetic_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SyntheticExpressionRow {
+            is_spread: data.is_spread,
+            tuple_name_source: context
+                .encode_node(FieldKey::new(132, ordinal, 1), data.tuple_name_source),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (132, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_partially_emitted_expression(
+        &mut self,
+        data: PartiallyEmittedExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .partially_emitted_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = PartiallyEmittedExpressionRow {
+            expression: context.encode_node(FieldKey::new(133, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (133, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_element(
+        &mut self,
+        data: JsxElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_element.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxElementRow {
+            opening_element: context
+                .encode_node(FieldKey::new(134, ordinal, 0), data.opening_element),
+            children: context.encode_list(FieldKey::new(134, ordinal, 1), data.children),
+            closing_element: context
+                .encode_node(FieldKey::new(134, ordinal, 2), data.closing_element),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (134, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_attributes(
+        &mut self,
+        data: JsxAttributesData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_attributes.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxAttributesRow {
+            properties: context.encode_list(FieldKey::new(135, ordinal, 0), data.properties),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (135, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_namespaced_name(
+        &mut self,
+        data: JsxNamespacedNameData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .jsx_namespaced_name
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxNamespacedNameRow {
+            namespace: context.encode_node(FieldKey::new(136, ordinal, 0), data.namespace),
+            name: context.encode_node(FieldKey::new(136, ordinal, 1), data.name),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (136, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_opening_element(
+        &mut self,
+        data: JsxOpeningElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .jsx_opening_element
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxOpeningElementRow {
+            tag_name: context.encode_node(FieldKey::new(137, ordinal, 0), data.tag_name),
+            type_arguments: context
+                .encode_list(FieldKey::new(137, ordinal, 1), data.type_arguments),
+            attributes: context.encode_node(FieldKey::new(137, ordinal, 2), data.attributes),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (137, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_self_closing_element(
+        &mut self,
+        data: JsxSelfClosingElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .jsx_self_closing_element
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxSelfClosingElementRow {
+            tag_name: context.encode_node(FieldKey::new(138, ordinal, 0), data.tag_name),
+            type_arguments: context
+                .encode_list(FieldKey::new(138, ordinal, 1), data.type_arguments),
+            attributes: context.encode_node(FieldKey::new(138, ordinal, 2), data.attributes),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (138, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_fragment(
+        &mut self,
+        data: JsxFragmentData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_fragment.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxFragmentRow {
+            opening_fragment: context
+                .encode_node(FieldKey::new(139, ordinal, 0), data.opening_fragment),
+            children: context.encode_list(FieldKey::new(139, ordinal, 1), data.children),
+            closing_fragment: context
+                .encode_node(FieldKey::new(139, ordinal, 2), data.closing_fragment),
+            facts: AtomicU32::new(0),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (139, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_opening_fragment(
+        &mut self,
+        _data: JsxOpeningFragmentData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (140, 0)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_closing_fragment(
+        &mut self,
+        _data: JsxClosingFragmentData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (141, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_attribute(
+        &mut self,
+        data: JsxAttributeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_attribute.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxAttributeRow {
+            name: context.encode_node(FieldKey::new(142, ordinal, 0), data.name),
+            initializer: context.encode_node(FieldKey::new(142, ordinal, 1), data.initializer),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (142, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_spread_attribute(
+        &mut self,
+        data: JsxSpreadAttributeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .jsx_spread_attribute
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxSpreadAttributeRow {
+            expression: context.encode_node(FieldKey::new(143, ordinal, 0), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (143, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_closing_element(
+        &mut self,
+        data: JsxClosingElementData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .jsx_closing_element
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxClosingElementRow {
+            tag_name: context.encode_node(FieldKey::new(144, ordinal, 0), data.tag_name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (144, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_expression(
+        &mut self,
+        data: JsxExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_expression.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxExpressionRow {
+            dot_dot_dot_token: context
+                .encode_node(FieldKey::new(145, ordinal, 0), data.dot_dot_dot_token),
+            expression: context.encode_node(FieldKey::new(145, ordinal, 1), data.expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (145, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_jsx_text(
+        &mut self,
+        data: JsxTextData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.jsx_text.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JsxTextRow {
+            text: context.encode_text(FieldKey::new(146, ordinal, 0), data.text),
+            token_flags: data.token_flags,
+            contains_only_trivia_white_spaces: data.contains_only_trivia_white_spaces,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (146, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_syntax_list(
+        &mut self,
+        data: SyntaxListData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.syntax_list.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SyntaxListRow {
+            children: context.encode_node_slice(FieldKey::new(147, ordinal, 0), data.children),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (147, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc(
+        &mut self,
+        data: JSDocData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocRow {
+            comment: context.encode_list(FieldKey::new(148, ordinal, 0), data.comment),
+            tags: context.encode_list(FieldKey::new(148, ordinal, 1), data.tags),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (148, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_type_expression(
+        &mut self,
+        data: JSDocTypeExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_type_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTypeExpressionRow {
+            r#type: context.encode_node(FieldKey::new(149, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (149, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_non_nullable_type(
+        &mut self,
+        data: JSDocNonNullableTypeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_non_nullable_type
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocNonNullableTypeRow {
+            r#type: context.encode_node(FieldKey::new(150, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (150, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_nullable_type(
+        &mut self,
+        data: JSDocNullableTypeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_nullable_type
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocNullableTypeRow {
+            r#type: context.encode_node(FieldKey::new(151, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (151, ordinal)
+    }
+    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_all_type(
+        &mut self,
+        _data: JSDocAllTypeData,
+        _context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        (152, 0)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_variadic_type(
+        &mut self,
+        data: JSDocVariadicTypeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_variadic_type
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocVariadicTypeRow {
+            r#type: context.encode_node(FieldKey::new(153, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (153, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_optional_type(
+        &mut self,
+        data: JSDocOptionalTypeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_optional_type
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocOptionalTypeRow {
+            r#type: context.encode_node(FieldKey::new(154, ordinal, 0), data.r#type),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (154, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_type_tag(
+        &mut self,
+        data: JSDocTypeTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_type_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTypeTagRow {
+            tag_name: context.encode_node(FieldKey::new(155, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(155, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(155, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (155, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_unknown_tag(
+        &mut self,
+        data: JSDocUnknownTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_unknown_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocUnknownTagRow {
+            tag_name: context.encode_node(FieldKey::new(156, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(156, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (156, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_template_tag(
+        &mut self,
+        data: JSDocTemplateTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_template_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTemplateTagRow {
+            tag_name: context.encode_node(FieldKey::new(157, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(157, ordinal, 1), data.comment),
+            constraint: context.encode_node(FieldKey::new(157, ordinal, 2), data.constraint),
+            type_parameters: context
+                .encode_list(FieldKey::new(157, ordinal, 3), data.type_parameters),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (157, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_return_tag(
+        &mut self,
+        data: JSDocReturnTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_return_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocReturnTagRow {
+            tag_name: context.encode_node(FieldKey::new(158, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(158, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(158, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (158, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_public_tag(
+        &mut self,
+        data: JSDocPublicTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_public_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocPublicTagRow {
+            tag_name: context.encode_node(FieldKey::new(159, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(159, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (159, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_private_tag(
+        &mut self,
+        data: JSDocPrivateTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_private_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocPrivateTagRow {
+            tag_name: context.encode_node(FieldKey::new(160, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(160, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (160, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_protected_tag(
+        &mut self,
+        data: JSDocProtectedTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_protected_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocProtectedTagRow {
+            tag_name: context.encode_node(FieldKey::new(161, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(161, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (161, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_readonly_tag(
+        &mut self,
+        data: JSDocReadonlyTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_readonly_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocReadonlyTagRow {
+            tag_name: context.encode_node(FieldKey::new(162, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(162, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (162, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_override_tag(
+        &mut self,
+        data: JSDocOverrideTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_override_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocOverrideTagRow {
+            tag_name: context.encode_node(FieldKey::new(163, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(163, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (163, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_deprecated_tag(
+        &mut self,
+        data: JSDocDeprecatedTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_deprecated_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocDeprecatedTagRow {
+            tag_name: context.encode_node(FieldKey::new(164, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(164, ordinal, 1), data.comment),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (164, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_see_tag(
+        &mut self,
+        data: JSDocSeeTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_see_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocSeeTagRow {
+            tag_name: context.encode_node(FieldKey::new(165, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(165, ordinal, 1), data.comment),
+            name_expression: context
+                .encode_node(FieldKey::new(165, ordinal, 2), data.name_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (165, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_implements_tag(
+        &mut self,
+        data: JSDocImplementsTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_implements_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocImplementsTagRow {
+            tag_name: context.encode_node(FieldKey::new(166, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(166, ordinal, 1), data.comment),
+            class_name: context.encode_node(FieldKey::new(166, ordinal, 2), data.class_name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (166, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_augments_tag(
+        &mut self,
+        data: JSDocAugmentsTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_augments_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocAugmentsTagRow {
+            tag_name: context.encode_node(FieldKey::new(167, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(167, ordinal, 1), data.comment),
+            class_name: context.encode_node(FieldKey::new(167, ordinal, 2), data.class_name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (167, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_satisfies_tag(
+        &mut self,
+        data: JSDocSatisfiesTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_satisfies_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocSatisfiesTagRow {
+            tag_name: context.encode_node(FieldKey::new(168, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(168, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(168, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (168, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_throws_tag(
+        &mut self,
+        data: JSDocThrowsTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_throws_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocThrowsTagRow {
+            tag_name: context.encode_node(FieldKey::new(169, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(169, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(169, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (169, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_this_tag(
+        &mut self,
+        data: JSDocThisTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_this_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocThisTagRow {
+            tag_name: context.encode_node(FieldKey::new(170, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(170, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(170, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (170, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_import_tag(
+        &mut self,
+        data: JSDocImportTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_import_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocImportTagRow {
+            tag_name: context.encode_node(FieldKey::new(171, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(171, ordinal, 1), data.comment),
+            import_clause: context.encode_node(FieldKey::new(171, ordinal, 2), data.import_clause),
+            module_specifier: context
+                .encode_node(FieldKey::new(171, ordinal, 3), data.module_specifier),
+            attributes: context.encode_node(FieldKey::new(171, ordinal, 4), data.attributes),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (171, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_callback_tag(
+        &mut self,
+        data: JSDocCallbackTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_callback_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocCallbackTagRow {
+            tag_name: context.encode_node(FieldKey::new(172, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(172, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(172, ordinal, 2), data.type_expression),
+            name: context.encode_node(FieldKey::new(172, ordinal, 3), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (172, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_overload_tag(
+        &mut self,
+        data: JSDocOverloadTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_overload_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocOverloadTagRow {
+            tag_name: context.encode_node(FieldKey::new(173, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(173, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(173, ordinal, 2), data.type_expression),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (173, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_typedef_tag(
+        &mut self,
+        data: JSDocTypedefTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_typedef_tag.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTypedefTagRow {
+            tag_name: context.encode_node(FieldKey::new(174, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(174, ordinal, 1), data.comment),
+            type_expression: context
+                .encode_node(FieldKey::new(174, ordinal, 2), data.type_expression),
+            name: context.encode_node(FieldKey::new(174, ordinal, 3), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (174, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_signature(
+        &mut self,
+        data: JSDocSignatureData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_signature.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocSignatureRow {
+            type_parameters: context
+                .encode_list(FieldKey::new(175, ordinal, 0), data.type_parameters),
+            parameters: context.encode_list(FieldKey::new(175, ordinal, 1), data.parameters),
+            r#type: context.encode_node(FieldKey::new(175, ordinal, 2), data.r#type),
+            full_signature: context
+                .encode_node(FieldKey::new(175, ordinal, 3), data.full_signature),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (175, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_name_reference(
+        &mut self,
+        data: JSDocNameReferenceData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_name_reference
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocNameReferenceRow {
+            name: context.encode_node(FieldKey::new(176, ordinal, 0), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (176, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_source_file(
+        &mut self,
+        data: SourceFileData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.source_file.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SourceFileRow {
+            statements: context.encode_list(FieldKey::new(177, ordinal, 0), data.statements),
+            end_of_file_token: context
+                .encode_node(FieldKey::new(177, ordinal, 1), data.end_of_file_token),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            locals: 0,
+            next_container: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (177, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_module_declaration(
+        &mut self,
+        data: ModuleDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.module_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ModuleDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(178, ordinal, 0), data.modifiers),
+            asterisk_token: context
+                .encode_node(FieldKey::new(178, ordinal, 1), data.asterisk_token),
+            body: context.encode_node(FieldKey::new(178, ordinal, 2), data.body),
+            keyword: data.keyword,
+            name: context.encode_node(FieldKey::new(178, ordinal, 4), data.name),
+            attributes: context.encode_node(FieldKey::new(178, ordinal, 5), data.attributes),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            locals: 0,
+            next_container: 0,
+            flow_node: 0,
+            end_flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (178, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_equals_declaration(
+        &mut self,
+        data: ImportEqualsDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .import_equals_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportEqualsDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(179, ordinal, 0), data.modifiers),
+            is_type_only: data.is_type_only,
+            name: context.encode_node(FieldKey::new(179, ordinal, 2), data.name),
+            module_reference: context
+                .encode_node(FieldKey::new(179, ordinal, 3), data.module_reference),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (179, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_export_declaration(
+        &mut self,
+        data: ExportDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.export_declaration.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ExportDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(180, ordinal, 0), data.modifiers),
+            is_type_only: data.is_type_only,
+            export_clause: context.encode_node(FieldKey::new(180, ordinal, 2), data.export_clause),
+            module_specifier: context
+                .encode_node(FieldKey::new(180, ordinal, 3), data.module_specifier),
+            attributes: context.encode_node(FieldKey::new(180, ordinal, 4), data.attributes),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            flow_node: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (180, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_type_node(
+        &mut self,
+        data: ImportTypeNodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_type_node.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportTypeNodeRow {
+            type_arguments: context
+                .encode_list(FieldKey::new(181, ordinal, 0), data.type_arguments),
+            is_type_of: data.is_type_of,
+            argument: context.encode_node(FieldKey::new(181, ordinal, 2), data.argument),
+            attributes: context.encode_node(FieldKey::new(181, ordinal, 3), data.attributes),
+            qualifier: context.encode_node(FieldKey::new(181, ordinal, 4), data.qualifier),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (181, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_clause(
+        &mut self,
+        data: ImportClauseData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_clause.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportClauseRow {
+            phase_modifier: data.phase_modifier,
+            name: context.encode_node(FieldKey::new(182, ordinal, 1), data.name),
+            named_bindings: context
+                .encode_node(FieldKey::new(182, ordinal, 2), data.named_bindings),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (182, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_import_specifier(
+        &mut self,
+        data: ImportSpecifierData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.import_specifier.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = ImportSpecifierRow {
+            is_type_only: data.is_type_only,
+            property_name: context.encode_node(FieldKey::new(183, ordinal, 1), data.property_name),
+            name: context.encode_node(FieldKey::new(183, ordinal, 2), data.name),
+            facts: AtomicU32::new(0),
+            symbol: 0,
+            local_symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (183, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_text(
+        &mut self,
+        data: JSDocTextData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_text.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTextRow {
+            text: context.encode_text_slice(FieldKey::new(184, ordinal, 0), data.text),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (184, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_link(
+        &mut self,
+        data: JSDocLinkData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_link.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocLinkRow {
+            text: context.encode_text_slice(FieldKey::new(185, ordinal, 0), data.text),
+            name: context.encode_node(FieldKey::new(185, ordinal, 1), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (185, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_link_plain(
+        &mut self,
+        data: JSDocLinkPlainData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_link_plain.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocLinkPlainRow {
+            text: context.encode_text_slice(FieldKey::new(186, ordinal, 0), data.text),
+            name: context.encode_node(FieldKey::new(186, ordinal, 1), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (186, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_link_code(
+        &mut self,
+        data: JSDocLinkCodeData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self.js_doc_link_code.get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocLinkCodeRow {
+            text: context.encode_text_slice(FieldKey::new(187, ordinal, 0), data.text),
+            name: context.encode_node(FieldKey::new(187, ordinal, 1), data.name),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (187, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_type_parameter_declaration(
+        &mut self,
+        data: TypeParameterDeclarationData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .type_parameter_declaration
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = TypeParameterDeclarationRow {
+            modifiers: context.encode_list(FieldKey::new(188, ordinal, 0), data.modifiers),
+            name: context.encode_node(FieldKey::new(188, ordinal, 1), data.name),
+            constraint: context.encode_node(FieldKey::new(188, ordinal, 2), data.constraint),
+            expression: context.encode_node(FieldKey::new(188, ordinal, 3), data.expression),
+            default_type: context.encode_node(FieldKey::new(188, ordinal, 4), data.default_type),
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (188, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_synthetic_reference_expression(
+        &mut self,
+        data: SyntheticReferenceExpressionData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .synthetic_reference_expression
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = SyntheticReferenceExpressionRow {
+            expression: context.encode_node(FieldKey::new(189, ordinal, 0), data.expression),
+            this_arg: context.encode_node(FieldKey::new(189, ordinal, 1), data.this_arg),
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (189, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_type_literal(
+        &mut self,
+        data: JSDocTypeLiteralData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_type_literal
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocTypeLiteralRow {
+            js_doc_property_tags: context
+                .encode_node_slice(FieldKey::new(190, ordinal, 0), data.js_doc_property_tags),
+            is_array_type: data.is_array_type,
+            symbol: 0,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (190, ordinal)
+    }
+    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.
+    pub(crate) fn insert_js_doc_parameter_or_property_tag(
+        &mut self,
+        data: JSDocParameterOrPropertyTagData,
+        context: &mut PackingContext<'_>,
+    ) -> (u16, u32) {
+        let rows = self
+            .js_doc_parameter_or_property_tag
+            .get_or_insert_with(Default::default);
+        let ordinal = rows.len();
+        let row = JSDocParameterOrPropertyTagRow {
+            tag_name: context.encode_node(FieldKey::new(191, ordinal, 0), data.tag_name),
+            comment: context.encode_list(FieldKey::new(191, ordinal, 1), data.comment),
+            name: context.encode_node(FieldKey::new(191, ordinal, 2), data.name),
+            is_bracketed: data.is_bracketed,
+            type_expression: context
+                .encode_node(FieldKey::new(191, ordinal, 4), data.type_expression),
+            is_name_first: data.is_name_first,
+        };
+        assert_eq!(rows.push(row), ordinal, "compact row identity");
+        (191, ordinal)
     }
 
     #[allow(clippy::unused_self)] // Payloadless shapes retain the uniform borrowed selector signature.

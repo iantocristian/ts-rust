@@ -3,7 +3,7 @@
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-use super::ast::{array, fields, header, nullable, rust_type, snake, string};
+use super::ast::{array, boxed, fields, header, nullable, rust_type, snake, string};
 
 fn has_facts(node: &Value) -> Result<bool, String> {
     Ok(array(node, "baseTypes")?
@@ -160,34 +160,53 @@ pub(super) fn emit(nodes: &[Value], pin: &str) -> Result<String, String> {
         ));
     }
     code.push_str("        }\n    }\n    pub(crate) fn insert(&mut self, data: NodeData, context: &mut PackingContext<'_>) -> (u16, u32) {\n        match data {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        let data = if boxed(node)? { "*data" } else { "data" };
+        code.push_str(&format!(
+            "            NodeData::{name}(data) => self.insert_{member}({data}, context),\n"
+        ));
+    }
+    code.push_str("        }\n    }\n");
     for (shape, node) in nodes.iter().enumerate() {
         let name = string(node, "name")?;
         let member = snake(name);
         let fields = fields(node)?;
+        let data = if fields.is_empty() { "_data" } else { "data" };
+        let mut uses_context = false;
+        for field in &fields {
+            uses_context |= matches!(
+                rust_type(&field["type"])?.as_str(),
+                "NodeId" | "NodeListId" | "NodeSlice" | "TextSlice" | "JsString"
+            );
+        }
+        let context = if uses_context { "context" } else { "_context" };
         if !has_row(node)? {
-            code.push_str(&format!(
-                "            NodeData::{name}(_) => ({shape}, 0),\n"
-            ));
+            code.push_str("    #[allow(clippy::unused_self)] // Empty shapes share the uniform concrete insertion boundary.\n");
+        }
+        code.push_str("    #[allow(clippy::needless_pass_by_value)] // The uniform insertion boundary consumes owned factory inputs, including shapes that transfer strings.\n");
+        code.push_str(&format!("    pub(crate) fn insert_{member}(&mut self, {data}: {name}Data, {context}: &mut PackingContext<'_>) -> (u16, u32) {{\n"));
+        if !has_row(node)? {
+            code.push_str(&format!("        ({shape}, 0)\n    }}\n"));
             continue;
         }
-        let data_pattern = if fields.is_empty() { "_" } else { "data" };
-        code.push_str(&format!("            NodeData::{name}({data_pattern}) => {{\n                let rows = self.{member}.get_or_insert_with(Default::default);\n                let ordinal = rows.len();\n                let row = {name}Row {{\n"));
+        code.push_str(&format!("        let rows = self.{member}.get_or_insert_with(Default::default);\n        let ordinal = rows.len();\n        let row = {name}Row {{\n"));
         for (index, field) in fields.iter().enumerate() {
             code.push_str(&format!(
-                "                    {}: {},\n",
+                "            {}: {},\n",
                 snake(string(field, "name")?),
                 pack_field(shape, index, field)?
             ));
         }
         if has_facts(node)? {
-            code.push_str("                    facts: AtomicU32::new(0),\n");
+            code.push_str("            facts: AtomicU32::new(0),\n");
         }
         for field in binding_fields(node)? {
-            code.push_str(&format!("                    {}: 0,\n", field.name));
+            code.push_str(&format!("            {}: 0,\n", field.name));
         }
-        code.push_str(&format!("                }};\n                assert_eq!(rows.push(row), ordinal, \"compact row identity\");\n                ({shape}, ordinal)\n            }}\n"));
+        code.push_str(&format!("        }};\n        assert_eq!(rows.push(row), ordinal, \"compact row identity\");\n        ({shape}, ordinal)\n    }}\n"));
     }
-    code.push_str("        }\n    }\n");
     for node in nodes {
         let name = string(node, "name")?;
         let member = snake(name);

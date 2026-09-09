@@ -31,9 +31,10 @@ pub trait Factory {
         Err(Error::InvalidGraph)
     }
     fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId;
+    crate::factory_generated::factory_construction_methods!(defaults);
     // port: tsc/internal/ast/ast.go:NodeFactory.NewModifier
     fn new_modifier(&mut self, kind: NodeKind) -> NodeId {
-        self.new_node(kind, crate::TokenData {}.into())
+        self.new_token_data(kind, crate::TokenData {})
     }
     fn increment_text_count(&mut self);
     fn set_node_flags(&mut self, id: NodeId, flags: u32);
@@ -102,6 +103,8 @@ impl AstBuilder {
     }
 }
 impl Factory for AstBuilder {
+    crate::factory_generated::factory_construction_methods!(builder);
+
     fn read_source_file(&self, id: NodeId) -> Result<SourceFileRead<'_>, Error> {
         self.factory_view(id)?.source_file(id)
     }
@@ -226,6 +229,8 @@ impl Factory for AstTransaction<'_, '_> {
 pub struct BorrowedFactory<'a, T: ?Sized>(pub &'a mut T);
 
 impl<T: Factory + ?Sized> Factory for BorrowedFactory<'_, T> {
+    crate::factory_generated::factory_construction_methods!(forward, 0);
+
     fn read_source_file(&self, id: NodeId) -> Result<SourceFileRead<'_>, Error> {
         self.0.read_source_file(id)
     }

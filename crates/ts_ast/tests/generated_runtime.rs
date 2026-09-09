@@ -280,3 +280,180 @@ fn owner_validation_includes_references_omitted_from_child_enumeration() {
     .is_err());
     assert_eq!(destination.node_count(), 0);
 }
+
+struct InterceptingFactory {
+    inner: AstBuilder,
+    calls: Vec<(NodeKind, i64, i64)>,
+}
+impl Factory for InterceptingFactory {
+    fn node(&self, id: NodeId) -> NodeRead<'_> {
+        Factory::node(&self.inner, id)
+    }
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_> {
+        Factory::node_mut(&mut self.inner, id)
+    }
+    fn node_count(&self) -> i64 {
+        self.inner.node_count()
+    }
+    fn text_count(&self) -> i64 {
+        self.inner.text_count()
+    }
+    fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId {
+        self.calls
+            .push((kind, self.node_count(), self.text_count()));
+        self.inner.new_node(kind, data)
+    }
+    fn increment_text_count(&mut self) {
+        self.inner.increment_text_count();
+    }
+    fn set_node_flags(&mut self, id: NodeId, flags: u32) {
+        self.inner.set_node_flags(id, flags);
+    }
+    fn finish_update(&mut self, updated: NodeId, original: NodeId) -> NodeId {
+        self.inner.finish_update(updated, original)
+    }
+    fn finish_clone(&mut self, updated: NodeId, original: NodeId) -> NodeId {
+        self.inner.finish_clone(updated, original)
+    }
+}
+
+#[test]
+fn concrete_entries_preserve_custom_interception_and_prevalidation_text_counts() {
+    let mut foreign = builder();
+    let wrong = foreign.new_token(SyntaxKind::Unknown.into());
+    let mut factory = InterceptingFactory {
+        inner: builder(),
+        calls: Vec::new(),
+    };
+    let first = factory.new_identifier(JsString::from_bytes(b"name".as_slice()));
+    let failure = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        factory.new_js_doc_link(Some(wrong), TextSlice::empty());
+    }));
+    assert!(failure.is_err());
+    assert_eq!((factory.node_count(), factory.text_count()), (1, 2));
+    let next = BorrowedFactory(&mut factory).new_token(NodeKind::from_raw(-1));
+    assert_eq!(next.slot(), first.slot() + 1);
+    assert_eq!(
+        factory.calls,
+        [
+            (SyntaxKind::Identifier.into(), 0, 1),
+            (SyntaxKind::JSDocLink.into(), 1, 2),
+            (NodeKind::from_raw(-1), 1, 2),
+        ]
+    );
+    assert_eq!(factory.node(first).as_identifier().unwrap().text(), b"name");
+    assert_eq!(factory.node(next).kind(), NodeKind::from_raw(-1));
+}
+
+#[test]
+fn concrete_entries_validate_in_field_order_before_node_allocation_and_hooks() {
+    let hooks = Arc::new(Hooks::default());
+    let mut factory =
+        AstBuilder::with_hooks(SourceText::default(), &Counters::new(), hooks.clone());
+    let first = factory.new_identifier(JsString::from_bytes(b"first".as_slice()));
+    let mut foreign = builder();
+    let wrong = foreign.new_token(SyntaxKind::Unknown.into());
+    let text = TextSlice::empty();
+    let failure = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        factory.new_js_doc_link(Some(wrong), text);
+    }))
+    .unwrap_err();
+    assert_eq!(
+        failure.downcast_ref::<String>().unwrap(),
+        "factory edges belong to retained storage: WrongOwner"
+    );
+    assert_eq!((factory.node_count(), factory.text_count()), (1, 2));
+    assert_eq!(hooks.0.lock().unwrap().len(), 1);
+    let invalid = NodeId::from_parts(factory.id().arena(), u32::MAX).unwrap();
+    let data = BinaryExpressionData {
+        modifiers: None,
+        left: Some(invalid),
+        r#type: Some(wrong),
+        operator_token: None,
+        right: None,
+    };
+    let failure = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        factory.new_binary_expression_data(NodeKind::from_raw(-1), data);
+    }))
+    .unwrap_err();
+    // Schema order places left before type: local missing slot wins over wrong owner.
+    assert_eq!(
+        failure.downcast_ref::<String>().unwrap(),
+        "factory edges belong to retained storage: InvalidSlot"
+    );
+    assert_eq!(factory.node_count(), 1);
+    let next =
+        BorrowedFactory(&mut factory).new_identifier(JsString::from_bytes(b"next".as_slice()));
+    assert_eq!(next.slot(), first.slot() + 1);
+    assert_eq!(
+        *hooks.0.lock().unwrap(),
+        [
+            [0, i64::from(SyntaxKind::Identifier as u16), 0, -1, -1, 1, 1],
+            [0, i64::from(SyntaxKind::Identifier as u16), 0, -1, -1, 2, 3],
+        ]
+    );
+}
+
+#[test]
+fn concrete_large_payload_keeps_all_fields_forged_kind_and_lazy_compatibility() {
+    let mut factory = builder();
+    let left = factory.new_identifier(JsString::from_bytes(b"left".as_slice()));
+    let right = factory.new_identifier(JsString::from_bytes(b"right".as_slice()));
+    let operator = factory.new_token(SyntaxKind::PlusToken.into());
+    let edges = factory
+        .node_slice(vec![Some(left), None, Some(right)])
+        .unwrap();
+    let modifiers = factory.new_list(TextRange::new(-1, 5), edges).unwrap();
+    let data = BinaryExpressionData {
+        modifiers: Some(modifiers),
+        left: Some(left),
+        r#type: Some(right),
+        operator_token: Some(operator),
+        right: Some(right),
+    };
+    let kind = NodeKind::from_raw(-1);
+    let concrete = factory.new_binary_expression_data(kind, data.clone());
+    let generic = factory.new_node(kind, data.clone().into());
+    assert_eq!((factory.node_count(), factory.text_count()), (5, 2));
+    for id in [concrete, generic] {
+        let node = factory.node(id);
+        assert_eq!(node.kind(), kind);
+        assert_eq!(node.data().to_owned(), NodeData::from(data.clone()));
+        assert_eq!(
+            (node.parent(), node.flags(), node.pos(), node.end()),
+            (None, 0, -1, -1)
+        );
+        assert_eq!(NodeAccess::cached_subtree_facts(&node), 0);
+        assert_eq!(existing_runtime_node_id(&node), 0);
+    }
+    let root = factory.new_source_file(
+        SourceFileParseOptions {
+            file_name: JsString::from_bytes(b"/concrete.ts".as_slice()),
+            ..SourceFileParseOptions::default()
+        },
+        SourceText::default(),
+        Some(modifiers),
+        Some(operator),
+    );
+    let file = factory.complete(root).unwrap().publish_unbound();
+    assert_eq!(
+        file.view().source_file(root).unwrap().file_name(),
+        b"/concrete.ts"
+    );
+    let docs = file
+        .view()
+        .jsdoc(root, |transaction| {
+            let lazy =
+                BorrowedFactory(&mut *transaction).new_binary_expression_data(kind, data.clone());
+            assert_eq!(
+                Factory::node(transaction, lazy).data().to_owned(),
+                NodeData::from(data.clone())
+            );
+            assert_eq!(transaction.node_count(), 1);
+            Ok(vec![lazy])
+        })
+        .unwrap();
+    let lazy = file.view().node(docs[0]).unwrap();
+    assert_eq!(lazy.kind(), kind);
+    assert_eq!(lazy.data().to_owned(), NodeData::from(data));
+}

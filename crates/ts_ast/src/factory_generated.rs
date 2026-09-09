@@ -2,6 +2,6755 @@
 // Upstream: 1f70213d4922b434345f639b441681e470c7cfc1
 // upstream: tsc/internal/ast/ast_generated.go
 
+macro_rules! factory_construction_methods {
+    (defaults) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+    };
+    (builder) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_token(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_identifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_private_identifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.left {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.right {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_qualified_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_computed_property_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_decorator(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_empty_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.then_statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.else_statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_if_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_do_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_while_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.condition {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.incrementor {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_for_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.await_modifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_for_in_or_of_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_break_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_continue_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_return_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_with_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.case_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_switch_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_case_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_case_or_default_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_throw_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.try_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.catch_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.finally_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_try_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.variable_declaration {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_catch_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_debugger_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_labeled_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_expression_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.declaration_list {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.exclamation_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.declarations {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_declaration_list(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binding_pattern(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parameter_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binding_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_missing_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_heritage_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_interface_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_alias_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_enum_member(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_enum_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_module_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_not_emitted_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_not_emitted_type_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.import_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_external_module_reference(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_import(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_imports(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_export_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_export(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_exports(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_specifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_call_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_construct_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_constructor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_get_accessor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_set_accessor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_index_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_method_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_method_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_semicolon_class_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_static_block_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_omitted_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_keyword_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_string_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_numeric_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_big_int_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_regular_expression_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_no_substitution_template_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.left {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.operator_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.right {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.operand {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_prefix_unary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.operand {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_postfix_unary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_yield_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.equals_greater_than_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_arrow_function(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_as_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_satisfies_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.condition {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.when_true {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.colon_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.when_false {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_conditional_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_access_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.argument_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_element_access_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_call_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_new_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_meta_property(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_non_null_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_spread_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.head {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template_spans {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_span(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_tagged_template_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parenthesized_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_array_literal_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.properties {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_object_literal_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_spread_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.equals_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.object_assignment_initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_shorthand_property_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_delete_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_of_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_void_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_await_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_assertion(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_keyword_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_union_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_intersection_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.check_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.extends_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.true_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.false_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_conditional_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_operator_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameter {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_infer_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.element_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_array_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.object_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.index_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_indexed_access_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_reference_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_expression_with_type_arguments(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_literal_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_this_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.asserts_modifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameter_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_predicate_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.value {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.attributes {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_attributes(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expr_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_query_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.readonly_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameter {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_mapped_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_literal_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_tuple_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_tuple_member(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_optional_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_rest_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parenthesized_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_constructor_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_head(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_middle(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_tail(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.head {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template_spans {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_literal_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_literal_type_span(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tuple_name_source {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_synthetic_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_partially_emitted_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.opening_element {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.children {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.closing_element {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.properties {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_attributes(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.namespace {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_namespaced_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_opening_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_self_closing_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.opening_fragment {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.children {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.closing_fragment {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_opening_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_closing_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_spread_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_closing_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_text(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.node_slice(data.children)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_syntax_list(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.tags {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_non_nullable_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_nullable_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_all_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_variadic_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_optional_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_unknown_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.constraint {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_template_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_return_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_public_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_private_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_protected_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_readonly_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_override_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_deprecated_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_see_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.class_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_implements_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.class_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_augments_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_satisfies_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_throws_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_this_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.import_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_import_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_callback_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_overload_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_typedef_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_signature(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_name_reference(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.end_of_file_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_source_file(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_module_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_reference {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_equals_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.export_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.argument {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.qualifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.named_bindings {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_specifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_text(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link_plain(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link_code(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.constraint {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.default_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_parameter_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.this_arg {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_synthetic_reference_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.node_slice(data.js_doc_property_tags)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_parameter_or_property_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+    };
+    (forward, $field:tt) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            self.$field.new_token_data(kind, data)
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_identifier_data(kind, data)
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_private_identifier_data(kind, data)
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_qualified_name_data(kind, data)
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_computed_property_name_data(kind, data)
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            self.$field.new_decorator_data(kind, data)
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_empty_statement_data(kind, data)
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_if_statement_data(kind, data)
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_do_statement_data(kind, data)
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_while_statement_data(kind, data)
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_for_statement_data(kind, data)
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_for_in_or_of_statement_data(kind, data)
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_break_statement_data(kind, data)
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_continue_statement_data(kind, data)
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_return_statement_data(kind, data)
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_with_statement_data(kind, data)
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_switch_statement_data(kind, data)
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_case_block_data(kind, data)
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_case_or_default_clause_data(kind, data)
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_throw_statement_data(kind, data)
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_try_statement_data(kind, data)
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_catch_clause_data(kind, data)
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_debugger_statement_data(kind, data)
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_labeled_statement_data(kind, data)
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_expression_statement_data(kind, data)
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_block_data(kind, data)
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_statement_data(kind, data)
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_declaration_data(kind, data)
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_declaration_list_data(kind, data)
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            self.$field.new_binding_pattern_data(kind, data)
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_parameter_declaration_data(kind, data)
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_binding_element_data(kind, data)
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_missing_declaration_data(kind, data)
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_declaration_data(kind, data)
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_class_declaration_data(kind, data)
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_class_expression_data(kind, data)
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_heritage_clause_data(kind, data)
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_interface_declaration_data(kind, data)
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_alias_declaration_data(kind, data)
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            self.$field.new_enum_member_data(kind, data)
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_enum_declaration_data(kind, data)
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_module_block_data(kind, data)
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_not_emitted_statement_data(kind, data)
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_not_emitted_type_element_data(kind, data)
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_declaration_data(kind, data)
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            self.$field.new_external_module_reference_data(kind, data)
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            self.$field.new_namespace_import_data(kind, data)
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_imports_data(kind, data)
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_assignment_data(kind, data)
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_namespace_export_declaration_data(kind, data)
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            self.$field.new_namespace_export_data(kind, data)
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_exports_data(kind, data)
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_specifier_data(kind, data)
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_call_signature_declaration_data(kind, data)
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_construct_signature_declaration_data(kind, data)
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_constructor_declaration_data(kind, data)
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_get_accessor_declaration_data(kind, data)
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_set_accessor_declaration_data(kind, data)
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_index_signature_declaration_data(kind, data)
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_method_signature_declaration_data(kind, data)
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_method_declaration_data(kind, data)
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_property_signature_declaration_data(kind, data)
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_declaration_data(kind, data)
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_semicolon_class_element_data(kind, data)
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_class_static_block_declaration_data(kind, data)
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_omitted_expression_data(kind, data)
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_keyword_expression_data(kind, data)
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_string_literal_data(kind, data)
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_numeric_literal_data(kind, data)
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_big_int_literal_data(kind, data)
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_regular_expression_literal_data(kind, data)
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_no_substitution_template_literal_data(kind, data)
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_binary_expression_data(kind, data)
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_prefix_unary_expression_data(kind, data)
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_postfix_unary_expression_data(kind, data)
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_yield_expression_data(kind, data)
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            self.$field.new_arrow_function_data(kind, data)
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_expression_data(kind, data)
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_as_expression_data(kind, data)
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_satisfies_expression_data(kind, data)
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_conditional_expression_data(kind, data)
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_access_expression_data(kind, data)
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_element_access_expression_data(kind, data)
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_call_expression_data(kind, data)
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_new_expression_data(kind, data)
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            self.$field.new_meta_property_data(kind, data)
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_non_null_expression_data(kind, data)
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_spread_element_data(kind, data)
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_expression_data(kind, data)
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_span_data(kind, data)
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_tagged_template_expression_data(kind, data)
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_parenthesized_expression_data(kind, data)
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_array_literal_expression_data(kind, data)
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_object_literal_expression_data(kind, data)
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_spread_assignment_data(kind, data)
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_assignment_data(kind, data)
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_shorthand_property_assignment_data(kind, data)
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_delete_expression_data(kind, data)
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_of_expression_data(kind, data)
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_void_expression_data(kind, data)
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_await_expression_data(kind, data)
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_assertion_data(kind, data)
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_keyword_type_node_data(kind, data)
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_union_type_node_data(kind, data)
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_intersection_type_node_data(kind, data)
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_conditional_type_node_data(kind, data)
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_operator_node_data(kind, data)
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_infer_type_node_data(kind, data)
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_array_type_node_data(kind, data)
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_indexed_access_type_node_data(kind, data)
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_reference_node_data(kind, data)
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_expression_with_type_arguments_data(kind, data)
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_literal_type_node_data(kind, data)
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_this_type_node_data(kind, data)
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_predicate_node_data(kind, data)
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_attribute_data(kind, data)
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_attributes_data(kind, data)
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_query_node_data(kind, data)
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_mapped_type_node_data(kind, data)
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_literal_node_data(kind, data)
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_tuple_type_node_data(kind, data)
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_tuple_member_data(kind, data)
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_optional_type_node_data(kind, data)
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_rest_type_node_data(kind, data)
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_parenthesized_type_node_data(kind, data)
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_type_node_data(kind, data)
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_constructor_type_node_data(kind, data)
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_head_data(kind, data)
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_middle_data(kind, data)
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_tail_data(kind, data)
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_literal_type_node_data(kind, data)
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_literal_type_span_data(kind, data)
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_synthetic_expression_data(kind, data)
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_partially_emitted_expression_data(kind, data)
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_element_data(kind, data)
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_attributes_data(kind, data)
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_namespaced_name_data(kind, data)
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_opening_element_data(kind, data)
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_self_closing_element_data(kind, data)
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_fragment_data(kind, data)
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_opening_fragment_data(kind, data)
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_closing_fragment_data(kind, data)
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_attribute_data(kind, data)
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_spread_attribute_data(kind, data)
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_closing_element_data(kind, data)
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_expression_data(kind, data)
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_text_data(kind, data)
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            self.$field.new_syntax_list_data(kind, data)
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_data(kind, data)
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_expression_data(kind, data)
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_non_nullable_type_data(kind, data)
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_nullable_type_data(kind, data)
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_all_type_data(kind, data)
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_variadic_type_data(kind, data)
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_optional_type_data(kind, data)
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_tag_data(kind, data)
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_unknown_tag_data(kind, data)
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_template_tag_data(kind, data)
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_return_tag_data(kind, data)
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_public_tag_data(kind, data)
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_private_tag_data(kind, data)
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_protected_tag_data(kind, data)
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_readonly_tag_data(kind, data)
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_override_tag_data(kind, data)
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_deprecated_tag_data(kind, data)
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_see_tag_data(kind, data)
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_implements_tag_data(kind, data)
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_augments_tag_data(kind, data)
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_satisfies_tag_data(kind, data)
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_throws_tag_data(kind, data)
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_this_tag_data(kind, data)
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_import_tag_data(kind, data)
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_callback_tag_data(kind, data)
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_overload_tag_data(kind, data)
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_typedef_tag_data(kind, data)
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_signature_data(kind, data)
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_name_reference_data(kind, data)
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            self.$field.new_source_file_data(kind, data)
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_module_declaration_data(kind, data)
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_equals_declaration_data(kind, data)
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_declaration_data(kind, data)
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_type_node_data(kind, data)
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_clause_data(kind, data)
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_specifier_data(kind, data)
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_text_data(kind, data)
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_data(kind, data)
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_plain_data(kind, data)
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_code_data(kind, data)
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_parameter_declaration_data(kind, data)
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_synthetic_reference_expression_data(kind, data)
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_literal_data(kind, data)
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_js_doc_parameter_or_property_tag_data(kind, data)
+        }
+    };
+}
+pub(crate) use factory_construction_methods;
+
 #[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.
 use crate::*;
 
@@ -11,7 +6760,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewToken
     fn new_token(&mut self, kind: NodeKind) -> NodeId {
         let data = TokenData {};
-        self.new_node(kind, data.into())
+        self.new_token_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:Token.Clone
     fn clone_token(&mut self, original_id: NodeId) -> NodeId {
@@ -28,7 +6777,7 @@ pub trait FactoryMethods: Factory {
     fn new_identifier(&mut self, text: JsString) -> NodeId {
         let data = IdentifierData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::Identifier.into(), data.into())
+        self.new_identifier_data(SyntaxKind::Identifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:Identifier.Clone
     fn clone_identifier(&mut self, original_id: NodeId) -> NodeId {
@@ -45,7 +6794,7 @@ pub trait FactoryMethods: Factory {
     fn new_private_identifier(&mut self, text: JsString) -> NodeId {
         let data = PrivateIdentifierData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::PrivateIdentifier.into(), data.into())
+        self.new_private_identifier_data(SyntaxKind::PrivateIdentifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:PrivateIdentifier.Clone
     fn clone_private_identifier(&mut self, original_id: NodeId) -> NodeId {
@@ -61,7 +6810,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewQualifiedName
     fn new_qualified_name(&mut self, left: Option<NodeId>, right: Option<NodeId>) -> NodeId {
         let data = QualifiedNameData { left, right };
-        self.new_node(SyntaxKind::QualifiedName.into(), data.into())
+        self.new_qualified_name_data(SyntaxKind::QualifiedName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateQualifiedName
     fn update_qualified_name(
@@ -96,7 +6845,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewComputedPropertyName
     fn new_computed_property_name(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ComputedPropertyNameData { expression };
-        self.new_node(SyntaxKind::ComputedPropertyName.into(), data.into())
+        self.new_computed_property_name_data(SyntaxKind::ComputedPropertyName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateComputedPropertyName
     fn update_computed_property_name(
@@ -129,7 +6878,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDecorator
     fn new_decorator(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = DecoratorData { expression };
-        self.new_node(SyntaxKind::Decorator.into(), data.into())
+        self.new_decorator_data(SyntaxKind::Decorator.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDecorator
     fn update_decorator(&mut self, original_id: NodeId, expression: Option<NodeId>) -> NodeId {
@@ -158,7 +6907,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewEmptyStatement
     fn new_empty_statement(&mut self) -> NodeId {
         let data = EmptyStatementData {};
-        self.new_node(SyntaxKind::EmptyStatement.into(), data.into())
+        self.new_empty_statement_data(SyntaxKind::EmptyStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:EmptyStatement.Clone
     fn clone_empty_statement(&mut self, original_id: NodeId) -> NodeId {
@@ -182,7 +6931,7 @@ pub trait FactoryMethods: Factory {
             then_statement,
             else_statement,
         };
-        self.new_node(SyntaxKind::IfStatement.into(), data.into())
+        self.new_if_statement_data(SyntaxKind::IfStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIfStatement
     fn update_if_statement(
@@ -229,7 +6978,7 @@ pub trait FactoryMethods: Factory {
             statement,
             expression,
         };
-        self.new_node(SyntaxKind::DoStatement.into(), data.into())
+        self.new_do_statement_data(SyntaxKind::DoStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDoStatement
     fn update_do_statement(
@@ -271,7 +7020,7 @@ pub trait FactoryMethods: Factory {
             statement,
             expression,
         };
-        self.new_node(SyntaxKind::WhileStatement.into(), data.into())
+        self.new_while_statement_data(SyntaxKind::WhileStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateWhileStatement
     fn update_while_statement(
@@ -317,7 +7066,7 @@ pub trait FactoryMethods: Factory {
             condition,
             incrementor,
         };
-        self.new_node(SyntaxKind::ForStatement.into(), data.into())
+        self.new_for_statement_data(SyntaxKind::ForStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateForStatement
     fn update_for_statement(
@@ -372,7 +7121,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statement,
         };
-        self.new_node(kind, data.into())
+        self.new_for_in_or_of_statement_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateForInOrOfStatement
     fn update_for_in_or_of_statement(
@@ -429,7 +7178,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewBreakStatement
     fn new_break_statement(&mut self, label: Option<NodeId>) -> NodeId {
         let data = BreakStatementData { label };
-        self.new_node(SyntaxKind::BreakStatement.into(), data.into())
+        self.new_break_statement_data(SyntaxKind::BreakStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBreakStatement
     fn update_break_statement(&mut self, original_id: NodeId, label: Option<NodeId>) -> NodeId {
@@ -458,7 +7207,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewContinueStatement
     fn new_continue_statement(&mut self, label: Option<NodeId>) -> NodeId {
         let data = ContinueStatementData { label };
-        self.new_node(SyntaxKind::ContinueStatement.into(), data.into())
+        self.new_continue_statement_data(SyntaxKind::ContinueStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateContinueStatement
     fn update_continue_statement(&mut self, original_id: NodeId, label: Option<NodeId>) -> NodeId {
@@ -487,7 +7236,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewReturnStatement
     fn new_return_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ReturnStatementData { expression };
-        self.new_node(SyntaxKind::ReturnStatement.into(), data.into())
+        self.new_return_statement_data(SyntaxKind::ReturnStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateReturnStatement
     fn update_return_statement(
@@ -527,7 +7276,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statement,
         };
-        self.new_node(SyntaxKind::WithStatement.into(), data.into())
+        self.new_with_statement_data(SyntaxKind::WithStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateWithStatement
     fn update_with_statement(
@@ -569,7 +7318,7 @@ pub trait FactoryMethods: Factory {
             expression,
             case_block,
         };
-        self.new_node(SyntaxKind::SwitchStatement.into(), data.into())
+        self.new_switch_statement_data(SyntaxKind::SwitchStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSwitchStatement
     fn update_switch_statement(
@@ -604,7 +7353,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewCaseBlock
     fn new_case_block(&mut self, clauses: Option<NodeListId>) -> NodeId {
         let data = CaseBlockData { clauses };
-        self.new_node(SyntaxKind::CaseBlock.into(), data.into())
+        self.new_case_block_data(SyntaxKind::CaseBlock.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCaseBlock
     fn update_case_block(&mut self, original_id: NodeId, clauses: Option<NodeListId>) -> NodeId {
@@ -641,7 +7390,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statements,
         };
-        self.new_node(kind, data.into())
+        self.new_case_or_default_clause_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCaseOrDefaultClause
     fn update_case_or_default_clause(
@@ -678,7 +7427,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewThrowStatement
     fn new_throw_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ThrowStatementData { expression };
-        self.new_node(SyntaxKind::ThrowStatement.into(), data.into())
+        self.new_throw_statement_data(SyntaxKind::ThrowStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateThrowStatement
     fn update_throw_statement(
@@ -720,7 +7469,7 @@ pub trait FactoryMethods: Factory {
             catch_clause,
             finally_block,
         };
-        self.new_node(SyntaxKind::TryStatement.into(), data.into())
+        self.new_try_statement_data(SyntaxKind::TryStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTryStatement
     fn update_try_statement(
@@ -767,7 +7516,7 @@ pub trait FactoryMethods: Factory {
             variable_declaration,
             block,
         };
-        self.new_node(SyntaxKind::CatchClause.into(), data.into())
+        self.new_catch_clause_data(SyntaxKind::CatchClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCatchClause
     fn update_catch_clause(
@@ -802,7 +7551,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDebuggerStatement
     fn new_debugger_statement(&mut self) -> NodeId {
         let data = DebuggerStatementData {};
-        self.new_node(SyntaxKind::DebuggerStatement.into(), data.into())
+        self.new_debugger_statement_data(SyntaxKind::DebuggerStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:DebuggerStatement.Clone
     fn clone_debugger_statement(&mut self, original_id: NodeId) -> NodeId {
@@ -821,7 +7570,7 @@ pub trait FactoryMethods: Factory {
         statement: Option<NodeId>,
     ) -> NodeId {
         let data = LabeledStatementData { label, statement };
-        self.new_node(SyntaxKind::LabeledStatement.into(), data.into())
+        self.new_labeled_statement_data(SyntaxKind::LabeledStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateLabeledStatement
     fn update_labeled_statement(
@@ -856,7 +7605,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewExpressionStatement
     fn new_expression_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ExpressionStatementData { expression };
-        self.new_node(SyntaxKind::ExpressionStatement.into(), data.into())
+        self.new_expression_statement_data(SyntaxKind::ExpressionStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExpressionStatement
     fn update_expression_statement(
@@ -892,7 +7641,7 @@ pub trait FactoryMethods: Factory {
             statements,
             multi_line,
         };
-        self.new_node(SyntaxKind::Block.into(), data.into())
+        self.new_block_data(SyntaxKind::Block.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBlock
     fn update_block(
@@ -934,7 +7683,7 @@ pub trait FactoryMethods: Factory {
             modifiers,
             declaration_list,
         };
-        self.new_node(SyntaxKind::VariableStatement.into(), data.into())
+        self.new_variable_statement_data(SyntaxKind::VariableStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVariableStatement
     fn update_variable_statement(
@@ -980,7 +7729,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::VariableDeclaration.into(), data.into())
+        self.new_variable_declaration_data(SyntaxKind::VariableDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVariableDeclaration
     fn update_variable_declaration(
@@ -1027,7 +7776,8 @@ pub trait FactoryMethods: Factory {
         flags: u32,
     ) -> NodeId {
         let data = VariableDeclarationListData { declarations };
-        let created = self.new_node(SyntaxKind::VariableDeclarationList.into(), data.into());
+        let created = self
+            .new_variable_declaration_list_data(SyntaxKind::VariableDeclarationList.into(), data);
         self.set_node_flags(created, flags);
         created
     }
@@ -1064,7 +7814,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewBindingPattern
     fn new_binding_pattern(&mut self, kind: NodeKind, elements: Option<NodeListId>) -> NodeId {
         let data = BindingPatternData { elements };
-        self.new_node(kind, data.into())
+        self.new_binding_pattern_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBindingPattern
     fn update_binding_pattern(
@@ -1114,7 +7864,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::Parameter.into(), data.into())
+        self.new_parameter_declaration_data(SyntaxKind::Parameter.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParameterDeclaration
     fn update_parameter_declaration(
@@ -1188,7 +7938,7 @@ pub trait FactoryMethods: Factory {
             name,
             initializer,
         };
-        self.new_node(SyntaxKind::BindingElement.into(), data.into())
+        self.new_binding_element_data(SyntaxKind::BindingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBindingElement
     fn update_binding_element(
@@ -1231,7 +7981,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewMissingDeclaration
     fn new_missing_declaration(&mut self, modifiers: Option<NodeListId>) -> NodeId {
         let data = MissingDeclarationData { modifiers };
-        self.new_node(SyntaxKind::MissingDeclaration.into(), data.into())
+        self.new_missing_declaration_data(SyntaxKind::MissingDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMissingDeclaration
     fn update_missing_declaration(
@@ -1283,7 +8033,7 @@ pub trait FactoryMethods: Factory {
             body,
             name,
         };
-        self.new_node(SyntaxKind::FunctionDeclaration.into(), data.into())
+        self.new_function_declaration_data(SyntaxKind::FunctionDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionDeclaration
     fn update_function_declaration(
@@ -1369,7 +8119,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::ClassDeclaration.into(), data.into())
+        self.new_class_declaration_data(SyntaxKind::ClassDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassDeclaration
     fn update_class_declaration(
@@ -1430,7 +8180,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::ClassExpression.into(), data.into())
+        self.new_class_expression_data(SyntaxKind::ClassExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassExpression
     fn update_class_expression(
@@ -1478,7 +8228,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewHeritageClause
     fn new_heritage_clause(&mut self, token: NodeKind, types: Option<NodeListId>) -> NodeId {
         let data = HeritageClauseData { token, types };
-        self.new_node(SyntaxKind::HeritageClause.into(), data.into())
+        self.new_heritage_clause_data(SyntaxKind::HeritageClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateHeritageClause
     fn update_heritage_clause(
@@ -1526,7 +8276,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::InterfaceDeclaration.into(), data.into())
+        self.new_interface_declaration_data(SyntaxKind::InterfaceDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateInterfaceDeclaration
     fn update_interface_declaration(
@@ -1595,7 +8345,7 @@ pub trait FactoryMethods: Factory {
             type_parameters,
             r#type,
         };
-        self.new_node(SyntaxKind::TypeAliasDeclaration.into(), data.into())
+        self.new_type_alias_declaration_data(SyntaxKind::TypeAliasDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSTypeAliasDeclaration
     fn new_js_type_alias_declaration(
@@ -1611,7 +8361,7 @@ pub trait FactoryMethods: Factory {
             type_parameters,
             r#type,
         };
-        self.new_node(SyntaxKind::JSTypeAliasDeclaration.into(), data.into())
+        self.new_type_alias_declaration_data(SyntaxKind::JSTypeAliasDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeAliasDeclaration
     fn update_type_alias_declaration(
@@ -1683,7 +8433,7 @@ pub trait FactoryMethods: Factory {
             postfix_token: None,
             initializer,
         };
-        self.new_node(SyntaxKind::EnumMember.into(), data.into())
+        self.new_enum_member_data(SyntaxKind::EnumMember.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateEnumMember
     fn update_enum_member(
@@ -1727,7 +8477,7 @@ pub trait FactoryMethods: Factory {
             name,
             members,
         };
-        self.new_node(SyntaxKind::EnumDeclaration.into(), data.into())
+        self.new_enum_declaration_data(SyntaxKind::EnumDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateEnumDeclaration
     fn update_enum_declaration(
@@ -1764,7 +8514,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewModuleBlock
     fn new_module_block(&mut self, statements: Option<NodeListId>) -> NodeId {
         let data = ModuleBlockData { statements };
-        self.new_node(SyntaxKind::ModuleBlock.into(), data.into())
+        self.new_module_block_data(SyntaxKind::ModuleBlock.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateModuleBlock
     fn update_module_block(
@@ -1797,7 +8547,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNotEmittedStatement
     fn new_not_emitted_statement(&mut self) -> NodeId {
         let data = NotEmittedStatementData {};
-        self.new_node(SyntaxKind::NotEmittedStatement.into(), data.into())
+        self.new_not_emitted_statement_data(SyntaxKind::NotEmittedStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NotEmittedStatement.Clone
     fn clone_not_emitted_statement(&mut self, original_id: NodeId) -> NodeId {
@@ -1812,7 +8562,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNotEmittedTypeElement
     fn new_not_emitted_type_element(&mut self) -> NodeId {
         let data = NotEmittedTypeElementData {};
-        self.new_node(SyntaxKind::NotEmittedTypeElement.into(), data.into())
+        self.new_not_emitted_type_element_data(SyntaxKind::NotEmittedTypeElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NotEmittedTypeElement.Clone
     fn clone_not_emitted_type_element(&mut self, original_id: NodeId) -> NodeId {
@@ -1838,7 +8588,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::ImportDeclaration.into(), data.into())
+        self.new_import_declaration_data(SyntaxKind::ImportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSImportDeclaration
     fn new_js_import_declaration(
@@ -1854,7 +8604,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::JSImportDeclaration.into(), data.into())
+        self.new_import_declaration_data(SyntaxKind::JSImportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportDeclaration
     fn update_import_declaration(
@@ -1927,7 +8677,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewExternalModuleReference
     fn new_external_module_reference(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ExternalModuleReferenceData { expression };
-        self.new_node(SyntaxKind::ExternalModuleReference.into(), data.into())
+        self.new_external_module_reference_data(SyntaxKind::ExternalModuleReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExternalModuleReference
     fn update_external_module_reference(
@@ -1960,7 +8710,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamespaceImport
     fn new_namespace_import(&mut self, name: Option<NodeId>) -> NodeId {
         let data = NamespaceImportData { name };
-        self.new_node(SyntaxKind::NamespaceImport.into(), data.into())
+        self.new_namespace_import_data(SyntaxKind::NamespaceImport.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceImport
     fn update_namespace_import(&mut self, original_id: NodeId, name: Option<NodeId>) -> NodeId {
@@ -1989,7 +8739,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamedImports
     fn new_named_imports(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = NamedImportsData { elements };
-        self.new_node(SyntaxKind::NamedImports.into(), data.into())
+        self.new_named_imports_data(SyntaxKind::NamedImports.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedImports
     fn update_named_imports(
@@ -2033,7 +8783,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             expression,
         };
-        self.new_node(SyntaxKind::ExportAssignment.into(), data.into())
+        self.new_export_assignment_data(SyntaxKind::ExportAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportAssignment
     fn update_export_assignment(
@@ -2080,7 +8830,10 @@ pub trait FactoryMethods: Factory {
         name: Option<NodeId>,
     ) -> NodeId {
         let data = NamespaceExportDeclarationData { modifiers, name };
-        self.new_node(SyntaxKind::NamespaceExportDeclaration.into(), data.into())
+        self.new_namespace_export_declaration_data(
+            SyntaxKind::NamespaceExportDeclaration.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceExportDeclaration
     fn update_namespace_export_declaration(
@@ -2115,7 +8868,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamespaceExport
     fn new_namespace_export(&mut self, name: Option<NodeId>) -> NodeId {
         let data = NamespaceExportData { name };
-        self.new_node(SyntaxKind::NamespaceExport.into(), data.into())
+        self.new_namespace_export_data(SyntaxKind::NamespaceExport.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceExport
     fn update_namespace_export(&mut self, original_id: NodeId, name: Option<NodeId>) -> NodeId {
@@ -2144,7 +8897,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamedExports
     fn new_named_exports(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = NamedExportsData { elements };
-        self.new_node(SyntaxKind::NamedExports.into(), data.into())
+        self.new_named_exports_data(SyntaxKind::NamedExports.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedExports
     fn update_named_exports(
@@ -2186,7 +8939,7 @@ pub trait FactoryMethods: Factory {
             property_name,
             name,
         };
-        self.new_node(SyntaxKind::ExportSpecifier.into(), data.into())
+        self.new_export_specifier_data(SyntaxKind::ExportSpecifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportSpecifier
     fn update_export_specifier(
@@ -2236,7 +8989,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::CallSignature.into(), data.into())
+        self.new_call_signature_declaration_data(SyntaxKind::CallSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCallSignatureDeclaration
     fn update_call_signature_declaration(
@@ -2286,7 +9039,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::ConstructSignature.into(), data.into())
+        self.new_construct_signature_declaration_data(SyntaxKind::ConstructSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructSignatureDeclaration
     fn update_construct_signature_declaration(
@@ -2342,7 +9095,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::Constructor.into(), data.into())
+        self.new_constructor_declaration_data(SyntaxKind::Constructor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructorDeclaration
     fn update_constructor_declaration(
@@ -2424,7 +9177,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::GetAccessor.into(), data.into())
+        self.new_get_accessor_declaration_data(SyntaxKind::GetAccessor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateGetAccessorDeclaration
     fn update_get_accessor_declaration(
@@ -2511,7 +9264,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::SetAccessor.into(), data.into())
+        self.new_set_accessor_declaration_data(SyntaxKind::SetAccessor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSetAccessorDeclaration
     fn update_set_accessor_declaration(
@@ -2590,7 +9343,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::IndexSignature.into(), data.into())
+        self.new_index_signature_declaration_data(SyntaxKind::IndexSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIndexSignatureDeclaration
     fn update_index_signature_declaration(
@@ -2646,7 +9399,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::MethodSignature.into(), data.into())
+        self.new_method_signature_declaration_data(SyntaxKind::MethodSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMethodSignatureDeclaration
     fn update_method_signature_declaration(
@@ -2730,7 +9483,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token,
             body,
         };
-        self.new_node(SyntaxKind::MethodDeclaration.into(), data.into())
+        self.new_method_declaration_data(SyntaxKind::MethodDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMethodDeclaration
     fn update_method_declaration(
@@ -2821,7 +9574,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertySignature.into(), data.into())
+        self.new_property_signature_declaration_data(SyntaxKind::PropertySignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertySignatureDeclaration
     fn update_property_signature_declaration(
@@ -2892,7 +9645,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertyDeclaration.into(), data.into())
+        self.new_property_declaration_data(SyntaxKind::PropertyDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertyDeclaration
     fn update_property_declaration(
@@ -2940,7 +9693,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSemicolonClassElement
     fn new_semicolon_class_element(&mut self) -> NodeId {
         let data = SemicolonClassElementData {};
-        self.new_node(SyntaxKind::SemicolonClassElement.into(), data.into())
+        self.new_semicolon_class_element_data(SyntaxKind::SemicolonClassElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:SemicolonClassElement.Clone
     fn clone_semicolon_class_element(&mut self, original_id: NodeId) -> NodeId {
@@ -2959,7 +9712,10 @@ pub trait FactoryMethods: Factory {
         body: Option<NodeId>,
     ) -> NodeId {
         let data = ClassStaticBlockDeclarationData { modifiers, body };
-        self.new_node(SyntaxKind::ClassStaticBlockDeclaration.into(), data.into())
+        self.new_class_static_block_declaration_data(
+            SyntaxKind::ClassStaticBlockDeclaration.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassStaticBlockDeclaration
     fn update_class_static_block_declaration(
@@ -2994,7 +9750,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewOmittedExpression
     fn new_omitted_expression(&mut self) -> NodeId {
         let data = OmittedExpressionData {};
-        self.new_node(SyntaxKind::OmittedExpression.into(), data.into())
+        self.new_omitted_expression_data(SyntaxKind::OmittedExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:OmittedExpression.Clone
     fn clone_omitted_expression(&mut self, original_id: NodeId) -> NodeId {
@@ -3009,7 +9765,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewKeywordExpression
     fn new_keyword_expression(&mut self, kind: NodeKind) -> NodeId {
         let data = KeywordExpressionData {};
-        self.new_node(kind, data.into())
+        self.new_keyword_expression_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:KeywordExpression.Clone
     fn clone_keyword_expression(&mut self, original_id: NodeId) -> NodeId {
@@ -3029,7 +9785,7 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::STRING_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::StringLiteral.into(), data.into())
+        self.new_string_literal_data(SyntaxKind::StringLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:StringLiteral.Clone
     fn clone_string_literal(&mut self, original_id: NodeId) -> NodeId {
@@ -3050,7 +9806,7 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::NUMERIC_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::NumericLiteral.into(), data.into())
+        self.new_numeric_literal_data(SyntaxKind::NumericLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NumericLiteral.Clone
     fn clone_numeric_literal(&mut self, original_id: NodeId) -> NodeId {
@@ -3071,7 +9827,7 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::NUMERIC_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::BigIntLiteral.into(), data.into())
+        self.new_big_int_literal_data(SyntaxKind::BigIntLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:BigIntLiteral.Clone
     fn clone_big_int_literal(&mut self, original_id: NodeId) -> NodeId {
@@ -3092,7 +9848,7 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::REGULAR_EXPRESSION_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::RegularExpressionLiteral.into(), data.into())
+        self.new_regular_expression_literal_data(SyntaxKind::RegularExpressionLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:RegularExpressionLiteral.Clone
     fn clone_regular_expression_literal(&mut self, original_id: NodeId) -> NodeId {
@@ -3119,9 +9875,9 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(
+        self.new_no_substitution_template_literal_data(
             SyntaxKind::NoSubstitutionTemplateLiteral.into(),
-            data.into(),
+            data,
         )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NoSubstitutionTemplateLiteral.Clone
@@ -3152,7 +9908,7 @@ pub trait FactoryMethods: Factory {
             operator_token,
             right,
         };
-        self.new_node(SyntaxKind::BinaryExpression.into(), data.into())
+        self.new_binary_expression_data(SyntaxKind::BinaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBinaryExpression
     fn update_binary_expression(
@@ -3202,7 +9958,7 @@ pub trait FactoryMethods: Factory {
         operand: Option<NodeId>,
     ) -> NodeId {
         let data = PrefixUnaryExpressionData { operator, operand };
-        self.new_node(SyntaxKind::PrefixUnaryExpression.into(), data.into())
+        self.new_prefix_unary_expression_data(SyntaxKind::PrefixUnaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePrefixUnaryExpression
     fn update_prefix_unary_expression(
@@ -3241,7 +9997,7 @@ pub trait FactoryMethods: Factory {
         operator: NodeKind,
     ) -> NodeId {
         let data = PostfixUnaryExpressionData { operand, operator };
-        self.new_node(SyntaxKind::PostfixUnaryExpression.into(), data.into())
+        self.new_postfix_unary_expression_data(SyntaxKind::PostfixUnaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePostfixUnaryExpression
     fn update_postfix_unary_expression(
@@ -3283,7 +10039,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token,
             expression,
         };
-        self.new_node(SyntaxKind::YieldExpression.into(), data.into())
+        self.new_yield_expression_data(SyntaxKind::YieldExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateYieldExpression
     fn update_yield_expression(
@@ -3336,7 +10092,7 @@ pub trait FactoryMethods: Factory {
             body,
             equals_greater_than_token,
         };
-        self.new_node(SyntaxKind::ArrowFunction.into(), data.into())
+        self.new_arrow_function_data(SyntaxKind::ArrowFunction.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrowFunction
     fn update_arrow_function(
@@ -3423,7 +10179,7 @@ pub trait FactoryMethods: Factory {
             body,
             name,
         };
-        self.new_node(SyntaxKind::FunctionExpression.into(), data.into())
+        self.new_function_expression_data(SyntaxKind::FunctionExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionExpression
     fn update_function_expression(
@@ -3496,7 +10252,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewAsExpression
     fn new_as_expression(&mut self, expression: Option<NodeId>, r#type: Option<NodeId>) -> NodeId {
         let data = AsExpressionData { expression, r#type };
-        self.new_node(SyntaxKind::AsExpression.into(), data.into())
+        self.new_as_expression_data(SyntaxKind::AsExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateAsExpression
     fn update_as_expression(
@@ -3535,7 +10291,7 @@ pub trait FactoryMethods: Factory {
         r#type: Option<NodeId>,
     ) -> NodeId {
         let data = SatisfiesExpressionData { expression, r#type };
-        self.new_node(SyntaxKind::SatisfiesExpression.into(), data.into())
+        self.new_satisfies_expression_data(SyntaxKind::SatisfiesExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSatisfiesExpression
     fn update_satisfies_expression(
@@ -3583,7 +10339,7 @@ pub trait FactoryMethods: Factory {
             colon_token,
             when_false,
         };
-        self.new_node(SyntaxKind::ConditionalExpression.into(), data.into())
+        self.new_conditional_expression_data(SyntaxKind::ConditionalExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConditionalExpression
     fn update_conditional_expression(
@@ -3651,7 +10407,8 @@ pub trait FactoryMethods: Factory {
             question_dot_token,
             name,
         };
-        let created = self.new_node(SyntaxKind::PropertyAccessExpression.into(), data.into());
+        let created = self
+            .new_property_access_expression_data(SyntaxKind::PropertyAccessExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3710,7 +10467,8 @@ pub trait FactoryMethods: Factory {
             question_dot_token,
             argument_expression,
         };
-        let created = self.new_node(SyntaxKind::ElementAccessExpression.into(), data.into());
+        let created = self
+            .new_element_access_expression_data(SyntaxKind::ElementAccessExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3779,7 +10537,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             arguments,
         };
-        let created = self.new_node(SyntaxKind::CallExpression.into(), data.into());
+        let created = self.new_call_expression_data(SyntaxKind::CallExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3850,7 +10608,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             arguments,
         };
-        self.new_node(SyntaxKind::NewExpression.into(), data.into())
+        self.new_new_expression_data(SyntaxKind::NewExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNewExpression
     fn update_new_expression(
@@ -3893,7 +10651,7 @@ pub trait FactoryMethods: Factory {
             keyword_token,
             name,
         };
-        self.new_node(SyntaxKind::MetaProperty.into(), data.into())
+        self.new_meta_property_data(SyntaxKind::MetaProperty.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMetaProperty
     fn update_meta_property(
@@ -3928,7 +10686,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNonNullExpression
     fn new_non_null_expression(&mut self, expression: Option<NodeId>, flags: u32) -> NodeId {
         let data = NonNullExpressionData { expression };
-        let created = self.new_node(SyntaxKind::NonNullExpression.into(), data.into());
+        let created = self.new_non_null_expression_data(SyntaxKind::NonNullExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3967,7 +10725,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSpreadElement
     fn new_spread_element(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = SpreadElementData { expression };
-        self.new_node(SyntaxKind::SpreadElement.into(), data.into())
+        self.new_spread_element_data(SyntaxKind::SpreadElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSpreadElement
     fn update_spread_element(&mut self, original_id: NodeId, expression: Option<NodeId>) -> NodeId {
@@ -4003,7 +10761,7 @@ pub trait FactoryMethods: Factory {
             head,
             template_spans,
         };
-        self.new_node(SyntaxKind::TemplateExpression.into(), data.into())
+        self.new_template_expression_data(SyntaxKind::TemplateExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateExpression
     fn update_template_expression(
@@ -4041,7 +10799,7 @@ pub trait FactoryMethods: Factory {
             expression,
             literal,
         };
-        self.new_node(SyntaxKind::TemplateSpan.into(), data.into())
+        self.new_template_span_data(SyntaxKind::TemplateSpan.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateSpan
     fn update_template_span(
@@ -4088,7 +10846,8 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             template,
         };
-        let created = self.new_node(SyntaxKind::TaggedTemplateExpression.into(), data.into());
+        let created = self
+            .new_tagged_template_expression_data(SyntaxKind::TaggedTemplateExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -4150,7 +10909,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewParenthesizedExpression
     fn new_parenthesized_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ParenthesizedExpressionData { expression };
-        self.new_node(SyntaxKind::ParenthesizedExpression.into(), data.into())
+        self.new_parenthesized_expression_data(SyntaxKind::ParenthesizedExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParenthesizedExpression
     fn update_parenthesized_expression(
@@ -4190,7 +10949,7 @@ pub trait FactoryMethods: Factory {
             elements,
             multi_line,
         };
-        self.new_node(SyntaxKind::ArrayLiteralExpression.into(), data.into())
+        self.new_array_literal_expression_data(SyntaxKind::ArrayLiteralExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrayLiteralExpression
     fn update_array_literal_expression(
@@ -4232,7 +10991,7 @@ pub trait FactoryMethods: Factory {
             properties,
             multi_line,
         };
-        self.new_node(SyntaxKind::ObjectLiteralExpression.into(), data.into())
+        self.new_object_literal_expression_data(SyntaxKind::ObjectLiteralExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateObjectLiteralExpression
     fn update_object_literal_expression(
@@ -4267,7 +11026,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSpreadAssignment
     fn new_spread_assignment(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = SpreadAssignmentData { expression };
-        self.new_node(SyntaxKind::SpreadAssignment.into(), data.into())
+        self.new_spread_assignment_data(SyntaxKind::SpreadAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSpreadAssignment
     fn update_spread_assignment(
@@ -4313,7 +11072,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertyAssignment.into(), data.into())
+        self.new_property_assignment_data(SyntaxKind::PropertyAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertyAssignment
     fn update_property_assignment(
@@ -4376,7 +11135,10 @@ pub trait FactoryMethods: Factory {
             equals_token,
             object_assignment_initializer,
         };
-        self.new_node(SyntaxKind::ShorthandPropertyAssignment.into(), data.into())
+        self.new_shorthand_property_assignment_data(
+            SyntaxKind::ShorthandPropertyAssignment.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateShorthandPropertyAssignment
     fn update_shorthand_property_assignment(
@@ -4439,7 +11201,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDeleteExpression
     fn new_delete_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = DeleteExpressionData { expression };
-        self.new_node(SyntaxKind::DeleteExpression.into(), data.into())
+        self.new_delete_expression_data(SyntaxKind::DeleteExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDeleteExpression
     fn update_delete_expression(
@@ -4472,7 +11234,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeOfExpression
     fn new_type_of_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = TypeOfExpressionData { expression };
-        self.new_node(SyntaxKind::TypeOfExpression.into(), data.into())
+        self.new_type_of_expression_data(SyntaxKind::TypeOfExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeOfExpression
     fn update_type_of_expression(
@@ -4505,7 +11267,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewVoidExpression
     fn new_void_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = VoidExpressionData { expression };
-        self.new_node(SyntaxKind::VoidExpression.into(), data.into())
+        self.new_void_expression_data(SyntaxKind::VoidExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVoidExpression
     fn update_void_expression(
@@ -4538,7 +11300,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewAwaitExpression
     fn new_await_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = AwaitExpressionData { expression };
-        self.new_node(SyntaxKind::AwaitExpression.into(), data.into())
+        self.new_await_expression_data(SyntaxKind::AwaitExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateAwaitExpression
     fn update_await_expression(
@@ -4571,7 +11333,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeAssertion
     fn new_type_assertion(&mut self, r#type: Option<NodeId>, expression: Option<NodeId>) -> NodeId {
         let data = TypeAssertionData { r#type, expression };
-        self.new_node(SyntaxKind::TypeAssertionExpression.into(), data.into())
+        self.new_type_assertion_data(SyntaxKind::TypeAssertionExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeAssertion
     fn update_type_assertion(
@@ -4606,7 +11368,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewKeywordTypeNode
     fn new_keyword_type_node(&mut self, kind: NodeKind) -> NodeId {
         let data = KeywordTypeNodeData {};
-        self.new_node(kind, data.into())
+        self.new_keyword_type_node_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:KeywordTypeNode.Clone
     fn clone_keyword_type_node(&mut self, original_id: NodeId) -> NodeId {
@@ -4622,7 +11384,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewUnionTypeNode
     fn new_union_type_node(&mut self, types: Option<NodeListId>) -> NodeId {
         let data = UnionTypeNodeData { types };
-        self.new_node(SyntaxKind::UnionType.into(), data.into())
+        self.new_union_type_node_data(SyntaxKind::UnionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateUnionTypeNode
     fn update_union_type_node(&mut self, original_id: NodeId, types: Option<NodeListId>) -> NodeId {
@@ -4651,7 +11413,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewIntersectionTypeNode
     fn new_intersection_type_node(&mut self, types: Option<NodeListId>) -> NodeId {
         let data = IntersectionTypeNodeData { types };
-        self.new_node(SyntaxKind::IntersectionType.into(), data.into())
+        self.new_intersection_type_node_data(SyntaxKind::IntersectionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIntersectionTypeNode
     fn update_intersection_type_node(
@@ -4695,7 +11457,7 @@ pub trait FactoryMethods: Factory {
             true_type,
             false_type,
         };
-        self.new_node(SyntaxKind::ConditionalType.into(), data.into())
+        self.new_conditional_type_node_data(SyntaxKind::ConditionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConditionalTypeNode
     fn update_conditional_type_node(
@@ -4740,7 +11502,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeOperatorNode
     fn new_type_operator_node(&mut self, operator: NodeKind, r#type: Option<NodeId>) -> NodeId {
         let data = TypeOperatorNodeData { operator, r#type };
-        self.new_node(SyntaxKind::TypeOperator.into(), data.into())
+        self.new_type_operator_node_data(SyntaxKind::TypeOperator.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeOperatorNode
     fn update_type_operator_node(
@@ -4775,7 +11537,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewInferTypeNode
     fn new_infer_type_node(&mut self, type_parameter: Option<NodeId>) -> NodeId {
         let data = InferTypeNodeData { type_parameter };
-        self.new_node(SyntaxKind::InferType.into(), data.into())
+        self.new_infer_type_node_data(SyntaxKind::InferType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateInferTypeNode
     fn update_infer_type_node(
@@ -4808,7 +11570,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewArrayTypeNode
     fn new_array_type_node(&mut self, element_type: Option<NodeId>) -> NodeId {
         let data = ArrayTypeNodeData { element_type };
-        self.new_node(SyntaxKind::ArrayType.into(), data.into())
+        self.new_array_type_node_data(SyntaxKind::ArrayType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrayTypeNode
     fn update_array_type_node(
@@ -4848,7 +11610,7 @@ pub trait FactoryMethods: Factory {
             object_type,
             index_type,
         };
-        self.new_node(SyntaxKind::IndexedAccessType.into(), data.into())
+        self.new_indexed_access_type_node_data(SyntaxKind::IndexedAccessType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIndexedAccessTypeNode
     fn update_indexed_access_type_node(
@@ -4890,7 +11652,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             type_name,
         };
-        self.new_node(SyntaxKind::TypeReference.into(), data.into())
+        self.new_type_reference_node_data(SyntaxKind::TypeReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeReferenceNode
     fn update_type_reference_node(
@@ -4932,7 +11694,10 @@ pub trait FactoryMethods: Factory {
             expression,
             type_arguments,
         };
-        self.new_node(SyntaxKind::ExpressionWithTypeArguments.into(), data.into())
+        self.new_expression_with_type_arguments_data(
+            SyntaxKind::ExpressionWithTypeArguments.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExpressionWithTypeArguments
     fn update_expression_with_type_arguments(
@@ -4967,7 +11732,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewLiteralTypeNode
     fn new_literal_type_node(&mut self, literal: Option<NodeId>) -> NodeId {
         let data = LiteralTypeNodeData { literal };
-        self.new_node(SyntaxKind::LiteralType.into(), data.into())
+        self.new_literal_type_node_data(SyntaxKind::LiteralType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateLiteralTypeNode
     fn update_literal_type_node(&mut self, original_id: NodeId, literal: Option<NodeId>) -> NodeId {
@@ -4996,7 +11761,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewThisTypeNode
     fn new_this_type_node(&mut self) -> NodeId {
         let data = ThisTypeNodeData {};
-        self.new_node(SyntaxKind::ThisType.into(), data.into())
+        self.new_this_type_node_data(SyntaxKind::ThisType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:ThisTypeNode.Clone
     fn clone_this_type_node(&mut self, original_id: NodeId) -> NodeId {
@@ -5020,7 +11785,7 @@ pub trait FactoryMethods: Factory {
             parameter_name,
             r#type,
         };
-        self.new_node(SyntaxKind::TypePredicate.into(), data.into())
+        self.new_type_predicate_node_data(SyntaxKind::TypePredicate.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypePredicateNode
     fn update_type_predicate_node(
@@ -5060,7 +11825,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewImportAttribute
     fn new_import_attribute(&mut self, name: Option<NodeId>, value: Option<NodeId>) -> NodeId {
         let data = ImportAttributeData { name, value };
-        self.new_node(SyntaxKind::ImportAttribute.into(), data.into())
+        self.new_import_attribute_data(SyntaxKind::ImportAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportAttribute
     fn update_import_attribute(
@@ -5104,7 +11869,7 @@ pub trait FactoryMethods: Factory {
             attributes,
             multi_line,
         };
-        self.new_node(SyntaxKind::ImportAttributes.into(), data.into())
+        self.new_import_attributes_data(SyntaxKind::ImportAttributes.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportAttributes
     fn update_import_attributes(
@@ -5151,7 +11916,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             expr_name,
         };
-        self.new_node(SyntaxKind::TypeQuery.into(), data.into())
+        self.new_type_query_node_data(SyntaxKind::TypeQuery.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeQueryNode
     fn update_type_query_node(
@@ -5201,7 +11966,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             members,
         };
-        self.new_node(SyntaxKind::MappedType.into(), data.into())
+        self.new_mapped_type_node_data(SyntaxKind::MappedType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMappedTypeNode
     fn update_mapped_type_node(
@@ -5264,7 +12029,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeLiteralNode
     fn new_type_literal_node(&mut self, members: Option<NodeListId>) -> NodeId {
         let data = TypeLiteralNodeData { members };
-        self.new_node(SyntaxKind::TypeLiteral.into(), data.into())
+        self.new_type_literal_node_data(SyntaxKind::TypeLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeLiteralNode
     fn update_type_literal_node(
@@ -5297,7 +12062,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTupleTypeNode
     fn new_tuple_type_node(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = TupleTypeNodeData { elements };
-        self.new_node(SyntaxKind::TupleType.into(), data.into())
+        self.new_tuple_type_node_data(SyntaxKind::TupleType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTupleTypeNode
     fn update_tuple_type_node(
@@ -5341,7 +12106,7 @@ pub trait FactoryMethods: Factory {
             question_token,
             r#type,
         };
-        self.new_node(SyntaxKind::NamedTupleMember.into(), data.into())
+        self.new_named_tuple_member_data(SyntaxKind::NamedTupleMember.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedTupleMember
     fn update_named_tuple_member(
@@ -5384,7 +12149,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewOptionalTypeNode
     fn new_optional_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = OptionalTypeNodeData { r#type };
-        self.new_node(SyntaxKind::OptionalType.into(), data.into())
+        self.new_optional_type_node_data(SyntaxKind::OptionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateOptionalTypeNode
     fn update_optional_type_node(&mut self, original_id: NodeId, r#type: Option<NodeId>) -> NodeId {
@@ -5413,7 +12178,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewRestTypeNode
     fn new_rest_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = RestTypeNodeData { r#type };
-        self.new_node(SyntaxKind::RestType.into(), data.into())
+        self.new_rest_type_node_data(SyntaxKind::RestType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateRestTypeNode
     fn update_rest_type_node(&mut self, original_id: NodeId, r#type: Option<NodeId>) -> NodeId {
@@ -5442,7 +12207,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewParenthesizedTypeNode
     fn new_parenthesized_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = ParenthesizedTypeNodeData { r#type };
-        self.new_node(SyntaxKind::ParenthesizedType.into(), data.into())
+        self.new_parenthesized_type_node_data(SyntaxKind::ParenthesizedType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParenthesizedTypeNode
     fn update_parenthesized_type_node(
@@ -5486,7 +12251,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::FunctionType.into(), data.into())
+        self.new_function_type_node_data(SyntaxKind::FunctionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionTypeNode
     fn update_function_type_node(
@@ -5538,7 +12303,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::ConstructorType.into(), data.into())
+        self.new_constructor_type_node_data(SyntaxKind::ConstructorType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructorTypeNode
     fn update_constructor_type_node(
@@ -5594,7 +12359,7 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateHead.into(), data.into())
+        self.new_template_head_data(SyntaxKind::TemplateHead.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateHead.Clone
     fn clone_template_head(&mut self, original_id: NodeId) -> NodeId {
@@ -5623,7 +12388,7 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateMiddle.into(), data.into())
+        self.new_template_middle_data(SyntaxKind::TemplateMiddle.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateMiddle.Clone
     fn clone_template_middle(&mut self, original_id: NodeId) -> NodeId {
@@ -5652,7 +12417,7 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateTail.into(), data.into())
+        self.new_template_tail_data(SyntaxKind::TemplateTail.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateTail.Clone
     fn clone_template_tail(&mut self, original_id: NodeId) -> NodeId {
@@ -5677,7 +12442,7 @@ pub trait FactoryMethods: Factory {
             head,
             template_spans,
         };
-        self.new_node(SyntaxKind::TemplateLiteralType.into(), data.into())
+        self.new_template_literal_type_node_data(SyntaxKind::TemplateLiteralType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateLiteralTypeNode
     fn update_template_literal_type_node(
@@ -5716,7 +12481,7 @@ pub trait FactoryMethods: Factory {
         literal: Option<NodeId>,
     ) -> NodeId {
         let data = TemplateLiteralTypeSpanData { r#type, literal };
-        self.new_node(SyntaxKind::TemplateLiteralTypeSpan.into(), data.into())
+        self.new_template_literal_type_span_data(SyntaxKind::TemplateLiteralTypeSpan.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateLiteralTypeSpan
     fn update_template_literal_type_span(
@@ -5751,7 +12516,10 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewPartiallyEmittedExpression
     fn new_partially_emitted_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = PartiallyEmittedExpressionData { expression };
-        self.new_node(SyntaxKind::PartiallyEmittedExpression.into(), data.into())
+        self.new_partially_emitted_expression_data(
+            SyntaxKind::PartiallyEmittedExpression.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePartiallyEmittedExpression
     fn update_partially_emitted_expression(
@@ -5793,7 +12561,7 @@ pub trait FactoryMethods: Factory {
             children,
             closing_element,
         };
-        self.new_node(SyntaxKind::JsxElement.into(), data.into())
+        self.new_jsx_element_data(SyntaxKind::JsxElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxElement
     fn update_jsx_element(
@@ -5833,7 +12601,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxAttributes
     fn new_jsx_attributes(&mut self, properties: Option<NodeListId>) -> NodeId {
         let data = JsxAttributesData { properties };
-        self.new_node(SyntaxKind::JsxAttributes.into(), data.into())
+        self.new_jsx_attributes_data(SyntaxKind::JsxAttributes.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxAttributes
     fn update_jsx_attributes(
@@ -5870,7 +12638,7 @@ pub trait FactoryMethods: Factory {
         name: Option<NodeId>,
     ) -> NodeId {
         let data = JsxNamespacedNameData { namespace, name };
-        self.new_node(SyntaxKind::JsxNamespacedName.into(), data.into())
+        self.new_jsx_namespaced_name_data(SyntaxKind::JsxNamespacedName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxNamespacedName
     fn update_jsx_namespaced_name(
@@ -5914,7 +12682,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             attributes,
         };
-        self.new_node(SyntaxKind::JsxOpeningElement.into(), data.into())
+        self.new_jsx_opening_element_data(SyntaxKind::JsxOpeningElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxOpeningElement
     fn update_jsx_opening_element(
@@ -5963,7 +12731,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             attributes,
         };
-        self.new_node(SyntaxKind::JsxSelfClosingElement.into(), data.into())
+        self.new_jsx_self_closing_element_data(SyntaxKind::JsxSelfClosingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxSelfClosingElement
     fn update_jsx_self_closing_element(
@@ -6012,7 +12780,7 @@ pub trait FactoryMethods: Factory {
             children,
             closing_fragment,
         };
-        self.new_node(SyntaxKind::JsxFragment.into(), data.into())
+        self.new_jsx_fragment_data(SyntaxKind::JsxFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxFragment
     fn update_jsx_fragment(
@@ -6052,7 +12820,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxOpeningFragment
     fn new_jsx_opening_fragment(&mut self) -> NodeId {
         let data = JsxOpeningFragmentData {};
-        self.new_node(SyntaxKind::JsxOpeningFragment.into(), data.into())
+        self.new_jsx_opening_fragment_data(SyntaxKind::JsxOpeningFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxOpeningFragment.Clone
     fn clone_jsx_opening_fragment(&mut self, original_id: NodeId) -> NodeId {
@@ -6067,7 +12835,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxClosingFragment
     fn new_jsx_closing_fragment(&mut self) -> NodeId {
         let data = JsxClosingFragmentData {};
-        self.new_node(SyntaxKind::JsxClosingFragment.into(), data.into())
+        self.new_jsx_closing_fragment_data(SyntaxKind::JsxClosingFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxClosingFragment.Clone
     fn clone_jsx_closing_fragment(&mut self, original_id: NodeId) -> NodeId {
@@ -6082,7 +12850,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxAttribute
     fn new_jsx_attribute(&mut self, name: Option<NodeId>, initializer: Option<NodeId>) -> NodeId {
         let data = JsxAttributeData { name, initializer };
-        self.new_node(SyntaxKind::JsxAttribute.into(), data.into())
+        self.new_jsx_attribute_data(SyntaxKind::JsxAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxAttribute
     fn update_jsx_attribute(
@@ -6117,7 +12885,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxSpreadAttribute
     fn new_jsx_spread_attribute(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = JsxSpreadAttributeData { expression };
-        self.new_node(SyntaxKind::JsxSpreadAttribute.into(), data.into())
+        self.new_jsx_spread_attribute_data(SyntaxKind::JsxSpreadAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxSpreadAttribute
     fn update_jsx_spread_attribute(
@@ -6150,7 +12918,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxClosingElement
     fn new_jsx_closing_element(&mut self, tag_name: Option<NodeId>) -> NodeId {
         let data = JsxClosingElementData { tag_name };
-        self.new_node(SyntaxKind::JsxClosingElement.into(), data.into())
+        self.new_jsx_closing_element_data(SyntaxKind::JsxClosingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxClosingElement
     fn update_jsx_closing_element(
@@ -6190,7 +12958,7 @@ pub trait FactoryMethods: Factory {
             dot_dot_dot_token,
             expression,
         };
-        self.new_node(SyntaxKind::JsxExpression.into(), data.into())
+        self.new_jsx_expression_data(SyntaxKind::JsxExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxExpression
     fn update_jsx_expression(
@@ -6230,7 +12998,7 @@ pub trait FactoryMethods: Factory {
             contains_only_trivia_white_spaces,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JsxText.into(), data.into())
+        self.new_jsx_text_data(SyntaxKind::JsxText.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxText.Clone
     fn clone_jsx_text(&mut self, original_id: NodeId) -> NodeId {
@@ -6247,7 +13015,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSyntaxList
     fn new_syntax_list(&mut self, children: NodeSlice) -> NodeId {
         let data = SyntaxListData { children };
-        self.new_node(SyntaxKind::SyntaxList.into(), data.into())
+        self.new_syntax_list_data(SyntaxKind::SyntaxList.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSyntaxList
     fn update_syntax_list(&mut self, original_id: NodeId, children: NodeSlice) -> NodeId {
@@ -6276,7 +13044,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDoc
     fn new_js_doc(&mut self, comment: Option<NodeListId>, tags: Option<NodeListId>) -> NodeId {
         let data = JSDocData { comment, tags };
-        self.new_node(SyntaxKind::JSDoc.into(), data.into())
+        self.new_js_doc_data(SyntaxKind::JSDoc.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDoc
     fn update_js_doc(
@@ -6311,7 +13079,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocTypeExpression
     fn new_js_doc_type_expression(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocTypeExpressionData { r#type };
-        self.new_node(SyntaxKind::JSDocTypeExpression.into(), data.into())
+        self.new_js_doc_type_expression_data(SyntaxKind::JSDocTypeExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeExpression
     fn update_js_doc_type_expression(
@@ -6344,7 +13112,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNonNullableType
     fn new_js_doc_non_nullable_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocNonNullableTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocNonNullableType.into(), data.into())
+        self.new_js_doc_non_nullable_type_data(SyntaxKind::JSDocNonNullableType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNonNullableType
     fn update_js_doc_non_nullable_type(
@@ -6377,7 +13145,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNullableType
     fn new_js_doc_nullable_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocNullableTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocNullableType.into(), data.into())
+        self.new_js_doc_nullable_type_data(SyntaxKind::JSDocNullableType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNullableType
     fn update_js_doc_nullable_type(
@@ -6410,7 +13178,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocAllType
     fn new_js_doc_all_type(&mut self) -> NodeId {
         let data = JSDocAllTypeData {};
-        self.new_node(SyntaxKind::JSDocAllType.into(), data.into())
+        self.new_js_doc_all_type_data(SyntaxKind::JSDocAllType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JSDocAllType.Clone
     fn clone_js_doc_all_type(&mut self, original_id: NodeId) -> NodeId {
@@ -6425,7 +13193,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocVariadicType
     fn new_js_doc_variadic_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocVariadicTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocVariadicType.into(), data.into())
+        self.new_js_doc_variadic_type_data(SyntaxKind::JSDocVariadicType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocVariadicType
     fn update_js_doc_variadic_type(
@@ -6458,7 +13226,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocOptionalType
     fn new_js_doc_optional_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocOptionalTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocOptionalType.into(), data.into())
+        self.new_js_doc_optional_type_data(SyntaxKind::JSDocOptionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOptionalType
     fn update_js_doc_optional_type(
@@ -6500,7 +13268,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocTypeTag.into(), data.into())
+        self.new_js_doc_type_tag_data(SyntaxKind::JSDocTypeTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeTag
     fn update_js_doc_type_tag(
@@ -6544,7 +13312,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocUnknownTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocUnknownTag.into(), data.into())
+        self.new_js_doc_unknown_tag_data(SyntaxKind::JSDocUnknownTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocUnknownTag
     fn update_js_doc_unknown_tag(
@@ -6590,7 +13358,7 @@ pub trait FactoryMethods: Factory {
             constraint,
             type_parameters,
         };
-        self.new_node(SyntaxKind::JSDocTemplateTag.into(), data.into())
+        self.new_js_doc_template_tag_data(SyntaxKind::JSDocTemplateTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTemplateTag
     fn update_js_doc_template_tag(
@@ -6642,7 +13410,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocReturnTag.into(), data.into())
+        self.new_js_doc_return_tag_data(SyntaxKind::JSDocReturnTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocReturnTag
     fn update_js_doc_return_tag(
@@ -6686,7 +13454,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocPublicTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocPublicTag.into(), data.into())
+        self.new_js_doc_public_tag_data(SyntaxKind::JSDocPublicTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocPublicTag
     fn update_js_doc_public_tag(
@@ -6725,7 +13493,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocPrivateTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocPrivateTag.into(), data.into())
+        self.new_js_doc_private_tag_data(SyntaxKind::JSDocPrivateTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocPrivateTag
     fn update_js_doc_private_tag(
@@ -6764,7 +13532,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocProtectedTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocProtectedTag.into(), data.into())
+        self.new_js_doc_protected_tag_data(SyntaxKind::JSDocProtectedTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocProtectedTag
     fn update_js_doc_protected_tag(
@@ -6803,7 +13571,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocReadonlyTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocReadonlyTag.into(), data.into())
+        self.new_js_doc_readonly_tag_data(SyntaxKind::JSDocReadonlyTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocReadonlyTag
     fn update_js_doc_readonly_tag(
@@ -6842,7 +13610,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocOverrideTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocOverrideTag.into(), data.into())
+        self.new_js_doc_override_tag_data(SyntaxKind::JSDocOverrideTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOverrideTag
     fn update_js_doc_override_tag(
@@ -6881,7 +13649,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocDeprecatedTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocDeprecatedTag.into(), data.into())
+        self.new_js_doc_deprecated_tag_data(SyntaxKind::JSDocDeprecatedTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocDeprecatedTag
     fn update_js_doc_deprecated_tag(
@@ -6925,7 +13693,7 @@ pub trait FactoryMethods: Factory {
             comment,
             name_expression,
         };
-        self.new_node(SyntaxKind::JSDocSeeTag.into(), data.into())
+        self.new_js_doc_see_tag_data(SyntaxKind::JSDocSeeTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSeeTag
     fn update_js_doc_see_tag(
@@ -6974,7 +13742,7 @@ pub trait FactoryMethods: Factory {
             comment,
             class_name,
         };
-        self.new_node(SyntaxKind::JSDocImplementsTag.into(), data.into())
+        self.new_js_doc_implements_tag_data(SyntaxKind::JSDocImplementsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocImplementsTag
     fn update_js_doc_implements_tag(
@@ -7023,7 +13791,7 @@ pub trait FactoryMethods: Factory {
             comment,
             class_name,
         };
-        self.new_node(SyntaxKind::JSDocAugmentsTag.into(), data.into())
+        self.new_js_doc_augments_tag_data(SyntaxKind::JSDocAugmentsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocAugmentsTag
     fn update_js_doc_augments_tag(
@@ -7072,7 +13840,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocSatisfiesTag.into(), data.into())
+        self.new_js_doc_satisfies_tag_data(SyntaxKind::JSDocSatisfiesTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSatisfiesTag
     fn update_js_doc_satisfies_tag(
@@ -7121,7 +13889,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocThrowsTag.into(), data.into())
+        self.new_js_doc_throws_tag_data(SyntaxKind::JSDocThrowsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocThrowsTag
     fn update_js_doc_throws_tag(
@@ -7170,7 +13938,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocThisTag.into(), data.into())
+        self.new_js_doc_this_tag_data(SyntaxKind::JSDocThisTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocThisTag
     fn update_js_doc_this_tag(
@@ -7223,7 +13991,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::JSDocImportTag.into(), data.into())
+        self.new_js_doc_import_tag_data(SyntaxKind::JSDocImportTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocImportTag
     fn update_js_doc_import_tag(
@@ -7292,7 +14060,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             name,
         };
-        self.new_node(SyntaxKind::JSDocCallbackTag.into(), data.into())
+        self.new_js_doc_callback_tag_data(SyntaxKind::JSDocCallbackTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocCallbackTag
     fn update_js_doc_callback_tag(
@@ -7344,7 +14112,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocOverloadTag.into(), data.into())
+        self.new_js_doc_overload_tag_data(SyntaxKind::JSDocOverloadTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOverloadTag
     fn update_js_doc_overload_tag(
@@ -7395,7 +14163,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             name,
         };
-        self.new_node(SyntaxKind::JSDocTypedefTag.into(), data.into())
+        self.new_js_doc_typedef_tag_data(SyntaxKind::JSDocTypedefTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypedefTag
     fn update_js_doc_typedef_tag(
@@ -7448,7 +14216,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::JSDocSignature.into(), data.into())
+        self.new_js_doc_signature_data(SyntaxKind::JSDocSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSignature
     fn update_js_doc_signature(
@@ -7488,7 +14256,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNameReference
     fn new_js_doc_name_reference(&mut self, name: Option<NodeId>) -> NodeId {
         let data = JSDocNameReferenceData { name };
-        self.new_node(SyntaxKind::JSDocNameReference.into(), data.into())
+        self.new_js_doc_name_reference_data(SyntaxKind::JSDocNameReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNameReference
     fn update_js_doc_name_reference(
@@ -7535,7 +14303,7 @@ pub trait FactoryMethods: Factory {
             name,
             attributes,
         };
-        self.new_node(SyntaxKind::ModuleDeclaration.into(), data.into())
+        self.new_module_declaration_data(SyntaxKind::ModuleDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateModuleDeclaration
     fn update_module_declaration(
@@ -7592,7 +14360,7 @@ pub trait FactoryMethods: Factory {
             name,
             module_reference,
         };
-        self.new_node(SyntaxKind::ImportEqualsDeclaration.into(), data.into())
+        self.new_import_equals_declaration_data(SyntaxKind::ImportEqualsDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportEqualsDeclaration
     fn update_import_equals_declaration(
@@ -7650,7 +14418,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::ExportDeclaration.into(), data.into())
+        self.new_export_declaration_data(SyntaxKind::ExportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportDeclaration
     fn update_export_declaration(
@@ -7721,7 +14489,7 @@ pub trait FactoryMethods: Factory {
             attributes,
             qualifier,
         };
-        self.new_node(SyntaxKind::ImportType.into(), data.into())
+        self.new_import_type_node_data(SyntaxKind::ImportType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportTypeNode
     fn update_import_type_node(
@@ -7778,7 +14546,7 @@ pub trait FactoryMethods: Factory {
             name,
             named_bindings,
         };
-        self.new_node(SyntaxKind::ImportClause.into(), data.into())
+        self.new_import_clause_data(SyntaxKind::ImportClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportClause
     fn update_import_clause(
@@ -7827,7 +14595,7 @@ pub trait FactoryMethods: Factory {
             property_name,
             name,
         };
-        self.new_node(SyntaxKind::ImportSpecifier.into(), data.into())
+        self.new_import_specifier_data(SyntaxKind::ImportSpecifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportSpecifier
     fn update_import_specifier(
@@ -7868,7 +14636,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_text(&mut self, text: TextSlice) -> NodeId {
         let data = JSDocTextData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocText.into(), data.into())
+        self.new_js_doc_text_data(SyntaxKind::JSDocText.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JSDocText.Clone
     fn clone_js_doc_text(&mut self, original_id: NodeId) -> NodeId {
@@ -7885,7 +14653,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLink.into(), data.into())
+        self.new_js_doc_link_data(SyntaxKind::JSDocLink.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLink
     fn update_js_doc_link(
@@ -7921,7 +14689,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link_plain(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkPlainData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLinkPlain.into(), data.into())
+        self.new_js_doc_link_plain_data(SyntaxKind::JSDocLinkPlain.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLinkPlain
     fn update_js_doc_link_plain(
@@ -7957,7 +14725,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link_code(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkCodeData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLinkCode.into(), data.into())
+        self.new_js_doc_link_code_data(SyntaxKind::JSDocLinkCode.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLinkCode
     fn update_js_doc_link_code(
@@ -8005,7 +14773,7 @@ pub trait FactoryMethods: Factory {
             expression,
             default_type,
         };
-        self.new_node(SyntaxKind::TypeParameter.into(), data.into())
+        self.new_type_parameter_declaration_data(SyntaxKind::TypeParameter.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeParameterDeclaration
     fn update_type_parameter_declaration(
@@ -8070,7 +14838,10 @@ pub trait FactoryMethods: Factory {
             expression,
             this_arg,
         };
-        self.new_node(SyntaxKind::SyntheticReferenceExpression.into(), data.into())
+        self.new_synthetic_reference_expression_data(
+            SyntaxKind::SyntheticReferenceExpression.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSyntheticReferenceExpression
     fn update_synthetic_reference_expression(
@@ -8112,7 +14883,7 @@ pub trait FactoryMethods: Factory {
             js_doc_property_tags,
             is_array_type,
         };
-        self.new_node(SyntaxKind::JSDocTypeLiteral.into(), data.into())
+        self.new_js_doc_type_literal_data(SyntaxKind::JSDocTypeLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeLiteral
     fn update_js_doc_type_literal(
@@ -8165,7 +14936,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             is_name_first,
         };
-        self.new_node(kind, data.into())
+        self.new_js_doc_parameter_or_property_tag_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocParameterOrPropertyTag
     fn update_js_doc_parameter_or_property_tag(

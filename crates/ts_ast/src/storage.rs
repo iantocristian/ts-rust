@@ -97,6 +97,33 @@ impl AstBuilder {
         }
         id
     }
+    /// Generated concrete entries validate all supplied edges before calling.
+    /// Node counts and row/header allocation keep the generic factory's order.
+    pub(crate) fn new_typed_node_before_hook(
+        &mut self,
+        kind: crate::NodeKind,
+        pack: impl FnOnce(
+            &mut crate::AstPayloadStore,
+            &mut crate::compact::PackingContext<'_>,
+        ) -> (u16, u32),
+    ) -> NodeId {
+        let frame = self.frame_mut();
+        frame.node_count = frame.node_count.wrapping_add(1);
+        let nodes = self.id().arena();
+        let auxiliary = self.storage.view().auxiliary_arena();
+        let (store, source) = self.storage.store_and_source_mut();
+        let (payloads, mut context) = store.packing_parts(nodes, auxiliary, source, -1);
+        let (shape, ordinal) = pack(payloads, &mut context);
+        self.storage.push(StoredNode {
+            kind,
+            shape,
+            flags: 0,
+            pos: -1,
+            end: -1,
+            parent: 0,
+            ordinal,
+        })
+    }
     pub(crate) fn write_parent(&mut self, id: NodeId, parent: Option<NodeId>) -> Result<(), Error> {
         let auxiliary = self.storage.view().auxiliary_arena();
         let (header, store, source) = self.storage.node_store_and_source_mut(id)?;
@@ -489,7 +516,21 @@ impl<'a> AstView<'a> {
     pub fn position_map(self) -> &'a ts_jsstring::PositionMap {
         self.0.position_map()
     }
+    #[inline]
     pub fn node(self, id: NodeId) -> Result<NodeRead<'a>, Error> {
+        if id.arena() == self.0.id().arena()
+            && self.1.is_none_or(|binding| binding.reads_core_directly(id))
+        {
+            return Ok(NodeRead::core(
+                id,
+                self.0.core_node(id)?,
+                self.0.physical_owner(),
+            ));
+        }
+        self.node_compatibility(id)
+    }
+    #[inline(never)]
+    fn node_compatibility(self, id: NodeId) -> Result<NodeRead<'a>, Error> {
         if let Some(node) = self
             .binding_for_node(id)?
             .and_then(|result| result.overlay(id))

@@ -555,3 +555,19 @@ selection. Complete graph comparisons and the fixed combined screen before
 claiming a net improvement. Hold auxiliary compaction while testing this change:
 its current estimate is only 95–107 MB retained and requires a core/lazy auxiliary
 API split; neither that estimate nor smaller rows establish a CPU benefit.
+
+The combined implementation now includes CP5, all 192 generated typed factory
+entry points and the selected-core read path. The generated generic and typed
+constructors share the same packing methods. Compatibility paths remain in
+place for custom/lazy factories and published overlays or foreign owners.
+Independent review found no substantive issue in dispatch, validation/counter/
+hook order, kind/payload pairing or read routing.
+
+Validation passes: 112 AST, 25 parser, 28 binder and 12 compiler library tests;
+seven generated-factory integration tests; the selected-core arena test; four
+arena and eleven AST documentation tests; pinned generation and drift checks;
+workspace all-target/all-feature Clippy; and Rust 1.96 compilation. These checks
+establish implementation readiness for the frozen combined screen, not a
+performance result or promotion. Full workload graph comparison precedes that
+screen; broader ownership instrumentation and fresh Go acceptance remain later
+prerequisites.

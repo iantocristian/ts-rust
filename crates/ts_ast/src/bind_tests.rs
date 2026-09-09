@@ -89,6 +89,11 @@ fn exclusive_node_reads_observe_mutations_and_reject_unretained_owners() {
         completed.view().node(child).unwrap().flags(),
         node_flags::UNREACHABLE
     );
+    let missing = NodeId::from_parts(child.arena(), u32::MAX).unwrap();
+    assert!(matches!(
+        completed.view().node(missing),
+        Err(Error::InvalidSlot)
+    ));
     assert_eq!(foreign.view().node(foreign_child).unwrap().flags(), 0);
 }
 
