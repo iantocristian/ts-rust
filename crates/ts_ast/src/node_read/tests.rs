@@ -48,10 +48,7 @@ fn imported_records_keep_their_physical_owner_source_and_edges() {
         assert_eq!(identifier.id(), name);
         assert_eq!(identifier.owner_id(), record.owner_id());
         assert_eq!(identifier.source().as_bytes(), bytes);
-        assert_eq!(
-            identifier.data().as_identifier().unwrap().text.as_bytes(),
-            bytes
-        );
+        assert_eq!(identifier.as_identifier().unwrap().text(), bytes);
     }
     let record = caller.view().node(root).unwrap();
     assert_eq!(record.source().as_bytes(), b"caller");
@@ -140,10 +137,7 @@ fn transaction_and_retained_lazy_reads_keep_identity_through_owner_disposal() {
         assert_eq!(record.owner_id(), dependency_id);
         assert_eq!(record.source().as_bytes(), b"dependency");
         assert_eq!(record.parent(), Some(parent));
-        assert_eq!(
-            record.data().as_identifier().unwrap().text.as_bytes(),
-            b"lazy"
-        );
+        assert_eq!(record.as_identifier().unwrap().text(), b"lazy");
         // The retained handle already owns its lazy page. Its read borrows that
         // stable record instead of acquiring another page guard.
         assert!(record.as_borrowed().is_some());
@@ -225,4 +219,96 @@ fn bound_overlays_keep_physical_source_separate_from_logical_source_metadata() {
         file.view().source_file(source).unwrap().text().as_bytes(),
         b"logical source text"
     );
+}
+
+#[test]
+fn payload_views_preserve_shape_dispatch_lists_and_owned_text() {
+    use crate::{NodeKind, SyntaxKind};
+    let counters = Counters::new();
+    let mut builder = AstBuilder::new(
+        SourceText::from_loaded_bytes(b"source spelling differs".as_slice()),
+        &counters,
+    );
+    // Identifier text can be decoded, synthetic or raw WTF-8; it need not be
+    // recoverable from this node's source range.
+    let bytes = b"decoded\xed\xa0\x80\xff";
+    let name = builder.new_identifier(JsString::from_bytes(bytes.as_slice()));
+    let token = builder.new_token(SyntaxKind::Identifier.into());
+    let property = crate::Factory::new_node(
+        &mut builder,
+        NodeKind::from_raw(-1),
+        crate::PropertyAccessExpressionData {
+            expression: Some(name),
+            question_dot_token: None,
+            name: Some(name),
+        }
+        .into(),
+    );
+    let elements = builder.node_slice(vec![Some(name), None]).unwrap();
+    let parameters = builder
+        .new_list(ts_core::TextRange::new(0, 2), elements)
+        .unwrap();
+    let function = builder.new_function_declaration(
+        None,
+        None,
+        Some(name),
+        None,
+        Some(parameters),
+        None,
+        None,
+        None,
+    );
+    // Actual shape controls access even when factory callers use an open kind.
+    let file = builder.complete(function).unwrap().publish_unbound();
+    let view = file.view();
+    let property_record = view.node(property).unwrap();
+    let access = property_record.as_property_access_expression().unwrap();
+    assert_eq!(access.expression(), Some(name));
+    assert_eq!(access.name(), Some(name));
+    assert_eq!(access.question_dot_token(), None);
+    assert_eq!(access.node().id(), property);
+    assert!(property_record.as_identifier().is_none());
+    drop(property_record);
+    let token_read = view.node(token).unwrap();
+    assert!(token_read.as_token().is_some());
+    assert!(token_read.as_identifier().is_none());
+    let error = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let _ = view.node_text(token);
+    }))
+    .expect_err("kind/shape mismatch must fail before returning text");
+    let message = error
+        .downcast_ref::<String>()
+        .map(String::as_str)
+        .or_else(|| error.downcast_ref::<&str>().copied())
+        .unwrap();
+    assert_eq!(
+        message,
+        "interface conversion: ast.nodeData is *ast.Token, not *ast.Identifier"
+    );
+    let record = view.node(function).unwrap();
+    let function_read = record.as_function_declaration().unwrap();
+    assert_eq!(function_read.name(), Some(name));
+    assert_eq!(function_read.parameters(), Some(parameters));
+    assert_eq!(function_read.body(), None);
+    let list = view.list(function_read.parameters().unwrap()).unwrap();
+    assert_eq!(
+        &*view.node_slice(list.nodes()).unwrap(),
+        &[Some(name), None]
+    );
+    let text = view.node_text(name).unwrap();
+    assert_eq!(text.as_bytes(), bytes);
+    let owned = text.into_js_string();
+    // Ownership conversion keeps the current backing; compact source words
+    // must likewise return an owning string only when explicitly requested.
+    let name_read = view.node(name).unwrap();
+    assert_eq!(
+        owned.as_bytes().as_ptr(),
+        name_read.as_identifier().unwrap().text().as_ptr()
+    );
+    drop(name_read);
+    drop(record);
+    drop(list);
+    drop(token_read);
+    drop(file);
+    assert_eq!(owned.as_bytes(), bytes);
 }

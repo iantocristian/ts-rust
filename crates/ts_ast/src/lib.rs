@@ -28,6 +28,7 @@ mod node_index;
 mod node_kind;
 mod node_map;
 mod node_read;
+mod node_read_generated;
 mod node_text;
 mod precedence;
 mod runtime_generated;
@@ -66,6 +67,7 @@ pub use lists::{
 pub use node_index::NodeIndexCache;
 pub use node_kind::NodeKind;
 pub use node_read::NodeRead;
+pub use node_read_generated::*;
 pub use node_text::NodeText;
 pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;

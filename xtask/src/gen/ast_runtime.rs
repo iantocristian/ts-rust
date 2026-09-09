@@ -172,7 +172,7 @@ fn field_access(member: &Value) -> Result<String, String> {
     if flags_member(member) {
         Ok("original.flags()".into())
     } else {
-        Ok(format!("data.{}", snake(string(member, "name")?)))
+        Ok(format!("data.{}()", snake(string(member, "name")?)))
     }
 }
 
@@ -234,19 +234,17 @@ fn emit_update(
         return Ok(());
     }
     mapped(code, scope, "NodeFactory", &format!("Update{name}"));
-    code.push_str(&format!("    fn update_{}(&mut self, original_id: NodeId{}) -> NodeId {{\n        let original = self.node(original_id);\n        let data = original.data().as_{}().expect(\"Update{name} requires {name} payload\");\n",snake(name),params(&updates)?,snake(name)));
+    code.push_str(&format!("    fn update_{}(&mut self, original_id: NodeId{}) -> NodeId {{\n        let original = self.node(original_id);\n        let data = original.as_{}().expect(\"Update{name} requires {name} payload\");\n",snake(name),params(&updates)?,snake(name)));
     let comparisons = updates
         .iter()
         .map(|m| {
             let param = snake(string(m, "name")?);
             let access = field_access(m)?;
-            Ok(
-                if matches!(rust_type(&m["type"])?.as_str(), "NodeSlice" | "TextSlice") {
-                    format!("{param}.same({access})")
-                } else {
-                    format!("{param} == {access}")
-                },
-            )
+            Ok(match rust_type(&m["type"])?.as_str() {
+                "NodeSlice" | "TextSlice" => format!("{param}.same({access})"),
+                "JsString" => format!("{param}.as_bytes() == {access}"),
+                _ => format!("{param} == {access}"),
+            })
         })
         .collect::<Result<Vec<_>, String>>()?;
     code.push_str(&format!(
@@ -287,10 +285,13 @@ fn snapshot(
         .iter()
         .any(|m| !flag(m, "kindParameter") && !flags_member(m))
     {
-        code.push_str(&format!("        let data = original.data().as_{}().expect(\"operation requires {name} payload\");\n",snake(name)));
+        code.push_str(&format!(
+            "        let data = original.as_{}().expect(\"operation requires {name} payload\");\n",
+            snake(name)
+        ));
     } else {
         code.push_str(&format!(
-            "        original.data().as_{}().expect(\"operation requires {name} payload\");\n",
+            "        original.as_{}().expect(\"operation requires {name} payload\");\n",
             snake(name)
         ));
     }
@@ -301,13 +302,12 @@ fn snapshot(
     }
     for m in ms.iter().filter(|m| !flag(m, "kindParameter")) {
         let param = snake(string(m, "name")?);
-        let access = field_access(m)?;
-        let clone = if rust_type(&m["type"])? == "JsString" {
-            ".clone()"
+        let access = if rust_type(&m["type"])? == "JsString" {
+            format!("data.{}()", super::ast_read::owned_method(&param))
         } else {
-            ""
+            field_access(m)?
         };
-        code.push_str(&format!("        let {param} = {access}{clone};\n"));
+        code.push_str(&format!("        let {param} = {access};\n"));
     }
     code.push_str("        drop(original);\n");
     Ok(())

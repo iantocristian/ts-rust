@@ -14,6 +14,17 @@ use ts_jsstring::SourceText;
 /// a view instead acquires a page guard, whose payload references stay bounded
 /// by a borrow of this read. Neither path retains an additional file owner.
 /// Use `RetainedNode` to escape.
+///
+/// Contextual payload bytes cannot outlive a directory-resolved lazy read guard,
+/// even when its enclosing file lives longer:
+///
+/// ```compile_fail
+/// use ts_ast::{AstFile, NodeId};
+/// fn escaped_text<'owner>(file: &'owner AstFile, lazy: NodeId) -> &'owner [u8] {
+///     let read = file.view().node(lazy).unwrap();
+///     read.as_identifier().unwrap().text()
+/// }
+/// ```
 pub struct NodeRead<'a> {
     record: StorageRead<'a, Node>,
     id: NodeId,

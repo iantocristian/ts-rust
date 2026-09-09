@@ -16,7 +16,7 @@ impl NodeText<'_> {
     pub fn into_js_string(self) -> JsString {
         match self.0 {
             TextStorage::Empty => JsString::default(),
-            TextStorage::Node(node) => stored_string(&node).clone(),
+            TextStorage::Node(node) => stored_owned_text(&node),
             TextStorage::Fragment(parts) => parts[0].clone(),
             TextStorage::Joined(bytes) => JsString::from_bytes(bytes),
         }
@@ -50,37 +50,66 @@ macro_rules! bytes_field {
     };
 }
 
-macro_rules! string_field {
-    ($node:expr, $variant:ident, $field:ident) => {
-        match $node.data() {
-            NodeData::$variant(data) => &data.$field,
-            _ => panic!(
-                "interface conversion: ast.nodeData is *ast.{}, not *ast.{}",
-                $node.data().name(),
-                stringify!($variant)
-            ),
+// Byte access must not require a physical `&JsString`: compact identifiers
+// will borrow their source suffix or exception pool through this same view.
+macro_rules! text_field {
+    ($node:expr, $variant:ident, $accessor:ident, $getter:ident) => {
+        $node
+            .$accessor()
+            .unwrap_or_else(|| {
+                panic!(
+                    "interface conversion: ast.nodeData is *ast.{}, not *ast.{}",
+                    $node.data().name(),
+                    stringify!($variant)
+                )
+            })
+            .$getter()
+    };
+}
+macro_rules! stored_text_field {
+    ($node:expr, $getter:ident) => {
+        match $node.kind().known() {
+            Some(K::Identifier) => text_field!($node, Identifier, as_identifier, $getter),
+            Some(K::PrivateIdentifier) => {
+                text_field!($node, PrivateIdentifier, as_private_identifier, $getter)
+            }
+            Some(K::StringLiteral) => text_field!($node, StringLiteral, as_string_literal, $getter),
+            Some(K::NumericLiteral) => {
+                text_field!($node, NumericLiteral, as_numeric_literal, $getter)
+            }
+            Some(K::BigIntLiteral) => {
+                text_field!($node, BigIntLiteral, as_big_int_literal, $getter)
+            }
+            Some(K::NoSubstitutionTemplateLiteral) => {
+                text_field!(
+                    $node,
+                    NoSubstitutionTemplateLiteral,
+                    as_no_substitution_template_literal,
+                    $getter
+                )
+            }
+            Some(K::TemplateHead) => text_field!($node, TemplateHead, as_template_head, $getter),
+            Some(K::TemplateMiddle) => {
+                text_field!($node, TemplateMiddle, as_template_middle, $getter)
+            }
+            Some(K::TemplateTail) => text_field!($node, TemplateTail, as_template_tail, $getter),
+            Some(K::RegularExpressionLiteral) => {
+                text_field!(
+                    $node,
+                    RegularExpressionLiteral,
+                    as_regular_expression_literal,
+                    $getter
+                )
+            }
+            _ => panic!("Unhandled case in Node.Text: *ast.{}", $node.data().name()),
         }
     };
 }
-fn stored_text(node: &Node) -> &[u8] {
-    stored_string(node).as_bytes()
+fn stored_text<'read>(node: &'read NodeRead<'_>) -> &'read [u8] {
+    stored_text_field!(node, text)
 }
-fn stored_string(node: &Node) -> &JsString {
-    match node.kind().known() {
-        Some(K::Identifier) => string_field!(node, Identifier, text),
-        Some(K::PrivateIdentifier) => string_field!(node, PrivateIdentifier, text),
-        Some(K::StringLiteral) => string_field!(node, StringLiteral, text),
-        Some(K::NumericLiteral) => string_field!(node, NumericLiteral, text),
-        Some(K::BigIntLiteral) => string_field!(node, BigIntLiteral, text),
-        Some(K::NoSubstitutionTemplateLiteral) => {
-            string_field!(node, NoSubstitutionTemplateLiteral, text)
-        }
-        Some(K::TemplateHead) => string_field!(node, TemplateHead, text),
-        Some(K::TemplateMiddle) => string_field!(node, TemplateMiddle, text),
-        Some(K::TemplateTail) => string_field!(node, TemplateTail, text),
-        Some(K::RegularExpressionLiteral) => string_field!(node, RegularExpressionLiteral, text),
-        _ => panic!("Unhandled case in Node.Text: *ast.{}", node.data().name()),
-    }
+fn stored_owned_text(node: &NodeRead<'_>) -> JsString {
+    stored_text_field!(node, text_owned)
 }
 
 impl Node {

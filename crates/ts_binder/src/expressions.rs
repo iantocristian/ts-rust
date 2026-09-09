@@ -399,10 +399,16 @@ impl Binder<'_, '_> {
             }
         }
         if self.n(expression).kind() == K::PropertyAccessExpression {
-            let access = payload!(self, expression, as_property_access_expression);
-            if self.n(need(access.name)).kind() == K::Identifier
-                && self.is_narrowable_operand(need(access.expression))
-                && ts_ast::is_push_or_unshift_identifier(self.view(), need(access.name))
+            let (name, target) = {
+                let node = self.n(expression);
+                let access = node
+                    .as_property_access_expression()
+                    .expect("binder syntax payload");
+                (access.name(), access.expression())
+            };
+            if self.n(need(name)).kind() == K::Identifier
+                && self.is_narrowable_operand(need(target))
+                && ts_ast::is_push_or_unshift_identifier(self.view(), need(name))
                     .expect("retained method name")
             {
                 self.current_flow = Some(self.create_flow_mutation(

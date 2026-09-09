@@ -230,11 +230,7 @@ retained reads borrow their already-held record without reacquiring that lock.
 This is migration infrastructure over the existing 80-byte node, with a temporary
 `Deref<Target = Node>` for unmigrated consumers. It adds no owner retention or
 payload copies, but enlarges the transient read descriptor; its runtime cost is
-not yet measured. Generated contextual payload access, compact parent/list
-resolution, construction and the typed backend remain to be implemented. In
-particular, the generic arena's owner-free `storage_parent` contract must change
-before parents can be stored as local words. Do not treat this step as a storage
-or performance promotion.
+not yet measured. Do not treat this step as a storage or performance promotion.
 
 Validation for this boundary: 182 workspace library tests, six AST doctests,
 workspace all-target Clippy with warnings denied and Rust 1.96 checks, plus the
@@ -244,6 +240,32 @@ the fixed path is exercised inside a same-owner initializer. Local commands,
 source hashes and logs are in
 `target/s07-bis/contextual-read-step1-validation/`. These are development checks;
 they do not refresh the tracker producers or final performance evidence.
+
+The second implementation step generates contextual payload views for all 192
+shapes. Each view borrows its originating read and actual typed payload; zero-field
+shapes keep only the read. Scalar and graph getters expose semantic values rather
+than stored field widths. Text getters return borrowed bytes, with a separate
+explicit owned-string operation, so source suffixes and exception pools can
+replace physical `JsString` fields later. Shape dispatch remains independent of
+the open syntax kind. A compile-fail example enforces the lazy read-guard lifetime.
+
+Generated clone/update/transform methods now consume these getters, preserving
+field capture, byte equality, list identity, flags and callback order. `NodeText`
+uses the byte/owned distinction, and one binder property-access site extracts its
+two child IDs before recursive reads. Existing owned factory inputs and physical
+storage remain unchanged. Compact header/parent/list resolution, insertion and
+the typed backend are still outstanding; the generic arena's owner-free
+`storage_parent` contract must change before parents can be stored as local words.
+
+Validation for the second step: pinned generation check, 20 generator tests,
+183 workspace library tests, 25 additional AST integration tests and seven
+doctests. Workspace all-target Clippy/Rust 1.96, release tests and formatting
+pass; all four contextual-read cases pass under strict-provenance Miri and ASan.
+Independent review found no substantive issue. Two test-only Clippy findings
+were fixed and the affected checks repeated. Commands, source hashes, the initial
+failures and final logs are under
+`target/s07-bis/contextual-payload-step2-validation/`; no tracker producer or
+performance result is refreshed by these development checks.
 
 ### 4.2 Direct binding fields, with a conditional side-table fallback
 

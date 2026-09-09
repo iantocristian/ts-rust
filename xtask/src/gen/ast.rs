@@ -563,6 +563,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<BTreeMap<PathBuf, String
         ("kinds_generated.rs", kinds_code),
         ("data_generated.rs", data),
         ("accessors_generated.rs", accessors),
+        ("node_read_generated.rs", super::ast_read::emit(nodes, pin)?),
         ("visitors_generated.rs", visitors),
     ]
     .into_iter()

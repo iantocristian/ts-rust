@@ -18,11 +18,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_qualified_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_qualified_name()
             .expect("operation requires QualifiedName payload");
-        let left = data.left;
-        let right = data.right;
+        let left = data.left();
+        let right = data.right();
         drop(original);
         let left = self.visit_node(left, ChildRole::Node);
         let right = self.visit_node(right, ChildRole::Node);
@@ -32,10 +31,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_computed_property_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_computed_property_name()
             .expect("operation requires ComputedPropertyName payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_computed_property_name(original_id, expression)
@@ -44,10 +42,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_decorator(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_decorator()
             .expect("operation requires Decorator payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_decorator(original_id, expression)
@@ -56,12 +53,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_if_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_if_statement()
             .expect("operation requires IfStatement payload");
-        let expression = data.expression;
-        let then_statement = data.then_statement;
-        let else_statement = data.else_statement;
+        let expression = data.expression();
+        let then_statement = data.then_statement();
+        let else_statement = data.else_statement();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let then_statement = self.visit_node(then_statement, ChildRole::EmbeddedStatement);
@@ -72,11 +68,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_do_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_do_statement()
             .expect("operation requires DoStatement payload");
-        let statement = data.statement;
-        let expression = data.expression;
+        let statement = data.statement();
+        let expression = data.expression();
         drop(original);
         let statement = self.visit_node(statement, ChildRole::IterationBody);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -86,11 +81,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_while_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_while_statement()
             .expect("operation requires WhileStatement payload");
-        let expression = data.expression;
-        let statement = data.statement;
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let statement = self.visit_node(statement, ChildRole::IterationBody);
@@ -100,13 +94,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_for_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_statement()
             .expect("operation requires ForStatement payload");
-        let initializer = data.initializer;
-        let condition = data.condition;
-        let incrementor = data.incrementor;
-        let statement = data.statement;
+        let initializer = data.initializer();
+        let condition = data.condition();
+        let incrementor = data.incrementor();
+        let statement = data.statement();
         drop(original);
         let initializer = self.visit_node(initializer, ChildRole::Node);
         let condition = self.visit_node(condition, ChildRole::Node);
@@ -118,13 +111,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_for_in_or_of_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_in_or_of_statement()
             .expect("operation requires ForInOrOfStatement payload");
-        let await_modifier = data.await_modifier;
-        let initializer = data.initializer;
-        let expression = data.expression;
-        let statement = data.statement;
+        let await_modifier = data.await_modifier();
+        let initializer = data.initializer();
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let await_modifier = self.visit_node(await_modifier, ChildRole::Node);
         let initializer = self.visit_node(initializer, ChildRole::Node);
@@ -142,10 +134,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_break_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_break_statement()
             .expect("operation requires BreakStatement payload");
-        let label = data.label;
+        let label = data.label();
         drop(original);
         let label = self.visit_node(label, ChildRole::Node);
         self.update_break_statement(original_id, label)
@@ -154,10 +145,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_continue_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_continue_statement()
             .expect("operation requires ContinueStatement payload");
-        let label = data.label;
+        let label = data.label();
         drop(original);
         let label = self.visit_node(label, ChildRole::Node);
         self.update_continue_statement(original_id, label)
@@ -166,10 +156,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_return_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_return_statement()
             .expect("operation requires ReturnStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_return_statement(original_id, expression)
@@ -178,11 +167,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_with_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_with_statement()
             .expect("operation requires WithStatement payload");
-        let expression = data.expression;
-        let statement = data.statement;
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let statement = self.visit_node(statement, ChildRole::EmbeddedStatement);
@@ -192,11 +180,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_switch_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_switch_statement()
             .expect("operation requires SwitchStatement payload");
-        let expression = data.expression;
-        let case_block = data.case_block;
+        let expression = data.expression();
+        let case_block = data.case_block();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let case_block = self.visit_node(case_block, ChildRole::Node);
@@ -206,10 +193,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_case_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_block()
             .expect("operation requires CaseBlock payload");
-        let clauses = data.clauses;
+        let clauses = data.clauses();
         drop(original);
         let clauses = self.visit_list(clauses, ChildRole::Nodes);
         self.update_case_block(original_id, clauses)
@@ -218,11 +204,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_case_or_default_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_or_default_clause()
             .expect("operation requires CaseOrDefaultClause payload");
-        let expression = data.expression;
-        let statements = data.statements;
+        let expression = data.expression();
+        let statements = data.statements();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let statements = self.visit_list(statements, ChildRole::Nodes);
@@ -232,10 +217,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_throw_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_throw_statement()
             .expect("operation requires ThrowStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_throw_statement(original_id, expression)
@@ -244,12 +228,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_try_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_try_statement()
             .expect("operation requires TryStatement payload");
-        let try_block = data.try_block;
-        let catch_clause = data.catch_clause;
-        let finally_block = data.finally_block;
+        let try_block = data.try_block();
+        let catch_clause = data.catch_clause();
+        let finally_block = data.finally_block();
         drop(original);
         let try_block = self.visit_node(try_block, ChildRole::Node);
         let catch_clause = self.visit_node(catch_clause, ChildRole::Node);
@@ -260,11 +243,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_catch_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_catch_clause()
             .expect("operation requires CatchClause payload");
-        let variable_declaration = data.variable_declaration;
-        let block = data.block;
+        let variable_declaration = data.variable_declaration();
+        let block = data.block();
         drop(original);
         let variable_declaration = self.visit_node(variable_declaration, ChildRole::Node);
         let block = self.visit_node(block, ChildRole::Node);
@@ -274,11 +256,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_labeled_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_labeled_statement()
             .expect("operation requires LabeledStatement payload");
-        let label = data.label;
-        let statement = data.statement;
+        let label = data.label();
+        let statement = data.statement();
         drop(original);
         let label = self.visit_node(label, ChildRole::Node);
         let statement = self.visit_node(statement, ChildRole::EmbeddedStatement);
@@ -288,10 +269,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_expression_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_expression_statement()
             .expect("operation requires ExpressionStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_expression_statement(original_id, expression)
@@ -300,11 +280,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_block()
             .expect("operation requires Block payload");
-        let statements = data.statements;
-        let multi_line = data.multi_line;
+        let statements = data.statements();
+        let multi_line = data.multi_line();
         drop(original);
         let statements = self.visit_list(statements, ChildRole::Nodes);
         self.update_block(original_id, statements, multi_line)
@@ -313,11 +292,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_variable_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_statement()
             .expect("operation requires VariableStatement payload");
-        let modifiers = data.modifiers;
-        let declaration_list = data.declaration_list;
+        let modifiers = data.modifiers();
+        let declaration_list = data.declaration_list();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let declaration_list = self.visit_node(declaration_list, ChildRole::Node);
@@ -327,13 +305,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_variable_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration()
             .expect("operation requires VariableDeclaration payload");
-        let name = data.name;
-        let exclamation_token = data.exclamation_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let name = data.name();
+        let exclamation_token = data.exclamation_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         let exclamation_token = self.visit_node(exclamation_token, ChildRole::Node);
@@ -345,10 +322,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_variable_declaration_list(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration_list()
             .expect("operation requires VariableDeclarationList payload");
-        let declarations = data.declarations;
+        let declarations = data.declarations();
         let flags = original.flags();
         drop(original);
         let declarations = self.visit_list(declarations, ChildRole::Nodes);
@@ -358,10 +334,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_binding_pattern(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_pattern()
             .expect("operation requires BindingPattern payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let elements = self.visit_list(elements, ChildRole::Nodes);
         self.update_binding_pattern(original_id, elements)
@@ -370,15 +345,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_parameter_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parameter_declaration()
             .expect("operation requires ParameterDeclaration payload");
-        let modifiers = data.modifiers;
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let name = data.name;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let name = data.name();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let dot_dot_dot_token = self.visit_node(dot_dot_dot_token, ChildRole::Node);
@@ -400,13 +374,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_binding_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_element()
             .expect("operation requires BindingElement payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let property_name = data.property_name;
-        let name = data.name;
-        let initializer = data.initializer;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let property_name = data.property_name();
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let dot_dot_dot_token = self.visit_node(dot_dot_dot_token, ChildRole::Node);
         let property_name = self.visit_node(property_name, ChildRole::Node);
@@ -424,10 +397,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_missing_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_missing_declaration()
             .expect("operation requires MissingDeclaration payload");
-        let modifiers = data.modifiers;
+        let modifiers = data.modifiers();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         self.update_missing_declaration(original_id, modifiers)
@@ -436,17 +408,16 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_function_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_declaration()
             .expect("operation requires FunctionDeclaration payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let asterisk_token = self.visit_node(asterisk_token, ChildRole::Node);
@@ -472,14 +443,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_class_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_declaration()
             .expect("operation requires ClassDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -499,14 +469,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_class_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_expression()
             .expect("operation requires ClassExpression payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -526,11 +495,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_heritage_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_heritage_clause()
             .expect("operation requires HeritageClause payload");
-        let token = data.token;
-        let types = data.types;
+        let token = data.token();
+        let types = data.types();
         drop(original);
         let types = self.visit_list(types, ChildRole::Nodes);
         self.update_heritage_clause(original_id, token, types)
@@ -539,14 +507,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_interface_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_interface_declaration()
             .expect("operation requires InterfaceDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -566,13 +533,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_alias_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_alias_declaration()
             .expect("operation requires TypeAliasDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let r#type = data.r#type();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -584,11 +550,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_enum_member(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_member()
             .expect("operation requires EnumMember payload");
-        let name = data.name;
-        let initializer = data.initializer;
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         let initializer = self.visit_node(initializer, ChildRole::Node);
@@ -598,12 +563,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_enum_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_declaration()
             .expect("operation requires EnumDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let members = data.members();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -614,10 +578,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_module_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_block()
             .expect("operation requires ModuleBlock payload");
-        let statements = data.statements;
+        let statements = data.statements();
         drop(original);
         let statements = self.visit_list(statements, ChildRole::Nodes);
         self.update_module_block(original_id, statements)
@@ -626,13 +589,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_declaration()
             .expect("operation requires ImportDeclaration payload");
-        let modifiers = data.modifiers;
-        let import_clause = data.import_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
+        let modifiers = data.modifiers();
+        let import_clause = data.import_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let import_clause = self.visit_node(import_clause, ChildRole::Node);
@@ -650,10 +612,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_external_module_reference(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_external_module_reference()
             .expect("operation requires ExternalModuleReference payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_external_module_reference(original_id, expression)
@@ -662,10 +623,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_namespace_import(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_import()
             .expect("operation requires NamespaceImport payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_namespace_import(original_id, name)
@@ -674,10 +634,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_named_imports(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_imports()
             .expect("operation requires NamedImports payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let elements = self.visit_list(elements, ChildRole::Nodes);
         self.update_named_imports(original_id, elements)
@@ -686,13 +645,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_export_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_assignment()
             .expect("operation requires ExportAssignment payload");
-        let modifiers = data.modifiers;
-        let is_export_equals = data.is_export_equals;
-        let r#type = data.r#type;
-        let expression = data.expression;
+        let modifiers = data.modifiers();
+        let is_export_equals = data.is_export_equals();
+        let r#type = data.r#type();
+        let expression = data.expression();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let r#type = self.visit_node(r#type, ChildRole::Node);
@@ -703,11 +661,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_namespace_export_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export_declaration()
             .expect("operation requires NamespaceExportDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
+        let modifiers = data.modifiers();
+        let name = data.name();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -717,10 +674,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_namespace_export(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export()
             .expect("operation requires NamespaceExport payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_namespace_export(original_id, name)
@@ -729,10 +685,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_named_exports(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_exports()
             .expect("operation requires NamedExports payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let elements = self.visit_list(elements, ChildRole::Nodes);
         self.update_named_exports(original_id, elements)
@@ -741,12 +696,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_export_specifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_specifier()
             .expect("operation requires ExportSpecifier payload");
-        let is_type_only = data.is_type_only;
-        let property_name = data.property_name;
-        let name = data.name;
+        let is_type_only = data.is_type_only();
+        let property_name = data.property_name();
+        let name = data.name();
         drop(original);
         let property_name = self.visit_node(property_name, ChildRole::Node);
         let name = self.visit_node(name, ChildRole::Node);
@@ -756,12 +710,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_call_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_signature_declaration()
             .expect("operation requires CallSignatureDeclaration payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
         let parameters = self.visit_list(parameters, ChildRole::Nodes);
@@ -772,12 +725,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_construct_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_construct_signature_declaration()
             .expect("operation requires ConstructSignatureDeclaration payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
         let parameters = self.visit_list(parameters, ChildRole::Nodes);
@@ -793,15 +745,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_constructor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_declaration()
             .expect("operation requires ConstructorDeclaration payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
@@ -823,16 +774,15 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_get_accessor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_get_accessor_declaration()
             .expect("operation requires GetAccessorDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -856,16 +806,15 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_set_accessor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_set_accessor_declaration()
             .expect("operation requires SetAccessorDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -889,12 +838,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_index_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_index_signature_declaration()
             .expect("operation requires IndexSignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let parameters = self.visit_list(parameters, ChildRole::Nodes);
@@ -905,15 +853,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_method_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_signature_declaration()
             .expect("operation requires MethodSignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -935,18 +882,17 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_method_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_declaration()
             .expect("operation requires MethodDeclaration payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let asterisk_token = self.visit_node(asterisk_token, ChildRole::Node);
@@ -974,14 +920,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_property_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_signature_declaration()
             .expect("operation requires PropertySignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -1001,14 +946,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_property_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_declaration()
             .expect("operation requires PropertyDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -1028,11 +972,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_class_static_block_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_static_block_declaration()
             .expect("operation requires ClassStaticBlockDeclaration payload");
-        let modifiers = data.modifiers;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let body = self.visit_node(body, ChildRole::Node);
@@ -1042,14 +985,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_binary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binary_expression()
             .expect("operation requires BinaryExpression payload");
-        let modifiers = data.modifiers;
-        let left = data.left;
-        let r#type = data.r#type;
-        let operator_token = data.operator_token;
-        let right = data.right;
+        let modifiers = data.modifiers();
+        let left = data.left();
+        let r#type = data.r#type();
+        let operator_token = data.operator_token();
+        let right = data.right();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let left = self.visit_node(left, ChildRole::Node);
@@ -1062,11 +1004,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_prefix_unary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_prefix_unary_expression()
             .expect("operation requires PrefixUnaryExpression payload");
-        let operator = data.operator;
-        let operand = data.operand;
+        let operator = data.operator();
+        let operand = data.operand();
         drop(original);
         let operand = self.visit_node(operand, ChildRole::Node);
         self.update_prefix_unary_expression(original_id, operator, operand)
@@ -1075,11 +1016,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_postfix_unary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_postfix_unary_expression()
             .expect("operation requires PostfixUnaryExpression payload");
-        let operand = data.operand;
-        let operator = data.operator;
+        let operand = data.operand();
+        let operator = data.operator();
         drop(original);
         let operand = self.visit_node(operand, ChildRole::Node);
         self.update_postfix_unary_expression(original_id, operand, operator)
@@ -1088,11 +1028,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_yield_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_yield_expression()
             .expect("operation requires YieldExpression payload");
-        let asterisk_token = data.asterisk_token;
-        let expression = data.expression;
+        let asterisk_token = data.asterisk_token();
+        let expression = data.expression();
         drop(original);
         let asterisk_token = self.visit_node(asterisk_token, ChildRole::Node);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1102,16 +1041,15 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_arrow_function(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_arrow_function()
             .expect("operation requires ArrowFunction payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let equals_greater_than_token = data.equals_greater_than_token;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let equals_greater_than_token = data.equals_greater_than_token();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
@@ -1135,17 +1073,16 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_function_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_expression()
             .expect("operation requires FunctionExpression payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let asterisk_token = self.visit_node(asterisk_token, ChildRole::Node);
@@ -1171,11 +1108,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_as_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_as_expression()
             .expect("operation requires AsExpression payload");
-        let expression = data.expression;
-        let r#type = data.r#type;
+        let expression = data.expression();
+        let r#type = data.r#type();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let r#type = self.visit_node(r#type, ChildRole::Node);
@@ -1185,11 +1121,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_satisfies_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_satisfies_expression()
             .expect("operation requires SatisfiesExpression payload");
-        let expression = data.expression;
-        let r#type = data.r#type;
+        let expression = data.expression();
+        let r#type = data.r#type();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let r#type = self.visit_node(r#type, ChildRole::Node);
@@ -1199,14 +1134,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_conditional_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_expression()
             .expect("operation requires ConditionalExpression payload");
-        let condition = data.condition;
-        let question_token = data.question_token;
-        let when_true = data.when_true;
-        let colon_token = data.colon_token;
-        let when_false = data.when_false;
+        let condition = data.condition();
+        let question_token = data.question_token();
+        let when_true = data.when_true();
+        let colon_token = data.colon_token();
+        let when_false = data.when_false();
         drop(original);
         let condition = self.visit_node(condition, ChildRole::Node);
         let question_token = self.visit_node(question_token, ChildRole::Node);
@@ -1226,12 +1160,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_property_access_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_access_expression()
             .expect("operation requires PropertyAccessExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let name = data.name;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let name = data.name();
         let flags = original.flags();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1249,12 +1182,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_element_access_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_element_access_expression()
             .expect("operation requires ElementAccessExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let argument_expression = data.argument_expression;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let argument_expression = data.argument_expression();
         let flags = original.flags();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1272,13 +1204,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_call_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_expression()
             .expect("operation requires CallExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let type_arguments = data.type_arguments;
-        let arguments = data.arguments;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let type_arguments = data.type_arguments();
+        let arguments = data.arguments();
         let flags = original.flags();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1298,12 +1229,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_new_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_new_expression()
             .expect("operation requires NewExpression payload");
-        let expression = data.expression;
-        let type_arguments = data.type_arguments;
-        let arguments = data.arguments;
+        let expression = data.expression();
+        let type_arguments = data.type_arguments();
+        let arguments = data.arguments();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -1314,11 +1244,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_meta_property(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_meta_property()
             .expect("operation requires MetaProperty payload");
-        let keyword_token = data.keyword_token;
-        let name = data.name;
+        let keyword_token = data.keyword_token();
+        let name = data.name();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_meta_property(original_id, keyword_token, name)
@@ -1327,10 +1256,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_non_null_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_non_null_expression()
             .expect("operation requires NonNullExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         let flags = original.flags();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1340,10 +1268,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_spread_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_element()
             .expect("operation requires SpreadElement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_spread_element(original_id, expression)
@@ -1352,11 +1279,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_template_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_expression()
             .expect("operation requires TemplateExpression payload");
-        let head = data.head;
-        let template_spans = data.template_spans;
+        let head = data.head();
+        let template_spans = data.template_spans();
         drop(original);
         let head = self.visit_node(head, ChildRole::Node);
         let template_spans = self.visit_list(template_spans, ChildRole::Nodes);
@@ -1366,11 +1292,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_template_span(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_span()
             .expect("operation requires TemplateSpan payload");
-        let expression = data.expression;
-        let literal = data.literal;
+        let expression = data.expression();
+        let literal = data.literal();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let literal = self.visit_node(literal, ChildRole::Node);
@@ -1380,13 +1305,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_tagged_template_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tagged_template_expression()
             .expect("operation requires TaggedTemplateExpression payload");
-        let tag = data.tag;
-        let question_dot_token = data.question_dot_token;
-        let type_arguments = data.type_arguments;
-        let template = data.template;
+        let tag = data.tag();
+        let question_dot_token = data.question_dot_token();
+        let type_arguments = data.type_arguments();
+        let template = data.template();
         let flags = original.flags();
         drop(original);
         let tag = self.visit_node(tag, ChildRole::Node);
@@ -1406,10 +1330,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_parenthesized_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_expression()
             .expect("operation requires ParenthesizedExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_parenthesized_expression(original_id, expression)
@@ -1418,11 +1341,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_array_literal_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_literal_expression()
             .expect("operation requires ArrayLiteralExpression payload");
-        let elements = data.elements;
-        let multi_line = data.multi_line;
+        let elements = data.elements();
+        let multi_line = data.multi_line();
         drop(original);
         let elements = self.visit_list(elements, ChildRole::Nodes);
         self.update_array_literal_expression(original_id, elements, multi_line)
@@ -1431,11 +1353,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_object_literal_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_object_literal_expression()
             .expect("operation requires ObjectLiteralExpression payload");
-        let properties = data.properties;
-        let multi_line = data.multi_line;
+        let properties = data.properties();
+        let multi_line = data.multi_line();
         drop(original);
         let properties = self.visit_list(properties, ChildRole::Nodes);
         self.update_object_literal_expression(original_id, properties, multi_line)
@@ -1444,10 +1365,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_spread_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_assignment()
             .expect("operation requires SpreadAssignment payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_spread_assignment(original_id, expression)
@@ -1456,14 +1376,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_property_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_assignment()
             .expect("operation requires PropertyAssignment payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -1483,15 +1402,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_shorthand_property_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_shorthand_property_assignment()
             .expect("operation requires ShorthandPropertyAssignment payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let equals_token = data.equals_token;
-        let object_assignment_initializer = data.object_assignment_initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let equals_token = data.equals_token();
+        let object_assignment_initializer = data.object_assignment_initializer();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -1514,10 +1432,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_delete_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_delete_expression()
             .expect("operation requires DeleteExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_delete_expression(original_id, expression)
@@ -1526,10 +1443,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_of_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_of_expression()
             .expect("operation requires TypeOfExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_type_of_expression(original_id, expression)
@@ -1538,10 +1454,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_void_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_void_expression()
             .expect("operation requires VoidExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_void_expression(original_id, expression)
@@ -1550,10 +1465,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_await_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_await_expression()
             .expect("operation requires AwaitExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_await_expression(original_id, expression)
@@ -1562,11 +1476,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_assertion(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_assertion()
             .expect("operation requires TypeAssertion payload");
-        let r#type = data.r#type;
-        let expression = data.expression;
+        let r#type = data.r#type();
+        let expression = data.expression();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -1576,10 +1489,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_union_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_union_type_node()
             .expect("operation requires UnionTypeNode payload");
-        let types = data.types;
+        let types = data.types();
         drop(original);
         let types = self.visit_list(types, ChildRole::Nodes);
         self.update_union_type_node(original_id, types)
@@ -1588,10 +1500,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_intersection_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_intersection_type_node()
             .expect("operation requires IntersectionTypeNode payload");
-        let types = data.types;
+        let types = data.types();
         drop(original);
         let types = self.visit_list(types, ChildRole::Nodes);
         self.update_intersection_type_node(original_id, types)
@@ -1600,13 +1511,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_conditional_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_type_node()
             .expect("operation requires ConditionalTypeNode payload");
-        let check_type = data.check_type;
-        let extends_type = data.extends_type;
-        let true_type = data.true_type;
-        let false_type = data.false_type;
+        let check_type = data.check_type();
+        let extends_type = data.extends_type();
+        let true_type = data.true_type();
+        let false_type = data.false_type();
         drop(original);
         let check_type = self.visit_node(check_type, ChildRole::Node);
         let extends_type = self.visit_node(extends_type, ChildRole::Node);
@@ -1624,11 +1534,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_operator_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_operator_node()
             .expect("operation requires TypeOperatorNode payload");
-        let operator = data.operator;
-        let r#type = data.r#type;
+        let operator = data.operator();
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_type_operator_node(original_id, operator, r#type)
@@ -1637,10 +1546,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_infer_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_infer_type_node()
             .expect("operation requires InferTypeNode payload");
-        let type_parameter = data.type_parameter;
+        let type_parameter = data.type_parameter();
         drop(original);
         let type_parameter = self.visit_node(type_parameter, ChildRole::Node);
         self.update_infer_type_node(original_id, type_parameter)
@@ -1649,10 +1557,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_array_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_type_node()
             .expect("operation requires ArrayTypeNode payload");
-        let element_type = data.element_type;
+        let element_type = data.element_type();
         drop(original);
         let element_type = self.visit_node(element_type, ChildRole::Node);
         self.update_array_type_node(original_id, element_type)
@@ -1661,11 +1568,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_indexed_access_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_indexed_access_type_node()
             .expect("operation requires IndexedAccessTypeNode payload");
-        let object_type = data.object_type;
-        let index_type = data.index_type;
+        let object_type = data.object_type();
+        let index_type = data.index_type();
         drop(original);
         let object_type = self.visit_node(object_type, ChildRole::Node);
         let index_type = self.visit_node(index_type, ChildRole::Node);
@@ -1675,11 +1581,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_reference_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_reference_node()
             .expect("operation requires TypeReferenceNode payload");
-        let type_name = data.type_name;
-        let type_arguments = data.type_arguments;
+        let type_name = data.type_name();
+        let type_arguments = data.type_arguments();
         drop(original);
         let type_name = self.visit_node(type_name, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -1689,11 +1594,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_expression_with_type_arguments(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_expression_with_type_arguments()
             .expect("operation requires ExpressionWithTypeArguments payload");
-        let expression = data.expression;
-        let type_arguments = data.type_arguments;
+        let expression = data.expression();
+        let type_arguments = data.type_arguments();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -1703,10 +1607,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_literal_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_literal_type_node()
             .expect("operation requires LiteralTypeNode payload");
-        let literal = data.literal;
+        let literal = data.literal();
         drop(original);
         let literal = self.visit_node(literal, ChildRole::Node);
         self.update_literal_type_node(original_id, literal)
@@ -1715,12 +1618,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_predicate_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_predicate_node()
             .expect("operation requires TypePredicateNode payload");
-        let asserts_modifier = data.asserts_modifier;
-        let parameter_name = data.parameter_name;
-        let r#type = data.r#type;
+        let asserts_modifier = data.asserts_modifier();
+        let parameter_name = data.parameter_name();
+        let r#type = data.r#type();
         drop(original);
         let asserts_modifier = self.visit_node(asserts_modifier, ChildRole::Node);
         let parameter_name = self.visit_node(parameter_name, ChildRole::Node);
@@ -1731,11 +1633,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attribute()
             .expect("operation requires ImportAttribute payload");
-        let name = data.name;
-        let value = data.value;
+        let name = data.name();
+        let value = data.value();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         let value = self.visit_node(value, ChildRole::Node);
@@ -1745,12 +1646,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_attributes(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attributes()
             .expect("operation requires ImportAttributes payload");
-        let token = data.token;
-        let attributes = data.attributes;
-        let multi_line = data.multi_line;
+        let token = data.token();
+        let attributes = data.attributes();
+        let multi_line = data.multi_line();
         drop(original);
         let attributes = self.visit_list(attributes, ChildRole::Nodes);
         self.update_import_attributes(original_id, token, attributes, multi_line)
@@ -1759,11 +1659,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_query_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_query_node()
             .expect("operation requires TypeQueryNode payload");
-        let expr_name = data.expr_name;
-        let type_arguments = data.type_arguments;
+        let expr_name = data.expr_name();
+        let type_arguments = data.type_arguments();
         drop(original);
         let expr_name = self.visit_node(expr_name, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -1773,15 +1672,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_mapped_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_mapped_type_node()
             .expect("operation requires MappedTypeNode payload");
-        let readonly_token = data.readonly_token;
-        let type_parameter = data.type_parameter;
-        let name_type = data.name_type;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
-        let members = data.members;
+        let readonly_token = data.readonly_token();
+        let type_parameter = data.type_parameter();
+        let name_type = data.name_type();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
+        let members = data.members();
         drop(original);
         let readonly_token = self.visit_node(readonly_token, ChildRole::Node);
         let type_parameter = self.visit_node(type_parameter, ChildRole::Node);
@@ -1803,10 +1701,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_literal_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_literal_node()
             .expect("operation requires TypeLiteralNode payload");
-        let members = data.members;
+        let members = data.members();
         drop(original);
         let members = self.visit_list(members, ChildRole::Nodes);
         self.update_type_literal_node(original_id, members)
@@ -1815,10 +1712,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_tuple_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tuple_type_node()
             .expect("operation requires TupleTypeNode payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let elements = self.visit_list(elements, ChildRole::Nodes);
         self.update_tuple_type_node(original_id, elements)
@@ -1827,13 +1723,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_named_tuple_member(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_tuple_member()
             .expect("operation requires NamedTupleMember payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let name = data.name;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let name = data.name();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
         drop(original);
         let dot_dot_dot_token = self.visit_node(dot_dot_dot_token, ChildRole::Node);
         let name = self.visit_node(name, ChildRole::Node);
@@ -1845,10 +1740,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_optional_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_optional_type_node()
             .expect("operation requires OptionalTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_optional_type_node(original_id, r#type)
@@ -1857,10 +1751,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_rest_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_rest_type_node()
             .expect("operation requires RestTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_rest_type_node(original_id, r#type)
@@ -1869,10 +1762,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_parenthesized_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_type_node()
             .expect("operation requires ParenthesizedTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_parenthesized_type_node(original_id, r#type)
@@ -1881,12 +1773,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_function_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_type_node()
             .expect("operation requires FunctionTypeNode payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
         let parameters = self.visit_list(parameters, ChildRole::Nodes);
@@ -1897,13 +1788,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_constructor_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_type_node()
             .expect("operation requires ConstructorTypeNode payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
@@ -1921,11 +1811,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_template_literal_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_node()
             .expect("operation requires TemplateLiteralTypeNode payload");
-        let head = data.head;
-        let template_spans = data.template_spans;
+        let head = data.head();
+        let template_spans = data.template_spans();
         drop(original);
         let head = self.visit_node(head, ChildRole::Node);
         let template_spans = self.visit_list(template_spans, ChildRole::Nodes);
@@ -1935,11 +1824,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_template_literal_type_span(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_span()
             .expect("operation requires TemplateLiteralTypeSpan payload");
-        let r#type = data.r#type;
-        let literal = data.literal;
+        let r#type = data.r#type();
+        let literal = data.literal();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         let literal = self.visit_node(literal, ChildRole::Node);
@@ -1949,10 +1837,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_partially_emitted_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_partially_emitted_expression()
             .expect("operation requires PartiallyEmittedExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_partially_emitted_expression(original_id, expression)
@@ -1961,12 +1848,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_element()
             .expect("operation requires JsxElement payload");
-        let opening_element = data.opening_element;
-        let children = data.children;
-        let closing_element = data.closing_element;
+        let opening_element = data.opening_element();
+        let children = data.children();
+        let closing_element = data.closing_element();
         drop(original);
         let opening_element = self.visit_node(opening_element, ChildRole::Node);
         let children = self.visit_list(children, ChildRole::Nodes);
@@ -1977,10 +1863,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_attributes(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attributes()
             .expect("operation requires JsxAttributes payload");
-        let properties = data.properties;
+        let properties = data.properties();
         drop(original);
         let properties = self.visit_list(properties, ChildRole::Nodes);
         self.update_jsx_attributes(original_id, properties)
@@ -1989,11 +1874,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_namespaced_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_namespaced_name()
             .expect("operation requires JsxNamespacedName payload");
-        let namespace = data.namespace;
-        let name = data.name;
+        let namespace = data.namespace();
+        let name = data.name();
         drop(original);
         let namespace = self.visit_node(namespace, ChildRole::Node);
         let name = self.visit_node(name, ChildRole::Node);
@@ -2003,12 +1887,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_opening_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_opening_element()
             .expect("operation requires JsxOpeningElement payload");
-        let tag_name = data.tag_name;
-        let type_arguments = data.type_arguments;
-        let attributes = data.attributes;
+        let tag_name = data.tag_name();
+        let type_arguments = data.type_arguments();
+        let attributes = data.attributes();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -2019,12 +1902,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_self_closing_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_self_closing_element()
             .expect("operation requires JsxSelfClosingElement payload");
-        let tag_name = data.tag_name;
-        let type_arguments = data.type_arguments;
-        let attributes = data.attributes;
+        let tag_name = data.tag_name();
+        let type_arguments = data.type_arguments();
+        let attributes = data.attributes();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_arguments = self.visit_list(type_arguments, ChildRole::Nodes);
@@ -2035,12 +1917,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_fragment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_fragment()
             .expect("operation requires JsxFragment payload");
-        let opening_fragment = data.opening_fragment;
-        let children = data.children;
-        let closing_fragment = data.closing_fragment;
+        let opening_fragment = data.opening_fragment();
+        let children = data.children();
+        let closing_fragment = data.closing_fragment();
         drop(original);
         let opening_fragment = self.visit_node(opening_fragment, ChildRole::Node);
         let children = self.visit_list(children, ChildRole::Nodes);
@@ -2051,11 +1932,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attribute()
             .expect("operation requires JsxAttribute payload");
-        let name = data.name;
-        let initializer = data.initializer;
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         let initializer = self.visit_node(initializer, ChildRole::Node);
@@ -2065,10 +1945,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_spread_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_spread_attribute()
             .expect("operation requires JsxSpreadAttribute payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         self.update_jsx_spread_attribute(original_id, expression)
@@ -2077,10 +1956,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_closing_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_closing_element()
             .expect("operation requires JsxClosingElement payload");
-        let tag_name = data.tag_name;
+        let tag_name = data.tag_name();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         self.update_jsx_closing_element(original_id, tag_name)
@@ -2089,11 +1967,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_jsx_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_expression()
             .expect("operation requires JsxExpression payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let expression = data.expression;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let expression = data.expression();
         drop(original);
         let dot_dot_dot_token = self.visit_node(dot_dot_dot_token, ChildRole::Node);
         let expression = self.visit_node(expression, ChildRole::Node);
@@ -2103,10 +1980,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_syntax_list(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_syntax_list()
             .expect("operation requires SyntaxList payload");
-        let children = data.children;
+        let children = data.children();
         drop(original);
         let children = self.map_raw_nodes(children);
         self.update_syntax_list(original_id, children)
@@ -2115,11 +1991,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc()
             .expect("operation requires JSDoc payload");
-        let comment = data.comment;
-        let tags = data.tags;
+        let comment = data.comment();
+        let tags = data.tags();
         drop(original);
         let comment = self.visit_list(comment, ChildRole::Nodes);
         let tags = self.visit_list(tags, ChildRole::Nodes);
@@ -2129,10 +2004,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_type_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_expression()
             .expect("operation requires JSDocTypeExpression payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_js_doc_type_expression(original_id, r#type)
@@ -2141,10 +2015,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_non_nullable_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_non_nullable_type()
             .expect("operation requires JSDocNonNullableType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_js_doc_non_nullable_type(original_id, r#type)
@@ -2153,10 +2026,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_nullable_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_nullable_type()
             .expect("operation requires JSDocNullableType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_js_doc_nullable_type(original_id, r#type)
@@ -2165,10 +2037,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_variadic_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_variadic_type()
             .expect("operation requires JSDocVariadicType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_js_doc_variadic_type(original_id, r#type)
@@ -2177,10 +2048,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_optional_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_optional_type()
             .expect("operation requires JSDocOptionalType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let r#type = self.visit_node(r#type, ChildRole::Node);
         self.update_js_doc_optional_type(original_id, r#type)
@@ -2189,12 +2059,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_type_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_tag()
             .expect("operation requires JSDocTypeTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2205,11 +2074,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_unknown_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_unknown_tag()
             .expect("operation requires JSDocUnknownTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2219,13 +2087,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_template_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_template_tag()
             .expect("operation requires JSDocTemplateTag payload");
-        let tag_name = data.tag_name;
-        let constraint = data.constraint;
-        let type_parameters = data.type_parameters;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let constraint = data.constraint();
+        let type_parameters = data.type_parameters();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let constraint = self.visit_node(constraint, ChildRole::Node);
@@ -2237,12 +2104,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_return_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_return_tag()
             .expect("operation requires JSDocReturnTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2253,11 +2119,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_public_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_public_tag()
             .expect("operation requires JSDocPublicTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2267,11 +2132,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_private_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_private_tag()
             .expect("operation requires JSDocPrivateTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2281,11 +2145,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_protected_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_protected_tag()
             .expect("operation requires JSDocProtectedTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2295,11 +2158,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_readonly_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_readonly_tag()
             .expect("operation requires JSDocReadonlyTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2309,11 +2171,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_override_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_override_tag()
             .expect("operation requires JSDocOverrideTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2323,11 +2184,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_deprecated_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_deprecated_tag()
             .expect("operation requires JSDocDeprecatedTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let comment = self.visit_list(comment, ChildRole::Nodes);
@@ -2337,12 +2197,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_see_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_see_tag()
             .expect("operation requires JSDocSeeTag payload");
-        let tag_name = data.tag_name;
-        let name_expression = data.name_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let name_expression = data.name_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let name_expression = self.visit_node(name_expression, ChildRole::Node);
@@ -2353,12 +2212,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_implements_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_implements_tag()
             .expect("operation requires JSDocImplementsTag payload");
-        let tag_name = data.tag_name;
-        let class_name = data.class_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let class_name = data.class_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let class_name = self.visit_node(class_name, ChildRole::Node);
@@ -2369,12 +2227,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_augments_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_augments_tag()
             .expect("operation requires JSDocAugmentsTag payload");
-        let tag_name = data.tag_name;
-        let class_name = data.class_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let class_name = data.class_name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let class_name = self.visit_node(class_name, ChildRole::Node);
@@ -2385,12 +2242,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_satisfies_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_satisfies_tag()
             .expect("operation requires JSDocSatisfiesTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2401,12 +2257,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_throws_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_throws_tag()
             .expect("operation requires JSDocThrowsTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2417,12 +2272,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_this_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_this_tag()
             .expect("operation requires JSDocThisTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2433,14 +2287,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_import_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_import_tag()
             .expect("operation requires JSDocImportTag payload");
-        let tag_name = data.tag_name;
-        let import_clause = data.import_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let import_clause = data.import_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let import_clause = self.visit_node(import_clause, ChildRole::Node);
@@ -2460,13 +2313,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_callback_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_callback_tag()
             .expect("operation requires JSDocCallbackTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let name = data.name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let name = data.name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2478,12 +2330,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_overload_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_overload_tag()
             .expect("operation requires JSDocOverloadTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2494,13 +2345,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_typedef_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_typedef_tag()
             .expect("operation requires JSDocTypedefTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let name = data.name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let name = data.name();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let type_expression = self.visit_node(type_expression, ChildRole::Node);
@@ -2512,12 +2362,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_signature(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_signature()
             .expect("operation requires JSDocSignature payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let type_parameters = self.visit_list(type_parameters, ChildRole::Nodes);
         let parameters = self.visit_list(parameters, ChildRole::Nodes);
@@ -2528,10 +2377,9 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_name_reference(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_name_reference()
             .expect("operation requires JSDocNameReference payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_js_doc_name_reference(original_id, name)
@@ -2540,14 +2388,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_module_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_declaration()
             .expect("operation requires ModuleDeclaration payload");
-        let modifiers = data.modifiers;
-        let keyword = data.keyword;
-        let name = data.name;
-        let attributes = data.attributes;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let keyword = data.keyword();
+        let name = data.name();
+        let attributes = data.attributes();
+        let body = data.body();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -2559,13 +2406,12 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_equals_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_equals_declaration()
             .expect("operation requires ImportEqualsDeclaration payload");
-        let modifiers = data.modifiers;
-        let is_type_only = data.is_type_only;
-        let name = data.name;
-        let module_reference = data.module_reference;
+        let modifiers = data.modifiers();
+        let is_type_only = data.is_type_only();
+        let name = data.name();
+        let module_reference = data.module_reference();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -2582,14 +2428,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_export_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_declaration()
             .expect("operation requires ExportDeclaration payload");
-        let modifiers = data.modifiers;
-        let is_type_only = data.is_type_only;
-        let export_clause = data.export_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
+        let modifiers = data.modifiers();
+        let is_type_only = data.is_type_only();
+        let export_clause = data.export_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let export_clause = self.visit_node(export_clause, ChildRole::Node);
@@ -2608,14 +2453,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_type_node()
             .expect("operation requires ImportTypeNode payload");
-        let is_type_of = data.is_type_of;
-        let argument = data.argument;
-        let attributes = data.attributes;
-        let qualifier = data.qualifier;
-        let type_arguments = data.type_arguments;
+        let is_type_of = data.is_type_of();
+        let argument = data.argument();
+        let attributes = data.attributes();
+        let qualifier = data.qualifier();
+        let type_arguments = data.type_arguments();
         drop(original);
         let argument = self.visit_node(argument, ChildRole::Node);
         let attributes = self.visit_node(attributes, ChildRole::Node);
@@ -2634,12 +2478,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_clause()
             .expect("operation requires ImportClause payload");
-        let phase_modifier = data.phase_modifier;
-        let name = data.name;
-        let named_bindings = data.named_bindings;
+        let phase_modifier = data.phase_modifier();
+        let name = data.name();
+        let named_bindings = data.named_bindings();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         let named_bindings = self.visit_node(named_bindings, ChildRole::Node);
@@ -2649,12 +2492,11 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_import_specifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_specifier()
             .expect("operation requires ImportSpecifier payload");
-        let is_type_only = data.is_type_only;
-        let property_name = data.property_name;
-        let name = data.name;
+        let is_type_only = data.is_type_only();
+        let property_name = data.property_name();
+        let name = data.name();
         drop(original);
         let property_name = self.visit_node(property_name, ChildRole::Node);
         let name = self.visit_node(name, ChildRole::Node);
@@ -2664,11 +2506,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_link(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link()
             .expect("operation requires JSDocLink payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_js_doc_link(original_id, name, text)
@@ -2677,11 +2518,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_link_plain(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_plain()
             .expect("operation requires JSDocLinkPlain payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_js_doc_link_plain(original_id, name, text)
@@ -2690,11 +2530,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_link_code(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_code()
             .expect("operation requires JSDocLinkCode payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let name = self.visit_node(name, ChildRole::Node);
         self.update_js_doc_link_code(original_id, name, text)
@@ -2703,14 +2542,13 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_type_parameter_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_parameter_declaration()
             .expect("operation requires TypeParameterDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let constraint = data.constraint;
-        let expression = data.expression;
-        let default_type = data.default_type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let constraint = data.constraint();
+        let expression = data.expression();
+        let default_type = data.default_type();
         drop(original);
         let modifiers = self.visit_list(modifiers, ChildRole::Modifiers);
         let name = self.visit_node(name, ChildRole::Node);
@@ -2730,11 +2568,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_synthetic_reference_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_synthetic_reference_expression()
             .expect("operation requires SyntheticReferenceExpression payload");
-        let expression = data.expression;
-        let this_arg = data.this_arg;
+        let expression = data.expression();
+        let this_arg = data.this_arg();
         drop(original);
         let expression = self.visit_node(expression, ChildRole::Node);
         let this_arg = self.visit_node(this_arg, ChildRole::Node);
@@ -2744,11 +2581,10 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_type_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_literal()
             .expect("operation requires JSDocTypeLiteral payload");
-        let js_doc_property_tags = data.js_doc_property_tags;
-        let is_array_type = data.is_array_type;
+        let js_doc_property_tags = data.js_doc_property_tags();
+        let is_array_type = data.is_array_type();
         drop(original);
         let js_doc_property_tags = self.map_raw_nodes(js_doc_property_tags);
         self.update_js_doc_type_literal(original_id, js_doc_property_tags, is_array_type)
@@ -2757,15 +2593,14 @@ pub trait VisitorMethods: VisitContext {
     fn visit_each_child_js_doc_parameter_or_property_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_parameter_or_property_tag()
             .expect("operation requires JSDocParameterOrPropertyTag payload");
-        let tag_name = data.tag_name;
-        let name = data.name;
-        let is_bracketed = data.is_bracketed;
-        let type_expression = data.type_expression;
-        let is_name_first = data.is_name_first;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let name = data.name();
+        let is_bracketed = data.is_bracketed();
+        let type_expression = data.type_expression();
+        let is_name_first = data.is_name_first();
+        let comment = data.comment();
         drop(original);
         let tag_name = self.visit_node(tag_name, ChildRole::Node);
         let name = self.visit_node(name, ChildRole::Node);
