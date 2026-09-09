@@ -971,10 +971,43 @@ Keep semantic validity and complete replacement costs mandatory. In particular,
 page-backed lists enter CP3 with a named resolved-reader contract; matching
 legacy's isolated traversal percentage is not a prerequisite. A component may
 remain a leading candidate while its integrated CPU/memory effect is unmeasured.
-The 5% win and 2% non-regression rules below apply to actual complete-pipeline
-screens, never to the microbenchmark's percentages or hypothetical conversions.
-The existing infrastructure exception remains available for a necessary CP3
-component after its full-pipeline non-regression checks; no final gate is relaxed.
+The screening rules below apply to actual complete-pipeline measurements, never
+to microbenchmark percentages or hypothetical conversions. Distinguish whether
+to invest in another experiment, retain reviewed code, promote a measured control,
+or accept S07; those decisions do not have identical thresholds.
+
+### Components, combined experiments and small improvements
+
+The compact slice is one combined candidate by default. Its header, payloads,
+inline binding fields, edge storage and dependent CPU repairs structurally trade
+costs. Intermediate full-pipeline screens attribute those costs; they are not a
+requirement that every component independently pass before integration. Keep
+graph parity and ownership checks during implementation. A CPU-regressing
+memory change can remain on the experimental branch while its named dependent
+CPU work is built. Record the regression, next dependency and remaining gate
+distances; do not call it an accepted performance control.
+
+Judge the measured combination against the complete vector of CPU modes,
+allocation and RSS, with the same workload and same-screen control. No weighted
+score permits a failed final gate, and no arithmetic sum of separate experiments
+predicts a combined result. Normal screening tolerances below account for noise;
+they do not require every metric to improve strictly. Final Go-relative gates
+remain unchanged.
+
+Use a likely 5% pipeline effect to prioritize *further experimental investment*.
+Do not discard an already measured, reviewed and semantically clean small CPU
+improvement solely because its median win is below 5%. It may be retained when
+at least one timing mode has upper 95% candidate/control ratio < 1.0, all metrics
+meet the non-regression/noise conditions below, and it does not complicate a
+surface scheduled for replacement. Record its absolute saving and maintenance
+cost. This is a prospective retention rule, not permission to relabel historical
+screens or to assume a small improvement survives a storage migration.
+
+The earlier list-copy and lookup-reuse implementations remain archived and
+removed. Their original screens used the original 5% rule. Both modified binder
+access that the compact facade subsequently replaced; restoring them now would
+require adapting and measuring the actual combination. No new experiment in
+those low-payoff directions is scheduled just to recover a historical percentage.
 
 ### Complete-pipeline capture and promotion
 
@@ -1000,8 +1033,8 @@ allocation builds; alternate order. Keep all rows, failures and stderr.
 Screening validates work counts and loaded input identity; it emits no E5/E6
 metrics and cannot substitute for complete graph comparison.
 
-The default promotion rule is a demonstrated reduction in the targeted cost
-and a median candidate/control ratio <= 0.95 in at least one full-pipeline
+The default substantial-candidate promotion rule is a demonstrated reduction in
+the targeted cost and a median candidate/control ratio <= 0.95 in at least one full-pipeline
 metric/mode. Every timing mode must additionally have bootstrap upper 95%
 candidate/control ratio <= 1.02 and both variants' relative MAD <= 5%; a claimed
 timing win needs upper < 1.0. Use the existing fixed bootstrap algorithm for this
@@ -1017,6 +1050,10 @@ step can be retained after review without a 5% win only if it meets every 1.02
 non-regression/noise condition above, with its dependent checkpoint named.
 Any other tradeoff requires a recorded combined-candidate result showing a
 better route to all gates; no individual savings are added to predict that result.
+This limits promotion, not temporary retention of a named component in the
+combined experiment. The reviewed-small-improvement rule above is a separate
+retention path; preserve the runner's original screen verdict and record the
+reason for retaining it rather than rewriting the captured evidence.
 
 Before promoting a complete storage slice as the next implementation control,
 run full relevant parity and ownership evidence. A diagnostic winner alone is

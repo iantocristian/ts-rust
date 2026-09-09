@@ -362,6 +362,17 @@ the missing observation. Apply pipeline thresholds only to pipeline measurements
 keep a materially smaller storage candidate in contention while testing its
 integration. Do not infer a rigorous upper bound from a cheaper synthetic control.
 
+Separate performance acceptance from experimental retention and investment.
+Components that trade CPU for memory can belong in one combined implementation;
+measure that complete implementation against the same control before promoting
+it. Preserve component results for attribution, including regressions. Never add
+separately measured savings or use a weighted score to excuse a failed final
+gate. An investment threshold is not a reason to discard a reviewed small win
+already supported beyond noise: weigh its absolute benefit, maintenance cost
+and whether its implementation surface will survive the next planned change.
+Keep phase elapsed clocks distinct from sampled CPU; retain matched phase
+attribution when a storage tradeoff could improve binding while slowing parsing.
+
 Do not use report grades or counts as acceptance criteria. Shorter files,
 fewer casts, fewer `expect`s, more derives, more comments and more probes can
 each make a port worse if pursued without examining the contract. Identify
