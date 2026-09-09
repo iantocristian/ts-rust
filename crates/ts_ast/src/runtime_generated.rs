@@ -4422,6 +4422,1309 @@ impl NodeRead<'_> {
         for_each_child_generated(self, visitor)
     }
 }
+impl AstPayloadStore {
+    pub(crate) fn for_each_stored_child(
+        &self,
+        kind: NodeKind,
+        shape: u16,
+        ordinal: u32,
+        end: i32,
+        context: crate::compact::CompactContext<'_>,
+        visitor: &mut impl ChildVisitor,
+    ) -> ControlFlow<()> {
+        match kind.known() {
+            Some(SyntaxKind::QualifiedName) => {
+                assert!(
+                    shape == 3,
+                    "QualifiedName kind requires QualifiedName payload"
+                );
+                self.read_qualified_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ComputedPropertyName) => {
+                assert!(
+                    shape == 4,
+                    "ComputedPropertyName kind requires ComputedPropertyName payload"
+                );
+                self.read_computed_property_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Decorator) => {
+                assert!(shape == 5, "Decorator kind requires Decorator payload");
+                self.read_decorator(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IfStatement) => {
+                assert!(shape == 7, "IfStatement kind requires IfStatement payload");
+                self.read_if_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::DoStatement) => {
+                assert!(shape == 8, "DoStatement kind requires DoStatement payload");
+                self.read_do_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::WhileStatement) => {
+                assert!(
+                    shape == 9,
+                    "WhileStatement kind requires WhileStatement payload"
+                );
+                self.read_while_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ForStatement) => {
+                assert!(
+                    shape == 10,
+                    "ForStatement kind requires ForStatement payload"
+                );
+                self.read_for_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => {
+                assert!(
+                    shape == 11,
+                    "ForInOrOfStatement kind requires ForInOrOfStatement payload"
+                );
+                self.read_for_in_or_of_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BreakStatement) => {
+                assert!(
+                    shape == 12,
+                    "BreakStatement kind requires BreakStatement payload"
+                );
+                self.read_break_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ContinueStatement) => {
+                assert!(
+                    shape == 13,
+                    "ContinueStatement kind requires ContinueStatement payload"
+                );
+                self.read_continue_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ReturnStatement) => {
+                assert!(
+                    shape == 14,
+                    "ReturnStatement kind requires ReturnStatement payload"
+                );
+                self.read_return_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::WithStatement) => {
+                assert!(
+                    shape == 15,
+                    "WithStatement kind requires WithStatement payload"
+                );
+                self.read_with_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SwitchStatement) => {
+                assert!(
+                    shape == 16,
+                    "SwitchStatement kind requires SwitchStatement payload"
+                );
+                self.read_switch_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CaseBlock) => {
+                assert!(shape == 17, "CaseBlock kind requires CaseBlock payload");
+                self.read_case_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => {
+                assert!(
+                    shape == 18,
+                    "CaseOrDefaultClause kind requires CaseOrDefaultClause payload"
+                );
+                self.read_case_or_default_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ThrowStatement) => {
+                assert!(
+                    shape == 19,
+                    "ThrowStatement kind requires ThrowStatement payload"
+                );
+                self.read_throw_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TryStatement) => {
+                assert!(
+                    shape == 20,
+                    "TryStatement kind requires TryStatement payload"
+                );
+                self.read_try_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CatchClause) => {
+                assert!(shape == 21, "CatchClause kind requires CatchClause payload");
+                self.read_catch_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::LabeledStatement) => {
+                assert!(
+                    shape == 23,
+                    "LabeledStatement kind requires LabeledStatement payload"
+                );
+                self.read_labeled_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExpressionStatement) => {
+                assert!(
+                    shape == 24,
+                    "ExpressionStatement kind requires ExpressionStatement payload"
+                );
+                self.read_expression_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Block) => {
+                assert!(shape == 25, "Block kind requires Block payload");
+                self.read_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableStatement) => {
+                assert!(
+                    shape == 26,
+                    "VariableStatement kind requires VariableStatement payload"
+                );
+                self.read_variable_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableDeclaration) => {
+                assert!(
+                    shape == 27,
+                    "VariableDeclaration kind requires VariableDeclaration payload"
+                );
+                self.read_variable_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableDeclarationList) => {
+                assert!(
+                    shape == 28,
+                    "VariableDeclarationList kind requires VariableDeclarationList payload"
+                );
+                self.read_variable_declaration_list(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => {
+                assert!(
+                    shape == 29,
+                    "BindingPattern kind requires BindingPattern payload"
+                );
+                self.read_binding_pattern(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Parameter) => {
+                assert!(
+                    shape == 30,
+                    "ParameterDeclaration kind requires ParameterDeclaration payload"
+                );
+                self.read_parameter_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BindingElement) => {
+                assert!(
+                    shape == 31,
+                    "BindingElement kind requires BindingElement payload"
+                );
+                self.read_binding_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MissingDeclaration) => {
+                assert!(
+                    shape == 32,
+                    "MissingDeclaration kind requires MissingDeclaration payload"
+                );
+                self.read_missing_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionDeclaration) => {
+                assert!(
+                    shape == 33,
+                    "FunctionDeclaration kind requires FunctionDeclaration payload"
+                );
+                self.read_function_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassDeclaration) => {
+                assert!(
+                    shape == 34,
+                    "ClassDeclaration kind requires ClassDeclaration payload"
+                );
+                self.read_class_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassExpression) => {
+                assert!(
+                    shape == 35,
+                    "ClassExpression kind requires ClassExpression payload"
+                );
+                self.read_class_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::HeritageClause) => {
+                assert!(
+                    shape == 36,
+                    "HeritageClause kind requires HeritageClause payload"
+                );
+                self.read_heritage_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::InterfaceDeclaration) => {
+                assert!(
+                    shape == 37,
+                    "InterfaceDeclaration kind requires InterfaceDeclaration payload"
+                );
+                self.read_interface_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => {
+                assert!(
+                    shape == 38,
+                    "TypeAliasDeclaration kind requires TypeAliasDeclaration payload"
+                );
+                self.read_type_alias_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::EnumMember) => {
+                assert!(shape == 39, "EnumMember kind requires EnumMember payload");
+                self.read_enum_member(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::EnumDeclaration) => {
+                assert!(
+                    shape == 40,
+                    "EnumDeclaration kind requires EnumDeclaration payload"
+                );
+                self.read_enum_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ModuleBlock) => {
+                assert!(shape == 41, "ModuleBlock kind requires ModuleBlock payload");
+                self.read_module_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => {
+                assert!(
+                    shape == 44,
+                    "ImportDeclaration kind requires ImportDeclaration payload"
+                );
+                self.read_import_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExternalModuleReference) => {
+                assert!(
+                    shape == 45,
+                    "ExternalModuleReference kind requires ExternalModuleReference payload"
+                );
+                self.read_external_module_reference(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceImport) => {
+                assert!(
+                    shape == 46,
+                    "NamespaceImport kind requires NamespaceImport payload"
+                );
+                self.read_namespace_import(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedImports) => {
+                assert!(
+                    shape == 47,
+                    "NamedImports kind requires NamedImports payload"
+                );
+                self.read_named_imports(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportAssignment) => {
+                assert!(
+                    shape == 48,
+                    "ExportAssignment kind requires ExportAssignment payload"
+                );
+                self.read_export_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceExportDeclaration) => {
+                assert!(
+                    shape == 49,
+                    "NamespaceExportDeclaration kind requires NamespaceExportDeclaration payload"
+                );
+                self.read_namespace_export_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceExport) => {
+                assert!(
+                    shape == 50,
+                    "NamespaceExport kind requires NamespaceExport payload"
+                );
+                self.read_namespace_export(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedExports) => {
+                assert!(
+                    shape == 51,
+                    "NamedExports kind requires NamedExports payload"
+                );
+                self.read_named_exports(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportSpecifier) => {
+                assert!(
+                    shape == 52,
+                    "ExportSpecifier kind requires ExportSpecifier payload"
+                );
+                self.read_export_specifier(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CallSignature) => {
+                assert!(
+                    shape == 53,
+                    "CallSignatureDeclaration kind requires CallSignatureDeclaration payload"
+                );
+                self.read_call_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConstructSignature) => {
+                assert!(shape == 54, "ConstructSignatureDeclaration kind requires ConstructSignatureDeclaration payload");
+                self.read_construct_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Constructor) => {
+                assert!(
+                    shape == 55,
+                    "ConstructorDeclaration kind requires ConstructorDeclaration payload"
+                );
+                self.read_constructor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::GetAccessor) => {
+                assert!(
+                    shape == 56,
+                    "GetAccessorDeclaration kind requires GetAccessorDeclaration payload"
+                );
+                self.read_get_accessor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SetAccessor) => {
+                assert!(
+                    shape == 57,
+                    "SetAccessorDeclaration kind requires SetAccessorDeclaration payload"
+                );
+                self.read_set_accessor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IndexSignature) => {
+                assert!(
+                    shape == 58,
+                    "IndexSignatureDeclaration kind requires IndexSignatureDeclaration payload"
+                );
+                self.read_index_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MethodSignature) => {
+                assert!(
+                    shape == 59,
+                    "MethodSignatureDeclaration kind requires MethodSignatureDeclaration payload"
+                );
+                self.read_method_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MethodDeclaration) => {
+                assert!(
+                    shape == 60,
+                    "MethodDeclaration kind requires MethodDeclaration payload"
+                );
+                self.read_method_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertySignature) => {
+                assert!(shape == 61, "PropertySignatureDeclaration kind requires PropertySignatureDeclaration payload");
+                self.read_property_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyDeclaration) => {
+                assert!(
+                    shape == 62,
+                    "PropertyDeclaration kind requires PropertyDeclaration payload"
+                );
+                self.read_property_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassStaticBlockDeclaration) => {
+                assert!(
+                    shape == 64,
+                    "ClassStaticBlockDeclaration kind requires ClassStaticBlockDeclaration payload"
+                );
+                self.read_class_static_block_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BinaryExpression) => {
+                assert!(
+                    shape == 72,
+                    "BinaryExpression kind requires BinaryExpression payload"
+                );
+                self.read_binary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PrefixUnaryExpression) => {
+                assert!(
+                    shape == 73,
+                    "PrefixUnaryExpression kind requires PrefixUnaryExpression payload"
+                );
+                self.read_prefix_unary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PostfixUnaryExpression) => {
+                assert!(
+                    shape == 74,
+                    "PostfixUnaryExpression kind requires PostfixUnaryExpression payload"
+                );
+                self.read_postfix_unary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::YieldExpression) => {
+                assert!(
+                    shape == 75,
+                    "YieldExpression kind requires YieldExpression payload"
+                );
+                self.read_yield_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrowFunction) => {
+                assert!(
+                    shape == 76,
+                    "ArrowFunction kind requires ArrowFunction payload"
+                );
+                self.read_arrow_function(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionExpression) => {
+                assert!(
+                    shape == 77,
+                    "FunctionExpression kind requires FunctionExpression payload"
+                );
+                self.read_function_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::AsExpression) => {
+                assert!(
+                    shape == 78,
+                    "AsExpression kind requires AsExpression payload"
+                );
+                self.read_as_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SatisfiesExpression) => {
+                assert!(
+                    shape == 79,
+                    "SatisfiesExpression kind requires SatisfiesExpression payload"
+                );
+                self.read_satisfies_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConditionalExpression) => {
+                assert!(
+                    shape == 80,
+                    "ConditionalExpression kind requires ConditionalExpression payload"
+                );
+                self.read_conditional_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyAccessExpression) => {
+                assert!(
+                    shape == 81,
+                    "PropertyAccessExpression kind requires PropertyAccessExpression payload"
+                );
+                self.read_property_access_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ElementAccessExpression) => {
+                assert!(
+                    shape == 82,
+                    "ElementAccessExpression kind requires ElementAccessExpression payload"
+                );
+                self.read_element_access_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CallExpression) => {
+                assert!(
+                    shape == 83,
+                    "CallExpression kind requires CallExpression payload"
+                );
+                self.read_call_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NewExpression) => {
+                assert!(
+                    shape == 84,
+                    "NewExpression kind requires NewExpression payload"
+                );
+                self.read_new_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MetaProperty) => {
+                assert!(
+                    shape == 85,
+                    "MetaProperty kind requires MetaProperty payload"
+                );
+                self.read_meta_property(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NonNullExpression) => {
+                assert!(
+                    shape == 86,
+                    "NonNullExpression kind requires NonNullExpression payload"
+                );
+                self.read_non_null_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SpreadElement) => {
+                assert!(
+                    shape == 87,
+                    "SpreadElement kind requires SpreadElement payload"
+                );
+                self.read_spread_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateExpression) => {
+                assert!(
+                    shape == 88,
+                    "TemplateExpression kind requires TemplateExpression payload"
+                );
+                self.read_template_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateSpan) => {
+                assert!(
+                    shape == 89,
+                    "TemplateSpan kind requires TemplateSpan payload"
+                );
+                self.read_template_span(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TaggedTemplateExpression) => {
+                assert!(
+                    shape == 90,
+                    "TaggedTemplateExpression kind requires TaggedTemplateExpression payload"
+                );
+                self.read_tagged_template_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ParenthesizedExpression) => {
+                assert!(
+                    shape == 91,
+                    "ParenthesizedExpression kind requires ParenthesizedExpression payload"
+                );
+                self.read_parenthesized_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrayLiteralExpression) => {
+                assert!(
+                    shape == 92,
+                    "ArrayLiteralExpression kind requires ArrayLiteralExpression payload"
+                );
+                self.read_array_literal_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ObjectLiteralExpression) => {
+                assert!(
+                    shape == 93,
+                    "ObjectLiteralExpression kind requires ObjectLiteralExpression payload"
+                );
+                self.read_object_literal_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SpreadAssignment) => {
+                assert!(
+                    shape == 94,
+                    "SpreadAssignment kind requires SpreadAssignment payload"
+                );
+                self.read_spread_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyAssignment) => {
+                assert!(
+                    shape == 95,
+                    "PropertyAssignment kind requires PropertyAssignment payload"
+                );
+                self.read_property_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ShorthandPropertyAssignment) => {
+                assert!(
+                    shape == 96,
+                    "ShorthandPropertyAssignment kind requires ShorthandPropertyAssignment payload"
+                );
+                self.read_shorthand_property_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::DeleteExpression) => {
+                assert!(
+                    shape == 97,
+                    "DeleteExpression kind requires DeleteExpression payload"
+                );
+                self.read_delete_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeOfExpression) => {
+                assert!(
+                    shape == 98,
+                    "TypeOfExpression kind requires TypeOfExpression payload"
+                );
+                self.read_type_of_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VoidExpression) => {
+                assert!(
+                    shape == 99,
+                    "VoidExpression kind requires VoidExpression payload"
+                );
+                self.read_void_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::AwaitExpression) => {
+                assert!(
+                    shape == 100,
+                    "AwaitExpression kind requires AwaitExpression payload"
+                );
+                self.read_await_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeAssertionExpression) => {
+                assert!(
+                    shape == 101,
+                    "TypeAssertion kind requires TypeAssertion payload"
+                );
+                self.read_type_assertion(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::UnionType) => {
+                assert!(
+                    shape == 103,
+                    "UnionTypeNode kind requires UnionTypeNode payload"
+                );
+                self.read_union_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IntersectionType) => {
+                assert!(
+                    shape == 104,
+                    "IntersectionTypeNode kind requires IntersectionTypeNode payload"
+                );
+                self.read_intersection_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConditionalType) => {
+                assert!(
+                    shape == 105,
+                    "ConditionalTypeNode kind requires ConditionalTypeNode payload"
+                );
+                self.read_conditional_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeOperator) => {
+                assert!(
+                    shape == 106,
+                    "TypeOperatorNode kind requires TypeOperatorNode payload"
+                );
+                self.read_type_operator_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::InferType) => {
+                assert!(
+                    shape == 107,
+                    "InferTypeNode kind requires InferTypeNode payload"
+                );
+                self.read_infer_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrayType) => {
+                assert!(
+                    shape == 108,
+                    "ArrayTypeNode kind requires ArrayTypeNode payload"
+                );
+                self.read_array_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IndexedAccessType) => {
+                assert!(
+                    shape == 109,
+                    "IndexedAccessTypeNode kind requires IndexedAccessTypeNode payload"
+                );
+                self.read_indexed_access_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeReference) => {
+                assert!(
+                    shape == 110,
+                    "TypeReferenceNode kind requires TypeReferenceNode payload"
+                );
+                self.read_type_reference_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExpressionWithTypeArguments) => {
+                assert!(
+                    shape == 111,
+                    "ExpressionWithTypeArguments kind requires ExpressionWithTypeArguments payload"
+                );
+                self.read_expression_with_type_arguments(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::LiteralType) => {
+                assert!(
+                    shape == 112,
+                    "LiteralTypeNode kind requires LiteralTypeNode payload"
+                );
+                self.read_literal_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypePredicate) => {
+                assert!(
+                    shape == 114,
+                    "TypePredicateNode kind requires TypePredicateNode payload"
+                );
+                self.read_type_predicate_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportAttribute) => {
+                assert!(
+                    shape == 115,
+                    "ImportAttribute kind requires ImportAttribute payload"
+                );
+                self.read_import_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportAttributes) => {
+                assert!(
+                    shape == 116,
+                    "ImportAttributes kind requires ImportAttributes payload"
+                );
+                self.read_import_attributes(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeQuery) => {
+                assert!(
+                    shape == 117,
+                    "TypeQueryNode kind requires TypeQueryNode payload"
+                );
+                self.read_type_query_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MappedType) => {
+                assert!(
+                    shape == 118,
+                    "MappedTypeNode kind requires MappedTypeNode payload"
+                );
+                self.read_mapped_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeLiteral) => {
+                assert!(
+                    shape == 119,
+                    "TypeLiteralNode kind requires TypeLiteralNode payload"
+                );
+                self.read_type_literal_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TupleType) => {
+                assert!(
+                    shape == 120,
+                    "TupleTypeNode kind requires TupleTypeNode payload"
+                );
+                self.read_tuple_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedTupleMember) => {
+                assert!(
+                    shape == 121,
+                    "NamedTupleMember kind requires NamedTupleMember payload"
+                );
+                self.read_named_tuple_member(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::OptionalType) => {
+                assert!(
+                    shape == 122,
+                    "OptionalTypeNode kind requires OptionalTypeNode payload"
+                );
+                self.read_optional_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::RestType) => {
+                assert!(
+                    shape == 123,
+                    "RestTypeNode kind requires RestTypeNode payload"
+                );
+                self.read_rest_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ParenthesizedType) => {
+                assert!(
+                    shape == 124,
+                    "ParenthesizedTypeNode kind requires ParenthesizedTypeNode payload"
+                );
+                self.read_parenthesized_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionType) => {
+                assert!(
+                    shape == 125,
+                    "FunctionTypeNode kind requires FunctionTypeNode payload"
+                );
+                self.read_function_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConstructorType) => {
+                assert!(
+                    shape == 126,
+                    "ConstructorTypeNode kind requires ConstructorTypeNode payload"
+                );
+                self.read_constructor_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateLiteralType) => {
+                assert!(
+                    shape == 130,
+                    "TemplateLiteralTypeNode kind requires TemplateLiteralTypeNode payload"
+                );
+                self.read_template_literal_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateLiteralTypeSpan) => {
+                assert!(
+                    shape == 131,
+                    "TemplateLiteralTypeSpan kind requires TemplateLiteralTypeSpan payload"
+                );
+                self.read_template_literal_type_span(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntheticExpression) => {
+                assert!(
+                    shape == 132,
+                    "SyntheticExpression kind requires SyntheticExpression payload"
+                );
+                self.read_synthetic_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PartiallyEmittedExpression) => {
+                assert!(
+                    shape == 133,
+                    "PartiallyEmittedExpression kind requires PartiallyEmittedExpression payload"
+                );
+                self.read_partially_emitted_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxElement) => {
+                assert!(shape == 134, "JsxElement kind requires JsxElement payload");
+                self.read_jsx_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxAttributes) => {
+                assert!(
+                    shape == 135,
+                    "JsxAttributes kind requires JsxAttributes payload"
+                );
+                self.read_jsx_attributes(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxNamespacedName) => {
+                assert!(
+                    shape == 136,
+                    "JsxNamespacedName kind requires JsxNamespacedName payload"
+                );
+                self.read_jsx_namespaced_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxOpeningElement) => {
+                assert!(
+                    shape == 137,
+                    "JsxOpeningElement kind requires JsxOpeningElement payload"
+                );
+                self.read_jsx_opening_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxSelfClosingElement) => {
+                assert!(
+                    shape == 138,
+                    "JsxSelfClosingElement kind requires JsxSelfClosingElement payload"
+                );
+                self.read_jsx_self_closing_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxFragment) => {
+                assert!(
+                    shape == 139,
+                    "JsxFragment kind requires JsxFragment payload"
+                );
+                self.read_jsx_fragment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxAttribute) => {
+                assert!(
+                    shape == 142,
+                    "JsxAttribute kind requires JsxAttribute payload"
+                );
+                self.read_jsx_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxSpreadAttribute) => {
+                assert!(
+                    shape == 143,
+                    "JsxSpreadAttribute kind requires JsxSpreadAttribute payload"
+                );
+                self.read_jsx_spread_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxClosingElement) => {
+                assert!(
+                    shape == 144,
+                    "JsxClosingElement kind requires JsxClosingElement payload"
+                );
+                self.read_jsx_closing_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxExpression) => {
+                assert!(
+                    shape == 145,
+                    "JsxExpression kind requires JsxExpression payload"
+                );
+                self.read_jsx_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntaxList) => {
+                assert!(shape == 147, "SyntaxList kind requires SyntaxList payload");
+                self.read_syntax_list(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDoc) => {
+                assert!(shape == 148, "JSDoc kind requires JSDoc payload");
+                self.read_js_doc(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeExpression) => {
+                assert!(
+                    shape == 149,
+                    "JSDocTypeExpression kind requires JSDocTypeExpression payload"
+                );
+                self.read_js_doc_type_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNonNullableType) => {
+                assert!(
+                    shape == 150,
+                    "JSDocNonNullableType kind requires JSDocNonNullableType payload"
+                );
+                self.read_js_doc_non_nullable_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNullableType) => {
+                assert!(
+                    shape == 151,
+                    "JSDocNullableType kind requires JSDocNullableType payload"
+                );
+                self.read_js_doc_nullable_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocVariadicType) => {
+                assert!(
+                    shape == 153,
+                    "JSDocVariadicType kind requires JSDocVariadicType payload"
+                );
+                self.read_js_doc_variadic_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOptionalType) => {
+                assert!(
+                    shape == 154,
+                    "JSDocOptionalType kind requires JSDocOptionalType payload"
+                );
+                self.read_js_doc_optional_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeTag) => {
+                assert!(
+                    shape == 155,
+                    "JSDocTypeTag kind requires JSDocTypeTag payload"
+                );
+                self.read_js_doc_type_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocUnknownTag) => {
+                assert!(
+                    shape == 156,
+                    "JSDocUnknownTag kind requires JSDocUnknownTag payload"
+                );
+                self.read_js_doc_unknown_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTemplateTag) => {
+                assert!(
+                    shape == 157,
+                    "JSDocTemplateTag kind requires JSDocTemplateTag payload"
+                );
+                self.read_js_doc_template_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocReturnTag) => {
+                assert!(
+                    shape == 158,
+                    "JSDocReturnTag kind requires JSDocReturnTag payload"
+                );
+                self.read_js_doc_return_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocPublicTag) => {
+                assert!(
+                    shape == 159,
+                    "JSDocPublicTag kind requires JSDocPublicTag payload"
+                );
+                self.read_js_doc_public_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocPrivateTag) => {
+                assert!(
+                    shape == 160,
+                    "JSDocPrivateTag kind requires JSDocPrivateTag payload"
+                );
+                self.read_js_doc_private_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocProtectedTag) => {
+                assert!(
+                    shape == 161,
+                    "JSDocProtectedTag kind requires JSDocProtectedTag payload"
+                );
+                self.read_js_doc_protected_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocReadonlyTag) => {
+                assert!(
+                    shape == 162,
+                    "JSDocReadonlyTag kind requires JSDocReadonlyTag payload"
+                );
+                self.read_js_doc_readonly_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOverrideTag) => {
+                assert!(
+                    shape == 163,
+                    "JSDocOverrideTag kind requires JSDocOverrideTag payload"
+                );
+                self.read_js_doc_override_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocDeprecatedTag) => {
+                assert!(
+                    shape == 164,
+                    "JSDocDeprecatedTag kind requires JSDocDeprecatedTag payload"
+                );
+                self.read_js_doc_deprecated_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSeeTag) => {
+                assert!(
+                    shape == 165,
+                    "JSDocSeeTag kind requires JSDocSeeTag payload"
+                );
+                self.read_js_doc_see_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocImplementsTag) => {
+                assert!(
+                    shape == 166,
+                    "JSDocImplementsTag kind requires JSDocImplementsTag payload"
+                );
+                self.read_js_doc_implements_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocAugmentsTag) => {
+                assert!(
+                    shape == 167,
+                    "JSDocAugmentsTag kind requires JSDocAugmentsTag payload"
+                );
+                self.read_js_doc_augments_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSatisfiesTag) => {
+                assert!(
+                    shape == 168,
+                    "JSDocSatisfiesTag kind requires JSDocSatisfiesTag payload"
+                );
+                self.read_js_doc_satisfies_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocThrowsTag) => {
+                assert!(
+                    shape == 169,
+                    "JSDocThrowsTag kind requires JSDocThrowsTag payload"
+                );
+                self.read_js_doc_throws_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocThisTag) => {
+                assert!(
+                    shape == 170,
+                    "JSDocThisTag kind requires JSDocThisTag payload"
+                );
+                self.read_js_doc_this_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocImportTag) => {
+                assert!(
+                    shape == 171,
+                    "JSDocImportTag kind requires JSDocImportTag payload"
+                );
+                self.read_js_doc_import_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocCallbackTag) => {
+                assert!(
+                    shape == 172,
+                    "JSDocCallbackTag kind requires JSDocCallbackTag payload"
+                );
+                self.read_js_doc_callback_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOverloadTag) => {
+                assert!(
+                    shape == 173,
+                    "JSDocOverloadTag kind requires JSDocOverloadTag payload"
+                );
+                self.read_js_doc_overload_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypedefTag) => {
+                assert!(
+                    shape == 174,
+                    "JSDocTypedefTag kind requires JSDocTypedefTag payload"
+                );
+                self.read_js_doc_typedef_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSignature) => {
+                assert!(
+                    shape == 175,
+                    "JSDocSignature kind requires JSDocSignature payload"
+                );
+                self.read_js_doc_signature(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNameReference) => {
+                assert!(
+                    shape == 176,
+                    "JSDocNameReference kind requires JSDocNameReference payload"
+                );
+                self.read_js_doc_name_reference(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SourceFile) => {
+                assert!(shape == 177, "SourceFile kind requires SourceFile payload");
+                self.read_source_file(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ModuleDeclaration) => {
+                assert!(
+                    shape == 178,
+                    "ModuleDeclaration kind requires ModuleDeclaration payload"
+                );
+                self.read_module_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportEqualsDeclaration) => {
+                assert!(
+                    shape == 179,
+                    "ImportEqualsDeclaration kind requires ImportEqualsDeclaration payload"
+                );
+                self.read_import_equals_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportDeclaration) => {
+                assert!(
+                    shape == 180,
+                    "ExportDeclaration kind requires ExportDeclaration payload"
+                );
+                self.read_export_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportType) => {
+                assert!(
+                    shape == 181,
+                    "ImportTypeNode kind requires ImportTypeNode payload"
+                );
+                self.read_import_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportClause) => {
+                assert!(
+                    shape == 182,
+                    "ImportClause kind requires ImportClause payload"
+                );
+                self.read_import_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportSpecifier) => {
+                assert!(
+                    shape == 183,
+                    "ImportSpecifier kind requires ImportSpecifier payload"
+                );
+                self.read_import_specifier(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLink) => {
+                assert!(shape == 185, "JSDocLink kind requires JSDocLink payload");
+                self.read_js_doc_link(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLinkPlain) => {
+                assert!(
+                    shape == 186,
+                    "JSDocLinkPlain kind requires JSDocLinkPlain payload"
+                );
+                self.read_js_doc_link_plain(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLinkCode) => {
+                assert!(
+                    shape == 187,
+                    "JSDocLinkCode kind requires JSDocLinkCode payload"
+                );
+                self.read_js_doc_link_code(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeParameter) => {
+                assert!(
+                    shape == 188,
+                    "TypeParameterDeclaration kind requires TypeParameterDeclaration payload"
+                );
+                self.read_type_parameter_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntheticReferenceExpression) => {
+                assert!(shape == 189, "SyntheticReferenceExpression kind requires SyntheticReferenceExpression payload");
+                self.read_synthetic_reference_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeLiteral) => {
+                assert!(
+                    shape == 190,
+                    "JSDocTypeLiteral kind requires JSDocTypeLiteral payload"
+                );
+                self.read_js_doc_type_literal(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => {
+                assert!(
+                    shape == 191,
+                    "JSDocParameterOrPropertyTag kind requires JSDocParameterOrPropertyTag payload"
+                );
+                self.read_js_doc_parameter_or_property_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            _ => ControlFlow::Continue(()),
+        }
+    }
+}
 impl NodeData {
     pub fn declaration_name_generated(&self) -> Option<NodeId> {
         match self {

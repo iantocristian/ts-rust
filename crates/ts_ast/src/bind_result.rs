@@ -329,6 +329,7 @@ impl BindBuilder<'_> {
     pub fn source(&self) -> NodeId {
         self.result.source
     }
+    #[inline]
     pub fn node(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
         match &self.storage {
             // Exclusive binding writes the core directly. Keep its checked
@@ -337,8 +338,12 @@ impl BindBuilder<'_> {
             BindStorage::Exclusive(parsed) if id.arena() == self.result.source.arena() => {
                 parsed.core_node_read(id)
             }
-            _ => self.view().node(id),
+            _ => self.node_compatibility(id),
         }
+    }
+    #[inline(never)]
+    fn node_compatibility(&self, id: NodeId) -> Result<NodeRead<'_>, Error> {
+        self.view().node(id)
     }
     pub fn node_mut(&mut self, id: NodeId) -> Result<crate::NodeMut<'_>, Error> {
         let parsed = match &mut self.storage {

@@ -638,3 +638,27 @@ retains this screen, exact sources/binaries, generator sources, graph streams,
 raw observations, successful and failed development checks, and native CPU
 exports with their audit. The regenerated tracker views reflect stale evidence
 as pending; this diagnostic screen has not been substituted for tracker capture.
+
+### Next combined implementation: parent attachment and auxiliary records
+
+Checked owner-local parent attachment is implemented. It streams parent writes
+only while construction has proved the immutable child/backing structure, the
+owner is core-only, and no reference escapes require mutation of the read side.
+The parser still finishes the header, clears its error flag, then attaches
+parents. The default custom/hooked/imported/lazy/dirty paths retain scratch
+gathering and their exact failure behavior; a later malformed backing fails
+before writes, while a later invalid child ID can fail after earlier writes.
+Nonempty scratch after a recovered failed enumeration also retains the default.
+The binder's checked local read has an inline hint and a separate compatibility
+helper, with its existing predicate and borrow lifetime unchanged. No individual
+CPU saving is claimed.
+
+Independent review found no actionable issue. Validation passes 119 AST,
+26 parser and 26 arena library tests, six arena documentation tests, pinned
+generation/drift, workspace Clippy, Rust 1.96 compilation and formatting.
+The [CP6 accounting](../tools/s07/performance-experiments/results/2026-09-09-cp6-accounting/README.md)
+rules out treating payload-page overhead as the full remaining memory deficit.
+Keep that policy and implement the
+[compact auxiliary plan](S07-bis-auxiliary-plan.md) next. Screen this coherent
+combination after implementation; these intermediate checks are correctness
+evidence, not another performance capture.

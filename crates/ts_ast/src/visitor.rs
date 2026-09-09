@@ -13,6 +13,12 @@ pub trait RuntimeFactory: Factory {
     fn alloc_nodes(&mut self, nodes: Vec<Option<NodeId>>) -> NodeSlice;
     fn alloc_list(&mut self, loc: TextRange, nodes: NodeSlice) -> NodeListId;
     fn mutable_list(&mut self, id: NodeListId) -> &mut NodeList;
+    /// Read all immediate children before changing their parents. Implementors
+    /// may specialize validated exclusive storage; the default preserves custom
+    /// read/write dispatch and leaves parents untouched if enumeration fails.
+    fn override_parent_in_immediate_children(&mut self, node: NodeId, scratch: &mut Vec<NodeId>) {
+        override_parent_with_factory(self, node, scratch);
+    }
     fn set_list_location(&mut self, id: NodeListId, loc: TextRange) {
         self.mutable_list(id).set_loc(loc);
     }
@@ -67,7 +73,46 @@ pub trait RuntimeFactory: Factory {
         flags
     }
 }
+
+fn override_parent_with_factory<F: RuntimeFactory + ?Sized>(
+    factory: &mut F,
+    parent: NodeId,
+    scratch: &mut Vec<NodeId>,
+) {
+    struct Children<'a, F: ?Sized> {
+        factory: &'a F,
+        nodes: &'a mut Vec<NodeId>,
+    }
+    impl<F: RuntimeFactory + ?Sized> crate::ChildVisitor for Children<'_, F> {
+        fn visit_node(&mut self, node: NodeId) -> std::ops::ControlFlow<()> {
+            self.nodes.push(node);
+            std::ops::ControlFlow::Continue(())
+        }
+        fn visit_list(&mut self, list: NodeListId) -> std::ops::ControlFlow<()> {
+            self.visit_node_slice(self.factory.read_list(list).nodes())
+        }
+        fn visit_node_slice(&mut self, nodes: NodeSlice) -> std::ops::ControlFlow<()> {
+            self.nodes
+                .extend(self.factory.read_nodes(nodes).iter().flatten());
+            std::ops::ControlFlow::Continue(())
+        }
+    }
+    let mut visitor = Children {
+        factory,
+        nodes: scratch,
+    };
+    let _ = visitor.factory.node(parent).for_each_child(&mut visitor);
+    for child in scratch.drain(..) {
+        factory.set_node_parent(child, Some(parent));
+    }
+}
+
 impl RuntimeFactory for AstBuilder {
+    fn override_parent_in_immediate_children(&mut self, node: NodeId, scratch: &mut Vec<NodeId>) {
+        if !scratch.is_empty() || !self.override_core_parents(node) {
+            override_parent_with_factory(self, node, scratch);
+        }
+    }
     fn read_list(&self, id: NodeListId) -> NodeListRead<'_> {
         self.view().list(id).expect("factory list")
     }
@@ -562,6 +607,9 @@ impl VisitContext for NodeVisitor<'_> {
 }
 
 impl<T: RuntimeFactory + ?Sized> RuntimeFactory for crate::BorrowedFactory<'_, T> {
+    fn override_parent_in_immediate_children(&mut self, node: NodeId, scratch: &mut Vec<NodeId>) {
+        self.0.override_parent_in_immediate_children(node, scratch);
+    }
     fn read_list(&self, id: NodeListId) -> NodeListRead<'_> {
         self.0.read_list(id)
     }

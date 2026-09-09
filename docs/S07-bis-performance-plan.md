@@ -123,6 +123,18 @@ infer individual component savings or add results from the earlier captures.
 Auxiliary compaction remains a separately priced option, not a promised saving.
 Final gates are unchanged.
 
+Current page accounting now bounds that decision: 371.034 MB modeled retained
+typed-row storage, plus 46.905 MB of discarded directory growth arrays in
+the request total. Even free page/directory/root overhead would recover only
+132.262 MB of requests, below the roughly 399 MB remaining allocation deficit.
+Keep the four-row payload policy. Select the
+[compact auxiliary implementation](S07-bis-auxiliary-plan.md) alongside the
+checked owner-local parent-attachment work. Its 95–107 MB retained estimate is
+useful but insufficient by itself and remains unmeasured. Preserve unrestricted
+list mutation by cold promotion of only the touched header, retaining its AuxId
+and direct `&mut NodeList` semantics. No allocation-bearing mutation guard is
+introduced. Complete and screen the combination before any promotion decision.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,

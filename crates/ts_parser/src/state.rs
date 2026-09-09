@@ -1,8 +1,8 @@
 use crate::ParserFactory;
-use std::{collections::HashSet, ops::ControlFlow};
+use std::collections::HashSet;
 use ts_ast::{
-    node_flags, ChildVisitor, Diagnostic, JsString, NodeId, NodeListId, NodeSlice,
-    SourceFileParseOptions, SyntaxKind,
+    node_flags, Diagnostic, JsString, NodeId, NodeListId, NodeSlice, SourceFileParseOptions,
+    SyntaxKind,
 };
 use ts_core::{LanguageVariant, ScriptKind, TextRange};
 use ts_jsstring::SourceText;
@@ -311,32 +311,8 @@ impl<'src, F: ParserFactory> Parser<'src, F> {
     }
     /// port: tsc/internal/parser/parser.go:Parser.overrideParentInImmediateChildren
     pub(crate) fn override_parent_in_immediate_children(&mut self, node: NodeId) {
-        struct Children<'a, F> {
-            factory: &'a F,
-            nodes: &'a mut Vec<NodeId>,
-        }
-        impl<F: ParserFactory> ChildVisitor for Children<'_, F> {
-            fn visit_node(&mut self, node: NodeId) -> ControlFlow<()> {
-                self.nodes.push(node);
-                ControlFlow::Continue(())
-            }
-            fn visit_list(&mut self, list: NodeListId) -> ControlFlow<()> {
-                self.visit_node_slice(self.factory.read_list(list).nodes())
-            }
-            fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
-                self.nodes
-                    .extend(self.factory.read_nodes(nodes).iter().flatten());
-                ControlFlow::Continue(())
-            }
-        }
-        let mut visitor = Children {
-            factory: &self.factory,
-            nodes: &mut self.parent_scratch,
-        };
-        let _ = self.factory.node(node).for_each_child(&mut visitor);
-        for child in self.parent_scratch.drain(..) {
-            self.factory.set_node_parent(child, Some(node));
-        }
+        self.factory
+            .override_parent_in_immediate_children(node, &mut self.parent_scratch);
     }
 }
 

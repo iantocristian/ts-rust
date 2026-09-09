@@ -21,7 +21,7 @@ mod scratch;
 pub use bundle::{StorageBundle, StorageHandle};
 pub use counters::{Counters, Counts};
 pub use error::Error;
-pub use file::{StorageBuilder, StorageOwner, StorageView};
+pub use file::{CoreDataRead, CoreNodesMut, StorageBuilder, StorageOwner, StorageView};
 pub use ids::{ArenaId, AuxId, FileId, NodeId, SymbolId};
 pub use initialization::{InitializationDomain, InitializationGuard};
 pub use lazy::{StorageTransaction, TokenKey};

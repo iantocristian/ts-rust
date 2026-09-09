@@ -12,6 +12,9 @@ use ts_arena::{
 use ts_core::TextRange;
 use ts_jsstring::SourceText;
 
+#[cfg(test)]
+mod parent_tests;
+
 /// Exclusive syntax construction. Hooks exist only during this exclusive phase.
 pub struct AstBuilder {
     pub(crate) storage: StorageBuilder<StoredNode>,
@@ -130,6 +133,49 @@ impl AstBuilder {
         let (_, mut context) = store.packing_parts(id.arena(), auxiliary, source, header.end);
         header.parent = context.encode_node(FieldKey::parent(id.slot()), parent);
         Ok(())
+    }
+    /// Construction validated every child and list before insertion. With no
+    /// escaped links, only core headers need mutation: payload and list borrows
+    /// remain valid throughout traversal. Dirty and exceptional owners retain
+    /// the factory's gather-before-write path, including its failure behavior.
+    pub(crate) fn override_core_parents(&mut self, parent: NodeId) -> bool {
+        if !self.construction_edges_valid
+            || !self.storage.is_core_only()
+            || self.storage.store().has_link_escapes()
+            || parent.slot() == u32::MAX
+        {
+            return false;
+        }
+        let (nodes, data) = self.storage.split_core_mut();
+        let header = nodes
+            .get(parent)
+            .expect("factory node belongs to retained storage");
+        let (kind, shape, ordinal, end) = (
+            header.kind,
+            header.actual_shape(),
+            header.ordinal,
+            header.end,
+        );
+        let context = CompactContext {
+            nodes: nodes.id(),
+            auxiliary: data.auxiliary_arena(),
+            source: data.source(),
+            store: data.store(),
+        };
+        let mut visitor = CoreParents {
+            nodes,
+            data,
+            parent,
+        };
+        let _ = context.store.payloads.for_each_stored_child(
+            kind,
+            shape,
+            ordinal,
+            end,
+            context,
+            &mut visitor,
+        );
+        true
     }
     pub(crate) fn finish_header(
         &mut self,
@@ -275,6 +321,44 @@ impl AstBuilder {
             builder: self,
             validated: true,
         })
+    }
+}
+
+struct CoreParents<'a> {
+    nodes: ts_arena::CoreNodesMut<'a, StoredNode>,
+    data: ts_arena::CoreDataRead<'a, StoredNode>,
+    // Resolved against nodes before traversal; its slot fits the local codec.
+    parent: NodeId,
+}
+impl crate::ChildVisitor for CoreParents<'_> {
+    fn visit_node(&mut self, node: NodeId) -> std::ops::ControlFlow<()> {
+        self.nodes
+            .get_mut(node)
+            .expect("factory owns mutable core node")
+            .parent = self.parent.slot();
+        std::ops::ControlFlow::Continue(())
+    }
+    fn visit_list(&mut self, list: NodeListId) -> std::ops::ControlFlow<()> {
+        let header = list_read(StorageRead::borrowed(
+            self.data.auxiliary(list.0).expect("factory list"),
+        ))
+        .expect("factory list");
+        self.visit_node_slice(header.nodes())
+    }
+    fn visit_node_slice(&mut self, nodes: NodeSlice) -> std::ops::ControlFlow<()> {
+        let record = nodes.backing.map(|backing| {
+            StorageRead::borrowed(self.data.auxiliary(backing).expect("factory slice"))
+        });
+        let values = node_slice_read(
+            nodes,
+            record,
+            Some((&self.data.store().edges, self.nodes.id())),
+        )
+        .expect("factory slice");
+        for child in values.iter().flatten() {
+            self.visit_node(child)?;
+        }
+        std::ops::ControlFlow::Continue(())
     }
 }
 

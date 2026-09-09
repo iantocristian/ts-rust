@@ -101,6 +101,40 @@ fn parent_assignment_observes_generated_children_and_resets_prior_parents() {
 }
 
 #[test]
+fn finish_failure_and_parent_failure_keep_the_parse_error_reset_boundary() {
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+    let source = SourceText::default();
+    let factory = AstBuilder::new(source.clone(), &Counters::new());
+    let mut parser = Parser::new(
+        SourceFileParseOptions::default(),
+        &source,
+        ScriptKind::TS,
+        factory,
+    );
+    let malformed = parser.factory.new_node(
+        SyntaxKind::ParenthesizedExpression.into(),
+        ts_ast::TokenData {}.into(),
+    );
+    parser.has_parse_error = true;
+    let pos = i64::from(i32::MAX) + 1;
+    let failed_parent = catch_unwind(AssertUnwindSafe(|| {
+        parser.finish_node_with_end(malformed, pos, -2)
+    }));
+    assert!(failed_parent.is_err());
+    assert!(!parser.has_parse_error);
+    let read = parser.factory.node(malformed);
+    assert_eq!(read.range(), TextRange::new(i64::from(i32::MIN), -2));
+    assert_ne!(read.flags() & node_flags::THIS_NODE_HAS_ERROR, 0);
+    let invalid = ts_arena::NodeId::from_parts(malformed.arena(), u32::MAX).unwrap();
+    parser.has_parse_error = true;
+    assert!(catch_unwind(AssertUnwindSafe(
+        || parser.finish_node_with_end(invalid, 1, 2)
+    ))
+    .is_err());
+    assert!(parser.has_parse_error);
+}
+
+#[test]
 fn source_debug_assertions_keep_contract_messages_instead_of_rust_assert_formatting() {
     use std::panic::{catch_unwind, AssertUnwindSafe};
     fn message(failure: Box<dyn std::any::Any + Send>) -> String {

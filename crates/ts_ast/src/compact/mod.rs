@@ -89,6 +89,10 @@ pub(crate) struct PackingContext<'a> {
 }
 
 impl CoreStore {
+    pub(crate) fn has_link_escapes(&self) -> bool {
+        !self.links.is_empty()
+    }
+
     pub(crate) fn packing_parts<'a>(
         &'a mut self,
         nodes: ArenaId,

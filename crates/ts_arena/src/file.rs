@@ -16,6 +16,42 @@ pub struct StorageBuilder<N: NodeRecord, S = ()> {
     pub(crate) counters: Counters,
 }
 
+/// Checked exclusive core records, disjoint from immutable auxiliary/payload data.
+/// This borrow cannot allocate, publish, or resolve imported and lazy records.
+pub struct CoreNodesMut<'a, N>(&'a mut Arena<N>);
+impl<N> CoreNodesMut<'_, N> {
+    pub fn id(&self) -> ArenaId {
+        self.0.id
+    }
+    pub fn get(&self, id: NodeId) -> Result<&N, Error> {
+        self.0.get(id.arena(), id.slot())
+    }
+    pub fn get_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
+        self.0.get_mut(id.arena(), id.slot())
+    }
+}
+
+/// Read-only construction data paired with an exclusive core-record borrow.
+pub struct CoreDataRead<'a, N: NodeRecord> {
+    auxiliary: &'a Arena<N::Aux>,
+    store: &'a N::Store,
+    source: &'a SourceText,
+}
+impl<'a, N: NodeRecord> CoreDataRead<'a, N> {
+    pub fn auxiliary_arena(&self) -> ArenaId {
+        self.auxiliary.id
+    }
+    pub fn auxiliary(&self, id: AuxId) -> Result<&'a N::Aux, Error> {
+        self.auxiliary.get(id.arena(), id.slot())
+    }
+    pub fn store(&self) -> &'a N::Store {
+        self.store
+    }
+    pub fn source(&self) -> &'a SourceText {
+        self.source
+    }
+}
+
 // Only the imported capability requires shared payloads. Keeping that bound on
 // this private object preserves Send-only exclusive builders with no imports.
 trait RetainedImport<N: NodeRecord, S>: Send + Sync {
@@ -85,6 +121,38 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     }
     pub fn store_and_source_mut(&mut self) -> (&mut N::Store, &SourceText) {
         (&mut self.owner.store, &self.owner.source)
+    }
+    /// Split exclusive core records from immutable construction data. Both
+    /// halves borrow this builder; neither can grow storage or escape its owner.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Node, NodeId, StorageBuilder};
+    /// fn grow(builder: &mut StorageBuilder<Node<()>>, id: NodeId) {
+    ///     let (mut nodes, data) = builder.split_core_mut();
+    ///     let node = nodes.get_mut(id).unwrap();
+    ///     builder.push(Node::new(0, ()));
+    ///     node.kind = data.source().len() as u32;
+    /// }
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Node, StorageBuilder};
+    /// fn dispose(mut builder: StorageBuilder<Node<()>>) {
+    ///     let (_, data) = builder.split_core_mut();
+    ///     let source = data.source();
+    ///     drop(builder);
+    ///     let _ = source.as_bytes();
+    /// }
+    /// ```
+    pub fn split_core_mut(&mut self) -> (CoreNodesMut<'_, N>, CoreDataRead<'_, N>) {
+        (
+            CoreNodesMut(&mut self.owner.core),
+            CoreDataRead {
+                auxiliary: &self.owner.auxiliary,
+                store: &self.owner.store,
+                source: &self.owner.source,
+            },
+        )
     }
     /// Borrow a checked core header and its payload storage exclusively together.
     pub fn node_and_store_mut(&mut self, id: NodeId) -> Result<(&mut N, &mut N::Store), Error> {
@@ -605,6 +673,31 @@ mod tests {
     use super::*;
     use crate::Node;
     use std::sync::Barrier;
+
+    #[test]
+    fn core_split_keeps_auxiliary_borrows_live_during_checked_header_mutation() {
+        let counters = Counters::new();
+        let mut builder =
+            StorageBuilder::<Node<()>>::new(Arc::from(b"source".as_slice()), &counters);
+        let id = builder.push(Node::new(1, ()));
+        let auxiliary = builder.push_aux(());
+        let mut foreign = StorageBuilder::<Node<()>>::new(Arc::from([]), &counters);
+        let foreign_id = foreign.push(Node::new(2, ()));
+        let missing = NodeId::from_parts(id.arena(), u32::MAX).unwrap();
+        let missing_foreign = NodeId::from_parts(foreign_id.arena(), u32::MAX).unwrap();
+        {
+            let (mut nodes, data) = builder.split_core_mut();
+            let record = data.auxiliary(auxiliary).unwrap();
+            nodes.get_mut(id).unwrap().kind = 3;
+            assert_eq!(nodes.get(id).unwrap().kind, 3);
+            assert!(std::ptr::eq(record, data.auxiliary(auxiliary).unwrap()));
+            assert_eq!(data.source().as_bytes(), b"source");
+            assert_eq!(nodes.get_mut(missing), Err(Error::InvalidSlot));
+            assert_eq!(nodes.get_mut(missing_foreign), Err(Error::WrongOwner));
+            assert_eq!(nodes.get(foreign_id), Err(Error::WrongOwner));
+        }
+        assert_eq!(builder.core_node(id).unwrap().kind, 3);
+    }
 
     #[test]
     fn position_map_is_initialized_on_demand_and_shared_between_threads() {
