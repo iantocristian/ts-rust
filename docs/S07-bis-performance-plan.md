@@ -160,6 +160,14 @@ time, and allocation-binary requested bytes still live at the retained endpoint
 versus cumulative requests. Reuse the existing allocator counters; do not rebuild
 the obsolete physical census adapter or claim current RSS from live requests.
 This diagnostic selects subsequent work and cannot promote the candidate.
+It is now complete: parse 2.749 s, binding/publication 2.742 s; pipeline requests
+2.244 GB comprise 1.910 GB net live growth and 333.733 MB freed/superseded requests.
+One native sample of the unchanged normal binary locates 398 ms of distinct
+keyword-comparison/slice-validation weight. Follow the reviewed
+[shared text-processing plan](S07-bis-text-processing-plan.md), using generated
+keyword matching and proven UTF-8 slice boundaries. The
+[current-cost record](S07-bis-current-costs.md) distinguishes these diagnostic
+scopes; no sampled weight is a predicted saving or fresh acceptance result.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
