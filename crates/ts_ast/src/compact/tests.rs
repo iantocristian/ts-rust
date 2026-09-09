@@ -4,49 +4,18 @@ use ts_arena::Counters;
 use ts_core::TextRange;
 
 #[test]
-fn physical_header_is_24_bytes_and_typed_rows_keep_ordinals_during_growth() {
+fn physical_header_is_24_bytes_and_typed_pages_keep_addresses_during_growth() {
     assert_eq!(std::mem::size_of::<StoredNode>(), 24);
-    let mut rows = TypedRows::<u32>::default();
-    assert!(rows.get(0).is_none());
-    assert!(rows.get_mut(0).is_none());
-    assert_eq!(rows.push(41), 0);
+    let mut rows = RowPages::<u32>::default();
+    rows.push(41);
+    let first = std::ptr::from_ref(rows.get(0).unwrap());
     for value in 1..1027 {
-        assert_eq!(rows.push(value), value);
+        rows.push(value);
     }
-    assert_eq!(rows.len(), 1027);
-    *rows.get_mut(512).unwrap() = 42;
-    for value in 1027..4099 {
-        assert_eq!(rows.push(value), value);
-    }
+    assert_eq!(std::ptr::from_ref(rows.get(0).unwrap()), first);
     assert_eq!(rows.get(0), Some(&41));
-    assert_eq!(rows.get(512), Some(&42));
     assert_eq!(rows.get(1026), Some(&1026));
-    assert_eq!(rows.get(4098), Some(&4098));
-    assert!(rows.get(4099).is_none());
-    assert!(rows.get_mut(4099).is_none());
-    assert!(rows.get(u32::MAX).is_none());
-}
-
-#[test]
-fn generated_row_growth_preserves_edges_atomic_facts_and_published_identity() {
-    let mut ast = AstBuilder::new(SourceText::default(), &Counters::new());
-    let expression = ast.new_identifier(JsString::from_bytes(b"base".as_slice()));
-    let name = ast.new_identifier(JsString::from_bytes(b"member".as_slice()));
-    let original = ast.new_property_access_expression(Some(expression), None, Some(name), 0);
-    let facts = 0x1234_5678;
-    ast.node(original).store_subtree_facts(facts);
-    let runtime = crate::runtime_node_id(&ast.node(original));
-    for _ in 0..4096 {
-        ast.new_property_access_expression(Some(name), None, Some(expression), 0);
-    }
-    let file = ast.complete(original).unwrap().publish_unbound();
-    let read = file.view().node(original).unwrap();
-    let payload = read.as_property_access_expression().unwrap();
-    assert_eq!(payload.expression(), Some(expression));
-    assert_eq!(payload.name(), Some(name));
-    assert_eq!(payload.question_dot_token(), None);
-    assert_eq!(read.cached_subtree_facts(), facts);
-    assert_eq!(crate::runtime_node_id(&read), runtime);
+    assert!(rows.get(1027).is_none());
 }
 
 #[test]

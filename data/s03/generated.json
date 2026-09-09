@@ -1,7 +1,7 @@
 {
   "files": {
     "crates/ts_ast/src/accessors_generated.rs": "741d265e01ef93cfc1d92d54f4e6c1079f6ec7cacca6752567b9831b58980f77",
-    "crates/ts_ast/src/compact_generated.rs": "dc75ab126b945829ec1196b900729004e157d0a5701e9e80b55ccfbbe3b413e1",
+    "crates/ts_ast/src/compact_generated.rs": "7676b4206f1a6e8d518120fe1fba3dd767a3e0c0f5bbc65a128a25a64e84540b",
     "crates/ts_ast/src/data_generated.rs": "8563c53e83fe66ea8d7a353102858dabdb5d570556150be53f96ec57f5879428",
     "crates/ts_ast/src/factory_generated.rs": "79ba627d1f1ccc158e10796060ecbe85f1214de02c1b4d878a9d0b1a544cf8b5",
     "crates/ts_ast/src/kinds_generated.rs": "4b28d852a3d6934fd5fe3b2c625aba4b997afdccb790c13c1b406c51f9ad2a07",
