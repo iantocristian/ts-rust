@@ -1,22 +1,25 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
-pass their checkpoint screens and are retained. All 192 compact shapes and the
-borrowed facade are implemented; their completed screens reduce memory
-but fail CPU non-regression. The vector policy was rejected. Compact binding
-storage, construction/access, parent/auxiliary, inline parser-list and shared
-text-processing combinations have completed their screens. The latest uses
-2.244 GB allocated / 2.322 GB RSS, with CPU ratios 1.020 / 0.993 against
-same-screen CP1. This remains experimental: the one-worker CPU upper confidence
-bound is 1.056, and final S07 gates remain open.
-Date: 2026-09-09. Work branch: `codex/s07-bis`.
+Status: implementation in progress. The [complete local binder combination](S07-bis-local-bind-completion.md)
+now qualifies for review: one/eight-worker CPU ratios are 0.859609 / 0.837626
+against same-screen CP1, with upper 95% bounds 0.880953 / 0.854378. Allocation is
+2.302 GB and peak RSS 2.320 GB. Full workload graphs, scoped instrumentation and
+the full binder producer pass. E3 rejects stale inventories despite all executed
+tests passing. The next revision repairs those inventories/filter and an
+introduced owned-text copy. CP1 remains the accepted control. Earlier rejected or
+unpromoted compact experiments below keep their original dispositions. Final
+S07 CPU and memory gates remain open.
+Date: 2026-09-10. Work branch: `codex/s07-bis`.
 
 The [current allocation traffic diagnostic](S07-bis-allocation-traffic.md) is
 complete. It attributes 225.443 MB of the 333.733 MB freed/superseded requests,
 leaving 108.289 MB unclassified. No individual measured family establishes the
-remaining 209 MB request saving, and this diagnostic supplies no RSS or CPU
-acceptance. The selected [local binder implementation](S07-bis-local-bind-plan.md)
-continues without another memory diagnostic as a prerequisite.
+then-remaining 209 MB request saving, and this diagnostic supplies no RSS or CPU
+acceptance. The later local combination requests about 57.9 MB more than that
+earlier compact capture; its current historical request deficit is 266–267 MB,
+RSS deficit 103–108 MB, and CPU deficits 971 / 256 ms. Those are distances to old
+Go medians, not fresh acceptance results. Identify the new request traffic
+before applying the old family attribution to another storage change.
 
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.

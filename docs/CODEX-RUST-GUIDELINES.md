@@ -36,6 +36,13 @@ value for transfer, and a retained handle for an explicit lifetime extension.
 Do not add `Arc`, `Mutex` or cloning merely to make a lifetime problem disappear.
 Work out what must outlive what before choosing the storage representation.
 
+An owned result does not necessarily require a byte copy. When replacing a
+contextual string reader with `&[u8]`, preserve its explicit owned conversion:
+`JsString::from_bytes` allocates, while a source slice or pooled-string clone
+can retain existing backing. Carry that operation through the local reader
+instead of reconstructing it from borrowed bytes. Check backing sharing and
+post-owner-drop validity, then charge any new requests in the full pipeline.
+
 Keep mutable construction separate from publication when that matches the
 lifecycle. A consuming `finish(self)` can make invalid transitions unavailable.
 Keep identity constructors and mutation capabilities private to the layer that

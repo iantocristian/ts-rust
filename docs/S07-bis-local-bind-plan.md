@@ -149,25 +149,30 @@ evidence; neither is promised by this plan.
 
 ### Current evidence and cost ledger
 
-The selected completion record inventories the shared getter/helper algorithms
-and remaining general boundaries. Its final validation fields deliberately stay
-pending until the exact source has passed the required checks. Earlier graph or
-instrumentation results retain their original source scope.
+The [selected completion record](S07-bis-local-bind-completion.md) inventories the
+shared getter/helper algorithms and remaining general boundaries, and records
+the completed fixed screen. Earlier graph or instrumentation results retain
+their original source scope; broader producer results remain separate from
+the passing scoped validation.
 
 | Item | Established evidence / outstanding measurement |
 | --- | --- |
 | Accepted control | CP1 remains unchanged. The compact/local implementation remains the experimental candidate. |
-| Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Final validation is pending. |
+| Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Affected native checks, scoped instrumentation and both full-workload graphs pass. |
 | Earlier migration native profile | [One untimed capture](S07-bis-local-bind-migration-cpu.md), no rebuild or paired screen. Remaining general helper/validation callers were identified; it does not measure this later source or establish CPU improvement. |
 | Continuations and temporary observations | Earlier selected binary: `Step` 24 bytes, alignment 8; `Exit` 24 bytes. Final artifact layout, peak capacity, tuple/adapter stack costs and request traffic must be charged; no saving is assumed. |
-| Allocation mechanism evidence | [Frozen attribution](S07-bis-allocation-traffic.md): 333.733 MB traffic, 108.289 MB unclassified. No new memory policy or whole-candidate saving has been measured. |
-| Final graph/ownership/toolchain validation | Pending for the completion source, with failed checks retained. Previous milestone passes are not carried forward as fresh evidence. |
-| Both CPU modes, allocation and RSS | One combined fixed screen pending, against CP1 with all four Go-relative gate distances reported. No result or control switch is implied by implementation completion. |
-| Parse versus bind | Matched phase elapsed attribution pending alongside the combined screen; native sampled CPU is a separate diagnostic. |
+| Allocation mechanism evidence | [Earlier frozen attribution](S07-bis-allocation-traffic.md): 333.733 MB traffic, 108.289 MB unclassified. The complete local candidate requests 2.302 GB, about 57.9 MB more than that older compact capture; this increase is not yet attributed by family. |
+| Final graph/ownership/toolchain validation | Both 13,094-file graph modes, all-local probes, affected native checks, scoped Miri/ASan and full binder parity pass. Full E3 rejects three stale exact inventories, including an unintended substring-filter selection; its failed evidence is retained. |
+| Both CPU modes, allocation and RSS | Completed fixed screen qualifies for review: CPU ratios 0.859609 / 0.837626, upper bounds 0.880953 / 0.854378; allocation 2.302 GB and RSS 2.320 GB. All distances improve against same-screen CP1; final Go-relative gates remain open. |
+| Parse versus bind | One source-matched elapsed diagnostic: parse 2.230553404 s, bind/publication/validation 1.639655704 s. It is not a paired phase speedup or a Go ratio. |
 
 The fixed schedule remains eight warmup executions and 56 recorded executions
 across the normal/allocation binaries, both worker counts and both variants.
 Freeze and hash-check the selected compiler artifacts and their source/configuration
 before measuring. Report all rows, failures and all metric distances. Do not
 launch another small screening sequence or silently lengthen an inconclusive
-batch. The next promotion decision belongs to this complete combination.
+batch. Retain the completed combination as a measured candidate, without
+promotion while E3 is false. The next revision corrects its ownership inventory
+and filtering, and forwards local owned text through the existing source/pool
+retention operation. It needs its own source-bound validation and combined
+measurement. No fresh Go gate is claimed from this CP1 comparison.
