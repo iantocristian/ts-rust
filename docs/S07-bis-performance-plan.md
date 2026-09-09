@@ -2,8 +2,9 @@
 
 Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
 pass their checkpoint screens and are retained. All 192 compact shapes and the
-borrowed facade are implemented; their three completed screens reduce memory
-but fail CPU non-regression. One row-allocation trial is in progress. Final S07 gates
+borrowed facade are implemented; their completed screens reduce memory
+but fail CPU non-regression. The vector policy was rejected; compact binding
+storage and request-traffic work is in progress. Final S07 gates
 remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
@@ -67,6 +68,16 @@ Keep checked ordinals and actual lifetime guarantees. Use default vector growth;
 measure capacity slack and total allocation as well as CPU. This is one changed
 production candidate, not a page-size matrix. CP1 remains the measured control,
 and no compact candidate has qualified for promotion.
+
+The vector trial also fails (CPU ratios 1.285 / 1.259, allocation 3.536 GB),
+and its implementation is removed. Continue CP4 as one combined unpromoted
+candidate on the thin paged implementation: compact flow/symbol records, shared
+names and table access, pooled declaration backings, and removal of eager parser
+list reservations. The result record specifies the compatibility tests and the
+limits of the historical size arithmetic. A short native sample of the frozen
+thin candidate audits remaining CPU costs without expanding trace/replay work.
+No more row-policy matrix or small lookup trial is scheduled. CP1 remains the
+retained control until a complete candidate passes all required screens/evidence.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB

@@ -276,3 +276,82 @@ full graph comparison and fixed pipeline screen against CP1. No page-size matrix
 field trace or replay harness is added. If it also fails, reassess the integrated
 representation's remaining costs before any further policy tuning. Memory savings
 alone do not qualify a CPU-regressing implementation for promotion.
+
+
+## Vector policy result: rejected
+
+The fourth candidate (`e31f485`, manifest
+`5d2c44ae63d0399ef79ce4f9902557efcf4bcf894134b9cc19170a8c6cc5c503`)
+passes all 13,094 graphs at one/eight workers, with zero binding fallbacks.
+All fixed measurements and receipt verification completed.
+
+| Metric | Same-screen CP1 | Vector candidate | Candidate/control |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 4.535 s | 5.828 s | 1.285 |
+| Eight-worker wall | 1.038 s | 1.307 s | 1.259 |
+| Allocation, worse median | 4.643 GB | 3.536 GB | 0.762 |
+| Peak RSS, worse median | 4.509 GB | 2.869 GB | 0.636 |
+
+CPU upper 95% ratios are 1.301 / 1.274; relative MAD is below 1.2% for both
+variants and all modes. This still fails CPU non-regression, and allocation
+is approximately 351 MB higher than the thin paged candidate's capture.
+That memory comparison is descriptive across captures, not a paired timing
+claim. Ordinary vector growth is rejected and its six implementation files are
+restored to the thin four-row-page version. No further row-policy matrix is
+queued. The [fourth archive](../tools/s07/performance-experiments/results/2026-09-09-compact-vec/README.md)
+retains the rejected implementation, binaries, all graphs and samples.
+
+| Metric | Vector candidate | Historical same-mode limit | Remaining reduction |
+| --- | ---: | ---: | ---: |
+| One-worker wall | 5.828119 s | 2.937627 s | 2.890492 s |
+| Eight-worker wall | 1.307331 s | 0.633963 s | 0.673368 s |
+| One-worker allocation | 3.535607 GB | 2.035226 GB | 1.500381 GB |
+| Eight-worker allocation | 3.535607 GB | 2.035767 GB | 1.499841 GB |
+| One-worker peak RSS | 2.865840 GB | 2.208948 GB | 0.656892 GB |
+| Eight-worker peak RSS | 2.868740 GB | 2.217045 GB | 0.651695 GB |
+
+## Next combined implementation: binding storage and request traffic
+
+Continue the planned CP4 work on the paged compact implementation, still as an
+unpromoted combined candidate against CP1. A native sample of that exact frozen
+thin paged binary is retained with the fourth archive to audit remaining CPU
+costs. It uses no field trace or replay and does not establish phase timings by
+itself. Do not add another small routing-policy trial.
+
+The historical census still prices 2,459,867 symbols at 112 bytes, 2,950,559 flow
+records at 48 bytes, 1,297,945 flow lists at 16 bytes, and 2,446,623 declaration
+backings containing only 2,454,685 capacity cells. Straightforward width changes
+explain about 162 MB of used-record arithmetic; they do not explain the entire
+remaining 0.62 GB RSS or 1.15 GB allocation gap. Name/table duplication, temporary
+traffic and capacity must also be charged and measured.
+
+- Store ordinary flow records in 20 bytes with an independent full tag and open
+  flags, outlined synthetic switch/reduce payloads, and full-ID escapes. Flow
+  list cells use two local words. Borrowed readers and narrow writes avoid
+  reconstructing full payloads for flags or antecedents. Keep cold unrestricted
+  mutation only for actual compatibility callers.
+- Pool declaration cells into 256-word pages with stable backing descriptors.
+  Keep nil versus allocated empty, full capacity, copied slice headers, shared
+  writes, reslicing, pinned Go growth rounding and old backing visibility. Append
+  from nil writes directly without allocating a temporary vector.
+- Compact symbols with owner-relative links and names shared with table entries.
+  Use a byte-equivalent name pool and table facade; preserve absent versus
+  present-null entries and arbitrary malformed/generated names. Keep exact
+  runtime symbol identity and retained-owner behavior. This work includes both
+  record storage and consumers, not a second name cache layered over old maps.
+- Remove the parser's eager 16-element reservations in both list builders as
+  part of request-traffic work. Keep ordinary vector growth and all list behavior;
+  measure the whole candidate, rather than assigning a predicted saving.
+
+The table/name implementation can use the already locked `hashbrown` 0.17.1
+`HashTable` with byte equality and the existing randomized hashing semantics.
+Prefer that safe table API over writing a bespoke hash table or duplicating
+`JsString` keys in both a map and a pool. Making the existing transitive dependency
+direct requires the same dependency, MSRV and four-native-target checks.
+
+Preserve checked owner/slot namespaces, full public ID domains, error timing,
+cycles and lazy/published compatibility. Add focused counterexamples for compact
+escapes, flow flags versus payload tags, declaration capacity aliasing and name
+bytes. Run affected tests and complete graphs before the next fixed screen.
+The new combined result must satisfy the existing CPU and memory rules; neither
+model arithmetic nor independent category savings authorize promotion.
