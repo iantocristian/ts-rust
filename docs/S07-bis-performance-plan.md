@@ -1,8 +1,10 @@
 # S07-bis: measured storage and CPU improvements
 
 Status: implementation in progress; A0-b and the bounded CP1 node-lookup change
-pass their checkpoint screens and are retained. Compact-storage feasibility,
-the general borrowed facade and final S07 gates remain open.
+pass their checkpoint screens and are retained. All 192 compact shapes and the
+borrowed facade are implemented; their first integrated screen reduces memory
+but fails CPU non-regression. A bounded repair is in progress. Final S07 gates
+remain open.
 Date: 2026-09-09. Work branch: `codex/s07-bis`.
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
@@ -29,8 +31,20 @@ integrated result, rather than become another prerequisite to integration.
 The lookup trial is now complete and **rejected**: 52.010 / 12.893 ms wall savings
 (1.13% / 1.21%), with no meaningful memory change, miss the committed 5% screen.
 The candidate's binder changes were restored to CP1 before the compact-storage
-migration started. Proceed to the typed compact backend; there is no further
-standalone lookup experiment queued.
+migration started. There is no further standalone lookup experiment queued.
+
+The [first integrated compact-storage screen](S07-bis-compact-storage.md) is now
+complete: 3.185 GB allocated and 2.837 GB peak RSS, but 7.265 / 1.624 s wall time
+at one/eight workers. It passes full workload graphs and fails the unchanged
+CPU non-regression rule. CP1 remains the retained control. Preserve this result
+and test one combined repair of overhead introduced by the migration: direct
+construction of already-resolved core reads, direct typed-row selection when the
+caller knows the shape, and bypassing empty exceptional-reference maps during
+ordinary local writes. A native sample of the exact frozen normal executable
+identifies these paths; no expanded field trace or replay is needed. Keep owner,
+slot, shape and overwrite validation. Re-run the fixed pipeline screen for the
+changed candidate before choosing subsequent storage work; memory savings do
+not authorize promotion with a CPU regression.
 
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
