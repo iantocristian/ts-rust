@@ -26,6 +26,11 @@ does not measure residual lookup latency or guarantee a reduction to two reads
 per node. Further diagnostics must resolve a specific decision left open by the
 integrated result, rather than become another prerequisite to integration.
 
+The lookup trial is now complete and **rejected**: 52.010 / 12.893 ms wall savings
+(1.13% / 1.21%), with no meaningful memory change, miss the committed 5% screen.
+Production is restored to CP1. Proceed to the typed compact backend; there is
+no further standalone lookup experiment queued.
+
 Typed rows are the selected first implementation, with mixed word rows held as
 an alternative. Their current modeled premium is 51.545 MB retained and 74.336 MB
 requested, before missing owner costs. This is an engineering choice to test,
