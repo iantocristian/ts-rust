@@ -1,26 +1,36 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: implementation in progress. The [complete local binder with shared text](S07-bis-local-text-repair.md)
-is accepted as the next experimental control after source review, full workload
+Status: the [selected page/text/helper combination](S07-bis-pages-text-helpers.md)
+is implemented; final validation and performance screening are pending. Its
+[fresh paired comparison control](S07-bis-control-refresh.md) is source `eaf50b7`,
+immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`.
+That baseline passes full graphs, native capture verification and E5/E6 consumers;
+all final CPU and memory gates remain open.
+
+The preceding [complete local binder with shared text](S07-bis-local-text-repair.md)
+was accepted as an experimental control after source review, full workload
 graphs, corrected E3 and the fixed screen. One/eight-worker CPU ratios are
 0.854300 / 0.821120 against same-screen CP1, with upper 95% bounds
 0.855997 / 0.831178. Requested allocation is 2.244 GB and peak RSS 2.322 GB.
-The freeze is `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`
+That earlier freeze is `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`
 from `6de7612`. The preceding completion keeps its failed E3 capture and
 unpromoted disposition; the corrected inventory passes all 29 S06 / 76 S07
 cases in every required mode. Earlier rejected experiments retain their original
 dispositions. Final S07 CPU and memory gates remain open.
 Date: 2026-09-10. Work branch: `codex/s07-bis`.
 
-The [current allocation traffic diagnostic](S07-bis-allocation-traffic.md) is
+The [earlier frozen allocation traffic diagnostic](S07-bis-allocation-traffic.md) is
 complete. It attributes 225.443 MB of the 333.733 MB freed/superseded requests,
 leaving 108.289 MB unclassified. No individual measured family establishes the
 then-remaining 209 MB request saving, and this diagnostic supplies no RSS or CPU
 acceptance. The shared-text repair removes about 58.5 MB of requests from the
-preceding local combination. Current historical deficits are 208.3 / 207.8 MB
+preceding local combination. Its historical deficits were 208.3 / 207.8 MB
 requested allocation, 109.7 / 104.9 MB RSS and 828.2 / 180.5 ms CPU. Those are
-distances to old Go medians, not fresh acceptance results. Keep older family
-attribution tied to its binary when selecting the next memory change.
+distances to old Go medians; the completed paired baseline now supplies current
+gate distances. Keep older family attribution tied to its binary. The old
+125.378 MB growth-only ceiling does not bound the selected changes to row-page
+width and text-entry size; charge their tails and replacement storage in the
+combined measurement.
 
 Baseline: `53b523a` from `codex/s07-binder` / PR #11.
 Initial plan reference committed by the user: `4173b89`.
@@ -35,6 +45,15 @@ S07 parse-and-bind implementation pass both memory criteria and both CPU modes,
 while keeping every existing correctness and ownership prerequisite current.
 
 ## 1. Decision
+
+The current selected experiment combines sixteen-row typed pages, eight-byte
+text-pool entries preserving shared owned backing, and the remaining shared
+binding helper migration. The [implementation record](S07-bis-pages-text-helpers.md)
+defines its pending validation, one fixed combined screen against the refreshed
+control, and comparable elapsed-phase attribution. No unmeasured component is
+promoted or assumed to close a gate.
+
+### Prior decisions and measurements
 
 The next sequence, approved after the first full access capture, is **one bounded
 [lookup-reuse experiment](S07-bis-lookup-reuse.md), then integrated compact storage

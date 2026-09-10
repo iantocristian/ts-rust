@@ -5,26 +5,33 @@ including scoped syntax/list and symbol/table consumers, after the
 [dispatch/list/flow milestone](S07-bis-local-bind-migration.md) and
 [first local scope](S07-bis-local-bind-milestone.md). The
 [owned-text and inventory repair](S07-bis-local-text-repair.md) passes final
-checks, full graphs, corrected E3 and the combined screen, and is accepted as
-the next experimental control. Explicit shared-helper, diagnostics, lazy and
-public-reference boundaries remain. This is not a claim that the entire binder
-is facade-free. This supersedes the standalone experiment sequence in
+checks, full graphs, corrected E3 and the combined screen. Its
+[paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, is now
+the comparison control: immutable manifest
+`957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`.
+The [selected page/text/helper combination](S07-bis-pages-text-helpers.md) is
+implemented; final validation and performance screening are pending. Explicit
+diagnostics, lazy and public-reference boundaries remain. This is not a claim
+that the entire binder is facade-free. This supersedes the standalone experiment sequence in
 [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic counterexamples
 remain applicable; those changes are components of this design.
 
-The [current allocation attribution](S07-bis-allocation-traffic.md) is complete:
+The [earlier frozen allocation attribution](S07-bis-allocation-traffic.md) is complete:
 225.443 MB of 333.733 MB traffic is assigned to observed backings; 108.289 MB
 remains unclassified. Typed-row directory and text-entry growth are the largest
 newly observed mechanisms. Even eliminating both replacements completely would
-save at most 125.378 MB, below the roughly 209 MB request deficit, without proving
-any RSS saving. No single memory rewrite is selected from those ceilings. The
-local binder implementation proceeds; attribution is no longer its prerequisite.
+save at most 125.378 MB, below that capture's roughly 209 MB request deficit,
+without proving any RSS saving. That is a growth-only ceiling for the old layout,
+not a bound on sixteen-row pages or shrinking text entries. The selected combined
+experiment charges replacement storage, directory changes and page tails together;
+its net allocation, RSS and CPU effects still require the complete screen.
 
 ## Decision and limits
 
-The main CPU candidate is a local binder view over the existing compact storage.
-The main memory investigation is attribution of current allocation requests,
-retained backing and replacement traffic. A small proof burden is no longer a
+The local binder view is implemented. Current work combines its remaining shared
+helper migration with larger typed pages and compact text entries, as specified
+in the selected experiment. The original access and attribution contracts below
+remain the design record. A small proof burden is no longer a
 reason to exclude the binder-wide access work. Bounded means explicit contracts,
 an early implementation milestone and a decision after a fixed complete screen.
 
@@ -36,7 +43,7 @@ Likewise, eliminating the allocation deficit requires about 63% of observed
 freed/superseded traffic if retained storage is unchanged. That arithmetic
 does not establish a saving or close the separate RSS gate.
 
-## Memory attribution on the current freeze
+## Memory attribution on the earlier diagnostic freeze
 
 Use a disposable diagnostic copy of the existing corrected `8f7236e` freeze,
 whose normal executable is `3b375719ca8c3334c443f77b934c1388eec42ec1a94d12971586bc792056e8c2`.
@@ -126,9 +133,10 @@ graphs in both worker modes before performance screening.
 
 ## Measurement and completion
 
-Preserve CP1 as the accepted control and the current compact freeze as the
-experimental starting point. Neither the control nor a gate changes through
-documentation. Build the complete local-view combination and any separately
+The original local-view screen used CP1; preserve that control and its results.
+The selected page/text/helper experiment uses the refreshed `95742194…` control
+identified above. Neither a control nor a gate changes through documentation.
+Build the complete local-view combination and any separately
 justified memory component with fresh isolated artifacts. Use the primary plan's
 one fixed eight-warmup/56-sample schedule at one/eight workers, keeping every
 result and applying the combined-tradeoff rules. No standalone flow/source-fact
@@ -159,7 +167,9 @@ the passing scoped validation.
 
 | Item | Established evidence / outstanding measurement |
 | --- | --- |
-| Accepted control | The shared-text local combination, immutable manifest `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`, replaces CP1 for subsequent experiments. Both earlier freezes remain preserved. |
+| Current comparison control | The [paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`. Its complete native Go/Rust capture is valid; all final gates remain open. |
+| Current selected experiment | [Sixteen-row pages, eight-byte text entries and remaining shared binding helpers](S07-bis-pages-text-helpers.md) are integrated. Final validation and the combined screen are pending; no performance result or promotion is claimed. |
+| Earlier accepted combination | Shared-text local freeze `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc` replaced CP1 before the fresh paired baseline. Both earlier freezes remain preserved; the rows below retain their original evidence scope. |
 | Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Affected native checks, scoped instrumentation and both full-workload graphs pass. |
 | Earlier migration native profile | [One untimed capture](S07-bis-local-bind-migration-cpu.md), no rebuild or paired screen. Remaining general helper/validation callers were identified; it does not measure this later source or establish CPU improvement. |
 | Continuations and temporary observations | Earlier selected binary: `Step` 24 bytes, alignment 8; `Exit` 24 bytes. Final artifact layout, peak capacity, tuple/adapter stack costs and request traffic must be charged; no saving is assumed. |
@@ -173,8 +183,8 @@ across the normal/allocation binaries, both worker counts and both variants.
 Freeze and hash-check the selected compiler artifacts and their source/configuration
 before measuring. Report all rows, failures and all metric distances. Do not
 launch another small screening sequence or silently lengthen an inconclusive
-batch. The corrected complete combination meets the normal substantial-candidate
-rule and supplies the next experimental control. The preceding E3 failure and
+batch. The preceding corrected combination met the normal substantial-candidate
+rule and supplied the earlier experimental control. The preceding E3 failure and
 all earlier results remain recorded. No fresh Go gate is claimed from this CP1
-comparison. Restore the six reviewed traceability markers with the next source
-revision; the current worklist honestly records their missing mappings.
+comparison. The six reviewed traceability markers were restored in `be74975`
+before the completed paired baseline refresh.
