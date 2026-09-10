@@ -1,6 +1,16 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: the [page/text/helper result](S07-bis-pages-text-helpers-result.md) is complete.
+Status: the [bounded drain/hash follow-on](S07-bis-drain-hash-result.md) is complete
+and **unretained**. It passes correctness and both full workload graph modes,
+but CPU ratio intervals are 0.954296–1.008483 / 0.894933–1.022502 and memory is
+effectively unchanged. The fixed runner reports `regressing_or_uncertain`;
+this is inconclusive, not proof of regression. Both production edits were
+restored to the preceding control. No extra samples or new acceptance batch
+were run. The profile and worker diagnostic identify no proportionate second
+candidate; no scheduling change or broad parse rewrite is selected. Thresholds
+remain unchanged.
+
+The preceding [page/text/helper result](S07-bis-pages-text-helpers-result.md) remains retained.
 Native checks, both full graph modes, the full binder producer and E3
 (29 S06 / 83 S07 cases in every mode) pass. The fixed screen reports
 `no_demonstrated_win`: CPU ratios are 0.9533396729 / 0.9606986456, with upper 95%

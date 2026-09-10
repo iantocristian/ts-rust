@@ -1,7 +1,10 @@
 # S07-bis: canonical-name hashing decision
 
-Status: selected for the combined empty-drain/hash candidate; performance and
-retention remain subject to its one full-pipeline screen.
+Status: tested in the combined empty-drain/hash candidate at `187d956`.
+Correctness passed, but the [fixed screen](S07-bis-drain-hash-result.md) did not
+establish a reliable improvement. The candidate was removed and the existing
+`hash_one` implementation restored. The rationale below records the tested
+design; no hasher replacement is currently selected.
 
 ## Decision and scope
 

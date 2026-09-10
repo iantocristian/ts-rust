@@ -6,6 +6,8 @@ It identifies parent attachment as a bounded question for the later parse-side
 step; it does **not** establish the proposed 100–300 ms construction saving, a
 route to CPU parity, or a reason to remove final validation. No third-step code
 or native experiment is part of this attribution.
+The subsequent [combined screen](S07-bis-drain-hash-result.md) was inconclusive;
+the tested code was not retained and no further candidate was selected.
 
 ## What was measured
 
@@ -140,6 +142,12 @@ facade rewrite or establish the correctness contract for a specialized path.
 The source audit and the selected combined trial's result determine whether this
 becomes the later candidate. No additional profiler is needed to identify this
 particular question.
+
+The subsequent [source audit](S07-bis-drain-hash-result.md) narrows this further:
+`CoreParents` already uses direct core reads/writes. The repeated shared lazy
+read is in the `is_core_only` eligibility query before that traversal. An
+exclusive query may remove lock acquisition; it does not automatically justify
+dropping the public initialization-guard behavior or the child walk.
 
 ## Items that remain required work
 

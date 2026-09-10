@@ -1,8 +1,10 @@
 # S07-bis: bounded CPU diagnostic and drain/hash candidate
 
-Status: steps 1 and 2 authorized on 2026-09-10; implementation and measurement
-in progress. Step 3 is a recommendation to report after this result, not an
-authorized second implementation. No acceptance thresholds change.
+Status: steps 1 and 2 authorized on 2026-09-10 are complete. The
+[combined result](S07-bis-drain-hash-result.md) passes correctness and full
+graphs but is inconclusive on timing; neither production edit is retained.
+The preceding control is restored, and no step-3 implementation is selected.
+No acceptance thresholds change. The protocol below is preserved as executed.
 
 ## Frozen control and scope
 
