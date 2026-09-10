@@ -1,10 +1,12 @@
 """Repeated native S07 captures. Raw failures and slow samples stay in the record."""
 import fcntl
 import json
+import math
 import os
 import platform
 from pathlib import Path
 import sys
+import tomllib
 from statistics import median
 
 from s04_common import command, strict_json_loads
@@ -132,7 +134,31 @@ def allocation_preflight():
     return validate_allocation_preflight(results)
 
 
+def e6_thresholds():
+    """Per-mode timing criteria from the ledger (ADR 0021); the only source of the E6 thresholds."""
+    items = tomllib.loads((ROOT / "status/experiments.toml").read_text())["E6"]["criteria"]
+    criteria = {item["id"]: item for item in items}
+    if len(criteria) != len(items):
+        raise ValueError("duplicate E6 criterion")
+    thresholds = {}
+    for workers, name in (("1", "one_thread"), ("8", "eight_threads")):
+        item = criteria[name]
+        if item["metric"] != f"run.e6.{name}_wall_time_ratio" or item["op"] != "<=" or type(item["threshold"]) not in {int, float}:
+            raise ValueError("E6 criterion shape changed; the stability rule must be re-derived")
+        thresholds[workers] = float(item["threshold"])
+        if not math.isfinite(thresholds[workers]) or thresholds[workers] <= 0:
+            raise ValueError("E6 threshold must be a positive finite ratio")
+    return thresholds
+
+
+def validate_threshold_host(host):
+    # ADR 0021 authorizes these thresholds only for the measured host class.
+    if host["os"] != "darwin" or host["architecture"] not in {"arm64", "aarch64"}:
+        raise ValueError("ADR 0021 acceptance requires macOS arm64; other hosts need a separate threshold decision")
+
+
 def aggregate(rows):
+    thresholds = e6_thresholds()
     result = {}
     for workers in (1, 8):
         selected = [row for row in rows if row["workers"] == workers]
@@ -142,7 +168,7 @@ def aggregate(rows):
             for runtime in ("go", "rust"):
                 samples = [row["sample"] for row in selected if row["runtime"] == runtime and row["allocation"] == allocation]
                 values[runtime] = [item["peak_rss_bytes"] if metric == "peak_rss_bytes" else item["report"][metric] for item in samples]
-            summary[metric] = ratio_summary(values["go"], values["rust"], timing=metric == "wall_time_ns")
+            summary[metric] = ratio_summary(values["go"], values["rust"], timing=metric == "wall_time_ns", threshold=thresholds[str(workers)])
         overhead = {}
         for metric in ("wall_time_ns", "peak_rss_bytes"):
             values = {}
@@ -186,6 +212,9 @@ def capture(graph_report, destination):
         # visible to a separate e5/e6 consumer.
         (destination / "report.json").write_text('{"version":1,"status":"capture_in_progress"}\n')
         before = source_fingerprint()
+        thresholds = e6_thresholds()
+        host = host_info()
+        validate_threshold_host(host)
         cargo_config = cargo_configuration()
         graph_bytes = Path(graph_report).read_bytes()
         prerequisite = strict_json_loads(graph_bytes)
@@ -246,7 +275,7 @@ def capture(graph_report, destination):
                     if not allocation:
                         while True:
                             values = {runtime: [row["sample"]["report"]["wall_time_ns"] for row in samples if row["workers"] == workers and not row["allocation"] and row["runtime"] == runtime] for runtime in runtimes}
-                            statistics = ratio_summary(values["go"], values["rust"], timing=True)
+                            statistics = ratio_summary(values["go"], values["rust"], timing=True, threshold=thresholds[str(workers)])
                             if not statistics["needs_more"]:
                                 break
                             for index in range(len(values["go"]), len(values["go"]) + 7):

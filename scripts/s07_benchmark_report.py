@@ -8,7 +8,7 @@ from s04_common import strict_json_loads
 from s06_protocol import canonical
 from s07_benchmark import ROOT, CACHE, sha, source_fingerprint, cargo_configuration
 from s07_benchmark_graph import validate_measurement_prerequisite
-from s07_benchmark_measure import aggregate, metrics_from_summaries, validate_sample, validate_allocation_preflight, RUST_PROFILE, MEASUREMENT_DOMAINS
+from s07_benchmark_measure import aggregate, metrics_from_summaries, validate_sample, validate_allocation_preflight, RUST_PROFILE, MEASUREMENT_DOMAINS, e6_thresholds, validate_threshold_host
 from s07_benchmark_stats import ratio_summary
 from s04_runtime import load_toolchains
 
@@ -34,6 +34,7 @@ def validate_metadata(report):
             or type(host["initial_load_average"]) is not list or len(host["initial_load_average"]) != 3
             or any(type(value) not in {int, float} or not 0 <= value <= 2**31 or not math.isfinite(value) for value in host["initial_load_average"])):
         raise ValueError("benchmark lacks a capacity-qualified host record")
+    validate_threshold_host(host)
     stable = tomllib.loads((ROOT / "rust-toolchain.toml").read_text())["toolchain"]["channel"]
     rustc = report["rustc"]
     if type(rustc) is not str:
@@ -58,6 +59,7 @@ def validate_metadata(report):
 def validate_rows(rows, expected):
     """Reject omitted, duplicated, reordered and selectively extended samples."""
     cursor = 0
+    thresholds = e6_thresholds()
     for workers in (1, 8):
         for allocation in (False, True):
             selected = []
@@ -79,7 +81,7 @@ def validate_rows(rows, expected):
                 values = {runtime: [row["sample"]["report"]["wall_time_ns"] for row in selected if row["runtime"] == runtime] for runtime in ("go", "rust")}
                 # Every extension and stopping decision follows the frozen rule.
                 for end in range(7, count + 1, 7):
-                    summary = ratio_summary(values["go"][:end], values["rust"][:end], timing=True)
+                    summary = ratio_summary(values["go"][:end], values["rust"][:end], timing=True, threshold=thresholds[str(workers)])
                     if summary["needs_more"] != (end < count):
                         raise ValueError("benchmark stopping/extension policy changed")
     if cursor != len(rows):

@@ -56,7 +56,7 @@ class CaptureArtifacts(unittest.TestCase):
         self.stack.enter_context(patch.object(measure, "native_environment", return_value={}))
         self.stack.enter_context(patch.object(measure, "provision_inputs", return_value=(self.inputs, {})))
         self.stack.enter_context(patch.object(graph, "requests_from_frozen", return_value=([], fixtures.PrerequisiteTests.frozen["requests"])))
-        self.stack.enter_context(patch.object(measure, "host_info", return_value={}))
+        self.stack.enter_context(patch.object(measure, "host_info", return_value={"os": "darwin", "architecture": "arm64"}))
         self.stack.enter_context(patch.object(measure, "reject_concurrent_builds"))
         self.stack.enter_context(patch.object(measure, "rust_native_toolchain", return_value=("fixture", "fixture")))
         self.stack.enter_context(patch.object(measure, "command", return_value=b"fixture\n"))

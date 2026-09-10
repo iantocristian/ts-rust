@@ -7,8 +7,8 @@ effectively unchanged. The fixed runner reports `regressing_or_uncertain`;
 this is inconclusive, not proof of regression. Both production edits were
 restored to the preceding control. No extra samples or new acceptance batch
 were run. The profile and worker diagnostic identify no proportionate second
-candidate; no scheduling change or broad parse rewrite is selected. Thresholds
-remain unchanged.
+candidate; no scheduling change or broad parse rewrite is selected. The owner has since changed the four final thresholds through ADR 0021; see
+the closure subsection below. Historical experiment verdicts are unchanged.
 
 The preceding [page/text/helper result](S07-bis-pages-text-helpers-result.md) remains retained.
 Native checks, both full graph modes, the full binder producer and E3
@@ -27,10 +27,11 @@ immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078e
 That baseline remains the comparison control for the completed screen.
 The retained implementation now has a [standard paired Go/Rust acceptance batch](S07-bis-candidate-acceptance.md):
 CPU ratios **1.213911 / 1.404619**, allocation **0.738066 / 0.737854** and
-RSS **0.737440 / 0.735532**. All final gates remain open. Current paired deficits
+RSS **0.737440 / 0.735532**. All original final gates failed in that batch. Its paired deficits
 are 653.1 / 245.1 ms CPU, 110.7 / 110.1 MB allocation and 118.1 / 112.5 MB RSS.
-These supersede the earlier cross-batch distance arithmetic. The new source-bound
-E5/E6 evidence is current; its valid capture has failing gate results.
+These supersede the earlier cross-batch distance arithmetic. That source-bound
+E5/E6 evidence records failures under the original thresholds and becomes stale
+when the ADR 0021 benchmark changes are applied.
 The next experimental control is the exact native bundle
 `1c04605dcd248d78dcec1e42c4c6f82f036843a054cf5e27d81c1b3b229753b5`,
 frozen from the unchanged implementation at `26b6c4e`.
@@ -44,7 +45,7 @@ That earlier freeze is `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5
 from `6de7612`. The preceding completion keeps its failed E3 capture and
 unpromoted disposition; the corrected inventory passes all 29 S06 / 76 S07
 cases in every required mode. Earlier rejected experiments retain their original
-dispositions. Final S07 CPU and memory gates remain open.
+dispositions. Final S07 CPU and memory gates remained open at that checkpoint.
 Date: 2026-09-10. Work branch: `codex/s07-bis`.
 
 The [earlier frozen allocation traffic diagnostic](S07-bis-allocation-traffic.md) is
@@ -68,7 +69,7 @@ Keep this work on the separate S07-bis branch. Preserve the committed reference;
 do not amend it or commit subsequent S07-bis work to the S07 branch.
 
 S07-bis is the performance follow-through for S07, not a new tracker sprint or
-a replacement acceptance definition. Its objective is to make the existing
+a replacement tracker sprint. Its original objective was to make the existing
 S07 parse-and-bind implementation pass both memory criteria and both CPU modes,
 while keeping every existing correctness and ownership prerequisite current.
 
@@ -375,6 +376,41 @@ For the new consuming path, explicitly document parse→bind→publish, its boun
 result API and failure behavior; it does not claim a preserved parsed snapshot
 that was never published. Reconcile the cross-references in the implementation's
 contract update without overwriting unrelated work.
+
+
+### Closure: thresholds re-based by ADR 0021 (2026-09-10)
+
+The performance experiments end with the retained implementation measured in the paired acceptance capture of revision `26b6c4e`
+([record](S07-bis-candidate-acceptance.md)): wall 1.214 / 1.405 of Go at one /
+eight workers with 95% intervals 1.150–1.235 and 1.280–1.443, requested bytes
+0.738, peak RSS 0.737. The retained implementation is the compact typed storage,
+exclusive binding and the branded local binder view; the drain/hash follow-on
+([result](S07-bis-drain-hash-result.md)) is the last bounded CPU experiment and
+is not retained.
+
+The owner re-based the four parse-and-bind criteria in
+[ADR 0021](adr/0021-parse-and-bind-performance-thresholds.md): E5 peak RSS and
+requested bytes 0.7 → 0.85; E6 one / eight workers 1.0 → 1.25 / 1.45, with
+`run.e6.stable` and the sample-extension rule judged against each mode's
+threshold instead of parity. This is an owner decision recorded outside this
+plan; section 6's rule that no threshold changes to finish an experiment stands
+for every screen and record written under it, and none is relabelled.
+
+Because the benchmark scripts and the threshold ledger are part of every
+capture's source fingerprint, the acceptance capture and its E5/E6 evidence are
+stale once the decision is applied. S07-4 can close on one fresh paired capture of
+the retained implementation at the revision containing the decision, under the
+standard sequence. That capture and four-target CI are pending. The measured margins to the new
+thresholds are 0.015 (one worker) and 0.007 (eight workers) on the upper bounds;
+a miss is recorded and reported, not re-sampled.
+
+Open questions, without a new experiment commitment, are the eight-worker scaling
+difference (4.4× against Go's 5.0×), the 653 ms one-worker elapsed gap, and residual
+allocation traffic. The earlier 334 MB traffic / 108 MB unclassified attribution
+belongs to its frozen binary and predates later retained changes
+([attribution](S07-bis-allocation-traffic.md)). No Linux measurement exists; the
+Darwin samples do not predict a Linux ratio. ADR 0021 limits acceptance to macOS
+arm64 until a separate host-class decision is made.
 
 ## 2. Exact destination and starting gap
 

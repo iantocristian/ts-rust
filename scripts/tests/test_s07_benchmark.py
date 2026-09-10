@@ -18,6 +18,71 @@ class FixedStatistics(unittest.TestCase):
         self.assertFalse(slower["stable"])
         self.assertFalse(slower["needs_more"])
 
+    def test_timing_threshold_is_the_re_based_criterion_not_parity(self):
+        # ADR 0021: 1.2x is stable under a 1.25 criterion and unstable under parity.
+        rebased = ratio_summary([100] * 7, [120] * 7, timing=True, threshold=1.25)
+        self.assertTrue(rebased["stable"])
+        self.assertFalse(rebased["needs_more"])
+        self.assertEqual(rebased["bootstrap"]["threshold"], 1.25)
+        parity = ratio_summary([100] * 7, [120] * 7, timing=True)
+        self.assertFalse(parity["stable"])
+        for bad in (True, False, 0, -1.0, float("nan"), float("inf"), "1.25"):
+            with self.assertRaises(ValueError):
+                ratio_summary([100] * 7, [120] * 7, timing=True, threshold=bad)
+
+    def test_extension_uses_the_criterion_boundary(self):
+        rust = [120, 120, 120, 125, 125, 130, 130]
+        parity = ratio_summary([100] * 7, rust, timing=True)
+        rebased = ratio_summary([100] * 7, rust, timing=True, threshold=1.25)
+        self.assertFalse(parity["needs_more"])
+        self.assertTrue(rebased["needs_more"])
+        boundary = ratio_summary([100] * 7, [125] * 7, timing=True, threshold=1.25)
+        self.assertTrue(boundary["stable"])
+        self.assertFalse(boundary["needs_more"])
+
+
+class ThresholdLedger(unittest.TestCase):
+    def test_reads_both_modes_and_rejects_invalid_criteria(self):
+        import tempfile
+        from unittest.mock import patch
+        import s07_benchmark_measure as measure
+        ledger = (measure.ROOT / "status/experiments.toml").read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "status").mkdir()
+            path = root / "status/experiments.toml"
+            path.write_text(ledger)
+            with patch.object(measure, "ROOT", root):
+                self.assertEqual(measure.e6_thresholds(), {"1": 1.25, "8": 1.45})
+                for bad in ("true", "0", "-1", "nan", "inf", '"1.25"'):
+                    path.write_text(ledger.replace("threshold = 1.25", "threshold = " + bad))
+                    with self.subTest(bad=bad), self.assertRaises(ValueError):
+                        measure.e6_thresholds()
+                path.write_text(ledger.replace('run.e6.one_thread_wall_time_ratio', 'run.e6.wrong_metric'))
+                with self.assertRaises(ValueError):
+                    measure.e6_thresholds()
+                path.write_text(ledger.replace('metric = "run.e6.one_thread_wall_time_ratio"\nop = "<="', 'metric = "run.e6.one_thread_wall_time_ratio"\nop = ">="'))
+                with self.assertRaises(ValueError):
+                    measure.e6_thresholds()
+                path.write_text(ledger + '\n[[E6.criteria]]\nid = "one_thread"\n')
+                with self.assertRaisesRegex(ValueError, "duplicate"):
+                    measure.e6_thresholds()
+
+    def test_threshold_ledger_is_in_capture_and_producer_inputs(self):
+        import tomllib
+        from s07_benchmark import ROOT, source_fingerprint
+        self.assertIn("status/experiments.toml", source_fingerprint()["files"])
+        runs = tomllib.loads((ROOT / "status/runs.toml").read_text())
+        for producer in ("bindworkload", "e5", "e6"):
+            self.assertIn("status/experiments.toml", runs[producer]["inputs"])
+
+    def test_thresholds_do_not_authorize_other_hosts(self):
+        from s07_benchmark_measure import validate_threshold_host
+        validate_threshold_host({"os": "darwin", "architecture": "arm64"})
+        for os, architecture in (("linux", "aarch64"), ("darwin", "x86_64")):
+            with self.assertRaisesRegex(ValueError, "ADR 0021"):
+                validate_threshold_host({"os": os, "architecture": architecture})
+
     def test_noisy_capture_is_extended_then_remains_uncertain(self):
         values = [60, 70, 80, 100, 110, 120, 130]
         initial = ratio_summary([100] * 7, values, timing=True)
@@ -107,6 +172,25 @@ class NativeSamples(unittest.TestCase):
         high_memory = deepcopy(valid)
         high_memory[0]["sample"]["peak_rss_bytes"] = 10000
         self.assertEqual(validate_rows(high_memory, expected)["1"]["peak_rss_bytes"]["samples_per_runtime"], 7)
+
+    def test_replay_uses_each_modes_threshold_and_rejects_omitted_extension(self):
+        from s07_benchmark_measure import COUNTERS
+        from s07_benchmark_report import validate_rows
+        expected = {**dict.fromkeys(COUNTERS, 1), "loaded_input_sha256": "0"*64}
+        rows = self.rows()
+        for row in rows:
+            if row["runtime"] == "rust":
+                row["sample"]["report"]["wall_time_ns"] = 120 if row["workers"] == 1 else 140
+        summaries = validate_rows(rows, expected)
+        for workers, threshold in (("1", 1.25), ("8", 1.45)):
+            timing = summaries[workers]["wall_time_ns"]
+            self.assertTrue(timing["stable"])
+            self.assertEqual(timing["bootstrap"]["threshold"], threshold)
+        for row in rows:
+            if row["runtime"] == "rust" and row["workers"] == 1 and not row["allocation"]:
+                row["sample"]["report"]["wall_time_ns"] = [120, 120, 120, 125, 125, 130, 130][row["index"]]
+        with self.assertRaisesRegex(ValueError, "stopping/extension"):
+            validate_rows(rows, expected)
 
 
 class AllocatorPreflight(unittest.TestCase):

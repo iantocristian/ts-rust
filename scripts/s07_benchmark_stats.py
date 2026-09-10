@@ -18,9 +18,12 @@ def relative_mad(values):
     return median([abs(value - middle) for value in values]) / middle
 
 
-def ratio_summary(go, rust, timing=False):
+def ratio_summary(go, rust, timing=False, threshold=1.0):
+    """`threshold` is the timing criterion the upper bootstrap bound is judged against (ADR 0021)."""
     sample_values(go)
     sample_values(rust)
+    if type(threshold) not in {int, float} or not math.isfinite(threshold) or threshold <= 0:
+        raise ValueError("timing threshold must be a positive finite ratio")
     if len(go) != len(rust) or len(go) not in {7, 14, 21}:
         raise ValueError("S07 requires equal complete batches of 7, 14 or 21 samples")
     summary = {"samples_per_runtime": len(go), "go_median": median(go), "rust_median": median(rust),
@@ -31,7 +34,7 @@ def ratio_summary(go, rust, timing=False):
         # Frozen nearest-order-statistic bounds, no interpolation/version drift.
         summary["bootstrap"] = {"algorithm": "independent-median-ratio/order-statistic-v1", "seed": SEED,
                                 "resamples": RESAMPLES, "confidence": 0.95,
-                                "lower": ratios[249], "upper": ratios[9749]}
-        summary["stable"] = summary["go_relative_mad"] <= 0.05 and summary["rust_relative_mad"] <= 0.05 and ratios[9749] <= 1.0
-        summary["needs_more"] = len(go) < 21 and (ratios[249] <= 1.0 < ratios[9749] or summary["go_relative_mad"] > 0.05 or summary["rust_relative_mad"] > 0.05)
+                                "lower": ratios[249], "upper": ratios[9749], "threshold": threshold}
+        summary["stable"] = summary["go_relative_mad"] <= 0.05 and summary["rust_relative_mad"] <= 0.05 and ratios[9749] <= threshold
+        summary["needs_more"] = len(go) < 21 and (ratios[249] <= threshold < ratios[9749] or summary["go_relative_mad"] > 0.05 or summary["rust_relative_mad"] > 0.05)
     return summary
