@@ -30,8 +30,14 @@ fn page_position(index: usize) -> (usize, usize) {
 
 impl<T> Arena<T> {
     pub(crate) fn new(counters: &Counters) -> Self {
+        Self::with_id(next_arena(), counters)
+    }
+
+    /// Storage for an identity reserved elsewhere. Callers hand out each reserved
+    /// identity exactly once; `CheckerIdentity` enforces that for checkers.
+    pub(crate) fn with_id(id: ArenaId, counters: &Counters) -> Self {
         Self {
-            id: next_arena(),
+            id,
             pages: Vec::new(),
             len: 0,
             counters: counters.clone(),

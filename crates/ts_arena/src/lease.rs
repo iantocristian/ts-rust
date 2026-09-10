@@ -1,4 +1,4 @@
-use crate::{counters::Track, ids::next_arena, ArenaId, Counters, Error};
+use crate::{counters::Track, ids::next_arena, ArenaId, Counters, Error, SymbolArena};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex, MutexGuard,
@@ -39,11 +39,13 @@ impl Generation {
 }
 
 /// Exact-checker identity and exclusive operation permit, independent of checker
-/// algorithms. The id reserves this checker's future symbol-arena identity.
+/// algorithms. The id reserves this checker's symbol-arena identity, which
+/// `adopt_symbol_arena` hands out exactly once.
 pub struct CheckerIdentity {
     id: ArenaId,
     generation: Generation,
     operation: Mutex<()>,
+    adopted: AtomicBool,
     _owner: Track,
 }
 impl CheckerIdentity {
@@ -52,11 +54,21 @@ impl CheckerIdentity {
             id: next_arena(),
             generation,
             operation: Mutex::new(()),
+            adopted: AtomicBool::new(false),
             _owner: counters.owner(),
         })
     }
     pub fn id(&self) -> ArenaId {
         self.id
+    }
+    /// The checker's own symbol arena, numbered with this identity. The second
+    /// call fails: one identity never backs two arenas, and no public path
+    /// accepts an arbitrary arena number.
+    pub fn adopt_symbol_arena<T>(&self, counters: &Counters) -> Result<SymbolArena<T>, Error> {
+        self.adopted
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .map_err(|_| Error::IdentityAdopted)?;
+        Ok(SymbolArena::with_id(self.id, counters))
     }
     pub fn generation(&self) -> &Generation {
         &self.generation
@@ -117,5 +129,49 @@ impl CheckerLease<'_> {
         } else {
             Err(Error::InvalidSlot)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn identity_adopts_its_symbol_arena_exactly_once() {
+        let counters = Counters::new();
+        let identity = CheckerIdentity::new(Generation::new(&counters), &counters);
+        let mut symbols = identity.adopt_symbol_arena::<u32>(&counters).unwrap();
+        assert_eq!(symbols.id(), identity.id());
+        let id = symbols.push(7);
+        let lease = identity.lease().unwrap();
+        assert_eq!(lease.validate_identity(id.arena()), Ok(()));
+        assert_eq!(
+            lease.check_slot(id.arena(), id.slot(), symbols.len()),
+            Ok(0)
+        );
+        assert_eq!(
+            identity.adopt_symbol_arena::<u32>(&counters).err(),
+            Some(Error::IdentityAdopted)
+        );
+        let foreign = SymbolArena::<u32>::new(&counters);
+        assert_eq!(
+            lease.validate_identity(foreign.id()),
+            Err(Error::WrongOwner)
+        );
+    }
+
+    #[test]
+    fn adoption_does_not_outlive_retirement_checks() {
+        let counters = Counters::new();
+        let generation = Generation::new(&counters);
+        let identity = CheckerIdentity::new(generation.clone(), &counters);
+        let symbols = identity.adopt_symbol_arena::<u32>(&counters).unwrap();
+        generation.retire();
+        assert!(matches!(identity.lease(), Err(Error::Retired)));
+        assert_eq!(
+            symbols.len(),
+            0,
+            "storage survives retirement; only access is refused"
+        );
     }
 }

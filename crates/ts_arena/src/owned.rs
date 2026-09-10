@@ -61,6 +61,14 @@ macro_rules! owned_arena {
 owned_arena!(OwnedArena, AuxId);
 owned_arena!(SymbolArena, SymbolId);
 
+impl<T> SymbolArena<T> {
+    /// Storage numbered with an identity reserved by a `CheckerIdentity`, which
+    /// hands each reservation out exactly once.
+    pub(crate) fn with_id(id: ArenaId, counters: &Counters) -> Self {
+        Self(Arena::with_id(id, counters))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

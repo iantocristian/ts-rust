@@ -4,6 +4,7 @@ Reviewed 10 September 2026 by Codex, against merged `main` `4c0818d` and pinned
 Go source `1f70213d4922b434345f639b441681e470c7cfc1`. This is a review of the
 [implementation plan](S08-implementation-plan.md), performed by its author.
 It is not an independent review or evidence that checker code has been ported.
+The independent review that followed is the last section of this file.
 
 ## Source and requirement checks
 
@@ -80,3 +81,76 @@ The plan covers every S08 item and the dependencies identified by source
 inspection. It separates actual baseline authority, ownership proof, semantic
 parity and measurement. Proceed to P0 before implementation; do not interpret
 this review as satisfying P0's generated manifests or later acceptance gates.
+
+## Independent review (10 September 2026)
+
+Reviewed against the pinned source, the frozen S07 inputs and the tracker on
+`codex/s08-plan` `295e639`, independently of the author, for the owner. Findings
+were folded into the plan in the same change; each item names where.
+
+### Confirmed
+
+The selected approach (ID-based `&mut self` checker, small common record with
+typed payload storage, one owner and one operation, baseline authority through the
+pinned harness walkers, measurement gates without new speed targets, stop rules)
+follows the accepted ADRs and the S07 lessons. The plan's reading of the 10,728
+denominator and the 675 obligations is correct: obligations are syntax
+observations, and generic machinery is required through the loaded libraries.
+
+### Corrected or added
+
+1. **Declaration diagnostics were missing.** The Go harness appends
+   `GetDeclarationDiagnostics` to `.errors.txt` whenever declaration emit is on;
+   1,482 eligible variants set `declaration`, 4 `composite`; at least 65 of 7,301
+   reference `.errors.txt` baselines carry declaration-emit codes. That path is
+   the Phase 3 declarations transformer plus the checker's emit resolver. Added
+   to §5.1 and P0 as an owner decision: port it in S08, or record the phase as not
+   executed and list the affected baselines as named pending failures. Silent
+   matching by absence is rejected.
+2. **The denominator's composition was not stated.** §1 now lists the nine
+   families with zero eligible variants and the counts of what remains, so P3 and
+   P4 scope is legible without opening the rule file.
+3. **Homes missing from §3:** `ts_nodebuilder` (the cycle-breaking package
+   upstream keeps for the declarations transformer), `ts_evaluator`, the
+   collections the checker uses (24 `collections.Set` sites plus ordered and
+   copy-on-write structures), and the fact that `resolveName` already exists as
+   `ts_binder::name_resolver` with hooks the checker implements.
+4. **Go accounting baseline measured, not modeled.** `unsafe.Sizeof` at the pin:
+   `Type` header 56 bytes embedded in every payload, `UnionType` 272,
+   `InterfaceType` 376, `TupleType` 424, `ast.Symbol` 96 (§6.1 table, fixture in
+   `data/s08/`). 24 of the 56 header bytes are Go-only pointers, so the 0.80 risk
+   is in lists, maps, caches and slack, not headers.
+5. **Effort was unstated.** §8 now says what the exclusions leave (about 50,000
+   lines of `checker.go`, `relater.go`, `flow.go`, `inference.go` and
+   `grammarchecks.go`) and that S08 is the entry to the Phase 2 critical path,
+   reported by pass count per checkpoint rather than time-boxed.
+6. **Program host mapped member by member.** `ts_checker::CheckerHost` carries
+   the members whose types exist below the compiler and documents the rest as P2
+   obligations, including that `SourceFileMetaData` must move below the checker
+   and that project-reference members are explicitly unsupported.
+7. **Staleness stated.** The first crate addition stales S07's E5/E6 evidence
+   through `Cargo.lock`; §9 says so, so the dashboard change is not chased.
+
+### Scaffold delivered with this review
+
+`crates/ts_checker`: `CheckerOwner`/`Operation` (identity adoption exactly once,
+same-thread reentry refused before waiting, panic retires the generation),
+`ResolutionStack` (exact port of the four resolution-guard functions),
+`LinkStore` (paged per arena on first use), `TypeStore`/`TypeRecord`/`TypeAlias`,
+all `types.go` flag families and enums, `CheckerHost`, and the type-display
+constants and flag mask. `crates/ts_printer`: `EmitTextWriter`, `TextWriter`,
+`SingleLineStringWriter`, with Go's strict last-rune decoding.
+`crates/ts_nodebuilder`: flags and `SymbolTracker`. `ts_arena`:
+`CheckerIdentity::adopt_symbol_arena` and the `IdentityAdopted` error.
+`data/s08/checker-flag-observations.json`: 238 constants and 23 record sizes read
+out of the pinned Go packages through `go test -overlay`, asserted by the Rust
+flag ports. The ledger marks the eight source files these start as in progress.
+No algorithm, no producer, no evidence claim is included.
+
+### Open for the owner
+
+- Declaration diagnostics: port in S08, or defer with named pending failures.
+- Collections home (`ts_core` or `ts_collections`): decide at P1 with the first
+  ordered-structure use.
+- Whether to fold checker state into the `ts_arena` permit: decide from P1's
+  per-operation measurement, not now.

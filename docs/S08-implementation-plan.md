@@ -3,7 +3,8 @@
 Prepared 10 September 2026 on `codex/s08-plan`, based on merged `main`
 `4c0818d` (S07-bis PR #12). Status: planned; no S08 implementation or passing
 checker evidence is implied. The accompanying [review](S08-plan-review.md)
-records the source checks and amendments made before implementation.
+records the source checks and amendments made before implementation, and the
+independent review of 10 September 2026 whose amendments are folded in below.
 
 Source authority: TypeScript/Corsa
 `1f70213d4922b434345f639b441681e470c7cfc1`. Use the existing toolchain pins and
@@ -26,9 +27,14 @@ go through the production node builder and printer. Complete the required
 checker-local merge, recursion, text integration and measurement obligations.
 This is a substantial semantic port, not a type-annotation evaluator.
 
-The current workspace has no `ts_checker` or `ts_printer`. `ts_compiler` loads
-programs and verifies their options; its public module explicitly excludes
-checker/emitter construction. `run.e2` currently verifies only the source-selected
+The workspace holds the S08 scaffold and nothing more of the checker:
+`ts_checker` (owner and operation scope, the resolution-cycle guard, checker-local
+link stores, the type record and alias store, flags checked against the pinned Go
+package, and the program-host contract), `ts_printer` (the two text writers) and
+`ts_nodebuilder` (flags and the symbol-tracker contract). None contains a type
+construction, relation or checking algorithm. `ts_compiler` loads programs and
+verifies their options; its public module explicitly excludes checker/emitter
+construction. `run.e2` currently verifies only the source-selected
 denominator. `CheckerIdentity`/`CheckerLease` are generic identity and permit
 primitives, not a concrete checker or retained-type API.
 
@@ -39,6 +45,21 @@ not evidence of executed checker operations. They include generics, overloads,
 mapped and conditional types, inference, indexed access, template literal types
 and JSDoc in loaded declarations. A shallow implementation of literals, objects
 and unions cannot certify this denominator.
+
+What the denominator holds, from the frozen rule's own counts: nine syntax
+families have no eligible variant at all, because the rule excludes every variant
+containing them in test sources: explicit type parameters (2,628 excluded
+variants), decorators (765), JSX (455), indexed-access types (393), mapped types
+(313), conditional types (279), import types (124), `infer` types (122) and
+template-literal types (66). Everything else is in: control flow appears in 9,587
+eligible variants, declarations and merging in 9,931, declaration members in
+5,888, expressions and bindings in 7,654, imports and exports in 2,183, JavaScript
+sources under `allowJs` in 895, JSDoc in 558, and 1,482 variants set
+`declaration` (107 `emitDeclarationOnly`, 4 `composite`). The exclusions remove
+generic *syntax in test sources*, not generic *semantics*: the 111 loaded
+libraries bring `Array<T>`, `Promise<T>`, the lib's mapped and conditional helper
+types and generic signatures, so instantiation, type-argument inference at every
+call to a generic library signature and the relations they need are required work.
 
 Do not change the source selection, effective options, library closure, malformed
 cases, `skipLibCheck`, `noCheck`, or baseline eligibility to accommodate Rust.
@@ -131,13 +152,18 @@ obligation artifact merely to mark implementation progress.
 | `ts_checker::{symbols,resolve,types,signatures,instantiate,inference,relater,flow,check,grammar}` | Cohesive algorithm families; split large families further without opaque forwarding layers |
 | `ts_checker::{node_builder,type_display,accessibility}` | Checker-dependent type-to-node traversal, caches, name accessibility and display flags |
 | `crates/ts_printer` | Checker-independent AST printing, text writer, parenthesization, emit metadata and original-source text reuse |
+| `crates/ts_nodebuilder` | Node-builder flags and the `SymbolTracker` contract, kept as its own crate exactly as upstream keeps `internal/nodebuilder`, so the Phase 3 declarations transformer never depends on `ts_checker` |
+| `crates/ts_evaluator` | Constant evaluation (`internal/evaluator`, 168 lines): enum members, computed names and template-literal folding; the checker constructs it in initialization with its own `evaluateEntity` |
+| `ts_binder::name_resolver` | `resolveName` is already ported as the hook-driven resolver; the checker implements `NameResolverHooks` and `ResolverHost` over its state instead of porting `resolveName` a second time |
+| Collections (`ts_core` or a `ts_collections` crate, decided at P1) | The checker uses `collections.Set` at 24 sites plus `OrderedSet`, `OrderedMap`, `MultiMap` and the copy-on-write set and map; the ordered ones are output-order structures (deferred nodes, for one) and must keep insertion order |
 | `ts_compiler` | Implements the checker host/program interface over the existing loader; convenience entry points retain complete bound-file dependencies |
 | `ts_ast` / `ts_arena` | Only the concrete symbol/AST access and ownership primitives needed by both consumers; no dependency on `ts_checker` |
 | `ts_diagnostics` plus `ts_compiler` diagnostic formatting module | Structured diagnostics and pinned diagnostic-writer behavior; baseline decoration stays in the harness |
 | `scripts/s08_*.py`, `tools/s08/oracle/`, Rust examples/binaries | Strict requests, pinned Go access bridges, baseline comparison, ownership and measurements |
 
-The dependency direction is compiler → checker → printer → AST, with the checker
-host trait defined below the compiler. If shared flags/data need a lower home,
+The dependency direction is compiler → checker → printer → AST, with
+`ts_nodebuilder` beside `ts_printer` below the checker and the checker host trait
+(`ts_checker::CheckerHost`) defined below the compiler. If shared flags/data need a lower home,
 put only that common contract there. Upstream `internal/nodebuilder` contains
 flags; the actual checker-dependent builder is in `internal/checker/nodebuilder*`.
 Do not create a circular checker/node-builder crate dependency.
@@ -166,6 +192,17 @@ construction path so the concrete checker symbol arena uses that reservation
 exactly once. Do not accept an arbitrary public arena number or silently give a
 checker two inconsistent identities. Retain the full 32-bit arena namespace,
 zero-slot rules and checked exhaustion.
+
+The scaffold implements this. `CheckerIdentity::adopt_symbol_arena` hands the
+reserved arena number to one `SymbolArena`; a second call fails with
+`IdentityAdopted`, and `CheckerOwner::new` is its only caller. `CheckerOwner::
+operation` takes the identity's permit and then the state lock, refuses same-thread
+reentry through a thread-local set of active owners before waiting, lets ordinary
+contention wait, and a panic inside an operation retires the generation before the
+permit is released. Two lock acquisitions per operation is the known cost of
+reusing the `ts_arena` permit unchanged; operations are per query, not per node,
+and P1 measures whether folding the state into the permit is worth a `ts_arena`
+change.
 
 Checker-local type/signature slots are private. Owner-internal lists and cache
 values may contain them because they cannot escape or move to another checker.
@@ -204,7 +241,11 @@ Port `pushTypeResolution`, `findResolutionCycleStartIndex`,
 `typeResolutionHasProperty` and `popTypeResolution` together. The source guard
 keys on entity **and property**, invalidates an affected stack suffix on cycles,
 and stops its search when an intermediate resolution has produced a value.
-A generic `HashSet<TypeId>` or a one-bit "busy" flag is not equivalent.
+A generic `HashSet<TypeId>` or a one-bit "busy" flag is not equivalent. The
+guard is ported in `ts_checker::ResolutionStack`, with the produced-property
+predicate supplied by the checker because it reads the links; the link stores are
+`ts_checker::LinkStore`, keyed by arena and slot, paged per arena on first use,
+with a page count for the census.
 
 Distinguish algorithmic recursion, which continues under the current `&mut self`,
 from external callback reentry, which releases/reacquires an operation. Prohibited
@@ -280,6 +321,28 @@ wrong input digest, non-finite counter and malformed protocol are explicit
 failures. Compare named Go contract panics separately from unknown/assertion or
 overflow panics. A Go panic does not become a successful `.types` baseline.
 Retain complete per-case stderr and actual/expected output.
+
+**Declaration diagnostics.** The Go harness's error set is not the checker's
+alone. `harnessutil.go` collects config-file, program, syntactic, semantic and
+global diagnostics and, whenever `GetEmitDeclarations()` is true (`declaration`
+or `composite`), appends `GetDeclarationDiagnostics`. That call runs the
+declaration transformer (`internal/transformers/declarations`) over every
+non-declaration file through an emit host, the checker's emit resolver
+(`emitresolver.go`, `symbolaccessibility.go`) and the node builder's symbol
+tracker. 1,482 eligible variants set `declaration` and 4 set `composite`. Across
+the whole reference directory 65 of 7,301 `.errors.txt` baselines carry
+declaration-emit codes (TS4xxx, and TS9xxx under `isolatedDeclarations`); some
+declaration-emit diagnostics use TS2xxx and TS7xxx codes, so 65 is a floor, not
+the count. This is Phase 3 code that the plan did not list. P0 must count the
+affected frozen variants exactly, record per variant whether the declaration
+phase executed, and obtain an owner decision: port `getDeclarationDiagnostics`
+inside S08, or evaluate `errors_parity` with the declaration phase recorded as not
+executed and every affected baseline listed as a named pending failure until
+Phase 3. A harness that skips the phase and matches by absence claims more than
+it executed and is not accepted. The harness also collects the final error set
+after `Emit` and fails any test whose pre-emit and post-emit sets differ; the Go
+oracle therefore establishes that pre-emit collection suffices for every passing
+case, and P0 records that check rather than assuming it.
 
 ### 5.2 Type-system worklist
 
@@ -364,6 +427,30 @@ declared live checker/result roots. Record type headers, every concrete payload,
 aliases, type-owned strings and list backing, indexing/directory capacity and
 unused retained type-storage slots. Count shared backing once and handle cycles.
 Do not compare `size_of::<Type>()` with Go's common header alone.
+
+The Go side of that census is measured, not modeled
+(`data/s08/checker-flag-observations.json`, `unsafe.Sizeof` at the pin on
+darwin/arm64, go1.27.1). The `Type` header is 56 bytes and is embedded in every
+payload struct, so a Go type costs its payload struct plus its alias record and
+owned lists and maps:
+
+| Go record | Bytes | Go record | Bytes |
+| --- | ---: | --- | ---: |
+| `Type` (header) | 56 | `TypeReference` | 216 |
+| `IntrinsicType` | 72 | `InterfaceType` | 376 |
+| `LiteralType` | 88 | `TupleType` | 424 |
+| `UniqueESSymbolType` | 72 | `UnionType` | 272 |
+| `TypeParameter` | 104 | `IntersectionType` | 240 |
+| `ObjectType` | 184 | `MappedType` | 248 |
+| `IndexType` | 80 | `ConditionalType` | 144 |
+| `IndexedAccessType` | 88 | `Signature` | 128 |
+| `TypeAlias` | 32 | `IndexInfo` | 64 |
+| `ast.Symbol` | 96 | | |
+
+Of the 56-byte header, 24 bytes are the checker back-pointer and the `data`
+interface's self-reference, which no Rust layout carries. Headers are therefore
+not where the 0.80 ratio is at risk; lists, member maps, caches and page slack
+are, and the census must charge them on both sides.
 
 The proposed gate statistic is the ratio of aggregate mean bytes per retained
 type record: `(sum Rust type-storage bytes / sum Rust retained type records)`
@@ -516,7 +603,7 @@ when their production paths exist, not after every module edit.
 
 | Checkpoint | Work and exit evidence |
 | --- | --- |
-| **P0 — Freeze execution contracts** | Regenerate/verify S07 inputs without edits. Audit the typed source closure and checker host. Freeze baseline/query requests, missing-output semantics, supplemental fixtures, memory accounting, benchmark endpoints and relater fixtures. Run the actual Go oracle and one adversarial validator test for each output class. Rust gaps remain explicit. |
+| **P0 — Freeze execution contracts** | Regenerate/verify S07 inputs without edits. Audit the typed source closure and checker host. Freeze baseline/query requests, missing-output semantics, supplemental fixtures, memory accounting, benchmark endpoints and relater fixtures. Count the declaration-diagnostics variants and record the owner's decision on them (§5.1). Run the actual Go oracle and one adversarial validator test for each output class. Rust gaps remain explicit. |
 | **P1 — Ownership and storage feasibility** | Concrete checker owner/permit, private local IDs, symbol-arena identity adoption, types/signatures/lists/links, basic synthetic AST retention. Measure real intrinsic/literal/object/union/tuple storage and compare with the source census, with total and transient budgets. Prove the reference-relater allocation/recursion API on a real recursive fixture. Exit with debug/release foreign-owner, retention, exhaustion, reentry and first-query tests; no full parity claim. |
 | **P2 — First complete semantic slice** | Checker host, initialization, globals, symbol lookup/merge, intrinsic/literal/object types and basic queries. Add minimal production node building/printing and structured/baseline errors. Run real checker-local merge fixtures in all four execution modes. Obtain end-to-end Go/Rust observations for named small programs, including a failing program, before expanding the port. |
 | **P3 — Types, signatures, relations and ordering** | Compound types, declarations, signatures, inference/instantiation, the relation operations they require, required loaded-library operations and source comparators. These mutually dependent algorithms grow together in complete query slices. Extend the printer alongside the types. Direct comparator, residual-identity and recursive relation fixtures pass; all remaining obligation families are mapped to concrete pending work. |
@@ -525,6 +612,16 @@ when their production paths exist, not after every module edit.
 | **P6 — Semantic acceptance** | Exact E2 inventory, baseline bytes, ordering and type-display parity; measured recursion and divergence checks. Complete S08 ownership contributors and rerun applicable E3 instrumentation. Review algorithms, identity/lifetimes and ordinary-path costs separately. All nonmeasurement S08 requirements pass with current inputs. |
 | **P7 — Required measurements** | Finish and parity-check the isolated relater. Run the full type census, checkerbench and relater comparisons with frozen methodology. If type footprint misses 0.80, select one integrated candidate from actual attribution and record its complete comparison; no declaration of success based on a model. Unfavorable checker/relater throughput is reported, not hidden. |
 | **P8 — Final evidence and delivery** | Stage the final tracked inventory. Refresh all affected correctness producers and S07 native graph/capture evidence once as needed for changed Cargo/source fingerprints. Verify captures, compose E2/E3/E4/E5/checkerbench/relater, regenerate status, require `cargo xtask check S08` and `status --check-committed`. Archive raw requests/results, policies, logs and replay code; push and run four-target CI. |
+
+Size of the work, so no checkpoint is mistaken for a sprint: the checker package
+is 60,678 non-test Go lines. The exclusions take out `jsx.go` (1,488) and parts
+of the node builder and grammar checks; they leave the bulk of `checker.go`
+(32,523), `relater.go` (5,044), `flow.go` (2,761), `inference.go` (1,684) and
+`grammarchecks.go` (2,230). S08 is the entry to the Phase 2 critical path and is
+not time-boxed the way S07 was. Each checkpoint reports the pass count over the
+10,728-variant denominator and the named families still failing; a partial
+increment ends with explicit remaining work. The scaffold committed with this
+revision is P1's starting point, not a P1 result.
 
 P1 must not become a storage research program: one measured production candidate
 and the minimum alternative-relater feasibility proof. P3/P4 may take several
@@ -578,7 +675,10 @@ The last S07 capture may become stale when new crates change the Cargo closure.
 Schedule its required refresh after final source changes, not repeatedly during
 porting. Retain ADR 0021's 0.85 memory and 1.25/1.45 CPU limits and host scope.
 Replaying an archive confirms its recorded inputs; it does not make old evidence
-current for a changed compiler.
+current for a changed compiler. Adding crates changes `Cargo.lock`, which is in
+every S07 native fingerprint and in the `sources` of every host producer; from the
+scaffold commit onward S07's E5/E6 evidence shows stale until the P8 refresh.
+That is expected and recorded, not a regression to chase before then.
 
 ## 10. Completion record
 
