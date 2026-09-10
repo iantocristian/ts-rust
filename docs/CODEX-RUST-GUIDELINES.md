@@ -304,6 +304,13 @@ configuration hash records the configuration but does not establish a claimed
 profile. Enforce or observe the actual optimization, LTO, unwind and codegen
 settings while preserving registry and offline configuration.
 
+Fresh builds need not produce identical bytes: native dependencies can embed
+compilation timestamps, and linkers can retain temporary output paths. When
+semantic validation is bound to an executable hash, time that exact executable
+after checking its source and build configuration. Rebuilding the same source
+is not a replacement for its artifact identity, and a mismatch is not a reason
+to weaken the hash check. Build separately instrumented variants explicitly.
+
 Bind each measured child to the bytes and options it actually loaded. Equal
 file, byte, node, symbol and diagnostic counts cannot distinguish a same-size
 literal edit. Compute the ordered input identity during preload,

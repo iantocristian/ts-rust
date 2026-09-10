@@ -5,17 +5,18 @@ This directory implements the diagnostic screening policy in
 It writes no tracker metrics and does not replace full graph or ownership parity.
 `layout_model.py` and its inputs implement the separate CP0 layout model.
 
-The latest [reviewed complete local binder](../../../docs/S07-bis-local-text-repair.md)
-is the next experimental control after full graphs, corrected ownership evidence
-and its fixed combined screen. For a new candidate, pass
-`--control target/s07-bis/local-text-owned-repair-candidate` and
-`--control-sha 99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc`
-to `build`, `graphs` and `screen`. Its already sealed candidate bundle can serve
-as the control without rebuilding or changing its manifest. Preserve CP1, the original
-control and [A0-b](../../../docs/S07-bis-A0.md) as well: the commands below
-document the first experiment. This manual
-checkpoint decision follows full graph, ownership and targeted-cost review; it
-does not change `freeze-control` into an automatic promotion mechanism.
+The [reviewed complete local binder](../../../docs/S07-bis-local-text-repair.md)
+remains the accepted implementation. Its [fresh Go/Rust acceptance capture](../../../docs/S07-bis-control-refresh.md)
+now supplies the next comparison control, including the restored source mappings
+and producer artifact-reuse repair. For the combined page/text/helper experiment,
+pass `--control target/s07-bis/pages-text-helpers-control` and
+`--control-sha 957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`
+to `build`, `graphs` and `screen`. Its identity is recorded in
+[manifests/pages-text-helpers-control.json](manifests/pages-text-helpers-control.json).
+Preserve the preceding shared-text freeze, CP1, original control and
+[A0-b](../../../docs/S07-bis-A0.md): the commands below document the first
+experiment. A validated capture and experimental control do not imply passing
+final performance gates.
 
 The original control is frozen under `target/s07-bis/control`; its externally
 recorded identity is [manifests/control.json](manifests/control.json). It contains

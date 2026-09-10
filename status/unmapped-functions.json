@@ -595,13 +595,7 @@
     "internal/binder": [
       "tsc/internal/binder/binder.go:ActiveLabel.BreakTarget",
       "tsc/internal/binder/binder.go:ActiveLabel.ContinueTarget",
-      "tsc/internal/binder/binder.go:Binder.bindEach",
-      "tsc/internal/binder/binder.go:Binder.bindModifiers",
-      "tsc/internal/binder/binder.go:Binder.bindNodeList",
       "tsc/internal/binder/binder.go:Binder.getStrictModeBlockScopeFunctionDeclarationMessage",
-      "tsc/internal/binder/binder.go:Binder.newFlowList",
-      "tsc/internal/binder/binder.go:Binder.newFlowNodeEx",
-      "tsc/internal/binder/binder.go:Binder.newSymbol",
       "tsc/internal/binder/binder.go:getBinder",
       "tsc/internal/binder/binder.go:isFunctionSymbol",
       "tsc/internal/binder/binder.go:isSignedNumericLiteral",
