@@ -1,9 +1,11 @@
 //! Small typed pages keep payload addresses stable through exclusive growth.
 
+const ROWS_PER_PAGE: usize = 16;
+
 enum Directory<T> {
     Empty,
-    One(Box<[T; 4]>),
-    Many(Vec<Box<[T; 4]>>),
+    One(Box<[T; ROWS_PER_PAGE]>),
+    Many(Vec<Box<[T; ROWS_PER_PAGE]>>),
 }
 
 pub(crate) struct RowPages<T> {
@@ -32,9 +34,9 @@ impl<T> RowPages<T> {
         let page = match &self.directory {
             Directory::Empty => return None,
             Directory::One(page) => page,
-            Directory::Many(pages) => pages.get(ordinal as usize / 4)?,
+            Directory::Many(pages) => pages.get(ordinal as usize / ROWS_PER_PAGE)?,
         };
-        page.get(ordinal as usize % 4)
+        page.get(ordinal as usize % ROWS_PER_PAGE)
     }
 
     pub(crate) fn get_mut(&mut self, ordinal: u32) -> Option<&mut T> {
@@ -44,9 +46,9 @@ impl<T> RowPages<T> {
         let page = match &mut self.directory {
             Directory::Empty => return None,
             Directory::One(page) => page,
-            Directory::Many(pages) => pages.get_mut(ordinal as usize / 4)?,
+            Directory::Many(pages) => pages.get_mut(ordinal as usize / ROWS_PER_PAGE)?,
         };
-        page.get_mut(ordinal as usize % 4)
+        page.get_mut(ordinal as usize % ROWS_PER_PAGE)
     }
 }
 
@@ -56,7 +58,7 @@ impl<T: Default> RowPages<T> {
         let next = ordinal
             .checked_add(1)
             .expect("typed payload ordinal space exhausted");
-        if ordinal.is_multiple_of(4) {
+        if (ordinal as usize).is_multiple_of(ROWS_PER_PAGE) {
             let page = Box::new(std::array::from_fn(|_| T::default()));
             self.directory = match std::mem::replace(&mut self.directory, Directory::Empty) {
                 Directory::Empty => Directory::One(page),

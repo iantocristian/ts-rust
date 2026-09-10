@@ -234,6 +234,81 @@ impl<'scope> Binder<'_, 'scope, '_> {
             self.bind_optional_target(self.edge(edges, index));
         }
     }
+    pub(crate) fn target_name_of_declaration(
+        &self,
+        node: Option<BindingNode<'scope>>,
+    ) -> Option<BindingNode<'scope>> {
+        let node = node?;
+        match node {
+            BindingNode::Local(node) => {
+                let Backend::Local(local) = &self.builder else {
+                    unreachable!("local binder scope")
+                };
+                crate::checked(local.get_name_of_declaration(Some(node))).map(BindingNode::Local)
+            }
+            BindingNode::Checked(node) => {
+                crate::checked(ts_ast::get_name_of_declaration(self.view(), Some(node)))
+                    .map(|name| self.binding_node(name))
+            }
+        }
+    }
+    pub(crate) fn target_has_dynamic_name(&self, node: Option<BindingNode<'scope>>) -> bool {
+        match node {
+            Some(BindingNode::Local(node)) => {
+                let Backend::Local(local) = &self.builder else {
+                    unreachable!("local binder scope")
+                };
+                crate::checked(local.has_dynamic_name(Some(node)))
+            }
+            node => crate::checked(ts_ast::has_dynamic_name(
+                self.view(),
+                node.map(|node| self.node_id(node)),
+            )),
+        }
+    }
+    pub(crate) fn target_is_ambient_module(&self, node: BindingNode<'scope>) -> bool {
+        match node {
+            BindingNode::Local(node) => {
+                let Backend::Local(local) = &self.builder else {
+                    unreachable!("local binder scope")
+                };
+                local.is_ambient_module(node)
+            }
+            BindingNode::Checked(node) => {
+                crate::checked(ts_ast::is_ambient_module(self.view(), node))
+            }
+        }
+    }
+    pub(crate) fn target_has_syntactic_modifier(
+        &self,
+        node: BindingNode<'scope>,
+        flags: u32,
+    ) -> bool {
+        match node {
+            BindingNode::Local(node) => {
+                let Backend::Local(local) = &self.builder else {
+                    unreachable!("local binder scope")
+                };
+                local.has_syntactic_modifier(node, flags)
+            }
+            BindingNode::Checked(node) => crate::checked(
+                ts_ast::utilities::has_syntactic_modifier(self.view(), node, flags),
+            ),
+        }
+    }
+    pub(crate) fn target_combined_modifier_flags(&self, node: BindingNode<'scope>) -> u32 {
+        match node {
+            BindingNode::Local(node) => {
+                let Backend::Local(local) = &self.builder else {
+                    unreachable!("local binder scope")
+                };
+                local.get_combined_modifier_flags(node)
+            }
+            BindingNode::Checked(node) => crate::checked(
+                ts_ast::utilities::get_combined_modifier_flags(self.view(), node),
+            ),
+        }
+    }
     pub(crate) fn target_text(&self, node: BindingNode<'scope>) -> ts_ast::JsString {
         match node {
             BindingNode::Local(node) => {

@@ -86,10 +86,14 @@
         "bind_result::local_bind::compatibility::tests::compatibility_promotes_flow_only_bindings_and_keeps_cleared_records",
         "bind_result::local_bind::compatibility::tests::compatibility_routes_lazy_nodes_created_after_scope_entry",
         "bind_result::local_bind::compatibility::tests::scope_selection_records_actual_callback_entry_not_in_place_binding",
+        "bind_result::local_bind::helpers::tests::ambient_modules_preserve_keyword_name_order_and_shape_failures",
+        "bind_result::local_bind::helpers::tests::declaration_names_keep_assigned_names_and_checked_assignment_boundary",
+        "bind_result::local_bind::helpers::tests::dynamic_names_preserve_literal_parentheses_and_failure_rules",
         "bind_result::local_bind::helpers::tests::entity_names_preserve_name_first_failures_and_shape_independence",
         "bind_result::local_bind::helpers::tests::kind_predicates_preserve_open_kinds_and_token_payloads",
         "bind_result::local_bind::helpers::tests::left_hand_side_skips_only_partially_emitted_wrappers",
         "bind_result::local_bind::helpers::tests::locals_container_predicate_includes_source_roles_without_inline_locals_storage",
+        "bind_result::local_bind::helpers::tests::modifier_helpers_read_stored_flags_and_binding_root_inheritance",
         "bind_result::local_bind::helpers::tests::semantic_getters_share_kind_shape_and_nil_contracts",
         "bind_result::local_bind::helpers::tests::shared_optional_logical_and_text_helpers_preserve_selected_reads",
         "bind_result::local_bind::state::tests::compatibility_escapes_remain_raw_until_import_and_narrow_writes_clear_them",
@@ -107,10 +111,13 @@
     },
     "local_binder": {
       "cases": [
+        "local_tests::declaration_helper_bridges_keep_lazy_names_checked",
         "local_tests::local_block_dispatch_preserves_checked_payload_failures",
         "local_tests::narrowable_receivers_preserve_checked_interface_conversion_panics",
         "local_tests::parsed_contextual_keywords_preserve_diagnostics_and_error_flags_across_backends",
         "local_tests::scoped_and_checked_node_aliases_share_identity_and_live_flags",
+        "local_tests::strict_predicates_keep_diagnostic_order_and_source_ranges",
+        "local_tests::strict_predicates_preserve_selected_payload_failures",
         "local_tests::target_text_preserves_checked_kind_shape_failures",
         "local_tests::target_text_shares_core_and_lazy_backings"
       ],

@@ -39,16 +39,13 @@ impl<'scope> Binder<'_, 'scope, '_> {
         replaceable: bool,
         computed: bool,
     ) -> BindingSymbol<'scope> {
-        assert!(computed || !checked(a::has_dynamic_name(self.view(), Some(self.node_id(node)))));
-        let default_export = checked(a::has_syntactic_modifier(
-            self.view(),
-            self.node_id(node),
-            mf::DEFAULT,
-        )) || self.node_kind(node) == K::ExportSpecifier
-            && checked(a::module_export_name_is_default(
-                self.view(),
-                self.node_id(need(self.node_name(node))),
-            ));
+        assert!(computed || !self.target_has_dynamic_name(Some(node)));
+        let default_export = self.target_has_syntactic_modifier(node, mf::DEFAULT)
+            || self.node_kind(node) == K::ExportSpecifier
+                && checked(a::module_export_name_is_default(
+                    self.view(),
+                    self.node_id(need(self.node_name(node))),
+                ));
         let name = if computed {
             JsString::from_bytes(names::COMPUTED)
         } else if default_export && parent.is_some() {
@@ -96,12 +93,8 @@ impl<'scope> Binder<'_, 'scope, '_> {
                         message = d::A_module_cannot_have_multiple_default_exports;
                         needs_name = false;
                     }
-                    let declaration_name = checked(a::get_name_of_declaration(
-                        self.view(),
-                        Some(self.node_id(node)),
-                    ))
-                    .map(|id| self.binding_node(id))
-                    .unwrap_or(node);
+                    let declaration_name =
+                        self.target_name_of_declaration(Some(node)).unwrap_or(node);
                     let args = if needs_name {
                         vec![self.display_name(node)]
                     } else {
@@ -117,11 +110,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
                             .node_type(node)
                             .map(|id| self.n(self.node_id(id)))
                             .is_none_or(|node| a::node_is_missing(Some(&node)))
-                        && checked(a::has_syntactic_modifier(
-                            self.view(),
-                            self.node_id(node),
-                            mf::EXPORT,
-                        ))
+                        && self.target_has_syntactic_modifier(node, mf::EXPORT)
                         && flags & (sf::ALIAS | sf::TYPE | sf::NAMESPACE) != 0
                     {
                         let text = self.target_text(need(self.node_name(node)));
@@ -138,12 +127,9 @@ impl<'scope> Binder<'_, 'scope, '_> {
                     }
                     for (index, declaration) in declarations.into_iter().enumerate() {
                         let declaration = self.binding_node(need(declaration));
-                        let name_node = checked(a::get_name_of_declaration(
-                            self.view(),
-                            Some(self.node_id(declaration)),
-                        ))
-                        .map(|id| self.binding_node(id))
-                        .unwrap_or(declaration);
+                        let name_node = self
+                            .target_name_of_declaration(Some(declaration))
+                            .unwrap_or(declaration);
                         let args = if needs_name {
                             vec![self.display_name(declaration)]
                         } else {
@@ -214,12 +200,8 @@ impl<'scope> Binder<'_, 'scope, '_> {
                 },
             );
         }
-        if let Some(name) = checked(a::get_name_of_declaration(
-            self.view(),
-            Some(self.node_id(node)),
-        )) {
-            let name = self.binding_node(name);
-            if checked(a::is_ambient_module(self.view(), self.node_id(node))) {
+        if let Some(name) = self.target_name_of_declaration(Some(node)) {
+            if self.target_is_ambient_module(node) {
                 let module_name = self.target_text(name);
                 if a::is_global_scope_augmentation(&self.n(self.node_id(node))) {
                     return JsString::from_bytes(names::GLOBAL);
@@ -403,11 +385,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
         excludes: u32,
     ) -> BindingSymbol<'scope> {
         let container = self.binding_node(need(self.container));
-        let exported = checked(a::get_combined_modifier_flags(
-            self.view(),
-            self.node_id(node),
-        )) & mf::EXPORT
-            != 0
+        let exported = self.target_combined_modifier_flags(node) & mf::EXPORT != 0
             || checked(a::is_implicitly_exported_js_doc_declaration(
                 self.view(),
                 self.node_id(node),
@@ -423,17 +401,14 @@ impl<'scope> Binder<'_, 'scope, '_> {
             let table = self.ensure_binding_locals(container);
             return self.declare_binding_symbol(table, None, node, flags, excludes);
         }
-        if !checked(a::is_ambient_module(self.view(), self.node_id(node)))
+        if !self.target_is_ambient_module(node)
             && (exported || self.node_flags(container) & a::node_flags::EXPORT_CONTEXT != 0)
         {
             let parent = need(self.node_binding_symbol(container));
             let exports = self.ensure_binding_exports(parent);
             if !self.target_has_locals(container)
-                || checked(a::has_syntactic_modifier(
-                    self.view(),
-                    self.node_id(node),
-                    mf::DEFAULT,
-                )) && self.declaration_name(node).as_bytes() == names::MISSING
+                || self.target_has_syntactic_modifier(node, mf::DEFAULT)
+                    && self.declaration_name(node).as_bytes() == names::MISSING
             {
                 return self.declare_binding_symbol(exports, Some(parent), node, flags, excludes);
             }

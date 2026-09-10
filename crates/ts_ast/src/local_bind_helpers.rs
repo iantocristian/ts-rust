@@ -2,6 +2,50 @@
 use super::{BindNode, LocalBind};
 
 impl<'scope> LocalBind<'scope, '_> {
+    pub fn get_name_of_declaration(
+        &self,
+        node: Option<BindNode<'scope>>,
+    ) -> Result<Option<BindNode<'scope>>, ts_arena::Error> {
+        match crate::declaration_helpers::name(self, node).unwrap_or_else(|never| match never {}) {
+            crate::declaration_helpers::Name::Resolved(name) => Ok(name),
+            crate::declaration_helpers::Name::Assignment(node) => {
+                // The JS assignment/Object.defineProperty subtree remains the
+                // authoritative checked implementation. Preserve its failure before import.
+                crate::binder_helpers::assignment_name_of_declaration(
+                    self.view(),
+                    self.node_id(node),
+                )?
+                .map(|name| self.import_node(name))
+                .transpose()
+            }
+        }
+    }
+    pub fn has_dynamic_name(
+        &self,
+        node: Option<BindNode<'scope>>,
+    ) -> Result<bool, ts_arena::Error> {
+        Ok(self.get_name_of_declaration(node)?.is_some_and(|name| {
+            crate::declaration_helpers::dynamic_name(self, name)
+                .unwrap_or_else(|never| match never {})
+        }))
+    }
+    pub fn is_ambient_module(&self, node: BindNode<'scope>) -> bool {
+        crate::declaration_helpers::ambient_module(self, node)
+            .unwrap_or_else(|never| match never {})
+    }
+    pub fn modifier_flags(&self, node: BindNode<'scope>) -> u32 {
+        crate::declaration_helpers::modifier_flags(self, node)
+            .unwrap_or_else(|never| match never {})
+    }
+    pub fn has_syntactic_modifier(&self, node: BindNode<'scope>, flags: u32) -> bool {
+        crate::declaration_helpers::has_modifier(self, node, flags)
+            .unwrap_or_else(|never| match never {})
+    }
+    pub fn get_combined_modifier_flags(&self, node: BindNode<'scope>) -> u32 {
+        crate::declaration_helpers::combined_modifier_flags(self, node)
+            .unwrap_or_else(|never| match never {})
+    }
+
     pub fn is_push_or_unshift_identifier(&self, node: BindNode<'scope>) -> bool {
         let read = self.node(node);
         if read.kind() == crate::SyntaxKind::Identifier {

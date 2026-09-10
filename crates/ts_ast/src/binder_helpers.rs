@@ -377,26 +377,7 @@ pub fn get_element_or_property_access_name(
     view: AstView<'_>,
     id: NodeId,
 ) -> Result<Option<NodeId>, Error> {
-    let node = view.node(id)?;
-    match node.kind().known() {
-        Some(K::PropertyAccessExpression) => Ok((required(view, node.name())?.kind()
-            == K::Identifier)
-            .then_some(node.name())
-            .flatten()),
-        Some(K::ElementAccessExpression) => {
-            let arg = skip_parentheses(
-                view,
-                payload!(node, ElementAccessExpression)
-                    .argument_expression()
-                    .expect("nil element access argument"),
-            )?;
-            Ok(
-                crate::utilities::is_string_or_numeric_literal_like(&view.node(arg)?)
-                    .then_some(arg),
-            )
-        }
-        _ => panic!("Unhandled case in GetElementOrPropertyAccessName"),
-    }
+    crate::declaration_helpers::access_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsModuleExportsAccessExpression
 pub fn is_module_exports_access_expression(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
@@ -530,37 +511,10 @@ pub fn get_assignment_declaration_kind(
 
 /// port: tsc/internal/ast/utilities.go:GetAssignedName
 pub fn get_assigned_name(view: AstView<'_>, id: NodeId) -> Result<Option<NodeId>, Error> {
-    let Some(parent_id) = view.node(id)?.parent() else {
-        return Ok(None);
-    };
-    let p = view.node(parent_id)?;
-    match p.kind().known() {
-        Some(K::PropertyAssignment) => return Ok(payload!(p, PropertyAssignment).name()),
-        Some(K::BindingElement) => return Ok(payload!(p, BindingElement).name()),
-        Some(K::BinaryExpression) => {
-            let bin = payload!(p, BinaryExpression);
-            if bin.right() == Some(id) {
-                let left_id = bin.left().expect("nil assigned-name left operand");
-                let left = view.node(left_id)?;
-                match left.kind().known() {
-                    Some(K::Identifier) => return Ok(Some(left_id)),
-                    Some(K::PropertyAccessExpression) => return Ok(left.name()),
-                    Some(K::ElementAccessExpression) => {
-                        return get_element_or_property_access_name(view, left_id);
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Some(K::VariableDeclaration) if required(view, p.name())?.kind() == K::Identifier => {
-            return Ok(p.name());
-        }
-        _ => {}
-    }
-    Ok(None)
+    crate::declaration_helpers::assigned_name(&view, id)
 }
-/// port: tsc/internal/ast/utilities.go:GetNonAssignedNameOfDeclaration
-pub fn get_non_assigned_name_of_declaration(
+// Cold JS assignment/name classification shared by checked and scoped callers.
+pub(crate) fn assignment_name_of_declaration(
     view: AstView<'_>,
     id: NodeId,
 ) -> Result<Option<NodeId>, Error> {
@@ -583,11 +537,20 @@ pub fn get_non_assigned_name_of_declaration(
                 _ => None,
             })
         }
-        Some(K::ExportAssignment) => Ok((required(view, node.expression())?.kind()
-            == K::Identifier)
-            .then_some(node.expression())
-            .flatten()),
-        _ => Ok(node.name()),
+        _ => unreachable!("checked assignment-name branch"),
+    }
+}
+
+/// port: tsc/internal/ast/utilities.go:GetNonAssignedNameOfDeclaration
+pub fn get_non_assigned_name_of_declaration(
+    view: AstView<'_>,
+    id: NodeId,
+) -> Result<Option<NodeId>, Error> {
+    match crate::declaration_helpers::non_assigned_name(&view, id)? {
+        crate::declaration_helpers::Name::Resolved(name) => Ok(name),
+        crate::declaration_helpers::Name::Assignment(id) => {
+            assignment_name_of_declaration(view, id)
+        }
     }
 }
 /// port: tsc/internal/ast/utilities.go:GetNameOfDeclaration
@@ -595,39 +558,16 @@ pub fn get_name_of_declaration(
     view: AstView<'_>,
     id: Option<NodeId>,
 ) -> Result<Option<NodeId>, Error> {
-    let Some(id) = id else {
-        return Ok(None);
-    };
-    if let Some(name) = get_non_assigned_name_of_declaration(view, id)? {
-        return Ok(Some(name));
+    match crate::declaration_helpers::name(&view, id)? {
+        crate::declaration_helpers::Name::Resolved(name) => Ok(name),
+        crate::declaration_helpers::Name::Assignment(id) => {
+            assignment_name_of_declaration(view, id)
+        }
     }
-    if matches!(
-        view.node(id)?.kind().known(),
-        Some(K::FunctionExpression | K::ArrowFunction | K::ClassExpression)
-    ) {
-        return get_assigned_name(view, id);
-    }
-    Ok(None)
 }
 /// port: tsc/internal/ast/utilities.go:IsDynamicName
 pub fn is_dynamic_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    let node = view.node(id)?;
-    let expression = match node.kind().known() {
-        Some(K::ComputedPropertyName) => {
-            node.expression().expect("nil computed property expression")
-        }
-        Some(K::ElementAccessExpression) => skip_parentheses(
-            view,
-            payload!(node, ElementAccessExpression)
-                .argument_expression()
-                .expect("nil element access argument"),
-        )?,
-        _ => return Ok(false),
-    };
-    Ok(
-        !crate::utilities::is_string_or_numeric_literal_like(&view.node(expression)?)
-            && !crate::utilities::is_signed_numeric_literal(view, expression)?,
-    )
+    crate::declaration_helpers::dynamic_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:HasDynamicName
 pub fn has_dynamic_name(view: AstView<'_>, id: Option<NodeId>) -> Result<bool, Error> {
@@ -640,10 +580,7 @@ pub fn expression_is_alias(view: AstView<'_>, id: NodeId) -> Result<bool, Error>
 
 /// port: tsc/internal/ast/utilities.go:IsAmbientModule
 pub fn is_ambient_module(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    let node = view.node(id)?;
-    Ok(node.kind() == K::ModuleDeclaration
-        && (required(view, payload!(node, ModuleDeclaration).name())?.kind() == K::StringLiteral
-            || crate::utilities::is_global_scope_augmentation(&node)))
+    crate::declaration_helpers::ambient_module(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsModuleAugmentationExternal
 pub fn is_module_augmentation_external(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {

@@ -20,6 +20,11 @@ pub(crate) trait Read {
     fn prefix_operator(&self) -> NodeKind;
     fn prefix_operand(&self) -> Option<Self::Id>;
     fn element_argument(&self) -> Option<Self::Id>;
+    fn declaration_binary_operands(&self) -> (Option<Self::Id>, Option<Self::Id>);
+    fn property_assignment_name(&self) -> Option<Self::Id>;
+    fn binding_element_name(&self) -> Option<Self::Id>;
+    fn module_name(&self) -> Option<Self::Id>;
+    fn module_keyword(&self) -> NodeKind;
 }
 
 impl<T: NodeAccess + ?Sized> Read for T {
@@ -65,6 +70,61 @@ impl<T: NodeAccess + ?Sized> Read for T {
             "interface conversion: ast.nodeData is *ast.{}, not *ast.ElementAccessExpression", self.data_source().name()
         )).argument_expression()
     }
+    fn declaration_binary_operands(&self) -> (Option<Self::Id>, Option<Self::Id>) {
+        let data = self
+            .data_source()
+            .as_binary_expression()
+            .unwrap_or_else(|| {
+                panic!(
+                    "interface conversion: ast.nodeData is *ast.{}, not *ast.BinaryExpression",
+                    self.data_source().name()
+                )
+            });
+        (data.left(), data.right())
+    }
+
+    fn property_assignment_name(&self) -> Option<Self::Id> {
+        let data = self
+            .data_source()
+            .as_property_assignment()
+            .unwrap_or_else(|| {
+                panic!(
+                    "interface conversion: ast.nodeData is *ast.{}, not *ast.PropertyAssignment",
+                    self.data_source().name()
+                )
+            });
+        data.name()
+    }
+
+    fn binding_element_name(&self) -> Option<Self::Id> {
+        let data = self.data_source().as_binding_element().unwrap_or_else(|| {
+            panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.BindingElement",
+                self.data_source().name()
+            )
+        });
+        data.name()
+    }
+
+    fn module_name(&self) -> Option<Self::Id> {
+        let data = self
+            .data_source()
+            .as_module_declaration()
+            .unwrap_or_else(|| {
+                panic!(
+                    "interface conversion: ast.nodeData is *ast.{}, not *ast.ModuleDeclaration",
+                    self.data_source().name()
+                )
+            });
+        data.name()
+    }
+
+    fn module_keyword(&self) -> NodeKind {
+        self.data_source()
+            .as_module_declaration()
+            .expect("ModuleDeclaration payload")
+            .keyword()
+    }
 }
 
 impl<'scope> Read for BindRead<'scope, '_> {
@@ -107,6 +167,51 @@ impl<'scope> Read for BindRead<'scope, '_> {
             "interface conversion: ast.nodeData is *ast.{}, not *ast.ElementAccessExpression", self.payload_name()
         )).argument_expression()
     }
+    fn declaration_binary_operands(&self) -> (Option<Self::Id>, Option<Self::Id>) {
+        let data = self.as_binary_expression().unwrap_or_else(|| {
+            panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.BinaryExpression",
+                self.payload_name()
+            )
+        });
+        (data.left(), data.right())
+    }
+
+    fn property_assignment_name(&self) -> Option<Self::Id> {
+        let data = self.as_property_assignment().unwrap_or_else(|| {
+            panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.PropertyAssignment",
+                self.payload_name()
+            )
+        });
+        data.name()
+    }
+
+    fn binding_element_name(&self) -> Option<Self::Id> {
+        let data = self.as_binding_element().unwrap_or_else(|| {
+            panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.BindingElement",
+                self.payload_name()
+            )
+        });
+        data.name()
+    }
+
+    fn module_name(&self) -> Option<Self::Id> {
+        let data = self.as_module_declaration().unwrap_or_else(|| {
+            panic!(
+                "interface conversion: ast.nodeData is *ast.{}, not *ast.ModuleDeclaration",
+                self.payload_name()
+            )
+        });
+        data.name()
+    }
+
+    fn module_keyword(&self) -> NodeKind {
+        self.as_module_declaration()
+            .expect("ModuleDeclaration payload")
+            .keyword()
+    }
 }
 
 pub(crate) trait View {
@@ -116,6 +221,7 @@ pub(crate) trait View {
     where
         Self: 'read;
     fn read(&self, node: Self::Id) -> Result<Self::Node<'_>, Self::Error>;
+    fn modifier_flags<'read>(&'read self, node: &Self::Node<'read>) -> Result<u32, Self::Error>;
 }
 
 impl View for AstView<'_> {
@@ -128,6 +234,9 @@ impl View for AstView<'_> {
     fn read(&self, node: NodeId) -> Result<Self::Node<'_>, Error> {
         self.node(node)
     }
+    fn modifier_flags<'read>(&'read self, node: &Self::Node<'read>) -> Result<u32, Error> {
+        node.modifier_flags(*self)
+    }
 }
 
 impl<'scope> View for LocalBind<'scope, '_> {
@@ -139,6 +248,11 @@ impl<'scope> View for LocalBind<'scope, '_> {
         Self: 'read;
     fn read(&self, node: Self::Id) -> Result<Self::Node<'_>, Infallible> {
         Ok(self.node(node))
+    }
+    fn modifier_flags<'read>(&'read self, node: &Self::Node<'read>) -> Result<u32, Infallible> {
+        Ok(node
+            .modifiers()
+            .map_or(0, |list| self.list_modifier_flags(list)))
     }
 }
 

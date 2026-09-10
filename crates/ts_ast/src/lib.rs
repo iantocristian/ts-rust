@@ -21,6 +21,7 @@ pub use symbol_access::{SymbolAccess, SymbolRef};
 pub use symbol_store::{SymbolMut, SymbolRead, SymbolsMut, SymbolsRead};
 pub use symbols::*;
 mod binder_helpers;
+mod declaration_helpers;
 mod syntax_helpers;
 pub use binder_helpers::*;
 mod clone;

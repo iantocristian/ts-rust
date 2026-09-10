@@ -73,6 +73,15 @@ impl AuxStore {
         })
     }
 
+    /// Read the stored flags, including explicit values unrelated to edge kinds.
+    #[inline]
+    pub(crate) fn local_modifier_flags(&self, record: &StoredAux) -> Option<u32> {
+        if record.kind != LIST {
+            return None;
+        }
+        Some(self.lists.get(record.row)?.modifier_flags)
+    }
+
     /// Keep full-width cold offsets intact; edge bounds are checked by the caller.
     #[inline]
     pub(crate) fn local_backing(&self, record: &StoredAux) -> Option<CompactNodes> {

@@ -42,7 +42,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
         {
             self.set_flow_node(self.node_id(node), self.current_flow);
         }
-        if checked(a::has_dynamic_name(self.view(), Some(self.node_id(node)))) {
+        if self.target_has_dynamic_name(Some(node)) {
             self.bind_anonymous_target(node, flags, JsString::from_bytes(names::COMPUTED));
         } else {
             self.declare_target_symbol(node, flags, excludes);
@@ -62,7 +62,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
         self.set_flow_node(self.node_id(node), self.current_flow);
         let name =
             if self.node_kind(node) == K::FunctionExpression && self.node_name(node).is_some() {
-                self.check_strict_mode_function_name(self.node_id(node));
+                self.check_strict_mode_function_name(node);
                 self.target_text(need(self.node_name(node)))
             } else {
                 JsString::from_bytes(names::FUNCTION)
@@ -130,10 +130,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindVariableDeclarationOrBindingElement
     pub fn bind_variable_declaration_or_binding_element(&mut self, node: BindingNode<'scope>) {
-        self.check_strict_mode_eval_or_arguments(
-            self.node_id(node),
-            self.node_name(node).map(|name| self.node_id(name)),
-        );
+        self.check_strict_mode_eval_or_arguments(node, self.node_name(node));
         if self
             .node_name(node)
             .is_some_and(|name| !a::is_binding_pattern_kind(self.node_kind(name)))
@@ -170,10 +167,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindParameter
     pub fn bind_parameter(&mut self, node: BindingNode<'scope>) {
         if self.node_flags(node) & nf::AMBIENT == 0 {
-            self.check_strict_mode_eval_or_arguments(
-                self.node_id(node),
-                self.node_name(node).map(|name| self.node_id(name)),
-            );
+            self.check_strict_mode_eval_or_arguments(node, self.node_name(node));
         }
         let parent = need(self.node_parent(node));
         if a::is_binding_pattern_kind(self.node_kind(need(self.node_name(node)))) {
@@ -212,7 +206,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindFunctionDeclaration
     pub fn bind_function_declaration(&mut self, node: BindingNode<'scope>) {
         self.record_async_function(node);
-        self.check_strict_mode_function_name(self.node_id(node));
+        self.check_strict_mode_function_name(node);
         self.bind_block_scoped_target(node, sf::FUNCTION, sf::FUNCTION_EXCLUDES);
     }
     // port: tsc/internal/binder/binder.go:Binder.getInferTypeContainer

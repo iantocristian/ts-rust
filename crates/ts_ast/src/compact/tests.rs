@@ -16,14 +16,58 @@ fn physical_header_is_24_bytes_and_typed_pages_keep_addresses_during_growth() {
     assert_eq!(rows.get(0), Some(&41));
     assert_eq!(rows.get(1026), Some(&1026));
     assert!(rows.get(1027).is_none());
+    assert!(rows.get_mut(1027).is_none());
+    assert!(rows.get(u32::MAX).is_none());
+    for ordinal in [15, 16, 17, 31, 32, 33] {
+        assert_eq!(rows.get(ordinal), Some(&ordinal));
+        *rows.get_mut(ordinal).unwrap() += 100;
+        assert_eq!(rows.get(ordinal), Some(&(ordinal + 100)));
+    }
+
+    #[derive(Default)]
+    struct RetainedRow(Option<std::rc::Rc<std::cell::Cell<usize>>>);
+    impl Drop for RetainedRow {
+        fn drop(&mut self) {
+            if let Some(drops) = &self.0 {
+                drops.set(drops.get() + 1);
+            }
+        }
+    }
+    let drops = std::rc::Rc::new(std::cell::Cell::new(0));
+    let mut retained = RowPages::default();
+    for _ in 0..35 {
+        retained.push(RetainedRow(Some(drops.clone())));
+    }
+    assert_eq!(drops.get(), 0);
+    drop(retained);
+    assert_eq!(drops.get(), 35);
+    assert_eq!(std::rc::Rc::strong_count(&drops), 1);
 }
 
 #[test]
 fn compact_reads_and_unrestricted_edits_keep_identity_text_and_independent_shape() {
-    let mut ast = AstBuilder::new(
-        SourceText::from_loaded_bytes(b"alpha beta".as_slice()),
-        &Counters::new(),
+    let source = SourceText::from_loaded_bytes(b"alpha beta".as_slice());
+    let mut ast = AstBuilder::new(source.clone(), &Counters::new());
+    let literal = ast.new_string_literal(source.slice(6..10).unwrap(), 0);
+    ast.finish_node(literal, TextRange::new(0, 5), 0);
+    let retained_literal = ast.node(literal).as_string_literal().unwrap().text_owned();
+    assert_eq!(retained_literal.as_bytes(), b"beta");
+    assert_eq!(
+        retained_literal.as_bytes().as_ptr(),
+        source.as_bytes()[6..].as_ptr()
     );
+    let changed_literal = JsString::from_bytes(b"alpha".as_slice());
+    let changed_pointer = changed_literal.as_bytes().as_ptr();
+    {
+        let mut node = ast.node_mut(literal).unwrap();
+        *node.data_mut() = crate::StringLiteralData {
+            text: changed_literal,
+            token_flags: 0,
+        }
+        .into();
+    }
+    let retained_change = ast.node(literal).as_string_literal().unwrap().text_owned();
+    assert_eq!(retained_change.as_bytes().as_ptr(), changed_pointer);
     let name = ast.new_identifier(JsString::from_bytes(b"alpha".as_slice()));
     ast.finish_node(name, TextRange::new(0, 5), 0);
     let runtime = crate::runtime_node_id(&ast.node(name));
@@ -53,6 +97,19 @@ fn compact_reads_and_unrestricted_edits_keep_identity_text_and_independent_shape
         crate::runtime_node_id(&file.view().node(second).unwrap()),
         second_runtime
     );
+    let published_literal = file
+        .view()
+        .node(literal)
+        .unwrap()
+        .as_string_literal()
+        .unwrap()
+        .text_owned();
+    assert_eq!(published_literal.as_bytes().as_ptr(), changed_pointer);
+    drop(file);
+    drop(source);
+    assert_eq!(retained_literal.as_bytes(), b"beta");
+    assert_eq!(retained_change.as_bytes(), b"alpha");
+    assert_eq!(published_literal.as_bytes(), b"alpha");
 }
 
 #[test]

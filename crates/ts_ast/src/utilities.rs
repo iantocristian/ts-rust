@@ -745,11 +745,8 @@ pub fn walk_up_parenthesized_types(
     Ok(node)
 }
 /// port: tsc/internal/ast/utilities.go:GetRootDeclaration
-pub fn get_root_declaration(view: AstView<'_>, mut node: NodeId) -> Result<NodeId, Error> {
-    while view.node(node)?.kind() == K::BindingElement {
-        node = parent(view, parent(view, node)?)?;
-    }
-    Ok(node)
+pub fn get_root_declaration(view: AstView<'_>, node: NodeId) -> Result<NodeId, Error> {
+    crate::declaration_helpers::root_declaration(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:WalkUpBindingElementsAndPatterns
 pub fn walk_up_binding_elements_and_patterns(
@@ -992,7 +989,7 @@ pub fn is_type_node_kind(kind: NodeKind) -> bool {
 }
 /// port: tsc/internal/ast/utilities.go:HasSyntacticModifier
 pub fn has_syntactic_modifier(view: AstView<'_>, node: NodeId, flags: u32) -> Result<bool, Error> {
-    Ok(view.node(node)?.modifier_flags(view)? & flags != 0)
+    crate::declaration_helpers::has_modifier(&view, node, flags)
 }
 /// port: tsc/internal/ast/utilities.go:HasAccessorModifier
 pub fn has_accessor_modifier(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
@@ -1027,27 +1024,7 @@ pub fn is_parameter_property_declaration(
 }
 /// port: tsc/internal/ast/utilities.go:GetCombinedModifierFlags
 pub fn get_combined_modifier_flags(view: AstView<'_>, node: NodeId) -> Result<u32, Error> {
-    let id = get_root_declaration(view, node)?;
-    let root = view.node(id)?;
-    let mut flags = root.modifier_flags(view)?;
-    let mut current = Some(id);
-    if root.kind() == K::VariableDeclaration {
-        current = root.parent();
-    }
-    if let Some(id) = current {
-        let n = view.node(id)?;
-        if n.kind() == K::VariableDeclarationList {
-            flags |= n.modifier_flags(view)?;
-            current = n.parent();
-        }
-    }
-    if let Some(id) = current {
-        let n = view.node(id)?;
-        if n.kind() == K::VariableStatement {
-            flags |= n.modifier_flags(view)?;
-        }
-    }
-    Ok(flags)
+    crate::declaration_helpers::combined_modifier_flags(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsEnumConst
 pub fn is_enum_const(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
@@ -1099,18 +1076,7 @@ pub fn is_instance_of_expression(view: AstView<'_>, node: NodeId) -> Result<bool
 }
 /// port: tsc/internal/ast/utilities.go:IsSignedNumericLiteral
 pub fn is_signed_numeric_literal(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
-    let n = view.node(node)?;
-    if n.kind() != K::PrefixUnaryExpression {
-        return Ok(false);
-    }
-    let data = n
-        .data_source()
-        .as_prefix_unary_expression()
-        .expect("PrefixUnaryExpression payload");
-    Ok(
-        matches!(data.operator().known(), Some(K::PlusToken | K::MinusToken))
-            && view.node(required(data.operand()))?.kind() == K::NumericLiteral,
-    )
+    crate::declaration_helpers::signed_numeric_literal(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsOptionalChain
 pub fn is_optional_chain(node: &(impl NodeAccess + ?Sized)) -> bool {

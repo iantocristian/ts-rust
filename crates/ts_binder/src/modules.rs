@@ -30,8 +30,8 @@ impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindModuleDeclaration
     pub fn bind_module_declaration(&mut self, node: NodeId) {
         self.set_export_context_flag(node);
-        if checked(a::is_ambient_module(self.view(), node)) {
-            if checked(a::has_syntactic_modifier(self.view(), node, mf::EXPORT)) {
+        if self.target_is_ambient_module(self.binding_node(node)) {
+            if self.target_has_syntactic_modifier(self.binding_node(node), mf::EXPORT) {
                 self.error_on_first_token(node, d::X_export_modifier_cannot_be_applied_to_ambient_modules_and_module_augmentations_since_they_are_always_visible, Vec::new());
             }
             if checked(a::is_module_augmentation_external(self.view(), node)) {

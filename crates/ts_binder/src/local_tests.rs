@@ -375,3 +375,134 @@ fn scoped_and_checked_node_aliases_share_identity_and_live_flags() {
         })
         .unwrap();
 }
+
+#[test]
+fn strict_predicates_preserve_selected_payload_failures() {
+    for (kind, message) in [
+        (SyntaxKind::BinaryExpression, "binary payload"),
+        (SyntaxKind::PrefixUnaryExpression, "prefix payload"),
+        (SyntaxKind::PostfixUnaryExpression, "postfix payload"),
+        (SyntaxKind::CatchClause, "catch payload"),
+        (SyntaxKind::LabeledStatement, "label payload"),
+    ] {
+        let (parsed, node) = malformed_receiver(kind);
+        parsed
+            .bind_and_publish(|builder| {
+                {
+                    let mut binder = Binder::new(builder);
+                    let failure = catch_unwind(AssertUnwindSafe(|| {
+                        invoke_strict_predicate(
+                            &mut binder,
+                            kind,
+                            crate::target::BindingNode::Checked(node),
+                        );
+                    }))
+                    .unwrap_err();
+                    assert_eq!(panic_message(&*failure), message);
+                }
+                builder
+                    .with_local_scope(|local| {
+                        let target =
+                            crate::target::BindingNode::Local(local.import_node(node).unwrap());
+                        let mut binder =
+                            Binder::from_backend(crate::backend::Backend::Local(local));
+                        let failure = catch_unwind(AssertUnwindSafe(|| {
+                            invoke_strict_predicate(&mut binder, kind, target);
+                        }))
+                        .unwrap_err();
+                        assert_eq!(panic_message(&*failure), message);
+                    })
+                    .expect("malformed kind retains a valid local graph");
+                Ok(())
+            })
+            .unwrap();
+    }
+}
+
+#[test]
+fn strict_predicates_keep_diagnostic_order_and_source_ranges() {
+    let bytes = b"export {}; let eval = 1; eval++; ++arguments; delete eval; function arguments(eval) {} try {} catch (arguments) {}";
+    let file = parse(bytes).publish_unbound();
+    let source = file.root().unwrap();
+    let checked = crate::bind_source_file(&file, source).unwrap();
+    let expected = diagnostics(checked.view().result().diagnostics(), source);
+    assert!(
+        !expected.is_empty(),
+        "fixture must exercise diagnostic construction"
+    );
+    let completed = crate::bind_parsed_file(parse(bytes)).unwrap();
+    assert!(completed.bound_with_local_scope());
+    assert_eq!(
+        diagnostics(completed.view().result().diagnostics(), completed.source()),
+        expected
+    );
+    assert_eq!(
+        syntax_headers(completed.view().ast(), completed.source()),
+        syntax_headers(checked.view().ast(), source)
+    );
+}
+
+#[test]
+fn declaration_helper_bridges_keep_lazy_names_checked() {
+    let source_text = SourceText::default();
+    let mut build = AstBuilder::new(source_text.clone(), &Counters::new());
+    let root = build.new_identifier(JsString::from_bytes(b"root".as_slice()));
+    let source = build.new_source_file(
+        SourceFileParseOptions {
+            file_name: JsString::from_bytes(b"/lazy-name.ts".as_slice()),
+            ..Default::default()
+        },
+        source_text,
+        None,
+        None,
+    );
+    build.set_node_parent(root, Some(source));
+    build
+        .complete(source)
+        .unwrap()
+        .bind_and_publish(|builder| {
+            builder
+                .with_local_scope(|local| {
+                    let lazy = local.view().source_jsdoc(source, root, |transaction| {
+                        let name =
+                            transaction.new_identifier(JsString::from_bytes(b"lazy".as_slice()));
+                        let declaration =
+                            transaction.new_variable_declaration(Some(name), None, None, None);
+                        transaction.node_mut(name)?.set_parent(Some(declaration));
+                        transaction.node_mut(declaration)?.set_parent(Some(root));
+                        Ok(vec![name, declaration])
+                    })?;
+                    let binder = Binder::from_backend(crate::backend::Backend::Local(local));
+                    let name = binder
+                        .target_name_of_declaration(Some(binder.binding_node(lazy[1])))
+                        .unwrap();
+                    assert!(matches!(name, crate::target::BindingNode::Checked(_)));
+                    assert_eq!(binder.node_id(name), lazy[0]);
+                    assert!(!binder.target_has_dynamic_name(Some(binder.binding_node(lazy[1]))));
+                    assert_eq!(
+                        binder.target_combined_modifier_flags(binder.binding_node(lazy[1])),
+                        0
+                    );
+                    Ok(())
+                })
+                .expect("valid root admits local scope")
+        })
+        .unwrap();
+}
+
+fn invoke_strict_predicate<'scope>(
+    binder: &mut Binder<'_, 'scope, '_>,
+    kind: SyntaxKind,
+    node: crate::target::BindingNode<'scope>,
+) {
+    match kind {
+        SyntaxKind::BinaryExpression => binder.check_strict_mode_binary_expression(node),
+        SyntaxKind::PrefixUnaryExpression => binder.check_strict_mode_prefix_unary_expression(node),
+        SyntaxKind::PostfixUnaryExpression => {
+            binder.check_strict_mode_postfix_unary_expression(node);
+        }
+        SyntaxKind::CatchClause => binder.check_strict_mode_catch_clause(node),
+        SyntaxKind::LabeledStatement => binder.check_strict_mode_labeled_statement(node),
+        _ => unreachable!(),
+    }
+}

@@ -92,16 +92,18 @@ impl<'scope> Binder<'_, 'scope, '_> {
                     a::JSDeclarationKind::ThisProperty => self.bind_this_property_assignment(node),
                     _ => {}
                 }
-                self.check_strict_mode_binary_expression(node);
+                self.check_strict_mode_binary_expression(target);
             }
-            Some(K::CatchClause) => self.check_strict_mode_catch_clause(node),
-            Some(K::DeleteExpression) => self.check_strict_mode_delete_expression(node),
+            Some(K::CatchClause) => self.check_strict_mode_catch_clause(target),
+            Some(K::DeleteExpression) => self.check_strict_mode_delete_expression(target),
             Some(K::PostfixUnaryExpression) => {
-                self.check_strict_mode_postfix_unary_expression(node);
+                self.check_strict_mode_postfix_unary_expression(target);
             }
-            Some(K::PrefixUnaryExpression) => self.check_strict_mode_prefix_unary_expression(node),
-            Some(K::WithStatement) => self.check_strict_mode_with_statement(node),
-            Some(K::LabeledStatement) => self.check_strict_mode_labeled_statement(node),
+            Some(K::PrefixUnaryExpression) => {
+                self.check_strict_mode_prefix_unary_expression(target);
+            }
+            Some(K::WithStatement) => self.check_strict_mode_with_statement(target),
+            Some(K::LabeledStatement) => self.check_strict_mode_labeled_statement(target),
             Some(K::ThisType) => self.seen_this_keyword = true,
             Some(K::TypeParameter) => self.bind_type_parameter(target),
             Some(K::Parameter) => self.bind_parameter(target),

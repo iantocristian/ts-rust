@@ -386,6 +386,19 @@ impl<'scope> LocalBind<'scope, '_> {
             flow.map_or(0, |flow| flow.word.get()),
         )
     }
+    /// Modifier flags are stored on the list header; syntax edges are not scanned.
+    #[inline]
+    pub(crate) fn list_modifier_flags(&self, list: BindList<'scope>) -> u32 {
+        let record = self
+            .core
+            .auxiliary_slot(list.word.get())
+            .expect("validated local list");
+        self.core
+            .store()
+            .auxiliary
+            .local_modifier_flags(record)
+            .expect("local list encoding")
+    }
     pub fn list(&self, list: BindList<'scope>) -> BindSlice<'scope> {
         let record = self
             .core

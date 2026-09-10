@@ -439,3 +439,213 @@ fn left_hand_side_skips_only_partially_emitted_wrappers() {
         }
     });
 }
+
+#[test]
+fn declaration_names_keep_assigned_names_and_checked_assignment_boundary() {
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let name = build.new_identifier(JsString::from_bytes(b"value".as_slice()));
+    let object = build.new_identifier(JsString::from_bytes(b"object".as_slice()));
+    let assigned = build.new_function_expression(None, None, None, None, None, None, None, None);
+    let declaration = build.new_variable_declaration(Some(name), None, None, Some(assigned));
+    build.set_node_parent(assigned, Some(declaration));
+    let anonymous = build.new_function_expression(None, None, None, None, None, None, None, None);
+    let access = build.new_property_access_expression(Some(object), None, Some(name), 0);
+    let equals = build.new_token(K::EqualsToken.into());
+    let assignment =
+        build.new_binary_expression(None, Some(access), None, Some(equals), Some(anonymous));
+    build.set_node_parent(anonymous, Some(assignment));
+    let unnamed = build.new_function_expression(None, None, None, None, None, None, None, None);
+    let malformed = build.new_token(K::BinaryExpression.into());
+    in_local_scope(build, |local| {
+        for (node, expected) in [
+            (declaration, Some(name)),
+            (assigned, Some(name)),
+            (anonymous, Some(name)),
+            (assignment, Some(name)),
+            (unnamed, None),
+        ] {
+            let id = local.import_node(node).unwrap();
+            assert_eq!(
+                local
+                    .get_name_of_declaration(Some(id))
+                    .unwrap()
+                    .map(|id| local.node_id(id)),
+                expected
+            );
+            assert_eq!(
+                crate::get_name_of_declaration(local.view(), Some(node)).unwrap(),
+                expected
+            );
+        }
+        assert_eq!(local.get_name_of_declaration(None).unwrap(), None);
+        let expected = Err(
+            "interface conversion: ast.nodeData is *ast.Token, not *ast.BinaryExpression"
+                .to_owned(),
+        );
+        assert_eq!(
+            outcome(|| local
+                .get_name_of_declaration(Some(local.import_node(malformed).unwrap()))
+                .unwrap()
+                .map(|id| local.node_id(id))),
+            expected
+        );
+        assert_eq!(
+            outcome(|| crate::get_name_of_declaration(local.view(), Some(malformed)).unwrap()),
+            expected
+        );
+    });
+}
+
+#[test]
+fn dynamic_names_preserve_literal_parentheses_and_failure_rules() {
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let text = build.new_string_literal(JsString::from_bytes(b"literal".as_slice()), 0);
+    let number = build.new_numeric_literal(JsString::from_bytes(b"1".as_slice()), 0);
+    let variable = build.new_identifier(JsString::from_bytes(b"dynamic".as_slice()));
+    let signed = build.new_prefix_unary_expression(K::MinusToken.into(), Some(number));
+    let increment = build.new_prefix_unary_expression(K::PlusPlusToken.into(), Some(number));
+    let mut declarations = Vec::new();
+    for (expression, expected) in [
+        (text, false),
+        (number, false),
+        (signed, false),
+        (increment, true),
+        (variable, true),
+    ] {
+        let name = build.new_computed_property_name(Some(expression));
+        declarations.push((
+            build.new_variable_declaration(Some(name), None, None, None),
+            expected,
+        ));
+    }
+    let parenthesized = build.new_parenthesized_expression(Some(text));
+    let element = build.new_element_access_expression(Some(variable), None, Some(parenthesized), 0);
+    declarations.push((
+        build.new_variable_declaration(Some(element), None, None, None),
+        false,
+    ));
+    let missing = build.new_computed_property_name(None);
+    let malformed = build.new_variable_declaration(Some(missing), None, None, None);
+    in_local_scope(build, |local| {
+        for (node, expected) in declarations {
+            assert_eq!(
+                local
+                    .has_dynamic_name(Some(local.import_node(node).unwrap()))
+                    .unwrap(),
+                expected
+            );
+            assert_eq!(
+                crate::has_dynamic_name(local.view(), Some(node)).unwrap(),
+                expected
+            );
+        }
+        let expected = Err("nil computed property expression".to_owned());
+        assert_eq!(
+            outcome(|| local
+                .has_dynamic_name(Some(local.import_node(malformed).unwrap()))
+                .unwrap()),
+            expected
+        );
+        assert_eq!(
+            outcome(|| crate::has_dynamic_name(local.view(), Some(malformed)).unwrap()),
+            expected
+        );
+    });
+}
+
+#[test]
+fn ambient_modules_preserve_keyword_name_order_and_shape_failures() {
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let identifier = build.new_identifier(JsString::from_bytes(b"global".as_slice()));
+    let text = build.new_string_literal(JsString::from_bytes(b"module".as_slice()), 0);
+    let ordinary = build.new_module_declaration(
+        None,
+        K::NamespaceKeyword.into(),
+        Some(identifier),
+        None,
+        None,
+    );
+    let global =
+        build.new_module_declaration(None, K::GlobalKeyword.into(), Some(identifier), None, None);
+    let external =
+        build.new_module_declaration(None, K::NamespaceKeyword.into(), Some(text), None, None);
+    let nil_global = build.new_module_declaration(None, K::GlobalKeyword.into(), None, None, None);
+    let token = build.new_token(K::ModuleDeclaration.into());
+    in_local_scope(build, |local| {
+        for (node, expected) in [
+            (ordinary, Ok(false)),
+            (global, Ok(true)),
+            (external, Ok(true)),
+            (nil_global, Err("nil node in source AST utility")),
+            (
+                token,
+                Err("interface conversion: ast.nodeData is *ast.Token, not *ast.ModuleDeclaration"),
+            ),
+        ] {
+            let expected = expected.map_err(str::to_owned);
+            assert_eq!(
+                outcome(|| local.is_ambient_module(local.import_node(node).unwrap())),
+                expected
+            );
+            assert_eq!(
+                outcome(|| crate::is_ambient_module(local.view(), node).unwrap()),
+                expected
+            );
+        }
+    });
+}
+
+#[test]
+fn modifier_helpers_read_stored_flags_and_binding_root_inheritance() {
+    use crate::{modifier_flags as mf, VariableStatementData};
+    let mut build = AstBuilder::new(SourceText::default(), &Counters::new());
+    let token = build.new_modifier(K::ExportKeyword.into());
+    let backing = build.node_slice(vec![Some(token)]).unwrap();
+    let mut lists = Vec::new();
+    for flags in [mf::ASYNC, mf::DEFAULT, mf::EXPORT] {
+        let list = build
+            .new_list(ts_core::TextRange::new(0, 0), backing)
+            .unwrap();
+        build.set_list_modifier_flags(list, flags).unwrap();
+        lists.push(list);
+    }
+    let root = build.new_variable_statement_data(
+        K::VariableDeclaration.into(),
+        VariableStatementData {
+            modifiers: Some(lists[0]),
+            declaration_list: None,
+        },
+    );
+    let parent = build.new_variable_statement_data(
+        K::VariableDeclarationList.into(),
+        VariableStatementData {
+            modifiers: Some(lists[1]),
+            declaration_list: None,
+        },
+    );
+    let statement = build.new_variable_statement(Some(lists[2]), Some(parent));
+    build.set_node_parent(root, Some(parent));
+    build.set_node_parent(parent, Some(statement));
+    let pattern = build.new_token(K::ObjectBindingPattern.into());
+    let element = build.new_token(K::BindingElement.into());
+    build.set_node_parent(element, Some(pattern));
+    build.set_node_parent(pattern, Some(root));
+    let empty = build.new_variable_statement(None, None);
+    in_local_scope(build, |local| {
+        let root_id = local.import_node(root).unwrap();
+        assert_eq!(local.modifier_flags(root_id), mf::ASYNC);
+        assert!(!local.has_syntactic_modifier(root_id, mf::EXPORT));
+        for node in [root, element] {
+            let expected = mf::ASYNC | mf::DEFAULT | mf::EXPORT;
+            assert_eq!(
+                local.get_combined_modifier_flags(local.import_node(node).unwrap()),
+                expected
+            );
+            assert_eq!(
+                crate::utilities::get_combined_modifier_flags(local.view(), node).unwrap(),
+                expected
+            );
+        }
+        assert_eq!(local.modifier_flags(local.import_node(empty).unwrap()), 0);
+    });
+}

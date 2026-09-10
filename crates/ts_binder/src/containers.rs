@@ -207,8 +207,15 @@ impl<'scope> Binder<'_, 'scope, '_> {
             let saved_explicit_return = self.has_explicit_return;
             let saved_seen_this = self.seen_this_keyword;
             let immediately_invoked = flags & C::IS_FUNCTION_EXPRESSION != 0
-                && !u::has_syntactic_modifier(self.view(), node, modifier_flags::ASYNC)
-                    .expect("retained function modifiers")
+                && !match target {
+                    BindingNode::Local(_) => {
+                        self.target_has_syntactic_modifier(target, modifier_flags::ASYNC)
+                    }
+                    BindingNode::Checked(node) => {
+                        u::has_syntactic_modifier(self.view(), node, modifier_flags::ASYNC)
+                            .expect("retained function modifiers")
+                    }
+                }
                 && !self.is_generator_function_expression(node)
                 && ts_ast::get_immediately_invoked_function_expression(self.view(), node)
                     .expect("retained IIFE")
@@ -327,7 +334,12 @@ impl<'scope> Binder<'_, 'scope, '_> {
             && u::is_external_or_common_js_module(
                 &self.view().source_file(node).expect("source file"),
             )
-            || ts_ast::is_ambient_module(self.view(), node).expect("retained module")
+            || match target {
+                BindingNode::Local(_) => self.target_is_ambient_module(target),
+                BindingNode::Checked(node) => {
+                    ts_ast::is_ambient_module(self.view(), node).expect("retained module")
+                }
+            }
         {
             self.bind_common_js_type_exports(need(self.symbol(node)));
         }

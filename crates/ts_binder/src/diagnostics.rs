@@ -1,4 +1,8 @@
-use crate::{ast as a, checked, need, Binder};
+use crate::{
+    ast as a, checked, need,
+    target::{target_payload, BindingNode},
+    Binder,
+};
 use ts_ast::{node_flags as nf, AstView, Diagnostic, JsString, NodeId, SyntaxKind as K};
 use ts_diagnostics::{self as d, Message};
 
@@ -150,105 +154,106 @@ impl<'scope> Binder<'_, 'scope, '_> {
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeFunctionName
-    pub fn check_strict_mode_function_name(&mut self, node: NodeId) {
-        if self.n(node).flags() & nf::AMBIENT == 0 {
-            self.check_strict_mode_eval_or_arguments(node, self.n(node).name());
+    pub fn check_strict_mode_function_name(&mut self, node: BindingNode<'scope>) {
+        if self.node_flags(node) & nf::AMBIENT == 0 {
+            self.check_strict_mode_eval_or_arguments(node, self.node_name(node));
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeBinaryExpression
-    pub fn check_strict_mode_binary_expression(&mut self, node: NodeId) {
-        let data = self
-            .n(node)
-            .data_source()
-            .as_binary_expression()
-            .expect("binary payload")
-            .to_owned();
-        if checked(a::is_left_hand_side_expression(
-            self.view(),
-            need(data.left),
-        )) && a::is_assignment_operator(self.n(need(data.operator_token)).kind())
-        {
-            self.check_strict_mode_eval_or_arguments(node, data.left);
+    pub fn check_strict_mode_binary_expression(&mut self, node: BindingNode<'scope>) {
+        let (left, operator) = target_payload!(self, node, as_binary_expression, "binary payload"; node: left, node: operator_token);
+        let left_hand_side = match need(left) {
+            BindingNode::Local(left) => {
+                self.target_is_left_hand_side_expression(BindingNode::Local(left))
+            }
+            BindingNode::Checked(left) => {
+                checked(a::is_left_hand_side_expression(self.view(), left))
+            }
+        };
+        if left_hand_side && a::is_assignment_operator(self.node_kind(need(operator))) {
+            self.check_strict_mode_eval_or_arguments(node, left);
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeCatchClause
-    pub fn check_strict_mode_catch_clause(&mut self, node: NodeId) {
-        let declaration = self
-            .n(node)
-            .data_source()
-            .as_catch_clause()
-            .expect("catch payload")
-            .variable_declaration();
+    pub fn check_strict_mode_catch_clause(&mut self, node: BindingNode<'scope>) {
+        let (declaration,) = target_payload!(self, node, as_catch_clause, "catch payload"; node: variable_declaration);
         if let Some(declaration) = declaration {
-            self.check_strict_mode_eval_or_arguments(node, self.n(declaration).name());
+            self.check_strict_mode_eval_or_arguments(node, self.node_name(declaration));
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeDeleteExpression
-    pub fn check_strict_mode_delete_expression(&mut self, node: NodeId) {
-        let expression = need(self.n(node).expression());
-        if self.n(expression).kind() == K::Identifier {
+    pub fn check_strict_mode_delete_expression(&mut self, node: BindingNode<'scope>) {
+        let expression = need(self.node_expression(node));
+        if self.node_kind(expression) == K::Identifier {
             self.error_on_node(
-                expression,
+                self.node_id(expression),
                 d::X_delete_cannot_be_called_on_an_identifier_in_strict_mode,
                 Vec::new(),
             );
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModePostfixUnaryExpression
-    pub fn check_strict_mode_postfix_unary_expression(&mut self, node: NodeId) {
-        self.check_strict_mode_eval_or_arguments(
-            node,
-            self.n(node)
-                .data_source()
-                .as_postfix_unary_expression()
-                .expect("postfix payload")
-                .operand(),
-        );
+    pub fn check_strict_mode_postfix_unary_expression(&mut self, node: BindingNode<'scope>) {
+        let (operand,) = target_payload!(self, node, as_postfix_unary_expression, "postfix payload"; node: operand);
+        self.check_strict_mode_eval_or_arguments(node, operand);
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModePrefixUnaryExpression
-    pub fn check_strict_mode_prefix_unary_expression(&mut self, node: NodeId) {
-        let data = self
-            .n(node)
-            .data_source()
-            .as_prefix_unary_expression()
-            .expect("prefix payload")
-            .to_owned();
+    pub fn check_strict_mode_prefix_unary_expression(&mut self, node: BindingNode<'scope>) {
+        let (operator, operand) = target_payload!(self, node, as_prefix_unary_expression, "prefix payload"; scalar: operator, node: operand);
         if matches!(
-            data.operator.known(),
+            operator.known(),
             Some(K::PlusPlusToken | K::MinusMinusToken)
         ) {
-            self.check_strict_mode_eval_or_arguments(node, data.operand);
+            self.check_strict_mode_eval_or_arguments(node, operand);
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeWithStatement
-    pub fn check_strict_mode_with_statement(&mut self, node: NodeId) {
+    pub fn check_strict_mode_with_statement(&mut self, node: BindingNode<'scope>) {
         self.error_on_first_token(
-            node,
+            self.node_id(node),
             d::X_with_statements_are_not_allowed_in_strict_mode,
             Vec::new(),
         );
     }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeLabeledStatement
-    pub fn check_strict_mode_labeled_statement(&mut self, node: NodeId) {
-        let data = self
-            .n(node)
-            .data_source()
-            .as_labeled_statement()
-            .expect("label payload")
-            .to_owned();
-        let statement = self.n(need(data.statement));
-        if a::is_declaration_statement(&statement) || statement.kind() == K::VariableStatement {
-            self.error_on_first_token(need(data.label), d::A_label_is_not_allowed_here, Vec::new());
+    pub fn check_strict_mode_labeled_statement(&mut self, node: BindingNode<'scope>) {
+        let (label, statement) = target_payload!(self, node, as_labeled_statement, "label payload"; node: label, node: statement);
+        let kind = self.node_kind(need(statement));
+        if a::is_declaration_statement_kind(kind) || kind == K::VariableStatement {
+            self.error_on_first_token(
+                self.node_id(need(label)),
+                d::A_label_is_not_allowed_here,
+                Vec::new(),
+            );
         }
     }
+    fn target_is_eval_or_arguments_identifier(&self, node: BindingNode<'scope>) -> bool {
+        if self.node_kind(node) != K::Identifier {
+            return false;
+        }
+        if let BindingNode::Local(node) = node {
+            let crate::backend::Backend::Local(local) = &self.builder else {
+                unreachable!("local binder scope")
+            };
+            let read = local.node(node);
+            if let Some(identifier) = read.as_identifier() {
+                return is_eval_or_arguments_text(identifier.text());
+            }
+        }
+        is_eval_or_arguments_identifier(self.view(), self.node_id(node))
+    }
     // port: tsc/internal/binder/binder.go:Binder.checkStrictModeEvalOrArguments
-    pub fn check_strict_mode_eval_or_arguments(&mut self, context: NodeId, name: Option<NodeId>) {
+    pub fn check_strict_mode_eval_or_arguments(
+        &mut self,
+        context: BindingNode<'scope>,
+        name: Option<BindingNode<'scope>>,
+    ) {
         if let Some(name) = name {
-            if is_eval_or_arguments_identifier(self.view(), name) {
+            if self.target_is_eval_or_arguments_identifier(name) {
                 self.error_on_node(
-                    name,
-                    self.get_strict_mode_eval_or_arguments_message(context),
-                    vec![self.text(name)],
+                    self.node_id(name),
+                    self.get_strict_mode_eval_or_arguments_message(self.node_id(context)),
+                    vec![self.target_text(name)],
                 );
             }
         }
@@ -267,10 +272,10 @@ impl<'scope> Binder<'_, 'scope, '_> {
 // port: tsc/internal/binder/binder.go:isEvalOrArgumentsIdentifier
 pub fn is_eval_or_arguments_identifier(view: AstView<'_>, node: NodeId) -> bool {
     checked(view.node(node)).kind() == K::Identifier
-        && matches!(
-            checked(view.node_text(node)).as_bytes(),
-            b"eval" | b"arguments"
-        )
+        && is_eval_or_arguments_text(checked(view.node_text(node)).as_bytes())
+}
+fn is_eval_or_arguments_text(bytes: &[u8]) -> bool {
+    matches!(bytes, b"eval" | b"arguments")
 }
 // port: tsc/internal/binder/binder.go:isUseStrictPrologueDirective
 pub fn is_use_strict_prologue_directive(view: AstView<'_>, source: NodeId, node: NodeId) -> bool {
