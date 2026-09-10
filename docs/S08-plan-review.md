@@ -154,3 +154,27 @@ No algorithm, no producer, no evidence claim is included.
   ordered-structure use.
 - Whether to fold checker state into the `ts_arena` permit: decide from P1's
   per-operation measurement, not now.
+
+## Codex takeover review
+
+The owner delegated the declaration-diagnostics decision on takeover. Codex chose
+to implement the required declaration-transform/emit-resolver path inside S08,
+preserving the frozen `.errors.txt` requirement. This is recorded in §5.1 and P0;
+it does not approve any baseline divergence or claim general emit parity.
+
+Two factual corrections to the independent review:
+
+- `harnessutil.compileFilesWithHost` compares pre/post diagnostic **counts**. It
+  does not detect equal-count changes in payloads. The new oracle must compare
+  complete pre/post observations rather than infer equivalence from this check.
+- The 23 Go `unsafe.Sizeof` observations are fixed-record measurements. They are
+  not the live per-type census, and removing Go back-pointers does not prove that
+  Rust's replacement indices, payloads and capacity meet the memory gate.
+
+The scaffold also exposes unbranded `TypeId`/`TypeStore` values and mutable
+`CheckerState` through public APIs. A caller can move a same-numbered ID or swap
+stores between owners. P1 must close that boundary before algorithm consumers
+arrive; constructors being private does not prevent an issued ID from escaping.
+The scaffold flag fixture describes an overlay generator that is not committed.
+P0 will add the reproducible request inventory and overlay source rather than
+accept a prose derivation as a regeneration command.

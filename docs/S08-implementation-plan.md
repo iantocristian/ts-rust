@@ -82,7 +82,9 @@ owner decision.
 | S08-9 | Fixed checker workload: throughput, allocation traffic and retained bytes against Go, excluding parse/bind |
 | S08-10 | Real arena-reference/interior-mutability relater prototype, fixture parity and measured comparison with the production ID-based relater |
 
-S08 does not complete general emit/transforms, the full language service, API
+S08 includes the declaration-transform and emit-resolver operations required to
+produce declaration diagnostics on the frozen subset (decision below). It does
+not claim general `.js`/`.d.ts` emit parity, the full language service, API
 registries, shared-pool response commitment, WebAssembly or embedding. S09 owns
 the complete registry/retirement integration and E3 completion; S10 owns the
 portable checker/consumer gates. S08 must supply real reusable owners and host
@@ -333,16 +335,32 @@ tracker. 1,482 eligible variants set `declaration` and 4 set `composite`. Across
 the whole reference directory 65 of 7,301 `.errors.txt` baselines carry
 declaration-emit codes (TS4xxx, and TS9xxx under `isolatedDeclarations`); some
 declaration-emit diagnostics use TS2xxx and TS7xxx codes, so 65 is a floor, not
-the count. This is Phase 3 code that the plan did not list. P0 must count the
-affected frozen variants exactly, record per variant whether the declaration
-phase executed, and obtain an owner decision: port `getDeclarationDiagnostics`
-inside S08, or evaluate `errors_parity` with the declaration phase recorded as not
-executed and every affected baseline listed as a named pending failure until
-Phase 3. A harness that skips the phase and matches by absence claims more than
-it executed and is not accepted. The harness also collects the final error set
-after `Emit` and fails any test whose pre-emit and post-emit sets differ; the Go
-oracle therefore establishes that pre-emit collection suffices for every passing
-case, and P0 records that check rather than assuming it.
+the count. The implementation choice on takeover is to **port the required declaration-
+diagnostics path inside S08**. The user delegated this decision to Codex; this
+preserves the existing error-parity requirement and authorizes no divergence.
+P0 lists every variant for which `GetEmitDeclarations()` is true, distinguishes
+phase requested/executed/failed and records per-file selection. Until Rust
+executes the required path, those outcomes remain named failures even if an
+existing reference baseline happens to contain no declaration error.
+
+Add the required `internal/transformers/declarations` slice under
+`crates/ts_transformers/src/declarations/`, below compiler and separate from the
+checker. Its emit host/resolver contracts must remain cycle-free through the
+existing AST, node-builder and printer layers; implement their checker-specific
+callbacks in `ts_checker::{emit_resolver,accessibility}`. P0 traces
+`Program.getDeclarationDiagnosticsForFile`, `declarations.GetDeclarationDiagnostics`
+and the callbacks they execute, including isolated declarations. P4/P5 complete
+this path before E2 semantic acceptance. Emitted JavaScript/declaration file
+baselines remain Phase 3 work.
+
+The harness constructs separate pre-emit and post-emit programs. Contrary to the
+initial review's wording, it detects **unequal diagnostic counts**, not every
+changed diagnostic payload when counts are equal (`harnessutil.go:690`). The Go
+oracle must compare the complete sorted pre/post sets independently and retain
+both. Any emit-dependent difference is a named scope dependency to resolve; an
+equal count alone cannot establish that pre-emit collection suffices. Preserve
+`CaptureSuggestions`, diagnostic directives and no-emit filtering as well.
+
 
 ### 5.2 Type-system worklist
 
@@ -448,9 +466,10 @@ owned lists and maps:
 | `ast.Symbol` | 96 | | |
 
 Of the 56-byte header, 24 bytes are the checker back-pointer and the `data`
-interface's self-reference, which no Rust layout carries. Headers are therefore
-not where the 0.80 ratio is at risk; lists, member maps, caches and page slack
-are, and the census must charge them on both sides.
+interface's self-reference, which no Rust layout carries. This suggests room for a smaller common record; it does not establish the
+whole-storage ratio. Rust still needs payload tags/indices and owner metadata.
+These are fixed record-size observations, not a live per-type census: lists,
+member maps, caches and page slack remain unmeasured and must be charged.
 
 The proposed gate statistic is the ratio of aggregate mean bytes per retained
 type record: `(sum Rust type-storage bytes / sum Rust retained type records)`
@@ -603,11 +622,11 @@ when their production paths exist, not after every module edit.
 
 | Checkpoint | Work and exit evidence |
 | --- | --- |
-| **P0 — Freeze execution contracts** | Regenerate/verify S07 inputs without edits. Audit the typed source closure and checker host. Freeze baseline/query requests, missing-output semantics, supplemental fixtures, memory accounting, benchmark endpoints and relater fixtures. Count the declaration-diagnostics variants and record the owner's decision on them (§5.1). Run the actual Go oracle and one adversarial validator test for each output class. Rust gaps remain explicit. |
+| **P0 — Freeze execution contracts** | Regenerate/verify S07 inputs without edits. Audit the typed source closure and checker host. Freeze baseline/query requests, missing-output semantics, supplemental fixtures, memory accounting, benchmark endpoints and relater fixtures. Freeze declaration-phase obligations for every eligible variant under the chosen full-parity path (§5.1). Run the actual Go oracle and one adversarial validator test for each output class. Rust gaps remain explicit. |
 | **P1 — Ownership and storage feasibility** | Concrete checker owner/permit, private local IDs, symbol-arena identity adoption, types/signatures/lists/links, basic synthetic AST retention. Measure real intrinsic/literal/object/union/tuple storage and compare with the source census, with total and transient budgets. Prove the reference-relater allocation/recursion API on a real recursive fixture. Exit with debug/release foreign-owner, retention, exhaustion, reentry and first-query tests; no full parity claim. |
 | **P2 — First complete semantic slice** | Checker host, initialization, globals, symbol lookup/merge, intrinsic/literal/object types and basic queries. Add minimal production node building/printing and structured/baseline errors. Run real checker-local merge fixtures in all four execution modes. Obtain end-to-end Go/Rust observations for named small programs, including a failing program, before expanding the port. |
 | **P3 — Types, signatures, relations and ordering** | Compound types, declarations, signatures, inference/instantiation, the relation operations they require, required loaded-library operations and source comparators. These mutually dependent algorithms grow together in complete query slices. Extend the printer alongside the types. Direct comparator, residual-identity and recursive relation fixtures pass; all remaining obligation families are mapped to concrete pending work. |
-| **P4 — Body checking and full dependency closure** | Relations, expression/statement/grammar checks, flow narrowing and declaration/module diagnostics across all frozen options and loaded dependencies. Run all primary variants and retain every failure bucket; finish required missing operations without changing eligibility. Complete direct fixtures for lazy library capabilities. |
+| **P4 — Body checking and full dependency closure** | Relations, expression/statement/grammar checks, flow narrowing and declaration/module diagnostics across all frozen options and loaded dependencies, including the required declaration-transform/emit-resolver path. Run all primary variants and retain every failure bucket; finish required missing operations without changing eligibility. Complete direct fixtures for lazy library capabilities. |
 | **P5 — Display, bytes and recursion** | Finish builder/accessibility/emit-metadata/printer closure, exact type/error baseline decoration, E4 production integration and actual nested serialization/resolution tests. Stress left/right binary chains, nested parentheses/JSX, recursive object relations, conditional/instantiation limits and printing on small stacks that prove growth. Panic cleanup and subsequent owner retirement are observed; native tests do not certify wasm stack behavior. |
 | **P6 — Semantic acceptance** | Exact E2 inventory, baseline bytes, ordering and type-display parity; measured recursion and divergence checks. Complete S08 ownership contributors and rerun applicable E3 instrumentation. Review algorithms, identity/lifetimes and ordinary-path costs separately. All nonmeasurement S08 requirements pass with current inputs. |
 | **P7 — Required measurements** | Finish and parity-check the isolated relater. Run the full type census, checkerbench and relater comparisons with frozen methodology. If type footprint misses 0.80, select one integrated candidate from actual attribution and record its complete comparison; no declaration of success based on a model. Unfavorable checker/relater throughput is reported, not hidden. |
