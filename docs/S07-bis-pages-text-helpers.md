@@ -1,6 +1,9 @@
 # S07-bis: larger typed pages, compact text entries and remaining binding helpers
 
-Status: combined implementation integrated; final validation and measurement pending.
+Status: implementation, validation and the fixed screen are complete;
+[retained after independent review](S07-bis-pages-text-helpers-result.md)
+under the existing small-improvement policy. The measured outcome remains
+`no_demonstrated_win`; it does not meet the 5% substantial-candidate threshold.
 The user approved this sequence after the [complete local binder control](S07-bis-local-text-repair.md).
 
 ## Baseline before implementation
@@ -59,29 +62,44 @@ bytes. Extend real ownership inventories if new cases are added; do not let a
 substring filter or stale denominator silently omit them. Use paired checked/local
 fixtures for shared helper rules and preserve the independently pinned Go corpus.
 
-The integrated changes have independent source review and preliminary debug
-coverage. Existing test-artifact listings match all 21 `local_ast_core` and nine
+The integrated changes have independent source review. Preliminary test-artifact
+listings matched all 21 `local_ast_core` and nine
 `local_binder` cases; the unchanged 53 inventory entries give a declared S07 total
-of 83. This listing check executes no tests and is not renewed E3 evidence.
-Final source validation, full graphs, instrumentation and performance are pending.
+of 83. That listing check executed no tests and was not renewed E3 evidence.
 
-Run affected debug/release and documentation
-tests, lint, minimum Rust, generator drift and formatting. Review the ownership
-and malformed-input boundaries independently; renew the required Miri/ASan
-evidence on the final source. Run full graph parity for all 13,094 files at both
-worker counts and confirm the selected binding paths before timing.
+Final native checks now pass, including affected debug/release and documentation
+tests, lint, minimum Rust, generator drift and formatting. Both 13,094-file graph
+modes, the full binder producer and renewed E3 pass. E3 observes all 29 S06 / 83
+S07 cases in debug, release, Miri and ASan. See the result record for exact sources
+and retained evidence.
 
 ## Measurement and decision
 
-Build and freeze the complete candidate once source/configuration stops changing.
-Screen it against the refreshed immutable control with the existing fixed eight
-warmups and 56 observations. Keep every result; no component screen decides
-promotion and no independently estimated savings are added. Report absolute
-time/request/RSS changes, confidence/noise qualifications and all Go gate distances.
+The complete candidate is frozen as
+`8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`,
+with Rust implementation `02490d8` and freeze HEAD `9a394bf`. Its fixed eight
+warmups and 56 observations are complete against the refreshed control.
+One/eight-worker wall time improves from 3.798938417 / 0.826130333 seconds to
+3.621678708 / 0.793662292 seconds. Ratios are 0.9533396729 / 0.9606986456;
+upper 95% bounds are 0.9707271814 / 0.9993300452. Requested allocation falls
+97.655 / 97.670 MB to about 2.14592 GB; RSS rises 7.045 / 7.078 MB to
+2.32602 / 2.32931 GB. Nonregression passes, but no median gain reaches 5%.
 
-Retain comparable consuming parse and bind/publication/validation elapsed
-observations for control and candidate using the separate existing phase driver.
-These explain the combined result; they do not modify the ordinary acceptance
+The [result and retention review](S07-bis-pages-text-helpers-result.md) preserve
+that screen verdict. Retention under the already-agreed small-improvement path
+is accepted after independent review. No component screen or estimated sum
+supplies the decision.
+
+Against the refreshed Go medians, contextual gaps remain 501.7 / 63.5 ms CPU,
+110.7 / 110.1 MB allocation and 117.6 / 113.2 MB RSS. These are not fresh paired
+candidate/Go acceptance results. The same frozen control took 826 ms in this
+eight-worker screen and 1,037 ms in the earlier native batch; their difference
+cannot establish a roughly 24% candidate improvement. The actual paired gain
+in this mode is 3.9%.
+
+Comparable consuming parse and bind/publication/validation elapsed observations
+for control and candidate are retained using the separate existing phase driver.
+These provide elapsed-phase context; they do not modify the ordinary acceptance
 executables or establish sampled CPU costs. Do not run the obsolete published
 versus consuming comparison as a substitute for this attribution.
 

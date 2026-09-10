@@ -6,13 +6,18 @@ including scoped syntax/list and symbol/table consumers, after the
 [first local scope](S07-bis-local-bind-milestone.md). The
 [owned-text and inventory repair](S07-bis-local-text-repair.md) passes final
 checks, full graphs, corrected E3 and the combined screen. Its
-[paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, is now
-the comparison control: immutable manifest
+[paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, supplied
+the completed screen's comparison control: immutable manifest
 `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`.
-The [selected page/text/helper combination](S07-bis-pages-text-helpers.md) is
-implemented; final validation and performance screening are pending. Explicit
-diagnostics, lazy and public-reference boundaries remain. This is not a claim
-that the entire binder is facade-free. This supersedes the standalone experiment sequence in
+The [page/text/helper combination is complete](S07-bis-pages-text-helpers-result.md):
+native checks, both full graph modes, the full binder producer and E3
+(29 S06 / 83 S07 cases in every mode) pass. Its fixed screen passes nonregression
+and reports `no_demonstrated_win`, since no median gain reaches 5%. Retention
+under the existing small-improvement path is accepted after independent review;
+that candidate is the next experimental control.
+Explicit diagnostics, lazy and public-reference boundaries remain. This is not
+a claim that the entire binder is facade-free. This supersedes the standalone
+experiment sequence in
 [the flow/source-fact plan](S07-bis-bind-cpu-plan.md). Its semantic counterexamples
 remain applicable; those changes are components of this design.
 
@@ -23,15 +28,17 @@ newly observed mechanisms. Even eliminating both replacements completely would
 save at most 125.378 MB, below that capture's roughly 209 MB request deficit,
 without proving any RSS saving. That is a growth-only ceiling for the old layout,
 not a bound on sixteen-row pages or shrinking text entries. The selected combined
-experiment charges replacement storage, directory changes and page tails together;
-its net allocation, RSS and CPU effects still require the complete screen.
+experiment charges replacement storage, directory changes and page tails together.
+Its complete screen observes about 97.7 MB fewer requests, about 7.1 MB more RSS
+and 4.7% / 3.9% less wall time against the paired control. These net measurements
+do not establish each component's isolated effect.
 
 ## Decision and limits
 
-The local binder view is implemented. Current work combines its remaining shared
-helper migration with larger typed pages and compact text entries, as specified
-in the selected experiment. The original access and attribution contracts below
-remain the design record. A small proof burden is no longer a
+The local binder view and its selected shared-helper migration are implemented
+and measured with larger typed pages and compact text entries. The retention
+review is recorded with the combined result. The original access and attribution
+contracts below remain the design record. A small proof burden is no longer a
 reason to exclude the binder-wide access work. Bounded means explicit contracts,
 an early implementation milestone and a decision after a fixed complete screen.
 
@@ -167,8 +174,10 @@ the passing scoped validation.
 
 | Item | Established evidence / outstanding measurement |
 | --- | --- |
-| Current comparison control | The [paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`. Its complete native Go/Rust capture is valid; all final gates remain open. |
-| Current selected experiment | [Sixteen-row pages, eight-byte text entries and remaining shared binding helpers](S07-bis-pages-text-helpers.md) are integrated. Final validation and the combined screen are pending; no performance result or promotion is claimed. |
+| Completed screen control | The [paired baseline refresh](S07-bis-control-refresh.md), source `eaf50b7`, immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`. Its complete native Go/Rust capture is valid; all final gates remain open. |
+| Retained experimental control | [Complete result](S07-bis-pages-text-helpers-result.md), candidate `8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`, Rust `02490d8`, freeze HEAD `9a394bf`. Native checks, both 13,094-file graphs, full binder and E3 29/83 in all modes pass. Retained after independent review under the existing small-improvement rule. |
+| Current paired costs | Wall 3.798938417 → 3.621678708 s / 0.826130333 → 0.793662292 s; ratios 0.9533396729 / 0.9606986456, upper bounds 0.9707271814 / 0.9993300452. Requests fall 97.655 / 97.670 MB to about 2.14592 GB; RSS rises 7.045 / 7.078 MB to 2.32602 / 2.32931 GB. Nonregression passes; `no_demonstrated_win` remains the screen verdict. |
+| Current gate context | Refreshed-Go gaps remain 501.7 / 63.5 ms CPU, 110.7 / 110.1 MB allocation and 117.6 / 113.2 MB RSS. No fresh candidate/Go acceptance is claimed. The eight-worker paired gain is 3.9%; comparing to the control's slower earlier native batch cannot establish a roughly 24% gain. |
 | Earlier accepted combination | Shared-text local freeze `99d11d1f2efd383919663bece6459a0230bc0fe815723ba65b7178e5973c5abc` replaced CP1 before the fresh paired baseline. Both earlier freezes remain preserved; the rows below retain their original evidence scope. |
 | Selected migration scope | Four binder files plus their adapters carry scoped syntax/list and symbol/table handles; shared semantic inventories replace duplicated checked/local rules. Affected native checks, scoped instrumentation and both full-workload graphs pass. |
 | Earlier migration native profile | [One untimed capture](S07-bis-local-bind-migration-cpu.md), no rebuild or paired screen. Remaining general helper/validation callers were identified; it does not measure this later source or establish CPU improvement. |

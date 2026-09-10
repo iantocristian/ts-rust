@@ -5,18 +5,23 @@ This directory implements the diagnostic screening policy in
 It writes no tracker metrics and does not replace full graph or ownership parity.
 `layout_model.py` and its inputs implement the separate CP0 layout model.
 
-The [reviewed complete local binder](../../../docs/S07-bis-local-text-repair.md)
-remains the accepted implementation. Its [fresh Go/Rust acceptance capture](../../../docs/S07-bis-control-refresh.md)
-now supplies the next comparison control, including the restored source mappings
-and producer artifact-reuse repair. For the combined page/text/helper experiment,
-pass `--control target/s07-bis/pages-text-helpers-control` and
-`--control-sha 957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`
-to `build`, `graphs` and `screen`. Its identity is recorded in
-[manifests/pages-text-helpers-control.json](manifests/pages-text-helpers-control.json).
-Preserve the preceding shared-text freeze, CP1, original control and
-[A0-b](../../../docs/S07-bis-A0.md): the commands below document the first
-experiment. A validated capture and experimental control do not imply passing
-final performance gates.
+The [page/text/helper combination](../../../docs/S07-bis-pages-text-helpers-result.md)
+is retained as the next experimental control under the existing reviewed-small-
+improvement rule. Its `no_demonstrated_win` screen verdict remains unchanged:
+median CPU wins are 4.67% / 3.93%, requested allocation falls about 97.7 MB, and
+RSS rises about 7.1 MB (0.30%). All declared non-regression/noise conditions and
+correctness prerequisites pass. For the next experiment, use
+`--control target/s07-bis/pages-text-helpers-candidate` and
+`--control-sha 8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`.
+Its identity is recorded in
+[manifests/pages-text-helpers-candidate.json](manifests/pages-text-helpers-candidate.json).
+
+The [fresh native Go/Rust baseline](../../../docs/S07-bis-control-refresh.md),
+manifest `95742194…`, remains the preserved control for that completed screen.
+Its native Go observations supply contextual gate distances, not fresh candidate
+acceptance. Preserve that control, the preceding shared-text freeze, CP1, original
+control and [A0-b](../../../docs/S07-bis-A0.md). The commands below document the
+first experiment. Final S07 performance gates remain open.
 
 The original control is frozen under `target/s07-bis/control`; its externally
 recorded identity is [manifests/control.json](manifests/control.json). It contains

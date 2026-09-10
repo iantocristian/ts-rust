@@ -1,11 +1,23 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: the [selected page/text/helper combination](S07-bis-pages-text-helpers.md)
-is implemented; final validation and performance screening are pending. Its
+Status: the [page/text/helper result](S07-bis-pages-text-helpers-result.md) is complete.
+Native checks, both full graph modes, the full binder producer and E3
+(29 S06 / 83 S07 cases in every mode) pass. The fixed screen reports
+`no_demonstrated_win`: CPU ratios are 0.9533396729 / 0.9606986456, with upper 95%
+bounds 0.9707271814 / 0.9993300452. Requests fall about 97.7 MB to 2.14592 GB;
+RSS rises about 7.1 MB to 2.32602 / 2.32931 GB. Nonregression passes. Retention
+under the existing small-improvement policy is accepted after independent review;
+the screen does not meet the 5% substantial-candidate threshold.
+
+Candidate `8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`
+contains Rust `02490d8`, frozen at HEAD `9a394bf`, and is the next experimental
+control. Its
 [fresh paired comparison control](S07-bis-control-refresh.md) is source `eaf50b7`,
 immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`.
 That baseline passes full graphs, native capture verification and E5/E6 consumers;
-all final CPU and memory gates remain open.
+all final CPU and memory gates remain open. Contextual deficits against those
+Go medians are 501.7 / 63.5 ms CPU, 110.7 / 110.1 MB allocation and
+117.6 / 113.2 MB RSS. No fresh paired candidate/Go acceptance is claimed.
 
 The preceding [complete local binder with shared text](S07-bis-local-text-repair.md)
 was accepted as an experimental control after source review, full workload
@@ -46,12 +58,14 @@ while keeping every existing correctness and ownership prerequisite current.
 
 ## 1. Decision
 
-The current selected experiment combines sixteen-row typed pages, eight-byte
+The completed selected experiment combines sixteen-row typed pages, eight-byte
 text-pool entries preserving shared owned backing, and the remaining shared
-binding helper migration. The [implementation record](S07-bis-pages-text-helpers.md)
-defines its pending validation, one fixed combined screen against the refreshed
-control, and comparable elapsed-phase attribution. No unmeasured component is
-promoted or assumed to close a gate.
+binding helper migration. The [result record](S07-bis-pages-text-helpers-result.md)
+records validation, the fixed combined screen and elapsed-phase attribution.
+Independent result review found no blocker to this retention decision. The eight-worker
+gain is 3.9% against its same-screen control; comparing against that control's
+1,037 ms earlier native run instead of its 826 ms screen observation cannot
+establish a roughly 24% improvement. No gate or raw verdict changes with retention.
 
 ### Prior decisions and measurements
 
