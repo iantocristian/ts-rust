@@ -164,6 +164,11 @@ jobs:
         run: |
           cargo test -p ts_binder -p ts_compiler -p ts_tsoptions -p ts_module -p ts_semver -p ts_tspath -p ts_vfs -p ts_bundled --all-targets --all-features --locked
           cargo test -p ts_binder -p ts_compiler -p ts_tsoptions -p ts_module -p ts_semver -p ts_tspath -p ts_vfs -p ts_bundled --all-targets --all-features --locked --release
+      - name: Checker ownership, constructor and type-display contracts
+        if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
+        run: |
+          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer --all-features --locked
+          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer --all-features --locked --release
       - name: Native allocator build and original-request accounting
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: |
