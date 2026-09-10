@@ -24,6 +24,8 @@ and Rust toolchains, using a new output directory for every invocation:
 python3 scripts/s08_flags.py --output target/s08/flags-review
 python3 scripts/s08.py check --output target/s08/phases-review
 python3 scripts/s08_storage.py --output target/s08/storage-review
+python3 scripts/s08_baselines.py --output target/s08/baselines-review
+python3 scripts/s08_baselines.py --review-capture target/s08/baselines-review --output target/s08/baselines-review-inventory.json
 python3 -m unittest discover -s scripts/tests -p test_s08.py
 ```
 
@@ -31,6 +33,17 @@ python3 -m unittest discover -s scripts/tests -p test_s08.py
 frozen manifest only after regenerating Go policy. Missing references do not
 prove `NoContent`, and `not_implemented` cannot pass. These commands do not
 register an E2/E5 producer or modify evidence thresholds.
+
+`s08_baselines.py` captures native raw baseline generation for every frozen
+variant; `--smoke` selects five fixed source cases, and `--case` takes one exact
+eligible variant ID for diagnosis. Skips, failures, disabled baselines,
+`NoContent` and empty content are distinct. A successful capture command means
+the outcome inventory was completed, not that checking or parity passed.
+`--review-capture` verifies source snapshots and request/observation hashes,
+compares available inputs and complete pre/post diagnostics, and writes a named
+review inventory. It refuses partial captures and existing output paths.
+The first full capture's contract conflict requires
+[review](../../docs/S08-P0-baseline-review.md) before freezing expected queries.
 
 Checkpoint results, including the unusable first Go retained-memory endpoint,
 are documented in `docs/S08-P0-P1.md` and archived under `tools/s08/results/`.

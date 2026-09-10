@@ -292,6 +292,12 @@ S08 storage must already permit correct reclamation.
 
 ### 5.1 Baseline authority
 
+**P0 execution review (2026-09-11):** the full native capture found 1,315 harness
+option-policy skips, 34 option rejections and one input-closure discrepancy.
+[The concrete authority proposal](S08-P0-baseline-review.md) is pending review;
+it is not an approved exception to this contract. Keep all 10,728 IDs and leave
+the final query freeze open until that review is resolved.
+
 Build an oracle around the pinned compiler runner and
 `internal/testutil/tsbaseline/{type_symbol_baseline,error_baseline}.go`. Use
 access-only bridges in an exported source closure, leaving `upstream/` untouched.
