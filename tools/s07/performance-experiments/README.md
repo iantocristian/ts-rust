@@ -10,16 +10,20 @@ is retained as the next experimental control under the existing reviewed-small-
 improvement rule. Its `no_demonstrated_win` screen verdict remains unchanged:
 median CPU wins are 4.67% / 3.93%, requested allocation falls about 97.7 MB, and
 RSS rises about 7.1 MB (0.30%). All declared non-regression/noise conditions and
-correctness prerequisites pass. For the next experiment, use
-`--control target/s07-bis/pages-text-helpers-candidate` and
-`--control-sha 8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`.
-Its identity is recorded in
-[manifests/pages-text-helpers-candidate.json](manifests/pages-text-helpers-candidate.json).
+correctness prerequisites pass. Its unchanged implementation now has a
+[paired native acceptance batch](../../../docs/S07-bis-candidate-acceptance.md),
+with CPU ratios 1.214 / 1.405 and all final gates still open. For the next
+experiment, use
+`--control target/s07-bis/current-candidate-acceptance-2026-09-10/frozen` and
+`--control-sha 1c04605dcd248d78dcec1e42c4c6f82f036843a054cf5e27d81c1b3b229753b5`.
+The earlier screen candidate and its
+[manifest](manifests/pages-text-helpers-candidate.json) remain preserved.
 
 The [fresh native Go/Rust baseline](../../../docs/S07-bis-control-refresh.md),
 manifest `95742194…`, remains the preserved control for that completed screen.
-Its native Go observations supply contextual gate distances, not fresh candidate
-acceptance. Preserve that control, the preceding shared-text freeze, CP1, original
+Its native Go observations supplied historical contextual gate distances;
+current candidate acceptance is the later paired batch above. Preserve that
+control, the preceding shared-text freeze, CP1, original
 control and [A0-b](../../../docs/S07-bis-A0.md). The commands below document the
 first experiment. Final S07 performance gates remain open.
 

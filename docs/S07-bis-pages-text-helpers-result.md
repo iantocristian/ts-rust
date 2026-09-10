@@ -2,6 +2,11 @@
 
 Status: complete combined experiment; retained after independent review under the existing reviewed-small-improvement rule. Final S07 gates remain open.
 
+Follow-up: a [standard paired candidate/Go batch](S07-bis-candidate-acceptance.md)
+now measures CPU ratios 1.213911 / 1.404619 and refreshes E5/E6 on this source.
+It supersedes the historical cross-batch gate distances below; the original
+candidate/control screen and its retention decision remain unchanged.
+
 The [selected combination](S07-bis-pages-text-helpers.md) improves both CPU modes
 and requested allocation, with a small, measured RSS increase. Keep the entire
 combination. Preserve the runner's `no_demonstrated_win` verdict: its largest
@@ -61,7 +66,7 @@ no phase confidence bounds, sampled self-cost ranking or attribution to individu
 components. The adapter's 91.8 ms difference does not replace the normal binary's
 177.3 ms median difference, and neither is added to earlier measured savings.
 
-## Remaining gate distances
+## Historical cross-batch gate distances
 
 The [fresh Go baseline](S07-bis-control-refresh.md) is preserved separately.
 The following arithmetic compares this screen's candidate medians with that
@@ -78,8 +83,9 @@ Cross-batch wall changes are material: the same frozen control measured
 Only the same-screen 32.468 ms / 3.93% improvement belongs to this candidate.
 The apparent candidate/Go ratio of 1.087 is contextual arithmetic, not a new
 confidence bound or evidence that the eight-worker gate is nearly closed.
-The source-bound E5/E6 refresh belongs to the preceding control and becomes stale
-on the new source; the tracker must not present it as current acceptance evidence.
+At this screen's completion, source-bound E5/E6 belonged to the preceding control
+and were stale on the new source. The later paired acceptance batch linked above
+supplies current evidence without reassigning these historical observations.
 
 ## Correctness and review
 

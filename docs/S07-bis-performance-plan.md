@@ -10,14 +10,20 @@ under the existing small-improvement policy is accepted after independent review
 the screen does not meet the 5% substantial-candidate threshold.
 
 Candidate `8d837bc0ab365972d2d5e0eeb0ee95255a505e44dea01964fca2198e78850898`
-contains Rust `02490d8`, frozen at HEAD `9a394bf`, and is the next experimental
-control. Its
+contains Rust `02490d8`, frozen at HEAD `9a394bf`, and was retained as the
+experimental control for this follow-up. Its
 [fresh paired comparison control](S07-bis-control-refresh.md) is source `eaf50b7`,
 immutable manifest `957421942258d954765fc88b494b2031982dfac849d9358850dfdba7078edcd4`.
-That baseline passes full graphs, native capture verification and E5/E6 consumers;
-all final CPU and memory gates remain open. Contextual deficits against those
-Go medians are 501.7 / 63.5 ms CPU, 110.7 / 110.1 MB allocation and
-117.6 / 113.2 MB RSS. No fresh paired candidate/Go acceptance is claimed.
+That baseline remains the comparison control for the completed screen.
+The retained implementation now has a [standard paired Go/Rust acceptance batch](S07-bis-candidate-acceptance.md):
+CPU ratios **1.213911 / 1.404619**, allocation **0.738066 / 0.737854** and
+RSS **0.737440 / 0.735532**. All final gates remain open. Current paired deficits
+are 653.1 / 245.1 ms CPU, 110.7 / 110.1 MB allocation and 118.1 / 112.5 MB RSS.
+These supersede the earlier cross-batch distance arithmetic. The new source-bound
+E5/E6 evidence is current; its valid capture has failing gate results.
+The next experimental control is the exact native bundle
+`1c04605dcd248d78dcec1e42c4c6f82f036843a054cf5e27d81c1b3b229753b5`,
+frozen from the unchanged implementation at `26b6c4e`.
 
 The preceding [complete local binder with shared text](S07-bis-local-text-repair.md)
 was accepted as an experimental control after source review, full workload

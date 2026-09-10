@@ -216,11 +216,11 @@ Every criterion is required. Missing or stale evidence leaves the experiment pen
 | E4: Strings | encoder_output_bytes | `run.e1.encoder_output_bytes == true` byte-identical encoder output wherever Go encodes successfully | missing | pending |
 | E4: Strings | helper_semantics | `run.e4.helper_semantics == true` leaf case mapping, truncation and escape helpers match Go replacements and fragments; actual source-reuse/regenerated printer integration remains a separate requirement | missing | pending |
 | E4: Strings | token_value_bytes | `run.scanner.token_value_bytes == true` scanner token bytes, literal value bytes and rescans match Go; checker-created literal types remain a separate integration requirement | missing | pending |
-| E5: Memory | peak_rss | `run.e5.peak_rss_ratio <= 0.7` Rust / Go peak RSS for parse and bind of the pinned VS Code workload | missing | pending |
-| E5: Memory | allocated_bytes | `run.e5.allocated_bytes_ratio <= 0.7` Rust / Go bytes allocated for the same parse/bind workload | missing | pending |
+| E5: Memory | peak_rss | `run.e5.peak_rss_ratio <= 0.7` Rust / Go peak RSS for parse and bind of the pinned VS Code workload | 0.7374402069191177 | fail |
+| E5: Memory | allocated_bytes | `run.e5.allocated_bytes_ratio <= 0.7` Rust / Go bytes allocated for the same parse/bind workload | 0.7380658136984337 | fail |
 | E5: Memory | type_footprint | `run.e5.type_footprint_ratio <= 0.8` Rust / Go per-type footprint on the frozen checker subset | missing | pending |
-| E6: CPU | one_thread | `run.e6.one_thread_wall_time_ratio <= 1` Rust / Go wall time at one thread | missing | pending |
-| E6: CPU | eight_threads | `run.e6.eight_threads_wall_time_ratio <= 1` Rust / Go wall time at eight threads | missing | pending |
+| E6: CPU | one_thread | `run.e6.one_thread_wall_time_ratio <= 1` Rust / Go wall time at one thread | 1.2139109311057956 | fail |
+| E6: CPU | eight_threads | `run.e6.eight_threads_wall_time_ratio <= 1` Rust / Go wall time at eight threads | 1.404618989754805 | fail |
 | E7: WebAssembly | parser_artifact_size | `run.e7.parser_artifact_size_ratio <= 0.25` Rust wasm32 / Go GOOS=js parser artifact bytes | missing | pending |
 | E7: WebAssembly | parse_throughput | `run.e7.parse_throughput_ratio >= 2` Rust / Go parse throughput | missing | pending |
 | E7: WebAssembly | checker_parity | `run.e7.checker_parity == 1` frozen E2 cases matching both diagnostics and types / frozen E2 cases | missing | pending |
@@ -250,15 +250,15 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 | Run | State | Artifact |
 |---|---|---|
 | binder | current | [result](status/evidence/a208adad6d99a70057403637d9dd8eb4d46d66a30216a518173d0c07e471046f.json) |
-| bindworkload | stale: source, pin, command or inputs changed | [result](status/evidence/86651e2b7aab76b5cfeea9b1e42ed92d540ee9d2dd439ad55a7dfa566d1dd305.json) |
+| bindworkload | current | [result](status/evidence/483f6951d8c982aff9ed3d4fe12fb321b9f62875ccf09a6d8da8b54dbffeb797.json) |
 | clippy | stale: source, pin, command or inputs changed | [result](status/evidence/af885af71851f8188b005d9bb35fd244c08eddb9f371cd1ff3da65346d2068c0.json) |
 | deny | stale: source, pin, command or inputs changed | [result](status/evidence/7ead4f161a68a1f92f39e946e7bfa146487b29e18705dd8f4f57b536939a7e0f.json) |
 | e1 | stale: source, pin, command or inputs changed | [result](status/evidence/9f3547df0cc15f57360e946348886ad96a3653c1757cb5e6ccf33aa357ee0b88.json) |
 | e2 | stale: source, pin, command or inputs changed | [result](status/evidence/9c1f559ece21dd632eec71dc5554e4cf81548a76b204c33049a1ea56496d8c51.json) |
 | e3 | current | [result](status/evidence/c5f349a2e0439f58d74d532183e48e33f428aa984cf85ba0339f93deb734c3ee.json) |
 | e4 | stale: source, pin, command or inputs changed | [result](status/evidence/88c9d6f415291aec1923bf3f551c49ecef2a3521d0f51ddfa199ef15aa55a458.json) |
-| e5 | stale: source, pin, command or inputs changed | [result](status/evidence/db8056ff57887bd1014878cad024e52e2ba8731b9ea3275d9ecddc02aa49e099.json) |
-| e6 | stale: source, pin, command or inputs changed | [result](status/evidence/b9e13035971f0c440ad5733644fa85df18f55b9298251168cf968983bb5dc0e2.json) |
+| e5 | current | [result](status/evidence/ae0e9fc639b2dfa698e7171cd9319193407b42bbd6a21362ebf02ff5306284fa.json) |
+| e6 | current | [result](status/evidence/d5e7541f724caf1f157175370fca91f8988287c796cedf8c80d29c3d18378ab3.json) |
 | fmt | stale: source, pin, command or inputs changed | [result](status/evidence/ed8a170ce2337a346d1d4256858562fe260a06a824c3162ba031d124fcdb7037.json) |
 | gen | stale: source, pin, command or inputs changed | [result](status/evidence/f284d37dac607ce1304ba4ff735d300cba1250a0f90e48de927eac5aebb8e5be.json) |
 | oracle | stale: source, pin, command or inputs changed | [result](status/evidence/725d535ee945d2bfdfee04ebed6e52f8a32a42e3059221ba1cec20e3932a16c5.json) |
@@ -436,7 +436,7 @@ Exit checks:
 - [x] `run.binder.resolvers == true`
 - [x] `run.binder.graph_contracts == true`
 - [x] `run.binder.depth == true`
-- [ ] `run.bindworkload.parity == 1` (unknown metric)
+- [x] `run.bindworkload.parity == 1`
 - [ ] `run.program.subset_loads == true` (unknown metric)
 - [ ] `exp.E2.frozen_subset.pass == 1`
 - [x] `exp.E3.shared_bound_file.pass == 1`
@@ -444,7 +444,7 @@ Exit checks:
 - [ ] `exp.E5.peak_rss.pass == 1`
 - [ ] `exp.E5.allocated_bytes.pass == 1`
 - [ ] `exp.E6.pass == 1`
-- [ ] `run.e6.stable == true` (unknown metric)
+- [ ] `run.e6.stable == true`
 - [x] `functions.package[internal/binder].ratio >= 0.9`
 - [ ] `run.clippy.clean == true` (unknown metric)
 
