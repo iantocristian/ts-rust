@@ -12,7 +12,7 @@ from s04_common import strict_json_loads
 from s06_protocol import canonical, exact_keys, hex_bytes, integer
 from s06_process import Process
 from s07_benchmark import (CACHE, ROOT, build_go, build_rust, provision_inputs,
-                           source_fingerprint, sha)
+                           source_fingerprint, cargo_configuration, sha)
 from s07_binder import KINDS, GraphValidator, name_identity, first_difference, comparable
 
 FIELDS="version kind workers index filename_hex path_hex script_kind jsx force source_bytes source_sha256 canonical_sha256 raw_sha256 records counts qualified_names diagnostics node_count symbol_count parse_diagnostics bind_diagnostics"
@@ -178,7 +178,7 @@ def compare_rows(oracle,rust,recipes,frozen,workers,directory):
         "raw_exact_files":sum(item["raw_exact"] for item in results),"expected_scalars":totals(oracle),"rust_scalars":totals(rust),"results":results}
 
 
-def validate_measurement_prerequisite(report_path, current_source, binaries):
+def validate_measurement_prerequisite(report_path, current_source, binaries, current_configuration=None):
     """Return exact scalar obligations only from complete, current two-mode parity."""
     report=strict_json_loads(Path(report_path).read_bytes()) if not isinstance(report_path,dict) else report_path
     if type(report.get("version")) is not int or report.get("version")!=1 or report.get("diagnostic_subset") is not False or report.get("source_stable") is not True:
@@ -187,6 +187,11 @@ def validate_measurement_prerequisite(report_path, current_source, binaries):
         raise ValueError("benchmark graph parity is not exact")
     if report.get("source_fingerprint")!=current_source or report.get("source_fingerprint_after")!=current_source:
         raise ValueError("graph capture is not for the current production source bytes")
+    # Native timing must bind the external Cargo configuration used to build
+    # these exact graph artifacts. The optional argument preserves the older
+    # protocol used by self-contained historical diagnostic archive replays.
+    if current_configuration is not None and (report.get("cargo_configuration")!=current_configuration or report.get("cargo_configuration_after")!=current_configuration):
+        raise ValueError("graph capture is not for the current Cargo configuration")
     expected_binaries={"oracle":binaries["go"],"rust":binaries["rust"]}
     if report.get("binary_sha256")!=expected_binaries or report.get("binary_sha256_after")!=expected_binaries:
         raise ValueError("timing binaries differ from the uninstrumented graph binaries")
@@ -225,7 +230,7 @@ def main():
     args=parser.parse_args()
     if args.no_build and not args.diagnostic:raise ValueError("--no-build is diagnostic only; final captures must build their binaries")
     if args.operation=="freeze" and args.diagnostic and args.write_manifest:raise ValueError("diagnostic cached binaries cannot freeze obligations")
-    build_source=source_fingerprint()
+    build_source=source_fingerprint();build_configuration=cargo_configuration()
     if args.operation=="capture" and args.write_manifest:raise ValueError("graph capture cannot rewrite obligations")
     if args.no_build:
         from s07_benchmark import native_environment
@@ -235,15 +240,16 @@ def main():
         go=build_go();inputs,options=provision_inputs(*go)
         if options!=strict_json_loads((ROOT/"data/s07/vscode-parse-options.json").read_bytes()):raise ValueError("Go parse options changed")
         rust=build_rust() if args.operation=="capture" else None
-    source=source_fingerprint();build_stable=source==build_source and not args.no_build
-    if not build_stable and not args.diagnostic:raise ValueError("production sources changed while graph binaries were building")
+    source=source_fingerprint();configuration=cargo_configuration()
+    build_stable=source==build_source and configuration==build_configuration and not args.no_build
+    if not build_stable and not args.diagnostic:raise ValueError("production sources or Cargo configuration changed while graph binaries were building")
     requests,recipes=requests_from_frozen(inputs)
     output=ROOT/"target/s07-bindworkload";output.mkdir(exist_ok=True,parents=True)
     frozen_path=ROOT/"data/s07/bindworkload-probes.json"
     if args.operation=="freeze":
         rows=read_reports(*go,inputs,requests,1,output/"preflight","oracle")
         document=freeze_document(recipes,rows);content=canonical(document)+b"\n"
-        if source_fingerprint()!=source and not args.diagnostic:raise ValueError("production sources changed during Go graph preflight")
+        if (source_fingerprint()!=source or cargo_configuration()!=configuration) and not args.diagnostic:raise ValueError("production sources or Cargo configuration changed during Go graph preflight")
         if args.write_manifest:frozen_path.write_bytes(content)
         elif not frozen_path.exists() or frozen_path.read_bytes()!=content:raise ValueError("frozen bindworkload observations drifted")
         print(json.dumps({"files":len(rows),"expected_scalars":document["expected_scalars"],"input_sha256":document["input_sha256"]}));return
@@ -261,14 +267,17 @@ def main():
         run=compare_rows(oracle_rows,rust_rows,recipes,frozen,workers,directory)
         run["first_mismatch_witness"]=capture_first_witness(run,(("oracle",go),("rust",rust)),inputs,(oracle_rows,rust_rows),directory)
         runs.append(run)
-    after=source_fingerprint();binary_hashes_after={"oracle":sha(go[0].read_bytes()),"rust":sha(rust[0].read_bytes())};stable=build_stable and source==after and binary_hashes==binary_hashes_after
+    after=source_fingerprint();configuration_after=cargo_configuration()
+    binary_hashes_after={"oracle":sha(go[0].read_bytes()),"rust":sha(rust[0].read_bytes())}
+    stable=build_stable and source==after and configuration==configuration_after and binary_hashes==binary_hashes_after
     report={"version":1,"diagnostic_subset":args.diagnostic,"source_stable":stable,"files":len(recipes),"parity":min(run["parity"] for run in runs),
         "expected_scalars":frozen["expected_scalars"],"input_sha256":frozen["input_sha256"],"options_sha256":frozen["options_sha256"],"workload_sha256":frozen["workload_sha256"],
-        "source_fingerprint":source,"source_fingerprint_after":after,"binary_sha256":binary_hashes,"binary_sha256_after":binary_hashes_after,"runs":runs}
+        "source_fingerprint":source,"source_fingerprint_after":after,"cargo_configuration":build_configuration,"cargo_configuration_after":configuration_after,
+        "binary_sha256":binary_hashes,"binary_sha256_after":binary_hashes_after,"runs":runs}
     if not stable or args.diagnostic:report["parity"]=None
     (output/"report.json").write_bytes(canonical(report)+b"\n")
     print(json.dumps({key:value for key,value in report.items() if key not in ("runs","source_fingerprint","source_fingerprint_after")}))
-    if not stable and not args.diagnostic:raise ValueError("source changed during graph capture")
+    if not stable and not args.diagnostic:raise ValueError("source, Cargo configuration or binaries changed during graph capture")
     # Complete measured mismatches remain valid captures with a failing parity
     # metric; missing prerequisites and malformed protocols still raise above.
 

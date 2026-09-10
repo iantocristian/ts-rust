@@ -107,7 +107,7 @@ def read_capture(directory=ROOT / "target/s07-benchmark", graph_report=ROOT / "t
         raise ValueError("benchmark capture binaries changed")
     if report.get("graph_report_sha256") != sha(graph_report.read_bytes()):
         raise ValueError("benchmark graph prerequisite changed")
-    expected = validate_measurement_prerequisite(graph_report, before, binaries)
+    expected = validate_measurement_prerequisite(graph_report, before, binaries, report["cargo_configuration"])
     if canonical(report.get("expected_work")) != canonical(expected):
         raise ValueError("benchmark scalar obligations changed")
     raw = (directory / "samples.ndjson").read_bytes()

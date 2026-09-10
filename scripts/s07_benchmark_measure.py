@@ -8,7 +8,7 @@ import sys
 from statistics import median
 
 from s04_common import command, strict_json_loads
-from s07_benchmark import ROOT, CACHE, build_go, build_rust, build_allocation_probe, native_environment, provision_inputs, sha, source_fingerprint, cargo_configuration, rust_native_toolchain
+from s07_benchmark import ROOT, CACHE, build_rust, build_allocation_probe, native_environment, go_native_environment, provision_inputs, sha, source_fingerprint, cargo_configuration, rust_native_toolchain
 from s07_benchmark_stats import ratio_summary
 from s04_runtime import load_toolchains
 
@@ -187,13 +187,25 @@ def capture(graph_report, destination):
         (destination / "report.json").write_text('{"version":1,"status":"capture_in_progress"}\n')
         before = source_fingerprint()
         cargo_config = cargo_configuration()
+        graph_bytes = Path(graph_report).read_bytes()
+        prerequisite = strict_json_loads(graph_bytes)
+        graph_sha256 = sha(graph_bytes)
+        go = CACHE / "s07-benchmark/go-benchmark"
+        rust = CACHE / "s07-benchmark/rust-benchmark"
+        # Native builds are not byte-reproducible (for example, mimalloc embeds
+        # its compilation time). Reuse the exact normal artifacts that passed
+        # graph parity, rejecting stale source/configuration or changed bytes.
+        graph_binaries = {"go": sha(go.read_bytes()), "rust": sha(rust.read_bytes())}
+        expected = validate_measurement_prerequisite(prerequisite, before, graph_binaries, cargo_config)
         preflight = allocation_preflight()
-        go, go_env = build_go()
-        rust, rust_env = build_rust()
+        go_env = go_native_environment()
+        rust_env = native_environment()
         instrumented, _ = build_rust(True)
-        inputs, _ = provision_inputs(go, go_env)
         binaries = {"go": sha(go.read_bytes()), "rust": sha(rust.read_bytes()), "rust_allocation": sha(instrumented.read_bytes())}
-        expected = validate_measurement_prerequisite(graph_report, before, binaries)
+        if source_fingerprint() != before or cargo_configuration() != cargo_config or sha(Path(graph_report).read_bytes()) != graph_sha256:
+            raise ValueError("source, Cargo configuration or graph prerequisite changed while preparing measurement")
+        validate_measurement_prerequisite(prerequisite, before, binaries, cargo_config)
+        inputs, _ = provision_inputs(go, go_env)
         _, recipes = requests_from_frozen(inputs)
         if loaded_input_digest(recipes) != expected["loaded_input_sha256"]:
             raise ValueError("benchmark input transport differs from graph prerequisite")
@@ -202,7 +214,7 @@ def capture(graph_report, destination):
         reject_concurrent_builds()
         samples = []
         metadata = {"version": 1, "source_fingerprint": before, "binaries": binaries, "host": host,
-                    "graph_report_sha256": sha(Path(graph_report).read_bytes()),
+                    "graph_report_sha256": graph_sha256,
                     "transport_sha256": transport_sha256,
                     "revision": command(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip(),
                     "rust_profile": RUST_PROFILE,
