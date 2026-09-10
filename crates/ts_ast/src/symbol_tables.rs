@@ -8,7 +8,7 @@
 #![allow(clippy::option_option)]
 
 use std::collections::HashMap;
-use std::hash::{BuildHasher, RandomState};
+use std::hash::{BuildHasher, Hasher, RandomState};
 use std::ops::Range;
 
 use hashbrown::HashTable;
@@ -18,6 +18,17 @@ use ts_jsstring::JsString;
 /// Owned construction input. Stored tables expose borrowed byte keys instead.
 pub type SymbolTable = HashMap<JsString, Option<SymbolId>>;
 pub(crate) type NameId = usize;
+
+// This private domain contains one complete byte string per hash, never a
+// composite Hash value. Retain RandomState's keyed hasher, but omit the slice
+// Hash implementation's extra length-prefix block. The hasher still finalizes
+// the entire message, including its own length handling. Do not reuse this as a
+// composable Hash implementation; see docs/S07-bis-hash-decision.md.
+fn hash_name_bytes(builder: &RandomState, bytes: &[u8]) -> u64 {
+    let mut hasher = builder.build_hasher();
+    hasher.write(bytes);
+    hasher.finish()
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SymbolTableId(AuxId);
@@ -88,7 +99,7 @@ impl NamePool {
         }
     }
     fn hash(&self, bytes: &[u8]) -> u64 {
-        self.hash_builder.hash_one(bytes)
+        hash_name_bytes(&self.hash_builder, bytes)
     }
     fn range(&self, id: NameId) -> Range<usize> {
         let range = self.ranges[id - 1];
@@ -153,7 +164,7 @@ impl NamePool {
                 let start = range.start as usize;
                 start..start + range.len as usize
             };
-            hash_builder.hash_one(&bytes[range])
+            hash_name_bytes(hash_builder, &bytes[range])
         });
         id
     }
@@ -746,6 +757,56 @@ mod tests {
             .collect();
         assert_eq!(observed, expected);
         assert_eq!(tables.get(id).unwrap().iter().len(), expected.len());
+    }
+
+    #[test]
+    fn whole_byte_keys_keep_prefixes_zero_suffixes_and_growth_distinct() {
+        let counters = Counters::new();
+        let mut tables = SymbolTables::new(&counters);
+        let id = tables.alloc(SymbolTable::new());
+        let mut expected = SymbolTable::new();
+        // Exercise empty keys, SipHash block/tail boundaries, and the low-byte
+        // length wrap. Prefixes, embedded NULs and invalid UTF-8 stay distinct.
+        for len in [0, 1, 7, 8, 9, 15, 16, 17, 255, 256, 257, 511, 512, 513] {
+            for byte in [0, b'a', 0x80, 0xff] {
+                let mut key = vec![byte; len];
+                for suffix in [None, Some(0), Some(0xff)] {
+                    if let Some(suffix) = suffix {
+                        key.push(suffix);
+                    }
+                    let mut framed = vec![b'!'];
+                    framed.extend_from_slice(&key);
+                    framed.push(b'?');
+                    let framed = js(&framed);
+                    let selected = framed.slice(1..1 + key.len()).unwrap();
+                    assert_eq!(
+                        tables.get_mut(id).unwrap().insert(selected, None),
+                        expected.insert(js(&key), None)
+                    );
+                    if suffix.is_some() {
+                        key.pop();
+                    }
+                }
+            }
+        }
+        assert_eq!(tables.get(id).unwrap().len(), expected.len());
+        for key in expected.keys() {
+            assert_eq!(tables.get(id).unwrap().get(key.as_bytes()), Some(None));
+        }
+        let observed: SymbolTable = tables
+            .get(id)
+            .unwrap()
+            .iter()
+            .map(|(key, value)| (js(key), value))
+            .collect();
+        assert_eq!(observed, expected);
+        for key in expected.keys() {
+            assert_eq!(
+                tables.get_mut(id).unwrap().remove(key.as_bytes()),
+                Some(None)
+            );
+        }
+        assert!(tables.get(id).unwrap().is_empty());
     }
 
     #[test]
