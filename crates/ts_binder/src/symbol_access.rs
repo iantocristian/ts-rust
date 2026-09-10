@@ -61,6 +61,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
             BindingSymbol::Checked(id) => self.s(id),
         }
     }
+    // port: tsc/internal/binder/binder.go:Binder.newSymbol
     pub(crate) fn new_binding_symbol(
         &mut self,
         flags: u32,

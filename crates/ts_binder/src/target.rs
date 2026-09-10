@@ -225,6 +225,9 @@ impl<'scope> Binder<'_, 'scope, '_> {
     pub(crate) fn bind_optional_target(&mut self, node: Option<BindingNode<'scope>>) -> bool {
         node.is_some_and(|node| self.bind_target(node))
     }
+    // port: tsc/internal/binder/binder.go:Binder.bindEach
+    // port: tsc/internal/binder/binder.go:Binder.bindNodeList
+    // port: tsc/internal/binder/binder.go:Binder.bindModifiers
     pub(crate) fn bind_target_list(&mut self, list: Option<BindingList<'scope>>) {
         let edges = self.target_list_edges(list);
         for index in 0..edges.len() {

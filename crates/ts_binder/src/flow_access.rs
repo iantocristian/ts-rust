@@ -193,6 +193,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
             .set_flow_list_next(raw_list, raw_next)
             .expect("retained flow list");
     }
+    // port: tsc/internal/binder/binder.go:Binder.newFlowNodeEx
     pub(crate) fn new_flow_node_ex(
         &mut self,
         flags: u32,
@@ -210,6 +211,7 @@ impl<'scope> Binder<'_, 'scope, '_> {
             .push_flow(FlowNode::new_ex(flags, data, raw_antecedent));
         self.binding_flow(id)
     }
+    // port: tsc/internal/binder/binder.go:Binder.newFlowList
     pub(crate) fn new_flow_list(
         &mut self,
         flow: Option<BindingFlow<'scope>>,
