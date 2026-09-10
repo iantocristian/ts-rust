@@ -25,12 +25,14 @@ pub fn to_node_builder_flags(flags: TypeFormatFlags) -> ts_nodebuilder::Flags {
 
 /// Upstream's nil-tolerant accessor: an absent alias has no symbol.
 // port: tsc/internal/checker/types.go:TypeAlias.Symbol
-pub fn alias_symbol(alias: Option<&TypeAlias>) -> Option<SymbolId> {
+#[allow(dead_code, reason = "alias display callers arrive in P2")]
+pub(crate) fn alias_symbol(alias: Option<&TypeAlias>) -> Option<SymbolId> {
     alias.map(|alias| alias.symbol)
 }
 
 /// Upstream's nil-tolerant accessor: an absent alias has no type arguments.
 // port: tsc/internal/checker/types.go:TypeAlias.TypeArguments
-pub fn alias_type_arguments(alias: Option<&TypeAlias>) -> &[TypeId] {
+#[allow(dead_code, reason = "alias display callers arrive in P2")]
+pub(crate) fn alias_type_arguments(alias: Option<&TypeAlias>) -> &[TypeId] {
     alias.map_or(&[], |alias| &alias.type_arguments)
 }

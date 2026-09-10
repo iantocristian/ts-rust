@@ -178,3 +178,22 @@ arrive; constructors being private does not prevent an issued ID from escaping.
 The scaffold flag fixture describes an overlay generator that is not committed.
 P0 will add the reproducible request inventory and overlay source rather than
 accept a prose derivation as a regeneration command.
+
+
+### Takeover implementation corrections
+
+The phase-policy capture calls pinned Go's `CompilerOptions.GetEmitDeclarations`
+for every eligible variant. It identifies **1,459** obligations: 1,450 with
+`declaration=true` and nine with `composite=true`. There are 40 explicit
+`declaration=false` options and 109 `emitDeclarationOnly=true` options. These
+replace the earlier review's 1,482/4/107 counts; checking key presence is not
+checking the effective boolean value.
+
+The regenerated flag fixture contains **289 constants** across checker and
+node-builder families, including the three display constants, and 23 fixed
+record sizes. Both compiled Go overlays reproduce the original fixture.
+
+The takeover closes public local-ID/state escape and detects reentry in the
+identity lease itself, including callers that acquire that lease directly.
+Compile-fail API tests and direct-lease/operation tests cover both boundaries.
+Full P0/P1 completion remains tracked in `S08-P0-P1.md`.

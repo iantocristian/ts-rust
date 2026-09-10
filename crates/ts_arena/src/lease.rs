@@ -1,8 +1,13 @@
 use crate::{counters::Track, ids::next_arena, ArenaId, Counters, Error, SymbolArena};
+use std::cell::RefCell;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex, MutexGuard,
 };
+
+thread_local! {
+    static ACTIVE_LEASES: RefCell<Vec<ArenaId>> = const { RefCell::new(Vec::new()) };
+}
 
 struct GenerationState {
     id: ArenaId,
@@ -75,11 +80,15 @@ impl CheckerIdentity {
     }
     pub fn lease(&self) -> Result<CheckerLease<'_>, Error> {
         self.generation.validate()?;
+        if ACTIVE_LEASES.with(|active| active.borrow().contains(&self.id)) {
+            return Err(Error::Reentry);
+        }
         let permit = self.operation.lock().map_err(|_| {
             self.generation.retire();
             Error::Retired
         })?;
         self.generation.validate()?;
+        ACTIVE_LEASES.with(|active| active.borrow_mut().push(self.id));
         Ok(CheckerLease {
             owner: self,
             _permit: permit,
@@ -101,6 +110,7 @@ impl Drop for CheckerLease<'_> {
             // sharing this generation. Poison is only a defensive backstop.
             self.owner.generation.retire();
         }
+        ACTIVE_LEASES.with(|active| active.borrow_mut().retain(|id| *id != self.owner.id));
     }
 }
 

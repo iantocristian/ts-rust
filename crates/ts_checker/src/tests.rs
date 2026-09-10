@@ -129,8 +129,8 @@ fn owner_adopts_the_identity_once_and_scopes_state_to_an_operation() {
         Err(Error::Arena(ts_arena::Error::IdentityAdopted))
     ));
     let mut operation = owner.operation().unwrap();
-    assert_eq!(operation.symbols().id(), identity.id());
-    let undefined = operation.symbols_mut().push(Symbol::new(
+    assert_eq!(operation.state().symbols().id(), identity.id());
+    let undefined = operation.state_mut().symbols_mut().push(Symbol::new(
         symbol_flags::PROPERTY,
         JsString::from_bytes(&b"undefined"[..]),
     ));
@@ -146,17 +146,17 @@ fn owner_adopts_the_identity_once_and_scopes_state_to_an_operation() {
         kind: TypeKind::Intrinsic,
         payload_row: 0,
     };
-    let any = operation.types_mut().push(record).unwrap();
+    let any = operation.state_mut().types_mut().push(record).unwrap();
     assert_eq!(any.get(), 1, "type ids start at 1 like TypeCount");
-    assert_eq!(operation.types().get(any), Some(&record));
-    assert!(operation.resolution_mut().push(
+    assert_eq!(operation.state().types().get(any), Some(&record));
+    assert!(operation.state_mut().resolution_mut().push(
         TypeSystemEntity::Type(any),
         TypeSystemPropertyName::ResolvedBaseConstraint,
         |_| false
     ));
-    assert!(operation.resolution_mut().pop());
+    assert!(operation.state_mut().resolution_mut().pop());
     drop(operation);
-    assert_eq!(owner.operation().unwrap().types().len(), 1);
+    assert_eq!(owner.operation().unwrap().state().types().len(), 1);
 }
 
 #[test]
@@ -202,6 +202,18 @@ fn a_panic_inside_an_operation_retires_the_generation() {
         owner.operation(),
         Err(Error::Arena(ts_arena::Error::Retired))
     ));
+}
+
+#[test]
+fn a_direct_identity_lease_cannot_bypass_operation_reentry_detection() {
+    let (_counters, _generation, identity, owner) = owner();
+    let lease = identity.lease().unwrap();
+    assert!(matches!(owner.operation(), Err(Error::Reentry)));
+    drop(lease);
+    let operation = owner.operation().unwrap();
+    assert!(matches!(identity.lease(), Err(ts_arena::Error::Reentry)));
+    drop(operation);
+    assert!(identity.lease().is_ok());
 }
 
 #[test]

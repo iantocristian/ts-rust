@@ -422,6 +422,8 @@ dependencies = [
 name = "ts_checker"
 version = "0.1.0"
 dependencies = [
+ "cap",
+ "mimalloc",
  "serde_json",
  "ts_arena",
  "ts_ast",

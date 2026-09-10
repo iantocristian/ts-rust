@@ -54,8 +54,10 @@ variants), decorators (765), JSX (455), indexed-access types (393), mapped types
 template-literal types (66). Everything else is in: control flow appears in 9,587
 eligible variants, declarations and merging in 9,931, declaration members in
 5,888, expressions and bindings in 7,654, imports and exports in 2,183, JavaScript
-sources under `allowJs` in 895, JSDoc in 558, and 1,482 variants set
-`declaration` (107 `emitDeclarationOnly`, 4 `composite`). The exclusions remove
+sources under `allowJs` in 895 and JSDoc in 558. Effective frozen options set
+`declaration=true` in 1,450 variants, `composite=true` in nine and
+`emitDeclarationOnly=true` in 109. Pinned Go requests declaration diagnostics
+for 1,459 variants; option-key presence alone overcounts the obligation. The exclusions remove
 generic *syntax in test sources*, not generic *semantics*: the 111 loaded
 libraries bring `Array<T>`, `Promise<T>`, the lib's mapped and conditional helper
 types and generic signatures, so instantiation, type-argument inference at every
@@ -331,7 +333,8 @@ or `composite`), appends `GetDeclarationDiagnostics`. That call runs the
 declaration transformer (`internal/transformers/declarations`) over every
 non-declaration file through an emit host, the checker's emit resolver
 (`emitresolver.go`, `symbolaccessibility.go`) and the node builder's symbol
-tracker. 1,482 eligible variants set `declaration` and 4 set `composite`. Across
+tracker. The P0 policy capture identifies 1,459 eligible variants that require
+this phase (1,450 with `declaration=true`, nine with `composite=true`). Across
 the whole reference directory 65 of 7,301 `.errors.txt` baselines carry
 declaration-emit codes (TS4xxx, and TS9xxx under `isolatedDeclarations`); some
 declaration-emit diagnostics use TS2xxx and TS7xxx codes, so 65 is a floor, not
