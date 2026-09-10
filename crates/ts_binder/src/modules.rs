@@ -5,7 +5,7 @@ use ts_ast::{
 };
 use ts_diagnostics as d;
 
-impl Binder<'_, '_> {
+impl Binder<'_, '_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindSourceFileIfExternalModule
     pub fn bind_source_file_if_external_module(&mut self) {
         self.set_export_context_flag(self.file);
@@ -17,7 +17,7 @@ impl Binder<'_, '_> {
             let original = need(self.symbol(self.file));
             let exports = self.ensure_exports(original);
             self.declare_symbol(exports, Some(original), self.file, sf::PROPERTY, sf::ALL);
-            self.binding_mut(self.file).symbol = Some(original);
+            self.set_node_symbol(self.file, Some(original));
         }
     }
     // port: tsc/internal/binder/binder.go:Binder.bindSourceFileAsExternalModule
@@ -30,8 +30,8 @@ impl Binder<'_, '_> {
     // port: tsc/internal/binder/binder.go:Binder.bindModuleDeclaration
     pub fn bind_module_declaration(&mut self, node: NodeId) {
         self.set_export_context_flag(node);
-        if checked(a::is_ambient_module(self.view(), node)) {
-            if checked(a::has_syntactic_modifier(self.view(), node, mf::EXPORT)) {
+        if self.target_is_ambient_module(self.binding_node(node)) {
+            if self.target_has_syntactic_modifier(self.binding_node(node), mf::EXPORT) {
                 self.error_on_first_token(node, d::X_export_modifier_cannot_be_applied_to_ambient_modules_and_module_augmentations_since_they_are_always_visible, Vec::new());
             }
             if checked(a::is_module_augmentation_external(self.view(), node)) {
@@ -60,10 +60,10 @@ impl Binder<'_, '_> {
                             });
                     } else if self
                         .n(node)
-                        .data()
+                        .data_source()
                         .as_module_declaration()
                         .expect("module payload")
-                        .attributes
+                        .attributes()
                         .is_some()
                     {
                         self.error_on_node(name, d::An_ambient_module_declaration_with_import_attributes_must_use_a_pattern_name_with_an_Asterisk_character, Vec::new());
@@ -75,13 +75,13 @@ impl Binder<'_, '_> {
             if state != a::ModuleInstanceState::NonInstantiated {
                 let symbol = need(self.symbol(node));
                 let constant_only =
-                    self.s(symbol).flags & (sf::FUNCTION | sf::CLASS | sf::REGULAR_ENUM) == 0
+                    self.s(symbol).flags() & (sf::FUNCTION | sf::CLASS | sf::REGULAR_ENUM) == 0
                         && state == a::ModuleInstanceState::ConstEnumOnly
                         && !self.not_const_enum_only_modules.contains(&symbol);
                 if constant_only {
-                    self.sm(symbol).flags |= sf::CONST_ENUM_ONLY_MODULE;
+                    *self.symbol_flags_mut(symbol) |= sf::CONST_ENUM_ONLY_MODULE;
                 } else {
-                    self.sm(symbol).flags &= !sf::CONST_ENUM_ONLY_MODULE;
+                    *self.symbol_flags_mut(symbol) &= !sf::CONST_ENUM_ONLY_MODULE;
                     self.not_const_enum_only_modules.insert(symbol);
                 }
             }
@@ -137,7 +137,7 @@ impl Binder<'_, '_> {
             let table = if let Some(table) = self.builder.result().global_exports() {
                 table
             } else {
-                let table = self.builder.tables_mut().alloc(SymbolTable::new());
+                let table = self.builder.alloc_table(SymbolTable::new());
                 self.builder.set_global_exports(Some(table));
                 table
             };
@@ -160,10 +160,10 @@ impl Binder<'_, '_> {
     pub fn bind_export_declaration(&mut self, node: NodeId) {
         let clause = self
             .n(node)
-            .data()
+            .data_source()
             .as_export_declaration()
             .expect("export declaration payload")
-            .export_clause;
+            .export_clause();
         if let Some(parent) = self.symbol(need(self.container)) {
             if clause.is_none() {
                 let table = self.ensure_exports(parent);
@@ -201,10 +201,10 @@ impl Binder<'_, '_> {
             let symbol = self.declare_symbol(table, Some(parent), node, flags, sf::ALL);
             if self
                 .n(node)
-                .data()
+                .data_source()
                 .as_export_assignment()
                 .expect("export assignment payload")
-                .is_export_equals
+                .is_export_equals()
             {
                 self.set_value_declaration(symbol, node);
             }
@@ -237,7 +237,6 @@ impl Binder<'_, '_> {
                     .node_slice(checked(self.n(body).statements(self.view()))),
             )
             .iter()
-            .copied()
             .any(|node| {
                 matches!(
                     self.n(need(node)).kind().known(),
@@ -275,27 +274,22 @@ impl Binder<'_, '_> {
     }
     // port: tsc/internal/binder/binder.go:Binder.bindCommonJSTypeExports
     pub fn bind_common_js_type_exports(&mut self, module: SymbolId) {
-        let Some(exports) = self.s(module).exports else {
+        let Some(exports) = self.s(module).exports() else {
             return;
         };
-        let Some(export_equals) = self
-            .table(exports)
-            .get(names::EXPORT_EQUALS)
-            .copied()
-            .flatten()
-        else {
+        let Some(export_equals) = self.table(exports).get(names::EXPORT_EQUALS).flatten() else {
             return;
         };
-        let values: Vec<_> = self.table(exports).values().copied().collect();
+        let values: Vec<_> = self.table(exports).iter().map(|(_, value)| value).collect();
         for symbol in values {
             let symbol = need(symbol);
-            if self.s(symbol).name.as_bytes() != names::EXPORT_EQUALS
-                && self.s(symbol).flags & (sf::TYPE | sf::NAMESPACE) != 0
+            if self.s(symbol).name_bytes() != names::EXPORT_EQUALS
+                && self.s(symbol).flags() & (sf::TYPE | sf::NAMESPACE) != 0
             {
-                let name = self.s(symbol).name.clone();
+                let name = self.s(symbol).name_to_owned();
                 let target = self.ensure_exports(export_equals);
                 self.table_mut(target).insert(name, Some(symbol));
-                self.sm(export_equals).flags |= sf::NAMESPACE_MODULE;
+                *self.symbol_flags_mut(export_equals) |= sf::NAMESPACE_MODULE;
             }
         }
     }

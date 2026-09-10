@@ -4,9 +4,9 @@ use std::ops::ControlFlow;
 use ts_arena::{Error, SymbolId};
 use ts_ast::{
     internal_symbol_names as names, modifier_flags as modifiers, node_flags, symbol_flags as flags,
-    utilities as u, utilities_middle as middle, AstView, ChildVisitor, JsString, NodeBinding,
-    NodeData, NodeId, NodeKind, NodeListId, NodeRead, NodeSlice, Symbol, SymbolFlags, SymbolTable,
-    SymbolTableId, SyntaxKind as K,
+    utilities as u, utilities_middle as middle, AstView, ChildVisitor, DeclarationRead, JsString,
+    NodeBinding, NodeDataRead, NodeId, NodeKind, NodeListId, NodeRead, NodeSlice, SymbolFlags,
+    SymbolRef, SymbolTableId, SymbolTableRead, SyntaxKind as K,
 };
 use ts_core::{ScriptTarget, Tristate};
 use ts_diagnostics::{self as diagnostics, Message};
@@ -33,9 +33,9 @@ pub struct ResolverOptions {
 pub trait ResolverHost {
     fn ast(&self, node: NodeId) -> Result<AstView<'_>, Error>;
     fn binding(&self, node: NodeId) -> Result<Option<NodeBinding>, Error>;
-    fn symbol(&self, symbol: SymbolId) -> Result<&Symbol, Error>;
-    fn table(&self, table: SymbolTableId) -> Result<&SymbolTable, Error>;
-    fn declarations(&self, symbol: SymbolId) -> Result<&[Option<NodeId>], Error>;
+    fn symbol(&self, symbol: SymbolId) -> Result<SymbolRef<'_>, Error>;
+    fn table(&self, table: SymbolTableId) -> Result<SymbolTableRead<'_>, Error>;
+    fn declarations(&self, symbol: SymbolId) -> Result<DeclarationRead<'_>, Error>;
     fn new_transient_symbol(
         &mut self,
         flags: SymbolFlags,
@@ -161,7 +161,7 @@ impl NameResolver {
         let name_is_const = name == b"const";
         'search: while let Some(mut current) = location {
             if name_is_const
-                && middle::is_const_assertion(host.ast(current)?, &*host.node(current)?)?
+                && middle::is_const_assertion(host.ast(current)?, &host.node(current)?)?
             {
                 return Ok(None);
             }
@@ -175,8 +175,8 @@ impl NameResolver {
                 current = required(host.node(current)?.parent());
             }
             let module_attributes = match host.node(current)?.data() {
-                NodeData::ModuleDeclaration(data) => {
-                    data.attributes.is_some() && last_location == data.attributes
+                NodeDataRead::ModuleDeclaration(data) => {
+                    data.attributes().is_some() && last_location == data.attributes()
                 }
                 _ => false,
             };
@@ -184,11 +184,11 @@ impl NameResolver {
             if locals.is_some() && !middle::is_global_source_file(host.ast(current)?, current)? {
                 result = Self::lookup(host, hooks, locals, name, meaning)?;
                 if let Some(symbol) = result {
-                    let symbol_flags = host.symbol(symbol)?.flags;
+                    let symbol_flags = host.symbol(symbol)?.flags();
                     let mut use_result = true;
                     if module_attributes {
                         use_result = false;
-                    } else if u::is_function_like(Some(&*host.node(current)?))
+                    } else if u::is_function_like(Some(&host.node(current)?))
                         && last_location.is_some()
                         && last_location != host.node(current)?.body()
                     {
@@ -220,7 +220,7 @@ impl NameResolver {
                                     || Some(last) == host.node(current)?.type_node()
                                         && ancestor_kind(
                                             host,
-                                            host.symbol(symbol)?.value_declaration,
+                                            host.symbol(symbol)?.value_declaration(),
                                             K::Parameter,
                                         )?
                                         .is_some();
@@ -230,10 +230,10 @@ impl NameResolver {
                         use_result = last_location
                             == host
                                 .node(current)?
-                                .data()
+                                .data_source()
                                 .as_conditional_type_node()
                                 .expect("ConditionalType payload")
-                                .true_type;
+                                .true_type();
                     }
                     if use_result {
                         break 'search;
@@ -252,10 +252,10 @@ impl NameResolver {
                         if let Some(module_symbol) =
                             Self::get_symbol_of_declaration(host, hooks, current)?
                         {
-                            let exports = host.symbol(module_symbol)?.exports;
+                            let exports = host.symbol(module_symbol)?.exports();
                             let external = kind(host, current)? == K::SourceFile
                                 || host.node(current)?.flags() & node_flags::AMBIENT != 0
-                                    && !u::is_global_scope_augmentation(&*host.node(current)?);
+                                    && !u::is_global_scope_augmentation(&host.node(current)?);
                             let mut pure_alias = false;
                             if external {
                                 result = table_entry(host, exports, names::DEFAULT)?;
@@ -263,8 +263,8 @@ impl NameResolver {
                                     if let Some(local) =
                                         get_local_symbol_for_export_default(host, Some(symbol))?
                                     {
-                                        if host.symbol(symbol)?.flags & meaning != 0
-                                            && host.symbol(local)?.name.as_bytes() == name
+                                        if host.symbol(symbol)?.flags() & meaning != 0
+                                            && host.symbol(local)?.name_bytes() == name
                                         {
                                             break 'search;
                                         }
@@ -272,7 +272,7 @@ impl NameResolver {
                                     result = None;
                                 }
                                 if let Some(symbol) = table_entry(host, exports, name)? {
-                                    pure_alias = host.symbol(symbol)?.flags == flags::ALIAS
+                                    pure_alias = host.symbol(symbol)?.flags() == flags::ALIAS
                                         && (declaration_of_kind(host, symbol, K::ExportSpecifier)?
                                             .is_some()
                                             || declaration_of_kind(
@@ -298,7 +298,8 @@ impl NameResolver {
                                             .source_file(current)?
                                             .common_js_module_indicator()
                                             .is_some();
-                                    if common_js && host.symbol(symbol)?.flags & flags::TYPE == 0 {
+                                    if common_js && host.symbol(symbol)?.flags() & flags::TYPE == 0
+                                    {
                                         result = None;
                                     } else {
                                         break 'search;
@@ -315,7 +316,7 @@ impl NameResolver {
                         result = Self::lookup(
                             host,
                             hooks,
-                            host.symbol(enum_symbol)?.exports,
+                            host.symbol(enum_symbol)?.exports(),
                             name,
                             meaning & flags::ENUM_MEMBER,
                         )?;
@@ -324,7 +325,7 @@ impl NameResolver {
                                 && self.options.isolated_modules
                                 && host.node(current)?.flags() & node_flags::AMBIENT == 0
                                 && source_file(host, Some(current))?
-                                    != source_file(host, host.symbol(symbol)?.value_declaration)?
+                                    != source_file(host, host.symbol(symbol)?.value_declaration())?
                             {
                                 let option = if self.options.verbatim_module_syntax {
                                     b"verbatimModuleSyntax".as_slice()
@@ -332,8 +333,7 @@ impl NameResolver {
                                     b"isolatedModules"
                                 };
                                 let qualified =
-                                    [host.symbol(enum_symbol)?.name.as_bytes(), b".", name]
-                                        .concat();
+                                    [host.symbol(enum_symbol)?.name_bytes(), b".", name].concat();
                                 Self::error(hooks, original_location, diagnostics::Cannot_access_0_from_another_file_without_qualification_when_1_is_enabled_Use_2_instead,
                                     &[JsString::from_bytes(name), JsString::from_bytes(option), JsString::from_bytes(qualified)])?;
                             }
@@ -370,7 +370,7 @@ impl NameResolver {
                     result = Self::lookup(
                         host,
                         hooks,
-                        host.symbol(container_symbol)?.members,
+                        host.symbol(container_symbol)?.members(),
                         name,
                         meaning & flags::TYPE,
                     )?;
@@ -402,21 +402,21 @@ impl NameResolver {
                     if kind(host, parent)? == K::HeritageClause
                         && host
                             .node(parent)?
-                            .data()
+                            .data_source()
                             .as_heritage_clause()
                             .expect("HeritageClause payload")
-                            .token
+                            .token()
                             == K::ExtendsKeyword
                     {
                         let container = required(host.node(parent)?.parent());
-                        if u::is_class_like(&*host.node(container)?) {
+                        if u::is_class_like(&host.node(container)?) {
                             let symbol = required_symbol(Self::get_symbol_of_declaration(
                                 host, hooks, container,
                             )?);
                             if Self::lookup(
                                 host,
                                 hooks,
-                                host.symbol(symbol)?.members,
+                                host.symbol(symbol)?.members(),
                                 name,
                                 meaning & flags::TYPE,
                             )?
@@ -433,7 +433,7 @@ impl NameResolver {
                 Some(K::ComputedPropertyName) => {
                     let parent = required(host.node(current)?.parent());
                     let grandparent = required(host.node(parent)?.parent());
-                    if u::is_class_like(&*host.node(grandparent)?)
+                    if u::is_class_like(&host.node(grandparent)?)
                         || kind(host, grandparent)? == K::InterfaceDeclaration
                     {
                         let symbol = required_symbol(Self::get_symbol_of_declaration(
@@ -444,7 +444,7 @@ impl NameResolver {
                         if Self::lookup(
                             host,
                             hooks,
-                            host.symbol(symbol)?.members,
+                            host.symbol(symbol)?.members(),
                             name,
                             meaning & flags::TYPE,
                         )?
@@ -484,7 +484,7 @@ impl NameResolver {
                         }
                     }
                     if let Some(parent) = host.node(current)?.parent() {
-                        if u::is_class_element(&*host.node(parent)?)
+                        if u::is_class_element(&host.node(parent)?)
                             || kind(host, parent)? == K::ClassDeclaration
                         {
                             current = parent;
@@ -496,7 +496,7 @@ impl NameResolver {
                         let node = host.node(current)?;
                         if (Some(last) == node.initializer()
                             || Some(last) == node.name()
-                                && u::is_binding_pattern(&*host.node(last)?))
+                                && u::is_binding_pattern(&host.node(last)?))
                             && (kind(host, current)? == K::Parameter
                                 || u::is_part_of_parameter_declaration(
                                     host.ast(current)?,
@@ -512,10 +512,10 @@ impl NameResolver {
                     if meaning & flags::TYPE_PARAMETER != 0 {
                         let parameter = required(
                             host.node(current)?
-                                .data()
+                                .data_source()
                                 .as_infer_type_node()
                                 .expect("InferType payload")
-                                .type_parameter,
+                                .type_parameter(),
                         );
                         if node_name_equals(host, parameter, name)? {
                             result = node_symbol(host, parameter)?;
@@ -526,10 +526,10 @@ impl NameResolver {
                 Some(K::ExportSpecifier) => {
                     let property = host
                         .node(current)?
-                        .data()
+                        .data_source()
                         .as_export_specifier()
                         .expect("ExportSpecifier payload")
-                        .property_name;
+                        .property_name();
                     if last_location.is_some() && last_location == property {
                         let parent = required(host.node(current)?.parent());
                         let grandparent = required(host.node(parent)?.parent());
@@ -569,10 +569,9 @@ impl NameResolver {
         }
         if result.is_none() {
             if let Some(original) = original_location {
-                if u::is_in_js_file(Some(&*host.node(original)?)) {
+                if u::is_in_js_file(Some(&host.node(original)?)) {
                     if let Some(parent) = host.node(original)?.parent() {
-                        if middle::is_require_call(host.ast(parent)?, &*host.node(parent)?, false)?
-                        {
+                        if middle::is_require_call(host.ast(parent)?, &host.node(parent)?, false)? {
                             return Ok(self.require_symbol);
                         }
                     }
@@ -618,7 +617,7 @@ impl NameResolver {
         if kind(host, last)? == K::Parameter {
             if let (Some(body), Some(value)) = (
                 host.node(location)?.body(),
-                host.symbol(result)?.value_declaration,
+                host.symbol(result)?.value_declaration(),
             ) {
                 if host.node(value)?.pos() >= host.node(body)?.pos()
                     && host.node(value)?.end() <= host.node(body)?.end()
@@ -628,7 +627,7 @@ impl NameResolver {
                         let view = host.ast(location)?;
                         let parameters = host.node(location)?.parameters(view)?;
                         let mut requires = false;
-                        for &parameter in &*view.node_slice(parameters)? {
+                        for parameter in view.node_slice(parameters)?.iter() {
                             if self.requires_scope_change(host, required(parameter))? {
                                 requires = true;
                                 break;
@@ -648,10 +647,10 @@ impl NameResolver {
         let (name, initializer) = {
             let n = host.node(node)?;
             let d = n
-                .data()
+                .data_source()
                 .as_parameter_declaration()
                 .expect("ParameterDeclaration payload");
-            (d.name, d.initializer)
+            (d.name(), d.initializer())
         };
         Ok(self.requires_scope_change_worker(host, required(name))?
             || initializer
@@ -690,10 +689,10 @@ impl NameResolver {
                     }
                     if node.kind() == K::BindingElement
                         && node
-                            .data()
+                            .data_source()
                             .as_binding_element()
                             .expect("BindingElement payload")
-                            .dot_dot_dot_token
+                            .dot_dot_dot_token()
                             .is_some()
                         && kind(host, required(node.parent()))? == K::ObjectBindingPattern
                     {
@@ -747,7 +746,7 @@ impl NameResolver {
         }
         if meaning != 0 {
             if let Some(symbol) = table_entry(host, table, name)? {
-                if host.symbol(symbol)?.flags & meaning != 0 {
+                if host.symbol(symbol)?.flags() & meaning != 0 {
                     return Ok(Some(symbol));
                 }
             }
@@ -795,7 +794,7 @@ impl ChildVisitor for ScopeVisitor<'_> {
     fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
         match self.view.node_slice(nodes) {
             Ok(nodes) => {
-                for &node in nodes.iter().flatten() {
+                for node in nodes.iter().flatten() {
                     self.visit_node(node)?;
                 }
                 ControlFlow::Continue(())
@@ -816,7 +815,7 @@ pub fn get_local_symbol_for_export_default(
     if !is_export_default_symbol(host, symbol)? {
         return Ok(None);
     }
-    for &declaration in host.declarations(required_symbol(symbol))? {
+    for declaration in host.declarations(required_symbol(symbol))?.iter() {
         if let Some(local) = host
             .binding(required(declaration))?
             .and_then(|b| b.local_symbol)
@@ -834,7 +833,7 @@ fn is_export_default_symbol(
     let Some(symbol) = symbol else {
         return Ok(false);
     };
-    let Some(&first) = host.declarations(symbol)?.first() else {
+    let Some(first) = host.declarations(symbol)?.first() else {
         return Ok(false);
     };
     let first = required(first);
@@ -861,8 +860,8 @@ fn get_is_deferred_context(
         return Ok(false);
     }
     let asterisk = match node.data() {
-        NodeData::ArrowFunction(data) => data.asterisk_token,
-        NodeData::FunctionExpression(data) => data.asterisk_token,
+        NodeDataRead::ArrowFunction(data) => data.asterisk_token(),
+        NodeDataRead::FunctionExpression(data) => data.asterisk_token(),
         _ => unreachable!(),
     };
     if asterisk.is_some() || node.modifier_flags(host.ast(location)?)? & modifiers::ASYNC != 0 {
@@ -879,7 +878,7 @@ fn is_type_parameter_symbol_declared_in_container(
     symbol: SymbolId,
     container: NodeId,
 ) -> Result<bool, Error> {
-    for &declaration in host.declarations(symbol)? {
+    for declaration in host.declarations(symbol)?.iter() {
         let declaration = required(declaration);
         if kind(host, declaration)? == K::TypeParameter
             && host.node(declaration)?.parent() == Some(container)
@@ -946,14 +945,14 @@ fn table_entry(
     let Some(table) = table else {
         return Ok(None);
     };
-    Ok(host.table(table)?.get(name).copied().flatten())
+    Ok(host.table(table)?.get(name).flatten())
 }
 fn declaration_of_kind(
     host: &dyn ResolverHost,
     symbol: SymbolId,
     expected: K,
 ) -> Result<Option<NodeId>, Error> {
-    for &declaration in host.declarations(symbol)? {
+    for declaration in host.declarations(symbol)?.iter() {
         let id = required(declaration);
         if kind(host, id)? == expected {
             return Ok(Some(id));

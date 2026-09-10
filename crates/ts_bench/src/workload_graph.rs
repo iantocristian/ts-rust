@@ -3,7 +3,7 @@ use super::{binder_graph, Loaded};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::io::Write;
-use ts_ast::BoundFile;
+use ts_ast::CompletedFile;
 
 fn normalize(value: &mut Value, path: &str, names: &mut Vec<Value>) {
     match value {
@@ -32,7 +32,7 @@ fn normalize(value: &mut Value, path: &str, names: &mut Vec<Value>) {
 }
 pub fn write_report(
     out: &mut impl Write,
-    file: &BoundFile,
+    file: &CompletedFile,
     input: &Loaded,
     index: usize,
     workers: usize,
@@ -70,7 +70,7 @@ pub fn write_report(
 /// field-level mismatch witness. Collection stays after the measured endpoint.
 pub fn write_records(
     out: &mut impl Write,
-    file: &BoundFile,
+    file: &CompletedFile,
     index: usize,
     workers: usize,
 ) -> Result<(), Box<dyn std::error::Error>> {

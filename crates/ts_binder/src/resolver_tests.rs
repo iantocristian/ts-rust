@@ -4,7 +4,7 @@ use crate::reference_resolver::{
     NoReferenceResolverHooks, ReferenceResolver, ReferenceResolverHooks,
 };
 use ts_arena::{Counters, SymbolArena};
-use ts_ast::{AstFile, BindBuilder, BindResult, SourceFileParseOptions};
+use ts_ast::{AstFile, BindBuilder, BindResult, SourceFileParseOptions, Symbol};
 use ts_core::ScriptKind;
 use ts_jsstring::SourceText;
 
@@ -68,22 +68,22 @@ impl ResolverHost for Host {
     }
     fn binding(&self, node: NodeId) -> Result<Option<NodeBinding>, Error> {
         self.ast(node)?;
-        Ok(self.result().node_binding(node))
+        Ok(self.result().node_binding(self.ast(node)?, node))
     }
-    fn symbol(&self, id: SymbolId) -> Result<&Symbol, Error> {
+    fn symbol(&self, id: SymbolId) -> Result<SymbolRef<'_>, Error> {
         if id.arena() == self.transient.id() {
-            self.transient.get(id)
+            self.transient.get(id).map(SymbolRef::Owned)
         } else {
-            self.result().symbols().get(id)
+            self.result().symbols().get(id).map(SymbolRef::Stored)
         }
     }
-    fn table(&self, id: SymbolTableId) -> Result<&SymbolTable, Error> {
+    fn table(&self, id: SymbolTableId) -> Result<SymbolTableRead<'_>, Error> {
         self.result().tables().get(id)
     }
-    fn declarations(&self, id: SymbolId) -> Result<&[Option<NodeId>], Error> {
+    fn declarations(&self, id: SymbolId) -> Result<DeclarationRead<'_>, Error> {
         self.result()
             .declarations()
-            .get(self.symbol(id)?.declarations)
+            .get(self.symbol(id)?.declarations())
     }
     fn new_transient_symbol(
         &mut self,
@@ -115,7 +115,7 @@ impl ChildVisitor for Find<'_> {
         self.visit_node_slice(self.view.list(id).unwrap().nodes())
     }
     fn visit_node_slice(&mut self, slice: NodeSlice) -> ControlFlow<()> {
-        for &id in self.view.node_slice(slice).unwrap().iter().flatten() {
+        for id in self.view.node_slice(slice).unwrap().iter().flatten() {
             self.visit_node(id)?;
         }
         ControlFlow::Continue(())
@@ -364,8 +364,8 @@ fn pinned_globals_arguments_require_and_const() {
     obs!(
         "arguments",
         a == b,
-        host.symbol(a).unwrap().flags,
-        String::from_utf8_lossy(host.symbol(a).unwrap().name.as_bytes())
+        host.symbol(a).unwrap().flags(),
+        String::from_utf8_lossy(host.symbol(a).unwrap().name_bytes())
     );
     assert_eq!(host.transient.len(), 1);
     let mut host = Host::empty("require(dynamic)", true);

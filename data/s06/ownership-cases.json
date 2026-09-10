@@ -1,4 +1,8 @@
 [
+  "storage_tests::borrowed_node_slice_rejection_preserves_error_order_and_inserts_nothing",
+  "storage_tests::borrowed_node_slices_copy_nil_edges_and_keep_allocated_empty_identity",
+  "storage_tests::compact_syntax_backings_span_pages_and_keep_imported_and_lazy_context",
+  "storage_tests::node_slice_values_preserve_nil_bounds_and_bidirectional_iteration",
   "storage_tests::storage_complete_and_publication_reject_references_installed_by_mutation",
   "storage_tests::storage_eager_jsdoc_is_core_only_and_survives_publication_without_initializer",
   "storage_tests::storage_exclusive_file_moves_to_worker_and_publication_keeps_lazy_identity",
@@ -22,5 +26,6 @@
   "storage_tests::storage_source_file_clones_share_existing_metadata_elements_but_not_replaced_headers",
   "storage_tests::storage_source_file_hooks_observe_initialized_metadata_and_keep_transaction_authority",
   "storage_tests::storage_text_slice_identity_preserves_raw_bytes_and_rejects_foreign_backing",
-  "storage_tests::storage_transaction_resolves_core_previous_and_staged_data_without_reentry"
+  "storage_tests::storage_transaction_resolves_core_previous_and_staged_data_without_reentry",
+  "storage_tests::unrestricted_record_replacement_starts_with_the_replacements_runtime_identity"
 ]

@@ -3,7 +3,7 @@ use crate::tokens::token_is_identifier_or_keyword;
 use crate::{JSDocInfo, Parser, ParserFactory, ParsingContext};
 use std::sync::Arc;
 use ts_ast::SyntaxKind as K;
-use ts_ast::{node_flags, Diagnostic, FactoryMethods, JsString, NodeData, NodeId, NodeListId};
+use ts_ast::{node_flags, Diagnostic, FactoryMethods, JsString, NodeDataRead, NodeId, NodeListId};
 use ts_core::TextRange;
 use ts_diagnostics::{self as diagnostics, Message};
 use ts_scanner::CommentRange;
@@ -70,10 +70,9 @@ impl<F: ParserFactory> Parser<'_, F> {
             return Vec::new();
         }
         if !self.is_java_script() {
-            let node = self.factory.node_mut(node);
-            node.set_flags(
-                node.flags()
-                    | node_flags::HAS_JS_DOC
+            self.factory.add_node_flags(
+                node,
+                node_flags::HAS_JS_DOC
                     | if info & 2 != 0 {
                         node_flags::POSSIBLY_CONTAINS_DEPRECATED_TAG
                     } else {
@@ -93,7 +92,7 @@ impl<F: ParserFactory> Parser<'_, F> {
             if let Some(parsed) =
                 self.parse_js_doc_comment(node, comment.loc.pos(), comment.loc.end(), pos)
             {
-                self.factory.node_mut(parsed).set_parent(Some(node));
+                self.factory.set_node_parent(parsed, Some(node));
                 docs.push(parsed);
                 pos = self.factory.node(parsed).range().end();
             }
@@ -101,10 +100,9 @@ impl<F: ParserFactory> Parser<'_, F> {
         ranges.clear();
         self.jsdoc_comment_ranges_space = ranges;
         if !docs.is_empty() {
-            let n = self.factory.node_mut(node);
-            n.set_flags(
-                n.flags()
-                    | node_flags::HAS_JS_DOC
+            self.factory.add_node_flags(
+                node,
+                node_flags::HAS_JS_DOC
                     | if self.has_deprecated_tag {
                         node_flags::POSSIBLY_CONTAINS_DEPRECATED_TAG
                     } else {
@@ -856,19 +854,19 @@ impl<F: ParserFactory> Parser<'_, F> {
                 Some(K::ObjectKeyword) => return true,
                 Some(K::ArrayType) => {
                     node = view
-                        .data()
+                        .data_source()
                         .as_array_type_node()
                         .expect("array type")
-                        .element_type
+                        .element_type()
                         .expect("array element type");
                 }
                 Some(K::TypeReference) => {
                     let data = view
-                        .data()
+                        .data_source()
                         .as_type_reference_node()
                         .expect("type reference");
-                    return data.type_arguments.is_none()
-                        && data.type_name.is_some_and(|name| {
+                    return data.type_arguments().is_none()
+                        && data.type_name().is_some_and(|name| {
                             self.factory.node(name).kind() == K::Identifier
                                 && self.jsdoc_text(name).as_bytes() == b"Object"
                         });
@@ -1181,14 +1179,14 @@ impl<F: ParserFactory> Parser<'_, F> {
                     body,
                 );
                 if nested {
-                    let n = self.factory.node_mut(node);
-                    n.set_flags(n.flags() | node_flags::NESTED_NAMESPACE);
+                    self.factory
+                        .add_node_flags(node, node_flags::NESTED_NAMESPACE);
                 }
                 return Some(self.finish_node(node, start));
             }
             if nested {
-                let n = self.factory.node_mut(name);
-                n.set_flags(n.flags() | node_flags::IDENTIFIER_IS_IN_JS_DOC_NAMESPACE);
+                self.factory
+                    .add_node_flags(name, node_flags::IDENTIFIER_IS_IN_JS_DOC_NAMESPACE);
             }
             Some(name)
         })
@@ -1300,7 +1298,7 @@ impl<F: ParserFactory> Parser<'_, F> {
             .new_js_doc_typedef_tag(Some(name), ty, Some(full_name), comment);
         self.finish_node_with_end(node, start, end);
         if let Some(ty) = ty {
-            self.factory.node_mut(ty).set_parent(Some(node));
+            self.factory.set_node_parent(ty, Some(node));
         }
         node
     }
@@ -1580,19 +1578,19 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     pub(crate) fn jsdoc_qualified_name(&self, id: NodeId) -> (NodeId, NodeId) {
         let n = self.factory.node(id);
-        let d = n.data().as_qualified_name().expect("qualified name");
+        let d = n.data_source().as_qualified_name().expect("qualified name");
         (
-            d.left.expect("qualified left"),
-            d.right.expect("qualified right"),
+            d.left().expect("qualified left"),
+            d.right().expect("qualified right"),
         )
     }
     pub(crate) fn jsdoc_text(&self, id: NodeId) -> JsString {
         match self.factory.node(id).data() {
-            NodeData::NoSubstitutionTemplateLiteral(d) => d.text.clone(),
-            NodeData::Identifier(d) => d.text.clone(),
-            NodeData::StringLiteral(d) => d.text.clone(),
-            NodeData::NumericLiteral(d) => d.text.clone(),
-            NodeData::BigIntLiteral(d) => d.text.clone(),
+            NodeDataRead::NoSubstitutionTemplateLiteral(d) => d.text_owned(),
+            NodeDataRead::Identifier(d) => d.text_owned(),
+            NodeDataRead::StringLiteral(d) => d.text_owned(),
+            NodeDataRead::NumericLiteral(d) => d.text_owned(),
+            NodeDataRead::BigIntLiteral(d) => d.text_owned(),
             _ => panic!("node has no text"),
         }
     }
@@ -1601,49 +1599,49 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     pub(crate) fn jsdoc_type(&self, id: NodeId) -> Option<NodeId> {
         match self.factory.node(id).data() {
-            NodeData::JSDocTypeExpression(d) => d.r#type,
-            NodeData::JSDocVariadicType(d) => d.r#type,
-            NodeData::JSDocOptionalType(d) => d.r#type,
-            NodeData::JSDocNullableType(d) => d.r#type,
-            NodeData::JSDocNonNullableType(d) => d.r#type,
-            NodeData::JSDocSignature(d) => d.r#type,
-            NodeData::JSDocTypeTag(d) => d.type_expression,
-            NodeData::JSDocReturnTag(d) => d.type_expression,
-            NodeData::JSDocThisTag(d) => d.type_expression,
-            NodeData::JSDocParameterOrPropertyTag(d) => d.type_expression,
-            NodeData::JSDocTypedefTag(d) => d.type_expression,
-            NodeData::JSDocCallbackTag(d) => d.type_expression,
-            NodeData::JSDocOverloadTag(d) => d.type_expression,
-            NodeData::JSDocSatisfiesTag(d) => d.type_expression,
-            NodeData::FunctionDeclaration(d) => d.r#type,
-            NodeData::MethodDeclaration(d) => d.r#type,
-            NodeData::FunctionExpression(d) => d.r#type,
-            NodeData::ArrowFunction(d) => d.r#type,
-            NodeData::ParameterDeclaration(d) => d.r#type,
-            NodeData::PropertyDeclaration(d) => d.r#type,
-            NodeData::PropertySignatureDeclaration(d) => d.r#type,
-            NodeData::TypeAliasDeclaration(d) => d.r#type,
-            NodeData::VariableDeclaration(d) => d.r#type,
-            NodeData::FunctionTypeNode(d) => d.r#type,
-            NodeData::ParenthesizedTypeNode(d) => d.r#type,
-            NodeData::ExportAssignment(d) => d.r#type,
-            NodeData::PropertyAssignment(d) => d.r#type,
-            NodeData::ShorthandPropertyAssignment(d) => d.r#type,
-            NodeData::BinaryExpression(d) => d.r#type,
-            NodeData::GetAccessorDeclaration(d) => d.r#type,
-            NodeData::SetAccessorDeclaration(d) => d.r#type,
-            NodeData::ConstructorDeclaration(d) => d.r#type,
-            NodeData::ConstructorTypeNode(d) => d.r#type,
-            NodeData::CallSignatureDeclaration(d) => d.r#type,
-            NodeData::ConstructSignatureDeclaration(d) => d.r#type,
-            NodeData::IndexSignatureDeclaration(d) => d.r#type,
-            NodeData::MethodSignatureDeclaration(d) => d.r#type,
+            NodeDataRead::JSDocTypeExpression(d) => d.r#type(),
+            NodeDataRead::JSDocVariadicType(d) => d.r#type(),
+            NodeDataRead::JSDocOptionalType(d) => d.r#type(),
+            NodeDataRead::JSDocNullableType(d) => d.r#type(),
+            NodeDataRead::JSDocNonNullableType(d) => d.r#type(),
+            NodeDataRead::JSDocSignature(d) => d.r#type(),
+            NodeDataRead::JSDocTypeTag(d) => d.type_expression(),
+            NodeDataRead::JSDocReturnTag(d) => d.type_expression(),
+            NodeDataRead::JSDocThisTag(d) => d.type_expression(),
+            NodeDataRead::JSDocParameterOrPropertyTag(d) => d.type_expression(),
+            NodeDataRead::JSDocTypedefTag(d) => d.type_expression(),
+            NodeDataRead::JSDocCallbackTag(d) => d.type_expression(),
+            NodeDataRead::JSDocOverloadTag(d) => d.type_expression(),
+            NodeDataRead::JSDocSatisfiesTag(d) => d.type_expression(),
+            NodeDataRead::FunctionDeclaration(d) => d.r#type(),
+            NodeDataRead::MethodDeclaration(d) => d.r#type(),
+            NodeDataRead::FunctionExpression(d) => d.r#type(),
+            NodeDataRead::ArrowFunction(d) => d.r#type(),
+            NodeDataRead::ParameterDeclaration(d) => d.r#type(),
+            NodeDataRead::PropertyDeclaration(d) => d.r#type(),
+            NodeDataRead::PropertySignatureDeclaration(d) => d.r#type(),
+            NodeDataRead::TypeAliasDeclaration(d) => d.r#type(),
+            NodeDataRead::VariableDeclaration(d) => d.r#type(),
+            NodeDataRead::FunctionTypeNode(d) => d.r#type(),
+            NodeDataRead::ParenthesizedTypeNode(d) => d.r#type(),
+            NodeDataRead::ExportAssignment(d) => d.r#type(),
+            NodeDataRead::PropertyAssignment(d) => d.r#type(),
+            NodeDataRead::ShorthandPropertyAssignment(d) => d.r#type(),
+            NodeDataRead::BinaryExpression(d) => d.r#type(),
+            NodeDataRead::GetAccessorDeclaration(d) => d.r#type(),
+            NodeDataRead::SetAccessorDeclaration(d) => d.r#type(),
+            NodeDataRead::ConstructorDeclaration(d) => d.r#type(),
+            NodeDataRead::ConstructorTypeNode(d) => d.r#type(),
+            NodeDataRead::CallSignatureDeclaration(d) => d.r#type(),
+            NodeDataRead::ConstructSignatureDeclaration(d) => d.r#type(),
+            NodeDataRead::IndexSignatureDeclaration(d) => d.r#type(),
+            NodeDataRead::MethodSignatureDeclaration(d) => d.r#type(),
             _ => None,
         }
     }
     fn jsdoc_tag_name(&self, id: NodeId) -> NodeId {
         match self.factory.node(id).data() {
-            NodeData::JSDocTemplateTag(d) => d.tag_name,
+            NodeDataRead::JSDocTemplateTag(d) => d.tag_name(),
             _ => panic!("expected JSDoc template tag"),
         }
         .expect("JSDoc tag name")

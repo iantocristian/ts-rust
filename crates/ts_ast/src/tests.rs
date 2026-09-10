@@ -71,10 +71,10 @@ fn validates_kind_data_pair_without_losing_text_bytes() {
     };
     let node = Node::new(SyntaxKind::Identifier, -1, -1, data.clone().into()).unwrap();
     assert_eq!(
-        node.data().as_identifier().unwrap().text.as_bytes(),
+        node.data_source().as_identifier().unwrap().text(),
         b"\xed\xa0\x80\xff"
     );
-    assert!(node.data().as_binary_expression().is_none());
+    assert!(node.data_source().as_binary_expression().is_none());
     assert!(Node::new(SyntaxKind::StringLiteral, 0, 0, data.into()).is_err());
     assert_eq!((node.pos(), node.end()), (-1, -1));
 }
@@ -102,7 +102,10 @@ fn optional_schema_kind_is_a_go_scalar_and_flags_keep_all_bits() {
         node.set_flags(u32::MAX);
         assert_eq!(node.flags(), u32::MAX);
         assert_eq!(
-            node.data().as_import_clause().unwrap().phase_modifier,
+            node.data_source()
+                .as_import_clause()
+                .unwrap()
+                .phase_modifier(),
             phase_modifier
         );
     }

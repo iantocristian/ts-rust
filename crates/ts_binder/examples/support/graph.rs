@@ -1,8 +1,8 @@
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use ts_ast::{
-    AstView, BindResult, DeclarationSlice, FlowData, FlowId, FlowListId, NodeData, NodeId,
-    NodeListId, NodeSlice, Symbol, SymbolId, SymbolTableId, TextSlice,
+    AstView, BindResult, DeclarationRead, DeclarationSlice, FlowData, FlowId, FlowListId,
+    NodeDataRead, NodeId, NodeListId, NodeSlice, SymbolId, SymbolRead, SymbolTableId, TextSlice,
 };
 
 #[path = "syntax_generated.rs"]
@@ -128,14 +128,14 @@ impl<'a> Graph<'a> {
     fn flow_list_ref(&mut self, value: Option<FlowListId>) -> usize {
         value.map_or(0, |id| reference!(self, flow_lists, id, Work::FlowList(id)))
     }
-    fn node_refs(&mut self, nodes: &[Option<NodeId>]) -> Vec<usize> {
-        nodes.iter().map(|&id| self.node_ref(id)).collect()
+    fn node_refs(&mut self, nodes: DeclarationRead<'_>) -> Vec<usize> {
+        nodes.iter().map(|id| self.node_ref(id)).collect()
     }
     fn result(&self) -> &'a BindResult {
         self.result
             .expect("S07 observer: binding-owned graph reached before binding")
     }
-    fn name(&mut self, raw: &[u8], symbol: Option<&Symbol>) -> Value {
+    fn name(&mut self, raw: &[u8], symbol: Option<SymbolRead<'_>>) -> Value {
         let mut result = json!({"raw_hex":hex(raw),"identity":null});
         let Some(symbol) = symbol else { return result };
         if !raw.starts_with(b"\xfe#") && !raw.starts_with(b"\xfe\"") {
@@ -145,11 +145,10 @@ impl<'a> Graph<'a> {
         for declaration in self
             .result()
             .declarations()
-            .get(symbol.declarations)
+            .get(symbol.declarations())
             .expect("symbol declarations")
             .iter()
             .flatten()
-            .copied()
         {
             let Some(name) =
                 ts_ast::get_name_of_declaration(view, Some(declaration)).expect("declaration name")
@@ -159,10 +158,10 @@ impl<'a> Graph<'a> {
             if ts_ast::is_ambient_module(view, declaration).expect("ambient module") {
                 let node = view.node(declaration).expect("module declaration");
                 let attributes = node
-                    .data()
+                    .data_source()
                     .as_module_declaration()
                     .expect("module payload")
-                    .attributes;
+                    .attributes();
                 let name = view.node_text(name).expect("module name");
                 let pattern = ts_core::pattern::Pattern::parse(name.as_bytes());
                 if let Some(attributes) =
@@ -192,13 +191,13 @@ impl<'a> Graph<'a> {
                 };
                 let Some(owner) = self
                     .result()
-                    .node_binding(class)
+                    .node_binding(view, class)
                     .and_then(|binding| binding.symbol)
                 else {
                     continue;
                 };
                 let owner_symbol = self.result().symbols().get(owner).expect("class symbol");
-                let runtime = ts_ast::existing_runtime_symbol_id(owner_symbol);
+                let runtime = ts_ast::existing_runtime_symbol_id(&owner_symbol);
                 let prefix = b"\xfe#";
                 let mut suffix = b"@".to_vec();
                 suffix.extend_from_slice(view.node_text(name).expect("private name").as_bytes());
@@ -255,7 +254,7 @@ impl<'a> Graph<'a> {
                 };
                 let binding = self
                     .result
-                    .and_then(|result| result.node_binding(node_id))
+                    .and_then(|result| result.node_binding(view, node_id))
                     .unwrap_or_default();
                 json!({"id":id,"kind":node.kind().raw(),"flags":node.flags(),"pos":node.pos(),"end":node.end(),"parent":parent,"payload":payload,"fields":fields,"jsdoc":docs,"symbol":self.symbol_ref(binding.symbol),"local_symbol":self.symbol_ref(binding.local_symbol),"locals":self.table_ref(binding.locals),"next_container":self.node_ref(binding.next_container),"flow_node":self.flow_ref(binding.flow_node),"end_flow_node":self.flow_ref(binding.end_flow_node),"return_flow_node":self.flow_ref(binding.return_flow_node),"fallthrough_flow_node":self.flow_ref(binding.fallthrough_flow_node)})
             }
@@ -264,7 +263,7 @@ impl<'a> Graph<'a> {
                 json!({"id":id,"pos":list.loc().pos(),"end":list.loc().end(),"nodes":self.node_slice_ref(list.nodes()),"missing":list.is_missing(),"modifier_flags":list.modifier_flags(),"is_modifier":modifier})
             }
             Work::Nodes(nodes) => {
-                json!({"id":id,"values":self.node_refs(&view.node_slice(nodes).expect("syntax node slice"))})
+                json!({"id":id,"values":view.node_slice(nodes).expect("syntax node slice").iter().map(|id| self.node_ref(id)).collect::<Vec<_>>()})
             }
             Work::Texts(texts) => {
                 json!({"id":id,"values_hex":view.text_slice(texts).expect("syntax text slice").iter().map(|value|hex(value.as_bytes())).collect::<Vec<_>>()})
@@ -275,18 +274,18 @@ impl<'a> Graph<'a> {
                     .symbols()
                     .get(symbol_id)
                     .expect("graph symbol");
-                json!({"id":id,"flags":symbol.flags,"check_flags":symbol.check_flags,"name":self.name(symbol.name.as_bytes(),Some(symbol)),"declarations":self.declaration_ref(symbol.declarations),"value_declaration":self.node_ref(symbol.value_declaration),"members":self.table_ref(symbol.members),"exports":self.table_ref(symbol.exports),"parent":self.symbol_ref(symbol.parent),"export_symbol":self.symbol_ref(symbol.export_symbol)})
+                json!({"id":id,"flags":symbol.flags(),"check_flags":symbol.check_flags(),"name":self.name(symbol.name_bytes(),Some(symbol)),"declarations":self.declaration_ref(symbol.declarations()),"value_declaration":self.node_ref(symbol.value_declaration()),"members":self.table_ref(symbol.members()),"exports":self.table_ref(symbol.exports()),"parent":self.symbol_ref(symbol.parent()),"export_symbol":self.symbol_ref(symbol.export_symbol())})
             }
             Work::Table(table_id) => {
                 let table = self.result().tables().get(table_id).expect("symbol table");
                 let mut entries = table.iter().collect::<Vec<_>>();
-                entries.sort_by(|(a, _), (b, _)| a.as_bytes().cmp(b.as_bytes()));
+                entries.sort_by_key(|(name, _)| *name);
                 let entries = entries
                     .into_iter()
-                    .map(|(key, &symbol)| {
+                    .map(|(key, symbol)| {
                         let record =
                             symbol.map(|id| self.result().symbols().get(id).expect("table symbol"));
-                        json!([self.name(key.as_bytes(), record), self.symbol_ref(symbol)])
+                        json!([self.name(key, record), self.symbol_ref(symbol)])
                     })
                     .collect::<Vec<_>>();
                 json!({"id":id,"entries":entries})
@@ -300,8 +299,8 @@ impl<'a> Graph<'a> {
                 json!({"id":id,"values":self.node_refs(nodes),"capacity":declarations.capacity(),"capacity_values":self.node_refs(self.result().declarations().get(declarations.slice(0..declarations.capacity()).expect("declaration capacity header")).expect("declaration capacity backing"))})
             }
             Work::Flow(flow_id) => {
-                let flow = *self.result().flows().get(flow_id).expect("flow node");
-                let data = match flow.node {
+                let flow = self.result().flows().get(flow_id).expect("flow node");
+                let data = match flow.node() {
                     None => Value::Null,
                     Some(FlowData::Ast(node)) => json!(["ast", self.node_ref(Some(node))]),
                     Some(FlowData::SwitchClause(data)) => json!([
@@ -316,11 +315,11 @@ impl<'a> Graph<'a> {
                         self.flow_list_ref(data.antecedents)
                     ]),
                 };
-                json!({"id":id,"flags":flow.flags,"data":data,"synthetic":match flow.node {Some(FlowData::SwitchClause(v))=>json!({"owner_flow":id,"payload":"switch","kind":v.kind().raw(),"flags":0,"pos":v.range().pos(),"end":v.range().end(),"parent":0}),Some(FlowData::ReduceLabel(v))=>json!({"owner_flow":id,"payload":"reduce","kind":v.kind().raw(),"flags":0,"pos":v.range().pos(),"end":v.range().end(),"parent":0}),_=>Value::Null},"antecedent":self.flow_ref(flow.antecedent),"antecedents":self.flow_list_ref(flow.antecedents)})
+                json!({"id":id,"flags":flow.flags(),"data":data,"synthetic":match flow.node() {Some(FlowData::SwitchClause(v))=>json!({"owner_flow":id,"payload":"switch","kind":v.kind().raw(),"flags":0,"pos":v.range().pos(),"end":v.range().end(),"parent":0}),Some(FlowData::ReduceLabel(v))=>json!({"owner_flow":id,"payload":"reduce","kind":v.kind().raw(),"flags":0,"pos":v.range().pos(),"end":v.range().end(),"parent":0}),_=>Value::Null},"antecedent":self.flow_ref(flow.antecedent()),"antecedents":self.flow_list_ref(flow.antecedents())})
             }
             Work::FlowList(list_id) => {
-                let list = *self.result().flow_lists().get(list_id).expect("flow list");
-                json!({"id":id,"flow":self.flow_ref(list.flow),"next":self.flow_list_ref(list.next)})
+                let list = self.result().flow_lists().get(list_id).expect("flow list");
+                json!({"id":id,"flow":self.flow_ref(list.flow()),"next":self.flow_list_ref(list.next())})
             }
         }
     }

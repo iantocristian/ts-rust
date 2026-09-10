@@ -77,7 +77,6 @@ impl<'a> Walk<'a> {
                                     .iter()
                                     .rev()
                                     .flatten()
-                                    .copied()
                                     .map(|id| Pending::Edge(Edge::Node(id), index)),
                             );
                         }

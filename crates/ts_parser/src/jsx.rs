@@ -27,7 +27,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let mut children = self.parse_jsx_children(opening);
                     let last = {
                         let nodes = self.factory.read_list(children).nodes();
-                        self.factory.read_nodes(nodes).last().copied().flatten()
+                        self.factory.read_nodes(nodes).last().flatten()
                     };
                     let closing = if let Some(last) = last
                         .filter(|&last| self.jsx_child_consumed_parent_closing_tag(opening, last))
@@ -46,18 +46,17 @@ impl<F: ParserFactory> Parser<'_, F> {
                         );
                         let last_start = self.factory.node(last_opening).range().pos();
                         self.finish_node_with_end(new_last, last_start, end);
-                        self.factory
-                            .node_mut(last_opening)
-                            .set_parent(Some(new_last));
+                        self.factory.set_node_parent(last_opening, Some(new_last));
                         let nodes = self.factory.read_list(last_children).nodes();
                         for i in 0..nodes.len() {
-                            let child =
-                                self.factory.read_nodes(nodes)[i].expect("parsed JSX child");
-                            self.factory.node_mut(child).set_parent(Some(new_last));
+                            let child = self
+                                .factory
+                                .read_nodes(nodes)
+                                .at(i)
+                                .expect("parsed JSX child");
+                            self.factory.set_node_parent(child, Some(new_last));
                         }
-                        self.factory
-                            .node_mut(new_closing)
-                            .set_parent(Some(new_last));
+                        self.factory.set_node_parent(new_closing, Some(new_last));
                         let loc = self.factory.read_list(children).loc();
                         let nodes = self.factory.read_list(children).nodes();
                         let mut replacement: Vec<_> = self
@@ -103,7 +102,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                         self.factory
                             .new_jsx_element(Some(opening), Some(children), Some(closing));
                     self.finish_node(node, pos);
-                    self.factory.node_mut(closing).set_parent(Some(node));
+                    self.factory.set_node_parent(closing, Some(node));
                     node
                 }
                 SyntaxKind::JsxOpeningFragment => {
@@ -129,8 +128,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                 let operator = self.factory.new_token(SyntaxKind::CommaToken.into());
                 let loc = self.factory.node(invalid).range();
                 self.factory
-                    .node_mut(operator)
-                    .set_range(TextRange::new(loc.pos(), loc.pos()));
+                    .set_node_range(operator, TextRange::new(loc.pos(), loc.pos()));
                 self.parse_error_at(
                     ts_scanner::skip_trivia(self.source_text, bad_pos),
                     loc.end(),
@@ -151,34 +149,34 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn jsx_element_parts(&self, node: NodeId) -> (NodeId, NodeListId, NodeId) {
         let node = self.factory.node(node);
-        let data = node.data().as_jsx_element().expect("JSX element payload");
+        let data = node
+            .data_source()
+            .as_jsx_element()
+            .expect("JSX element payload");
         (
-            data.opening_element.expect("parsed opening"),
-            data.children.expect("parsed children"),
-            data.closing_element.expect("parsed closing"),
+            data.opening_element().expect("parsed opening"),
+            data.children().expect("parsed children"),
+            data.closing_element().expect("parsed closing"),
         )
     }
     fn jsx_tag_name(&self, node: NodeId) -> NodeId {
         let node = self.factory.node(node);
         match node.kind().known() {
-            Some(SyntaxKind::JsxOpeningElement) => {
-                node.data()
-                    .as_jsx_opening_element()
-                    .expect("opening payload")
-                    .tag_name
-            }
-            Some(SyntaxKind::JsxClosingElement) => {
-                node.data()
-                    .as_jsx_closing_element()
-                    .expect("closing payload")
-                    .tag_name
-            }
-            Some(SyntaxKind::JsxSelfClosingElement) => {
-                node.data()
-                    .as_jsx_self_closing_element()
-                    .expect("self-closing payload")
-                    .tag_name
-            }
+            Some(SyntaxKind::JsxOpeningElement) => node
+                .data_source()
+                .as_jsx_opening_element()
+                .expect("opening payload")
+                .tag_name(),
+            Some(SyntaxKind::JsxClosingElement) => node
+                .data_source()
+                .as_jsx_closing_element()
+                .expect("closing payload")
+                .tag_name(),
+            Some(SyntaxKind::JsxSelfClosingElement) => node
+                .data_source()
+                .as_jsx_self_closing_element()
+                .expect("self-closing payload")
+                .tag_name(),
             _ => panic!("JSX tag-name access requires a named tag"),
         }
         .expect("parsed JSX tag name")
@@ -489,36 +487,44 @@ impl<F: ParserFactory> Parser<'_, F> {
             }
             match lhs.kind().known() {
                 Some(SyntaxKind::Identifier) => {
-                    return lhs.data().as_identifier().expect("identifier payload").text
-                        == rhs.data().as_identifier().expect("identifier payload").text;
+                    return lhs
+                        .data_source()
+                        .as_identifier()
+                        .expect("identifier payload")
+                        .text()
+                        == rhs
+                            .data_source()
+                            .as_identifier()
+                            .expect("identifier payload")
+                            .text();
                 }
                 Some(SyntaxKind::ThisKeyword) => return true,
                 Some(SyntaxKind::JsxNamespacedName) => {
                     let l = lhs
-                        .data()
+                        .data_source()
                         .as_jsx_namespaced_name()
                         .expect("namespaced payload");
                     let r = rhs
-                        .data()
+                        .data_source()
                         .as_jsx_namespaced_name()
                         .expect("namespaced payload");
-                    return self.identifier_texts_equal(l.namespace, r.namespace)
-                        && self.identifier_texts_equal(l.name, r.name);
+                    return self.identifier_texts_equal(l.namespace(), r.namespace())
+                        && self.identifier_texts_equal(l.name(), r.name());
                 }
                 Some(SyntaxKind::PropertyAccessExpression) => {
                     let l = lhs
-                        .data()
+                        .data_source()
                         .as_property_access_expression()
                         .expect("property access payload");
                     let r = rhs
-                        .data()
+                        .data_source()
                         .as_property_access_expression()
                         .expect("property access payload");
-                    if !self.identifier_texts_equal(l.name, r.name) {
+                    if !self.identifier_texts_equal(l.name(), r.name()) {
                         return false;
                     }
-                    left = l.expression.expect("parsed property receiver");
-                    right = r.expression.expect("parsed property receiver");
+                    left = l.expression().expect("parsed property receiver");
+                    right = r.expression().expect("parsed property receiver");
                 }
                 _ => panic!("Unhandled case in TagNamesAreEquivalent"),
             }
@@ -527,16 +533,16 @@ impl<F: ParserFactory> Parser<'_, F> {
     fn identifier_texts_equal(&self, left: Option<NodeId>, right: Option<NodeId>) -> bool {
         self.factory
             .node(left.expect("parsed identifier"))
-            .data()
+            .data_source()
             .as_identifier()
             .expect("identifier payload")
-            .text
+            .text()
             == self
                 .factory
                 .node(right.expect("parsed identifier"))
-                .data()
+                .data_source()
                 .as_identifier()
                 .expect("identifier payload")
-                .text
+                .text()
     }
 }

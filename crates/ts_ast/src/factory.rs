@@ -1,8 +1,9 @@
 use crate::{
-    AstBuilder, AstTransaction, AstView, Node, NodeData, NodeId, NodeKind, NodeRead,
+    AstBuilder, AstTransaction, AstView, Node, NodeData, NodeId, NodeKind, NodeMut, NodeRead,
     SourceFileRead, SourceFileState,
 };
 use ts_arena::Error;
+use ts_core::TextRange;
 
 /// Hooks receive identities and an exclusive factory context, with no outstanding
 /// node borrow. An immutable callback can reenter construction or mutate the
@@ -20,7 +21,7 @@ pub trait Factory {
     fn node(&self, id: NodeId) -> NodeRead<'_>;
     fn node_count(&self) -> i64;
     fn text_count(&self) -> i64;
-    fn node_mut(&mut self, id: NodeId) -> &mut Node;
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_>;
     /// Rich SourceFile metadata belongs to a complete owner. A lazy JSDoc
     /// transaction has no authority to create or mutate another source frame.
     fn read_source_file(&self, _id: NodeId) -> Result<SourceFileRead<'_>, Error> {
@@ -30,12 +31,36 @@ pub trait Factory {
         Err(Error::InvalidGraph)
     }
     fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId;
+    crate::factory_generated::factory_construction_methods!(defaults);
     // port: tsc/internal/ast/ast.go:NodeFactory.NewModifier
     fn new_modifier(&mut self, kind: NodeKind) -> NodeId {
-        self.new_node(kind, crate::TokenData {}.into())
+        self.new_token_data(kind, crate::TokenData {})
     }
     fn increment_text_count(&mut self);
     fn set_node_flags(&mut self, id: NodeId, flags: u32);
+    /// Header-only writes do not expose a mutable syntax payload. Parent edges
+    /// keep the factory's existing validation timing; this is not an early
+    /// owner check or a proof that a new parent belongs to retained storage.
+    fn set_node_parent(&mut self, id: NodeId, parent: Option<NodeId>) {
+        self.node_mut(id).set_parent(parent);
+    }
+    /// Preserve Go's signed int32 narrowing at the node's range boundary.
+    fn set_node_range(&mut self, id: NodeId, range: TextRange) {
+        self.node_mut(id).set_range(range);
+    }
+    fn add_node_flags(&mut self, id: NodeId, flags: u32) {
+        let mut node = self.node_mut(id);
+        let combined_flags = node.flags() | flags;
+        node.set_flags(combined_flags);
+    }
+    /// Parser completion sets the range before adding context/error flags.
+    /// Keep that ordinary operation to one mutable header lookup.
+    fn finish_node(&mut self, id: NodeId, range: TextRange, flags: u32) {
+        let mut node = self.node_mut(id);
+        node.set_range(range);
+        let combined_flags = node.flags() | flags;
+        node.set_flags(combined_flags);
+    }
     fn finish_update(&mut self, updated: NodeId, original: NodeId) -> NodeId;
     fn finish_clone(&mut self, updated: NodeId, original: NodeId) -> NodeId;
 }
@@ -68,7 +93,7 @@ impl AstBuilder {
             .expect("factory edges belong to retained storage");
         let frame = self.frame_mut();
         frame.node_count = frame.node_count.wrapping_add(1);
-        self.storage.push(Node::from_factory_parts(kind, data))
+        self.push_node(Node::from_factory_parts(kind, data))
     }
 
     pub(crate) fn run_create_hook(&mut self, node: NodeId) {
@@ -78,6 +103,8 @@ impl AstBuilder {
     }
 }
 impl Factory for AstBuilder {
+    crate::factory_generated::factory_construction_methods!(builder);
+
     fn read_source_file(&self, id: NodeId) -> Result<SourceFileRead<'_>, Error> {
         self.factory_view(id)?.source_file(id)
     }
@@ -96,10 +123,8 @@ impl Factory for AstBuilder {
             .node(id)
             .expect("factory node belongs to retained storage")
     }
-    fn node_mut(&mut self, id: NodeId) -> &mut Node {
-        self.storage
-            .node_mut(id)
-            .expect("factory owns mutable core node")
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_> {
+        AstBuilder::node_mut(self, id).expect("factory owns mutable core node")
     }
     fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId {
         let node = self.new_node_before_hook(kind, data);
@@ -116,18 +141,31 @@ impl Factory for AstBuilder {
             .expect("factory owns mutable node")
             .set_flags(flags);
     }
+    fn set_node_parent(&mut self, id: NodeId, parent: Option<NodeId>) {
+        self.write_parent(id, parent)
+            .expect("factory owns mutable core node");
+    }
+    fn set_node_range(&mut self, id: NodeId, range: TextRange) {
+        self.finish_header(id, range, 0, false)
+            .expect("factory owns mutable core node");
+    }
+    fn add_node_flags(&mut self, id: NodeId, flags: u32) {
+        let node = self
+            .storage
+            .node_mut(id)
+            .expect("factory owns mutable core node");
+        node.set_flags(node.flags | flags);
+    }
+    fn finish_node(&mut self, id: NodeId, range: TextRange, flags: u32) {
+        self.finish_header(id, range, flags, false)
+            .expect("factory owns mutable core node");
+    }
     fn finish_update(&mut self, updated: NodeId, original: NodeId) -> NodeId {
         if updated != original {
-            let (flags, range) = {
-                let original = self.node(original);
-                (original.flags(), original.range())
-            };
-            let node = self
-                .storage
-                .node_mut(updated)
+            let original_read = self.node(original);
+            let (flags, range) = (original_read.flags(), original_read.range());
+            self.finish_header(updated, range, flags, true)
                 .expect("factory owns updated core node");
-            node.set_flags(flags);
-            node.set_range(range);
             if let Some(hooks) = self.hooks.clone() {
                 hooks.on_update(self, updated, original);
             }
@@ -154,38 +192,28 @@ impl Factory for AstTransaction<'_, '_> {
     fn node(&self, id: NodeId) -> NodeRead<'_> {
         AstTransaction::node(self, id).expect("transaction node belongs to this file")
     }
-    fn node_mut(&mut self, id: NodeId) -> &mut Node {
-        self.storage
-            .node_mut(id)
-            .expect("transaction owns mutable staged node")
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_> {
+        AstTransaction::node_mut(self, id).expect("transaction owns mutable staged node")
     }
     fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId {
         self.validate_data(&data)
             .expect("transaction edges belong to this file");
         self.node_count = self.node_count.wrapping_add(1);
-        self.storage.push(Node::from_factory_parts(kind, data))
+        self.push_node(Node::from_factory_parts(kind, data))
     }
     fn increment_text_count(&mut self) {
         self.text_count = self.text_count.wrapping_add(1);
     }
     fn set_node_flags(&mut self, id: NodeId, flags: u32) {
-        self.storage
-            .node_mut(id)
+        AstTransaction::node_mut(self, id)
             .expect("transaction owns mutable node")
             .set_flags(flags);
     }
     fn finish_update(&mut self, updated: NodeId, original: NodeId) -> NodeId {
         if updated != original {
-            let original = self
-                .storage
-                .node(original)
-                .expect("original resolves in transaction");
-            let flags = original.flags();
-            let range = original.range();
-            let updated = self
-                .storage
-                .node_mut(updated)
-                .expect("updated node is staged");
+            let original = Factory::node(self, original);
+            let (flags, range) = (original.flags(), original.range());
+            let mut updated = Factory::node_mut(self, updated);
             updated.set_flags(flags);
             updated.set_range(range);
         }
@@ -201,6 +229,8 @@ impl Factory for AstTransaction<'_, '_> {
 pub struct BorrowedFactory<'a, T: ?Sized>(pub &'a mut T);
 
 impl<T: Factory + ?Sized> Factory for BorrowedFactory<'_, T> {
+    crate::factory_generated::factory_construction_methods!(forward, 0);
+
     fn read_source_file(&self, id: NodeId) -> Result<SourceFileRead<'_>, Error> {
         self.0.read_source_file(id)
     }
@@ -216,7 +246,7 @@ impl<T: Factory + ?Sized> Factory for BorrowedFactory<'_, T> {
     fn text_count(&self) -> i64 {
         self.0.text_count()
     }
-    fn node_mut(&mut self, id: NodeId) -> &mut Node {
+    fn node_mut(&mut self, id: NodeId) -> NodeMut<'_> {
         self.0.node_mut(id)
     }
     fn new_node(&mut self, kind: NodeKind, data: NodeData) -> NodeId {
@@ -231,10 +261,56 @@ impl<T: Factory + ?Sized> Factory for BorrowedFactory<'_, T> {
     fn set_node_flags(&mut self, id: NodeId, flags: u32) {
         self.0.set_node_flags(id, flags);
     }
+    fn set_node_parent(&mut self, id: NodeId, parent: Option<NodeId>) {
+        self.0.set_node_parent(id, parent);
+    }
+    fn set_node_range(&mut self, id: NodeId, range: TextRange) {
+        self.0.set_node_range(id, range);
+    }
+    fn add_node_flags(&mut self, id: NodeId, flags: u32) {
+        self.0.add_node_flags(id, flags);
+    }
+    fn finish_node(&mut self, id: NodeId, range: TextRange, flags: u32) {
+        self.0.finish_node(id, range, flags);
+    }
     fn finish_update(&mut self, updated: NodeId, original: NodeId) -> NodeId {
         self.0.finish_update(updated, original)
     }
     fn finish_clone(&mut self, updated: NodeId, original: NodeId) -> NodeId {
         self.0.finish_clone(updated, original)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{FactoryMethods, JsString};
+    use ts_arena::Counters;
+    use ts_jsstring::SourceText;
+
+    #[test]
+    fn header_operations_keep_signed_ranges_flags_and_deferred_parent_validation() {
+        let mut ast = AstBuilder::new(SourceText::default(), &Counters::new());
+        let child = ast.new_identifier(JsString::default());
+        let parent = ast.new_identifier(JsString::default());
+        {
+            let mut factory = BorrowedFactory(&mut ast);
+            factory.set_node_flags(child, 1);
+            factory.set_node_parent(child, Some(parent));
+            factory.finish_node(child, TextRange::new(i64::from(i32::MAX) + 1, -2), 2);
+            factory.add_node_flags(child, 4);
+            let node = factory.node(child);
+            assert_eq!(node.flags(), 7);
+            assert_eq!(node.range(), TextRange::new(i64::from(i32::MIN), -2));
+            assert_eq!(node.parent(), Some(parent));
+        }
+        let mut other = AstBuilder::new(SourceText::default(), &Counters::new());
+        let foreign = other.new_identifier(JsString::default());
+        // A header write retains construction's existing validation boundary:
+        // storing an invalid parent succeeds, and completion rejects the edge.
+        Factory::set_node_range(&mut ast, child, TextRange::new(-1, -1));
+        Factory::set_node_parent(&mut ast, child, Some(foreign));
+        assert_eq!(ast.node(child).parent(), Some(foreign));
+        assert!(matches!(ast.complete(child), Err(Error::WrongOwner)));
     }
 }

@@ -1,25 +1,27 @@
 //! File-owned binding symbols. Graph links and slice/table identities do not
 //! retain storage; their enclosing bind result supplies checked resolution.
 
-use crate::{modifier_flags, symbol_flags, AstView, JsString, Node, NodeData, NodeId, NodeText};
+use crate::{
+    modifier_flags, symbol_flags, AstView, JsString, NodeAccess, NodeDataRead, NodeId, NodeText,
+};
 use std::{
     borrow::Cow,
-    collections::HashMap,
-    ops::Range,
     sync::atomic::{AtomicU64, Ordering},
 };
+#[cfg(test)]
+use ts_arena::Counters;
+use ts_arena::Error;
 pub use ts_arena::SymbolId;
-use ts_arena::{ArenaId, AuxId, Counters, Error, OwnedArena};
 
 pub type SymbolFlags = u32;
 pub type CheckFlags = u32;
 
 /// port: tsc/internal/ast/utilities.go:IsNonLocalAlias
-pub fn is_non_local_alias(symbol: Option<&Symbol>, excludes: SymbolFlags) -> bool {
+pub fn is_non_local_alias(symbol: Option<&dyn crate::SymbolAccess>, excludes: SymbolFlags) -> bool {
     symbol.is_some_and(|symbol| {
-        symbol.flags & (symbol_flags::ALIAS | excludes) == symbol_flags::ALIAS
-            || symbol.flags & symbol_flags::ALIAS != 0
-                && symbol.flags & symbol_flags::ASSIGNMENT != 0
+        symbol.flags() & (symbol_flags::ALIAS | excludes) == symbol_flags::ALIAS
+            || symbol.flags() & symbol_flags::ALIAS != 0
+                && symbol.flags() & symbol_flags::ASSIGNMENT != 0
     })
 }
 
@@ -37,10 +39,10 @@ pub fn is_alias_symbol_declaration(view: AstView<'_>, id: NodeId) -> Result<bool
             | K::ExportSpecifier,
         ) => Ok(true),
         Some(K::ImportClause) => Ok(node
-            .data()
+            .data_source()
             .as_import_clause()
             .expect("ImportClause payload")
-            .name
+            .name()
             .is_some()),
         Some(K::ExportAssignment) => {
             crate::expression_is_alias(view, node.expression().expect("nil alias expression"))
@@ -55,10 +57,10 @@ pub fn is_alias_symbol_declaration(view: AstView<'_>, id: NodeId) -> Result<bool
             ) {
                 crate::expression_is_alias(
                     view,
-                    node.data()
+                    node.data_source()
                         .as_binary_expression()
                         .expect("BinaryExpression payload")
-                        .right
+                        .right()
                         .expect("nil alias expression"),
                 )
             } else {
@@ -80,7 +82,7 @@ pub struct Symbol {
     pub exports: Option<SymbolTableId>,
     pub parent: Option<SymbolId>,
     pub export_symbol: Option<SymbolId>,
-    runtime_id: AtomicU64,
+    pub(crate) runtime_id: AtomicU64,
 }
 impl Symbol {
     pub fn new(flags: SymbolFlags, name: JsString) -> Self {
@@ -113,23 +115,28 @@ impl Symbol {
 
 static NEXT_SYMBOL_ID: AtomicU64 = AtomicU64::new(0);
 /// Observe a previously assigned source identity without assigning one.
-pub fn existing_runtime_symbol_id(symbol: &Symbol) -> u64 {
-    symbol.runtime_id.load(Ordering::SeqCst)
+pub fn existing_runtime_symbol_id(symbol: &(impl crate::SymbolAccess + ?Sized)) -> u64 {
+    symbol.observe_runtime_identity()
 }
 /// The source's comparison/wire identity is distinct from checked storage IDs.
 // port: tsc/internal/ast/utilities.go:GetSymbolId
-pub fn runtime_symbol_id(symbol: &Symbol) -> u64 {
-    let mut id = symbol.runtime_id.load(Ordering::SeqCst);
+pub fn runtime_symbol_id(symbol: &(impl crate::SymbolAccess + ?Sized)) -> u64 {
+    symbol.assign_runtime_identity()
+}
+pub(crate) fn observe_runtime_cell(cell: &AtomicU64) -> u64 {
+    cell.load(Ordering::SeqCst)
+}
+pub(crate) fn assign_runtime_cell(cell: &AtomicU64) -> u64 {
+    let mut id = cell.load(Ordering::SeqCst);
     if id == 0 {
         id = NEXT_SYMBOL_ID
             .fetch_add(1, Ordering::SeqCst)
             .wrapping_add(1);
-        if symbol
-            .runtime_id
+        if cell
             .compare_exchange(0, id, Ordering::SeqCst, Ordering::SeqCst)
             .is_err()
         {
-            id = symbol.runtime_id.load(Ordering::SeqCst);
+            id = cell.load(Ordering::SeqCst);
         }
     }
     id
@@ -178,8 +185,11 @@ impl std::ops::Deref for SymbolName<'_> {
     }
 }
 // port: tsc/internal/ast/symbol.go:SymbolName
-pub fn symbol_name<'a>(symbol: &'a Symbol, view: AstView<'a>) -> Result<SymbolName<'a>, Error> {
-    if let Some(declaration) = symbol.value_declaration {
+pub fn symbol_name<'a>(
+    symbol: &'a (impl crate::SymbolAccess + ?Sized),
+    view: AstView<'a>,
+) -> Result<SymbolName<'a>, Error> {
+    if let Some(declaration) = symbol.value_declaration() {
         if crate::utilities::is_private_identifier_class_element_declaration(view, declaration)? {
             let name = view
                 .node(declaration)?
@@ -188,7 +198,7 @@ pub fn symbol_name<'a>(symbol: &'a Symbol, view: AstView<'a>) -> Result<SymbolNa
             return Ok(SymbolName::Private(view.node_text(name)?));
         }
     }
-    Ok(SymbolName::Stored(symbol.name.as_bytes()))
+    Ok(SymbolName::Stored(symbol.name_bytes()))
 }
 // port: tsc/internal/ast/symbol.go:EscapeAllInternalSymbolNames
 pub fn escape_all_internal_symbol_names(name: &[u8]) -> Cow<'_, [u8]> {
@@ -239,298 +249,52 @@ pub fn is_ambient_module_symbol_name(name: &[u8]) -> bool {
     try_get_ambient_module_name_from_symbol_name(name).is_some()
 }
 
-pub type SymbolTable = HashMap<JsString, Option<SymbolId>>;
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SymbolTableId(AuxId);
-impl SymbolTableId {
-    pub fn bits(self) -> u64 {
-        self.0.bits()
-    }
-    pub fn arena(self) -> ArenaId {
-        self.0.arena()
-    }
-}
-#[derive(Debug)]
-pub struct SymbolTables(OwnedArena<SymbolTable>);
-impl SymbolTables {
-    pub fn new(counters: &Counters) -> Self {
-        Self(OwnedArena::new(counters))
-    }
-    pub fn id(&self) -> ArenaId {
-        self.0.id()
-    }
-    pub fn alloc(&mut self, table: SymbolTable) -> SymbolTableId {
-        SymbolTableId(self.0.push(table))
-    }
-    pub fn get(&self, id: SymbolTableId) -> Result<&SymbolTable, Error> {
-        self.0.get(id.0)
-    }
-    pub fn get_mut(&mut self, id: SymbolTableId) -> Result<&mut SymbolTable, Error> {
-        self.0.get_mut(id.0)
-    }
-    pub fn iter(&self) -> impl Iterator<Item = (SymbolTableId, &SymbolTable)> {
-        self.0.iter().map(|(id, table)| (SymbolTableId(id), table))
-    }
-    pub fn get_or_create(
-        &mut self,
-        id: &mut Option<SymbolTableId>,
-    ) -> Result<&mut SymbolTable, Error> {
-        let id = *id.get_or_insert_with(|| self.alloc(SymbolTable::new()));
-        self.get_mut(id)
-    }
-}
+pub use crate::symbol_tables::{
+    SymbolTable, SymbolTableId, SymbolTableMut, SymbolTableRead, SymbolTables,
+};
 // port: tsc/internal/ast/utilities.go:GetSymbolTable
 pub fn get_symbol_table<'a>(
     tables: &'a mut SymbolTables,
     id: &mut Option<SymbolTableId>,
-) -> Result<&'a mut SymbolTable, Error> {
+) -> Result<SymbolTableMut<'a>, Error> {
     tables.get_or_create(id)
 }
 // port: tsc/internal/ast/utilities.go:GetMembers
 pub fn get_members<'a>(
     symbol: &mut Symbol,
     tables: &'a mut SymbolTables,
-) -> Result<&'a mut SymbolTable, Error> {
+) -> Result<SymbolTableMut<'a>, Error> {
     get_symbol_table(tables, &mut symbol.members)
 }
 // port: tsc/internal/ast/utilities.go:GetExports
 pub fn get_exports<'a>(
     symbol: &mut Symbol,
     tables: &'a mut SymbolTables,
-) -> Result<&'a mut SymbolTable, Error> {
+) -> Result<SymbolTableMut<'a>, Error> {
     get_symbol_table(tables, &mut symbol.exports)
 }
 
-/// A copied Go declaration-slice header. Nil, length and capacity are separate;
-/// replacing a header does not replace the backing seen through other headers.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct DeclarationSlice {
-    backing: Option<AuxId>,
-    start: u32,
-    len: u32,
-    capacity: u32,
-}
-impl DeclarationSlice {
-    /// Non-owning backing identity for graph observation; it cannot construct a
-    /// slice or grant mutation of a published binding result.
-    pub fn backing_id(self) -> Option<AuxId> {
-        self.backing
-    }
-    pub fn start(self) -> u32 {
-        self.start
-    }
-    pub const fn empty() -> Self {
-        Self {
-            backing: None,
-            start: 0,
-            len: 0,
-            capacity: 0,
-        }
-    }
-    pub fn is_nil(self) -> bool {
-        self.backing.is_none()
-    }
-    pub fn is_empty(self) -> bool {
-        self.len == 0
-    }
-    pub fn len(self) -> usize {
-        self.len as usize
-    }
-    pub fn capacity(self) -> usize {
-        self.capacity as usize
-    }
-    pub fn same(self, other: Self) -> bool {
-        self.len == other.len
-            && (self.len == 0 || self.backing == other.backing && self.start == other.start)
-    }
-    /// Go's two-index slice may extend to capacity, including previously hidden
-    /// elements written through another copied header.
-    pub fn slice(self, range: Range<usize>) -> Result<Self, Error> {
-        self.slice_with_capacity(range, self.capacity())
-    }
-    pub fn slice_with_capacity(self, range: Range<usize>, max: usize) -> Result<Self, Error> {
-        if range.start > range.end || range.end > max || max > self.capacity() {
-            return Err(Error::InvalidSlot);
-        }
-        Ok(Self {
-            backing: self.backing,
-            start: self
-                .start
-                .checked_add(range.start as u32)
-                .ok_or(Error::InvalidSlot)?,
-            len: range.len() as u32,
-            capacity: (max - range.start) as u32,
-        })
-    }
-}
-#[derive(Debug)]
-pub struct DeclarationLists(OwnedArena<Box<[Option<NodeId>]>>);
-impl DeclarationLists {
-    pub fn new(counters: &Counters) -> Self {
-        Self(OwnedArena::new(counters))
-    }
-    pub fn id(&self) -> ArenaId {
-        self.0.id()
-    }
-    pub fn alloc(&mut self, values: Vec<Option<NodeId>>) -> Result<DeclarationSlice, Error> {
-        let len = values.len();
-        self.alloc_with_capacity(values, len)
-    }
-    pub fn alloc_with_capacity(
-        &mut self,
-        mut values: Vec<Option<NodeId>>,
-        capacity: usize,
-    ) -> Result<DeclarationSlice, Error> {
-        let len = u32::try_from(values.len()).map_err(|_| Error::InvalidSlot)?;
-        let capacity = u32::try_from(capacity).map_err(|_| Error::InvalidSlot)?;
-        if len > capacity {
-            return Err(Error::InvalidSlot);
-        }
-        values.resize(capacity as usize, None);
-        Ok(DeclarationSlice {
-            backing: Some(self.0.push(values.into_boxed_slice())),
-            start: 0,
-            len,
-            capacity,
-        })
-    }
-    pub fn get(&self, slice: DeclarationSlice) -> Result<&[Option<NodeId>], Error> {
-        let Some(backing) = slice.backing else {
-            return Ok(&[]);
-        };
-        self.0
-            .get(backing)?
-            .get(slice.start as usize..slice.start as usize + slice.len())
-            .ok_or(Error::InvalidSlot)
-    }
-    pub fn get_mut(&mut self, slice: DeclarationSlice) -> Result<&mut [Option<NodeId>], Error> {
-        let Some(backing) = slice.backing else {
-            return Ok(&mut []);
-        };
-        self.0
-            .get_mut(backing)?
-            .get_mut(slice.start as usize..slice.start as usize + slice.len())
-            .ok_or(Error::InvalidSlot)
-    }
-    pub fn iter(&self) -> impl Iterator<Item = (AuxId, &[Option<NodeId>])> {
-        self.0.iter().map(|(id, values)| (id, values.as_ref()))
-    }
-    pub fn append(
-        &mut self,
-        slice: DeclarationSlice,
-        node: Option<NodeId>,
-    ) -> Result<DeclarationSlice, Error> {
-        self.get(slice)?;
-        let len = slice.len.checked_add(1).ok_or(Error::InvalidSlot)?;
-        if len <= slice.capacity {
-            let backing = slice.backing.expect("nonzero capacity has backing");
-            let index = slice.start as usize + slice.len();
-            *self
-                .0
-                .get_mut(backing)?
-                .get_mut(index)
-                .ok_or(Error::InvalidSlot)? = node;
-            return Ok(DeclarationSlice { len, ..slice });
-        }
-        let capacity = declaration_growth_capacity(len as usize, slice.capacity())?;
-        let mut values = self.get(slice)?.to_vec();
-        values.push(node);
-        self.alloc_with_capacity(values, capacity)
-    }
-    pub fn append_if_unique(
-        &mut self,
-        slice: DeclarationSlice,
-        node: Option<NodeId>,
-    ) -> Result<DeclarationSlice, Error> {
-        if self.get(slice)?.contains(&node) {
-            return Ok(slice);
-        }
-        self.append(slice, node)
-    }
-}
+#[path = "declaration_lists.rs"]
+mod declaration_lists;
+pub use declaration_lists::{DeclarationLists, DeclarationRead, DeclarationSlice};
 
-// Pinned Go 1.27.1 runtime nextslicecap/roundupsize for []*Node on the project's
-// 64-bit targets. Pointerful allocation rounding affects observable slice aliasing.
-fn declaration_growth_capacity(len: usize, old: usize) -> Result<usize, Error> {
-    let double = old.checked_mul(2).ok_or(Error::InvalidSlot)?;
-    let mut capacity = if len > double {
-        len
-    } else if old < 256 {
-        double
-    } else {
-        old
+macro_rules! locals_shape {
+    ($node:expr; $($variant:ident),*) => {
+        matches!($node.data(), $(NodeDataRead::$variant(_))|*)
     };
-    while capacity < len {
-        capacity = capacity
-            .checked_add((capacity + 3 * 256) >> 2)
-            .ok_or(Error::InvalidSlot)?;
-    }
-    let size = capacity.checked_mul(8).ok_or(Error::InvalidSlot)?;
-    let rounded = if size <= 32768 - 8 {
-        const CLASSES: &[usize] = &[
-            8, 16, 24, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 256, 288,
-            320, 352, 384, 416, 448, 480, 512, 576, 640, 704, 768, 896, 1024, 1152, 1280, 1408,
-            1536, 1792, 2048, 2304, 2688, 3072, 3200, 3456, 4096, 4864, 5376, 6144, 6528, 6784,
-            6912, 8192, 9472, 9728, 10240, 10880, 12288, 13568, 14336, 16384, 18432, 19072, 20480,
-            21760, 24576, 27264, 28672, 32768,
-        ];
-        let header = if size > 512 { 8 } else { 0 };
-        CLASSES
-            .iter()
-            .find(|&&class| class >= size + header)
-            .copied()
-            .ok_or(Error::InvalidSlot)?
-            - header
-    } else {
-        size.checked_add(8191).ok_or(Error::InvalidSlot)? & !8191
-    };
-    let capacity = rounded / 8;
-    u32::try_from(capacity).map_err(|_| Error::InvalidSlot)?;
-    Ok(capacity)
 }
 
 /// The source tests the payload's promoted LocalsContainerData method, even for
 /// an open kind/payload mismatch. Token(SourceFile) therefore has no locals.
 // port: tsc/internal/ast/ast.go:IsLocalsContainer
-pub fn is_locals_container(node: &Node) -> bool {
-    matches!(
-        node.data(),
-        NodeData::SourceFile(_)
-            | NodeData::ForStatement(_)
-            | NodeData::ForInOrOfStatement(_)
-            | NodeData::SwitchStatement(_)
-            | NodeData::CaseBlock(_)
-            | NodeData::TryStatement(_)
-            | NodeData::CatchClause(_)
-            | NodeData::Block(_)
-            | NodeData::FunctionDeclaration(_)
-            | NodeData::ClassDeclaration(_)
-            | NodeData::ClassExpression(_)
-            | NodeData::TypeAliasDeclaration(_)
-            | NodeData::CallSignatureDeclaration(_)
-            | NodeData::ConstructSignatureDeclaration(_)
-            | NodeData::ConstructorDeclaration(_)
-            | NodeData::GetAccessorDeclaration(_)
-            | NodeData::SetAccessorDeclaration(_)
-            | NodeData::IndexSignatureDeclaration(_)
-            | NodeData::MethodSignatureDeclaration(_)
-            | NodeData::MethodDeclaration(_)
-            | NodeData::ClassStaticBlockDeclaration(_)
-            | NodeData::ArrowFunction(_)
-            | NodeData::FunctionExpression(_)
-            | NodeData::ConditionalTypeNode(_)
-            | NodeData::MappedTypeNode(_)
-            | NodeData::FunctionTypeNode(_)
-            | NodeData::ConstructorTypeNode(_)
-            | NodeData::JSDocSignature(_)
-            | NodeData::ModuleDeclaration(_)
-    )
+pub fn is_locals_container(node: &(impl NodeAccess + ?Sized)) -> bool {
+    crate::node_semantics::locals_container_shapes!(locals_shape, node)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AstBuilder, Factory, FactoryMethods, RuntimeFactory, SyntaxKind};
+    use crate::{AstBuilder, Factory, FactoryMethods, Node, RuntimeFactory, SyntaxKind};
     use ts_arena::SymbolArena;
     use ts_jsstring::SourceText;
 
@@ -679,10 +443,8 @@ mod tests {
             .insert(JsString::from_bytes(b"\xff".as_slice()), None);
         let members = symbol.members.unwrap();
         assert_eq!(
-            get_members(&mut symbol, &mut tables)
-                .unwrap()
-                .get(&JsString::from_bytes(b"\xff".as_slice())),
-            Some(&None)
+            get_members(&mut symbol, &mut tables).unwrap().get(b"\xff"),
+            Some(None)
         );
         assert_eq!(symbol.members, Some(members));
         assert!(get_exports(&mut symbol, &mut tables).unwrap().is_empty());
@@ -730,17 +492,17 @@ mod tests {
             .alloc_with_capacity(vec![Some(first), None], 3)
             .unwrap();
         let copied = original;
-        lists.get_mut(original).unwrap()[0] = Some(second);
-        assert_eq!(lists.get(copied).unwrap(), &[Some(second), None]);
+        lists.set(original, 0, Some(second)).unwrap();
+        assert_eq!(lists.get(copied).unwrap().to_vec(), &[Some(second), None]);
         let extended = lists.append(original, Some(third)).unwrap();
         assert_eq!(
-            lists.get(copied.slice(0..3).unwrap()).unwrap(),
+            lists.get(copied.slice(0..3).unwrap()).unwrap().to_vec(),
             &[Some(second), None, Some(third)]
         );
         assert_eq!(copied.len(), 2);
         let detached = lists.append(extended, Some(first)).unwrap();
-        lists.get_mut(detached).unwrap()[0] = Some(first);
-        assert_eq!(lists.get(copied).unwrap()[0], Some(second));
+        lists.set(detached, 0, Some(first)).unwrap();
+        assert_eq!(lists.get(copied).unwrap().at(0), Some(second));
         assert_eq!(lists.append_if_unique(detached, None).unwrap(), detached);
         let clamped = detached.slice_with_capacity(0..1, 1).unwrap();
         let after = lists.append(clamped, Some(second)).unwrap();

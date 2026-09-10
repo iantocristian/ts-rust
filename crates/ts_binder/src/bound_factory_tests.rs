@@ -22,12 +22,12 @@ fn clone_and_update_bound_js_match_go_without_rebinding() {
     let file = parsed.publish_unbound();
     let (statements, eof) = {
         let node = file.view().node(original).unwrap();
-        let data = node.data().as_source_file().unwrap();
-        (data.statements.unwrap(), data.end_of_file_token)
+        let data = node.data_source().as_source_file().unwrap();
+        (data.statements().unwrap(), data.end_of_file_token())
     };
     let children = file.view().list(statements).unwrap().nodes();
-    let function = file.view().node_slice(children).unwrap()[1].unwrap();
-    let first_child = file.view().node_slice(children).unwrap()[0];
+    let function = file.view().node_slice(children).unwrap().at(1).unwrap();
+    let first_child = file.view().node_slice(children).unwrap().at(0);
     let parsed_flags = file.view().node(original).unwrap().flags();
     let parsed_function_flags = file.view().node(function).unwrap().flags();
     assert!(file
@@ -65,10 +65,10 @@ fn clone_and_update_bound_js_match_go_without_rebinding() {
         "commonJS": common_js.is_some(),
         "cloneCommonJS": factory.read_source_file(cloned).unwrap().common_js_module_indicator() == common_js,
         "updateCommonJS": factory.read_source_file(updated).unwrap().common_js_module_indicator() == common_js,
-        "sameCloneStatements": factory.node(cloned).data().as_source_file().unwrap().statements == Some(statements),
-        "sameUpdateChild": factory.read_nodes(factory.read_list(changed_statements).nodes())[0] == first_child,
-        "sameCloneEOF": factory.node(cloned).data().as_source_file().unwrap().end_of_file_token == eof,
-        "sameUpdateEOF": factory.node(updated).data().as_source_file().unwrap().end_of_file_token == eof,
+        "sameCloneStatements": factory.node(cloned).data_source().as_source_file().unwrap().statements() == Some(statements),
+        "sameUpdateChild": factory.read_nodes(factory.read_list(changed_statements).nodes()).at(0) == first_child,
+        "sameCloneEOF": factory.node(cloned).data_source().as_source_file().unwrap().end_of_file_token() == eof,
+        "sameUpdateEOF": factory.node(updated).data_source().as_source_file().unwrap().end_of_file_token() == eof,
         "sameUnchangedUpdate": unchanged == original,
     });
     assert_eq!(factory.view().node(original).unwrap().flags(), parsed_flags);

@@ -68,7 +68,7 @@ fn retained_snapshot_edit_reuses_only_equal_parse_inputs() {
     drop(after);
     cache.prune();
     assert!(retained.view().node(old_source).is_ok());
-    assert_eq!(retained.view().symbol(old_m).unwrap().name.as_bytes(), b"m");
+    assert_eq!(retained.view().symbol(old_m).unwrap().name_bytes(), b"m");
     drop(retained);
     cache.prune();
     assert_eq!(counters.snapshot(), ts_arena::Counts::default());
@@ -93,9 +93,14 @@ fn resolver_scope_routes_retained_files_and_rejects_foreign_generations() {
                 .unwrap()
                 .locals
                 .unwrap();
-            for symbol in host.table(table).unwrap().values().flatten() {
-                assert!(host.symbol(*symbol).is_ok());
-                assert!(!host.declarations(*symbol).unwrap().is_empty());
+            for symbol in host
+                .table(table)
+                .unwrap()
+                .iter()
+                .filter_map(|(_, symbol)| symbol)
+            {
+                assert!(host.symbol(symbol).is_ok());
+                assert!(!host.declarations(symbol).unwrap().is_empty());
             }
         }
         assert!(matches!(
@@ -108,10 +113,7 @@ fn resolver_scope_routes_retained_files_and_rejects_foreign_generations() {
                 JsString::from_bytes(b"arguments".as_slice()),
             )
             .unwrap();
-        assert_eq!(
-            host.symbol(transient).unwrap().name.as_bytes(),
-            b"arguments"
-        );
+        assert_eq!(host.symbol(transient).unwrap().name_bytes(), b"arguments");
         assert!(host.declarations(transient).unwrap().is_empty());
     }
     assert_eq!(counters.snapshot(), before);

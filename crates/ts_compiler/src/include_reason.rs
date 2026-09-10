@@ -7,7 +7,7 @@ use std::{
 };
 use ts_arena::Error as AstError;
 use ts_ast::{Diagnostic, NodeId};
-use ts_ast::{NodeData, SyntaxKind as K};
+use ts_ast::{NodeDataRead, SyntaxKind as K};
 use ts_core::TextRange;
 use ts_core::{ModuleKind, ScriptTarget};
 use ts_diagnostics::{self as d, Message};
@@ -471,10 +471,10 @@ impl IncludeExplanations {
             let property = ts_tsoptions::find_property(syntax, &[b"compilerOptions"])?;
             let view = syntax.file.view();
             let node = view.node(property).expect("config property owner");
-            let NodeData::PropertyAssignment(data) = node.data() else {
+            let NodeDataRead::PropertyAssignment(data) = node.data() else {
                 unreachable!("property lookup returns assignment")
             };
-            let initializer = data.initializer?;
+            let initializer = data.initializer()?;
             (view
                 .node(initializer)
                 .expect("config initializer owner")
@@ -717,17 +717,17 @@ fn find_array_value(
     };
     let view = config.file.view();
     let property = view.node(property)?;
-    let NodeData::PropertyAssignment(data) = property.data() else {
+    let NodeDataRead::PropertyAssignment(data) = property.data() else {
         unreachable!("property lookup returns assignment")
     };
-    let Some(initializer) = data.initializer else {
+    let Some(initializer) = data.initializer() else {
         return Ok(None);
     };
     let node = view.node(initializer)?;
-    let NodeData::ArrayLiteralExpression(data) = node.data() else {
+    let NodeDataRead::ArrayLiteralExpression(data) = node.data() else {
         return Ok(None);
     };
-    if let Some(elements) = data.elements {
+    if let Some(elements) = data.elements() {
         for id in view.node_slice(view.list(elements)?.nodes())?.iter() {
             let id = id.expect("config array element");
             if view.node(id)?.kind() == K::StringLiteral && view.node_text(id)?.as_bytes() == value

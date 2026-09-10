@@ -54,6 +54,11 @@ macro_rules! packed_id {
         #[repr(transparent)]
         pub struct $name(NonZeroU64);
         impl $name {
+            /// Reconstruct a non-owning identity in an existing namespace.
+            /// This checks the nonzero slot, not liveness, bounds or retention.
+            pub fn from_parts(arena: ArenaId, slot: u32) -> Result<Self, Error> {
+                Self::from_bits((u64::from(arena.get()) << 32) | u64::from(slot))
+            }
             /// Decode a storage identity, not an ownership proof or an API wire handle.
             pub(crate) fn from_bits(bits: u64) -> Result<Self, Error> {
                 if bits >> 32 == 0 || bits as u32 == 0 {

@@ -1,61 +1,33 @@
-# Rust and Go-to-Rust: my working guide
+# Rust and Go-to-Rust working guide
 
-This guide is for **Codex/Astra**, the assistant that wrote the original Astra
-S04 implementation and the synthesis. It records changes to my own coding and
-review habits. It is not a style mandate for other models or contributors, and
-does not supersede the accepted design notes, ADRs or the user's instructions.
+For Codex/Astra. The [loading conditions](../AGENTS.md) apply. This guide
+supplements the accepted design notes, ADRs and the user's instructions; it is
+not a style mandate for other models or contributors.
 
-Read this before planning, implementing or reviewing Rust in this project. For
-Rust work elsewhere, carry the general rules; reestablish that project's
-contracts instead of carrying over Corsa-specific semantics.
-
-## The correction I need to make
-
-My original implementation preserved many difficult Go behaviors and avoided
-unnecessary text allocations. I should retain that discipline. My weaknesses
-were broader owner modules, ownership acquisition hidden inside ordinary reads,
-and verification that was stronger at comparing successful outputs than at
-challenging its own assumptions. The synthesis improved the architecture, but
-my subsequent review still missed inherited evidence defects and one new eager
-computation. Passing tests and a favorable report did not make those defects
-less real.
-
-Before writing code, I should be able to answer six questions:
+Before writing code, answer these questions:
 
 1. What observable behavior must this API preserve, including invalid input?
 2. Who owns the data, who only borrows it, and what makes an escaped result live?
 3. What scans, allocations, reference-count operations and locks occur on the
    ordinary path, cache hit and first-use path?
 4. What happens after an error, panic, retry, reentry or owner retirement?
-5. What independent observation could prove my implementation wrong?
-6. Which other claims or sprint items will consume the evidence I emit?
+5. What independent observation could prove the implementation wrong?
+6. Which other claims or sprint items will consume the emitted evidence?
 
-## What the comparison actually changed
+## Implementation checks
 
-The baseline is my original `astra-s04` commit `397d676`, compared with the
-initial synthesis `9fe625c` and its review fixes `1cd7f00` in [PR #7](https://github.com/iantocristian/ts-rust/pull/7).
+- Split by responsibility and invariant before the implementation grows. Use upstream files as a starting point, not an inflexible module rule.
+- Make the normal result a borrow; require explicit retention when it escapes. Account for atomics as well as allocations.
+- Use a small branded API where repeated checks justify it, while retaining checked raw imports and safe bounds access.
+- Use byte/character literals and meaningful constants without losing the operation's integer or byte semantics.
+- Analyze reentry and wait cycles; detect prohibited same-thread reentry without rejecting ordinary contention.
+- Decide storage ownership and initialization timing separately. Verify unused derived data stays uncomputed.
+- Inspect every consumer of shared metrics, including later sprints. A workload subset must not certify the whole experiment.
+- Compare failure classes and contract messages; label modeled checks separately from upstream truth; freeze requests as well as scenario names.
+- Preserve the failed scenario and diagnostic. Failing closed does not replace useful failure reporting.
+- Verify the effective toolchain, configuration and failure flow of the complete producer, not just its command in a local environment.
 
-| My earlier choice or omission | What I must do differently |
-| --- | --- |
-| `owners.rs` combined construction, retention, lookup, lazy caches, scopes and scratch storage; `positions.rs` combined distinct conversion contracts. | Split by responsibility and invariant before the implementation grows. Use upstream files as a starting point, not an inflexible module rule. |
-| `FileHandle::node` cloned the retention root on every core lookup. | Make the normal result a borrow; require explicit retention when it escapes. Account for atomics as well as allocations. |
-| Repeated access had runtime checks but no scoped proof of owner validation. | Use a small branded API where repeated checks justify it, while retaining checked raw imports and safe bounds access. |
-| Decimal character codes obscured the escape table. | Use byte/character literals and meaningful constants without losing the operation's integer or byte semantics. |
-| Lazy callbacks ran under a write lock with only a “must not reenter” comment. | Analyze reentry and wait cycles; detect prohibited same-thread reentry without rejecting ordinary contention. |
-| Adding a file-owned position map in the synthesis also added an eager scan. | Decide storage ownership and initialization timing separately. Verify unused derived data stays uncomputed. |
-| The original already marked S09-5 complete from partial E3 metrics; I carried it into the synthesis. | Inspect every consumer of shared metrics, including later sprints. A workload subset must not certify the whole experiment. |
-| Panic occurrence, a modeled Go classifier, and large probe counts made the evidence look more complete than it was. | Compare failure classes and contract messages; label modeled checks separately from upstream truth; freeze requests as well as scenario names. |
-| Assertion-based E3 runs emitted passing rows only after all scenarios succeeded. | Preserve the failed scenario and diagnostic. The old gate failed closed, but its failure reporting was insufficient. |
-| Pins, cache behavior and CI failure paths were incompletely integrated. | Verify the effective toolchain, configuration and failure flow of the complete producer, not just its command on my machine. |
-
-Fable contributed smaller modules, borrowed access and invariant brands; Opus
-contributed explicit token checks and file-owned derived data; Sol provided
-examples of direct local naming and simple control flow. I should adopt each
-mechanism only after checking it against the contract. Their implementations
-also contained incompatible choices; combining the most appealing pieces is
-not itself a correctness argument.
-
-## General Rust rules I should apply
+## General Rust rules
 
 ### Design ownership and costs together
 
@@ -63,6 +35,13 @@ Start with the smallest truthful access contract: `&T` for a borrow, an owned
 value for transfer, and a retained handle for an explicit lifetime extension.
 Do not add `Arc`, `Mutex` or cloning merely to make a lifetime problem disappear.
 Work out what must outlive what before choosing the storage representation.
+
+An owned result does not necessarily require a byte copy. When replacing a
+contextual string reader with `&[u8]`, preserve its explicit owned conversion:
+`JsString::from_bytes` allocates, while a source slice or pooled-string clone
+can retain existing backing. Carry that operation through the local reader
+instead of reconstructing it from borrowed bytes. Check backing sharing and
+post-owner-drop validity, then charge any new requests in the full pipeline.
 
 Keep mutable construction separate from publication when that matches the
 lifecycle. A consuming `finish(self)` can make invalid transitions unavailable.
@@ -72,7 +51,7 @@ every hypothetical future owner or algorithm.
 
 For a common operation, write down its structural cost during design:
 
-| Operation | Intended S04 behavior |
+| Operation | Intended leaf behavior |
 | --- | --- |
 | Core lookup | Borrow; no lock, owner `Arc` clone or node allocation. |
 | Escape a node from its scope | Explicitly retain the complete file/bundle root. |
@@ -80,10 +59,10 @@ For a common operation, write down its structural cost during design:
 | Publish a file without requesting its map | Publish ownership without constructing the derived position map. |
 | Unchanged ASCII casing / truncation | Return borrowed `Cow` / a byte prefix where the API permits it. |
 
-These are operation-level claims, not compiler benchmarks. The synthesis also
-changed bundle members from inline file owners to `Arc<FileOwner>` values; a
-cheaper lookup does not establish fewer allocations everywhere. Measure actual
-throughput or heap behavior before making that broader claim.
+These are operation-level claims, not compiler benchmarks. Storing bundle
+members as `Arc<FileOwner>` instead of inline file owners also changes allocation
+costs; a cheaper lookup does not establish fewer allocations everywhere. Measure
+actual throughput or heap behavior before making that broader claim.
 
 ### Make module and API boundaries reviewable
 
@@ -101,7 +80,7 @@ on their own.
 
 Document non-obvious behavior, ownership, panic boundaries and concurrency
 restrictions at the API. Link to the design note for the architecture instead
-of copying its paragraphs into module headers. My UTF-16 decoder comment about
+of copying its paragraphs into module headers. A UTF-16 decoder comment about
 discarding an odd trailing byte is useful because it explains an otherwise
 surprising compatibility choice.
 
@@ -116,9 +95,9 @@ Do not replace manual implementations just to reduce a report's count:
   implement `Clone`; a manual implementation can preserve that API.
 - `Debug` should expose useful identity or state without recursively dumping an
   entire retained graph.
-- Conventional methods should read conventional state. The old bundle
-  `is_empty() == false` was consistent with its mandatory canonical file, but
-  delegating to the collection states that relationship more directly.
+- Conventional methods should read conventional state. For a bundle with a
+  mandatory canonical file, `is_empty() == false` is consistent with the invariant,
+  but delegating to the collection states that relationship more directly.
 
 Distinguish recoverable errors from violated invariants. Use typed errors at
 fallible boundaries. Use `expect` only where construction or prior validation
@@ -130,10 +109,9 @@ is a sound rule.
 Start with safe Rust and the standard library. In this repository, inherit the
 workspace's unsafe prohibition and dependency policy. A dependency needs a
 specific capability, maintenance and validation reason; “fewer dependencies”
-alone is not proof of better code. The synthesis uses standard locks so its
-production synchronization can run under the selected strict-provenance Miri
-configuration. That is a scoped choice, not a claim that another lock library
-is universally incorrect.
+alone is not proof of better code. Standard locks let production synchronization
+run under the selected strict-provenance Miri configuration. That is a scoped
+choice, not a claim that another lock library is universally incorrect.
 
 ### Treat concurrency as a state machine
 
@@ -141,7 +119,7 @@ Before adding a lock or callback, identify the protected state, publication
 point, lock order, callback behavior and unwind policy. Include cache hits,
 misses that race, partial construction and retry in the design.
 
-For S04, reservation and publication are separate: a failed attempt burns its
+Reservation and publication are separate: a failed attempt burns its
 provisional IDs, drops private staged payloads and publishes no partial graph.
 Page addresses remain stable while the directory grows. The cache miss is
 rechecked under the same write lock that protects publication.
@@ -171,7 +149,7 @@ project's divergence process; do not silently “improve” observable behavior.
 
 Use conversions according to their purpose:
 
-| Purpose | My default |
+| Purpose | Default |
 | --- | --- |
 | Lossless widening | `From` / `into` when available. |
 | Validation of a Rust ownership or external-input boundary | `TryFrom` / checked arithmetic with a meaningful failure. |
@@ -222,7 +200,7 @@ minted them; keep compile-fail tests for escape and cross-arena misuse.
 A node that escapes from a mapped file must retain its complete bundle, not
 just the page containing that node. Graph links use non-owning IDs to avoid
 ownership cycles. Generic payloads can still contain interior mutability or
-owning links: S04's storage API does not prove arbitrary AST payloads immutable
+owning links: the storage API does not prove arbitrary AST payloads immutable
 or cycle-free. Future AST and checker types must uphold their own contracts.
 
 Retirement, disposal and response commitment are separate events. A retained
@@ -231,7 +209,7 @@ lease primitive does not establish the later server's atomic
 retirement-versus-publication gate. Do not implement or claim those later
 systems through placeholder success flags.
 
-## Verification rules that correct my review blind spots
+## Verification rules
 
 ### Test the assertion, then test the measurement
 
@@ -239,9 +217,9 @@ For each important claim, identify a concrete counterexample before writing its
 test. Use runtime regressions for behavior, compile-fail cases for type-system
 guarantees, and appropriate instrumentation for executed memory/concurrency
 paths. Add failure-path tests for the producer itself. More assertions that
-repeat my implementation do not provide an independent reference.
+repeat the implementation do not provide an independent reference.
 
-| Claim | Counterexample my check should detect |
+| Claim | Counterexample the check should detect |
 | --- | --- |
 | Core reads borrow cheaply | A hidden owner `Arc` clone or allocation appears on repeated lookup. |
 | Failed IDs stay invalid | A retry makes a previously exposed provisional ID resolve to a new node. |
@@ -253,11 +231,11 @@ repeat my implementation do not provide an independent reference.
 
 The oracle should execute the pinned upstream functions, with access-only
 bridges where necessary. If upstream has no equivalent, label a model as a
-model and test the Rust contract separately. We removed the modeled classifier
-from the differential payload so the probe count could no longer imply upstream
-validation of that tag. Agreement between two versions of my own algorithm is
-not upstream validation. The remaining slice probes compare bounds, bytes and
-Go UTF-8 views.
+model and test the Rust contract separately. A modeled classifier in the
+differential payload must not imply upstream validation of a Rust-only validity
+tag. Agreement between two versions of the same algorithm is not upstream
+validation. Slice probes can compare bounds, bytes and Go UTF-8 views while
+Rust classification invariants are tested separately.
 
 Validate the protocol before treating any failure as library behavior. Reject
 duplicate keys, non-finite values, wrong types, duplicate/missing/extra/reordered
@@ -270,18 +248,17 @@ exactly and recognized runtime bounds failures by a narrow class. Unknown,
 assertion and overflow panics must not pass merely because both programs
 panicked. Do not loosen the classifier to make a new mismatch disappear.
 
-Repeated source output can vary even under an exact pin. S07's JSON dependency
-deliberately alternates between two diagnostic prefixes. Establish that behavior
+Repeated source output can vary even under an exact pin; a dependency can
+deliberately alternate between two diagnostic prefixes. Establish that behavior
 from the dependency's code and tests before adding a qualification; limit it to
 the demonstrated field and prefix, retain the raw diagnostics, and test that a
 changed message body or unknown prefix still fails. A diagnostic-only field is
 not a reason to silently discard all source-check differences.
 
-Exercise a producer helper through its caller as well as on its own. S07's
-operation inventory and binder-depth captures passed their checks but printed
-progress into the containing producer's JSON channel. The tracker correctly
-rejected both long captures. Reserve stdout for the protocol and test embedded
-calls with captured stdout/stderr before running the complete corpus.
+Exercise a producer helper through its caller as well as on its own. A helper
+can pass its checks yet print progress into the containing producer's JSON
+channel, invalidating the capture. Reserve stdout for the protocol and test
+embedded calls with captured stdout/stderr before running the complete corpus.
 
 ### Keep claims no broader than the execution
 
@@ -291,8 +268,7 @@ unavailable counters or instrumentation should remain absent. A measured
 instrumentation failure is false; missing prerequisites or malformed output
 cannot become success.
 
-Read every consumer of a shared metric before changing its producer. The
-original S09-5 mistake was present in Astra and survived my synthesis review.
+Read every consumer of a shared metric before changing its producer.
 Full E3 must remain incomplete while its later scenarios are absent. Likewise,
 owner/storage-unit counters establish their measured disposal properties, not
 total heap bytes, RSS or the absence of every possible leak.
@@ -328,9 +304,16 @@ configuration hash records the configuration but does not establish a claimed
 profile. Enforce or observe the actual optimization, LTO, unwind and codegen
 settings while preserving registry and offline configuration.
 
+Fresh builds need not produce identical bytes: native dependencies can embed
+compilation timestamps, and linkers can retain temporary output paths. When
+semantic validation is bound to an executable hash, time that exact executable
+after checking its source and build configuration. Rebuilding the same source
+is not a replacement for its artifact identity, and a mismatch is not a reason
+to weaken the hash check. Build separately instrumented variants explicitly.
+
 Bind each measured child to the bytes and options it actually loaded. Equal
-file, byte, node, symbol and diagnostic counts did not distinguish an S07
-same-size literal edit. Compute the ordered input identity during preload,
+file, byte, node, symbol and diagnostic counts cannot distinguish a same-size
+literal edit. Compute the ordered input identity during preload,
 outside the measured phase, and compare it with the independent graph
 obligations. Checking mutable input files only before a batch cannot prove what
 later children executed.
@@ -341,12 +324,12 @@ unrelated failures while their prerequisites still hold. A successful run alone
 does not test that failure path or demonstrate a warm cache hit.
 
 When a crate adds compile-time assets, audit every workspace build job's checkout
-inputs. S07's MSRV check passed locally with an initialized `upstream`, while
-all four CI MSRV targets lacked those embedded library files. Reproduce the job
-from a fresh checkout; an installed compiler and a passing warm workspace check
-do not establish that CI retrieves all required files.
+inputs. A local MSRV check with an initialized `upstream` does not establish that
+CI retrieves the embedded library files. Reproduce the job from a fresh checkout;
+an installed compiler and a passing warm workspace check do not establish that
+CI retrieves all required files.
 
-## My review and delivery routine
+## Review and delivery
 
 1. **Plan from contracts.** Read the relevant design notes, source functions and
    callers. Record the ownership transitions, semantic traps, scope and common
@@ -373,48 +356,60 @@ do not establish that CI retrieves all required files.
 
 Stage the final file inventory before evidence captures when moving or deleting
 files. The tracker currently hashes an unstaged tracked deletion as `deleted`,
-but omits the path after staging. I missed that distinction during S07: staging
-three moved AST sort files invalidated otherwise unchanged captures. Verify
-current gates again after staging and before committing; source-byte stability
-alone does not establish stability of this tracker's input inventory.
+but omits the path after staging. Verify current gates again after staging and
+before committing; source-byte stability alone does not establish stability of
+this tracker's input inventory.
 
-S07 passed its correctness comparisons while allocating 1.63 times Go's bytes
-and taking 1.79/1.93 times its one/eight-worker time. I established a 2.181 GB
-minimum retained representation only after completing the port, against a
-2.035 GB allocation budget. For quantitative acceptance targets, estimate the
-representation budget from representative counts and measure a storage prototype
-early. Include replacement storage in any proposed savings, and use separate
+For quantitative acceptance targets, estimate the representation budget from
+representative counts and measure a storage prototype early. Include replacement
+storage in any proposed savings, and use separate
 CPU profiles before attributing time to a suspected cost. Safe ownership and
 semantic parity do not establish acceptable memory use or speed.
 
+Judge performance tradeoffs at the scale of the actual requirement. Report
+absolute milliseconds and MB before relative percentages, with explicit sweep
+counts, production invocation frequency and allocation/live/RSS endpoints. A
+large slowdown inside a tiny microbenchmark is not a whole-pipeline veto, and a
+microbenchmark saving is not automatically available in production. If the real
+frequency or caller contract is unmeasured, show conditional arithmetic and name
+the missing observation. Apply pipeline thresholds only to pipeline measurements;
+keep a materially smaller storage candidate in contention while testing its
+integration. Do not infer a rigorous upper bound from a cheaper synthetic control.
+
+Separate performance acceptance from experimental retention and investment.
+Components that trade CPU for memory can belong in one combined implementation;
+measure that complete implementation against the same control before promoting
+it. Preserve component results for attribution, including regressions. Never add
+separately measured savings or use a weighted score to excuse a failed final
+gate. An investment threshold is not a reason to discard a reviewed small win
+already supported beyond noise: weigh its absolute benefit, maintenance cost
+and whether its implementation surface will survive the next planned change.
+Keep phase elapsed clocks distinct from sampled CPU; retain matched phase
+attribution when a storage tradeoff could improve binding while slowing parsing.
+
 Do not use report grades or counts as acceptance criteria. Shorter files,
 fewer casts, fewer `expect`s, more derives, more comments and more probes can
-each make a port worse if pursued without examining the contract. The
-improvement I need is earlier identification of hidden costs and unsupported
-claims, while retaining exact semantic work.
+each make a port worse if pursued without examining the contract. Identify
+hidden costs and unsupported claims early while retaining exact semantic work.
 
-The S03 follow-up review in [PR #8](https://github.com/iantocristian/ts-rust/pull/8)
-exposed further checks I missed. An output-map entry made `ast_schema` a success
-sentinel instead of a separately observable resolver result. Unique staging
-directories prevented reuse but accumulated without a retention limit. Broad
-source globs forced unrelated leaf edits through an expensive generator. For
-future generators, test a failed frontend, a second attempt and an unrelated
-source edit explicitly. Compare CI step durations and actual cache-hit logs
-before attributing an entire slowdown to one tool or cache; a clean independent
-review does not substitute for those observations.
+An output-map entry must not make `ast_schema` a success sentinel instead of a
+separately observable resolver result. Unique staging directories prevent reuse
+but accumulate without a retention limit. Broad source globs force unrelated
+leaf edits through an expensive generator. Test a failed frontend, a second
+attempt and an unrelated source edit explicitly. Compare CI step durations and
+actual cache-hit logs before attributing an entire slowdown to one tool or cache;
+a clean independent review does not substitute for those observations.
 
-The next CI run exposed a concrete cache lifecycle failure: `rust-cache` kept
-the tooling directory under `target/` but removed its Git files before saving
-the cache. The first clean run passed; the restored run could not read its
-origin. Keep non-Cargo repository state outside Cargo's cleanup domain and test
-generation after target cleanup as well as from a clean checkout.
+`rust-cache` can retain a tooling directory under `target/` while removing its
+Git files before saving the cache, leaving a restored directory without a usable
+repository. Keep non-Cargo repository state outside Cargo's cleanup domain and
+test generation after target cleanup as well as from a clean checkout.
 
-S06 review exposed two further assumptions to challenge. I counted generated
-Go functions toward thresholds that the tracker has always restricted to
-handwritten source. Read the actual metric collector before calculating scope;
-keep generated provenance and source coverage separate. Broad parser parity
-also did not establish utility behavior on constructed graphs and unusual kinds,
-so those families now have independently regenerated Go observations.
+The tracker restricts source-function coverage thresholds to handwritten source.
+Read the actual metric collector before calculating scope; keep generated
+provenance and source coverage separate. Broad parser parity does not establish
+utility behavior on constructed graphs and unusual kinds; verify those families
+with independently regenerated Go observations.
 
 For Go slices, test nil, allocated empty, nil elements and copied backing
 separately. Copying a slice header can require shared mutable backing during
@@ -423,32 +418,16 @@ through imported owners, validate stored IDs against the cache owner's retained
 graph. The caller's broader lookup context is not sufficient proof that the
 cached result will remain live after that caller disappears.
 
-## Evidence and maintenance
+## Code and contract references
 
-Prepared on 7 September 2026 from a fresh read of these local reports:
-
-- [Four-model comparison](/Users/cristian/git/ts-rust-s04-report/s04-comparison-x.md)
-  and its HTML presentation.
-- [Code-quality analysis](/Users/cristian/git/ts-rust-s04-report/code-quality.md).
-- Original Astra commit `397d676017b702e9ce2d70d1130b5354173af81c`, initial
-  synthesis `9fe625ce02fa86ca4dddfaf5c24f910dea349375`, and review fixes
-  `1cd7f007df44322610a25a84504f912e07242e42`. The report links above are local;
-  these revisions identify the code used for the comparison.
-
-Current implementation examples: [borrow/retention](../crates/ts_arena/src/refs.rs),
+Implementation examples: [borrow/retention](../crates/ts_arena/src/refs.rs),
 [brands](../crates/ts_arena/src/scope.rs),
 [publication and reentry](../crates/ts_arena/src/lazy.rs),
 [lazy position maps](../crates/ts_arena/src/file.rs),
 [panic comparison](../scripts/s04.py),
 [ownership measurement](../scripts/s04_ownership.py), and
-[the S09 regression](../xtask/src/tests.rs).
+[metric scope checks](../xtask/src/tests.rs).
 
-The governing references remain the [text](design/text.md) and
-[ownership](design/ownership.md) designs, [tracking contract](TRACKING.md),
-[divergence policy](adr/0004-the-owner-approves-baseline-divergences.md), and
-[ADR index](adr/README.md). See [S04](S04.md) for the captured results and scope.
-
-After a future review exposes a recurring mistake, amend this guide with the
-specific counterexample and the check that would have caught it earlier. Keep
-historical observations distinct from current implementation facts. Do not
-turn every one-off defect into a new universal rule.
+Use the relevant [text](design/text.md) and [ownership](design/ownership.md)
+designs, [tracking contract](TRACKING.md), [divergence policy](adr/0004-the-owner-approves-baseline-divergences.md),
+and [ADRs](adr/README.md).

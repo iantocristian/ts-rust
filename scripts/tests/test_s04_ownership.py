@@ -44,12 +44,16 @@ def program_manifest():
     # Minimal independent S07 suites keep these legacy producer tests focused on
     # their S04/S06 failures without bypassing S07 inventory/output validation.
     return {
-        "version": 1,
-        "common": {"package": "ts_ast", "filter": "bind_tests::", "exact": False,
-                   "cases": ["bind_tests::publication"]},
+        "version": 3,
+        "common": {
+            name: {"package": package, "filter": prefix, "exact": False,
+                   "skip": ownership.s07_ownership.SKIPS.get(name, []),
+                   "cases": [prefix + "publication"]}
+            for name, (package, prefix) in ownership.s07_ownership.COMMON.items()
+        },
         "groups": {
             name: {"package": "ts_compiler", "filter": f"ownership_tests::{name}",
-                   "exact": True, "cases": [f"ownership_tests::{name}"]}
+                   "exact": True, "skip": [], "cases": [f"ownership_tests::{name}"]}
             for name in ownership.s07_ownership.GROUPS
         },
     }
@@ -78,7 +82,7 @@ def successful_invoke(root, args, env=None):
     if "setup" in args:
         return b""
     manifest = ownership.s07_ownership.load_cases(root)
-    for suite in [manifest["common"], *manifest["groups"].values()]:
+    for suite in [*manifest["common"].values(), *manifest["groups"].values()]:
         if suite["package"] in args and suite["filter"] in args:
             return named_suite_output(suite["cases"])
     if "ts_ast" in args and "storage_tests::" in args:
@@ -87,6 +91,43 @@ def successful_invoke(root, args, env=None):
 
 
 class OwnershipProducerTests(unittest.TestCase):
+    def test_missing_exclusive_suite_cannot_leave_shared_e3_metrics_passing(self):
+        def invoke(root, args, env=None):
+            if "miri" in args and "exclusive_tests::" in args:
+                return b"running 0 tests\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;\n"
+            return successful_invoke(root, args, env)
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            fixture(root)
+            with patch.object(ownership, "invoke", invoke):
+                report = ownership.run(root)
+        self.assertFalse(report["metrics"]["miri"])
+        self.assertFalse(report["metrics"]["shared_bound_file"])
+        self.assertFalse(report["metrics"]["retained_snapshot_edit"])
+        self.assertFalse(report["metrics"]["shared_bound_file_miri"])
+        self.assertTrue(report["metrics"]["shared_bound_file_address_sanitizer"])
+        self.assertEqual(report["metrics"]["program_ownership_tests"],
+                         len(ownership.s07_ownership.COMMON) + len(ownership.s07_ownership.GROUPS) - 1)
+
+    def test_failed_validation_proof_suite_cannot_leave_sanitizer_metrics_passing(self):
+        def invoke(root, args, env=None):
+            if "-Zbuild-std" in args and "storage::validation_proof_tests::" in args:
+                raise RuntimeError("validation proof invariant failed under ASan")
+            return successful_invoke(root, args, env)
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            fixture(root)
+            with patch.object(ownership, "invoke", invoke):
+                report = ownership.run(root)
+        self.assertFalse(report["metrics"]["address_sanitizer"])
+        self.assertFalse(report["metrics"]["shared_bound_file"])
+        self.assertFalse(report["metrics"]["retained_snapshot_edit"])
+        self.assertTrue(report["metrics"]["miri"])
+        self.assertEqual(report["metrics"]["program_ownership_tests"],
+                         len(ownership.s07_ownership.COMMON) + len(ownership.s07_ownership.GROUPS) - 1)
+
     def test_duplicate_and_nonfinite_json_cannot_hide_failed_measurements(self):
         for text in ('{"live_owner_delta":2,"live_owner_delta":0}',
                      '{"live_owner_delta":NaN}', '{"live_owner_delta":Infinity}',

@@ -4,17 +4,17 @@ use std::{
     sync::{Arc, Weak},
 };
 use ts_arena::Counters;
-use ts_ast::{BoundFile, SourceFileParseOptions};
+use ts_ast::{CompletedFile, SourceFileParseOptions};
 use ts_core::ScriptKind;
 use ts_jsstring::{JsString, SourceText};
 /// An escaped file retains its complete parsed and bound owner. Graph edges in
 /// a Program are IDs; they never retain another Program or create Arc cycles.
 #[derive(Debug)]
 pub struct ProgramFile {
-    pub(crate) bound: BoundFile,
+    pub(crate) bound: CompletedFile,
 }
 impl ProgramFile {
-    pub fn bound(&self) -> &BoundFile {
+    pub fn bound(&self) -> &CompletedFile {
         &self.bound
     }
     pub fn source(&self) -> ts_ast::NodeId {
@@ -59,9 +59,7 @@ impl FileCache {
             }
         }
         let parsed = ts_parser::parse_source_file_with_counters(source, kind, options, counters);
-        let root = parsed.root();
-        let ast = parsed.publish_unbound();
-        let bound = ts_binder::bind_source_file(&ast, root)?;
+        let bound = ts_binder::bind_parsed_file(parsed)?;
         let file = Arc::new(ProgramFile { bound });
         entries.push(Arc::downgrade(&file));
         Ok(file)

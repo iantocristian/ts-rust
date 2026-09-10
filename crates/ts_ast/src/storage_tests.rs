@@ -16,6 +16,248 @@ fn builder(counters: &Counters) -> AstBuilder {
         counters,
     )
 }
+
+#[test]
+fn unrestricted_record_replacement_starts_with_the_replacements_runtime_identity() {
+    let mut build = builder(&Counters::new());
+    let id = build.new_identifier(JsString::from_bytes(b"first".as_slice()));
+    let original = runtime_node_id(&build.node(id));
+    let replacement = Node::new(
+        SyntaxKind::Identifier,
+        -1,
+        -1,
+        IdentifierData {
+            text: JsString::from_bytes(b"replacement".as_slice()),
+        }
+        .into(),
+    )
+    .unwrap();
+    assert_eq!(existing_runtime_node_id(&replacement), 0);
+    *build.node_mut(id).unwrap() = replacement;
+    assert_eq!(existing_runtime_node_id(&build.node(id)), 0);
+    assert_ne!(runtime_node_id(&build.node(id)), original);
+    assert_eq!(
+        build.node(id).as_identifier().unwrap().text(),
+        b"replacement"
+    );
+}
+
+#[test]
+fn node_slice_values_preserve_nil_bounds_and_bidirectional_iteration() {
+    let counters = Counters::new();
+    let mut build = builder(&counters);
+    let first = build.new_identifier(JsString::from_bytes(b"first".as_slice()));
+    let last = build.new_identifier(JsString::from_bytes(b"last".as_slice()));
+    let backing = build
+        .node_slice(vec![Some(first), None, Some(last)])
+        .unwrap();
+    let read = build.view().node_slice(backing).unwrap();
+    assert_eq!(read.get(1), Some(None));
+    assert_eq!(read.get(3), None);
+    assert_eq!(read.get(usize::MAX), None);
+    assert_eq!(read.first(), Some(Some(first)));
+    assert_eq!(read.last(), Some(Some(last)));
+    let mut values = read.iter();
+    assert_eq!(values.len(), 3);
+    assert_eq!(values.next_back(), Some(Some(last)));
+    assert_eq!(values.len(), 2);
+    assert_eq!(values.next(), Some(Some(first)));
+    assert_eq!(values.next_back(), Some(None));
+    assert_eq!(values.len(), 0);
+    assert_eq!(values.next(), None);
+    assert_eq!(values.next_back(), None);
+    let nil_only = build
+        .view()
+        .node_slice(backing.slice(1..2).unwrap())
+        .unwrap();
+    assert_eq!(nil_only.at(0), None);
+    assert_eq!(nil_only.iter().collect::<Vec<_>>(), vec![None]);
+    let panic = catch_unwind(AssertUnwindSafe(|| read.at(3))).unwrap_err();
+    assert_eq!(
+        panic.downcast_ref::<String>().unwrap(),
+        "index out of bounds: the len is 3 but the index is 3"
+    );
+    let empty = build.view().node_slice(NodeSlice::empty()).unwrap();
+    assert!(empty.is_empty());
+    assert_eq!(empty.first(), None);
+    assert_eq!(empty.last(), None);
+    assert_eq!(empty.iter().len(), 0);
+}
+
+#[test]
+fn borrowed_node_slices_copy_nil_edges_and_keep_allocated_empty_identity() {
+    let mut build = builder(&Counters::new());
+    let first = build.new_token(SyntaxKind::Unknown.into());
+    let last = build.new_token(SyntaxKind::EndOfFile.into());
+    let mut input = [Some(first), None, Some(last)];
+    let borrowed = build.node_slice_from_slice(&input).unwrap();
+    let consumed = build.node_slice(input.to_vec()).unwrap();
+    input[0] = Some(last);
+    for slice in [borrowed, consumed] {
+        assert_eq!(
+            build
+                .view()
+                .node_slice(slice)
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>(),
+            vec![Some(first), None, Some(last)]
+        );
+    }
+    assert_eq!(input[0], Some(last));
+    let first_empty = build.node_slice_from_slice(&[]).unwrap();
+    let second_empty = build.node_slice_from_slice(&[]).unwrap();
+    for slice in [first_empty, second_empty] {
+        assert!(slice.is_empty());
+        assert!(!slice.is_nil());
+        assert!(slice.backing_id().is_some());
+        assert!(build.view().node_slice(slice).unwrap().is_empty());
+    }
+    assert_ne!(first_empty.backing_id(), second_empty.backing_id());
+    assert!(NodeSlice::empty().is_nil());
+}
+
+#[test]
+fn borrowed_node_slice_rejection_preserves_error_order_and_inserts_nothing() {
+    let mut build = builder(&Counters::new());
+    let local = build.new_token(SyntaxKind::Unknown.into());
+    let missing = NodeId::from_parts(local.arena(), u32::MAX).unwrap();
+    let mut foreign = builder(&Counters::new());
+    let foreign_node = foreign.new_token(SyntaxKind::Unknown.into());
+    let foreign_missing = NodeId::from_parts(foreign_node.arena(), u32::MAX).unwrap();
+    let prefix = build.node_slice_from_slice(&[Some(local), None]).unwrap();
+    let count_before = build.storage.view().core_auxiliary().count();
+    for (nodes, error) in [
+        (
+            [Some(local), Some(missing), Some(foreign_node)],
+            Error::InvalidSlot,
+        ),
+        (
+            [Some(local), Some(foreign_node), Some(missing)],
+            Error::WrongOwner,
+        ),
+        (
+            [Some(local), None, Some(foreign_missing)],
+            Error::WrongOwner,
+        ),
+    ] {
+        assert_eq!(build.node_slice_from_slice(&nodes), Err(error));
+        assert_eq!(build.storage.view().core_auxiliary().count(), count_before);
+    }
+    let next = build.node_slice_from_slice(&[Some(local)]).unwrap();
+    assert_eq!(
+        next.backing_id().unwrap().slot(),
+        prefix.backing_id().unwrap().slot() + 1
+    );
+    let crate::auxiliary::AuxValue::CompactNodes(backing) = build
+        .view()
+        .auxiliary(next.backing_id().unwrap())
+        .unwrap()
+        .value()
+    else {
+        panic!("borrowed slice uses compact edge storage");
+    };
+    assert_eq!(backing.start, 2, "failed inputs must not append edge words");
+    assert_eq!(build.view().node_slice(prefix).unwrap().at(0), Some(local));
+    assert_eq!(build.view().node_slice(prefix).unwrap().at(1), None);
+}
+
+#[test]
+fn compact_syntax_backings_span_pages_and_keep_imported_and_lazy_context() {
+    let counters = Counters::new();
+    let before = counters.snapshot();
+    {
+        let mut dependency = builder(&counters);
+        let child = dependency.new_identifier(JsString::from_bytes(b"dependency".as_slice()));
+        let prefix = dependency.node_slice(vec![Some(child); 255]).unwrap();
+        let crossing = dependency
+            .node_slice(vec![None, Some(child), None])
+            .unwrap();
+        let empty = dependency.node_slice(Vec::new()).unwrap();
+        assert!(!empty.is_nil());
+        assert!(matches!(
+            dependency
+                .view()
+                .auxiliary(crossing.backing.unwrap())
+                .unwrap()
+                .value(),
+            crate::auxiliary::AuxValue::CompactNodes(_)
+        ));
+        let lazy_root = dependency.new_identifier(JsString::from_bytes(b"lazy parent".as_slice()));
+        let dependency = dependency.complete(child).unwrap().publish_unbound();
+        let lazy = dependency
+            .view()
+            .jsdoc(lazy_root, |transaction| {
+                // This reads compact core pages under the lazy publication lock.
+                assert_eq!(
+                    transaction
+                        .node_slice_read(crossing)?
+                        .iter()
+                        .collect::<Vec<_>>(),
+                    vec![None, Some(child), None]
+                );
+                let nodes = transaction.node_slice(vec![Some(child), None])?;
+                let list = transaction.new_list(TextRange::new(-1, -1), nodes)?;
+                let root = transaction.new_array_literal_expression(Some(list), false);
+                transaction.node_mut(root)?.set_parent(Some(lazy_root));
+                assert!(matches!(
+                    transaction.storage.aux(nodes.backing.unwrap())?,
+                    ts_arena::AuxiliaryRead::Lazy(record)
+                        if matches!(&*record, AstStorageData::Nodes(_))
+                ));
+                Ok(vec![root])
+            })
+            .unwrap()[0];
+        let mut importer = builder(&counters);
+        let own_child = importer.new_identifier(JsString::from_bytes(b"importer".as_slice()));
+        assert_eq!(own_child.slot(), child.slot());
+        assert_ne!(own_child.arena(), child.arena());
+        importer.retain_file(dependency);
+        // A foreign core edge and a retained lazy edge both use full-ID escapes.
+        let mixed = importer
+            .node_slice(vec![Some(own_child), Some(child), Some(lazy)])
+            .unwrap();
+        let file = importer.complete(own_child).unwrap().publish_unbound();
+        assert_eq!(
+            file.view()
+                .node_slice(mixed)
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>(),
+            vec![Some(own_child), Some(child), Some(lazy)]
+        );
+        assert_eq!(file.view().node_slice(prefix).unwrap().len(), 255);
+        let read = file.view().node_slice(crossing).unwrap();
+        let mut iter = read.iter();
+        assert_eq!(iter.nth(1), Some(Some(child)));
+        assert_eq!(iter.next_back(), Some(None));
+        assert_eq!(iter.len(), 0);
+        assert_eq!(
+            read.iter().rev().collect::<Vec<_>>(),
+            vec![None, Some(child), None]
+        );
+        assert!(file.view().node_slice(empty).unwrap().is_empty());
+        assert!(file
+            .view()
+            .node_slice(NodeSlice {
+                backing: crossing.backing,
+                start: 2,
+                len: 2,
+            })
+            .is_err());
+        let lazy_list = file.view().node(lazy).unwrap().element_list().unwrap();
+        let lazy_nodes = file.view().list(lazy_list).unwrap().nodes();
+        assert_eq!(
+            file.view()
+                .node_slice(lazy_nodes)
+                .unwrap()
+                .iter()
+                .collect::<Vec<_>>(),
+            vec![Some(child), None]
+        );
+    }
+    assert_eq!(counters.snapshot(), before);
+}
 fn array(factory: &mut impl Factory, list: NodeListId) -> NodeId {
     factory.new_node(
         SyntaxKind::ArrayLiteralExpression.into(),
@@ -70,7 +312,12 @@ fn storage_list_identity_is_independent_of_edges_empty_and_missing_state() {
     assert!(!build.view().list(empty_a).unwrap().is_missing());
     assert!(build.view().list(empty_b).unwrap().is_missing());
     assert_eq!(
-        &*build.view().node_slice(nodes).unwrap(),
+        &build
+            .view()
+            .node_slice(nodes)
+            .unwrap()
+            .iter()
+            .collect::<Vec<_>>(),
         &[Some(child), None]
     );
 }
@@ -108,10 +355,10 @@ fn storage_text_slice_identity_preserves_raw_bytes_and_rejects_foreign_backing()
         .view()
         .node(cloned)
         .unwrap()
-        .data()
+        .data_source()
         .as_js_doc_link()
         .unwrap()
-        .text
+        .text()
         .same(text));
 }
 
@@ -220,7 +467,7 @@ fn storage_imported_cache_operations_use_the_parents_owner() {
     let escaped = importing.retain_node(roots[0]).unwrap();
     drop(dependency);
     drop(importing);
-    assert_eq!(escaped.parent(), Some(lazy_parent));
+    assert_eq!(escaped.read().parent(), Some(lazy_parent));
 }
 
 #[test]
@@ -302,10 +549,12 @@ fn storage_retained_node_keeps_list_text_frame_and_source_alive() {
     assert_eq!(owner.view().file_info().root, Some(root));
     assert_eq!(owner.view().source().as_bytes(), b"x\n\xf0\x9f\x98\x80");
     assert_eq!(
-        &*owner
+        &owner
             .view()
             .node_slice(owner.view().list(list).unwrap().nodes())
-            .unwrap(),
+            .unwrap()
+            .iter()
+            .collect::<Vec<_>>(),
         &[Some(child), None]
     );
     assert_eq!(
@@ -374,11 +623,24 @@ fn storage_transaction_resolves_core_previous_and_staged_data_without_reentry() 
         .jsdoc(parent_b, |transaction| {
             assert_eq!(transaction.node(old)?.kind(), SyntaxKind::Unknown);
             assert_eq!(transaction.node(parent_a)?.kind(), SyntaxKind::EndOfFile);
+            assert!(matches!(
+                transaction.node_mut(parent_a),
+                Err(Error::WrongOwner)
+            ));
+            let missing_core = NodeId::from_parts(parent_a.arena(), u32::MAX).unwrap();
+            assert!(matches!(
+                transaction.node_mut(missing_core),
+                Err(Error::WrongOwner)
+            ));
+            assert!(matches!(transaction.node_mut(old), Err(Error::InvalidSlot)));
             assert_eq!(transaction.list(core_list)?.loc(), TextRange::new(0, 1));
             let nodes = transaction.node_slice(vec![Some(old), Some(parent_a), None])?;
             let list = transaction.new_list(TextRange::new(1, 4), nodes)?;
             assert_eq!(
-                &*transaction.node_slice_read(transaction.list(list)?.nodes())?,
+                &transaction
+                    .node_slice_read(transaction.list(list)?.nodes())?
+                    .iter()
+                    .collect::<Vec<_>>(),
                 &[Some(old), Some(parent_a), None]
             );
             Ok(vec![array(transaction, list)])
@@ -458,10 +720,10 @@ fn storage_lazy_first_use_publishes_one_graph_with_real_list_payloads() {
         .view()
         .node(ids[0])
         .unwrap()
-        .data()
+        .data_source()
         .as_array_literal_expression()
         .unwrap()
-        .elements
+        .elements()
         .unwrap();
     assert_eq!(
         file.view()
@@ -640,10 +902,12 @@ fn storage_group_validation_admits_only_the_consumed_sibling_owners() {
         Some(second_root)
     );
     assert_eq!(
-        &*file
+        &file
             .view()
             .node_slice(file.view().list(foreign_list).unwrap().nodes())
-            .unwrap(),
+            .unwrap()
+            .iter()
+            .collect::<Vec<_>>(),
         &[Some(child)]
     );
     let retained = file.retain_node(first_root).unwrap();
@@ -679,10 +943,13 @@ fn storage_lazy_validation_rejects_foreign_edges_added_after_node_creation() {
     let result = file.view().jsdoc(root, |transaction| {
         let doc = transaction.new_parenthesized_expression(None);
         rejected = Some(doc);
-        let NodeData::ParenthesizedExpression(data) = transaction.node_mut(doc)?.data_mut() else {
-            unreachable!("constructed parenthesized expression");
-        };
-        data.expression = Some(foreign_node);
+        {
+            let mut node = transaction.node_mut(doc)?;
+            let NodeData::ParenthesizedExpression(data) = node.data_mut() else {
+                unreachable!("constructed parenthesized expression");
+            };
+            data.expression = Some(foreign_node);
+        }
         Ok(vec![doc])
     });
     assert!(matches!(result, Err(Error::WrongOwner)));
@@ -757,11 +1024,11 @@ fn storage_explicit_import_retains_transitive_bundles_and_rejects_bare_ids() {
     assert_eq!(imported_retained.id(), first_root);
     assert_eq!(
         imported_retained
-            .data()
+            .read()
+            .data_source()
             .as_identifier()
             .unwrap()
-            .text
-            .as_bytes(),
+            .text(),
         b"first"
     );
     drop(group);
@@ -769,7 +1036,12 @@ fn storage_explicit_import_retains_transitive_bundles_and_rejects_bare_ids() {
     drop(outer);
     let outer = retained.file();
     assert_eq!(
-        &*outer.view().node_slice(edges).unwrap(),
+        &outer
+            .view()
+            .node_slice(edges)
+            .unwrap()
+            .iter()
+            .collect::<Vec<_>>(),
         &[Some(first_root), Some(second_root)]
     );
     assert_eq!(
@@ -789,21 +1061,21 @@ fn storage_explicit_import_retains_transitive_bundles_and_rejects_bare_ids() {
     drop(retained);
     assert_eq!(
         imported_retained
-            .data()
+            .read()
+            .data_source()
             .as_identifier()
             .unwrap()
-            .text
-            .as_bytes(),
+            .text(),
         b"first"
     );
     drop(imported_retained);
     assert_eq!(
         imported_lazy
-            .data()
+            .read()
+            .data_source()
             .as_identifier()
             .unwrap()
-            .text
-            .as_bytes(),
+            .text(),
         b"lazy import"
     );
     drop(imported_lazy);

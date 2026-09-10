@@ -1,7 +1,7 @@
 //! JavaScript JSDoc elaboration through the production AST factory.
 use crate::{JSDocInfo, Parser, ParserFactory, ParsingContext};
 use ts_ast::SyntaxKind as K;
-use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeId, NodeListId};
+use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeDataRead, NodeId, NodeListId};
 use ts_core::TextRange;
 use ts_diagnostics as diagnostics;
 
@@ -13,9 +13,9 @@ impl<F: ParserFactory> Parser<'_, F> {
     /// port: tsc/internal/parser/reparser.go:Parser.finishReparsedNode
     fn finish_reparsed_node(&mut self, node: NodeId, location: NodeId) {
         let loc = self.factory.node(location).range();
-        let n = self.factory.node_mut(node);
-        n.set_flags(self.context_flags | node_flags::REPARSED);
-        n.set_range(loc);
+        self.factory
+            .set_node_flags(node, self.context_flags | node_flags::REPARSED);
+        self.factory.set_node_range(node, loc);
         self.override_parent_in_immediate_children(node);
     }
     /// port: tsc/internal/parser/reparser.go:Parser.finishMutatedNode
@@ -33,8 +33,8 @@ impl<F: ParserFactory> Parser<'_, F> {
     /// port: tsc/internal/parser/reparser.go:Parser.addTransformedReparse
     fn add_transformed_reparse(&mut self, node: NodeId, old: NodeId) -> NodeId {
         self.finish_reparsed_node(node, old);
-        let n = self.factory.node_mut(node);
-        n.set_flags(n.flags() | node_flags::REPARSER_TRANSFORMED_LITERAL);
+        self.factory
+            .add_node_flags(node, node_flags::REPARSER_TRANSFORMED_LITERAL);
         self.reparsed_clones.push(node);
         node
     }
@@ -61,16 +61,16 @@ impl<F: ParserFactory> Parser<'_, F> {
             let tags = self
                 .factory
                 .node(doc)
-                .data()
+                .data_source()
                 .as_js_doc()
                 .expect("JSDoc payload")
-                .tags;
+                .tags();
             let Some(tags) = tags else {
                 continue;
             };
             let nodes = self.factory.read_list(tags).nodes();
             for i in 0..nodes.len() {
-                let tag = self.factory.read_nodes(nodes)[i].expect("JSDoc tag");
+                let tag = self.factory.read_nodes(nodes).at(i).expect("JSDoc tag");
                 self.reparse_unhosted(tag, parent, doc);
                 if is_last {
                     self.reparse_hosted(tag, parent, doc);
@@ -129,16 +129,15 @@ impl<F: ParserFactory> Parser<'_, F> {
                     parent: alias,
                     js_docs: vec![doc],
                 });
-                let n = self.factory.node_mut(alias);
-                n.set_flags(n.flags() | node_flags::HAS_JS_DOC);
+                self.factory.add_node_flags(alias, node_flags::HAS_JS_DOC);
                 let result = self.wrap_in_jsdoc_namespace(name, alias, false);
                 self.reparse_list.push(result);
             }
             Some(K::JSDocImportTag) => {
                 let (clause, specifier, attributes) = {
                     let n = self.factory.node(tag);
-                    let d = n.data().as_js_doc_import_tag().expect("import tag");
-                    (d.import_clause, d.module_specifier, d.attributes)
+                    let d = n.data_source().as_js_doc_import_tag().expect("import tag");
+                    (d.import_clause(), d.module_specifier(), d.attributes())
                 };
                 if clause.is_none() {
                     return;
@@ -228,7 +227,11 @@ impl<F: ParserFactory> Parser<'_, F> {
         let nodes = self.factory.read_list(list).nodes();
         let mut parameters = Vec::new();
         for i in 0..nodes.len() {
-            let param = self.factory.read_nodes(nodes)[i].expect("JSDoc parameter");
+            let param = self
+                .factory
+                .read_nodes(nodes)
+                .at(i)
+                .expect("JSDoc parameter");
             let parameter = match self.factory.node(param).kind().known() {
                 Some(K::JSDocThisTag) => {
                     let name = self
@@ -342,14 +345,18 @@ impl<F: ParserFactory> Parser<'_, F> {
             let (nodes, array) = {
                 let n = self.factory.node(ty);
                 let d = n
-                    .data()
+                    .data_source()
                     .as_js_doc_type_literal()
                     .expect("JSDoc type literal");
-                (d.js_doc_property_tags, d.is_array_type)
+                (d.js_doc_property_tags(), d.is_array_type())
             };
             let mut properties = Vec::new();
             for i in 0..nodes.len() {
-                let prop = self.factory.read_nodes(nodes)[i].expect("JSDoc property");
+                let prop = self
+                    .factory
+                    .read_nodes(nodes)
+                    .at(i)
+                    .expect("JSDoc property");
                 if !matches!(
                     self.factory.node(prop).kind().known(),
                     Some(K::JSDocPropertyTag | K::JSDocParameterTag)
@@ -398,8 +405,8 @@ impl<F: ParserFactory> Parser<'_, F> {
     /// port: tsc/internal/parser/reparser.go:Parser.reparseJSDocComment
     fn reparse_jsdoc_comment(&mut self, node: NodeId, tag: NodeId) {
         let comment = match self.factory.node(tag).data() {
-            NodeData::JSDocParameterOrPropertyTag(d) => d.comment,
-            NodeData::JSDocThisTag(d) => d.comment,
+            NodeDataRead::JSDocParameterOrPropertyTag(d) => d.comment(),
+            NodeDataRead::JSDocThisTag(d) => d.comment(),
             _ => None,
         };
         let Some(comment) = comment else {
@@ -411,7 +418,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         drop(list);
         let mut comments = Vec::with_capacity(nodes.len());
         for i in 0..nodes.len() {
-            let id = self.factory.read_nodes(nodes)[i];
+            let id = self.factory.read_nodes(nodes).at(i);
             comments.push(
                 ts_ast::deep_clone_reparse(&mut self.factory, id).expect("cloned JSDoc comment"),
             );
@@ -419,23 +426,22 @@ impl<F: ParserFactory> Parser<'_, F> {
         let list = self.new_node_list(loc, comments);
         let doc = self.factory.new_js_doc(Some(list), None);
         self.finish_reparsed_node(doc, tag);
-        self.factory.node_mut(doc).set_parent(Some(node));
+        self.factory.set_node_parent(doc, Some(node));
         self.jsdoc_infos.push(JSDocInfo {
             parent: node,
             js_docs: vec![doc],
         });
-        let n = self.factory.node_mut(node);
-        n.set_flags(n.flags() | node_flags::HAS_JS_DOC);
+        self.factory.add_node_flags(node, node_flags::HAS_JS_DOC);
     }
     /// port: tsc/internal/parser/reparser.go:Parser.gatherTypeParameters
     fn gather_type_parameters(&mut self, doc: NodeId, typedef: bool) -> Option<NodeListId> {
         let tags = self
             .factory
             .node(doc)
-            .data()
+            .data_source()
             .as_js_doc()
             .expect("JSDoc payload")
-            .tags
+            .tags()
             .expect("JSDoc tags");
         let tags = self.factory.read_list(tags).nodes();
         let mut result = Vec::new();
@@ -443,7 +449,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         let mut end = -1;
         let mut first_template = true;
         for i in 0..tags.len() {
-            let tag = self.factory.read_nodes(tags)[i].expect("JSDoc tag");
+            let tag = self.factory.read_nodes(tags).at(i).expect("JSDoc tag");
             if !typedef
                 && matches!(
                     self.factory.node(tag).kind().known(),
@@ -462,15 +468,22 @@ impl<F: ParserFactory> Parser<'_, F> {
             end = self.factory.node(tag).range().end();
             let (constraint, params) = {
                 let n = self.factory.node(tag);
-                let d = n.data().as_js_doc_template_tag().expect("template tag");
+                let d = n
+                    .data_source()
+                    .as_js_doc_template_tag()
+                    .expect("template tag");
                 (
-                    d.constraint,
-                    d.type_parameters.expect("template parameters"),
+                    d.constraint(),
+                    d.type_parameters().expect("template parameters"),
                 )
             };
             let params = self.factory.read_list(params).nodes();
             for i in 0..params.len() {
-                let param = self.factory.read_nodes(params)[i].expect("type parameter");
+                let param = self
+                    .factory
+                    .read_nodes(params)
+                    .at(i)
+                    .expect("type parameter");
                 let node = if let Some(constraint) = constraint.filter(|_| i == 0) {
                     let mods = self.node_modifiers(param);
                     let mods = ts_ast::deep_clone_reparse_modifiers(&mut self.factory, mods);
@@ -480,10 +493,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let default = self
                         .factory
                         .node(param)
-                        .data()
+                        .data_source()
                         .as_type_parameter_declaration()
                         .expect("type parameter")
-                        .default_type;
+                        .default_type();
                     let default = self.add_deep_clone_reparse(default);
                     let node = self
                         .factory
@@ -504,10 +517,10 @@ impl<F: ParserFactory> Parser<'_, F> {
         let (bracketed, expression) = {
             let n = self.factory.node(tag);
             let d = n
-                .data()
+                .data_source()
                 .as_js_doc_parameter_or_property_tag()
                 .expect("parameter tag");
-            (d.is_bracketed, d.type_expression)
+            (d.is_bracketed(), d.type_expression())
         };
         if bracketed
             || expression.is_some_and(|expr| {
@@ -545,9 +558,9 @@ impl<F: ParserFactory> Parser<'_, F> {
         let mut name = name?;
         while self.factory.node(name).kind() == K::ModuleDeclaration {
             let n = self.factory.node(name);
-            let d = n.data().as_module_declaration().expect("namespace");
-            let Some(body) = d.body else {
-                return d.name;
+            let d = n.data_source().as_module_declaration().expect("namespace");
+            let Some(body) = d.body() else {
+                return d.name();
             };
             name = body;
         }
@@ -569,10 +582,10 @@ impl<F: ParserFactory> Parser<'_, F> {
             let body = self
                 .factory
                 .node(name)
-                .data()
+                .data_source()
                 .as_module_declaration()
                 .expect("namespace")
-                .body;
+                .body();
             let wrapped = self.wrap_in_jsdoc_namespace(body, statement, true);
             let list = self.new_node_list(self.factory.node(name).range(), vec![wrapped]);
             let block = self.factory.new_module_block(Some(list));
@@ -596,20 +609,20 @@ impl<F: ParserFactory> Parser<'_, F> {
 macro_rules! function_field {
     ($data:expr, $field:ident) => {
         match $data {
-            NodeData::FunctionDeclaration(d) => d.$field,
-            NodeData::FunctionExpression(d) => d.$field,
-            NodeData::ArrowFunction(d) => d.$field,
-            NodeData::MethodDeclaration(d) => d.$field,
-            NodeData::ConstructorDeclaration(d) => d.$field,
-            NodeData::GetAccessorDeclaration(d) => d.$field,
-            NodeData::SetAccessorDeclaration(d) => d.$field,
-            NodeData::CallSignatureDeclaration(d) => d.$field,
-            NodeData::ConstructSignatureDeclaration(d) => d.$field,
-            NodeData::IndexSignatureDeclaration(d) => d.$field,
-            NodeData::MethodSignatureDeclaration(d) => d.$field,
-            NodeData::FunctionTypeNode(d) => d.$field,
-            NodeData::ConstructorTypeNode(d) => d.$field,
-            NodeData::JSDocSignature(d) => d.$field,
+            NodeDataRead::FunctionDeclaration(d) => d.$field(),
+            NodeDataRead::FunctionExpression(d) => d.$field(),
+            NodeDataRead::ArrowFunction(d) => d.$field(),
+            NodeDataRead::MethodDeclaration(d) => d.$field(),
+            NodeDataRead::ConstructorDeclaration(d) => d.$field(),
+            NodeDataRead::GetAccessorDeclaration(d) => d.$field(),
+            NodeDataRead::SetAccessorDeclaration(d) => d.$field(),
+            NodeDataRead::CallSignatureDeclaration(d) => d.$field(),
+            NodeDataRead::ConstructSignatureDeclaration(d) => d.$field(),
+            NodeDataRead::IndexSignatureDeclaration(d) => d.$field(),
+            NodeDataRead::MethodSignatureDeclaration(d) => d.$field(),
+            NodeDataRead::FunctionTypeNode(d) => d.$field(),
+            NodeDataRead::ConstructorTypeNode(d) => d.$field(),
+            NodeDataRead::JSDocSignature(d) => d.$field(),
             _ => None,
         }
     };
@@ -674,13 +687,13 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn reparse_expression(&self, node: NodeId) -> Option<NodeId> {
         match self.factory.node(node).data() {
-            NodeData::ExpressionStatement(d) => d.expression,
-            NodeData::ExportAssignment(d) => d.expression,
-            NodeData::ReturnStatement(d) => d.expression,
-            NodeData::ParenthesizedExpression(d) => d.expression,
-            NodeData::SatisfiesExpression(d) => d.expression,
-            NodeData::PropertyAccessExpression(d) => d.expression,
-            NodeData::ElementAccessExpression(d) => d.expression,
+            NodeDataRead::ExpressionStatement(d) => d.expression(),
+            NodeDataRead::ExportAssignment(d) => d.expression(),
+            NodeDataRead::ReturnStatement(d) => d.expression(),
+            NodeDataRead::ParenthesizedExpression(d) => d.expression(),
+            NodeDataRead::SatisfiesExpression(d) => d.expression(),
+            NodeDataRead::PropertyAccessExpression(d) => d.expression(),
+            NodeDataRead::ElementAccessExpression(d) => d.expression(),
             _ => None,
         }
     }
@@ -694,10 +707,10 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn reparse_initializer(&self, node: NodeId) -> Option<NodeId> {
         match self.factory.node(node).data() {
-            NodeData::VariableDeclaration(d) => d.initializer,
-            NodeData::PropertyDeclaration(d) => d.initializer,
-            NodeData::PropertyAssignment(d) => d.initializer,
-            NodeData::ShorthandPropertyAssignment(d) => d.object_assignment_initializer,
+            NodeDataRead::VariableDeclaration(d) => d.initializer(),
+            NodeDataRead::PropertyDeclaration(d) => d.initializer(),
+            NodeDataRead::PropertyAssignment(d) => d.initializer(),
+            NodeDataRead::ShorthandPropertyAssignment(d) => d.object_assignment_initializer(),
             _ => None,
         }
     }
@@ -714,8 +727,8 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn reparse_tag_name(&self, tag: NodeId) -> NodeId {
         match self.factory.node(tag).data() {
-            NodeData::JSDocOverloadTag(d) => d.tag_name,
-            NodeData::JSDocThisTag(d) => d.tag_name,
+            NodeDataRead::JSDocOverloadTag(d) => d.tag_name(),
+            NodeDataRead::JSDocThisTag(d) => d.tag_name(),
             _ => panic!("tag name unavailable"),
         }
         .expect("tag name")
@@ -727,18 +740,18 @@ impl<F: ParserFactory> Parser<'_, F> {
         let list = self
             .factory
             .node(node)
-            .data()
+            .data_source()
             .as_variable_statement()
             .expect("variable statement")
-            .declaration_list;
+            .declaration_list();
         list.map_or_else(Default::default, |list| {
             let list = self
                 .factory
                 .node(list)
-                .data()
+                .data_source()
                 .as_variable_declaration_list()
                 .expect("declaration list")
-                .declarations;
+                .declarations();
             self.reparse_list_nodes(list)
         })
     }
@@ -757,15 +770,18 @@ impl<F: ParserFactory> Parser<'_, F> {
                 // Source dereferences DeclarationList even when absent.
                 self.factory
                     .node(host)
-                    .data()
+                    .data_source()
                     .as_variable_statement()
                     .expect("variable statement")
-                    .declaration_list
+                    .declaration_list()
                     .expect("variable declaration list");
                 let nodes = self.reparse_declarations(host);
                 if !nodes.is_empty() {
                     fun = self.reparse_initializer(
-                        self.factory.read_nodes(nodes)[0].expect("variable declaration"),
+                        self.factory
+                            .read_nodes(nodes)
+                            .at(0)
+                            .expect("variable declaration"),
                     );
                 }
             }
@@ -791,14 +807,14 @@ impl<F: ParserFactory> Parser<'_, F> {
         let tags = self
             .factory
             .node(doc)
-            .data()
+            .data_source()
             .as_js_doc()
             .expect("JSDoc")
-            .tags;
+            .tags();
         let tags = self.reparse_list_nodes(tags);
         let mut index = -1;
         let mut count = -1;
-        for tag in self.factory.read_nodes(tags).iter().flatten().copied() {
+        for tag in self.factory.read_nodes(tags).iter().flatten() {
             if self.factory.node(tag).kind() == K::JSDocParameterTag {
                 count += 1;
                 if tag == parameter_tag {
@@ -828,18 +844,18 @@ impl<F: ParserFactory> Parser<'_, F> {
     /// port: tsc/internal/parser/reparser.go:getClassLikeData
     fn get_class_like_data(&self, node: NodeId) -> Option<ClassLikeFields> {
         match self.factory.node(node).data() {
-            NodeData::ClassDeclaration(d)
+            NodeDataRead::ClassDeclaration(d)
                 if self.factory.node(node).kind() == K::ClassDeclaration =>
             {
                 Some(ClassLikeFields {
-                    heritage: d.heritage_clauses,
+                    heritage: d.heritage_clauses(),
                 })
             }
-            NodeData::ClassExpression(d)
+            NodeDataRead::ClassExpression(d)
                 if self.factory.node(node).kind() == K::ClassExpression =>
             {
                 Some(ClassLikeFields {
-                    heritage: d.heritage_clauses,
+                    heritage: d.heritage_clauses(),
                 })
             }
             _ => None,
@@ -854,7 +870,7 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn append_reparse_list(&mut self, list: NodeListId, node: NodeId) {
         let nodes = self.factory.read_list(list).nodes();
-        let mut result = self.factory.read_nodes(nodes).to_vec();
+        let mut result = self.factory.read_nodes(nodes).iter().collect::<Vec<_>>();
         result.push(Some(node));
         let nodes = self.factory.alloc_nodes(result);
         self.factory.set_list_nodes(list, nodes);
@@ -867,7 +883,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                     Some(K::VariableStatement) => {
                         let nodes = self.reparse_declarations(parent);
                         for i in 0..nodes.len() {
-                            let node = self.factory.read_nodes(nodes)[i].expect("declaration");
+                            let node = self.factory.read_nodes(nodes).at(i).expect("declaration");
                             if self.jsdoc_type(node).is_none() {
                                 if let Some(expr) = self.jsdoc_type(tag) {
                                     let ty = self.add_deep_clone_reparse(self.jsdoc_type(expr));
@@ -936,7 +952,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                         .read_nodes(nodes)
                         .iter()
                         .flatten()
-                        .all(|&p| self.jsdoc_type(p).is_none());
+                        .all(|p| self.jsdoc_type(p).is_none());
                     if types.is_none() && self.jsdoc_type(fun).is_none() && no_types {
                         if let Some(expr) = self.jsdoc_type(tag) {
                             let ty = self.add_deep_clone_reparse(self.jsdoc_type(expr));
@@ -954,7 +970,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                 Some(K::VariableStatement) => {
                     let nodes = self.reparse_declarations(parent);
                     for i in 0..nodes.len() {
-                        let node = self.factory.read_nodes(nodes)[i].expect("declaration");
+                        let node = self.factory.read_nodes(nodes).at(i).expect("declaration");
                         if let (Some(expr), Some(ty)) =
                             (self.reparse_initializer(node), self.jsdoc_type(tag))
                         {
@@ -1002,10 +1018,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                             let right = self
                                 .factory
                                 .node(expr)
-                                .data()
+                                .data_source()
                                 .as_binary_expression()
                                 .expect("binary expression")
-                                .right
+                                .right()
                                 .expect("right operand");
                             let ty = self.add_deep_clone_reparse(self.jsdoc_type(ty));
                             let cast = self.make_new_cast(ty, right, false);
@@ -1032,8 +1048,8 @@ impl<F: ParserFactory> Parser<'_, F> {
                     }
                 } else {
                     let types = match self.factory.node(parent).data() {
-                        NodeData::ClassDeclaration(d) => Some(d.type_parameters),
-                        NodeData::ClassExpression(d) => Some(d.type_parameters),
+                        NodeDataRead::ClassDeclaration(d) => Some(d.type_parameters()),
+                        NodeDataRead::ClassExpression(d) => Some(d.type_parameters()),
                         _ => None,
                     };
                     if types == Some(None) {
@@ -1058,10 +1074,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                         if self
                             .factory
                             .node(param)
-                            .data()
+                            .data_source()
                             .as_parameter_declaration()
                             .expect("parameter")
-                            .question_token
+                            .question_token()
                             .is_none()
                         {
                             if let Some(question) = self.make_question_if_optional(tag) {
@@ -1086,7 +1102,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                         .expect("function parameter list");
                     let nodes = self.factory.read_list(list).nodes();
                     let has_this = !nodes.is_empty() && {
-                        let first = self.factory.read_nodes(nodes)[0].expect("parameter");
+                        let first = self.factory.read_nodes(nodes).at(0).expect("parameter");
                         let name = self.jsdoc_name(first).expect("parameter name");
                         self.factory.node(name).kind() == K::ThisKeyword
                             || self.factory.node(name).kind() == K::Identifier
@@ -1212,19 +1228,19 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let class_name = self
                         .factory
                         .node(tag)
-                        .data()
+                        .data_source()
                         .as_js_doc_implements_tag()
                         .expect("implements tag")
-                        .class_name
+                        .class_name()
                         .expect("implements class");
                     if let Some(clause) = self.find_heritage_clause(clauses, K::ImplementsKeyword) {
                         let types = self
                             .factory
                             .node(clause)
-                            .data()
+                            .data_source()
                             .as_heritage_clause()
                             .expect("heritage clause")
-                            .types
+                            .types()
                             .expect("heritage types");
                         let cloned = self
                             .add_deep_clone_reparse(Some(class_name))
@@ -1263,20 +1279,21 @@ impl<F: ParserFactory> Parser<'_, F> {
                         let list = self
                             .factory
                             .node(clause)
-                            .data()
+                            .data_source()
                             .as_heritage_clause()
                             .expect("heritage clause")
-                            .types;
+                            .types();
                         let nodes = self.reparse_list_nodes(list);
                         if nodes.len() == 1 {
-                            let target = self.factory.read_nodes(nodes)[0].expect("heritage type");
+                            let target =
+                                self.factory.read_nodes(nodes).at(0).expect("heritage type");
                             let source = self
                                 .factory
                                 .node(tag)
-                                .data()
+                                .data_source()
                                 .as_js_doc_augments_tag()
                                 .expect("augments tag")
-                                .class_name
+                                .class_name()
                                 .expect("augments class");
                             let (target_expr, target_types) =
                                 self.reparse_expression_with_type_arguments(target);
@@ -1292,7 +1309,7 @@ impl<F: ParserFactory> Parser<'_, F> {
                                     drop(list);
                                     let mut result = Vec::with_capacity(nodes.len());
                                     for i in 0..nodes.len() {
-                                        let node = self.factory.read_nodes(nodes)[i];
+                                        let node = self.factory.read_nodes(nodes).at(i);
                                         result.push(
                                             self.add_deep_clone_reparse(node)
                                                 .expect("cloned type argument"),
@@ -1318,30 +1335,25 @@ impl<F: ParserFactory> Parser<'_, F> {
     }
     fn find_heritage_clause(&self, clauses: Option<NodeListId>, kind: K) -> Option<NodeId> {
         let nodes = self.reparse_list_nodes(clauses);
-        self.factory
-            .read_nodes(nodes)
-            .iter()
-            .flatten()
-            .copied()
-            .find(|&id| {
-                self.factory
-                    .node(id)
-                    .data()
-                    .as_heritage_clause()
-                    .expect("heritage clause")
-                    .token
-                    == kind
-            })
+        self.factory.read_nodes(nodes).iter().flatten().find(|&id| {
+            self.factory
+                .node(id)
+                .data_source()
+                .as_heritage_clause()
+                .expect("heritage clause")
+                .token()
+                == kind
+        })
     }
     fn reparse_expression_with_type_arguments(&self, node: NodeId) -> (NodeId, Option<NodeListId>) {
         let n = self.factory.node(node);
         let d = n
-            .data()
+            .data_source()
             .as_expression_with_type_arguments()
             .expect("expression with type arguments");
         (
-            d.expression.expect("type argument expression"),
-            d.type_arguments,
+            d.expression().expect("type argument expression"),
+            d.type_arguments(),
         )
     }
 }
@@ -1408,31 +1420,31 @@ impl<F: ParserFactory> Parser<'_, F> {
                 break;
             }
             let data = view
-                .data()
+                .data_source()
                 .as_binary_expression()
                 .expect("binary expression");
             if !ts_ast::is_assignment_operator(
                 self.factory
-                    .node(data.operator_token.expect("binary operator"))
+                    .node(data.operator_token().expect("binary operator"))
                     .kind(),
             ) {
                 break;
             }
-            let mut left = data.left.expect("left operand");
+            let mut left = data.left().expect("left operand");
             while self.factory.node(left).kind() == K::PartiallyEmittedExpression {
                 left = self
                     .factory
                     .node(left)
-                    .data()
+                    .data_source()
                     .as_partially_emitted_expression()
                     .expect("partially emitted expression")
-                    .expression
+                    .expression()
                     .expect("partially emitted inner");
             }
             if !ts_ast::is_left_hand_side_expression_kind(self.factory.node(left).kind()) {
                 break;
             }
-            node = data.right.expect("assignment right operand");
+            node = data.right().expect("assignment right operand");
         }
         node
     }
@@ -1441,18 +1453,18 @@ impl<F: ParserFactory> Parser<'_, F> {
     fn is_binary_assignment_declaration(&self, node: NodeId) -> bool {
         let node = self.factory.node(node);
         let data = node
-            .data()
+            .data_source()
             .as_binary_expression()
             .expect("binary expression");
         if self
             .factory
-            .node(data.operator_token.expect("binary operator"))
+            .node(data.operator_token().expect("binary operator"))
             .kind()
             != K::EqualsToken
         {
             return false;
         }
-        let left = data.left.expect("left operand");
+        let left = data.left().expect("left operand");
         if !matches!(
             self.factory.node(left).kind().known(),
             Some(K::PropertyAccessExpression | K::ElementAccessExpression)
@@ -1463,7 +1475,7 @@ impl<F: ParserFactory> Parser<'_, F> {
         let target = self.reparse_expression(left).expect("access target");
         if js {
             if self.reparse_is_module_exports_access(left)
-                && !self.reparse_is_identifier(data.right.expect("right operand"), b"exports")
+                && !self.reparse_is_identifier(data.right().expect("right operand"), b"exports")
             {
                 return true;
             }
@@ -1506,10 +1518,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                 let mut arg = self
                     .factory
                     .node(node)
-                    .data()
+                    .data_source()
                     .as_element_access_expression()
                     .expect("element access")
-                    .argument_expression
+                    .argument_expression()
                     .expect("element argument");
                 while self.factory.node(arg).kind() == K::ParenthesizedExpression {
                     arg = self
@@ -1545,10 +1557,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let arg = self
                         .factory
                         .node(node)
-                        .data()
+                        .data_source()
                         .as_element_access_expression()
                         .expect("element access")
-                        .argument_expression
+                        .argument_expression()
                         .expect("element argument");
                     if !self.reparse_is_literal_name(arg) {
                         return false;

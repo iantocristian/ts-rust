@@ -1,8 +1,7 @@
 //! Source syntax helpers used by binding. Every graph read goes through the
 //! supplied view, including virtual-parent module analysis before parents exist.
-use crate::{
-    modifier_flags, node_flags, AstView, Node, NodeData, NodeId, NodeRead, SyntaxKind as K,
-};
+use crate::NodeAccess;
+use crate::{modifier_flags, node_flags, AstView, NodeDataRead, NodeId, NodeRead, SyntaxKind as K};
 use std::collections::HashMap;
 use ts_arena::Error;
 
@@ -18,7 +17,7 @@ fn parent(view: AstView<'_>, id: NodeId) -> Result<NodeId, Error> {
 macro_rules! payload {
     ($node:expr, $variant:ident) => {
         match $node.data() {
-            NodeData::$variant(data) => data,
+            NodeDataRead::$variant(data) => data,
             _ => panic!(
                 "interface conversion: ast.nodeData is *ast.{}, not *ast.{}",
                 $node.data().name(),
@@ -29,67 +28,67 @@ macro_rules! payload {
 }
 
 /// port: tsc/internal/ast/ast.go:IsDeclarationNode
-pub fn is_declaration_node(node: &Node) -> bool {
+pub fn is_declaration_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.data(),
-        NodeData::VariableDeclaration(_)
-            | NodeData::ParameterDeclaration(_)
-            | NodeData::BindingElement(_)
-            | NodeData::MissingDeclaration(_)
-            | NodeData::FunctionDeclaration(_)
-            | NodeData::ClassDeclaration(_)
-            | NodeData::ClassExpression(_)
-            | NodeData::InterfaceDeclaration(_)
-            | NodeData::TypeAliasDeclaration(_)
-            | NodeData::EnumMember(_)
-            | NodeData::EnumDeclaration(_)
-            | NodeData::ImportDeclaration(_)
-            | NodeData::NamespaceImport(_)
-            | NodeData::ExportAssignment(_)
-            | NodeData::NamespaceExportDeclaration(_)
-            | NodeData::NamespaceExport(_)
-            | NodeData::ExportSpecifier(_)
-            | NodeData::CallSignatureDeclaration(_)
-            | NodeData::ConstructSignatureDeclaration(_)
-            | NodeData::ConstructorDeclaration(_)
-            | NodeData::GetAccessorDeclaration(_)
-            | NodeData::SetAccessorDeclaration(_)
-            | NodeData::IndexSignatureDeclaration(_)
-            | NodeData::MethodSignatureDeclaration(_)
-            | NodeData::MethodDeclaration(_)
-            | NodeData::PropertySignatureDeclaration(_)
-            | NodeData::PropertyDeclaration(_)
-            | NodeData::SemicolonClassElement(_)
-            | NodeData::ClassStaticBlockDeclaration(_)
-            | NodeData::NoSubstitutionTemplateLiteral(_)
-            | NodeData::BinaryExpression(_)
-            | NodeData::ArrowFunction(_)
-            | NodeData::FunctionExpression(_)
-            | NodeData::CallExpression(_)
-            | NodeData::ObjectLiteralExpression(_)
-            | NodeData::SpreadAssignment(_)
-            | NodeData::PropertyAssignment(_)
-            | NodeData::ShorthandPropertyAssignment(_)
-            | NodeData::MappedTypeNode(_)
-            | NodeData::TypeLiteralNode(_)
-            | NodeData::NamedTupleMember(_)
-            | NodeData::FunctionTypeNode(_)
-            | NodeData::ConstructorTypeNode(_)
-            | NodeData::JsxAttributes(_)
-            | NodeData::JsxAttribute(_)
-            | NodeData::JSDocSignature(_)
-            | NodeData::SourceFile(_)
-            | NodeData::ModuleDeclaration(_)
-            | NodeData::ImportEqualsDeclaration(_)
-            | NodeData::ExportDeclaration(_)
-            | NodeData::ImportClause(_)
-            | NodeData::ImportSpecifier(_)
-            | NodeData::TypeParameterDeclaration(_)
-            | NodeData::JSDocTypeLiteral(_)
+        NodeDataRead::VariableDeclaration(_)
+            | NodeDataRead::ParameterDeclaration(_)
+            | NodeDataRead::BindingElement(_)
+            | NodeDataRead::MissingDeclaration(_)
+            | NodeDataRead::FunctionDeclaration(_)
+            | NodeDataRead::ClassDeclaration(_)
+            | NodeDataRead::ClassExpression(_)
+            | NodeDataRead::InterfaceDeclaration(_)
+            | NodeDataRead::TypeAliasDeclaration(_)
+            | NodeDataRead::EnumMember(_)
+            | NodeDataRead::EnumDeclaration(_)
+            | NodeDataRead::ImportDeclaration(_)
+            | NodeDataRead::NamespaceImport(_)
+            | NodeDataRead::ExportAssignment(_)
+            | NodeDataRead::NamespaceExportDeclaration(_)
+            | NodeDataRead::NamespaceExport(_)
+            | NodeDataRead::ExportSpecifier(_)
+            | NodeDataRead::CallSignatureDeclaration(_)
+            | NodeDataRead::ConstructSignatureDeclaration(_)
+            | NodeDataRead::ConstructorDeclaration(_)
+            | NodeDataRead::GetAccessorDeclaration(_)
+            | NodeDataRead::SetAccessorDeclaration(_)
+            | NodeDataRead::IndexSignatureDeclaration(_)
+            | NodeDataRead::MethodSignatureDeclaration(_)
+            | NodeDataRead::MethodDeclaration(_)
+            | NodeDataRead::PropertySignatureDeclaration(_)
+            | NodeDataRead::PropertyDeclaration(_)
+            | NodeDataRead::SemicolonClassElement(_)
+            | NodeDataRead::ClassStaticBlockDeclaration(_)
+            | NodeDataRead::NoSubstitutionTemplateLiteral(_)
+            | NodeDataRead::BinaryExpression(_)
+            | NodeDataRead::ArrowFunction(_)
+            | NodeDataRead::FunctionExpression(_)
+            | NodeDataRead::CallExpression(_)
+            | NodeDataRead::ObjectLiteralExpression(_)
+            | NodeDataRead::SpreadAssignment(_)
+            | NodeDataRead::PropertyAssignment(_)
+            | NodeDataRead::ShorthandPropertyAssignment(_)
+            | NodeDataRead::MappedTypeNode(_)
+            | NodeDataRead::TypeLiteralNode(_)
+            | NodeDataRead::NamedTupleMember(_)
+            | NodeDataRead::FunctionTypeNode(_)
+            | NodeDataRead::ConstructorTypeNode(_)
+            | NodeDataRead::JsxAttributes(_)
+            | NodeDataRead::JsxAttribute(_)
+            | NodeDataRead::JSDocSignature(_)
+            | NodeDataRead::SourceFile(_)
+            | NodeDataRead::ModuleDeclaration(_)
+            | NodeDataRead::ImportEqualsDeclaration(_)
+            | NodeDataRead::ExportDeclaration(_)
+            | NodeDataRead::ImportClause(_)
+            | NodeDataRead::ImportSpecifier(_)
+            | NodeDataRead::TypeParameterDeclaration(_)
+            | NodeDataRead::JSDocTypeLiteral(_)
     )
 }
 /// port: tsc/internal/ast/utilities.go:IsDeclaration
-pub fn is_declaration(node: &Node) -> bool {
+pub fn is_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     if node.kind() == K::TypeParameter {
         node.parent().is_some()
     } else {
@@ -98,43 +97,25 @@ pub fn is_declaration(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:NodeIsMissing
-pub fn node_is_missing(node: Option<&Node>) -> bool {
+pub fn node_is_missing(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_none_or(|n| n.pos() == n.end() && n.pos() >= 0 && n.kind() != K::EndOfFile)
 }
 /// port: tsc/internal/ast/utilities.go:NodeIsPresent
-pub fn node_is_present(node: Option<&Node>) -> bool {
+pub fn node_is_present(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     !node_is_missing(node)
 }
 
 /// port: tsc/internal/ast/utilities.go:SkipParentheses
-pub fn skip_parentheses(view: AstView<'_>, mut id: NodeId) -> Result<NodeId, Error> {
-    while view.node(id)?.kind() == K::ParenthesizedExpression {
-        id = view
-            .node(id)?
-            .expression()
-            .expect("nil parenthesized expression");
-    }
-    Ok(id)
+pub fn skip_parentheses(view: AstView<'_>, id: NodeId) -> Result<NodeId, Error> {
+    crate::syntax_helpers::skip_parentheses(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:SkipPartiallyEmittedExpressions
-pub fn skip_partially_emitted_expressions(
-    view: AstView<'_>,
-    mut id: NodeId,
-) -> Result<NodeId, Error> {
-    while view.node(id)?.kind() == K::PartiallyEmittedExpression {
-        id = view
-            .node(id)?
-            .expression()
-            .expect("nil partially emitted expression");
-    }
-    Ok(id)
+pub fn skip_partially_emitted_expressions(view: AstView<'_>, id: NodeId) -> Result<NodeId, Error> {
+    crate::syntax_helpers::skip_partially_emitted_expressions(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsLeftHandSideExpression
 pub fn is_left_hand_side_expression(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    Ok(crate::is_left_hand_side_expression_kind(
-        view.node(skip_partially_emitted_expressions(view, id)?)?
-            .kind(),
-    ))
+    crate::syntax_helpers::is_left_hand_side_expression(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsAssignmentExpression
 pub fn is_assignment_expression(
@@ -147,10 +128,10 @@ pub fn is_assignment_expression(
         return Ok(false);
     }
     let data = payload!(node, BinaryExpression);
-    let operator = required(view, data.operator_token)?.kind();
+    let operator = required(view, data.operator_token())?.kind();
     Ok((operator == K::EqualsToken
         || !exclude_compound_assignment && crate::is_assignment_operator(operator))
-        && is_left_hand_side_expression(view, data.left.expect("nil assignment left operand"))?)
+        && is_left_hand_side_expression(view, data.left().expect("nil assignment left operand"))?)
 }
 /// port: tsc/internal/ast/utilities.go:IsDestructuringAssignment
 pub fn is_destructuring_assignment(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
@@ -159,7 +140,7 @@ pub fn is_destructuring_assignment(view: AstView<'_>, id: NodeId) -> Result<bool
     }
     let node = view.node(id)?;
     Ok(matches!(
-        required(view, payload!(node, BinaryExpression).left)?
+        required(view, payload!(node, BinaryExpression).left())?
             .kind()
             .known(),
         Some(K::ObjectLiteralExpression | K::ArrayLiteralExpression)
@@ -174,20 +155,20 @@ pub fn get_assignment_target(view: AstView<'_>, mut id: NodeId) -> Result<Option
             Some(K::BinaryExpression) => {
                 let data = payload!(p, BinaryExpression);
                 return Ok((crate::is_assignment_operator(
-                    required(view, data.operator_token)?.kind(),
-                ) && data.left == Some(id))
+                    required(view, data.operator_token())?.kind(),
+                ) && data.left() == Some(id))
                 .then_some(parent_id));
             }
             Some(K::PrefixUnaryExpression) => {
                 return Ok(matches!(
-                    payload!(p, PrefixUnaryExpression).operator.known(),
+                    payload!(p, PrefixUnaryExpression).operator().known(),
                     Some(K::PlusPlusToken | K::MinusMinusToken)
                 )
                 .then_some(parent_id));
             }
             Some(K::PostfixUnaryExpression) => {
                 return Ok(matches!(
-                    payload!(p, PostfixUnaryExpression).operator.known(),
+                    payload!(p, PostfixUnaryExpression).operator().known(),
                     Some(K::PlusPlusToken | K::MinusMinusToken)
                 )
                 .then_some(parent_id));
@@ -203,13 +184,13 @@ pub fn get_assignment_target(view: AstView<'_>, mut id: NodeId) -> Result<Option
             ) => id = parent_id,
             Some(K::SpreadAssignment) => id = parent(view, parent_id)?,
             Some(K::ShorthandPropertyAssignment) => {
-                if payload!(p, ShorthandPropertyAssignment).name != Some(id) {
+                if payload!(p, ShorthandPropertyAssignment).name() != Some(id) {
                     return Ok(None);
                 }
                 id = parent(view, parent_id)?;
             }
             Some(K::PropertyAssignment) => {
-                if payload!(p, PropertyAssignment).name == Some(id) {
+                if payload!(p, PropertyAssignment).name() == Some(id) {
                     return Ok(None);
                 }
                 id = parent(view, parent_id)?;
@@ -226,7 +207,25 @@ pub fn is_assignment_target(view: AstView<'_>, id: NodeId) -> Result<bool, Error
 /// port: tsc/internal/ast/utilities.go:IsIdentifierName
 pub fn is_identifier_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
     let p = view.node(parent(view, id)?)?;
-    Ok(match p.kind().known() {
+    Ok(match identifier_name_role(p.kind()) {
+        IdentifierNameRole::Name => p.name() == Some(id),
+        IdentifierNameRole::Right => payload!(p, QualifiedName).right() == Some(id),
+        IdentifierNameRole::PropertyName => p.property_name() == Some(id),
+        IdentifierNameRole::Always => true,
+        IdentifierNameRole::Never => false,
+    })
+}
+
+pub(crate) enum IdentifierNameRole {
+    Name,
+    Right,
+    PropertyName,
+    Always,
+    Never,
+}
+
+pub(crate) fn identifier_name_role(kind: crate::NodeKind) -> IdentifierNameRole {
+    match kind.known() {
         Some(
             K::PropertyDeclaration
             | K::PropertySignature
@@ -237,25 +236,26 @@ pub fn is_identifier_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> 
             | K::EnumMember
             | K::PropertyAssignment
             | K::PropertyAccessExpression,
-        ) => p.name() == Some(id),
-        Some(K::QualifiedName) => payload!(p, QualifiedName).right == Some(id),
-        Some(K::BindingElement | K::ImportSpecifier) => p.property_name() == Some(id),
+        ) => IdentifierNameRole::Name,
+        Some(K::QualifiedName) => IdentifierNameRole::Right,
+        Some(K::BindingElement | K::ImportSpecifier) => IdentifierNameRole::PropertyName,
         Some(
             K::ExportSpecifier
             | K::JsxAttribute
             | K::JsxSelfClosingElement
             | K::JsxOpeningElement
             | K::JsxClosingElement,
-        ) => true,
-        _ => false,
-    })
+        ) => IdentifierNameRole::Always,
+        _ => IdentifierNameRole::Never,
+    }
 }
 /// port: tsc/internal/ast/utilities.go:IsPushOrUnshiftIdentifier
 pub fn is_push_or_unshift_identifier(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    Ok(matches!(
-        view.node_text(id)?.as_bytes(),
-        b"push" | b"unshift"
-    ))
+    Ok(is_push_or_unshift_text(view.node_text(id)?.as_bytes()))
+}
+
+pub(crate) fn is_push_or_unshift_text(bytes: &[u8]) -> bool {
+    matches!(bytes, b"push" | b"unshift")
 }
 
 /// port: tsc/internal/ast/utilities.go:IsExportsIdentifier
@@ -273,31 +273,10 @@ pub fn is_entity_name_expression(view: AstView<'_>, id: NodeId) -> Result<bool, 
 /// port: tsc/internal/ast/utilities.go:IsEntityNameExpressionEx
 pub fn is_entity_name_expression_ex(
     view: AstView<'_>,
-    mut id: NodeId,
+    id: NodeId,
     allow_js: bool,
 ) -> Result<bool, Error> {
-    loop {
-        let node = view.node(id)?;
-        match node.kind().known() {
-            Some(K::Identifier) => return Ok(true),
-            Some(K::PropertyAccessExpression) => {
-                if required(view, node.name())?.kind() != K::Identifier {
-                    return Ok(false);
-                }
-            }
-            Some(K::ThisKeyword) if allow_js => return Ok(true),
-            Some(K::ElementAccessExpression) if allow_js => {
-                if !crate::utilities::is_string_or_numeric_literal_like(&*required(
-                    view,
-                    payload!(node, ElementAccessExpression).argument_expression,
-                )?) {
-                    return Ok(false);
-                }
-            }
-            _ => return Ok(false),
-        }
-        id = node.expression().expect("nil entity-name expression");
-    }
+    crate::syntax_helpers::is_entity_name_expression(&view, id, allow_js)
 }
 /// port: tsc/internal/ast/utilities.go:IsPropertyAccessEntityNameExpression
 pub fn is_property_access_entity_name_expression(
@@ -322,9 +301,9 @@ pub fn is_element_access_entity_name_expression(
 ) -> Result<bool, Error> {
     let node = view.node(id)?;
     Ok(node.kind() == K::ElementAccessExpression
-        && crate::utilities::is_string_or_numeric_literal_like(&*required(
+        && crate::utilities::is_string_or_numeric_literal_like(&required(
             view,
-            payload!(node, ElementAccessExpression).argument_expression,
+            payload!(node, ElementAccessExpression).argument_expression(),
         )?)
         && is_entity_name_expression_ex(
             view,
@@ -333,27 +312,16 @@ pub fn is_element_access_entity_name_expression(
         )?)
 }
 /// port: tsc/internal/ast/utilities.go:IsDottedName
-pub fn is_dotted_name(view: AstView<'_>, mut id: NodeId) -> Result<bool, Error> {
-    loop {
-        let node = view.node(id)?;
-        match node.kind().known() {
-            Some(K::Identifier | K::ThisKeyword | K::SuperKeyword | K::MetaProperty) => {
-                return Ok(true);
-            }
-            Some(K::PropertyAccessExpression | K::ParenthesizedExpression) => {
-                id = node.expression().expect("nil dotted-name expression");
-            }
-            _ => return Ok(false),
-        }
-    }
+pub fn is_dotted_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
+    crate::syntax_helpers::is_dotted_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsLiteralLikeElementAccess
 pub fn is_literal_like_element_access(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
     let node = view.node(id)?;
     Ok(node.kind() == K::ElementAccessExpression
-        && crate::utilities::is_string_or_numeric_literal_like(&*required(
+        && crate::utilities::is_string_or_numeric_literal_like(&required(
             view,
-            payload!(node, ElementAccessExpression).argument_expression,
+            payload!(node, ElementAccessExpression).argument_expression(),
         )?))
 }
 /// port: tsc/internal/ast/utilities.go:IsBindableStaticAccessExpression
@@ -409,26 +377,7 @@ pub fn get_element_or_property_access_name(
     view: AstView<'_>,
     id: NodeId,
 ) -> Result<Option<NodeId>, Error> {
-    let node = view.node(id)?;
-    match node.kind().known() {
-        Some(K::PropertyAccessExpression) => Ok((required(view, node.name())?.kind()
-            == K::Identifier)
-            .then_some(node.name())
-            .flatten()),
-        Some(K::ElementAccessExpression) => {
-            let arg = skip_parentheses(
-                view,
-                payload!(node, ElementAccessExpression)
-                    .argument_expression
-                    .expect("nil element access argument"),
-            )?;
-            Ok(
-                crate::utilities::is_string_or_numeric_literal_like(&*view.node(arg)?)
-                    .then_some(arg),
-            )
-        }
-        _ => panic!("Unhandled case in GetElementOrPropertyAccessName"),
-    }
+    crate::declaration_helpers::access_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsModuleExportsAccessExpression
 pub fn is_module_exports_access_expression(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
@@ -466,10 +415,10 @@ pub fn is_bindable_object_define_property_call(
             .node_text(expr.name().expect("nil defineProperty name"))?
             .as_bytes()
             == b"defineProperty"
-        && crate::utilities::is_string_or_numeric_literal_like(&*required(view, arguments[1])?)
+        && crate::utilities::is_string_or_numeric_literal_like(&required(view, arguments.at(1))?)
         && is_bindable_static_name_expression(
             view,
-            arguments[0].expect("nil defineProperty target"),
+            arguments.at(0).expect("nil defineProperty target"),
             true,
         )?)
 }
@@ -495,8 +444,8 @@ pub fn get_assignment_declaration_kind(
     match node.kind().known() {
         Some(K::BinaryExpression) => {
             let bin = payload!(node, BinaryExpression);
-            if required(view, bin.operator_token)?.kind() == K::EqualsToken {
-                let left_id = bin.left.expect("nil assignment left operand");
+            if required(view, bin.operator_token())?.kind() == K::EqualsToken {
+                let left_id = bin.left().expect("nil assignment left operand");
                 let left = view.node(left_id)?;
                 if crate::utilities::is_access_expression(&left) {
                     let js = crate::utilities::is_in_js_file(Some(&left));
@@ -504,7 +453,7 @@ pub fn get_assignment_declaration_kind(
                         if is_module_exports_access_expression(view, left_id)?
                             && !is_exports_identifier(
                                 view,
-                                bin.right.expect("nil assignment right operand"),
+                                bin.right().expect("nil assignment right operand"),
                             )?
                         {
                             return Ok(JSDeclarationKind::ModuleExports);
@@ -544,7 +493,7 @@ pub fn get_assignment_declaration_kind(
                 && is_bindable_object_define_property_call(view, id)? =>
         {
             let args = view.node_slice(node.arguments(view)?)?;
-            let entity = args[0].expect("nil defineProperty target");
+            let entity = args.at(0).expect("nil defineProperty target");
             return Ok(
                 if is_exports_identifier(view, entity)?
                     || is_module_exports_access_expression(view, entity)?
@@ -562,37 +511,10 @@ pub fn get_assignment_declaration_kind(
 
 /// port: tsc/internal/ast/utilities.go:GetAssignedName
 pub fn get_assigned_name(view: AstView<'_>, id: NodeId) -> Result<Option<NodeId>, Error> {
-    let Some(parent_id) = view.node(id)?.parent() else {
-        return Ok(None);
-    };
-    let p = view.node(parent_id)?;
-    match p.kind().known() {
-        Some(K::PropertyAssignment) => return Ok(payload!(p, PropertyAssignment).name),
-        Some(K::BindingElement) => return Ok(payload!(p, BindingElement).name),
-        Some(K::BinaryExpression) => {
-            let bin = payload!(p, BinaryExpression);
-            if bin.right == Some(id) {
-                let left_id = bin.left.expect("nil assigned-name left operand");
-                let left = view.node(left_id)?;
-                match left.kind().known() {
-                    Some(K::Identifier) => return Ok(Some(left_id)),
-                    Some(K::PropertyAccessExpression) => return Ok(left.name()),
-                    Some(K::ElementAccessExpression) => {
-                        return get_element_or_property_access_name(view, left_id);
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Some(K::VariableDeclaration) if required(view, p.name())?.kind() == K::Identifier => {
-            return Ok(p.name());
-        }
-        _ => {}
-    }
-    Ok(None)
+    crate::declaration_helpers::assigned_name(&view, id)
 }
-/// port: tsc/internal/ast/utilities.go:GetNonAssignedNameOfDeclaration
-pub fn get_non_assigned_name_of_declaration(
+// Cold JS assignment/name classification shared by checked and scoped callers.
+pub(crate) fn assignment_name_of_declaration(
     view: AstView<'_>,
     id: NodeId,
 ) -> Result<Option<NodeId>, Error> {
@@ -604,22 +526,31 @@ pub fn get_non_assigned_name_of_declaration(
                 | JSDeclarationKind::ThisProperty
                 | JSDeclarationKind::ExportsProperty => {
                     let left = payload!(node, BinaryExpression)
-                        .left
+                        .left()
                         .expect("nil declaration left operand");
                     Some(get_element_or_property_access_name(view, left)?.unwrap_or(left))
                 }
                 JSDeclarationKind::ObjectDefinePropertyValue
                 | JSDeclarationKind::ObjectDefinePropertyExports => {
-                    view.node_slice(node.arguments(view)?)?[1]
+                    view.node_slice(node.arguments(view)?)?.at(1)
                 }
                 _ => None,
             })
         }
-        Some(K::ExportAssignment) => Ok((required(view, node.expression())?.kind()
-            == K::Identifier)
-            .then_some(node.expression())
-            .flatten()),
-        _ => Ok(node.name()),
+        _ => unreachable!("checked assignment-name branch"),
+    }
+}
+
+/// port: tsc/internal/ast/utilities.go:GetNonAssignedNameOfDeclaration
+pub fn get_non_assigned_name_of_declaration(
+    view: AstView<'_>,
+    id: NodeId,
+) -> Result<Option<NodeId>, Error> {
+    match crate::declaration_helpers::non_assigned_name(&view, id)? {
+        crate::declaration_helpers::Name::Resolved(name) => Ok(name),
+        crate::declaration_helpers::Name::Assignment(id) => {
+            assignment_name_of_declaration(view, id)
+        }
     }
 }
 /// port: tsc/internal/ast/utilities.go:GetNameOfDeclaration
@@ -627,39 +558,16 @@ pub fn get_name_of_declaration(
     view: AstView<'_>,
     id: Option<NodeId>,
 ) -> Result<Option<NodeId>, Error> {
-    let Some(id) = id else {
-        return Ok(None);
-    };
-    if let Some(name) = get_non_assigned_name_of_declaration(view, id)? {
-        return Ok(Some(name));
+    match crate::declaration_helpers::name(&view, id)? {
+        crate::declaration_helpers::Name::Resolved(name) => Ok(name),
+        crate::declaration_helpers::Name::Assignment(id) => {
+            assignment_name_of_declaration(view, id)
+        }
     }
-    if matches!(
-        view.node(id)?.kind().known(),
-        Some(K::FunctionExpression | K::ArrowFunction | K::ClassExpression)
-    ) {
-        return get_assigned_name(view, id);
-    }
-    Ok(None)
 }
 /// port: tsc/internal/ast/utilities.go:IsDynamicName
 pub fn is_dynamic_name(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    let node = view.node(id)?;
-    let expression = match node.kind().known() {
-        Some(K::ComputedPropertyName) => {
-            node.expression().expect("nil computed property expression")
-        }
-        Some(K::ElementAccessExpression) => skip_parentheses(
-            view,
-            payload!(node, ElementAccessExpression)
-                .argument_expression
-                .expect("nil element access argument"),
-        )?,
-        _ => return Ok(false),
-    };
-    Ok(
-        !crate::utilities::is_string_or_numeric_literal_like(&*view.node(expression)?)
-            && !crate::utilities::is_signed_numeric_literal(view, expression)?,
-    )
+    crate::declaration_helpers::dynamic_name(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:HasDynamicName
 pub fn has_dynamic_name(view: AstView<'_>, id: Option<NodeId>) -> Result<bool, Error> {
@@ -672,10 +580,7 @@ pub fn expression_is_alias(view: AstView<'_>, id: NodeId) -> Result<bool, Error>
 
 /// port: tsc/internal/ast/utilities.go:IsAmbientModule
 pub fn is_ambient_module(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
-    let node = view.node(id)?;
-    Ok(node.kind() == K::ModuleDeclaration
-        && (required(view, payload!(node, ModuleDeclaration).name)?.kind() == K::StringLiteral
-            || crate::utilities::is_global_scope_augmentation(&node)))
+    crate::declaration_helpers::ambient_module(&view, id)
 }
 /// port: tsc/internal/ast/utilities.go:IsModuleAugmentationExternal
 pub fn is_module_augmentation_external(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
@@ -720,7 +625,7 @@ pub fn get_this_container(
             Some(K::ComputedPropertyName) => {
                 let grand = parent(view, parent(view, id)?)?;
                 if include_class_computed_name
-                    && crate::utilities::is_class_like(&*view.node(grand)?)
+                    && crate::utilities::is_class_like(&view.node(grand)?)
                 {
                     return Ok(id);
                 }
@@ -729,10 +634,10 @@ pub fn get_this_container(
             Some(K::Decorator) => {
                 let p = parent(view, id)?;
                 if view.node(p)?.kind() == K::Parameter
-                    && crate::utilities::is_class_element(&*view.node(parent(view, p)?)?)
+                    && crate::utilities::is_class_element(&view.node(parent(view, p)?)?)
                 {
                     id = parent(view, p)?;
-                } else if crate::utilities::is_class_element(&*view.node(p)?) {
+                } else if crate::utilities::is_class_element(&view.node(p)?) {
                     id = p;
                 }
             }
@@ -827,7 +732,7 @@ pub fn find_constructor_declaration(
         let node = view.node(member)?;
         if node.kind() == K::Constructor {
             let body = node.body().map(|id| view.node(id)).transpose()?;
-            if node_is_present(body.as_deref()) {
+            if node_is_present(body.as_ref()) {
                 return Ok(Some(member));
             }
         }
@@ -859,7 +764,7 @@ pub fn is_expando_initializer(
 
 /// port: tsc/internal/ast/utilities.go:GetLeftmostAccessExpression
 pub fn get_leftmost_access_expression(view: AstView<'_>, mut id: NodeId) -> Result<NodeId, Error> {
-    while crate::utilities::is_access_expression(&*view.node(id)?) {
+    while crate::utilities::is_access_expression(&view.node(id)?) {
         id = view.node(id)?.expression().expect("nil access expression");
     }
     Ok(id)
@@ -886,7 +791,7 @@ fn variable_initialized_with_require(
         & modifier_flags::EXPORT
         == 0
         && node.type_node().is_none()
-        && crate::utilities_middle::is_require_call(view, &*view.node(initializer)?, true)?)
+        && crate::utilities_middle::is_require_call(view, &view.node(initializer)?, true)?)
 }
 /// port: tsc/internal/ast/utilities.go:IsVariableDeclarationInitializedToRequire
 pub fn is_variable_declaration_initialized_to_require(
@@ -928,7 +833,7 @@ pub fn is_potentially_executable_node(view: AstView<'_>, id: NodeId) -> Result<b
     if (K::FirstStatement as i16..=K::LastStatement as i16).contains(&node.kind().raw()) {
         if node.kind() == K::VariableStatement {
             let list = payload!(node, VariableStatement)
-                .declaration_list
+                .declaration_list()
                 .expect("nil variable declaration list");
             if crate::utilities::get_combined_node_flags(view, list)? & node_flags::BLOCK_SCOPED
                 != 0
@@ -937,10 +842,10 @@ pub fn is_potentially_executable_node(view: AstView<'_>, id: NodeId) -> Result<b
             }
             let list = view.node(list)?;
             let declarations = payload!(list, VariableDeclarationList)
-                .declarations
+                .declarations()
                 .expect("nil variable declarations");
             for id in view.node_slice(view.list(declarations)?.nodes())?.iter() {
-                if required(view, *id)?.initializer().is_some() {
+                if required(view, id)?.initializer().is_some() {
                     return Ok(true);
                 }
             }
@@ -959,19 +864,19 @@ pub fn is_async_function(view: AstView<'_>, id: NodeId) -> Result<bool, Error> {
     let (body, asterisk) = match node.kind().known() {
         Some(K::FunctionDeclaration) => {
             let d = payload!(node, FunctionDeclaration);
-            (d.body, d.asterisk_token)
+            (d.body(), d.asterisk_token())
         }
         Some(K::FunctionExpression) => {
             let d = payload!(node, FunctionExpression);
-            (d.body, d.asterisk_token)
+            (d.body(), d.asterisk_token())
         }
         Some(K::ArrowFunction) => {
             let d = payload!(node, ArrowFunction);
-            (d.body, d.asterisk_token)
+            (d.body(), d.asterisk_token())
         }
         Some(K::MethodDeclaration) => {
             let d = payload!(node, MethodDeclaration);
-            (d.body, d.asterisk_token)
+            (d.body(), d.asterisk_token())
         }
         _ => return Ok(false),
     };
@@ -1022,7 +927,7 @@ fn module_instance_state(
     visited: &mut HashMap<u64, ModuleInstanceState>,
 ) -> Result<ModuleInstanceState, Error> {
     let node = view.node(id)?;
-    let body = payload!(node, ModuleDeclaration).body;
+    let body = payload!(node, ModuleDeclaration).body();
     body.map_or(Ok(ModuleInstanceState::Instantiated), |body| {
         module_instance_state_cached(view, body, &push_ancestor(ancestors, id), visited)
     })
@@ -1035,7 +940,7 @@ fn module_instance_state_cached(
     visited: &mut HashMap<u64, ModuleInstanceState>,
 ) -> Result<ModuleInstanceState, Error> {
     stacker::maybe_grow(64 * 1024, 1024 * 1024, || {
-        let runtime_id = crate::runtime_node_id(&*view.node(id)?);
+        let runtime_id = crate::runtime_node_id(&view.node(id)?);
         if let Some(&state) = visited.get(&runtime_id) {
             return Ok(if state == ModuleInstanceState::Unknown {
                 ModuleInstanceState::NonInstantiated
@@ -1072,8 +977,8 @@ fn module_instance_state_worker(
         }
         Some(K::ExportDeclaration) => {
             let decl = payload!(node, ExportDeclaration);
-            if decl.module_specifier.is_none() {
-                if let Some(clause_id) = decl.export_clause {
+            if decl.module_specifier().is_none() {
+                if let Some(clause_id) = decl.export_clause() {
                     let clause = view.node(clause_id)?;
                     if clause.kind() == K::NamedExports {
                         let mut state = State::NonInstantiated;
@@ -1240,9 +1145,9 @@ pub fn node_has_name(view: AstView<'_>, id: NodeId, name: NodeId) -> Result<bool
             && view.node_text(n)?.as_bytes() == view.node_text(name)?.as_bytes());
     }
     if node.kind() == K::VariableStatement {
-        let list = required(view, payload!(node, VariableStatement).declaration_list)?;
+        let list = required(view, payload!(node, VariableStatement).declaration_list())?;
         let declarations = payload!(list, VariableDeclarationList)
-            .declarations
+            .declarations()
             .expect("nil variable declarations");
         for declaration in view.node_slice(view.list(declarations)?.nodes())?.iter() {
             if node_has_name(view, declaration.expect("nil variable declaration"), name)? {

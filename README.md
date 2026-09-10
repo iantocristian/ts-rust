@@ -11,7 +11,7 @@ The first contract leaves are implemented: `ts_jsstring` preserves source/string
 | [PLAN.md](PLAN.md) | The canonical plan. Update the HTML mirror when it changes. |
 | [Plan page](docs/corsa-in-rust.html) | The designed HTML mirror. An earlier version was published as a private page at https://claude.ai/code/artifact/6c72abf7-0d30-43fe-a7a8-6457828dcce8; that external copy is not automatically synchronized. |
 | [Tracking](docs/TRACKING.md) | Ledger, function-mapping, evidence, experiment and sprint-check contracts. |
-| [Codex/Astra Rust working guide](docs/CODEX-RUST-GUIDELINES.md) | Personal coding and review lessons from the original S04 implementation and synthesis. |
+| [Rust implementation guide](docs/CODEX-RUST-GUIDELINES.md) | Codex/Astra rules for Rust implementation and code review; loading conditions are in [AGENTS.md](AGENTS.md). |
 | [Current status](STATUS.md), [dashboard](docs/status.html) | Generated reports; evidence validity and parity are separate from implementation and mapping counts. |
 | [Unmapped functions](status/unmapped-functions.json) | Complete function worklist linked from the compact JSON status summary. |
 | [Architecture decisions](docs/adr/README.md) | Accepted ADRs 0001 to 0018 and the Proposed placeholders 0019 (test-host protocol) and 0020 (Phase 0 gate). |

@@ -30,6 +30,22 @@ fn members(node: &Value) -> Result<Vec<&Value>, String> {
         .collect())
 }
 
+/// Public child enumeration selects kinds before checking the concrete shape.
+/// Payloads on unhandled token/unknown kinds have no public children.
+pub(super) fn child_kind_pattern(node: &Value) -> Result<Option<String>, String> {
+    if !members(node)?.iter().any(|member| flag(member, "child")) && !flag(node, "handWritten") {
+        return Ok(None);
+    }
+    Ok(Some(format!(
+        "Some({})",
+        strings(array(node, "kinds")?)?
+            .iter()
+            .map(|kind| format!("SyntaxKind::{kind}"))
+            .collect::<Vec<_>>()
+            .join(" | ")
+    )))
+}
+
 fn parameter_type(member: &Value) -> Result<String, String> {
     let typ = rust_type(&member["type"])?;
     Ok(if nullable(member)? {
@@ -101,6 +117,54 @@ fn text_content(member: &Value) -> bool {
             && typ["element"]["name"] == "string")
 }
 
+/// Concrete entry points preserve interception by custom Factory implementations.
+/// The ordinary AstBuilder path selects the checked row without an owned enum.
+fn emit_construction_methods(code: &mut String, nodes: &[Value]) -> Result<(), String> {
+    code.push_str("macro_rules! factory_construction_methods {\n    (defaults) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n            self.new_node(kind, data.into())\n        }}\n"));
+    }
+    code.push_str("    };\n    (builder) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n"));
+        let mut references = Vec::new();
+        for field in fields(node)? {
+            let accessor = match rust_type(&field["type"])?.as_str() {
+                "NodeId" => "node",
+                "NodeListId" => "list",
+                "NodeSlice" => "node_slice",
+                "TextSlice" => "text_slice",
+                _ => continue,
+            };
+            references.push((field, accessor));
+        }
+        if !references.is_empty() {
+            code.push_str("            let view = self.view();\n");
+        }
+        for (field, accessor) in references {
+            let member = snake(string(field, "name")?);
+            if nullable(field)? {
+                code.push_str(&format!("            if let Some(id) = data.{member} {{ view.{accessor}(id).expect(\"factory edges belong to retained storage\"); }}\n"));
+            } else {
+                code.push_str(&format!("            view.{accessor}(data.{member}).expect(\"factory edges belong to retained storage\");\n"));
+            }
+        }
+        code.push_str(&format!("            let created = self.new_typed_node_before_hook(kind, |payloads, context| payloads.insert_{member}(data, context));\n            self.run_create_hook(created);\n            created\n        }}\n"));
+    }
+    code.push_str("    };\n    (forward, $field:tt) => {\n");
+    for node in nodes {
+        let name = string(node, "name")?;
+        let member = snake(name);
+        code.push_str(&format!("        fn new_{member}_data(&mut self, kind: $crate::NodeKind, data: $crate::{name}Data) -> $crate::NodeId {{\n            self.$field.new_{member}_data(kind, data)\n        }}\n"));
+    }
+    code.push_str("    };\n}\npub(crate) use factory_construction_methods;\n\n");
+    Ok(())
+}
+
 fn emit_new(
     code: &mut String,
     scope: &mut BTreeSet<String>,
@@ -142,12 +206,14 @@ fn emit_new(
     };
     if !ms.iter().any(|m| flags_member(m)) {
         code.push_str(&format!(
-            "        self.new_node({kind}, data.into())\n    }}\n"
+            "        self.new_{}_data({kind}, data)\n    }}\n",
+            snake(name)
         ));
         return Ok(());
     }
     code.push_str(&format!(
-        "        let created = self.new_node({kind}, data.into());\n"
+        "        let created = self.new_{}_data({kind}, data);\n",
+        snake(name)
     ));
     for member in ms.iter().filter(|m| flags_member(m)) {
         let assigned = value(member)?;
@@ -172,7 +238,7 @@ fn field_access(member: &Value) -> Result<String, String> {
     if flags_member(member) {
         Ok("original.flags()".into())
     } else {
-        Ok(format!("data.{}", snake(string(member, "name")?)))
+        Ok(format!("data.{}()", snake(string(member, "name")?)))
     }
 }
 
@@ -234,19 +300,17 @@ fn emit_update(
         return Ok(());
     }
     mapped(code, scope, "NodeFactory", &format!("Update{name}"));
-    code.push_str(&format!("    fn update_{}(&mut self, original_id: NodeId{}) -> NodeId {{\n        let original = self.node(original_id);\n        let data = original.data().as_{}().expect(\"Update{name} requires {name} payload\");\n",snake(name),params(&updates)?,snake(name)));
+    code.push_str(&format!("    fn update_{}(&mut self, original_id: NodeId{}) -> NodeId {{\n        let original = self.node(original_id);\n        let data = original.as_{}().expect(\"Update{name} requires {name} payload\");\n",snake(name),params(&updates)?,snake(name)));
     let comparisons = updates
         .iter()
         .map(|m| {
             let param = snake(string(m, "name")?);
             let access = field_access(m)?;
-            Ok(
-                if matches!(rust_type(&m["type"])?.as_str(), "NodeSlice" | "TextSlice") {
-                    format!("{param}.same({access})")
-                } else {
-                    format!("{param} == {access}")
-                },
-            )
+            Ok(match rust_type(&m["type"])?.as_str() {
+                "NodeSlice" | "TextSlice" => format!("{param}.same({access})"),
+                "JsString" => format!("{param}.as_bytes() == {access}"),
+                _ => format!("{param} == {access}"),
+            })
         })
         .collect::<Result<Vec<_>, String>>()?;
     code.push_str(&format!(
@@ -287,10 +351,13 @@ fn snapshot(
         .iter()
         .any(|m| !flag(m, "kindParameter") && !flags_member(m))
     {
-        code.push_str(&format!("        let data = original.data().as_{}().expect(\"operation requires {name} payload\");\n",snake(name)));
+        code.push_str(&format!(
+            "        let data = original.as_{}().expect(\"operation requires {name} payload\");\n",
+            snake(name)
+        ));
     } else {
         code.push_str(&format!(
-            "        original.data().as_{}().expect(\"operation requires {name} payload\");\n",
+            "        original.as_{}().expect(\"operation requires {name} payload\");\n",
             snake(name)
         ));
     }
@@ -301,13 +368,12 @@ fn snapshot(
     }
     for m in ms.iter().filter(|m| !flag(m, "kindParameter")) {
         let param = snake(string(m, "name")?);
-        let access = field_access(m)?;
-        let clone = if rust_type(&m["type"])? == "JsString" {
-            ".clone()"
+        let access = if rust_type(&m["type"])? == "JsString" {
+            format!("data.{}()", super::ast_read::owned_method(&param))
         } else {
-            ""
+            field_access(m)?
         };
-        code.push_str(&format!("        let {param} = {access}{clone};\n"));
+        code.push_str(&format!("        let {param} = {access};\n"));
     }
     code.push_str("        drop(original);\n");
     Ok(())
@@ -461,7 +527,7 @@ fn emit_children(
 fn emit_predicate(code: &mut String, scope: &mut BTreeSet<String>, name: &str, kinds: &[&str]) {
     mapped(code, scope, "", &format!("Is{name}"));
     code.push_str(&format!(
-        "pub fn is_{}(node: &Node) -> bool {{ matches!(node.kind().known(), Some({})) }}\n",
+        "pub fn is_{}(node: &(impl NodeAccess + ?Sized)) -> bool {{ matches!(node.kind().known(), Some({})) }}\n",
         snake(name),
         kinds
             .iter()
@@ -506,6 +572,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
     let mut scope = BTreeSet::new();
     let imports = "#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\nuse std::ops::ControlFlow;\n\n";
     let mut factory = header(pin, "ast_generated.go");
+    emit_construction_methods(&mut factory, nodes)?;
     factory.push_str("#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\n\n/// Pinned generated constructors, identity-preserving updates and shallow clones.\n#[allow(clippy::too_many_arguments)] // Positional factory signatures follow the pinned schema.\npub trait FactoryMethods: Factory {\n");
     let mut transform = header(pin, "ast_generated.go");
     transform.push_str("#[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.\nuse crate::*;\n\n/// Source-specific visitor hooks. Raw mapping is SameMap, not list flattening.\npub trait VisitContext: Factory {\n    fn visit_node(&mut self, node: Option<NodeId>, role: ChildRole) -> Option<NodeId>;\n    fn visit_list(&mut self, list: Option<NodeListId>, role: ChildRole) -> Option<NodeListId>;\n    fn map_raw_nodes(&mut self, nodes: NodeSlice) -> NodeSlice;\n    fn visit_each_child_source_file(&mut self, node: NodeId) -> NodeId;\n}\n\npub trait VisitorMethods: VisitContext {\n");
@@ -528,10 +595,7 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
                 emit_transform(&mut transform, &mut scope, node)?;
             }
             emit_children(&mut runtime, &mut scope, node)?;
-            if members(node)?
-                .iter()
-                .any(|m| m["name"] == "name" && flag(m, "private"))
-            {
+            if super::ast::has_declaration_name(node)? {
                 runtime.push_str(&format!("impl {name}Data {{\n"));
                 mapped(&mut runtime, &mut scope, name, "Name");
                 runtime.push_str(
@@ -591,41 +655,35 @@ pub(super) fn emit(schema: &Value, pin: &str) -> Result<Emission, String> {
         let name = string(node, "name")?;
         if !flag(node, "handWritten") && name != "SyntheticExpression" {
             factory.push_str(&format!(
-                "                NodeData::{name}(_) => Self::clone_{},\n",
+                "                NodeDataRead::{name}(_) => Self::clone_{},\n",
                 snake(name)
             ));
         }
     }
     factory.push_str("                _ => return None,\n            }\n        };\n        Some(clone(self, original_id))\n    }\n}\nimpl<T: Factory + ?Sized> FactoryMethods for T {}\n");
     transform.push_str("    fn visit_each_child_generated(&mut self, original_id: NodeId) -> NodeId {\n        let visit: fn(&mut Self, NodeId) -> NodeId = {\n            let original = self.node(original_id);\n            match original.data() {\n");
-    runtime.push_str("impl Node {\n");
     mapped(&mut runtime, &mut scope, "Node", "ForEachChild");
-    runtime.push_str("    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match self.kind().known() {\n");
-    for node in nodes {
+    runtime.push_str("pub fn for_each_child_generated(node: &(impl NodeAccess + ?Sized), visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match node.kind().known() {\n");
+    let mut stored_children = String::from("impl AstPayloadStore {\n    pub(crate) fn for_each_stored_child(&self, kind: NodeKind, shape: u16, ordinal: u32, end: i32, context: crate::compact::CompactContext<'_>, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {\n        match kind.known() {\n");
+    for (shape, node) in nodes.iter().enumerate() {
         let name = string(node, "name")?;
-        let child = members(node)?.iter().any(|m| flag(m, "child"));
-        if !child && !flag(node, "handWritten") {
+        let Some(pattern) = child_kind_pattern(node)? else {
             continue;
-        }
-        let pattern = format!(
-            "Some({})",
-            strings(array(node, "kinds")?)?
-                .iter()
-                .map(|k| format!("SyntaxKind::{k}"))
-                .collect::<Vec<_>>()
-                .join(" | ")
-        );
-        runtime.push_str(&format!("            {pattern} => self.data().as_{}().expect(\"{name} kind requires {name} payload\").for_each_child(visitor),\n",snake(name)));
+        };
+        runtime.push_str(&format!("            {pattern} => node.data_source().as_{}().expect(\"{name} kind requires {name} payload\").for_each_child(visitor),\n",snake(name)));
+        stored_children.push_str(&format!("            {pattern} => {{\n                assert!(shape == {shape}, \"{name} kind requires {name} payload\");\n                self.read_{}(ordinal, context, end).for_each_child(visitor)\n            }},\n", snake(name)));
         if name == "SyntheticExpression" {
-            transform.push_str(&format!("                NodeData::{name}(_) => panic!(\"SyntheticExpression transformation requires checker-owned Type\"),\n"));
+            transform.push_str(&format!("                NodeDataRead::{name}(_) => panic!(\"SyntheticExpression transformation requires checker-owned Type\"),\n"));
         } else {
             transform.push_str(&format!(
-                "                NodeData::{name}(_) => Self::visit_each_child_{},\n",
+                "                NodeDataRead::{name}(_) => Self::visit_each_child_{},\n",
                 snake(name)
             ));
         }
     }
-    runtime.push_str("            _ => ControlFlow::Continue(()),\n        }\n    }\n}\n");
+    runtime.push_str("            _ => ControlFlow::Continue(()),\n        }\n}\nimpl Node {\n    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> { for_each_child_generated(self, visitor) }\n}\nimpl NodeRead<'_> {\n    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> { for_each_child_generated(self, visitor) }\n}\n");
+    stored_children.push_str("            _ => ControlFlow::Continue(()),\n        }\n    }\n}\n");
+    runtime.push_str(&stored_children);
     transform.push_str("                _ => return original_id,\n            }\n        };\n        visit(self, original_id)\n    }\n}\nimpl<T: VisitContext + ?Sized> VisitorMethods for T {}\n");
     runtime.push_str(&format!("impl NodeData {{\n    pub fn declaration_name_generated(&self) -> Option<NodeId> {{\n        match self {{\n{names}            _ => None,\n        }}\n    }}\n}}\n"));
     runtime.push_str("impl NodeData {\n    /// Validate every stored identity, including fields omitted by Go child visitors.\n    pub fn validate_references<E>(&self, mut node: impl FnMut(NodeId) -> Result<(), E>, mut list: impl FnMut(NodeListId) -> Result<(), E>, mut raw: impl FnMut(NodeSlice) -> Result<(), E>, mut text: impl FnMut(TextSlice) -> Result<(), E>) -> Result<(), E> {\n        match self {\n");

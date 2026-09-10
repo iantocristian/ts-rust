@@ -1,5 +1,6 @@
 """Build provenance regressions, including an actual conflicting Cargo build."""
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -113,6 +114,7 @@ path="src/main.rs"
             config = root / ".cargo/config.toml"
             config.write_text('''[build]
 target-dir="configured-output"
+build-dir="configured-intermediate"
 target="intentionally-not-a-real-target"
 [profile.release]
 panic="abort"
@@ -159,11 +161,44 @@ codegen-units=64
             with patch.object(benchmark, "ROOT", root), patch.object(benchmark, "CACHE", root / "cache"), \
                  patch.dict(os.environ, {"CARGO_HOME": str(root / "cargo-home")}), \
                  patch.object(benchmark, "command", execute):
+                os.environ.pop("CARGO_BUILD_BUILD_DIR", None)
+                os.environ.pop("CARGO_TARGET_DIR", None)
                 env = benchmark.native_environment()
                 stable, host = benchmark.rust_native_toolchain(env)
                 subprocess.run(["cargo", "+"+stable, "generate-lockfile", "--offline"],
                                cwd=root, env=env, capture_output=True, check=True)
+                # A real diagnostic crate with the same package/bin identities
+                # occupies the configured cache. Native builds must not reuse
+                # or mutate it, regardless of Cargo's source-root freshness.
+                diagnostic = root / "diagnostic-source"
+                diagnostic_crate = diagnostic / "crates/ts_bench"
+                (diagnostic_crate / "src").mkdir(parents=True)
+                for name in ("Cargo.toml", "Cargo.lock", "rust-toolchain.toml"):
+                    (diagnostic / name).write_bytes((root / name).read_bytes())
+                (diagnostic_crate / "Cargo.toml").write_bytes((crate / "Cargo.toml").read_bytes())
+                (diagnostic_crate / "src/main.rs").write_text('fn main() { println!("diagnostic copy"); }')
+                configured = root / "configured-output"
+                messages = execute(["cargo", "+"+stable, "build", "--release", "--locked",
+                                    "--offline", "--package", "ts_bench", "--bin", "ts-bench",
+                                    "--target", host, "--target-dir", str(configured),
+                                    "--message-format=json-render-diagnostics",
+                                    *benchmark.release_configuration(env)], cwd=diagnostic, env=env)
+                diagnostic_binary = benchmark.rust_executable(messages, diagnostic_crate / "Cargo.toml", False)
+                self.assertEqual(subprocess.check_output([str(diagnostic_binary)]).strip(), b"diagnostic copy")
+                environment_target = root / "environment-output"
+                environment_build = root / "environment-intermediate"
+                for directory in (environment_target, environment_build):
+                    directory.mkdir()
+                    (directory / "preserved").write_bytes(b"caller cache")
+                cache_directories = (configured, root / "configured-intermediate", environment_target, environment_build)
+                self.assertTrue((root / "configured-intermediate").is_dir())
+                cached_files = {path.relative_to(root): hashlib.sha256(path.read_bytes()).hexdigest()
+                                for directory in cache_directories for path in directory.rglob("*") if path.is_file()}
+                build_directories = []
                 for allocation in (False, True):
+                    if allocation:
+                        os.environ["CARGO_TARGET_DIR"] = str(environment_target)
+                        os.environ["CARGO_BUILD_BUILD_DIR"] = str(environment_build)
                     binary, runtime_env = benchmark.build_rust(allocation)
                     output = subprocess.check_output([str(binary)], env=runtime_env).decode().strip()
                     self.assertEqual(output, f"current {str(allocation).lower()} false true")
@@ -172,7 +207,15 @@ codegen-units=64
                     self.assertIn("-C lto=fat", compiler)
                     self.assertIn("-C codegen-units=1", compiler)
                     self.assertNotIn("-C panic=abort", compiler)
-                    self.assertEqual(binary.read_bytes(), (root / "configured-output" / host / "release/ts-bench").read_bytes())
+                    build_directory = Path(args[args.index("--target-dir")+1])
+                    build_directories.append(build_directory)
+                    self.assertEqual(build_directory.parent, (root / "target").resolve())
+                    self.assertIn("build.build-dir=" + json.dumps(str(build_directory)), args)
+                    self.assertFalse(build_directory.exists(), "temporary target survives copied artifact")
+                    self.assertEqual(cached_files, {
+                        path.relative_to(root): hashlib.sha256(path.read_bytes()).hexdigest()
+                        for directory in cache_directories for path in directory.rglob("*") if path.is_file()})
+                self.assertNotEqual(*build_directories)
                 for mode in ("debug", "release"):
                     binary, runtime_env = benchmark.build_allocation_probe(mode, stable)
                     self.assertEqual(subprocess.check_output([str(binary)], env=runtime_env).decode().strip(),
@@ -184,6 +227,35 @@ codegen-units=64
             for path, original in originals.items():
                 self.assertEqual(path.read_bytes(), original)
             self.assertEqual(stale.read_text(), "stale executable from before target-dir changed")
+
+    def test_escaped_artifact_is_rejected_and_temporary_target_is_removed(self):
+        with tempfile.TemporaryDirectory(prefix="s07-cargo-escape-") as temporary:
+            root = Path(temporary)
+            external = root / "configured-output/ts-bench"
+            external.parent.mkdir()
+            external.write_bytes(b"unrelated configured executable")
+            build_directories = []
+
+            def escaped_artifact(args, **kwargs):
+                build_directories.append(Path(args[args.index("--target-dir")+1]))
+                self.assertTrue(build_directories[-1].is_dir())
+                _, artifact = CargoArtifacts().artifact()
+                artifact.update(manifest_path=str(root / "crates/ts_bench/Cargo.toml"),
+                                executable=str(external), filenames=[str(external)])
+                return b"\n".join(json.dumps(row).encode() for row in
+                                  (artifact, {"reason": "build-finished", "success": True}))
+
+            with patch.object(benchmark, "ROOT", root), patch.object(benchmark, "CACHE", root / "cache"), \
+                 patch.object(benchmark, "native_environment", return_value={}), \
+                 patch.object(benchmark, "rust_native_toolchain", return_value=("1.97.1", "native")), \
+                 patch.object(benchmark, "release_configuration", return_value=[]), \
+                 patch.object(benchmark, "command", escaped_artifact):
+                with self.assertRaisesRegex(ValueError, "escaped its isolated build directory"):
+                    benchmark.build_rust()
+            self.assertEqual(len(build_directories), 1)
+            self.assertFalse(build_directories[0].exists())
+            self.assertEqual(external.read_bytes(), b"unrelated configured executable")
+            self.assertFalse((root / "cache/s07-benchmark/rust-benchmark").exists())
 
     def test_persisted_go_target_and_experiments_cannot_change_native_baseline(self):
         with tempfile.TemporaryDirectory(prefix="s07-go-native-") as temporary:

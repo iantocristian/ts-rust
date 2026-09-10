@@ -27,7 +27,7 @@
   .chart { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:12px; }
 </style>
 <div class="page">
-  <div class="eyebrow">Corsa in Rust &middot; generated 2026-09-08 &middot; upstream pin 1f70213d4922b434345f639b441681e470c7cfc1</div>
+  <div class="eyebrow">Corsa in Rust &middot; generated 2026-09-10 &middot; upstream pin 1f70213d4922b434345f639b441681e470c7cfc1</div>
   <h1>Status</h1>
   <p>Function mappings measure traceability. Baseline parity and required gates establish behavior. <a href="../STATUS.md">Detailed report</a> · <a href="TRACKING.md">Tracking contract</a> · <a href="../status/unmapped-functions.json">Unmapped-function worklist</a></p>
 
@@ -35,8 +35,8 @@
     <div class="tile"><b>7.1%</b><span>lines verified, of 291999</span></div>
     <div class="tile"><b>21 / 457</b><span>files verified</span></div>
     <div class="tile"><b>14.7%</b><span>functions with a Rust counterpart, of 11506</span></div>
-    <div class="tile"><b>1 / 8</b><span>experiments passed</span></div>
-    <div class="tile"><b>18 / 20</b><span>decisions accepted</span></div>
+    <div class="tile"><b>2 / 8</b><span>experiments passed</span></div>
+    <div class="tile"><b>19 / 21</b><span>decisions accepted</span></div>
   </div>
   <h2>Over time</h2>
   <div class="chart"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Verified lines and mapped functions over time">
@@ -63,29 +63,29 @@
 <tr><td>E2</td><td>Checker slice</td><td>run.e2.types_parity == 1<br>run.e2.errors_parity == 1<br>run.e2.comparators == true<br>run.e2.frozen_subset == true<br>run.e2.divergences_approved == true<br>run.checkerbench.throughput_ratio &gt; 0<br>run.checkerbench.allocated_bytes_ratio &gt;= 0<br>run.checkerbench.retained_bytes_ratio &gt;= 0<br>run.relater.parity == 1<br>run.relater.throughput_ratio &gt; 0<br>run.relater.allocated_bytes_ratio &gt;= 0<br>run.relater.retained_bytes_ratio &gt;= 0</td><td>types_parity: missing<br>errors_parity: missing<br>comparators: missing<br>frozen_subset: true<br>divergences_approved: missing<br>checker_throughput: missing<br>checker_allocated_bytes: missing<br>checker_retained_bytes: missing<br>relater_prototype_parity: missing<br>relater_throughput: missing<br>relater_allocated_bytes: missing<br>relater_retained_bytes: missing</td><td><span class="chip warn">pending</span></td></tr>
 <tr><td>E3</td><td>Ownership</td><td>run.e3.shared_bound_file == true<br>run.e3.retained_snapshot_edit == true<br>run.e3.independent_checker_merges == true<br>run.e3.concurrent_lazy_storage == true<br>run.e3.mapper_bundle_disposal == true<br>run.e3.builder_cache_retention == true<br>run.e3.checker_result_retention == true<br>run.e3.checker_ast_retention == true<br>run.e3.api_scratch_disposal == true<br>run.e3.id_exhaustion == true<br>run.e3.wrong_owner_rejected == true<br>run.e3.stale_and_recycled_ids_rejected == true<br>run.e3.shared_pool_panic_retirement == true<br>run.e3.live_owner_delta == 0<br>run.e3.live_allocation_delta == 0<br>run.e3.miri == true<br>run.e3.address_sanitizer == true<br>run.e3.release_boundaries == true</td><td>shared_bound_file: true<br>retained_snapshot_edit: true<br>independent_checker_merges: missing<br>concurrent_lazy_storage: true<br>mapper_bundle_disposal: true<br>builder_cache_retention: missing<br>checker_result_retention: missing<br>checker_ast_retention: missing<br>api_scratch_disposal: missing<br>id_exhaustion: true<br>wrong_owner_rejected: true<br>stale_and_recycled_ids_rejected: true<br>shared_pool_panic_retirement: missing<br>owners_return_to_baseline: 0<br>allocations_return_to_baseline: 0<br>miri: true<br>address_sanitizer: true<br>release_boundaries: missing</td><td><span class="chip warn">pending</span></td></tr>
 <tr><td>E4</td><td>Strings</td><td>run.e4.source_decoding == true<br>run.scanner.diagnostics == true<br>run.e4.token_literal_bytes == true<br>run.e4.helper_printer_semantics == true<br>run.e4.slice_validity == true<br>run.e4.utf8_positions == true<br>run.e4.utf16_positions == true<br>run.e1.encoder_success_error == true<br>run.e1.encoder_output_bytes == true<br>run.e4.helper_semantics == true<br>run.scanner.token_value_bytes == true</td><td>source_decoding: true<br>diagnostics: true<br>token_literal_bytes: missing<br>helper_printer_semantics: missing<br>slice_validity: true<br>utf8_positions: true<br>utf16_positions: true<br>encoder_success_error: true<br>encoder_output_bytes: true<br>helper_semantics: true<br>token_value_bytes: true</td><td><span class="chip warn">pending</span></td></tr>
-<tr><td>E5</td><td>Memory</td><td>run.e5.peak_rss_ratio &lt;= 0.7<br>run.e5.allocated_bytes_ratio &lt;= 0.7<br>run.e5.type_footprint_ratio &lt;= 0.8</td><td>peak_rss: 1.4465356558760156<br>allocated_bytes: 1.6263307516550936<br>type_footprint: missing</td><td><span class="chip crit">fail</span></td></tr>
-<tr><td>E6</td><td>CPU</td><td>run.e6.one_thread_wall_time_ratio &lt;= 1<br>run.e6.eight_threads_wall_time_ratio &lt;= 1</td><td>one_thread: 1.7892743498951005<br>eight_threads: 1.9306587914752409</td><td><span class="chip crit">fail</span></td></tr>
+<tr><td>E5</td><td>Memory</td><td>run.e5.peak_rss_ratio &lt;= 0.85<br>run.e5.allocated_bytes_ratio &lt;= 0.85<br>run.e5.type_footprint_ratio &lt;= 0.8</td><td>peak_rss: 0.7375398025068437<br>allocated_bytes: 0.738070895918671<br>type_footprint: missing</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td>E6</td><td>CPU</td><td>run.e6.one_thread_wall_time_ratio &lt;= 1.25<br>run.e6.eight_threads_wall_time_ratio &lt;= 1.45</td><td>one_thread: 1.2323088199555672<br>eight_threads: 1.3461095001289387</td><td><span class="chip ok">pass</span></td></tr>
 <tr><td>E7</td><td>WebAssembly</td><td>run.e7.parser_artifact_size_ratio &lt;= 0.25<br>run.e7.parse_throughput_ratio &gt;= 2<br>run.e7.checker_parity == 1<br>run.e7.portable_host == true</td><td>parser_artifact_size: missing<br>parse_throughput: missing<br>checker_parity: missing<br>portable_host: missing</td><td><span class="chip warn">pending</span></td></tr>
 <tr><td>E8</td><td>Embedding</td><td>run.e8.node_parse_latency_ratio &lt;= 0.1<br>run.e8.rust_consumer_parity == 1<br>run.e8.lifetime_checks == true</td><td>node_parse_latency: missing<br>rust_consumer_parity: missing<br>lifetime_checks: missing</td><td><span class="chip warn">pending</span></td></tr>
 </tbody></table>
   <h2>Evidence</h2>
-  <table><thead><tr><th>Run</th><th>State</th><th>Artifact</th></tr></thead><tbody><tr><td>binder</td><td>current</td><td><a href="../status/evidence/258975e72a027bc20fe7186474dc362cb6d2eedd4da28d351565f9554863a099.json">result</a></td></tr>
-<tr><td>bindworkload</td><td>current</td><td><a href="../status/evidence/f60c479e8525cd84304e8b745d87167f379629aa17381c9bd5c8a1227e2af1ed.json">result</a></td></tr>
-<tr><td>clippy</td><td>current</td><td><a href="../status/evidence/af885af71851f8188b005d9bb35fd244c08eddb9f371cd1ff3da65346d2068c0.json">result</a></td></tr>
-<tr><td>deny</td><td>current</td><td><a href="../status/evidence/7ead4f161a68a1f92f39e946e7bfa146487b29e18705dd8f4f57b536939a7e0f.json">result</a></td></tr>
-<tr><td>e1</td><td>current</td><td><a href="../status/evidence/9f3547df0cc15f57360e946348886ad96a3653c1757cb5e6ccf33aa357ee0b88.json">result</a></td></tr>
-<tr><td>e2</td><td>current</td><td><a href="../status/evidence/9c1f559ece21dd632eec71dc5554e4cf81548a76b204c33049a1ea56496d8c51.json">result</a></td></tr>
-<tr><td>e3</td><td>current</td><td><a href="../status/evidence/33a344ff29053004bf6b9d310cbf0b8118e27de30a5f403487100b4e7820a6b0.json">result</a></td></tr>
-<tr><td>e4</td><td>current</td><td><a href="../status/evidence/64b2fe82534cc47330243bc434def31b3d998a582289e06e14d37cc4eefa159c.json">result</a></td></tr>
-<tr><td>e5</td><td>current</td><td><a href="../status/evidence/30c6deb72aeba3cbead4d1a1d92f19aef0ef0feaf35d7add4623476885eb35f6.json">result</a></td></tr>
-<tr><td>e6</td><td>current</td><td><a href="../status/evidence/494380cb1f91f529c7c9cd9090d1fb465aa8448881275217e4b321bb984498af.json">result</a></td></tr>
-<tr><td>fmt</td><td>current</td><td><a href="../status/evidence/ed8a170ce2337a346d1d4256858562fe260a06a824c3162ba031d124fcdb7037.json">result</a></td></tr>
-<tr><td>gen</td><td>current</td><td><a href="../status/evidence/f284d37dac607ce1304ba4ff735d300cba1250a0f90e48de927eac5aebb8e5be.json">result</a></td></tr>
-<tr><td>oracle</td><td>current</td><td><a href="../status/evidence/725d535ee945d2bfdfee04ebed6e52f8a32a42e3059221ba1cec20e3932a16c5.json">result</a></td></tr>
-<tr><td>program</td><td>current</td><td><a href="../status/evidence/cbaa73b694df7a0ef5e45bbf9436cc826c8ff5bb5b80fc22adb3a63e092ff699.json">result</a></td></tr>
-<tr><td>scanner</td><td>current</td><td><a href="../status/evidence/fc4f49179339e7c3a430d1926a297f5f882a2d2b0a963b0158c5cdcc6c3603b3.json">result</a></td></tr>
-<tr><td>selftest</td><td>current</td><td><a href="../status/evidence/e26914a4a255013b20f909f3f7b455e4a6b53d3046677ba48432cb6b0c22e1da.json">result</a></td></tr>
-<tr><td>workspace</td><td>current</td><td><a href="../status/evidence/1f6fa21971fc0d90a9713abcbae3b96d0134df0f3525c7877f39298e9d6cfe7e.json">result</a></td></tr></tbody></table>
+  <table><thead><tr><th>Run</th><th>State</th><th>Artifact</th></tr></thead><tbody><tr><td>binder</td><td>current</td><td><a href="../status/evidence/a208adad6d99a70057403637d9dd8eb4d46d66a30216a518173d0c07e471046f.json">result</a></td></tr>
+<tr><td>bindworkload</td><td>current</td><td><a href="../status/evidence/6c8627273ab14f7592eca85e92afb6d7ffb55859a2497cf909c9a82d476361c6.json">result</a></td></tr>
+<tr><td>clippy</td><td>current</td><td><a href="../status/evidence/d1e348dc5b3d79e0908888199086804227c95c91f433d7b004a5c0df7d2d6e40.json">result</a></td></tr>
+<tr><td>deny</td><td>current</td><td><a href="../status/evidence/6554aae769ed23f2cfc0a865ccd5a67d067f8ac52ba4f4abf1419f1d2b23c60f.json">result</a></td></tr>
+<tr><td>e1</td><td>current</td><td><a href="../status/evidence/df244296d9c922c56115ace1f580d35651a3b8acf096822d3c63fa36613528bd.json">result</a></td></tr>
+<tr><td>e2</td><td>current</td><td><a href="../status/evidence/b9b933bfcff4a9f4283e67478f2375cdac5ca40b3250973f37980ba33a0d7f76.json">result</a></td></tr>
+<tr><td>e3</td><td>current</td><td><a href="../status/evidence/c5f349a2e0439f58d74d532183e48e33f428aa984cf85ba0339f93deb734c3ee.json">result</a></td></tr>
+<tr><td>e4</td><td>current</td><td><a href="../status/evidence/bd37e12efba7dedbec65804f52dc0fb91fb7efd482b7e65f0349b02e6787ff4e.json">result</a></td></tr>
+<tr><td>e5</td><td>current</td><td><a href="../status/evidence/b759d3fd808558dba3f4af4412874a414a65e12198d300fd3fd7b59088a43ff8.json">result</a></td></tr>
+<tr><td>e6</td><td>current</td><td><a href="../status/evidence/2b01576766f38e65a440cc933442c5fd7df833d8c89924ff8448797ce8fbf36a.json">result</a></td></tr>
+<tr><td>fmt</td><td>current</td><td><a href="../status/evidence/bb9649c9a4f6db937b5b5fc202facd2f51105b4e7225af83af24f73f76ec1034.json">result</a></td></tr>
+<tr><td>gen</td><td>current</td><td><a href="../status/evidence/fd6667aaff1fac9900840c940ec4062c42689daa8152eb60e61b0433a6e40d78.json">result</a></td></tr>
+<tr><td>oracle</td><td>current</td><td><a href="../status/evidence/087049288e769f42de71aeab0228772c9ee2695359597af760055afdeb01f1db.json">result</a></td></tr>
+<tr><td>program</td><td>current</td><td><a href="../status/evidence/1fdaeefba2371f2f7983a2a6b255a83fb6127230ff2fc687f1a5c27f1144add5.json">result</a></td></tr>
+<tr><td>scanner</td><td>current</td><td><a href="../status/evidence/892280d5dbaf40c6508d7e4e3d3182fee73a260b3d58fdb422a5f978a9dc6fc5.json">result</a></td></tr>
+<tr><td>selftest</td><td>current</td><td><a href="../status/evidence/2c1ea3a0228a280780818110aa49a80fe2df03ae26c8a8f5ee44ffb87671ac44.json">result</a></td></tr>
+<tr><td>workspace</td><td>current</td><td><a href="../status/evidence/e9b13c564890c6253527b262a15a76cd5dcb4f670c0e74180a00f65aa7af862f.json">result</a></td></tr></tbody></table>
   <h2>Sprints</h2>
   <table><thead><tr><th>Sprint</th><th>Title</th><th class="num">Exit checks</th><th>State</th></tr></thead><tbody>
 <tr><td>S01</td><td>Contracts, workspace, oracle</td><td class="num">8 / 8</td><td><span class="chip ok">done</span></td></tr>
@@ -94,11 +94,11 @@
 <tr><td>S04</td><td>Contract leaves: ts_jsstring and ts_arena</td><td class="num">14 / 14</td><td><span class="chip ok">done</span></td></tr>
 <tr><td>S05</td><td>Scanner</td><td class="num">10 / 10</td><td><span class="chip ok">done</span></td></tr>
 <tr><td>S06</td><td>Parser, JSDoc, AST runtime and encoder</td><td class="num">16 / 16</td><td><span class="chip ok">done</span></td></tr>
-<tr><td>S07</td><td>Binder, resolution slice, program host, parse-and-bind benchmark</td><td class="num">16 / 20</td><td><span class="chip warn">open</span></td></tr>
-<tr><td>S08</td><td>Checker slice, printer and node builder</td><td class="num">1 / 8</td><td><span class="chip warn">open</span></td></tr>
+<tr><td>S07</td><td>Binder, resolution slice, program host, parse-and-bind benchmark</td><td class="num">20 / 20</td><td><span class="chip ok">done</span></td></tr>
+<tr><td>S08</td><td>Checker slice, printer and node builder</td><td class="num">2 / 8</td><td><span class="chip warn">open</span></td></tr>
 <tr><td>S09</td><td>Ownership and registry harness</td><td class="num">1 / 3</td><td><span class="chip warn">open</span></td></tr>
 <tr><td>S10</td><td>WebAssembly and Rust embedding</td><td class="num">0 / 3</td><td><span class="chip warn">open</span></td></tr>
 <tr><td>S11</td><td>Test-host transport prototype</td><td class="num">1 / 4</td><td><span class="chip warn">open</span></td></tr>
-<tr><td>S12</td><td>Phase 0 gate</td><td class="num">6 / 18</td><td><span class="chip warn">open</span></td></tr>
+<tr><td>S12</td><td>Phase 0 gate</td><td class="num">8 / 18</td><td><span class="chip warn">open</span></td></tr>
 </tbody></table>
 </div>

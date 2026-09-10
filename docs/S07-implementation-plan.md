@@ -1,8 +1,8 @@
 # S07 implementation plan
 
 Prepared 8 September 2026. This plan is stacked on S06 PR #10 and follows
-[S07](../sprints/S07.toml), the [personal working guide](CODEX-RUST-GUIDELINES.md),
-[PLAN §13](../PLAN.md#13-open-questions-and-pending-technical-decisions), and accepted ADRs
+[S07](../sprints/S07.toml), [PLAN §13](../PLAN.md#13-open-questions-and-pending-technical-decisions),
+and accepted ADRs
 [0006](adr/0006-node-ownership--arenas--lazy-file-storage--bundles-and-check.md),
 [0007](adr/0007-symbol-ownership--file-owned-binding--checker-local-merges.md),
 [0009](adr/0009-concurrency-model-kept-from-corsa.md),
@@ -80,6 +80,14 @@ ownership errors separately from upstream panic contracts.
 ## 3. Binding lifecycle and ownership
 
 ### 3.1 Initialization before immutable publication
+
+S07-bis implementation update: ordinary eligible `ParsedFile` inputs now use
+the consuming parse→bind→publish path described in the
+[A0 record](S07-bis-A0.md). Its `CompletedFile` capability exposes bound state
+without promising a pristine parsed snapshot. The publication-first contract
+below remains the supported path for already published inputs and for files
+rejected by exclusive eligibility. This preserves the independent mapped-sibling
+initialization requirement that motivated the original S07 implementation.
 
 Binding changes more than a symbol side table: it writes parents/container
 links, local/export symbols and tables, flags, CommonJS indicators, flow links,

@@ -1,5 +1,5 @@
 use crate::{
-    node_flags, ChildVisitor, Factory, FactoryMethods, NodeData, NodeId, NodeListId, NodeSlice,
+    node_flags, ChildVisitor, FactoryMethods, NodeDataRead, NodeId, NodeListId, NodeSlice,
     NodeVisitor, NodeVisitorHooks, RuntimeFactory,
 };
 use std::ops::ControlFlow;
@@ -10,7 +10,7 @@ pub fn clone_node(factory: &mut dyn RuntimeFactory, original: NodeId) -> NodeId 
     if let Some(cloned) = factory.clone_node_generated(original) {
         return cloned;
     }
-    let source = matches!(factory.node(original).data(), NodeData::SourceFile(_));
+    let source = matches!(factory.node(original).data(), NodeDataRead::SourceFile(_));
     if source {
         return factory.clone_source(original);
     }
@@ -31,7 +31,9 @@ fn with_deep_clone<T>(
             visited.expect("nil deep clone result")
         };
         if synthetic {
-            visitor.node_mut(cloned).set_range(TextRange::new(-1, -1));
+            visitor
+                .factory_mut()
+                .set_node_range(cloned, TextRange::new(-1, -1));
         }
         Some(cloned)
     };
@@ -76,9 +78,14 @@ fn clone_visited_list(
             .set_loc(TextRange::new(-1, -1));
         if visitor.factory().list_has_trailing_comma(original) {
             let nodes = visitor.factory().read_list(new).nodes();
-            let last = visitor.factory().read_nodes(nodes)[nodes.len() - 1]
+            let last = visitor
+                .factory()
+                .read_nodes(nodes)
+                .at(nodes.len() - 1)
                 .expect("nil trailing-comma clone");
-            visitor.node_mut(last).set_range(TextRange::new(-2, -2));
+            visitor
+                .factory_mut()
+                .set_node_range(last, TextRange::new(-2, -2));
         }
     }
     Some(new)
@@ -117,7 +124,7 @@ pub fn set_parent_in_children(factory: &mut dyn RuntimeFactory, root: NodeId) {
     while let Some((node, parent)) = pending.pop() {
         let node = node.expect("nil child in SetParentInChildren");
         if let Some(parent) = parent {
-            factory.node_mut(node).set_parent(Some(parent));
+            factory.set_node_parent(node, Some(parent));
         }
         children.clear();
         let value = factory.node(node);
@@ -142,8 +149,7 @@ impl ChildVisitor for ParentEdges<'_> {
         self.visit_node_slice(self.factory.read_list(list).nodes())
     }
     fn visit_node_slice(&mut self, nodes: NodeSlice) -> ControlFlow<()> {
-        self.nodes
-            .extend(self.factory.read_nodes(nodes).iter().copied());
+        self.nodes.extend(self.factory.read_nodes(nodes).iter());
         ControlFlow::Continue(())
     }
 }

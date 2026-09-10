@@ -135,16 +135,15 @@ impl<'a> Verifier<'a> {
                 let config = self.config?;
                 let view = config.file.view();
                 let read = view.node(node).expect("retained path substitution");
-                let ts_ast::NodeData::ArrayLiteralExpression(data) = read.data() else {
+                let ts_ast::NodeDataRead::ArrayLiteralExpression(data) = read.data() else {
                     return None;
                 };
                 let list = view
-                    .list(data.elements?)
+                    .list(data.elements()?)
                     .expect("retained substitution elements");
                 view.node_slice(list.nodes())
                     .expect("retained substitution values")
                     .get(index)
-                    .copied()
                     .flatten()
             });
         }

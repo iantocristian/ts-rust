@@ -5,14 +5,32 @@
 
 mod accessors_generated;
 mod bind_result;
+pub use bind_result::local_bind;
+#[cfg(any(test, doctest))]
+mod local_bind_tests;
+mod local_read_generated;
+pub use local_read_generated::*;
 mod flow;
+mod symbol_access;
 pub mod symbol_flags;
+mod symbol_store;
+mod symbol_tables;
 mod symbols;
 pub use flow::*;
+pub use symbol_access::{SymbolAccess, SymbolRef};
+pub use symbol_store::{SymbolMut, SymbolRead, SymbolsMut, SymbolsRead};
 pub use symbols::*;
 mod binder_helpers;
+mod declaration_helpers;
+mod syntax_helpers;
 pub use binder_helpers::*;
 mod clone;
+mod compact;
+mod compact_generated;
+pub(crate) use compact_generated::AstPayloadStore;
+pub(crate) mod auxiliary;
+#[cfg(test)]
+mod auxiliary_tests;
 mod data_generated;
 mod diagnostic;
 mod diagnostic_order;
@@ -20,13 +38,21 @@ mod factory;
 mod factory_generated;
 mod jsdoc;
 mod kinds_generated;
+pub use auxiliary::StoredAux;
 mod lists;
 pub mod modifier_flags;
+mod node_access;
+mod node_semantics;
+pub use node_access::NodeAccess;
 mod node_accessors;
 pub mod node_flags;
 mod node_index;
 mod node_kind;
 mod node_map;
+mod node_mut;
+pub use node_mut::NodeMut;
+mod node_read;
+mod node_read_generated;
 mod node_text;
 mod precedence;
 mod runtime_generated;
@@ -42,8 +68,8 @@ mod visitor;
 mod visitors_generated;
 
 pub use bind_result::{
-    BindBuilder, BindError, BindResult, BoundFile, BoundView, NodeBinding, PatternAmbientModule,
-    RetainedBoundNode, RetainedSymbol,
+    BindBuilder, BindError, BindResult, BoundFile, BoundView, CompletedFile, CompletedNode,
+    CompletedSymbol, NodeBinding, PatternAmbientModule, RetainedBoundNode, RetainedSymbol,
 };
 pub use clone::{
     clone_node, deep_clone_node, deep_clone_reparse, deep_clone_reparse_modifiers,
@@ -64,13 +90,15 @@ pub use lists::{
 };
 pub use node_index::NodeIndexCache;
 pub use node_kind::NodeKind;
+pub use node_read::NodeRead;
+pub use node_read_generated::*;
 pub use node_text::NodeText;
 pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;
 pub use runtime_id::{existing_runtime_node_id, runtime_node_id};
 pub use source_file::*;
 pub use storage::{
-    AstBuilder, AstBundle, AstFile, AstTransaction, AstView, NodeRead, ParsedFile, RetainedNode,
+    AstBuilder, AstBundle, AstFile, AstTransaction, AstView, ParsedFile, RetainedNode,
 };
 pub use subtree_facts::{is_left_hand_side_expression_kind, subtree_flags, SubtreeFacts};
 pub use subtree_generated::SubtreeContext;
@@ -161,14 +189,6 @@ impl Node {
             subtree_facts: AtomicU32::new(0),
             runtime_id: AtomicU64::new(0),
         })
-    }
-    pub(crate) fn copy_for_binding(&self) -> Self {
-        let mut copy = self.clone();
-        // Both representations name one logical node. Materialize identity on
-        // the canonical parsed record before copying it into the sparse overlay.
-        copy.runtime_id = AtomicU64::new(runtime_node_id(self));
-        copy.subtree_facts = AtomicU32::new(self.cached_subtree_facts());
-        copy
     }
     pub fn kind(&self) -> NodeKind {
         self.kind
@@ -280,18 +300,20 @@ mod tests;
 
 impl ts_arena::NodeRecord for Node {
     type Aux = AstStorageData;
+    type CoreAux = AstStorageData;
+    type Store = compact::CoreStore;
     fn storage_kind(&self) -> u32 {
         u32::from(self.kind.raw() as u16)
-    }
-    fn storage_parent(&self) -> Option<NodeId> {
-        self.parent
-    }
-    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
-        self.parent = parent;
     }
     fn storage_reparsed(&self) -> bool {
         // Pinned NodeFlagsReparsed; no second reparsed bit is stored.
         self.flags & node_flags::REPARSED != 0
+    }
+}
+
+impl ts_arena::NodeParentRecord for Node {
+    fn set_storage_parent(&mut self, parent: Option<NodeId>) {
+        self.parent = parent;
     }
 }
 

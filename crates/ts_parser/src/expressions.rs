@@ -160,10 +160,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let node = self.factory.node(last);
                     if node.kind() == SyntaxKind::BinaryExpression {
                         let operator = node
-                            .data()
+                            .data_source()
                             .as_binary_expression()
                             .expect("binary kind has binary payload")
-                            .operator_token
+                            .operator_token()
                             .expect("parser binary has operator");
                         ts_ast::get_binary_operator_precedence(self.factory.node(operator).kind())
                     } else {
@@ -492,10 +492,10 @@ impl<F: ParserFactory> Parser<'_, F> {
             let data = self.factory.node(node);
             if data.kind() == SyntaxKind::PartiallyEmittedExpression {
                 node = data
-                    .data()
+                    .data_source()
                     .as_partially_emitted_expression()
                     .expect("partially emitted payload")
-                    .expression
+                    .expression()
                     .expect("expression exists");
                 continue;
             }

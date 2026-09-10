@@ -10,7 +10,7 @@
   },
   "outputs": {
     "crates/ts_jsstring/src/go_fold_generated.rs": "08677ddcc7a94fb1cad65720dd8c6fefc34359180223e233c5f34e15583aa87a",
-    "crates/ts_scanner/src/tables_generated.rs": "cb2b9f244c059703aef34ac66e5a17504c3eb70841f105b128e933e8cb9b966b",
+    "crates/ts_scanner/src/tables_generated.rs": "7e574dfa4409c4a14c304a6e091d6c4deb2862bfc52ab8889234cecf9576cab1",
     "data/s05/tables.json": "2accdd4925b8f2177b0f1243fb8ae67594e90b2e399bf4d42452f226f78923c2"
   },
   "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1",

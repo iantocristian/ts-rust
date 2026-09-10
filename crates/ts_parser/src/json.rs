@@ -64,14 +64,18 @@ impl Parser<'_, AstBuilder> {
         self.finish_node(root, pos);
         let nodes = self.factory.read_list(statements).nodes();
         if !nodes.is_empty() {
-            let statement = self.factory.read_nodes(nodes)[0].expect("JSON statement");
+            let statement = self
+                .factory
+                .read_nodes(nodes)
+                .at(0)
+                .expect("JSON statement");
             let expression = self
                 .factory
                 .node(statement)
-                .data()
+                .data_source()
                 .as_expression_statement()
                 .expect("JSON expression statement")
-                .expression;
+                .expression();
             self.validate_json_value(root, expression);
         }
         self.finish_source_file(root, false);
@@ -115,13 +119,13 @@ impl<F: ParserFactory> Parser<'_, F> {
                 Some(K::PrefixUnaryExpression) => {
                     let data = self.factory.node(value);
                     let unary = data
-                        .data()
+                        .data_source()
                         .as_prefix_unary_expression()
                         .expect("prefix unary payload");
-                    if unary.operator == K::MinusToken
+                    if unary.operator() == K::MinusToken
                         && self
                             .factory
-                            .node(unary.operand.expect("parsed unary operand"))
+                            .node(unary.operand().expect("parsed unary operand"))
                             .kind()
                             == K::NumericLiteral
                     {
@@ -136,14 +140,14 @@ impl<F: ParserFactory> Parser<'_, F> {
                     let elements = self
                         .factory
                         .node(value)
-                        .data()
+                        .data_source()
                         .as_array_literal_expression()
                         .expect("array payload")
-                        .elements;
+                        .elements();
                     if let Some(list) = elements {
                         let nodes = self.factory.read_list(list).nodes();
                         for i in 0..nodes.len() {
-                            let element = self.factory.read_nodes(nodes)[i];
+                            let element = self.factory.read_nodes(nodes).at(i);
                             self.validate_json_value(source, element);
                         }
                     }
@@ -159,10 +163,10 @@ impl<F: ParserFactory> Parser<'_, F> {
         let node = self.factory.node(node);
         node.kind() == K::StringLiteral
             && node
-                .data()
+                .data_source()
                 .as_string_literal()
                 .expect("string payload")
-                .token_flags
+                .token_flags()
                 & token_flags::SINGLE_QUOTE
                 == 0
     }
@@ -171,14 +175,18 @@ impl<F: ParserFactory> Parser<'_, F> {
         let properties = self
             .factory
             .node(node)
-            .data()
+            .data_source()
             .as_object_literal_expression()
             .expect("object payload")
-            .properties
+            .properties()
             .expect("parsed object properties");
         let nodes = self.factory.read_list(properties).nodes();
         for i in 0..nodes.len() {
-            let element = self.factory.read_nodes(nodes)[i].expect("parsed property");
+            let element = self
+                .factory
+                .read_nodes(nodes)
+                .at(i)
+                .expect("parsed property");
             if self.factory.node(element).kind() != K::PropertyAssignment {
                 self.diagnostics.push(Diagnostic::new(
                     Some(source),
@@ -191,10 +199,10 @@ impl<F: ParserFactory> Parser<'_, F> {
             let (name, initializer) = {
                 let data = self.factory.node(element);
                 let property = data
-                    .data()
+                    .data_source()
                     .as_property_assignment()
                     .expect("property payload");
-                (property.name, property.initializer)
+                (property.name(), property.initializer())
             };
             if let Some(name) = name.filter(|&name| !self.is_double_quoted_string(name)) {
                 self.diagnostics.push(Diagnostic::new(

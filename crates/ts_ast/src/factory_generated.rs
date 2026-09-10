@@ -2,6 +2,6755 @@
 // Upstream: 1f70213d4922b434345f639b441681e470c7cfc1
 // upstream: tsc/internal/ast/ast_generated.go
 
+macro_rules! factory_construction_methods {
+    (defaults) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            self.new_node(kind, data.into())
+        }
+    };
+    (builder) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_token(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_identifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_private_identifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.left {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.right {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_qualified_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_computed_property_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_decorator(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_empty_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.then_statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.else_statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_if_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_do_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_while_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.condition {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.incrementor {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_for_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.await_modifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_for_in_or_of_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_break_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_continue_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_return_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_with_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.case_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_switch_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_case_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_case_or_default_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_throw_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.try_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.catch_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.finally_block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_try_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.variable_declaration {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.block {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_catch_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_debugger_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.label {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.statement {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_labeled_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_expression_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.declaration_list {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.exclamation_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.declarations {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_variable_declaration_list(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binding_pattern(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parameter_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binding_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_missing_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_heritage_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.heritage_clauses {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_interface_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_alias_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_enum_member(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_enum_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_module_block(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_not_emitted_statement(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_not_emitted_type_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.import_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_external_module_reference(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_import(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_imports(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_export_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_namespace_export(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_exports(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_specifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_call_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_construct_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_constructor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_get_accessor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_set_accessor_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_index_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_method_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_method_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_signature_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_semicolon_class_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_class_static_block_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_omitted_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_keyword_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_string_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_numeric_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_big_int_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_regular_expression_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_no_substitution_template_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.left {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.operator_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.right {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_binary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.operand {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_prefix_unary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.operand {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_postfix_unary_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_yield_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.equals_greater_than_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_arrow_function(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_as_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_satisfies_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.condition {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.when_true {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.colon_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.when_false {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_conditional_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_access_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.argument_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_element_access_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_call_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_new_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_meta_property(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_non_null_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_spread_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.head {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template_spans {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_span(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_tagged_template_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parenthesized_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_array_literal_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.properties {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_object_literal_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_spread_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_property_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.postfix_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.equals_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.object_assignment_initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_shorthand_property_assignment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_delete_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_of_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_void_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_await_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_assertion(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_keyword_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_union_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.types {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_intersection_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.check_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.extends_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.true_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.false_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_conditional_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_operator_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameter {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_infer_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.element_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_array_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.object_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.index_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_indexed_access_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_reference_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_expression_with_type_arguments(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_literal_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_this_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.asserts_modifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameter_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_predicate_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.value {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.attributes {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_attributes(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expr_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_query_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.readonly_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameter {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_mapped_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.members {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_literal_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.elements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_tuple_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.question_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_named_tuple_member(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_optional_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_rest_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_parenthesized_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_function_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_constructor_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_head(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_middle(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_tail(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.head {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.template_spans {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_literal_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.literal {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_template_literal_type_span(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tuple_name_source {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_synthetic_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_partially_emitted_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.opening_element {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.children {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.closing_element {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.properties {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_attributes(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.namespace {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_namespaced_name(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_opening_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_self_closing_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.opening_fragment {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.children {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.closing_fragment {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_opening_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_closing_fragment(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.initializer {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_spread_attribute(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_closing_element(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.dot_dot_dot_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_jsx_text(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.node_slice(data.children)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_syntax_list(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.tags {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_non_nullable_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_nullable_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_all_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_variadic_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_optional_type(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_unknown_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.constraint {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_template_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_return_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_public_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_private_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_protected_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_readonly_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_override_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_deprecated_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_see_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.class_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_implements_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.class_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_augments_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_satisfies_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_throws_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_this_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.import_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_import_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_callback_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_overload_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_typedef_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.parameters {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.r#type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.full_signature {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_signature(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_name_reference(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.statements {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.end_of_file_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_source_file(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.asterisk_token {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.body {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_module_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_reference {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_equals_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.export_clause {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.module_specifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_export_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.type_arguments {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.argument {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.attributes {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.qualifier {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_type_node(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.named_bindings {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_clause(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.property_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_import_specifier(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_text(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link_plain(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.text_slice(data.text)
+                .expect("factory edges belong to retained storage");
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_link_code(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.modifiers {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.constraint {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.default_type {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_type_parameter_declaration(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.this_arg {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_synthetic_reference_expression(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            view.node_slice(data.js_doc_property_tags)
+                .expect("factory edges belong to retained storage");
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_type_literal(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            let view = self.view();
+            if let Some(id) = data.tag_name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.comment {
+                view.list(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.name {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            if let Some(id) = data.type_expression {
+                view.node(id)
+                    .expect("factory edges belong to retained storage");
+            }
+            let created = self.new_typed_node_before_hook(kind, |payloads, context| {
+                payloads.insert_js_doc_parameter_or_property_tag(data, context)
+            });
+            self.run_create_hook(created);
+            created
+        }
+    };
+    (forward, $field:tt) => {
+        fn new_token_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TokenData,
+        ) -> $crate::NodeId {
+            self.$field.new_token_data(kind, data)
+        }
+        fn new_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IdentifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_identifier_data(kind, data)
+        }
+        fn new_private_identifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrivateIdentifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_private_identifier_data(kind, data)
+        }
+        fn new_qualified_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::QualifiedNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_qualified_name_data(kind, data)
+        }
+        fn new_computed_property_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ComputedPropertyNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_computed_property_name_data(kind, data)
+        }
+        fn new_decorator_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DecoratorData,
+        ) -> $crate::NodeId {
+            self.$field.new_decorator_data(kind, data)
+        }
+        fn new_empty_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EmptyStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_empty_statement_data(kind, data)
+        }
+        fn new_if_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IfStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_if_statement_data(kind, data)
+        }
+        fn new_do_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DoStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_do_statement_data(kind, data)
+        }
+        fn new_while_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WhileStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_while_statement_data(kind, data)
+        }
+        fn new_for_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_for_statement_data(kind, data)
+        }
+        fn new_for_in_or_of_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ForInOrOfStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_for_in_or_of_statement_data(kind, data)
+        }
+        fn new_break_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BreakStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_break_statement_data(kind, data)
+        }
+        fn new_continue_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ContinueStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_continue_statement_data(kind, data)
+        }
+        fn new_return_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ReturnStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_return_statement_data(kind, data)
+        }
+        fn new_with_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::WithStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_with_statement_data(kind, data)
+        }
+        fn new_switch_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SwitchStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_switch_statement_data(kind, data)
+        }
+        fn new_case_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseBlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_case_block_data(kind, data)
+        }
+        fn new_case_or_default_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CaseOrDefaultClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_case_or_default_clause_data(kind, data)
+        }
+        fn new_throw_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThrowStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_throw_statement_data(kind, data)
+        }
+        fn new_try_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TryStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_try_statement_data(kind, data)
+        }
+        fn new_catch_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CatchClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_catch_clause_data(kind, data)
+        }
+        fn new_debugger_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DebuggerStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_debugger_statement_data(kind, data)
+        }
+        fn new_labeled_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LabeledStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_labeled_statement_data(kind, data)
+        }
+        fn new_expression_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_expression_statement_data(kind, data)
+        }
+        fn new_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_block_data(kind, data)
+        }
+        fn new_variable_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_statement_data(kind, data)
+        }
+        fn new_variable_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_declaration_data(kind, data)
+        }
+        fn new_variable_declaration_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VariableDeclarationListData,
+        ) -> $crate::NodeId {
+            self.$field.new_variable_declaration_list_data(kind, data)
+        }
+        fn new_binding_pattern_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingPatternData,
+        ) -> $crate::NodeId {
+            self.$field.new_binding_pattern_data(kind, data)
+        }
+        fn new_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_parameter_declaration_data(kind, data)
+        }
+        fn new_binding_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BindingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_binding_element_data(kind, data)
+        }
+        fn new_missing_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MissingDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_missing_declaration_data(kind, data)
+        }
+        fn new_function_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_declaration_data(kind, data)
+        }
+        fn new_class_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_class_declaration_data(kind, data)
+        }
+        fn new_class_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_class_expression_data(kind, data)
+        }
+        fn new_heritage_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::HeritageClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_heritage_clause_data(kind, data)
+        }
+        fn new_interface_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InterfaceDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_interface_declaration_data(kind, data)
+        }
+        fn new_type_alias_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAliasDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_alias_declaration_data(kind, data)
+        }
+        fn new_enum_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumMemberData,
+        ) -> $crate::NodeId {
+            self.$field.new_enum_member_data(kind, data)
+        }
+        fn new_enum_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::EnumDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_enum_declaration_data(kind, data)
+        }
+        fn new_module_block_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleBlockData,
+        ) -> $crate::NodeId {
+            self.$field.new_module_block_data(kind, data)
+        }
+        fn new_not_emitted_statement_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedStatementData,
+        ) -> $crate::NodeId {
+            self.$field.new_not_emitted_statement_data(kind, data)
+        }
+        fn new_not_emitted_type_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NotEmittedTypeElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_not_emitted_type_element_data(kind, data)
+        }
+        fn new_import_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_declaration_data(kind, data)
+        }
+        fn new_external_module_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExternalModuleReferenceData,
+        ) -> $crate::NodeId {
+            self.$field.new_external_module_reference_data(kind, data)
+        }
+        fn new_namespace_import_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceImportData,
+        ) -> $crate::NodeId {
+            self.$field.new_namespace_import_data(kind, data)
+        }
+        fn new_named_imports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedImportsData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_imports_data(kind, data)
+        }
+        fn new_export_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_assignment_data(kind, data)
+        }
+        fn new_namespace_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_namespace_export_declaration_data(kind, data)
+        }
+        fn new_namespace_export_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamespaceExportData,
+        ) -> $crate::NodeId {
+            self.$field.new_namespace_export_data(kind, data)
+        }
+        fn new_named_exports_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedExportsData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_exports_data(kind, data)
+        }
+        fn new_export_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportSpecifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_specifier_data(kind, data)
+        }
+        fn new_call_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_call_signature_declaration_data(kind, data)
+        }
+        fn new_construct_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_construct_signature_declaration_data(kind, data)
+        }
+        fn new_constructor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_constructor_declaration_data(kind, data)
+        }
+        fn new_get_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::GetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_get_accessor_declaration_data(kind, data)
+        }
+        fn new_set_accessor_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SetAccessorDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_set_accessor_declaration_data(kind, data)
+        }
+        fn new_index_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_index_signature_declaration_data(kind, data)
+        }
+        fn new_method_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodSignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_method_signature_declaration_data(kind, data)
+        }
+        fn new_method_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MethodDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_method_declaration_data(kind, data)
+        }
+        fn new_property_signature_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertySignatureDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_property_signature_declaration_data(kind, data)
+        }
+        fn new_property_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_declaration_data(kind, data)
+        }
+        fn new_semicolon_class_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SemicolonClassElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_semicolon_class_element_data(kind, data)
+        }
+        fn new_class_static_block_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ClassStaticBlockDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_class_static_block_declaration_data(kind, data)
+        }
+        fn new_omitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_omitted_expression_data(kind, data)
+        }
+        fn new_keyword_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_keyword_expression_data(kind, data)
+        }
+        fn new_string_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::StringLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_string_literal_data(kind, data)
+        }
+        fn new_numeric_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NumericLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_numeric_literal_data(kind, data)
+        }
+        fn new_big_int_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BigIntLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_big_int_literal_data(kind, data)
+        }
+        fn new_regular_expression_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RegularExpressionLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_regular_expression_literal_data(kind, data)
+        }
+        fn new_no_substitution_template_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NoSubstitutionTemplateLiteralData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_no_substitution_template_literal_data(kind, data)
+        }
+        fn new_binary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::BinaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_binary_expression_data(kind, data)
+        }
+        fn new_prefix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PrefixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_prefix_unary_expression_data(kind, data)
+        }
+        fn new_postfix_unary_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PostfixUnaryExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_postfix_unary_expression_data(kind, data)
+        }
+        fn new_yield_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::YieldExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_yield_expression_data(kind, data)
+        }
+        fn new_arrow_function_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrowFunctionData,
+        ) -> $crate::NodeId {
+            self.$field.new_arrow_function_data(kind, data)
+        }
+        fn new_function_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_expression_data(kind, data)
+        }
+        fn new_as_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AsExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_as_expression_data(kind, data)
+        }
+        fn new_satisfies_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SatisfiesExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_satisfies_expression_data(kind, data)
+        }
+        fn new_conditional_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_conditional_expression_data(kind, data)
+        }
+        fn new_property_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_access_expression_data(kind, data)
+        }
+        fn new_element_access_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ElementAccessExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_element_access_expression_data(kind, data)
+        }
+        fn new_call_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::CallExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_call_expression_data(kind, data)
+        }
+        fn new_new_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NewExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_new_expression_data(kind, data)
+        }
+        fn new_meta_property_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MetaPropertyData,
+        ) -> $crate::NodeId {
+            self.$field.new_meta_property_data(kind, data)
+        }
+        fn new_non_null_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NonNullExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_non_null_expression_data(kind, data)
+        }
+        fn new_spread_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_spread_element_data(kind, data)
+        }
+        fn new_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_expression_data(kind, data)
+        }
+        fn new_template_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateSpanData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_span_data(kind, data)
+        }
+        fn new_tagged_template_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TaggedTemplateExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_tagged_template_expression_data(kind, data)
+        }
+        fn new_parenthesized_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_parenthesized_expression_data(kind, data)
+        }
+        fn new_array_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_array_literal_expression_data(kind, data)
+        }
+        fn new_object_literal_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ObjectLiteralExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_object_literal_expression_data(kind, data)
+        }
+        fn new_spread_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SpreadAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_spread_assignment_data(kind, data)
+        }
+        fn new_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_property_assignment_data(kind, data)
+        }
+        fn new_shorthand_property_assignment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ShorthandPropertyAssignmentData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_shorthand_property_assignment_data(kind, data)
+        }
+        fn new_delete_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::DeleteExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_delete_expression_data(kind, data)
+        }
+        fn new_type_of_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOfExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_of_expression_data(kind, data)
+        }
+        fn new_void_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::VoidExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_void_expression_data(kind, data)
+        }
+        fn new_await_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::AwaitExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_await_expression_data(kind, data)
+        }
+        fn new_type_assertion_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeAssertionData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_assertion_data(kind, data)
+        }
+        fn new_keyword_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::KeywordTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_keyword_type_node_data(kind, data)
+        }
+        fn new_union_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::UnionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_union_type_node_data(kind, data)
+        }
+        fn new_intersection_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IntersectionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_intersection_type_node_data(kind, data)
+        }
+        fn new_conditional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConditionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_conditional_type_node_data(kind, data)
+        }
+        fn new_type_operator_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeOperatorNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_operator_node_data(kind, data)
+        }
+        fn new_infer_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::InferTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_infer_type_node_data(kind, data)
+        }
+        fn new_array_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ArrayTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_array_type_node_data(kind, data)
+        }
+        fn new_indexed_access_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::IndexedAccessTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_indexed_access_type_node_data(kind, data)
+        }
+        fn new_type_reference_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeReferenceNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_reference_node_data(kind, data)
+        }
+        fn new_expression_with_type_arguments_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExpressionWithTypeArgumentsData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_expression_with_type_arguments_data(kind, data)
+        }
+        fn new_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::LiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_literal_type_node_data(kind, data)
+        }
+        fn new_this_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ThisTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_this_type_node_data(kind, data)
+        }
+        fn new_type_predicate_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypePredicateNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_predicate_node_data(kind, data)
+        }
+        fn new_import_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_attribute_data(kind, data)
+        }
+        fn new_import_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportAttributesData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_attributes_data(kind, data)
+        }
+        fn new_type_query_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeQueryNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_query_node_data(kind, data)
+        }
+        fn new_mapped_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::MappedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_mapped_type_node_data(kind, data)
+        }
+        fn new_type_literal_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeLiteralNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_literal_node_data(kind, data)
+        }
+        fn new_tuple_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TupleTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_tuple_type_node_data(kind, data)
+        }
+        fn new_named_tuple_member_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::NamedTupleMemberData,
+        ) -> $crate::NodeId {
+            self.$field.new_named_tuple_member_data(kind, data)
+        }
+        fn new_optional_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::OptionalTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_optional_type_node_data(kind, data)
+        }
+        fn new_rest_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::RestTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_rest_type_node_data(kind, data)
+        }
+        fn new_parenthesized_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ParenthesizedTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_parenthesized_type_node_data(kind, data)
+        }
+        fn new_function_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::FunctionTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_function_type_node_data(kind, data)
+        }
+        fn new_constructor_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ConstructorTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_constructor_type_node_data(kind, data)
+        }
+        fn new_template_head_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateHeadData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_head_data(kind, data)
+        }
+        fn new_template_middle_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateMiddleData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_middle_data(kind, data)
+        }
+        fn new_template_tail_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateTailData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_tail_data(kind, data)
+        }
+        fn new_template_literal_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_literal_type_node_data(kind, data)
+        }
+        fn new_template_literal_type_span_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TemplateLiteralTypeSpanData,
+        ) -> $crate::NodeId {
+            self.$field.new_template_literal_type_span_data(kind, data)
+        }
+        fn new_synthetic_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_synthetic_expression_data(kind, data)
+        }
+        fn new_partially_emitted_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::PartiallyEmittedExpressionData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_partially_emitted_expression_data(kind, data)
+        }
+        fn new_jsx_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_element_data(kind, data)
+        }
+        fn new_jsx_attributes_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributesData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_attributes_data(kind, data)
+        }
+        fn new_jsx_namespaced_name_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxNamespacedNameData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_namespaced_name_data(kind, data)
+        }
+        fn new_jsx_opening_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_opening_element_data(kind, data)
+        }
+        fn new_jsx_self_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSelfClosingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_self_closing_element_data(kind, data)
+        }
+        fn new_jsx_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_fragment_data(kind, data)
+        }
+        fn new_jsx_opening_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxOpeningFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_opening_fragment_data(kind, data)
+        }
+        fn new_jsx_closing_fragment_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingFragmentData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_closing_fragment_data(kind, data)
+        }
+        fn new_jsx_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_attribute_data(kind, data)
+        }
+        fn new_jsx_spread_attribute_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxSpreadAttributeData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_spread_attribute_data(kind, data)
+        }
+        fn new_jsx_closing_element_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxClosingElementData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_closing_element_data(kind, data)
+        }
+        fn new_jsx_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_expression_data(kind, data)
+        }
+        fn new_jsx_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JsxTextData,
+        ) -> $crate::NodeId {
+            self.$field.new_jsx_text_data(kind, data)
+        }
+        fn new_syntax_list_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntaxListData,
+        ) -> $crate::NodeId {
+            self.$field.new_syntax_list_data(kind, data)
+        }
+        fn new_js_doc_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_data(kind, data)
+        }
+        fn new_js_doc_type_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeExpressionData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_expression_data(kind, data)
+        }
+        fn new_js_doc_non_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNonNullableTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_non_nullable_type_data(kind, data)
+        }
+        fn new_js_doc_nullable_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNullableTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_nullable_type_data(kind, data)
+        }
+        fn new_js_doc_all_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAllTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_all_type_data(kind, data)
+        }
+        fn new_js_doc_variadic_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocVariadicTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_variadic_type_data(kind, data)
+        }
+        fn new_js_doc_optional_type_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOptionalTypeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_optional_type_data(kind, data)
+        }
+        fn new_js_doc_type_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_tag_data(kind, data)
+        }
+        fn new_js_doc_unknown_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocUnknownTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_unknown_tag_data(kind, data)
+        }
+        fn new_js_doc_template_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTemplateTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_template_tag_data(kind, data)
+        }
+        fn new_js_doc_return_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReturnTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_return_tag_data(kind, data)
+        }
+        fn new_js_doc_public_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPublicTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_public_tag_data(kind, data)
+        }
+        fn new_js_doc_private_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocPrivateTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_private_tag_data(kind, data)
+        }
+        fn new_js_doc_protected_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocProtectedTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_protected_tag_data(kind, data)
+        }
+        fn new_js_doc_readonly_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocReadonlyTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_readonly_tag_data(kind, data)
+        }
+        fn new_js_doc_override_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverrideTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_override_tag_data(kind, data)
+        }
+        fn new_js_doc_deprecated_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocDeprecatedTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_deprecated_tag_data(kind, data)
+        }
+        fn new_js_doc_see_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSeeTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_see_tag_data(kind, data)
+        }
+        fn new_js_doc_implements_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImplementsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_implements_tag_data(kind, data)
+        }
+        fn new_js_doc_augments_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocAugmentsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_augments_tag_data(kind, data)
+        }
+        fn new_js_doc_satisfies_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSatisfiesTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_satisfies_tag_data(kind, data)
+        }
+        fn new_js_doc_throws_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThrowsTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_throws_tag_data(kind, data)
+        }
+        fn new_js_doc_this_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocThisTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_this_tag_data(kind, data)
+        }
+        fn new_js_doc_import_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocImportTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_import_tag_data(kind, data)
+        }
+        fn new_js_doc_callback_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocCallbackTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_callback_tag_data(kind, data)
+        }
+        fn new_js_doc_overload_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocOverloadTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_overload_tag_data(kind, data)
+        }
+        fn new_js_doc_typedef_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypedefTagData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_typedef_tag_data(kind, data)
+        }
+        fn new_js_doc_signature_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocSignatureData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_signature_data(kind, data)
+        }
+        fn new_js_doc_name_reference_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocNameReferenceData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_name_reference_data(kind, data)
+        }
+        fn new_source_file_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SourceFileData,
+        ) -> $crate::NodeId {
+            self.$field.new_source_file_data(kind, data)
+        }
+        fn new_module_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ModuleDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_module_declaration_data(kind, data)
+        }
+        fn new_import_equals_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportEqualsDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_equals_declaration_data(kind, data)
+        }
+        fn new_export_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ExportDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_export_declaration_data(kind, data)
+        }
+        fn new_import_type_node_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportTypeNodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_type_node_data(kind, data)
+        }
+        fn new_import_clause_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportClauseData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_clause_data(kind, data)
+        }
+        fn new_import_specifier_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::ImportSpecifierData,
+        ) -> $crate::NodeId {
+            self.$field.new_import_specifier_data(kind, data)
+        }
+        fn new_js_doc_text_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTextData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_text_data(kind, data)
+        }
+        fn new_js_doc_link_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_data(kind, data)
+        }
+        fn new_js_doc_link_plain_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkPlainData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_plain_data(kind, data)
+        }
+        fn new_js_doc_link_code_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocLinkCodeData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_link_code_data(kind, data)
+        }
+        fn new_type_parameter_declaration_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::TypeParameterDeclarationData,
+        ) -> $crate::NodeId {
+            self.$field.new_type_parameter_declaration_data(kind, data)
+        }
+        fn new_synthetic_reference_expression_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::SyntheticReferenceExpressionData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_synthetic_reference_expression_data(kind, data)
+        }
+        fn new_js_doc_type_literal_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocTypeLiteralData,
+        ) -> $crate::NodeId {
+            self.$field.new_js_doc_type_literal_data(kind, data)
+        }
+        fn new_js_doc_parameter_or_property_tag_data(
+            &mut self,
+            kind: $crate::NodeKind,
+            data: $crate::JSDocParameterOrPropertyTagData,
+        ) -> $crate::NodeId {
+            self.$field
+                .new_js_doc_parameter_or_property_tag_data(kind, data)
+        }
+    };
+}
+pub(crate) use factory_construction_methods;
+
 #[allow(clippy::wildcard_imports)] // Generated methods consume the complete schema API.
 use crate::*;
 
@@ -11,13 +6760,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewToken
     fn new_token(&mut self, kind: NodeKind) -> NodeId {
         let data = TokenData {};
-        self.new_node(kind, data.into())
+        self.new_token_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:Token.Clone
     fn clone_token(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_token()
             .expect("operation requires Token payload");
         let original_kind = original.kind();
@@ -29,16 +6777,15 @@ pub trait FactoryMethods: Factory {
     fn new_identifier(&mut self, text: JsString) -> NodeId {
         let data = IdentifierData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::Identifier.into(), data.into())
+        self.new_identifier_data(SyntaxKind::Identifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:Identifier.Clone
     fn clone_identifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_identifier()
             .expect("operation requires Identifier payload");
-        let text = data.text.clone();
+        let text = data.text_owned();
         drop(original);
         let created = self.new_identifier(text);
         self.finish_clone(created, original_id)
@@ -47,16 +6794,15 @@ pub trait FactoryMethods: Factory {
     fn new_private_identifier(&mut self, text: JsString) -> NodeId {
         let data = PrivateIdentifierData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::PrivateIdentifier.into(), data.into())
+        self.new_private_identifier_data(SyntaxKind::PrivateIdentifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:PrivateIdentifier.Clone
     fn clone_private_identifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_private_identifier()
             .expect("operation requires PrivateIdentifier payload");
-        let text = data.text.clone();
+        let text = data.text_owned();
         drop(original);
         let created = self.new_private_identifier(text);
         self.finish_clone(created, original_id)
@@ -64,7 +6810,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewQualifiedName
     fn new_qualified_name(&mut self, left: Option<NodeId>, right: Option<NodeId>) -> NodeId {
         let data = QualifiedNameData { left, right };
-        self.new_node(SyntaxKind::QualifiedName.into(), data.into())
+        self.new_qualified_name_data(SyntaxKind::QualifiedName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateQualifiedName
     fn update_qualified_name(
@@ -75,10 +6821,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_qualified_name()
             .expect("UpdateQualifiedName requires QualifiedName payload");
-        if left == data.left && right == data.right {
+        if left == data.left() && right == data.right() {
             return original_id;
         }
         drop(original);
@@ -89,11 +6834,10 @@ pub trait FactoryMethods: Factory {
     fn clone_qualified_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_qualified_name()
             .expect("operation requires QualifiedName payload");
-        let left = data.left;
-        let right = data.right;
+        let left = data.left();
+        let right = data.right();
         drop(original);
         let created = self.new_qualified_name(left, right);
         self.finish_clone(created, original_id)
@@ -101,7 +6845,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewComputedPropertyName
     fn new_computed_property_name(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ComputedPropertyNameData { expression };
-        self.new_node(SyntaxKind::ComputedPropertyName.into(), data.into())
+        self.new_computed_property_name_data(SyntaxKind::ComputedPropertyName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateComputedPropertyName
     fn update_computed_property_name(
@@ -111,10 +6855,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_computed_property_name()
             .expect("UpdateComputedPropertyName requires ComputedPropertyName payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -125,10 +6868,9 @@ pub trait FactoryMethods: Factory {
     fn clone_computed_property_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_computed_property_name()
             .expect("operation requires ComputedPropertyName payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_computed_property_name(expression);
         self.finish_clone(created, original_id)
@@ -136,16 +6878,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDecorator
     fn new_decorator(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = DecoratorData { expression };
-        self.new_node(SyntaxKind::Decorator.into(), data.into())
+        self.new_decorator_data(SyntaxKind::Decorator.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDecorator
     fn update_decorator(&mut self, original_id: NodeId, expression: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_decorator()
             .expect("UpdateDecorator requires Decorator payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -156,10 +6897,9 @@ pub trait FactoryMethods: Factory {
     fn clone_decorator(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_decorator()
             .expect("operation requires Decorator payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_decorator(expression);
         self.finish_clone(created, original_id)
@@ -167,13 +6907,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewEmptyStatement
     fn new_empty_statement(&mut self) -> NodeId {
         let data = EmptyStatementData {};
-        self.new_node(SyntaxKind::EmptyStatement.into(), data.into())
+        self.new_empty_statement_data(SyntaxKind::EmptyStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:EmptyStatement.Clone
     fn clone_empty_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_empty_statement()
             .expect("operation requires EmptyStatement payload");
         drop(original);
@@ -192,7 +6931,7 @@ pub trait FactoryMethods: Factory {
             then_statement,
             else_statement,
         };
-        self.new_node(SyntaxKind::IfStatement.into(), data.into())
+        self.new_if_statement_data(SyntaxKind::IfStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIfStatement
     fn update_if_statement(
@@ -204,12 +6943,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_if_statement()
             .expect("UpdateIfStatement requires IfStatement payload");
-        if expression == data.expression
-            && then_statement == data.then_statement
-            && else_statement == data.else_statement
+        if expression == data.expression()
+            && then_statement == data.then_statement()
+            && else_statement == data.else_statement()
         {
             return original_id;
         }
@@ -221,12 +6959,11 @@ pub trait FactoryMethods: Factory {
     fn clone_if_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_if_statement()
             .expect("operation requires IfStatement payload");
-        let expression = data.expression;
-        let then_statement = data.then_statement;
-        let else_statement = data.else_statement;
+        let expression = data.expression();
+        let then_statement = data.then_statement();
+        let else_statement = data.else_statement();
         drop(original);
         let created = self.new_if_statement(expression, then_statement, else_statement);
         self.finish_clone(created, original_id)
@@ -241,7 +6978,7 @@ pub trait FactoryMethods: Factory {
             statement,
             expression,
         };
-        self.new_node(SyntaxKind::DoStatement.into(), data.into())
+        self.new_do_statement_data(SyntaxKind::DoStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDoStatement
     fn update_do_statement(
@@ -252,10 +6989,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_do_statement()
             .expect("UpdateDoStatement requires DoStatement payload");
-        if statement == data.statement && expression == data.expression {
+        if statement == data.statement() && expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -266,11 +7002,10 @@ pub trait FactoryMethods: Factory {
     fn clone_do_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_do_statement()
             .expect("operation requires DoStatement payload");
-        let statement = data.statement;
-        let expression = data.expression;
+        let statement = data.statement();
+        let expression = data.expression();
         drop(original);
         let created = self.new_do_statement(statement, expression);
         self.finish_clone(created, original_id)
@@ -285,7 +7020,7 @@ pub trait FactoryMethods: Factory {
             statement,
             expression,
         };
-        self.new_node(SyntaxKind::WhileStatement.into(), data.into())
+        self.new_while_statement_data(SyntaxKind::WhileStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateWhileStatement
     fn update_while_statement(
@@ -296,10 +7031,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_while_statement()
             .expect("UpdateWhileStatement requires WhileStatement payload");
-        if expression == data.expression && statement == data.statement {
+        if expression == data.expression() && statement == data.statement() {
             return original_id;
         }
         drop(original);
@@ -310,11 +7044,10 @@ pub trait FactoryMethods: Factory {
     fn clone_while_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_while_statement()
             .expect("operation requires WhileStatement payload");
-        let expression = data.expression;
-        let statement = data.statement;
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let created = self.new_while_statement(expression, statement);
         self.finish_clone(created, original_id)
@@ -333,7 +7066,7 @@ pub trait FactoryMethods: Factory {
             condition,
             incrementor,
         };
-        self.new_node(SyntaxKind::ForStatement.into(), data.into())
+        self.new_for_statement_data(SyntaxKind::ForStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateForStatement
     fn update_for_statement(
@@ -346,13 +7079,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_statement()
             .expect("UpdateForStatement requires ForStatement payload");
-        if initializer == data.initializer
-            && condition == data.condition
-            && incrementor == data.incrementor
-            && statement == data.statement
+        if initializer == data.initializer()
+            && condition == data.condition()
+            && incrementor == data.incrementor()
+            && statement == data.statement()
         {
             return original_id;
         }
@@ -364,13 +7096,12 @@ pub trait FactoryMethods: Factory {
     fn clone_for_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_statement()
             .expect("operation requires ForStatement payload");
-        let initializer = data.initializer;
-        let condition = data.condition;
-        let incrementor = data.incrementor;
-        let statement = data.statement;
+        let initializer = data.initializer();
+        let condition = data.condition();
+        let incrementor = data.incrementor();
+        let statement = data.statement();
         drop(original);
         let created = self.new_for_statement(initializer, condition, incrementor, statement);
         self.finish_clone(created, original_id)
@@ -390,7 +7121,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statement,
         };
-        self.new_node(kind, data.into())
+        self.new_for_in_or_of_statement_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateForInOrOfStatement
     fn update_for_in_or_of_statement(
@@ -403,13 +7134,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_in_or_of_statement()
             .expect("UpdateForInOrOfStatement requires ForInOrOfStatement payload");
-        if await_modifier == data.await_modifier
-            && initializer == data.initializer
-            && expression == data.expression
-            && statement == data.statement
+        if await_modifier == data.await_modifier()
+            && initializer == data.initializer()
+            && expression == data.expression()
+            && statement == data.statement()
         {
             return original_id;
         }
@@ -428,14 +7158,13 @@ pub trait FactoryMethods: Factory {
     fn clone_for_in_or_of_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_for_in_or_of_statement()
             .expect("operation requires ForInOrOfStatement payload");
         let original_kind = original.kind();
-        let await_modifier = data.await_modifier;
-        let initializer = data.initializer;
-        let expression = data.expression;
-        let statement = data.statement;
+        let await_modifier = data.await_modifier();
+        let initializer = data.initializer();
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let created = self.new_for_in_or_of_statement(
             original_kind,
@@ -449,16 +7178,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewBreakStatement
     fn new_break_statement(&mut self, label: Option<NodeId>) -> NodeId {
         let data = BreakStatementData { label };
-        self.new_node(SyntaxKind::BreakStatement.into(), data.into())
+        self.new_break_statement_data(SyntaxKind::BreakStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBreakStatement
     fn update_break_statement(&mut self, original_id: NodeId, label: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_break_statement()
             .expect("UpdateBreakStatement requires BreakStatement payload");
-        if label == data.label {
+        if label == data.label() {
             return original_id;
         }
         drop(original);
@@ -469,10 +7197,9 @@ pub trait FactoryMethods: Factory {
     fn clone_break_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_break_statement()
             .expect("operation requires BreakStatement payload");
-        let label = data.label;
+        let label = data.label();
         drop(original);
         let created = self.new_break_statement(label);
         self.finish_clone(created, original_id)
@@ -480,16 +7207,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewContinueStatement
     fn new_continue_statement(&mut self, label: Option<NodeId>) -> NodeId {
         let data = ContinueStatementData { label };
-        self.new_node(SyntaxKind::ContinueStatement.into(), data.into())
+        self.new_continue_statement_data(SyntaxKind::ContinueStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateContinueStatement
     fn update_continue_statement(&mut self, original_id: NodeId, label: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_continue_statement()
             .expect("UpdateContinueStatement requires ContinueStatement payload");
-        if label == data.label {
+        if label == data.label() {
             return original_id;
         }
         drop(original);
@@ -500,10 +7226,9 @@ pub trait FactoryMethods: Factory {
     fn clone_continue_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_continue_statement()
             .expect("operation requires ContinueStatement payload");
-        let label = data.label;
+        let label = data.label();
         drop(original);
         let created = self.new_continue_statement(label);
         self.finish_clone(created, original_id)
@@ -511,7 +7236,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewReturnStatement
     fn new_return_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ReturnStatementData { expression };
-        self.new_node(SyntaxKind::ReturnStatement.into(), data.into())
+        self.new_return_statement_data(SyntaxKind::ReturnStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateReturnStatement
     fn update_return_statement(
@@ -521,10 +7246,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_return_statement()
             .expect("UpdateReturnStatement requires ReturnStatement payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -535,10 +7259,9 @@ pub trait FactoryMethods: Factory {
     fn clone_return_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_return_statement()
             .expect("operation requires ReturnStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_return_statement(expression);
         self.finish_clone(created, original_id)
@@ -553,7 +7276,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statement,
         };
-        self.new_node(SyntaxKind::WithStatement.into(), data.into())
+        self.new_with_statement_data(SyntaxKind::WithStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateWithStatement
     fn update_with_statement(
@@ -564,10 +7287,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_with_statement()
             .expect("UpdateWithStatement requires WithStatement payload");
-        if expression == data.expression && statement == data.statement {
+        if expression == data.expression() && statement == data.statement() {
             return original_id;
         }
         drop(original);
@@ -578,11 +7300,10 @@ pub trait FactoryMethods: Factory {
     fn clone_with_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_with_statement()
             .expect("operation requires WithStatement payload");
-        let expression = data.expression;
-        let statement = data.statement;
+        let expression = data.expression();
+        let statement = data.statement();
         drop(original);
         let created = self.new_with_statement(expression, statement);
         self.finish_clone(created, original_id)
@@ -597,7 +7318,7 @@ pub trait FactoryMethods: Factory {
             expression,
             case_block,
         };
-        self.new_node(SyntaxKind::SwitchStatement.into(), data.into())
+        self.new_switch_statement_data(SyntaxKind::SwitchStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSwitchStatement
     fn update_switch_statement(
@@ -608,10 +7329,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_switch_statement()
             .expect("UpdateSwitchStatement requires SwitchStatement payload");
-        if expression == data.expression && case_block == data.case_block {
+        if expression == data.expression() && case_block == data.case_block() {
             return original_id;
         }
         drop(original);
@@ -622,11 +7342,10 @@ pub trait FactoryMethods: Factory {
     fn clone_switch_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_switch_statement()
             .expect("operation requires SwitchStatement payload");
-        let expression = data.expression;
-        let case_block = data.case_block;
+        let expression = data.expression();
+        let case_block = data.case_block();
         drop(original);
         let created = self.new_switch_statement(expression, case_block);
         self.finish_clone(created, original_id)
@@ -634,16 +7353,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewCaseBlock
     fn new_case_block(&mut self, clauses: Option<NodeListId>) -> NodeId {
         let data = CaseBlockData { clauses };
-        self.new_node(SyntaxKind::CaseBlock.into(), data.into())
+        self.new_case_block_data(SyntaxKind::CaseBlock.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCaseBlock
     fn update_case_block(&mut self, original_id: NodeId, clauses: Option<NodeListId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_block()
             .expect("UpdateCaseBlock requires CaseBlock payload");
-        if clauses == data.clauses {
+        if clauses == data.clauses() {
             return original_id;
         }
         drop(original);
@@ -654,10 +7372,9 @@ pub trait FactoryMethods: Factory {
     fn clone_case_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_block()
             .expect("operation requires CaseBlock payload");
-        let clauses = data.clauses;
+        let clauses = data.clauses();
         drop(original);
         let created = self.new_case_block(clauses);
         self.finish_clone(created, original_id)
@@ -673,7 +7390,7 @@ pub trait FactoryMethods: Factory {
             expression,
             statements,
         };
-        self.new_node(kind, data.into())
+        self.new_case_or_default_clause_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCaseOrDefaultClause
     fn update_case_or_default_clause(
@@ -684,10 +7401,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_or_default_clause()
             .expect("UpdateCaseOrDefaultClause requires CaseOrDefaultClause payload");
-        if expression == data.expression && statements == data.statements {
+        if expression == data.expression() && statements == data.statements() {
             return original_id;
         }
         let original_kind = original.kind();
@@ -699,12 +7415,11 @@ pub trait FactoryMethods: Factory {
     fn clone_case_or_default_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_case_or_default_clause()
             .expect("operation requires CaseOrDefaultClause payload");
         let original_kind = original.kind();
-        let expression = data.expression;
-        let statements = data.statements;
+        let expression = data.expression();
+        let statements = data.statements();
         drop(original);
         let created = self.new_case_or_default_clause(original_kind, expression, statements);
         self.finish_clone(created, original_id)
@@ -712,7 +7427,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewThrowStatement
     fn new_throw_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ThrowStatementData { expression };
-        self.new_node(SyntaxKind::ThrowStatement.into(), data.into())
+        self.new_throw_statement_data(SyntaxKind::ThrowStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateThrowStatement
     fn update_throw_statement(
@@ -722,10 +7437,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_throw_statement()
             .expect("UpdateThrowStatement requires ThrowStatement payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -736,10 +7450,9 @@ pub trait FactoryMethods: Factory {
     fn clone_throw_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_throw_statement()
             .expect("operation requires ThrowStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_throw_statement(expression);
         self.finish_clone(created, original_id)
@@ -756,7 +7469,7 @@ pub trait FactoryMethods: Factory {
             catch_clause,
             finally_block,
         };
-        self.new_node(SyntaxKind::TryStatement.into(), data.into())
+        self.new_try_statement_data(SyntaxKind::TryStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTryStatement
     fn update_try_statement(
@@ -768,12 +7481,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_try_statement()
             .expect("UpdateTryStatement requires TryStatement payload");
-        if try_block == data.try_block
-            && catch_clause == data.catch_clause
-            && finally_block == data.finally_block
+        if try_block == data.try_block()
+            && catch_clause == data.catch_clause()
+            && finally_block == data.finally_block()
         {
             return original_id;
         }
@@ -785,12 +7497,11 @@ pub trait FactoryMethods: Factory {
     fn clone_try_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_try_statement()
             .expect("operation requires TryStatement payload");
-        let try_block = data.try_block;
-        let catch_clause = data.catch_clause;
-        let finally_block = data.finally_block;
+        let try_block = data.try_block();
+        let catch_clause = data.catch_clause();
+        let finally_block = data.finally_block();
         drop(original);
         let created = self.new_try_statement(try_block, catch_clause, finally_block);
         self.finish_clone(created, original_id)
@@ -805,7 +7516,7 @@ pub trait FactoryMethods: Factory {
             variable_declaration,
             block,
         };
-        self.new_node(SyntaxKind::CatchClause.into(), data.into())
+        self.new_catch_clause_data(SyntaxKind::CatchClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCatchClause
     fn update_catch_clause(
@@ -816,10 +7527,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_catch_clause()
             .expect("UpdateCatchClause requires CatchClause payload");
-        if variable_declaration == data.variable_declaration && block == data.block {
+        if variable_declaration == data.variable_declaration() && block == data.block() {
             return original_id;
         }
         drop(original);
@@ -830,11 +7540,10 @@ pub trait FactoryMethods: Factory {
     fn clone_catch_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_catch_clause()
             .expect("operation requires CatchClause payload");
-        let variable_declaration = data.variable_declaration;
-        let block = data.block;
+        let variable_declaration = data.variable_declaration();
+        let block = data.block();
         drop(original);
         let created = self.new_catch_clause(variable_declaration, block);
         self.finish_clone(created, original_id)
@@ -842,13 +7551,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDebuggerStatement
     fn new_debugger_statement(&mut self) -> NodeId {
         let data = DebuggerStatementData {};
-        self.new_node(SyntaxKind::DebuggerStatement.into(), data.into())
+        self.new_debugger_statement_data(SyntaxKind::DebuggerStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:DebuggerStatement.Clone
     fn clone_debugger_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_debugger_statement()
             .expect("operation requires DebuggerStatement payload");
         drop(original);
@@ -862,7 +7570,7 @@ pub trait FactoryMethods: Factory {
         statement: Option<NodeId>,
     ) -> NodeId {
         let data = LabeledStatementData { label, statement };
-        self.new_node(SyntaxKind::LabeledStatement.into(), data.into())
+        self.new_labeled_statement_data(SyntaxKind::LabeledStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateLabeledStatement
     fn update_labeled_statement(
@@ -873,10 +7581,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_labeled_statement()
             .expect("UpdateLabeledStatement requires LabeledStatement payload");
-        if label == data.label && statement == data.statement {
+        if label == data.label() && statement == data.statement() {
             return original_id;
         }
         drop(original);
@@ -887,11 +7594,10 @@ pub trait FactoryMethods: Factory {
     fn clone_labeled_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_labeled_statement()
             .expect("operation requires LabeledStatement payload");
-        let label = data.label;
-        let statement = data.statement;
+        let label = data.label();
+        let statement = data.statement();
         drop(original);
         let created = self.new_labeled_statement(label, statement);
         self.finish_clone(created, original_id)
@@ -899,7 +7605,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewExpressionStatement
     fn new_expression_statement(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ExpressionStatementData { expression };
-        self.new_node(SyntaxKind::ExpressionStatement.into(), data.into())
+        self.new_expression_statement_data(SyntaxKind::ExpressionStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExpressionStatement
     fn update_expression_statement(
@@ -909,10 +7615,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_expression_statement()
             .expect("UpdateExpressionStatement requires ExpressionStatement payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -923,10 +7628,9 @@ pub trait FactoryMethods: Factory {
     fn clone_expression_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_expression_statement()
             .expect("operation requires ExpressionStatement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_expression_statement(expression);
         self.finish_clone(created, original_id)
@@ -937,7 +7641,7 @@ pub trait FactoryMethods: Factory {
             statements,
             multi_line,
         };
-        self.new_node(SyntaxKind::Block.into(), data.into())
+        self.new_block_data(SyntaxKind::Block.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBlock
     fn update_block(
@@ -948,10 +7652,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_block()
             .expect("UpdateBlock requires Block payload");
-        if statements == data.statements && multi_line == data.multi_line {
+        if statements == data.statements() && multi_line == data.multi_line() {
             return original_id;
         }
         drop(original);
@@ -962,11 +7665,10 @@ pub trait FactoryMethods: Factory {
     fn clone_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_block()
             .expect("operation requires Block payload");
-        let statements = data.statements;
-        let multi_line = data.multi_line;
+        let statements = data.statements();
+        let multi_line = data.multi_line();
         drop(original);
         let created = self.new_block(statements, multi_line);
         self.finish_clone(created, original_id)
@@ -981,7 +7683,7 @@ pub trait FactoryMethods: Factory {
             modifiers,
             declaration_list,
         };
-        self.new_node(SyntaxKind::VariableStatement.into(), data.into())
+        self.new_variable_statement_data(SyntaxKind::VariableStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVariableStatement
     fn update_variable_statement(
@@ -992,10 +7694,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_statement()
             .expect("UpdateVariableStatement requires VariableStatement payload");
-        if modifiers == data.modifiers && declaration_list == data.declaration_list {
+        if modifiers == data.modifiers() && declaration_list == data.declaration_list() {
             return original_id;
         }
         drop(original);
@@ -1006,11 +7707,10 @@ pub trait FactoryMethods: Factory {
     fn clone_variable_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_statement()
             .expect("operation requires VariableStatement payload");
-        let modifiers = data.modifiers;
-        let declaration_list = data.declaration_list;
+        let modifiers = data.modifiers();
+        let declaration_list = data.declaration_list();
         drop(original);
         let created = self.new_variable_statement(modifiers, declaration_list);
         self.finish_clone(created, original_id)
@@ -1029,7 +7729,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::VariableDeclaration.into(), data.into())
+        self.new_variable_declaration_data(SyntaxKind::VariableDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVariableDeclaration
     fn update_variable_declaration(
@@ -1042,13 +7742,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration()
             .expect("UpdateVariableDeclaration requires VariableDeclaration payload");
-        if name == data.name
-            && exclamation_token == data.exclamation_token
-            && r#type == data.r#type
-            && initializer == data.initializer
+        if name == data.name()
+            && exclamation_token == data.exclamation_token()
+            && r#type == data.r#type()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -1060,13 +7759,12 @@ pub trait FactoryMethods: Factory {
     fn clone_variable_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration()
             .expect("operation requires VariableDeclaration payload");
-        let name = data.name;
-        let exclamation_token = data.exclamation_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let name = data.name();
+        let exclamation_token = data.exclamation_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_variable_declaration(name, exclamation_token, r#type, initializer);
         self.finish_clone(created, original_id)
@@ -1078,7 +7776,8 @@ pub trait FactoryMethods: Factory {
         flags: u32,
     ) -> NodeId {
         let data = VariableDeclarationListData { declarations };
-        let created = self.new_node(SyntaxKind::VariableDeclarationList.into(), data.into());
+        let created = self
+            .new_variable_declaration_list_data(SyntaxKind::VariableDeclarationList.into(), data);
         self.set_node_flags(created, flags);
         created
     }
@@ -1091,10 +7790,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration_list()
             .expect("UpdateVariableDeclarationList requires VariableDeclarationList payload");
-        if declarations == data.declarations && flags == original.flags() {
+        if declarations == data.declarations() && flags == original.flags() {
             return original_id;
         }
         drop(original);
@@ -1105,10 +7803,9 @@ pub trait FactoryMethods: Factory {
     fn clone_variable_declaration_list(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_variable_declaration_list()
             .expect("operation requires VariableDeclarationList payload");
-        let declarations = data.declarations;
+        let declarations = data.declarations();
         let flags = original.flags();
         drop(original);
         let created = self.new_variable_declaration_list(declarations, flags);
@@ -1117,7 +7814,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewBindingPattern
     fn new_binding_pattern(&mut self, kind: NodeKind, elements: Option<NodeListId>) -> NodeId {
         let data = BindingPatternData { elements };
-        self.new_node(kind, data.into())
+        self.new_binding_pattern_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBindingPattern
     fn update_binding_pattern(
@@ -1127,10 +7824,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_pattern()
             .expect("UpdateBindingPattern requires BindingPattern payload");
-        if elements == data.elements {
+        if elements == data.elements() {
             return original_id;
         }
         let original_kind = original.kind();
@@ -1142,11 +7838,10 @@ pub trait FactoryMethods: Factory {
     fn clone_binding_pattern(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_pattern()
             .expect("operation requires BindingPattern payload");
         let original_kind = original.kind();
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let created = self.new_binding_pattern(original_kind, elements);
         self.finish_clone(created, original_id)
@@ -1169,7 +7864,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::Parameter.into(), data.into())
+        self.new_parameter_declaration_data(SyntaxKind::Parameter.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParameterDeclaration
     fn update_parameter_declaration(
@@ -1184,15 +7879,14 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parameter_declaration()
             .expect("UpdateParameterDeclaration requires ParameterDeclaration payload");
-        if modifiers == data.modifiers
-            && dot_dot_dot_token == data.dot_dot_dot_token
-            && name == data.name
-            && question_token == data.question_token
-            && r#type == data.r#type
-            && initializer == data.initializer
+        if modifiers == data.modifiers()
+            && dot_dot_dot_token == data.dot_dot_dot_token()
+            && name == data.name()
+            && question_token == data.question_token()
+            && r#type == data.r#type()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -1211,15 +7905,14 @@ pub trait FactoryMethods: Factory {
     fn clone_parameter_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parameter_declaration()
             .expect("operation requires ParameterDeclaration payload");
-        let modifiers = data.modifiers;
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let name = data.name;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let name = data.name();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_parameter_declaration(
             modifiers,
@@ -1245,7 +7938,7 @@ pub trait FactoryMethods: Factory {
             name,
             initializer,
         };
-        self.new_node(SyntaxKind::BindingElement.into(), data.into())
+        self.new_binding_element_data(SyntaxKind::BindingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBindingElement
     fn update_binding_element(
@@ -1258,13 +7951,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_element()
             .expect("UpdateBindingElement requires BindingElement payload");
-        if dot_dot_dot_token == data.dot_dot_dot_token
-            && property_name == data.property_name
-            && name == data.name
-            && initializer == data.initializer
+        if dot_dot_dot_token == data.dot_dot_dot_token()
+            && property_name == data.property_name()
+            && name == data.name()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -1276,13 +7968,12 @@ pub trait FactoryMethods: Factory {
     fn clone_binding_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binding_element()
             .expect("operation requires BindingElement payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let property_name = data.property_name;
-        let name = data.name;
-        let initializer = data.initializer;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let property_name = data.property_name();
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_binding_element(dot_dot_dot_token, property_name, name, initializer);
         self.finish_clone(created, original_id)
@@ -1290,7 +7981,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewMissingDeclaration
     fn new_missing_declaration(&mut self, modifiers: Option<NodeListId>) -> NodeId {
         let data = MissingDeclarationData { modifiers };
-        self.new_node(SyntaxKind::MissingDeclaration.into(), data.into())
+        self.new_missing_declaration_data(SyntaxKind::MissingDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMissingDeclaration
     fn update_missing_declaration(
@@ -1300,10 +7991,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_missing_declaration()
             .expect("UpdateMissingDeclaration requires MissingDeclaration payload");
-        if modifiers == data.modifiers {
+        if modifiers == data.modifiers() {
             return original_id;
         }
         drop(original);
@@ -1314,10 +8004,9 @@ pub trait FactoryMethods: Factory {
     fn clone_missing_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_missing_declaration()
             .expect("operation requires MissingDeclaration payload");
-        let modifiers = data.modifiers;
+        let modifiers = data.modifiers();
         drop(original);
         let created = self.new_missing_declaration(modifiers);
         self.finish_clone(created, original_id)
@@ -1344,7 +8033,7 @@ pub trait FactoryMethods: Factory {
             body,
             name,
         };
-        self.new_node(SyntaxKind::FunctionDeclaration.into(), data.into())
+        self.new_function_declaration_data(SyntaxKind::FunctionDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionDeclaration
     fn update_function_declaration(
@@ -1361,17 +8050,16 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_declaration()
             .expect("UpdateFunctionDeclaration requires FunctionDeclaration payload");
-        if modifiers == data.modifiers
-            && asterisk_token == data.asterisk_token
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && asterisk_token == data.asterisk_token()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -1392,17 +8080,16 @@ pub trait FactoryMethods: Factory {
     fn clone_function_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_declaration()
             .expect("operation requires FunctionDeclaration payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_function_declaration(
             modifiers,
@@ -1432,7 +8119,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::ClassDeclaration.into(), data.into())
+        self.new_class_declaration_data(SyntaxKind::ClassDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassDeclaration
     fn update_class_declaration(
@@ -1446,14 +8133,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_declaration()
             .expect("UpdateClassDeclaration requires ClassDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && heritage_clauses == data.heritage_clauses
-            && members == data.members
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && heritage_clauses == data.heritage_clauses()
+            && members == data.members()
         {
             return original_id;
         }
@@ -1466,14 +8152,13 @@ pub trait FactoryMethods: Factory {
     fn clone_class_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_declaration()
             .expect("operation requires ClassDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let created =
             self.new_class_declaration(modifiers, name, type_parameters, heritage_clauses, members);
@@ -1495,7 +8180,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::ClassExpression.into(), data.into())
+        self.new_class_expression_data(SyntaxKind::ClassExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassExpression
     fn update_class_expression(
@@ -1509,14 +8194,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_expression()
             .expect("UpdateClassExpression requires ClassExpression payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && heritage_clauses == data.heritage_clauses
-            && members == data.members
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && heritage_clauses == data.heritage_clauses()
+            && members == data.members()
         {
             return original_id;
         }
@@ -1529,14 +8213,13 @@ pub trait FactoryMethods: Factory {
     fn clone_class_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_expression()
             .expect("operation requires ClassExpression payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let created =
             self.new_class_expression(modifiers, name, type_parameters, heritage_clauses, members);
@@ -1545,7 +8228,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewHeritageClause
     fn new_heritage_clause(&mut self, token: NodeKind, types: Option<NodeListId>) -> NodeId {
         let data = HeritageClauseData { token, types };
-        self.new_node(SyntaxKind::HeritageClause.into(), data.into())
+        self.new_heritage_clause_data(SyntaxKind::HeritageClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateHeritageClause
     fn update_heritage_clause(
@@ -1556,10 +8239,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_heritage_clause()
             .expect("UpdateHeritageClause requires HeritageClause payload");
-        if token == data.token && types == data.types {
+        if token == data.token() && types == data.types() {
             return original_id;
         }
         drop(original);
@@ -1570,11 +8252,10 @@ pub trait FactoryMethods: Factory {
     fn clone_heritage_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_heritage_clause()
             .expect("operation requires HeritageClause payload");
-        let token = data.token;
-        let types = data.types;
+        let token = data.token();
+        let types = data.types();
         drop(original);
         let created = self.new_heritage_clause(token, types);
         self.finish_clone(created, original_id)
@@ -1595,7 +8276,7 @@ pub trait FactoryMethods: Factory {
             heritage_clauses,
             members,
         };
-        self.new_node(SyntaxKind::InterfaceDeclaration.into(), data.into())
+        self.new_interface_declaration_data(SyntaxKind::InterfaceDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateInterfaceDeclaration
     fn update_interface_declaration(
@@ -1609,14 +8290,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_interface_declaration()
             .expect("UpdateInterfaceDeclaration requires InterfaceDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && heritage_clauses == data.heritage_clauses
-            && members == data.members
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && heritage_clauses == data.heritage_clauses()
+            && members == data.members()
         {
             return original_id;
         }
@@ -1634,14 +8314,13 @@ pub trait FactoryMethods: Factory {
     fn clone_interface_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_interface_declaration()
             .expect("operation requires InterfaceDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let heritage_clauses = data.heritage_clauses;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let heritage_clauses = data.heritage_clauses();
+        let members = data.members();
         drop(original);
         let created = self.new_interface_declaration(
             modifiers,
@@ -1666,7 +8345,7 @@ pub trait FactoryMethods: Factory {
             type_parameters,
             r#type,
         };
-        self.new_node(SyntaxKind::TypeAliasDeclaration.into(), data.into())
+        self.new_type_alias_declaration_data(SyntaxKind::TypeAliasDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSTypeAliasDeclaration
     fn new_js_type_alias_declaration(
@@ -1682,7 +8361,7 @@ pub trait FactoryMethods: Factory {
             type_parameters,
             r#type,
         };
-        self.new_node(SyntaxKind::JSTypeAliasDeclaration.into(), data.into())
+        self.new_type_alias_declaration_data(SyntaxKind::JSTypeAliasDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeAliasDeclaration
     fn update_type_alias_declaration(
@@ -1695,13 +8374,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_alias_declaration()
             .expect("UpdateTypeAliasDeclaration requires TypeAliasDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && r#type == data.r#type
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -1725,14 +8403,13 @@ pub trait FactoryMethods: Factory {
     fn clone_type_alias_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_alias_declaration()
             .expect("operation requires TypeAliasDeclaration payload");
         let original_kind = original.kind();
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = match original_kind.known() {
             Some(SyntaxKind::TypeAliasDeclaration) => {
@@ -1756,7 +8433,7 @@ pub trait FactoryMethods: Factory {
             postfix_token: None,
             initializer,
         };
-        self.new_node(SyntaxKind::EnumMember.into(), data.into())
+        self.new_enum_member_data(SyntaxKind::EnumMember.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateEnumMember
     fn update_enum_member(
@@ -1767,10 +8444,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_member()
             .expect("UpdateEnumMember requires EnumMember payload");
-        if name == data.name && initializer == data.initializer {
+        if name == data.name() && initializer == data.initializer() {
             return original_id;
         }
         drop(original);
@@ -1781,11 +8457,10 @@ pub trait FactoryMethods: Factory {
     fn clone_enum_member(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_member()
             .expect("operation requires EnumMember payload");
-        let name = data.name;
-        let initializer = data.initializer;
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_enum_member(name, initializer);
         self.finish_clone(created, original_id)
@@ -1802,7 +8477,7 @@ pub trait FactoryMethods: Factory {
             name,
             members,
         };
-        self.new_node(SyntaxKind::EnumDeclaration.into(), data.into())
+        self.new_enum_declaration_data(SyntaxKind::EnumDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateEnumDeclaration
     fn update_enum_declaration(
@@ -1814,10 +8489,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_declaration()
             .expect("UpdateEnumDeclaration requires EnumDeclaration payload");
-        if modifiers == data.modifiers && name == data.name && members == data.members {
+        if modifiers == data.modifiers() && name == data.name() && members == data.members() {
             return original_id;
         }
         drop(original);
@@ -1828,12 +8502,11 @@ pub trait FactoryMethods: Factory {
     fn clone_enum_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_enum_declaration()
             .expect("operation requires EnumDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let members = data.members;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let members = data.members();
         drop(original);
         let created = self.new_enum_declaration(modifiers, name, members);
         self.finish_clone(created, original_id)
@@ -1841,7 +8514,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewModuleBlock
     fn new_module_block(&mut self, statements: Option<NodeListId>) -> NodeId {
         let data = ModuleBlockData { statements };
-        self.new_node(SyntaxKind::ModuleBlock.into(), data.into())
+        self.new_module_block_data(SyntaxKind::ModuleBlock.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateModuleBlock
     fn update_module_block(
@@ -1851,10 +8524,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_block()
             .expect("UpdateModuleBlock requires ModuleBlock payload");
-        if statements == data.statements {
+        if statements == data.statements() {
             return original_id;
         }
         drop(original);
@@ -1865,10 +8537,9 @@ pub trait FactoryMethods: Factory {
     fn clone_module_block(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_block()
             .expect("operation requires ModuleBlock payload");
-        let statements = data.statements;
+        let statements = data.statements();
         drop(original);
         let created = self.new_module_block(statements);
         self.finish_clone(created, original_id)
@@ -1876,13 +8547,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNotEmittedStatement
     fn new_not_emitted_statement(&mut self) -> NodeId {
         let data = NotEmittedStatementData {};
-        self.new_node(SyntaxKind::NotEmittedStatement.into(), data.into())
+        self.new_not_emitted_statement_data(SyntaxKind::NotEmittedStatement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NotEmittedStatement.Clone
     fn clone_not_emitted_statement(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_not_emitted_statement()
             .expect("operation requires NotEmittedStatement payload");
         drop(original);
@@ -1892,13 +8562,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNotEmittedTypeElement
     fn new_not_emitted_type_element(&mut self) -> NodeId {
         let data = NotEmittedTypeElementData {};
-        self.new_node(SyntaxKind::NotEmittedTypeElement.into(), data.into())
+        self.new_not_emitted_type_element_data(SyntaxKind::NotEmittedTypeElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NotEmittedTypeElement.Clone
     fn clone_not_emitted_type_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_not_emitted_type_element()
             .expect("operation requires NotEmittedTypeElement payload");
         drop(original);
@@ -1919,7 +8588,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::ImportDeclaration.into(), data.into())
+        self.new_import_declaration_data(SyntaxKind::ImportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSImportDeclaration
     fn new_js_import_declaration(
@@ -1935,7 +8604,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::JSImportDeclaration.into(), data.into())
+        self.new_import_declaration_data(SyntaxKind::JSImportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportDeclaration
     fn update_import_declaration(
@@ -1948,13 +8617,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_declaration()
             .expect("UpdateImportDeclaration requires ImportDeclaration payload");
-        if modifiers == data.modifiers
-            && import_clause == data.import_clause
-            && module_specifier == data.module_specifier
-            && attributes == data.attributes
+        if modifiers == data.modifiers()
+            && import_clause == data.import_clause()
+            && module_specifier == data.module_specifier()
+            && attributes == data.attributes()
         {
             return original_id;
         }
@@ -1981,14 +8649,13 @@ pub trait FactoryMethods: Factory {
     fn clone_import_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_declaration()
             .expect("operation requires ImportDeclaration payload");
         let original_kind = original.kind();
-        let modifiers = data.modifiers;
-        let import_clause = data.import_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
+        let modifiers = data.modifiers();
+        let import_clause = data.import_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
         drop(original);
         let created = match original_kind.known() {
             Some(SyntaxKind::ImportDeclaration) => {
@@ -2010,7 +8677,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewExternalModuleReference
     fn new_external_module_reference(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ExternalModuleReferenceData { expression };
-        self.new_node(SyntaxKind::ExternalModuleReference.into(), data.into())
+        self.new_external_module_reference_data(SyntaxKind::ExternalModuleReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExternalModuleReference
     fn update_external_module_reference(
@@ -2020,10 +8687,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_external_module_reference()
             .expect("UpdateExternalModuleReference requires ExternalModuleReference payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -2034,10 +8700,9 @@ pub trait FactoryMethods: Factory {
     fn clone_external_module_reference(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_external_module_reference()
             .expect("operation requires ExternalModuleReference payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_external_module_reference(expression);
         self.finish_clone(created, original_id)
@@ -2045,16 +8710,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamespaceImport
     fn new_namespace_import(&mut self, name: Option<NodeId>) -> NodeId {
         let data = NamespaceImportData { name };
-        self.new_node(SyntaxKind::NamespaceImport.into(), data.into())
+        self.new_namespace_import_data(SyntaxKind::NamespaceImport.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceImport
     fn update_namespace_import(&mut self, original_id: NodeId, name: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_import()
             .expect("UpdateNamespaceImport requires NamespaceImport payload");
-        if name == data.name {
+        if name == data.name() {
             return original_id;
         }
         drop(original);
@@ -2065,10 +8729,9 @@ pub trait FactoryMethods: Factory {
     fn clone_namespace_import(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_import()
             .expect("operation requires NamespaceImport payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let created = self.new_namespace_import(name);
         self.finish_clone(created, original_id)
@@ -2076,7 +8739,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamedImports
     fn new_named_imports(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = NamedImportsData { elements };
-        self.new_node(SyntaxKind::NamedImports.into(), data.into())
+        self.new_named_imports_data(SyntaxKind::NamedImports.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedImports
     fn update_named_imports(
@@ -2086,10 +8749,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_imports()
             .expect("UpdateNamedImports requires NamedImports payload");
-        if elements == data.elements {
+        if elements == data.elements() {
             return original_id;
         }
         drop(original);
@@ -2100,10 +8762,9 @@ pub trait FactoryMethods: Factory {
     fn clone_named_imports(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_imports()
             .expect("operation requires NamedImports payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let created = self.new_named_imports(elements);
         self.finish_clone(created, original_id)
@@ -2122,7 +8783,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             expression,
         };
-        self.new_node(SyntaxKind::ExportAssignment.into(), data.into())
+        self.new_export_assignment_data(SyntaxKind::ExportAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportAssignment
     fn update_export_assignment(
@@ -2135,13 +8796,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_assignment()
             .expect("UpdateExportAssignment requires ExportAssignment payload");
-        if modifiers == data.modifiers
-            && is_export_equals == data.is_export_equals
-            && r#type == data.r#type
-            && expression == data.expression
+        if modifiers == data.modifiers()
+            && is_export_equals == data.is_export_equals()
+            && r#type == data.r#type()
+            && expression == data.expression()
         {
             return original_id;
         }
@@ -2153,13 +8813,12 @@ pub trait FactoryMethods: Factory {
     fn clone_export_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_assignment()
             .expect("operation requires ExportAssignment payload");
-        let modifiers = data.modifiers;
-        let is_export_equals = data.is_export_equals;
-        let r#type = data.r#type;
-        let expression = data.expression;
+        let modifiers = data.modifiers();
+        let is_export_equals = data.is_export_equals();
+        let r#type = data.r#type();
+        let expression = data.expression();
         drop(original);
         let created = self.new_export_assignment(modifiers, is_export_equals, r#type, expression);
         self.finish_clone(created, original_id)
@@ -2171,7 +8830,10 @@ pub trait FactoryMethods: Factory {
         name: Option<NodeId>,
     ) -> NodeId {
         let data = NamespaceExportDeclarationData { modifiers, name };
-        self.new_node(SyntaxKind::NamespaceExportDeclaration.into(), data.into())
+        self.new_namespace_export_declaration_data(
+            SyntaxKind::NamespaceExportDeclaration.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceExportDeclaration
     fn update_namespace_export_declaration(
@@ -2182,10 +8844,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export_declaration()
             .expect("UpdateNamespaceExportDeclaration requires NamespaceExportDeclaration payload");
-        if modifiers == data.modifiers && name == data.name {
+        if modifiers == data.modifiers() && name == data.name() {
             return original_id;
         }
         drop(original);
@@ -2196,11 +8857,10 @@ pub trait FactoryMethods: Factory {
     fn clone_namespace_export_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export_declaration()
             .expect("operation requires NamespaceExportDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
+        let modifiers = data.modifiers();
+        let name = data.name();
         drop(original);
         let created = self.new_namespace_export_declaration(modifiers, name);
         self.finish_clone(created, original_id)
@@ -2208,16 +8868,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamespaceExport
     fn new_namespace_export(&mut self, name: Option<NodeId>) -> NodeId {
         let data = NamespaceExportData { name };
-        self.new_node(SyntaxKind::NamespaceExport.into(), data.into())
+        self.new_namespace_export_data(SyntaxKind::NamespaceExport.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamespaceExport
     fn update_namespace_export(&mut self, original_id: NodeId, name: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export()
             .expect("UpdateNamespaceExport requires NamespaceExport payload");
-        if name == data.name {
+        if name == data.name() {
             return original_id;
         }
         drop(original);
@@ -2228,10 +8887,9 @@ pub trait FactoryMethods: Factory {
     fn clone_namespace_export(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_namespace_export()
             .expect("operation requires NamespaceExport payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let created = self.new_namespace_export(name);
         self.finish_clone(created, original_id)
@@ -2239,7 +8897,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNamedExports
     fn new_named_exports(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = NamedExportsData { elements };
-        self.new_node(SyntaxKind::NamedExports.into(), data.into())
+        self.new_named_exports_data(SyntaxKind::NamedExports.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedExports
     fn update_named_exports(
@@ -2249,10 +8907,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_exports()
             .expect("UpdateNamedExports requires NamedExports payload");
-        if elements == data.elements {
+        if elements == data.elements() {
             return original_id;
         }
         drop(original);
@@ -2263,10 +8920,9 @@ pub trait FactoryMethods: Factory {
     fn clone_named_exports(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_exports()
             .expect("operation requires NamedExports payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let created = self.new_named_exports(elements);
         self.finish_clone(created, original_id)
@@ -2283,7 +8939,7 @@ pub trait FactoryMethods: Factory {
             property_name,
             name,
         };
-        self.new_node(SyntaxKind::ExportSpecifier.into(), data.into())
+        self.new_export_specifier_data(SyntaxKind::ExportSpecifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportSpecifier
     fn update_export_specifier(
@@ -2295,12 +8951,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_specifier()
             .expect("UpdateExportSpecifier requires ExportSpecifier payload");
-        if is_type_only == data.is_type_only
-            && property_name == data.property_name
-            && name == data.name
+        if is_type_only == data.is_type_only()
+            && property_name == data.property_name()
+            && name == data.name()
         {
             return original_id;
         }
@@ -2312,12 +8967,11 @@ pub trait FactoryMethods: Factory {
     fn clone_export_specifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_specifier()
             .expect("operation requires ExportSpecifier payload");
-        let is_type_only = data.is_type_only;
-        let property_name = data.property_name;
-        let name = data.name;
+        let is_type_only = data.is_type_only();
+        let property_name = data.property_name();
+        let name = data.name();
         drop(original);
         let created = self.new_export_specifier(is_type_only, property_name, name);
         self.finish_clone(created, original_id)
@@ -2335,7 +8989,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::CallSignature.into(), data.into())
+        self.new_call_signature_declaration_data(SyntaxKind::CallSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateCallSignatureDeclaration
     fn update_call_signature_declaration(
@@ -2347,12 +9001,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_signature_declaration()
             .expect("UpdateCallSignatureDeclaration requires CallSignatureDeclaration payload");
-        if type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -2364,12 +9017,11 @@ pub trait FactoryMethods: Factory {
     fn clone_call_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_signature_declaration()
             .expect("operation requires CallSignatureDeclaration payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_call_signature_declaration(type_parameters, parameters, r#type);
         self.finish_clone(created, original_id)
@@ -2387,7 +9039,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::ConstructSignature.into(), data.into())
+        self.new_construct_signature_declaration_data(SyntaxKind::ConstructSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructSignatureDeclaration
     fn update_construct_signature_declaration(
@@ -2398,12 +9050,12 @@ pub trait FactoryMethods: Factory {
         r#type: Option<NodeId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_construct_signature_declaration().expect(
+        let data = original.as_construct_signature_declaration().expect(
             "UpdateConstructSignatureDeclaration requires ConstructSignatureDeclaration payload",
         );
-        if type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -2415,12 +9067,11 @@ pub trait FactoryMethods: Factory {
     fn clone_construct_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_construct_signature_declaration()
             .expect("operation requires ConstructSignatureDeclaration payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_construct_signature_declaration(type_parameters, parameters, r#type);
         self.finish_clone(created, original_id)
@@ -2444,7 +9095,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::Constructor.into(), data.into())
+        self.new_constructor_declaration_data(SyntaxKind::Constructor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructorDeclaration
     fn update_constructor_declaration(
@@ -2459,15 +9110,14 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_declaration()
             .expect("UpdateConstructorDeclaration requires ConstructorDeclaration payload");
-        if modifiers == data.modifiers
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -2486,15 +9136,14 @@ pub trait FactoryMethods: Factory {
     fn clone_constructor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_declaration()
             .expect("operation requires ConstructorDeclaration payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_constructor_declaration(
             modifiers,
@@ -2528,7 +9177,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::GetAccessor.into(), data.into())
+        self.new_get_accessor_declaration_data(SyntaxKind::GetAccessor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateGetAccessorDeclaration
     fn update_get_accessor_declaration(
@@ -2544,16 +9193,15 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_get_accessor_declaration()
             .expect("UpdateGetAccessorDeclaration requires GetAccessorDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -2573,16 +9221,15 @@ pub trait FactoryMethods: Factory {
     fn clone_get_accessor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_get_accessor_declaration()
             .expect("operation requires GetAccessorDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_get_accessor_declaration(
             modifiers,
@@ -2617,7 +9264,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token: None,
             body,
         };
-        self.new_node(SyntaxKind::SetAccessor.into(), data.into())
+        self.new_set_accessor_declaration_data(SyntaxKind::SetAccessor.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSetAccessorDeclaration
     fn update_set_accessor_declaration(
@@ -2633,16 +9280,15 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_set_accessor_declaration()
             .expect("UpdateSetAccessorDeclaration requires SetAccessorDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -2662,16 +9308,15 @@ pub trait FactoryMethods: Factory {
     fn clone_set_accessor_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_set_accessor_declaration()
             .expect("operation requires SetAccessorDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_set_accessor_declaration(
             modifiers,
@@ -2698,7 +9343,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::IndexSignature.into(), data.into())
+        self.new_index_signature_declaration_data(SyntaxKind::IndexSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIndexSignatureDeclaration
     fn update_index_signature_declaration(
@@ -2710,10 +9355,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_index_signature_declaration()
             .expect("UpdateIndexSignatureDeclaration requires IndexSignatureDeclaration payload");
-        if modifiers == data.modifiers && parameters == data.parameters && r#type == data.r#type {
+        if modifiers == data.modifiers()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+        {
             return original_id;
         }
         drop(original);
@@ -2724,12 +9371,11 @@ pub trait FactoryMethods: Factory {
     fn clone_index_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_index_signature_declaration()
             .expect("operation requires IndexSignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_index_signature_declaration(modifiers, parameters, r#type);
         self.finish_clone(created, original_id)
@@ -2753,7 +9399,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::MethodSignature.into(), data.into())
+        self.new_method_signature_declaration_data(SyntaxKind::MethodSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMethodSignatureDeclaration
     fn update_method_signature_declaration(
@@ -2768,15 +9414,14 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_signature_declaration()
             .expect("UpdateMethodSignatureDeclaration requires MethodSignatureDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -2795,15 +9440,14 @@ pub trait FactoryMethods: Factory {
     fn clone_method_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_signature_declaration()
             .expect("operation requires MethodSignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_method_signature_declaration(
             modifiers,
@@ -2839,7 +9483,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token,
             body,
         };
-        self.new_node(SyntaxKind::MethodDeclaration.into(), data.into())
+        self.new_method_declaration_data(SyntaxKind::MethodDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMethodDeclaration
     fn update_method_declaration(
@@ -2857,18 +9501,17 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_declaration()
             .expect("UpdateMethodDeclaration requires MethodDeclaration payload");
-        if modifiers == data.modifiers
-            && asterisk_token == data.asterisk_token
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && asterisk_token == data.asterisk_token()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -2890,18 +9533,17 @@ pub trait FactoryMethods: Factory {
     fn clone_method_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_method_declaration()
             .expect("operation requires MethodDeclaration payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_method_declaration(
             modifiers,
@@ -2932,7 +9574,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertySignature.into(), data.into())
+        self.new_property_signature_declaration_data(SyntaxKind::PropertySignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertySignatureDeclaration
     fn update_property_signature_declaration(
@@ -2945,14 +9587,14 @@ pub trait FactoryMethods: Factory {
         initializer: Option<NodeId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_property_signature_declaration().expect(
+        let data = original.as_property_signature_declaration().expect(
             "UpdatePropertySignatureDeclaration requires PropertySignatureDeclaration payload",
         );
-        if modifiers == data.modifiers
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && r#type == data.r#type
-            && initializer == data.initializer
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && r#type == data.r#type()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -2970,14 +9612,13 @@ pub trait FactoryMethods: Factory {
     fn clone_property_signature_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_signature_declaration()
             .expect("operation requires PropertySignatureDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_property_signature_declaration(
             modifiers,
@@ -3004,7 +9645,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertyDeclaration.into(), data.into())
+        self.new_property_declaration_data(SyntaxKind::PropertyDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertyDeclaration
     fn update_property_declaration(
@@ -3018,14 +9659,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_declaration()
             .expect("UpdatePropertyDeclaration requires PropertyDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && r#type == data.r#type
-            && initializer == data.initializer
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && r#type == data.r#type()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -3038,14 +9678,13 @@ pub trait FactoryMethods: Factory {
     fn clone_property_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_declaration()
             .expect("operation requires PropertyDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let created =
             self.new_property_declaration(modifiers, name, postfix_token, r#type, initializer);
@@ -3054,13 +9693,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSemicolonClassElement
     fn new_semicolon_class_element(&mut self) -> NodeId {
         let data = SemicolonClassElementData {};
-        self.new_node(SyntaxKind::SemicolonClassElement.into(), data.into())
+        self.new_semicolon_class_element_data(SyntaxKind::SemicolonClassElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:SemicolonClassElement.Clone
     fn clone_semicolon_class_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_semicolon_class_element()
             .expect("operation requires SemicolonClassElement payload");
         drop(original);
@@ -3074,7 +9712,10 @@ pub trait FactoryMethods: Factory {
         body: Option<NodeId>,
     ) -> NodeId {
         let data = ClassStaticBlockDeclarationData { modifiers, body };
-        self.new_node(SyntaxKind::ClassStaticBlockDeclaration.into(), data.into())
+        self.new_class_static_block_declaration_data(
+            SyntaxKind::ClassStaticBlockDeclaration.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateClassStaticBlockDeclaration
     fn update_class_static_block_declaration(
@@ -3084,10 +9725,10 @@ pub trait FactoryMethods: Factory {
         body: Option<NodeId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_class_static_block_declaration().expect(
+        let data = original.as_class_static_block_declaration().expect(
             "UpdateClassStaticBlockDeclaration requires ClassStaticBlockDeclaration payload",
         );
-        if modifiers == data.modifiers && body == data.body {
+        if modifiers == data.modifiers() && body == data.body() {
             return original_id;
         }
         drop(original);
@@ -3098,11 +9739,10 @@ pub trait FactoryMethods: Factory {
     fn clone_class_static_block_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_class_static_block_declaration()
             .expect("operation requires ClassStaticBlockDeclaration payload");
-        let modifiers = data.modifiers;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let body = data.body();
         drop(original);
         let created = self.new_class_static_block_declaration(modifiers, body);
         self.finish_clone(created, original_id)
@@ -3110,13 +9750,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewOmittedExpression
     fn new_omitted_expression(&mut self) -> NodeId {
         let data = OmittedExpressionData {};
-        self.new_node(SyntaxKind::OmittedExpression.into(), data.into())
+        self.new_omitted_expression_data(SyntaxKind::OmittedExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:OmittedExpression.Clone
     fn clone_omitted_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_omitted_expression()
             .expect("operation requires OmittedExpression payload");
         drop(original);
@@ -3126,13 +9765,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewKeywordExpression
     fn new_keyword_expression(&mut self, kind: NodeKind) -> NodeId {
         let data = KeywordExpressionData {};
-        self.new_node(kind, data.into())
+        self.new_keyword_expression_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:KeywordExpression.Clone
     fn clone_keyword_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_keyword_expression()
             .expect("operation requires KeywordExpression payload");
         let original_kind = original.kind();
@@ -3147,17 +9785,16 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::STRING_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::StringLiteral.into(), data.into())
+        self.new_string_literal_data(SyntaxKind::StringLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:StringLiteral.Clone
     fn clone_string_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_string_literal()
             .expect("operation requires StringLiteral payload");
-        let text = data.text.clone();
-        let token_flags = data.token_flags;
+        let text = data.text_owned();
+        let token_flags = data.token_flags();
         drop(original);
         let created = self.new_string_literal(text, token_flags);
         self.finish_clone(created, original_id)
@@ -3169,17 +9806,16 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::NUMERIC_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::NumericLiteral.into(), data.into())
+        self.new_numeric_literal_data(SyntaxKind::NumericLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NumericLiteral.Clone
     fn clone_numeric_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_numeric_literal()
             .expect("operation requires NumericLiteral payload");
-        let text = data.text.clone();
-        let token_flags = data.token_flags;
+        let text = data.text_owned();
+        let token_flags = data.token_flags();
         drop(original);
         let created = self.new_numeric_literal(text, token_flags);
         self.finish_clone(created, original_id)
@@ -3191,17 +9827,16 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::NUMERIC_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::BigIntLiteral.into(), data.into())
+        self.new_big_int_literal_data(SyntaxKind::BigIntLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:BigIntLiteral.Clone
     fn clone_big_int_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_big_int_literal()
             .expect("operation requires BigIntLiteral payload");
-        let text = data.text.clone();
-        let token_flags = data.token_flags;
+        let text = data.text_owned();
+        let token_flags = data.token_flags();
         drop(original);
         let created = self.new_big_int_literal(text, token_flags);
         self.finish_clone(created, original_id)
@@ -3213,17 +9848,16 @@ pub trait FactoryMethods: Factory {
             token_flags: token_flags & crate::token_flags::REGULAR_EXPRESSION_LITERAL_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::RegularExpressionLiteral.into(), data.into())
+        self.new_regular_expression_literal_data(SyntaxKind::RegularExpressionLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:RegularExpressionLiteral.Clone
     fn clone_regular_expression_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_regular_expression_literal()
             .expect("operation requires RegularExpressionLiteral payload");
-        let text = data.text.clone();
-        let token_flags = data.token_flags;
+        let text = data.text_owned();
+        let token_flags = data.token_flags();
         drop(original);
         let created = self.new_regular_expression_literal(text, token_flags);
         self.finish_clone(created, original_id)
@@ -3241,20 +9875,19 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(
+        self.new_no_substitution_template_literal_data(
             SyntaxKind::NoSubstitutionTemplateLiteral.into(),
-            data.into(),
+            data,
         )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NoSubstitutionTemplateLiteral.Clone
     fn clone_no_substitution_template_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_no_substitution_template_literal()
             .expect("operation requires NoSubstitutionTemplateLiteral payload");
-        let text = data.text.clone();
-        let template_flags = data.template_flags;
+        let text = data.text_owned();
+        let template_flags = data.template_flags();
         drop(original);
         let created = self.new_no_substitution_template_literal(text, template_flags);
         self.finish_clone(created, original_id)
@@ -3275,7 +9908,7 @@ pub trait FactoryMethods: Factory {
             operator_token,
             right,
         };
-        self.new_node(SyntaxKind::BinaryExpression.into(), data.into())
+        self.new_binary_expression_data(SyntaxKind::BinaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateBinaryExpression
     fn update_binary_expression(
@@ -3289,14 +9922,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binary_expression()
             .expect("UpdateBinaryExpression requires BinaryExpression payload");
-        if modifiers == data.modifiers
-            && left == data.left
-            && r#type == data.r#type
-            && operator_token == data.operator_token
-            && right == data.right
+        if modifiers == data.modifiers()
+            && left == data.left()
+            && r#type == data.r#type()
+            && operator_token == data.operator_token()
+            && right == data.right()
         {
             return original_id;
         }
@@ -3308,14 +9940,13 @@ pub trait FactoryMethods: Factory {
     fn clone_binary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_binary_expression()
             .expect("operation requires BinaryExpression payload");
-        let modifiers = data.modifiers;
-        let left = data.left;
-        let r#type = data.r#type;
-        let operator_token = data.operator_token;
-        let right = data.right;
+        let modifiers = data.modifiers();
+        let left = data.left();
+        let r#type = data.r#type();
+        let operator_token = data.operator_token();
+        let right = data.right();
         drop(original);
         let created = self.new_binary_expression(modifiers, left, r#type, operator_token, right);
         self.finish_clone(created, original_id)
@@ -3327,7 +9958,7 @@ pub trait FactoryMethods: Factory {
         operand: Option<NodeId>,
     ) -> NodeId {
         let data = PrefixUnaryExpressionData { operator, operand };
-        self.new_node(SyntaxKind::PrefixUnaryExpression.into(), data.into())
+        self.new_prefix_unary_expression_data(SyntaxKind::PrefixUnaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePrefixUnaryExpression
     fn update_prefix_unary_expression(
@@ -3338,10 +9969,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_prefix_unary_expression()
             .expect("UpdatePrefixUnaryExpression requires PrefixUnaryExpression payload");
-        if operator == data.operator && operand == data.operand {
+        if operator == data.operator() && operand == data.operand() {
             return original_id;
         }
         drop(original);
@@ -3352,11 +9982,10 @@ pub trait FactoryMethods: Factory {
     fn clone_prefix_unary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_prefix_unary_expression()
             .expect("operation requires PrefixUnaryExpression payload");
-        let operator = data.operator;
-        let operand = data.operand;
+        let operator = data.operator();
+        let operand = data.operand();
         drop(original);
         let created = self.new_prefix_unary_expression(operator, operand);
         self.finish_clone(created, original_id)
@@ -3368,7 +9997,7 @@ pub trait FactoryMethods: Factory {
         operator: NodeKind,
     ) -> NodeId {
         let data = PostfixUnaryExpressionData { operand, operator };
-        self.new_node(SyntaxKind::PostfixUnaryExpression.into(), data.into())
+        self.new_postfix_unary_expression_data(SyntaxKind::PostfixUnaryExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePostfixUnaryExpression
     fn update_postfix_unary_expression(
@@ -3379,10 +10008,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_postfix_unary_expression()
             .expect("UpdatePostfixUnaryExpression requires PostfixUnaryExpression payload");
-        if operand == data.operand && operator == data.operator {
+        if operand == data.operand() && operator == data.operator() {
             return original_id;
         }
         drop(original);
@@ -3393,11 +10021,10 @@ pub trait FactoryMethods: Factory {
     fn clone_postfix_unary_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_postfix_unary_expression()
             .expect("operation requires PostfixUnaryExpression payload");
-        let operand = data.operand;
-        let operator = data.operator;
+        let operand = data.operand();
+        let operator = data.operator();
         drop(original);
         let created = self.new_postfix_unary_expression(operand, operator);
         self.finish_clone(created, original_id)
@@ -3412,7 +10039,7 @@ pub trait FactoryMethods: Factory {
             asterisk_token,
             expression,
         };
-        self.new_node(SyntaxKind::YieldExpression.into(), data.into())
+        self.new_yield_expression_data(SyntaxKind::YieldExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateYieldExpression
     fn update_yield_expression(
@@ -3423,10 +10050,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_yield_expression()
             .expect("UpdateYieldExpression requires YieldExpression payload");
-        if asterisk_token == data.asterisk_token && expression == data.expression {
+        if asterisk_token == data.asterisk_token() && expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -3437,11 +10063,10 @@ pub trait FactoryMethods: Factory {
     fn clone_yield_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_yield_expression()
             .expect("operation requires YieldExpression payload");
-        let asterisk_token = data.asterisk_token;
-        let expression = data.expression;
+        let asterisk_token = data.asterisk_token();
+        let expression = data.expression();
         drop(original);
         let created = self.new_yield_expression(asterisk_token, expression);
         self.finish_clone(created, original_id)
@@ -3467,7 +10092,7 @@ pub trait FactoryMethods: Factory {
             body,
             equals_greater_than_token,
         };
-        self.new_node(SyntaxKind::ArrowFunction.into(), data.into())
+        self.new_arrow_function_data(SyntaxKind::ArrowFunction.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrowFunction
     fn update_arrow_function(
@@ -3483,16 +10108,15 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_arrow_function()
             .expect("UpdateArrowFunction requires ArrowFunction payload");
-        if modifiers == data.modifiers
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && equals_greater_than_token == data.equals_greater_than_token
-            && body == data.body
+        if modifiers == data.modifiers()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && equals_greater_than_token == data.equals_greater_than_token()
+            && body == data.body()
         {
             return original_id;
         }
@@ -3512,16 +10136,15 @@ pub trait FactoryMethods: Factory {
     fn clone_arrow_function(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_arrow_function()
             .expect("operation requires ArrowFunction payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let equals_greater_than_token = data.equals_greater_than_token;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let equals_greater_than_token = data.equals_greater_than_token();
+        let body = data.body();
         drop(original);
         let created = self.new_arrow_function(
             modifiers,
@@ -3556,7 +10179,7 @@ pub trait FactoryMethods: Factory {
             body,
             name,
         };
-        self.new_node(SyntaxKind::FunctionExpression.into(), data.into())
+        self.new_function_expression_data(SyntaxKind::FunctionExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionExpression
     fn update_function_expression(
@@ -3573,17 +10196,16 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_expression()
             .expect("UpdateFunctionExpression requires FunctionExpression payload");
-        if modifiers == data.modifiers
-            && asterisk_token == data.asterisk_token
-            && name == data.name
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
-            && full_signature == data.full_signature
-            && body == data.body
+        if modifiers == data.modifiers()
+            && asterisk_token == data.asterisk_token()
+            && name == data.name()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
+            && full_signature == data.full_signature()
+            && body == data.body()
         {
             return original_id;
         }
@@ -3604,17 +10226,16 @@ pub trait FactoryMethods: Factory {
     fn clone_function_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_expression()
             .expect("operation requires FunctionExpression payload");
-        let modifiers = data.modifiers;
-        let asterisk_token = data.asterisk_token;
-        let name = data.name;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
-        let full_signature = data.full_signature;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let asterisk_token = data.asterisk_token();
+        let name = data.name();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
+        let full_signature = data.full_signature();
+        let body = data.body();
         drop(original);
         let created = self.new_function_expression(
             modifiers,
@@ -3631,7 +10252,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewAsExpression
     fn new_as_expression(&mut self, expression: Option<NodeId>, r#type: Option<NodeId>) -> NodeId {
         let data = AsExpressionData { expression, r#type };
-        self.new_node(SyntaxKind::AsExpression.into(), data.into())
+        self.new_as_expression_data(SyntaxKind::AsExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateAsExpression
     fn update_as_expression(
@@ -3642,10 +10263,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_as_expression()
             .expect("UpdateAsExpression requires AsExpression payload");
-        if expression == data.expression && r#type == data.r#type {
+        if expression == data.expression() && r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -3656,11 +10276,10 @@ pub trait FactoryMethods: Factory {
     fn clone_as_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_as_expression()
             .expect("operation requires AsExpression payload");
-        let expression = data.expression;
-        let r#type = data.r#type;
+        let expression = data.expression();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_as_expression(expression, r#type);
         self.finish_clone(created, original_id)
@@ -3672,7 +10291,7 @@ pub trait FactoryMethods: Factory {
         r#type: Option<NodeId>,
     ) -> NodeId {
         let data = SatisfiesExpressionData { expression, r#type };
-        self.new_node(SyntaxKind::SatisfiesExpression.into(), data.into())
+        self.new_satisfies_expression_data(SyntaxKind::SatisfiesExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSatisfiesExpression
     fn update_satisfies_expression(
@@ -3683,10 +10302,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_satisfies_expression()
             .expect("UpdateSatisfiesExpression requires SatisfiesExpression payload");
-        if expression == data.expression && r#type == data.r#type {
+        if expression == data.expression() && r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -3697,11 +10315,10 @@ pub trait FactoryMethods: Factory {
     fn clone_satisfies_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_satisfies_expression()
             .expect("operation requires SatisfiesExpression payload");
-        let expression = data.expression;
-        let r#type = data.r#type;
+        let expression = data.expression();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_satisfies_expression(expression, r#type);
         self.finish_clone(created, original_id)
@@ -3722,7 +10339,7 @@ pub trait FactoryMethods: Factory {
             colon_token,
             when_false,
         };
-        self.new_node(SyntaxKind::ConditionalExpression.into(), data.into())
+        self.new_conditional_expression_data(SyntaxKind::ConditionalExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConditionalExpression
     fn update_conditional_expression(
@@ -3736,14 +10353,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_expression()
             .expect("UpdateConditionalExpression requires ConditionalExpression payload");
-        if condition == data.condition
-            && question_token == data.question_token
-            && when_true == data.when_true
-            && colon_token == data.colon_token
-            && when_false == data.when_false
+        if condition == data.condition()
+            && question_token == data.question_token()
+            && when_true == data.when_true()
+            && colon_token == data.colon_token()
+            && when_false == data.when_false()
         {
             return original_id;
         }
@@ -3761,14 +10377,13 @@ pub trait FactoryMethods: Factory {
     fn clone_conditional_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_expression()
             .expect("operation requires ConditionalExpression payload");
-        let condition = data.condition;
-        let question_token = data.question_token;
-        let when_true = data.when_true;
-        let colon_token = data.colon_token;
-        let when_false = data.when_false;
+        let condition = data.condition();
+        let question_token = data.question_token();
+        let when_true = data.when_true();
+        let colon_token = data.colon_token();
+        let when_false = data.when_false();
         drop(original);
         let created = self.new_conditional_expression(
             condition,
@@ -3792,7 +10407,8 @@ pub trait FactoryMethods: Factory {
             question_dot_token,
             name,
         };
-        let created = self.new_node(SyntaxKind::PropertyAccessExpression.into(), data.into());
+        let created = self
+            .new_property_access_expression_data(SyntaxKind::PropertyAccessExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3809,12 +10425,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_access_expression()
             .expect("UpdatePropertyAccessExpression requires PropertyAccessExpression payload");
-        if expression == data.expression
-            && question_dot_token == data.question_dot_token
-            && name == data.name
+        if expression == data.expression()
+            && question_dot_token == data.question_dot_token()
+            && name == data.name()
             && flags == original.flags()
         {
             return original_id;
@@ -3828,12 +10443,11 @@ pub trait FactoryMethods: Factory {
     fn clone_property_access_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_access_expression()
             .expect("operation requires PropertyAccessExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let name = data.name;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let name = data.name();
         let flags = original.flags();
         drop(original);
         let created =
@@ -3853,7 +10467,8 @@ pub trait FactoryMethods: Factory {
             question_dot_token,
             argument_expression,
         };
-        let created = self.new_node(SyntaxKind::ElementAccessExpression.into(), data.into());
+        let created = self
+            .new_element_access_expression_data(SyntaxKind::ElementAccessExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3870,12 +10485,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_element_access_expression()
             .expect("UpdateElementAccessExpression requires ElementAccessExpression payload");
-        if expression == data.expression
-            && question_dot_token == data.question_dot_token
-            && argument_expression == data.argument_expression
+        if expression == data.expression()
+            && question_dot_token == data.question_dot_token()
+            && argument_expression == data.argument_expression()
             && flags == original.flags()
         {
             return original_id;
@@ -3893,12 +10507,11 @@ pub trait FactoryMethods: Factory {
     fn clone_element_access_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_element_access_expression()
             .expect("operation requires ElementAccessExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let argument_expression = data.argument_expression;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let argument_expression = data.argument_expression();
         let flags = original.flags();
         drop(original);
         let created = self.new_element_access_expression(
@@ -3924,7 +10537,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             arguments,
         };
-        let created = self.new_node(SyntaxKind::CallExpression.into(), data.into());
+        let created = self.new_call_expression_data(SyntaxKind::CallExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -3942,13 +10555,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_expression()
             .expect("UpdateCallExpression requires CallExpression payload");
-        if expression == data.expression
-            && question_dot_token == data.question_dot_token
-            && type_arguments == data.type_arguments
-            && arguments == data.arguments
+        if expression == data.expression()
+            && question_dot_token == data.question_dot_token()
+            && type_arguments == data.type_arguments()
+            && arguments == data.arguments()
             && flags == original.flags()
         {
             return original_id;
@@ -3967,13 +10579,12 @@ pub trait FactoryMethods: Factory {
     fn clone_call_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_call_expression()
             .expect("operation requires CallExpression payload");
-        let expression = data.expression;
-        let question_dot_token = data.question_dot_token;
-        let type_arguments = data.type_arguments;
-        let arguments = data.arguments;
+        let expression = data.expression();
+        let question_dot_token = data.question_dot_token();
+        let type_arguments = data.type_arguments();
+        let arguments = data.arguments();
         let flags = original.flags();
         drop(original);
         let created = self.new_call_expression(
@@ -3997,7 +10608,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             arguments,
         };
-        self.new_node(SyntaxKind::NewExpression.into(), data.into())
+        self.new_new_expression_data(SyntaxKind::NewExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNewExpression
     fn update_new_expression(
@@ -4009,12 +10620,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_new_expression()
             .expect("UpdateNewExpression requires NewExpression payload");
-        if expression == data.expression
-            && type_arguments == data.type_arguments
-            && arguments == data.arguments
+        if expression == data.expression()
+            && type_arguments == data.type_arguments()
+            && arguments == data.arguments()
         {
             return original_id;
         }
@@ -4026,12 +10636,11 @@ pub trait FactoryMethods: Factory {
     fn clone_new_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_new_expression()
             .expect("operation requires NewExpression payload");
-        let expression = data.expression;
-        let type_arguments = data.type_arguments;
-        let arguments = data.arguments;
+        let expression = data.expression();
+        let type_arguments = data.type_arguments();
+        let arguments = data.arguments();
         drop(original);
         let created = self.new_new_expression(expression, type_arguments, arguments);
         self.finish_clone(created, original_id)
@@ -4042,7 +10651,7 @@ pub trait FactoryMethods: Factory {
             keyword_token,
             name,
         };
-        self.new_node(SyntaxKind::MetaProperty.into(), data.into())
+        self.new_meta_property_data(SyntaxKind::MetaProperty.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMetaProperty
     fn update_meta_property(
@@ -4053,10 +10662,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_meta_property()
             .expect("UpdateMetaProperty requires MetaProperty payload");
-        if keyword_token == data.keyword_token && name == data.name {
+        if keyword_token == data.keyword_token() && name == data.name() {
             return original_id;
         }
         drop(original);
@@ -4067,11 +10675,10 @@ pub trait FactoryMethods: Factory {
     fn clone_meta_property(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_meta_property()
             .expect("operation requires MetaProperty payload");
-        let keyword_token = data.keyword_token;
-        let name = data.name;
+        let keyword_token = data.keyword_token();
+        let name = data.name();
         drop(original);
         let created = self.new_meta_property(keyword_token, name);
         self.finish_clone(created, original_id)
@@ -4079,7 +10686,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewNonNullExpression
     fn new_non_null_expression(&mut self, expression: Option<NodeId>, flags: u32) -> NodeId {
         let data = NonNullExpressionData { expression };
-        let created = self.new_node(SyntaxKind::NonNullExpression.into(), data.into());
+        let created = self.new_non_null_expression_data(SyntaxKind::NonNullExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -4094,10 +10701,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_non_null_expression()
             .expect("UpdateNonNullExpression requires NonNullExpression payload");
-        if expression == data.expression && flags == original.flags() {
+        if expression == data.expression() && flags == original.flags() {
             return original_id;
         }
         drop(original);
@@ -4108,10 +10714,9 @@ pub trait FactoryMethods: Factory {
     fn clone_non_null_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_non_null_expression()
             .expect("operation requires NonNullExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         let flags = original.flags();
         drop(original);
         let created = self.new_non_null_expression(expression, flags);
@@ -4120,16 +10725,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSpreadElement
     fn new_spread_element(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = SpreadElementData { expression };
-        self.new_node(SyntaxKind::SpreadElement.into(), data.into())
+        self.new_spread_element_data(SyntaxKind::SpreadElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSpreadElement
     fn update_spread_element(&mut self, original_id: NodeId, expression: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_element()
             .expect("UpdateSpreadElement requires SpreadElement payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4140,10 +10744,9 @@ pub trait FactoryMethods: Factory {
     fn clone_spread_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_element()
             .expect("operation requires SpreadElement payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_spread_element(expression);
         self.finish_clone(created, original_id)
@@ -4158,7 +10761,7 @@ pub trait FactoryMethods: Factory {
             head,
             template_spans,
         };
-        self.new_node(SyntaxKind::TemplateExpression.into(), data.into())
+        self.new_template_expression_data(SyntaxKind::TemplateExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateExpression
     fn update_template_expression(
@@ -4169,10 +10772,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_expression()
             .expect("UpdateTemplateExpression requires TemplateExpression payload");
-        if head == data.head && template_spans == data.template_spans {
+        if head == data.head() && template_spans == data.template_spans() {
             return original_id;
         }
         drop(original);
@@ -4183,11 +10785,10 @@ pub trait FactoryMethods: Factory {
     fn clone_template_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_expression()
             .expect("operation requires TemplateExpression payload");
-        let head = data.head;
-        let template_spans = data.template_spans;
+        let head = data.head();
+        let template_spans = data.template_spans();
         drop(original);
         let created = self.new_template_expression(head, template_spans);
         self.finish_clone(created, original_id)
@@ -4198,7 +10799,7 @@ pub trait FactoryMethods: Factory {
             expression,
             literal,
         };
-        self.new_node(SyntaxKind::TemplateSpan.into(), data.into())
+        self.new_template_span_data(SyntaxKind::TemplateSpan.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateSpan
     fn update_template_span(
@@ -4209,10 +10810,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_span()
             .expect("UpdateTemplateSpan requires TemplateSpan payload");
-        if expression == data.expression && literal == data.literal {
+        if expression == data.expression() && literal == data.literal() {
             return original_id;
         }
         drop(original);
@@ -4223,11 +10823,10 @@ pub trait FactoryMethods: Factory {
     fn clone_template_span(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_span()
             .expect("operation requires TemplateSpan payload");
-        let expression = data.expression;
-        let literal = data.literal;
+        let expression = data.expression();
+        let literal = data.literal();
         drop(original);
         let created = self.new_template_span(expression, literal);
         self.finish_clone(created, original_id)
@@ -4247,7 +10846,8 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             template,
         };
-        let created = self.new_node(SyntaxKind::TaggedTemplateExpression.into(), data.into());
+        let created = self
+            .new_tagged_template_expression_data(SyntaxKind::TaggedTemplateExpression.into(), data);
         let created_flags =
             self.node(created).flags() | (flags & crate::node_flags::OPTIONAL_CHAIN);
         self.set_node_flags(created, created_flags);
@@ -4265,13 +10865,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tagged_template_expression()
             .expect("UpdateTaggedTemplateExpression requires TaggedTemplateExpression payload");
-        if tag == data.tag
-            && question_dot_token == data.question_dot_token
-            && type_arguments == data.type_arguments
-            && template == data.template
+        if tag == data.tag()
+            && question_dot_token == data.question_dot_token()
+            && type_arguments == data.type_arguments()
+            && template == data.template()
             && flags == original.flags()
         {
             return original_id;
@@ -4290,13 +10889,12 @@ pub trait FactoryMethods: Factory {
     fn clone_tagged_template_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tagged_template_expression()
             .expect("operation requires TaggedTemplateExpression payload");
-        let tag = data.tag;
-        let question_dot_token = data.question_dot_token;
-        let type_arguments = data.type_arguments;
-        let template = data.template;
+        let tag = data.tag();
+        let question_dot_token = data.question_dot_token();
+        let type_arguments = data.type_arguments();
+        let template = data.template();
         let flags = original.flags();
         drop(original);
         let created = self.new_tagged_template_expression(
@@ -4311,7 +10909,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewParenthesizedExpression
     fn new_parenthesized_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = ParenthesizedExpressionData { expression };
-        self.new_node(SyntaxKind::ParenthesizedExpression.into(), data.into())
+        self.new_parenthesized_expression_data(SyntaxKind::ParenthesizedExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParenthesizedExpression
     fn update_parenthesized_expression(
@@ -4321,10 +10919,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_expression()
             .expect("UpdateParenthesizedExpression requires ParenthesizedExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4335,10 +10932,9 @@ pub trait FactoryMethods: Factory {
     fn clone_parenthesized_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_expression()
             .expect("operation requires ParenthesizedExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_parenthesized_expression(expression);
         self.finish_clone(created, original_id)
@@ -4353,7 +10949,7 @@ pub trait FactoryMethods: Factory {
             elements,
             multi_line,
         };
-        self.new_node(SyntaxKind::ArrayLiteralExpression.into(), data.into())
+        self.new_array_literal_expression_data(SyntaxKind::ArrayLiteralExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrayLiteralExpression
     fn update_array_literal_expression(
@@ -4364,10 +10960,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_literal_expression()
             .expect("UpdateArrayLiteralExpression requires ArrayLiteralExpression payload");
-        if elements == data.elements && multi_line == data.multi_line {
+        if elements == data.elements() && multi_line == data.multi_line() {
             return original_id;
         }
         drop(original);
@@ -4378,11 +10973,10 @@ pub trait FactoryMethods: Factory {
     fn clone_array_literal_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_literal_expression()
             .expect("operation requires ArrayLiteralExpression payload");
-        let elements = data.elements;
-        let multi_line = data.multi_line;
+        let elements = data.elements();
+        let multi_line = data.multi_line();
         drop(original);
         let created = self.new_array_literal_expression(elements, multi_line);
         self.finish_clone(created, original_id)
@@ -4397,7 +10991,7 @@ pub trait FactoryMethods: Factory {
             properties,
             multi_line,
         };
-        self.new_node(SyntaxKind::ObjectLiteralExpression.into(), data.into())
+        self.new_object_literal_expression_data(SyntaxKind::ObjectLiteralExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateObjectLiteralExpression
     fn update_object_literal_expression(
@@ -4408,10 +11002,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_object_literal_expression()
             .expect("UpdateObjectLiteralExpression requires ObjectLiteralExpression payload");
-        if properties == data.properties && multi_line == data.multi_line {
+        if properties == data.properties() && multi_line == data.multi_line() {
             return original_id;
         }
         drop(original);
@@ -4422,11 +11015,10 @@ pub trait FactoryMethods: Factory {
     fn clone_object_literal_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_object_literal_expression()
             .expect("operation requires ObjectLiteralExpression payload");
-        let properties = data.properties;
-        let multi_line = data.multi_line;
+        let properties = data.properties();
+        let multi_line = data.multi_line();
         drop(original);
         let created = self.new_object_literal_expression(properties, multi_line);
         self.finish_clone(created, original_id)
@@ -4434,7 +11026,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSpreadAssignment
     fn new_spread_assignment(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = SpreadAssignmentData { expression };
-        self.new_node(SyntaxKind::SpreadAssignment.into(), data.into())
+        self.new_spread_assignment_data(SyntaxKind::SpreadAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSpreadAssignment
     fn update_spread_assignment(
@@ -4444,10 +11036,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_assignment()
             .expect("UpdateSpreadAssignment requires SpreadAssignment payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4458,10 +11049,9 @@ pub trait FactoryMethods: Factory {
     fn clone_spread_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_spread_assignment()
             .expect("operation requires SpreadAssignment payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_spread_assignment(expression);
         self.finish_clone(created, original_id)
@@ -4482,7 +11072,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             initializer,
         };
-        self.new_node(SyntaxKind::PropertyAssignment.into(), data.into())
+        self.new_property_assignment_data(SyntaxKind::PropertyAssignment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePropertyAssignment
     fn update_property_assignment(
@@ -4496,14 +11086,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_assignment()
             .expect("UpdatePropertyAssignment requires PropertyAssignment payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && r#type == data.r#type
-            && initializer == data.initializer
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && r#type == data.r#type()
+            && initializer == data.initializer()
         {
             return original_id;
         }
@@ -4516,14 +11105,13 @@ pub trait FactoryMethods: Factory {
     fn clone_property_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_property_assignment()
             .expect("operation requires PropertyAssignment payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let initializer = data.initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let initializer = data.initializer();
         drop(original);
         let created =
             self.new_property_assignment(modifiers, name, postfix_token, r#type, initializer);
@@ -4547,7 +11135,10 @@ pub trait FactoryMethods: Factory {
             equals_token,
             object_assignment_initializer,
         };
-        self.new_node(SyntaxKind::ShorthandPropertyAssignment.into(), data.into())
+        self.new_shorthand_property_assignment_data(
+            SyntaxKind::ShorthandPropertyAssignment.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateShorthandPropertyAssignment
     fn update_shorthand_property_assignment(
@@ -4561,15 +11152,15 @@ pub trait FactoryMethods: Factory {
         object_assignment_initializer: Option<NodeId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_shorthand_property_assignment().expect(
+        let data = original.as_shorthand_property_assignment().expect(
             "UpdateShorthandPropertyAssignment requires ShorthandPropertyAssignment payload",
         );
-        if modifiers == data.modifiers
-            && name == data.name
-            && postfix_token == data.postfix_token
-            && r#type == data.r#type
-            && equals_token == data.equals_token
-            && object_assignment_initializer == data.object_assignment_initializer
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && postfix_token == data.postfix_token()
+            && r#type == data.r#type()
+            && equals_token == data.equals_token()
+            && object_assignment_initializer == data.object_assignment_initializer()
         {
             return original_id;
         }
@@ -4588,15 +11179,14 @@ pub trait FactoryMethods: Factory {
     fn clone_shorthand_property_assignment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_shorthand_property_assignment()
             .expect("operation requires ShorthandPropertyAssignment payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let postfix_token = data.postfix_token;
-        let r#type = data.r#type;
-        let equals_token = data.equals_token;
-        let object_assignment_initializer = data.object_assignment_initializer;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let postfix_token = data.postfix_token();
+        let r#type = data.r#type();
+        let equals_token = data.equals_token();
+        let object_assignment_initializer = data.object_assignment_initializer();
         drop(original);
         let created = self.new_shorthand_property_assignment(
             modifiers,
@@ -4611,7 +11201,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewDeleteExpression
     fn new_delete_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = DeleteExpressionData { expression };
-        self.new_node(SyntaxKind::DeleteExpression.into(), data.into())
+        self.new_delete_expression_data(SyntaxKind::DeleteExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateDeleteExpression
     fn update_delete_expression(
@@ -4621,10 +11211,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_delete_expression()
             .expect("UpdateDeleteExpression requires DeleteExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4635,10 +11224,9 @@ pub trait FactoryMethods: Factory {
     fn clone_delete_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_delete_expression()
             .expect("operation requires DeleteExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_delete_expression(expression);
         self.finish_clone(created, original_id)
@@ -4646,7 +11234,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeOfExpression
     fn new_type_of_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = TypeOfExpressionData { expression };
-        self.new_node(SyntaxKind::TypeOfExpression.into(), data.into())
+        self.new_type_of_expression_data(SyntaxKind::TypeOfExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeOfExpression
     fn update_type_of_expression(
@@ -4656,10 +11244,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_of_expression()
             .expect("UpdateTypeOfExpression requires TypeOfExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4670,10 +11257,9 @@ pub trait FactoryMethods: Factory {
     fn clone_type_of_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_of_expression()
             .expect("operation requires TypeOfExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_type_of_expression(expression);
         self.finish_clone(created, original_id)
@@ -4681,7 +11267,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewVoidExpression
     fn new_void_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = VoidExpressionData { expression };
-        self.new_node(SyntaxKind::VoidExpression.into(), data.into())
+        self.new_void_expression_data(SyntaxKind::VoidExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateVoidExpression
     fn update_void_expression(
@@ -4691,10 +11277,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_void_expression()
             .expect("UpdateVoidExpression requires VoidExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4705,10 +11290,9 @@ pub trait FactoryMethods: Factory {
     fn clone_void_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_void_expression()
             .expect("operation requires VoidExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_void_expression(expression);
         self.finish_clone(created, original_id)
@@ -4716,7 +11300,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewAwaitExpression
     fn new_await_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = AwaitExpressionData { expression };
-        self.new_node(SyntaxKind::AwaitExpression.into(), data.into())
+        self.new_await_expression_data(SyntaxKind::AwaitExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateAwaitExpression
     fn update_await_expression(
@@ -4726,10 +11310,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_await_expression()
             .expect("UpdateAwaitExpression requires AwaitExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4740,10 +11323,9 @@ pub trait FactoryMethods: Factory {
     fn clone_await_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_await_expression()
             .expect("operation requires AwaitExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_await_expression(expression);
         self.finish_clone(created, original_id)
@@ -4751,7 +11333,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeAssertion
     fn new_type_assertion(&mut self, r#type: Option<NodeId>, expression: Option<NodeId>) -> NodeId {
         let data = TypeAssertionData { r#type, expression };
-        self.new_node(SyntaxKind::TypeAssertionExpression.into(), data.into())
+        self.new_type_assertion_data(SyntaxKind::TypeAssertionExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeAssertion
     fn update_type_assertion(
@@ -4762,10 +11344,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_assertion()
             .expect("UpdateTypeAssertion requires TypeAssertion payload");
-        if r#type == data.r#type && expression == data.expression {
+        if r#type == data.r#type() && expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -4776,11 +11357,10 @@ pub trait FactoryMethods: Factory {
     fn clone_type_assertion(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_assertion()
             .expect("operation requires TypeAssertion payload");
-        let r#type = data.r#type;
-        let expression = data.expression;
+        let r#type = data.r#type();
+        let expression = data.expression();
         drop(original);
         let created = self.new_type_assertion(r#type, expression);
         self.finish_clone(created, original_id)
@@ -4788,13 +11368,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewKeywordTypeNode
     fn new_keyword_type_node(&mut self, kind: NodeKind) -> NodeId {
         let data = KeywordTypeNodeData {};
-        self.new_node(kind, data.into())
+        self.new_keyword_type_node_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:KeywordTypeNode.Clone
     fn clone_keyword_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_keyword_type_node()
             .expect("operation requires KeywordTypeNode payload");
         let original_kind = original.kind();
@@ -4805,16 +11384,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewUnionTypeNode
     fn new_union_type_node(&mut self, types: Option<NodeListId>) -> NodeId {
         let data = UnionTypeNodeData { types };
-        self.new_node(SyntaxKind::UnionType.into(), data.into())
+        self.new_union_type_node_data(SyntaxKind::UnionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateUnionTypeNode
     fn update_union_type_node(&mut self, original_id: NodeId, types: Option<NodeListId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_union_type_node()
             .expect("UpdateUnionTypeNode requires UnionTypeNode payload");
-        if types == data.types {
+        if types == data.types() {
             return original_id;
         }
         drop(original);
@@ -4825,10 +11403,9 @@ pub trait FactoryMethods: Factory {
     fn clone_union_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_union_type_node()
             .expect("operation requires UnionTypeNode payload");
-        let types = data.types;
+        let types = data.types();
         drop(original);
         let created = self.new_union_type_node(types);
         self.finish_clone(created, original_id)
@@ -4836,7 +11413,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewIntersectionTypeNode
     fn new_intersection_type_node(&mut self, types: Option<NodeListId>) -> NodeId {
         let data = IntersectionTypeNodeData { types };
-        self.new_node(SyntaxKind::IntersectionType.into(), data.into())
+        self.new_intersection_type_node_data(SyntaxKind::IntersectionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIntersectionTypeNode
     fn update_intersection_type_node(
@@ -4846,10 +11423,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_intersection_type_node()
             .expect("UpdateIntersectionTypeNode requires IntersectionTypeNode payload");
-        if types == data.types {
+        if types == data.types() {
             return original_id;
         }
         drop(original);
@@ -4860,10 +11436,9 @@ pub trait FactoryMethods: Factory {
     fn clone_intersection_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_intersection_type_node()
             .expect("operation requires IntersectionTypeNode payload");
-        let types = data.types;
+        let types = data.types();
         drop(original);
         let created = self.new_intersection_type_node(types);
         self.finish_clone(created, original_id)
@@ -4882,7 +11457,7 @@ pub trait FactoryMethods: Factory {
             true_type,
             false_type,
         };
-        self.new_node(SyntaxKind::ConditionalType.into(), data.into())
+        self.new_conditional_type_node_data(SyntaxKind::ConditionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConditionalTypeNode
     fn update_conditional_type_node(
@@ -4895,13 +11470,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_type_node()
             .expect("UpdateConditionalTypeNode requires ConditionalTypeNode payload");
-        if check_type == data.check_type
-            && extends_type == data.extends_type
-            && true_type == data.true_type
-            && false_type == data.false_type
+        if check_type == data.check_type()
+            && extends_type == data.extends_type()
+            && true_type == data.true_type()
+            && false_type == data.false_type()
         {
             return original_id;
         }
@@ -4914,13 +11488,12 @@ pub trait FactoryMethods: Factory {
     fn clone_conditional_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_conditional_type_node()
             .expect("operation requires ConditionalTypeNode payload");
-        let check_type = data.check_type;
-        let extends_type = data.extends_type;
-        let true_type = data.true_type;
-        let false_type = data.false_type;
+        let check_type = data.check_type();
+        let extends_type = data.extends_type();
+        let true_type = data.true_type();
+        let false_type = data.false_type();
         drop(original);
         let created =
             self.new_conditional_type_node(check_type, extends_type, true_type, false_type);
@@ -4929,7 +11502,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeOperatorNode
     fn new_type_operator_node(&mut self, operator: NodeKind, r#type: Option<NodeId>) -> NodeId {
         let data = TypeOperatorNodeData { operator, r#type };
-        self.new_node(SyntaxKind::TypeOperator.into(), data.into())
+        self.new_type_operator_node_data(SyntaxKind::TypeOperator.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeOperatorNode
     fn update_type_operator_node(
@@ -4940,10 +11513,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_operator_node()
             .expect("UpdateTypeOperatorNode requires TypeOperatorNode payload");
-        if operator == data.operator && r#type == data.r#type {
+        if operator == data.operator() && r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -4954,11 +11526,10 @@ pub trait FactoryMethods: Factory {
     fn clone_type_operator_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_operator_node()
             .expect("operation requires TypeOperatorNode payload");
-        let operator = data.operator;
-        let r#type = data.r#type;
+        let operator = data.operator();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_type_operator_node(operator, r#type);
         self.finish_clone(created, original_id)
@@ -4966,7 +11537,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewInferTypeNode
     fn new_infer_type_node(&mut self, type_parameter: Option<NodeId>) -> NodeId {
         let data = InferTypeNodeData { type_parameter };
-        self.new_node(SyntaxKind::InferType.into(), data.into())
+        self.new_infer_type_node_data(SyntaxKind::InferType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateInferTypeNode
     fn update_infer_type_node(
@@ -4976,10 +11547,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_infer_type_node()
             .expect("UpdateInferTypeNode requires InferTypeNode payload");
-        if type_parameter == data.type_parameter {
+        if type_parameter == data.type_parameter() {
             return original_id;
         }
         drop(original);
@@ -4990,10 +11560,9 @@ pub trait FactoryMethods: Factory {
     fn clone_infer_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_infer_type_node()
             .expect("operation requires InferTypeNode payload");
-        let type_parameter = data.type_parameter;
+        let type_parameter = data.type_parameter();
         drop(original);
         let created = self.new_infer_type_node(type_parameter);
         self.finish_clone(created, original_id)
@@ -5001,7 +11570,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewArrayTypeNode
     fn new_array_type_node(&mut self, element_type: Option<NodeId>) -> NodeId {
         let data = ArrayTypeNodeData { element_type };
-        self.new_node(SyntaxKind::ArrayType.into(), data.into())
+        self.new_array_type_node_data(SyntaxKind::ArrayType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateArrayTypeNode
     fn update_array_type_node(
@@ -5011,10 +11580,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_type_node()
             .expect("UpdateArrayTypeNode requires ArrayTypeNode payload");
-        if element_type == data.element_type {
+        if element_type == data.element_type() {
             return original_id;
         }
         drop(original);
@@ -5025,10 +11593,9 @@ pub trait FactoryMethods: Factory {
     fn clone_array_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_array_type_node()
             .expect("operation requires ArrayTypeNode payload");
-        let element_type = data.element_type;
+        let element_type = data.element_type();
         drop(original);
         let created = self.new_array_type_node(element_type);
         self.finish_clone(created, original_id)
@@ -5043,7 +11610,7 @@ pub trait FactoryMethods: Factory {
             object_type,
             index_type,
         };
-        self.new_node(SyntaxKind::IndexedAccessType.into(), data.into())
+        self.new_indexed_access_type_node_data(SyntaxKind::IndexedAccessType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateIndexedAccessTypeNode
     fn update_indexed_access_type_node(
@@ -5054,10 +11621,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_indexed_access_type_node()
             .expect("UpdateIndexedAccessTypeNode requires IndexedAccessTypeNode payload");
-        if object_type == data.object_type && index_type == data.index_type {
+        if object_type == data.object_type() && index_type == data.index_type() {
             return original_id;
         }
         drop(original);
@@ -5068,11 +11634,10 @@ pub trait FactoryMethods: Factory {
     fn clone_indexed_access_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_indexed_access_type_node()
             .expect("operation requires IndexedAccessTypeNode payload");
-        let object_type = data.object_type;
-        let index_type = data.index_type;
+        let object_type = data.object_type();
+        let index_type = data.index_type();
         drop(original);
         let created = self.new_indexed_access_type_node(object_type, index_type);
         self.finish_clone(created, original_id)
@@ -5087,7 +11652,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             type_name,
         };
-        self.new_node(SyntaxKind::TypeReference.into(), data.into())
+        self.new_type_reference_node_data(SyntaxKind::TypeReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeReferenceNode
     fn update_type_reference_node(
@@ -5098,10 +11663,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_reference_node()
             .expect("UpdateTypeReferenceNode requires TypeReferenceNode payload");
-        if type_name == data.type_name && type_arguments == data.type_arguments {
+        if type_name == data.type_name() && type_arguments == data.type_arguments() {
             return original_id;
         }
         drop(original);
@@ -5112,11 +11676,10 @@ pub trait FactoryMethods: Factory {
     fn clone_type_reference_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_reference_node()
             .expect("operation requires TypeReferenceNode payload");
-        let type_name = data.type_name;
-        let type_arguments = data.type_arguments;
+        let type_name = data.type_name();
+        let type_arguments = data.type_arguments();
         drop(original);
         let created = self.new_type_reference_node(type_name, type_arguments);
         self.finish_clone(created, original_id)
@@ -5131,7 +11694,10 @@ pub trait FactoryMethods: Factory {
             expression,
             type_arguments,
         };
-        self.new_node(SyntaxKind::ExpressionWithTypeArguments.into(), data.into())
+        self.new_expression_with_type_arguments_data(
+            SyntaxKind::ExpressionWithTypeArguments.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExpressionWithTypeArguments
     fn update_expression_with_type_arguments(
@@ -5141,10 +11707,10 @@ pub trait FactoryMethods: Factory {
         type_arguments: Option<NodeListId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_expression_with_type_arguments().expect(
+        let data = original.as_expression_with_type_arguments().expect(
             "UpdateExpressionWithTypeArguments requires ExpressionWithTypeArguments payload",
         );
-        if expression == data.expression && type_arguments == data.type_arguments {
+        if expression == data.expression() && type_arguments == data.type_arguments() {
             return original_id;
         }
         drop(original);
@@ -5155,11 +11721,10 @@ pub trait FactoryMethods: Factory {
     fn clone_expression_with_type_arguments(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_expression_with_type_arguments()
             .expect("operation requires ExpressionWithTypeArguments payload");
-        let expression = data.expression;
-        let type_arguments = data.type_arguments;
+        let expression = data.expression();
+        let type_arguments = data.type_arguments();
         drop(original);
         let created = self.new_expression_with_type_arguments(expression, type_arguments);
         self.finish_clone(created, original_id)
@@ -5167,16 +11732,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewLiteralTypeNode
     fn new_literal_type_node(&mut self, literal: Option<NodeId>) -> NodeId {
         let data = LiteralTypeNodeData { literal };
-        self.new_node(SyntaxKind::LiteralType.into(), data.into())
+        self.new_literal_type_node_data(SyntaxKind::LiteralType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateLiteralTypeNode
     fn update_literal_type_node(&mut self, original_id: NodeId, literal: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_literal_type_node()
             .expect("UpdateLiteralTypeNode requires LiteralTypeNode payload");
-        if literal == data.literal {
+        if literal == data.literal() {
             return original_id;
         }
         drop(original);
@@ -5187,10 +11751,9 @@ pub trait FactoryMethods: Factory {
     fn clone_literal_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_literal_type_node()
             .expect("operation requires LiteralTypeNode payload");
-        let literal = data.literal;
+        let literal = data.literal();
         drop(original);
         let created = self.new_literal_type_node(literal);
         self.finish_clone(created, original_id)
@@ -5198,13 +11761,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewThisTypeNode
     fn new_this_type_node(&mut self) -> NodeId {
         let data = ThisTypeNodeData {};
-        self.new_node(SyntaxKind::ThisType.into(), data.into())
+        self.new_this_type_node_data(SyntaxKind::ThisType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:ThisTypeNode.Clone
     fn clone_this_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_this_type_node()
             .expect("operation requires ThisTypeNode payload");
         drop(original);
@@ -5223,7 +11785,7 @@ pub trait FactoryMethods: Factory {
             parameter_name,
             r#type,
         };
-        self.new_node(SyntaxKind::TypePredicate.into(), data.into())
+        self.new_type_predicate_node_data(SyntaxKind::TypePredicate.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypePredicateNode
     fn update_type_predicate_node(
@@ -5235,12 +11797,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_predicate_node()
             .expect("UpdateTypePredicateNode requires TypePredicateNode payload");
-        if asserts_modifier == data.asserts_modifier
-            && parameter_name == data.parameter_name
-            && r#type == data.r#type
+        if asserts_modifier == data.asserts_modifier()
+            && parameter_name == data.parameter_name()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -5252,12 +11813,11 @@ pub trait FactoryMethods: Factory {
     fn clone_type_predicate_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_predicate_node()
             .expect("operation requires TypePredicateNode payload");
-        let asserts_modifier = data.asserts_modifier;
-        let parameter_name = data.parameter_name;
-        let r#type = data.r#type;
+        let asserts_modifier = data.asserts_modifier();
+        let parameter_name = data.parameter_name();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_type_predicate_node(asserts_modifier, parameter_name, r#type);
         self.finish_clone(created, original_id)
@@ -5265,7 +11825,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewImportAttribute
     fn new_import_attribute(&mut self, name: Option<NodeId>, value: Option<NodeId>) -> NodeId {
         let data = ImportAttributeData { name, value };
-        self.new_node(SyntaxKind::ImportAttribute.into(), data.into())
+        self.new_import_attribute_data(SyntaxKind::ImportAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportAttribute
     fn update_import_attribute(
@@ -5276,10 +11836,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attribute()
             .expect("UpdateImportAttribute requires ImportAttribute payload");
-        if name == data.name && value == data.value {
+        if name == data.name() && value == data.value() {
             return original_id;
         }
         drop(original);
@@ -5290,11 +11849,10 @@ pub trait FactoryMethods: Factory {
     fn clone_import_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attribute()
             .expect("operation requires ImportAttribute payload");
-        let name = data.name;
-        let value = data.value;
+        let name = data.name();
+        let value = data.value();
         drop(original);
         let created = self.new_import_attribute(name, value);
         self.finish_clone(created, original_id)
@@ -5311,7 +11869,7 @@ pub trait FactoryMethods: Factory {
             attributes,
             multi_line,
         };
-        self.new_node(SyntaxKind::ImportAttributes.into(), data.into())
+        self.new_import_attributes_data(SyntaxKind::ImportAttributes.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportAttributes
     fn update_import_attributes(
@@ -5323,10 +11881,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attributes()
             .expect("UpdateImportAttributes requires ImportAttributes payload");
-        if token == data.token && attributes == data.attributes && multi_line == data.multi_line {
+        if token == data.token()
+            && attributes == data.attributes()
+            && multi_line == data.multi_line()
+        {
             return original_id;
         }
         drop(original);
@@ -5337,12 +11897,11 @@ pub trait FactoryMethods: Factory {
     fn clone_import_attributes(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_attributes()
             .expect("operation requires ImportAttributes payload");
-        let token = data.token;
-        let attributes = data.attributes;
-        let multi_line = data.multi_line;
+        let token = data.token();
+        let attributes = data.attributes();
+        let multi_line = data.multi_line();
         drop(original);
         let created = self.new_import_attributes(token, attributes, multi_line);
         self.finish_clone(created, original_id)
@@ -5357,7 +11916,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             expr_name,
         };
-        self.new_node(SyntaxKind::TypeQuery.into(), data.into())
+        self.new_type_query_node_data(SyntaxKind::TypeQuery.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeQueryNode
     fn update_type_query_node(
@@ -5368,10 +11927,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_query_node()
             .expect("UpdateTypeQueryNode requires TypeQueryNode payload");
-        if expr_name == data.expr_name && type_arguments == data.type_arguments {
+        if expr_name == data.expr_name() && type_arguments == data.type_arguments() {
             return original_id;
         }
         drop(original);
@@ -5382,11 +11940,10 @@ pub trait FactoryMethods: Factory {
     fn clone_type_query_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_query_node()
             .expect("operation requires TypeQueryNode payload");
-        let expr_name = data.expr_name;
-        let type_arguments = data.type_arguments;
+        let expr_name = data.expr_name();
+        let type_arguments = data.type_arguments();
         drop(original);
         let created = self.new_type_query_node(expr_name, type_arguments);
         self.finish_clone(created, original_id)
@@ -5409,7 +11966,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             members,
         };
-        self.new_node(SyntaxKind::MappedType.into(), data.into())
+        self.new_mapped_type_node_data(SyntaxKind::MappedType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateMappedTypeNode
     fn update_mapped_type_node(
@@ -5424,15 +11981,14 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_mapped_type_node()
             .expect("UpdateMappedTypeNode requires MappedTypeNode payload");
-        if readonly_token == data.readonly_token
-            && type_parameter == data.type_parameter
-            && name_type == data.name_type
-            && question_token == data.question_token
-            && r#type == data.r#type
-            && members == data.members
+        if readonly_token == data.readonly_token()
+            && type_parameter == data.type_parameter()
+            && name_type == data.name_type()
+            && question_token == data.question_token()
+            && r#type == data.r#type()
+            && members == data.members()
         {
             return original_id;
         }
@@ -5451,15 +12007,14 @@ pub trait FactoryMethods: Factory {
     fn clone_mapped_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_mapped_type_node()
             .expect("operation requires MappedTypeNode payload");
-        let readonly_token = data.readonly_token;
-        let type_parameter = data.type_parameter;
-        let name_type = data.name_type;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
-        let members = data.members;
+        let readonly_token = data.readonly_token();
+        let type_parameter = data.type_parameter();
+        let name_type = data.name_type();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
+        let members = data.members();
         drop(original);
         let created = self.new_mapped_type_node(
             readonly_token,
@@ -5474,7 +12029,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTypeLiteralNode
     fn new_type_literal_node(&mut self, members: Option<NodeListId>) -> NodeId {
         let data = TypeLiteralNodeData { members };
-        self.new_node(SyntaxKind::TypeLiteral.into(), data.into())
+        self.new_type_literal_node_data(SyntaxKind::TypeLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeLiteralNode
     fn update_type_literal_node(
@@ -5484,10 +12039,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_literal_node()
             .expect("UpdateTypeLiteralNode requires TypeLiteralNode payload");
-        if members == data.members {
+        if members == data.members() {
             return original_id;
         }
         drop(original);
@@ -5498,10 +12052,9 @@ pub trait FactoryMethods: Factory {
     fn clone_type_literal_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_literal_node()
             .expect("operation requires TypeLiteralNode payload");
-        let members = data.members;
+        let members = data.members();
         drop(original);
         let created = self.new_type_literal_node(members);
         self.finish_clone(created, original_id)
@@ -5509,7 +12062,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewTupleTypeNode
     fn new_tuple_type_node(&mut self, elements: Option<NodeListId>) -> NodeId {
         let data = TupleTypeNodeData { elements };
-        self.new_node(SyntaxKind::TupleType.into(), data.into())
+        self.new_tuple_type_node_data(SyntaxKind::TupleType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTupleTypeNode
     fn update_tuple_type_node(
@@ -5519,10 +12072,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tuple_type_node()
             .expect("UpdateTupleTypeNode requires TupleTypeNode payload");
-        if elements == data.elements {
+        if elements == data.elements() {
             return original_id;
         }
         drop(original);
@@ -5533,10 +12085,9 @@ pub trait FactoryMethods: Factory {
     fn clone_tuple_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_tuple_type_node()
             .expect("operation requires TupleTypeNode payload");
-        let elements = data.elements;
+        let elements = data.elements();
         drop(original);
         let created = self.new_tuple_type_node(elements);
         self.finish_clone(created, original_id)
@@ -5555,7 +12106,7 @@ pub trait FactoryMethods: Factory {
             question_token,
             r#type,
         };
-        self.new_node(SyntaxKind::NamedTupleMember.into(), data.into())
+        self.new_named_tuple_member_data(SyntaxKind::NamedTupleMember.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateNamedTupleMember
     fn update_named_tuple_member(
@@ -5568,13 +12119,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_tuple_member()
             .expect("UpdateNamedTupleMember requires NamedTupleMember payload");
-        if dot_dot_dot_token == data.dot_dot_dot_token
-            && name == data.name
-            && question_token == data.question_token
-            && r#type == data.r#type
+        if dot_dot_dot_token == data.dot_dot_dot_token()
+            && name == data.name()
+            && question_token == data.question_token()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -5586,13 +12136,12 @@ pub trait FactoryMethods: Factory {
     fn clone_named_tuple_member(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_named_tuple_member()
             .expect("operation requires NamedTupleMember payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let name = data.name;
-        let question_token = data.question_token;
-        let r#type = data.r#type;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let name = data.name();
+        let question_token = data.question_token();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_named_tuple_member(dot_dot_dot_token, name, question_token, r#type);
         self.finish_clone(created, original_id)
@@ -5600,16 +12149,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewOptionalTypeNode
     fn new_optional_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = OptionalTypeNodeData { r#type };
-        self.new_node(SyntaxKind::OptionalType.into(), data.into())
+        self.new_optional_type_node_data(SyntaxKind::OptionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateOptionalTypeNode
     fn update_optional_type_node(&mut self, original_id: NodeId, r#type: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_optional_type_node()
             .expect("UpdateOptionalTypeNode requires OptionalTypeNode payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -5620,10 +12168,9 @@ pub trait FactoryMethods: Factory {
     fn clone_optional_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_optional_type_node()
             .expect("operation requires OptionalTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_optional_type_node(r#type);
         self.finish_clone(created, original_id)
@@ -5631,16 +12178,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewRestTypeNode
     fn new_rest_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = RestTypeNodeData { r#type };
-        self.new_node(SyntaxKind::RestType.into(), data.into())
+        self.new_rest_type_node_data(SyntaxKind::RestType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateRestTypeNode
     fn update_rest_type_node(&mut self, original_id: NodeId, r#type: Option<NodeId>) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_rest_type_node()
             .expect("UpdateRestTypeNode requires RestTypeNode payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -5651,10 +12197,9 @@ pub trait FactoryMethods: Factory {
     fn clone_rest_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_rest_type_node()
             .expect("operation requires RestTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_rest_type_node(r#type);
         self.finish_clone(created, original_id)
@@ -5662,7 +12207,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewParenthesizedTypeNode
     fn new_parenthesized_type_node(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = ParenthesizedTypeNodeData { r#type };
-        self.new_node(SyntaxKind::ParenthesizedType.into(), data.into())
+        self.new_parenthesized_type_node_data(SyntaxKind::ParenthesizedType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateParenthesizedTypeNode
     fn update_parenthesized_type_node(
@@ -5672,10 +12217,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_type_node()
             .expect("UpdateParenthesizedTypeNode requires ParenthesizedTypeNode payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -5686,10 +12230,9 @@ pub trait FactoryMethods: Factory {
     fn clone_parenthesized_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_parenthesized_type_node()
             .expect("operation requires ParenthesizedTypeNode payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_parenthesized_type_node(r#type);
         self.finish_clone(created, original_id)
@@ -5708,7 +12251,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::FunctionType.into(), data.into())
+        self.new_function_type_node_data(SyntaxKind::FunctionType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateFunctionTypeNode
     fn update_function_type_node(
@@ -5720,12 +12263,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_type_node()
             .expect("UpdateFunctionTypeNode requires FunctionTypeNode payload");
-        if type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -5737,12 +12279,11 @@ pub trait FactoryMethods: Factory {
     fn clone_function_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_function_type_node()
             .expect("operation requires FunctionTypeNode payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_function_type_node(type_parameters, parameters, r#type);
         self.finish_clone(created, original_id)
@@ -5762,7 +12303,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::ConstructorType.into(), data.into())
+        self.new_constructor_type_node_data(SyntaxKind::ConstructorType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateConstructorTypeNode
     fn update_constructor_type_node(
@@ -5775,13 +12316,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_type_node()
             .expect("UpdateConstructorTypeNode requires ConstructorTypeNode payload");
-        if modifiers == data.modifiers
-            && type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if modifiers == data.modifiers()
+            && type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -5794,13 +12334,12 @@ pub trait FactoryMethods: Factory {
     fn clone_constructor_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_constructor_type_node()
             .expect("operation requires ConstructorTypeNode payload");
-        let modifiers = data.modifiers;
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let modifiers = data.modifiers();
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created =
             self.new_constructor_type_node(modifiers, type_parameters, parameters, r#type);
@@ -5820,18 +12359,17 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateHead.into(), data.into())
+        self.new_template_head_data(SyntaxKind::TemplateHead.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateHead.Clone
     fn clone_template_head(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_head()
             .expect("operation requires TemplateHead payload");
-        let text = data.text.clone();
-        let raw_text = data.raw_text.clone();
-        let template_flags = data.template_flags;
+        let text = data.text_owned();
+        let raw_text = data.raw_text_owned();
+        let template_flags = data.template_flags();
         drop(original);
         let created = self.new_template_head(text, raw_text, template_flags);
         self.finish_clone(created, original_id)
@@ -5850,18 +12388,17 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateMiddle.into(), data.into())
+        self.new_template_middle_data(SyntaxKind::TemplateMiddle.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateMiddle.Clone
     fn clone_template_middle(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_middle()
             .expect("operation requires TemplateMiddle payload");
-        let text = data.text.clone();
-        let raw_text = data.raw_text.clone();
-        let template_flags = data.template_flags;
+        let text = data.text_owned();
+        let raw_text = data.raw_text_owned();
+        let template_flags = data.template_flags();
         drop(original);
         let created = self.new_template_middle(text, raw_text, template_flags);
         self.finish_clone(created, original_id)
@@ -5880,18 +12417,17 @@ pub trait FactoryMethods: Factory {
             template_flags: template_flags & crate::token_flags::TEMPLATE_LITERAL_LIKE_FLAGS,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::TemplateTail.into(), data.into())
+        self.new_template_tail_data(SyntaxKind::TemplateTail.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:TemplateTail.Clone
     fn clone_template_tail(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_tail()
             .expect("operation requires TemplateTail payload");
-        let text = data.text.clone();
-        let raw_text = data.raw_text.clone();
-        let template_flags = data.template_flags;
+        let text = data.text_owned();
+        let raw_text = data.raw_text_owned();
+        let template_flags = data.template_flags();
         drop(original);
         let created = self.new_template_tail(text, raw_text, template_flags);
         self.finish_clone(created, original_id)
@@ -5906,7 +12442,7 @@ pub trait FactoryMethods: Factory {
             head,
             template_spans,
         };
-        self.new_node(SyntaxKind::TemplateLiteralType.into(), data.into())
+        self.new_template_literal_type_node_data(SyntaxKind::TemplateLiteralType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateLiteralTypeNode
     fn update_template_literal_type_node(
@@ -5917,10 +12453,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_node()
             .expect("UpdateTemplateLiteralTypeNode requires TemplateLiteralTypeNode payload");
-        if head == data.head && template_spans == data.template_spans {
+        if head == data.head() && template_spans == data.template_spans() {
             return original_id;
         }
         drop(original);
@@ -5931,11 +12466,10 @@ pub trait FactoryMethods: Factory {
     fn clone_template_literal_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_node()
             .expect("operation requires TemplateLiteralTypeNode payload");
-        let head = data.head;
-        let template_spans = data.template_spans;
+        let head = data.head();
+        let template_spans = data.template_spans();
         drop(original);
         let created = self.new_template_literal_type_node(head, template_spans);
         self.finish_clone(created, original_id)
@@ -5947,7 +12481,7 @@ pub trait FactoryMethods: Factory {
         literal: Option<NodeId>,
     ) -> NodeId {
         let data = TemplateLiteralTypeSpanData { r#type, literal };
-        self.new_node(SyntaxKind::TemplateLiteralTypeSpan.into(), data.into())
+        self.new_template_literal_type_span_data(SyntaxKind::TemplateLiteralTypeSpan.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTemplateLiteralTypeSpan
     fn update_template_literal_type_span(
@@ -5958,10 +12492,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_span()
             .expect("UpdateTemplateLiteralTypeSpan requires TemplateLiteralTypeSpan payload");
-        if r#type == data.r#type && literal == data.literal {
+        if r#type == data.r#type() && literal == data.literal() {
             return original_id;
         }
         drop(original);
@@ -5972,11 +12505,10 @@ pub trait FactoryMethods: Factory {
     fn clone_template_literal_type_span(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_template_literal_type_span()
             .expect("operation requires TemplateLiteralTypeSpan payload");
-        let r#type = data.r#type;
-        let literal = data.literal;
+        let r#type = data.r#type();
+        let literal = data.literal();
         drop(original);
         let created = self.new_template_literal_type_span(r#type, literal);
         self.finish_clone(created, original_id)
@@ -5984,7 +12516,10 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewPartiallyEmittedExpression
     fn new_partially_emitted_expression(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = PartiallyEmittedExpressionData { expression };
-        self.new_node(SyntaxKind::PartiallyEmittedExpression.into(), data.into())
+        self.new_partially_emitted_expression_data(
+            SyntaxKind::PartiallyEmittedExpression.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdatePartiallyEmittedExpression
     fn update_partially_emitted_expression(
@@ -5994,10 +12529,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_partially_emitted_expression()
             .expect("UpdatePartiallyEmittedExpression requires PartiallyEmittedExpression payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -6008,10 +12542,9 @@ pub trait FactoryMethods: Factory {
     fn clone_partially_emitted_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_partially_emitted_expression()
             .expect("operation requires PartiallyEmittedExpression payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_partially_emitted_expression(expression);
         self.finish_clone(created, original_id)
@@ -6028,7 +12561,7 @@ pub trait FactoryMethods: Factory {
             children,
             closing_element,
         };
-        self.new_node(SyntaxKind::JsxElement.into(), data.into())
+        self.new_jsx_element_data(SyntaxKind::JsxElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxElement
     fn update_jsx_element(
@@ -6040,12 +12573,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_element()
             .expect("UpdateJsxElement requires JsxElement payload");
-        if opening_element == data.opening_element
-            && children == data.children
-            && closing_element == data.closing_element
+        if opening_element == data.opening_element()
+            && children == data.children()
+            && closing_element == data.closing_element()
         {
             return original_id;
         }
@@ -6057,12 +12589,11 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_element()
             .expect("operation requires JsxElement payload");
-        let opening_element = data.opening_element;
-        let children = data.children;
-        let closing_element = data.closing_element;
+        let opening_element = data.opening_element();
+        let children = data.children();
+        let closing_element = data.closing_element();
         drop(original);
         let created = self.new_jsx_element(opening_element, children, closing_element);
         self.finish_clone(created, original_id)
@@ -6070,7 +12601,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxAttributes
     fn new_jsx_attributes(&mut self, properties: Option<NodeListId>) -> NodeId {
         let data = JsxAttributesData { properties };
-        self.new_node(SyntaxKind::JsxAttributes.into(), data.into())
+        self.new_jsx_attributes_data(SyntaxKind::JsxAttributes.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxAttributes
     fn update_jsx_attributes(
@@ -6080,10 +12611,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attributes()
             .expect("UpdateJsxAttributes requires JsxAttributes payload");
-        if properties == data.properties {
+        if properties == data.properties() {
             return original_id;
         }
         drop(original);
@@ -6094,10 +12624,9 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_attributes(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attributes()
             .expect("operation requires JsxAttributes payload");
-        let properties = data.properties;
+        let properties = data.properties();
         drop(original);
         let created = self.new_jsx_attributes(properties);
         self.finish_clone(created, original_id)
@@ -6109,7 +12638,7 @@ pub trait FactoryMethods: Factory {
         name: Option<NodeId>,
     ) -> NodeId {
         let data = JsxNamespacedNameData { namespace, name };
-        self.new_node(SyntaxKind::JsxNamespacedName.into(), data.into())
+        self.new_jsx_namespaced_name_data(SyntaxKind::JsxNamespacedName.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxNamespacedName
     fn update_jsx_namespaced_name(
@@ -6120,10 +12649,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_namespaced_name()
             .expect("UpdateJsxNamespacedName requires JsxNamespacedName payload");
-        if namespace == data.namespace && name == data.name {
+        if namespace == data.namespace() && name == data.name() {
             return original_id;
         }
         drop(original);
@@ -6134,11 +12662,10 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_namespaced_name(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_namespaced_name()
             .expect("operation requires JsxNamespacedName payload");
-        let namespace = data.namespace;
-        let name = data.name;
+        let namespace = data.namespace();
+        let name = data.name();
         drop(original);
         let created = self.new_jsx_namespaced_name(namespace, name);
         self.finish_clone(created, original_id)
@@ -6155,7 +12682,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             attributes,
         };
-        self.new_node(SyntaxKind::JsxOpeningElement.into(), data.into())
+        self.new_jsx_opening_element_data(SyntaxKind::JsxOpeningElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxOpeningElement
     fn update_jsx_opening_element(
@@ -6167,12 +12694,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_opening_element()
             .expect("UpdateJsxOpeningElement requires JsxOpeningElement payload");
-        if tag_name == data.tag_name
-            && type_arguments == data.type_arguments
-            && attributes == data.attributes
+        if tag_name == data.tag_name()
+            && type_arguments == data.type_arguments()
+            && attributes == data.attributes()
         {
             return original_id;
         }
@@ -6184,12 +12710,11 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_opening_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_opening_element()
             .expect("operation requires JsxOpeningElement payload");
-        let tag_name = data.tag_name;
-        let type_arguments = data.type_arguments;
-        let attributes = data.attributes;
+        let tag_name = data.tag_name();
+        let type_arguments = data.type_arguments();
+        let attributes = data.attributes();
         drop(original);
         let created = self.new_jsx_opening_element(tag_name, type_arguments, attributes);
         self.finish_clone(created, original_id)
@@ -6206,7 +12731,7 @@ pub trait FactoryMethods: Factory {
             type_arguments,
             attributes,
         };
-        self.new_node(SyntaxKind::JsxSelfClosingElement.into(), data.into())
+        self.new_jsx_self_closing_element_data(SyntaxKind::JsxSelfClosingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxSelfClosingElement
     fn update_jsx_self_closing_element(
@@ -6218,12 +12743,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_self_closing_element()
             .expect("UpdateJsxSelfClosingElement requires JsxSelfClosingElement payload");
-        if tag_name == data.tag_name
-            && type_arguments == data.type_arguments
-            && attributes == data.attributes
+        if tag_name == data.tag_name()
+            && type_arguments == data.type_arguments()
+            && attributes == data.attributes()
         {
             return original_id;
         }
@@ -6235,12 +12759,11 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_self_closing_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_self_closing_element()
             .expect("operation requires JsxSelfClosingElement payload");
-        let tag_name = data.tag_name;
-        let type_arguments = data.type_arguments;
-        let attributes = data.attributes;
+        let tag_name = data.tag_name();
+        let type_arguments = data.type_arguments();
+        let attributes = data.attributes();
         drop(original);
         let created = self.new_jsx_self_closing_element(tag_name, type_arguments, attributes);
         self.finish_clone(created, original_id)
@@ -6257,7 +12780,7 @@ pub trait FactoryMethods: Factory {
             children,
             closing_fragment,
         };
-        self.new_node(SyntaxKind::JsxFragment.into(), data.into())
+        self.new_jsx_fragment_data(SyntaxKind::JsxFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxFragment
     fn update_jsx_fragment(
@@ -6269,12 +12792,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_fragment()
             .expect("UpdateJsxFragment requires JsxFragment payload");
-        if opening_fragment == data.opening_fragment
-            && children == data.children
-            && closing_fragment == data.closing_fragment
+        if opening_fragment == data.opening_fragment()
+            && children == data.children()
+            && closing_fragment == data.closing_fragment()
         {
             return original_id;
         }
@@ -6286,12 +12808,11 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_fragment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_fragment()
             .expect("operation requires JsxFragment payload");
-        let opening_fragment = data.opening_fragment;
-        let children = data.children;
-        let closing_fragment = data.closing_fragment;
+        let opening_fragment = data.opening_fragment();
+        let children = data.children();
+        let closing_fragment = data.closing_fragment();
         drop(original);
         let created = self.new_jsx_fragment(opening_fragment, children, closing_fragment);
         self.finish_clone(created, original_id)
@@ -6299,13 +12820,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxOpeningFragment
     fn new_jsx_opening_fragment(&mut self) -> NodeId {
         let data = JsxOpeningFragmentData {};
-        self.new_node(SyntaxKind::JsxOpeningFragment.into(), data.into())
+        self.new_jsx_opening_fragment_data(SyntaxKind::JsxOpeningFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxOpeningFragment.Clone
     fn clone_jsx_opening_fragment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_jsx_opening_fragment()
             .expect("operation requires JsxOpeningFragment payload");
         drop(original);
@@ -6315,13 +12835,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxClosingFragment
     fn new_jsx_closing_fragment(&mut self) -> NodeId {
         let data = JsxClosingFragmentData {};
-        self.new_node(SyntaxKind::JsxClosingFragment.into(), data.into())
+        self.new_jsx_closing_fragment_data(SyntaxKind::JsxClosingFragment.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxClosingFragment.Clone
     fn clone_jsx_closing_fragment(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_jsx_closing_fragment()
             .expect("operation requires JsxClosingFragment payload");
         drop(original);
@@ -6331,7 +12850,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxAttribute
     fn new_jsx_attribute(&mut self, name: Option<NodeId>, initializer: Option<NodeId>) -> NodeId {
         let data = JsxAttributeData { name, initializer };
-        self.new_node(SyntaxKind::JsxAttribute.into(), data.into())
+        self.new_jsx_attribute_data(SyntaxKind::JsxAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxAttribute
     fn update_jsx_attribute(
@@ -6342,10 +12861,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attribute()
             .expect("UpdateJsxAttribute requires JsxAttribute payload");
-        if name == data.name && initializer == data.initializer {
+        if name == data.name() && initializer == data.initializer() {
             return original_id;
         }
         drop(original);
@@ -6356,11 +12874,10 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_attribute()
             .expect("operation requires JsxAttribute payload");
-        let name = data.name;
-        let initializer = data.initializer;
+        let name = data.name();
+        let initializer = data.initializer();
         drop(original);
         let created = self.new_jsx_attribute(name, initializer);
         self.finish_clone(created, original_id)
@@ -6368,7 +12885,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxSpreadAttribute
     fn new_jsx_spread_attribute(&mut self, expression: Option<NodeId>) -> NodeId {
         let data = JsxSpreadAttributeData { expression };
-        self.new_node(SyntaxKind::JsxSpreadAttribute.into(), data.into())
+        self.new_jsx_spread_attribute_data(SyntaxKind::JsxSpreadAttribute.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxSpreadAttribute
     fn update_jsx_spread_attribute(
@@ -6378,10 +12895,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_spread_attribute()
             .expect("UpdateJsxSpreadAttribute requires JsxSpreadAttribute payload");
-        if expression == data.expression {
+        if expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -6392,10 +12908,9 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_spread_attribute(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_spread_attribute()
             .expect("operation requires JsxSpreadAttribute payload");
-        let expression = data.expression;
+        let expression = data.expression();
         drop(original);
         let created = self.new_jsx_spread_attribute(expression);
         self.finish_clone(created, original_id)
@@ -6403,7 +12918,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJsxClosingElement
     fn new_jsx_closing_element(&mut self, tag_name: Option<NodeId>) -> NodeId {
         let data = JsxClosingElementData { tag_name };
-        self.new_node(SyntaxKind::JsxClosingElement.into(), data.into())
+        self.new_jsx_closing_element_data(SyntaxKind::JsxClosingElement.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxClosingElement
     fn update_jsx_closing_element(
@@ -6413,10 +12928,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_closing_element()
             .expect("UpdateJsxClosingElement requires JsxClosingElement payload");
-        if tag_name == data.tag_name {
+        if tag_name == data.tag_name() {
             return original_id;
         }
         drop(original);
@@ -6427,10 +12941,9 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_closing_element(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_closing_element()
             .expect("operation requires JsxClosingElement payload");
-        let tag_name = data.tag_name;
+        let tag_name = data.tag_name();
         drop(original);
         let created = self.new_jsx_closing_element(tag_name);
         self.finish_clone(created, original_id)
@@ -6445,7 +12958,7 @@ pub trait FactoryMethods: Factory {
             dot_dot_dot_token,
             expression,
         };
-        self.new_node(SyntaxKind::JsxExpression.into(), data.into())
+        self.new_jsx_expression_data(SyntaxKind::JsxExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJsxExpression
     fn update_jsx_expression(
@@ -6456,10 +12969,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_expression()
             .expect("UpdateJsxExpression requires JsxExpression payload");
-        if dot_dot_dot_token == data.dot_dot_dot_token && expression == data.expression {
+        if dot_dot_dot_token == data.dot_dot_dot_token() && expression == data.expression() {
             return original_id;
         }
         drop(original);
@@ -6470,11 +12982,10 @@ pub trait FactoryMethods: Factory {
     fn clone_jsx_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_expression()
             .expect("operation requires JsxExpression payload");
-        let dot_dot_dot_token = data.dot_dot_dot_token;
-        let expression = data.expression;
+        let dot_dot_dot_token = data.dot_dot_dot_token();
+        let expression = data.expression();
         drop(original);
         let created = self.new_jsx_expression(dot_dot_dot_token, expression);
         self.finish_clone(created, original_id)
@@ -6487,17 +12998,16 @@ pub trait FactoryMethods: Factory {
             contains_only_trivia_white_spaces,
         };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JsxText.into(), data.into())
+        self.new_jsx_text_data(SyntaxKind::JsxText.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JsxText.Clone
     fn clone_jsx_text(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_jsx_text()
             .expect("operation requires JsxText payload");
-        let text = data.text.clone();
-        let contains_only_trivia_white_spaces = data.contains_only_trivia_white_spaces;
+        let text = data.text_owned();
+        let contains_only_trivia_white_spaces = data.contains_only_trivia_white_spaces();
         drop(original);
         let created = self.new_jsx_text(text, contains_only_trivia_white_spaces);
         self.finish_clone(created, original_id)
@@ -6505,16 +13015,15 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewSyntaxList
     fn new_syntax_list(&mut self, children: NodeSlice) -> NodeId {
         let data = SyntaxListData { children };
-        self.new_node(SyntaxKind::SyntaxList.into(), data.into())
+        self.new_syntax_list_data(SyntaxKind::SyntaxList.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSyntaxList
     fn update_syntax_list(&mut self, original_id: NodeId, children: NodeSlice) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_syntax_list()
             .expect("UpdateSyntaxList requires SyntaxList payload");
-        if children.same(data.children) {
+        if children.same(data.children()) {
             return original_id;
         }
         drop(original);
@@ -6525,10 +13034,9 @@ pub trait FactoryMethods: Factory {
     fn clone_syntax_list(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_syntax_list()
             .expect("operation requires SyntaxList payload");
-        let children = data.children;
+        let children = data.children();
         drop(original);
         let created = self.new_syntax_list(children);
         self.finish_clone(created, original_id)
@@ -6536,7 +13044,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDoc
     fn new_js_doc(&mut self, comment: Option<NodeListId>, tags: Option<NodeListId>) -> NodeId {
         let data = JSDocData { comment, tags };
-        self.new_node(SyntaxKind::JSDoc.into(), data.into())
+        self.new_js_doc_data(SyntaxKind::JSDoc.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDoc
     fn update_js_doc(
@@ -6547,10 +13055,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc()
             .expect("UpdateJSDoc requires JSDoc payload");
-        if comment == data.comment && tags == data.tags {
+        if comment == data.comment() && tags == data.tags() {
             return original_id;
         }
         drop(original);
@@ -6561,11 +13068,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc()
             .expect("operation requires JSDoc payload");
-        let comment = data.comment;
-        let tags = data.tags;
+        let comment = data.comment();
+        let tags = data.tags();
         drop(original);
         let created = self.new_js_doc(comment, tags);
         self.finish_clone(created, original_id)
@@ -6573,7 +13079,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocTypeExpression
     fn new_js_doc_type_expression(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocTypeExpressionData { r#type };
-        self.new_node(SyntaxKind::JSDocTypeExpression.into(), data.into())
+        self.new_js_doc_type_expression_data(SyntaxKind::JSDocTypeExpression.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeExpression
     fn update_js_doc_type_expression(
@@ -6583,10 +13089,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_expression()
             .expect("UpdateJSDocTypeExpression requires JSDocTypeExpression payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -6597,10 +13102,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_type_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_expression()
             .expect("operation requires JSDocTypeExpression payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_type_expression(r#type);
         self.finish_clone(created, original_id)
@@ -6608,7 +13112,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNonNullableType
     fn new_js_doc_non_nullable_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocNonNullableTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocNonNullableType.into(), data.into())
+        self.new_js_doc_non_nullable_type_data(SyntaxKind::JSDocNonNullableType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNonNullableType
     fn update_js_doc_non_nullable_type(
@@ -6618,10 +13122,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_non_nullable_type()
             .expect("UpdateJSDocNonNullableType requires JSDocNonNullableType payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -6632,10 +13135,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_non_nullable_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_non_nullable_type()
             .expect("operation requires JSDocNonNullableType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_non_nullable_type(r#type);
         self.finish_clone(created, original_id)
@@ -6643,7 +13145,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNullableType
     fn new_js_doc_nullable_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocNullableTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocNullableType.into(), data.into())
+        self.new_js_doc_nullable_type_data(SyntaxKind::JSDocNullableType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNullableType
     fn update_js_doc_nullable_type(
@@ -6653,10 +13155,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_nullable_type()
             .expect("UpdateJSDocNullableType requires JSDocNullableType payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -6667,10 +13168,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_nullable_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_nullable_type()
             .expect("operation requires JSDocNullableType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_nullable_type(r#type);
         self.finish_clone(created, original_id)
@@ -6678,13 +13178,12 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocAllType
     fn new_js_doc_all_type(&mut self) -> NodeId {
         let data = JSDocAllTypeData {};
-        self.new_node(SyntaxKind::JSDocAllType.into(), data.into())
+        self.new_js_doc_all_type_data(SyntaxKind::JSDocAllType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JSDocAllType.Clone
     fn clone_js_doc_all_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         original
-            .data()
             .as_js_doc_all_type()
             .expect("operation requires JSDocAllType payload");
         drop(original);
@@ -6694,7 +13193,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocVariadicType
     fn new_js_doc_variadic_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocVariadicTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocVariadicType.into(), data.into())
+        self.new_js_doc_variadic_type_data(SyntaxKind::JSDocVariadicType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocVariadicType
     fn update_js_doc_variadic_type(
@@ -6704,10 +13203,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_variadic_type()
             .expect("UpdateJSDocVariadicType requires JSDocVariadicType payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -6718,10 +13216,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_variadic_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_variadic_type()
             .expect("operation requires JSDocVariadicType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_variadic_type(r#type);
         self.finish_clone(created, original_id)
@@ -6729,7 +13226,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocOptionalType
     fn new_js_doc_optional_type(&mut self, r#type: Option<NodeId>) -> NodeId {
         let data = JSDocOptionalTypeData { r#type };
-        self.new_node(SyntaxKind::JSDocOptionalType.into(), data.into())
+        self.new_js_doc_optional_type_data(SyntaxKind::JSDocOptionalType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOptionalType
     fn update_js_doc_optional_type(
@@ -6739,10 +13236,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_optional_type()
             .expect("UpdateJSDocOptionalType requires JSDocOptionalType payload");
-        if r#type == data.r#type {
+        if r#type == data.r#type() {
             return original_id;
         }
         drop(original);
@@ -6753,10 +13249,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_optional_type(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_optional_type()
             .expect("operation requires JSDocOptionalType payload");
-        let r#type = data.r#type;
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_optional_type(r#type);
         self.finish_clone(created, original_id)
@@ -6773,7 +13268,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocTypeTag.into(), data.into())
+        self.new_js_doc_type_tag_data(SyntaxKind::JSDocTypeTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeTag
     fn update_js_doc_type_tag(
@@ -6785,12 +13280,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_tag()
             .expect("UpdateJSDocTypeTag requires JSDocTypeTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -6802,12 +13296,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_type_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_tag()
             .expect("operation requires JSDocTypeTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_type_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -6819,7 +13312,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocUnknownTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocUnknownTag.into(), data.into())
+        self.new_js_doc_unknown_tag_data(SyntaxKind::JSDocUnknownTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocUnknownTag
     fn update_js_doc_unknown_tag(
@@ -6830,10 +13323,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_unknown_tag()
             .expect("UpdateJSDocUnknownTag requires JSDocUnknownTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -6844,11 +13336,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_unknown_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_unknown_tag()
             .expect("operation requires JSDocUnknownTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_unknown_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -6867,7 +13358,7 @@ pub trait FactoryMethods: Factory {
             constraint,
             type_parameters,
         };
-        self.new_node(SyntaxKind::JSDocTemplateTag.into(), data.into())
+        self.new_js_doc_template_tag_data(SyntaxKind::JSDocTemplateTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTemplateTag
     fn update_js_doc_template_tag(
@@ -6880,13 +13371,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_template_tag()
             .expect("UpdateJSDocTemplateTag requires JSDocTemplateTag payload");
-        if tag_name == data.tag_name
-            && constraint == data.constraint
-            && type_parameters == data.type_parameters
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && constraint == data.constraint()
+            && type_parameters == data.type_parameters()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -6898,13 +13388,12 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_template_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_template_tag()
             .expect("operation requires JSDocTemplateTag payload");
-        let tag_name = data.tag_name;
-        let constraint = data.constraint;
-        let type_parameters = data.type_parameters;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let constraint = data.constraint();
+        let type_parameters = data.type_parameters();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_template_tag(tag_name, constraint, type_parameters, comment);
         self.finish_clone(created, original_id)
@@ -6921,7 +13410,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocReturnTag.into(), data.into())
+        self.new_js_doc_return_tag_data(SyntaxKind::JSDocReturnTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocReturnTag
     fn update_js_doc_return_tag(
@@ -6933,12 +13422,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_return_tag()
             .expect("UpdateJSDocReturnTag requires JSDocReturnTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -6950,12 +13438,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_return_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_return_tag()
             .expect("operation requires JSDocReturnTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_return_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -6967,7 +13454,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocPublicTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocPublicTag.into(), data.into())
+        self.new_js_doc_public_tag_data(SyntaxKind::JSDocPublicTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocPublicTag
     fn update_js_doc_public_tag(
@@ -6978,10 +13465,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_public_tag()
             .expect("UpdateJSDocPublicTag requires JSDocPublicTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -6992,11 +13478,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_public_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_public_tag()
             .expect("operation requires JSDocPublicTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_public_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7008,7 +13493,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocPrivateTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocPrivateTag.into(), data.into())
+        self.new_js_doc_private_tag_data(SyntaxKind::JSDocPrivateTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocPrivateTag
     fn update_js_doc_private_tag(
@@ -7019,10 +13504,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_private_tag()
             .expect("UpdateJSDocPrivateTag requires JSDocPrivateTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -7033,11 +13517,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_private_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_private_tag()
             .expect("operation requires JSDocPrivateTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_private_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7049,7 +13532,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocProtectedTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocProtectedTag.into(), data.into())
+        self.new_js_doc_protected_tag_data(SyntaxKind::JSDocProtectedTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocProtectedTag
     fn update_js_doc_protected_tag(
@@ -7060,10 +13543,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_protected_tag()
             .expect("UpdateJSDocProtectedTag requires JSDocProtectedTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -7074,11 +13556,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_protected_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_protected_tag()
             .expect("operation requires JSDocProtectedTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_protected_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7090,7 +13571,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocReadonlyTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocReadonlyTag.into(), data.into())
+        self.new_js_doc_readonly_tag_data(SyntaxKind::JSDocReadonlyTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocReadonlyTag
     fn update_js_doc_readonly_tag(
@@ -7101,10 +13582,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_readonly_tag()
             .expect("UpdateJSDocReadonlyTag requires JSDocReadonlyTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -7115,11 +13595,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_readonly_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_readonly_tag()
             .expect("operation requires JSDocReadonlyTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_readonly_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7131,7 +13610,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocOverrideTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocOverrideTag.into(), data.into())
+        self.new_js_doc_override_tag_data(SyntaxKind::JSDocOverrideTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOverrideTag
     fn update_js_doc_override_tag(
@@ -7142,10 +13621,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_override_tag()
             .expect("UpdateJSDocOverrideTag requires JSDocOverrideTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -7156,11 +13634,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_override_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_override_tag()
             .expect("operation requires JSDocOverrideTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_override_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7172,7 +13649,7 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let data = JSDocDeprecatedTagData { tag_name, comment };
-        self.new_node(SyntaxKind::JSDocDeprecatedTag.into(), data.into())
+        self.new_js_doc_deprecated_tag_data(SyntaxKind::JSDocDeprecatedTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocDeprecatedTag
     fn update_js_doc_deprecated_tag(
@@ -7183,10 +13660,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_deprecated_tag()
             .expect("UpdateJSDocDeprecatedTag requires JSDocDeprecatedTag payload");
-        if tag_name == data.tag_name && comment == data.comment {
+        if tag_name == data.tag_name() && comment == data.comment() {
             return original_id;
         }
         drop(original);
@@ -7197,11 +13673,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_deprecated_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_deprecated_tag()
             .expect("operation requires JSDocDeprecatedTag payload");
-        let tag_name = data.tag_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_deprecated_tag(tag_name, comment);
         self.finish_clone(created, original_id)
@@ -7218,7 +13693,7 @@ pub trait FactoryMethods: Factory {
             comment,
             name_expression,
         };
-        self.new_node(SyntaxKind::JSDocSeeTag.into(), data.into())
+        self.new_js_doc_see_tag_data(SyntaxKind::JSDocSeeTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSeeTag
     fn update_js_doc_see_tag(
@@ -7230,12 +13705,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_see_tag()
             .expect("UpdateJSDocSeeTag requires JSDocSeeTag payload");
-        if tag_name == data.tag_name
-            && name_expression == data.name_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && name_expression == data.name_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7247,12 +13721,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_see_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_see_tag()
             .expect("operation requires JSDocSeeTag payload");
-        let tag_name = data.tag_name;
-        let name_expression = data.name_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let name_expression = data.name_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_see_tag(tag_name, name_expression, comment);
         self.finish_clone(created, original_id)
@@ -7269,7 +13742,7 @@ pub trait FactoryMethods: Factory {
             comment,
             class_name,
         };
-        self.new_node(SyntaxKind::JSDocImplementsTag.into(), data.into())
+        self.new_js_doc_implements_tag_data(SyntaxKind::JSDocImplementsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocImplementsTag
     fn update_js_doc_implements_tag(
@@ -7281,10 +13754,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_implements_tag()
             .expect("UpdateJSDocImplementsTag requires JSDocImplementsTag payload");
-        if tag_name == data.tag_name && class_name == data.class_name && comment == data.comment {
+        if tag_name == data.tag_name()
+            && class_name == data.class_name()
+            && comment == data.comment()
+        {
             return original_id;
         }
         drop(original);
@@ -7295,12 +13770,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_implements_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_implements_tag()
             .expect("operation requires JSDocImplementsTag payload");
-        let tag_name = data.tag_name;
-        let class_name = data.class_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let class_name = data.class_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_implements_tag(tag_name, class_name, comment);
         self.finish_clone(created, original_id)
@@ -7317,7 +13791,7 @@ pub trait FactoryMethods: Factory {
             comment,
             class_name,
         };
-        self.new_node(SyntaxKind::JSDocAugmentsTag.into(), data.into())
+        self.new_js_doc_augments_tag_data(SyntaxKind::JSDocAugmentsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocAugmentsTag
     fn update_js_doc_augments_tag(
@@ -7329,10 +13803,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_augments_tag()
             .expect("UpdateJSDocAugmentsTag requires JSDocAugmentsTag payload");
-        if tag_name == data.tag_name && class_name == data.class_name && comment == data.comment {
+        if tag_name == data.tag_name()
+            && class_name == data.class_name()
+            && comment == data.comment()
+        {
             return original_id;
         }
         drop(original);
@@ -7343,12 +13819,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_augments_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_augments_tag()
             .expect("operation requires JSDocAugmentsTag payload");
-        let tag_name = data.tag_name;
-        let class_name = data.class_name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let class_name = data.class_name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_augments_tag(tag_name, class_name, comment);
         self.finish_clone(created, original_id)
@@ -7365,7 +13840,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocSatisfiesTag.into(), data.into())
+        self.new_js_doc_satisfies_tag_data(SyntaxKind::JSDocSatisfiesTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSatisfiesTag
     fn update_js_doc_satisfies_tag(
@@ -7377,12 +13852,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_satisfies_tag()
             .expect("UpdateJSDocSatisfiesTag requires JSDocSatisfiesTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7394,12 +13868,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_satisfies_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_satisfies_tag()
             .expect("operation requires JSDocSatisfiesTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_satisfies_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -7416,7 +13889,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocThrowsTag.into(), data.into())
+        self.new_js_doc_throws_tag_data(SyntaxKind::JSDocThrowsTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocThrowsTag
     fn update_js_doc_throws_tag(
@@ -7428,12 +13901,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_throws_tag()
             .expect("UpdateJSDocThrowsTag requires JSDocThrowsTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7445,12 +13917,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_throws_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_throws_tag()
             .expect("operation requires JSDocThrowsTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_throws_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -7467,7 +13938,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocThisTag.into(), data.into())
+        self.new_js_doc_this_tag_data(SyntaxKind::JSDocThisTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocThisTag
     fn update_js_doc_this_tag(
@@ -7479,12 +13950,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_this_tag()
             .expect("UpdateJSDocThisTag requires JSDocThisTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7496,12 +13966,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_this_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_this_tag()
             .expect("operation requires JSDocThisTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_this_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -7522,7 +13991,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::JSDocImportTag.into(), data.into())
+        self.new_js_doc_import_tag_data(SyntaxKind::JSDocImportTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocImportTag
     fn update_js_doc_import_tag(
@@ -7536,14 +14005,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_import_tag()
             .expect("UpdateJSDocImportTag requires JSDocImportTag payload");
-        if tag_name == data.tag_name
-            && import_clause == data.import_clause
-            && module_specifier == data.module_specifier
-            && attributes == data.attributes
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && import_clause == data.import_clause()
+            && module_specifier == data.module_specifier()
+            && attributes == data.attributes()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7561,14 +14029,13 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_import_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_import_tag()
             .expect("operation requires JSDocImportTag payload");
-        let tag_name = data.tag_name;
-        let import_clause = data.import_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let import_clause = data.import_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_import_tag(
             tag_name,
@@ -7593,7 +14060,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             name,
         };
-        self.new_node(SyntaxKind::JSDocCallbackTag.into(), data.into())
+        self.new_js_doc_callback_tag_data(SyntaxKind::JSDocCallbackTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocCallbackTag
     fn update_js_doc_callback_tag(
@@ -7606,13 +14073,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_callback_tag()
             .expect("UpdateJSDocCallbackTag requires JSDocCallbackTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && name == data.name
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && name == data.name()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7624,13 +14090,12 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_callback_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_callback_tag()
             .expect("operation requires JSDocCallbackTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let name = data.name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let name = data.name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_callback_tag(tag_name, type_expression, name, comment);
         self.finish_clone(created, original_id)
@@ -7647,7 +14112,7 @@ pub trait FactoryMethods: Factory {
             comment,
             type_expression,
         };
-        self.new_node(SyntaxKind::JSDocOverloadTag.into(), data.into())
+        self.new_js_doc_overload_tag_data(SyntaxKind::JSDocOverloadTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocOverloadTag
     fn update_js_doc_overload_tag(
@@ -7659,12 +14124,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_overload_tag()
             .expect("UpdateJSDocOverloadTag requires JSDocOverloadTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7676,12 +14140,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_overload_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_overload_tag()
             .expect("operation requires JSDocOverloadTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_overload_tag(tag_name, type_expression, comment);
         self.finish_clone(created, original_id)
@@ -7700,7 +14163,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             name,
         };
-        self.new_node(SyntaxKind::JSDocTypedefTag.into(), data.into())
+        self.new_js_doc_typedef_tag_data(SyntaxKind::JSDocTypedefTag.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypedefTag
     fn update_js_doc_typedef_tag(
@@ -7713,13 +14176,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_typedef_tag()
             .expect("UpdateJSDocTypedefTag requires JSDocTypedefTag payload");
-        if tag_name == data.tag_name
-            && type_expression == data.type_expression
-            && name == data.name
-            && comment == data.comment
+        if tag_name == data.tag_name()
+            && type_expression == data.type_expression()
+            && name == data.name()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -7731,13 +14193,12 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_typedef_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_typedef_tag()
             .expect("operation requires JSDocTypedefTag payload");
-        let tag_name = data.tag_name;
-        let type_expression = data.type_expression;
-        let name = data.name;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let type_expression = data.type_expression();
+        let name = data.name();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_typedef_tag(tag_name, type_expression, name, comment);
         self.finish_clone(created, original_id)
@@ -7755,7 +14216,7 @@ pub trait FactoryMethods: Factory {
             r#type,
             full_signature: None,
         };
-        self.new_node(SyntaxKind::JSDocSignature.into(), data.into())
+        self.new_js_doc_signature_data(SyntaxKind::JSDocSignature.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocSignature
     fn update_js_doc_signature(
@@ -7767,12 +14228,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_signature()
             .expect("UpdateJSDocSignature requires JSDocSignature payload");
-        if type_parameters == data.type_parameters
-            && parameters == data.parameters
-            && r#type == data.r#type
+        if type_parameters == data.type_parameters()
+            && parameters == data.parameters()
+            && r#type == data.r#type()
         {
             return original_id;
         }
@@ -7784,12 +14244,11 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_signature(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_signature()
             .expect("operation requires JSDocSignature payload");
-        let type_parameters = data.type_parameters;
-        let parameters = data.parameters;
-        let r#type = data.r#type;
+        let type_parameters = data.type_parameters();
+        let parameters = data.parameters();
+        let r#type = data.r#type();
         drop(original);
         let created = self.new_js_doc_signature(type_parameters, parameters, r#type);
         self.finish_clone(created, original_id)
@@ -7797,7 +14256,7 @@ pub trait FactoryMethods: Factory {
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.NewJSDocNameReference
     fn new_js_doc_name_reference(&mut self, name: Option<NodeId>) -> NodeId {
         let data = JSDocNameReferenceData { name };
-        self.new_node(SyntaxKind::JSDocNameReference.into(), data.into())
+        self.new_js_doc_name_reference_data(SyntaxKind::JSDocNameReference.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocNameReference
     fn update_js_doc_name_reference(
@@ -7807,10 +14266,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_name_reference()
             .expect("UpdateJSDocNameReference requires JSDocNameReference payload");
-        if name == data.name {
+        if name == data.name() {
             return original_id;
         }
         drop(original);
@@ -7821,10 +14279,9 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_name_reference(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_name_reference()
             .expect("operation requires JSDocNameReference payload");
-        let name = data.name;
+        let name = data.name();
         drop(original);
         let created = self.new_js_doc_name_reference(name);
         self.finish_clone(created, original_id)
@@ -7846,7 +14303,7 @@ pub trait FactoryMethods: Factory {
             name,
             attributes,
         };
-        self.new_node(SyntaxKind::ModuleDeclaration.into(), data.into())
+        self.new_module_declaration_data(SyntaxKind::ModuleDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateModuleDeclaration
     fn update_module_declaration(
@@ -7860,14 +14317,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_declaration()
             .expect("UpdateModuleDeclaration requires ModuleDeclaration payload");
-        if modifiers == data.modifiers
-            && keyword == data.keyword
-            && name == data.name
-            && attributes == data.attributes
-            && body == data.body
+        if modifiers == data.modifiers()
+            && keyword == data.keyword()
+            && name == data.name()
+            && attributes == data.attributes()
+            && body == data.body()
         {
             return original_id;
         }
@@ -7879,14 +14335,13 @@ pub trait FactoryMethods: Factory {
     fn clone_module_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_module_declaration()
             .expect("operation requires ModuleDeclaration payload");
-        let modifiers = data.modifiers;
-        let keyword = data.keyword;
-        let name = data.name;
-        let attributes = data.attributes;
-        let body = data.body;
+        let modifiers = data.modifiers();
+        let keyword = data.keyword();
+        let name = data.name();
+        let attributes = data.attributes();
+        let body = data.body();
         drop(original);
         let created = self.new_module_declaration(modifiers, keyword, name, attributes, body);
         self.finish_clone(created, original_id)
@@ -7905,7 +14360,7 @@ pub trait FactoryMethods: Factory {
             name,
             module_reference,
         };
-        self.new_node(SyntaxKind::ImportEqualsDeclaration.into(), data.into())
+        self.new_import_equals_declaration_data(SyntaxKind::ImportEqualsDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportEqualsDeclaration
     fn update_import_equals_declaration(
@@ -7918,13 +14373,12 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_equals_declaration()
             .expect("UpdateImportEqualsDeclaration requires ImportEqualsDeclaration payload");
-        if modifiers == data.modifiers
-            && is_type_only == data.is_type_only
-            && name == data.name
-            && module_reference == data.module_reference
+        if modifiers == data.modifiers()
+            && is_type_only == data.is_type_only()
+            && name == data.name()
+            && module_reference == data.module_reference()
         {
             return original_id;
         }
@@ -7937,13 +14391,12 @@ pub trait FactoryMethods: Factory {
     fn clone_import_equals_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_equals_declaration()
             .expect("operation requires ImportEqualsDeclaration payload");
-        let modifiers = data.modifiers;
-        let is_type_only = data.is_type_only;
-        let name = data.name;
-        let module_reference = data.module_reference;
+        let modifiers = data.modifiers();
+        let is_type_only = data.is_type_only();
+        let name = data.name();
+        let module_reference = data.module_reference();
         drop(original);
         let created =
             self.new_import_equals_declaration(modifiers, is_type_only, name, module_reference);
@@ -7965,7 +14418,7 @@ pub trait FactoryMethods: Factory {
             module_specifier,
             attributes,
         };
-        self.new_node(SyntaxKind::ExportDeclaration.into(), data.into())
+        self.new_export_declaration_data(SyntaxKind::ExportDeclaration.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateExportDeclaration
     fn update_export_declaration(
@@ -7979,14 +14432,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_declaration()
             .expect("UpdateExportDeclaration requires ExportDeclaration payload");
-        if modifiers == data.modifiers
-            && is_type_only == data.is_type_only
-            && export_clause == data.export_clause
-            && module_specifier == data.module_specifier
-            && attributes == data.attributes
+        if modifiers == data.modifiers()
+            && is_type_only == data.is_type_only()
+            && export_clause == data.export_clause()
+            && module_specifier == data.module_specifier()
+            && attributes == data.attributes()
         {
             return original_id;
         }
@@ -8004,14 +14456,13 @@ pub trait FactoryMethods: Factory {
     fn clone_export_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_export_declaration()
             .expect("operation requires ExportDeclaration payload");
-        let modifiers = data.modifiers;
-        let is_type_only = data.is_type_only;
-        let export_clause = data.export_clause;
-        let module_specifier = data.module_specifier;
-        let attributes = data.attributes;
+        let modifiers = data.modifiers();
+        let is_type_only = data.is_type_only();
+        let export_clause = data.export_clause();
+        let module_specifier = data.module_specifier();
+        let attributes = data.attributes();
         drop(original);
         let created = self.new_export_declaration(
             modifiers,
@@ -8038,7 +14489,7 @@ pub trait FactoryMethods: Factory {
             attributes,
             qualifier,
         };
-        self.new_node(SyntaxKind::ImportType.into(), data.into())
+        self.new_import_type_node_data(SyntaxKind::ImportType.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportTypeNode
     fn update_import_type_node(
@@ -8052,14 +14503,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_type_node()
             .expect("UpdateImportTypeNode requires ImportTypeNode payload");
-        if is_type_of == data.is_type_of
-            && argument == data.argument
-            && attributes == data.attributes
-            && qualifier == data.qualifier
-            && type_arguments == data.type_arguments
+        if is_type_of == data.is_type_of()
+            && argument == data.argument()
+            && attributes == data.attributes()
+            && qualifier == data.qualifier()
+            && type_arguments == data.type_arguments()
         {
             return original_id;
         }
@@ -8072,14 +14522,13 @@ pub trait FactoryMethods: Factory {
     fn clone_import_type_node(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_type_node()
             .expect("operation requires ImportTypeNode payload");
-        let is_type_of = data.is_type_of;
-        let argument = data.argument;
-        let attributes = data.attributes;
-        let qualifier = data.qualifier;
-        let type_arguments = data.type_arguments;
+        let is_type_of = data.is_type_of();
+        let argument = data.argument();
+        let attributes = data.attributes();
+        let qualifier = data.qualifier();
+        let type_arguments = data.type_arguments();
         drop(original);
         let created =
             self.new_import_type_node(is_type_of, argument, attributes, qualifier, type_arguments);
@@ -8097,7 +14546,7 @@ pub trait FactoryMethods: Factory {
             name,
             named_bindings,
         };
-        self.new_node(SyntaxKind::ImportClause.into(), data.into())
+        self.new_import_clause_data(SyntaxKind::ImportClause.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportClause
     fn update_import_clause(
@@ -8109,12 +14558,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_clause()
             .expect("UpdateImportClause requires ImportClause payload");
-        if phase_modifier == data.phase_modifier
-            && name == data.name
-            && named_bindings == data.named_bindings
+        if phase_modifier == data.phase_modifier()
+            && name == data.name()
+            && named_bindings == data.named_bindings()
         {
             return original_id;
         }
@@ -8126,12 +14574,11 @@ pub trait FactoryMethods: Factory {
     fn clone_import_clause(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_clause()
             .expect("operation requires ImportClause payload");
-        let phase_modifier = data.phase_modifier;
-        let name = data.name;
-        let named_bindings = data.named_bindings;
+        let phase_modifier = data.phase_modifier();
+        let name = data.name();
+        let named_bindings = data.named_bindings();
         drop(original);
         let created = self.new_import_clause(phase_modifier, name, named_bindings);
         self.finish_clone(created, original_id)
@@ -8148,7 +14595,7 @@ pub trait FactoryMethods: Factory {
             property_name,
             name,
         };
-        self.new_node(SyntaxKind::ImportSpecifier.into(), data.into())
+        self.new_import_specifier_data(SyntaxKind::ImportSpecifier.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateImportSpecifier
     fn update_import_specifier(
@@ -8160,12 +14607,11 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_specifier()
             .expect("UpdateImportSpecifier requires ImportSpecifier payload");
-        if is_type_only == data.is_type_only
-            && property_name == data.property_name
-            && name == data.name
+        if is_type_only == data.is_type_only()
+            && property_name == data.property_name()
+            && name == data.name()
         {
             return original_id;
         }
@@ -8177,12 +14623,11 @@ pub trait FactoryMethods: Factory {
     fn clone_import_specifier(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_import_specifier()
             .expect("operation requires ImportSpecifier payload");
-        let is_type_only = data.is_type_only;
-        let property_name = data.property_name;
-        let name = data.name;
+        let is_type_only = data.is_type_only();
+        let property_name = data.property_name();
+        let name = data.name();
         drop(original);
         let created = self.new_import_specifier(is_type_only, property_name, name);
         self.finish_clone(created, original_id)
@@ -8191,16 +14636,15 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_text(&mut self, text: TextSlice) -> NodeId {
         let data = JSDocTextData { text };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocText.into(), data.into())
+        self.new_js_doc_text_data(SyntaxKind::JSDocText.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:JSDocText.Clone
     fn clone_js_doc_text(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_text()
             .expect("operation requires JSDocText payload");
-        let text = data.text;
+        let text = data.text();
         drop(original);
         let created = self.new_js_doc_text(text);
         self.finish_clone(created, original_id)
@@ -8209,7 +14653,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLink.into(), data.into())
+        self.new_js_doc_link_data(SyntaxKind::JSDocLink.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLink
     fn update_js_doc_link(
@@ -8220,10 +14664,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link()
             .expect("UpdateJSDocLink requires JSDocLink payload");
-        if name == data.name && text.same(data.text) {
+        if name == data.name() && text.same(data.text()) {
             return original_id;
         }
         drop(original);
@@ -8234,11 +14677,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_link(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link()
             .expect("operation requires JSDocLink payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let created = self.new_js_doc_link(name, text);
         self.finish_clone(created, original_id)
@@ -8247,7 +14689,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link_plain(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkPlainData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLinkPlain.into(), data.into())
+        self.new_js_doc_link_plain_data(SyntaxKind::JSDocLinkPlain.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLinkPlain
     fn update_js_doc_link_plain(
@@ -8258,10 +14700,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_plain()
             .expect("UpdateJSDocLinkPlain requires JSDocLinkPlain payload");
-        if name == data.name && text.same(data.text) {
+        if name == data.name() && text.same(data.text()) {
             return original_id;
         }
         drop(original);
@@ -8272,11 +14713,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_link_plain(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_plain()
             .expect("operation requires JSDocLinkPlain payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let created = self.new_js_doc_link_plain(name, text);
         self.finish_clone(created, original_id)
@@ -8285,7 +14725,7 @@ pub trait FactoryMethods: Factory {
     fn new_js_doc_link_code(&mut self, name: Option<NodeId>, text: TextSlice) -> NodeId {
         let data = JSDocLinkCodeData { text, name };
         self.increment_text_count();
-        self.new_node(SyntaxKind::JSDocLinkCode.into(), data.into())
+        self.new_js_doc_link_code_data(SyntaxKind::JSDocLinkCode.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocLinkCode
     fn update_js_doc_link_code(
@@ -8296,10 +14736,9 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_code()
             .expect("UpdateJSDocLinkCode requires JSDocLinkCode payload");
-        if name == data.name && text.same(data.text) {
+        if name == data.name() && text.same(data.text()) {
             return original_id;
         }
         drop(original);
@@ -8310,11 +14749,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_link_code(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_link_code()
             .expect("operation requires JSDocLinkCode payload");
-        let name = data.name;
-        let text = data.text;
+        let name = data.name();
+        let text = data.text();
         drop(original);
         let created = self.new_js_doc_link_code(name, text);
         self.finish_clone(created, original_id)
@@ -8335,7 +14773,7 @@ pub trait FactoryMethods: Factory {
             expression,
             default_type,
         };
-        self.new_node(SyntaxKind::TypeParameter.into(), data.into())
+        self.new_type_parameter_declaration_data(SyntaxKind::TypeParameter.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateTypeParameterDeclaration
     fn update_type_parameter_declaration(
@@ -8349,14 +14787,13 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_parameter_declaration()
             .expect("UpdateTypeParameterDeclaration requires TypeParameterDeclaration payload");
-        if modifiers == data.modifiers
-            && name == data.name
-            && constraint == data.constraint
-            && expression == data.expression
-            && default_type == data.default_type
+        if modifiers == data.modifiers()
+            && name == data.name()
+            && constraint == data.constraint()
+            && expression == data.expression()
+            && default_type == data.default_type()
         {
             return original_id;
         }
@@ -8374,14 +14811,13 @@ pub trait FactoryMethods: Factory {
     fn clone_type_parameter_declaration(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_type_parameter_declaration()
             .expect("operation requires TypeParameterDeclaration payload");
-        let modifiers = data.modifiers;
-        let name = data.name;
-        let constraint = data.constraint;
-        let expression = data.expression;
-        let default_type = data.default_type;
+        let modifiers = data.modifiers();
+        let name = data.name();
+        let constraint = data.constraint();
+        let expression = data.expression();
+        let default_type = data.default_type();
         drop(original);
         let created = self.new_type_parameter_declaration(
             modifiers,
@@ -8402,7 +14838,10 @@ pub trait FactoryMethods: Factory {
             expression,
             this_arg,
         };
-        self.new_node(SyntaxKind::SyntheticReferenceExpression.into(), data.into())
+        self.new_synthetic_reference_expression_data(
+            SyntaxKind::SyntheticReferenceExpression.into(),
+            data,
+        )
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateSyntheticReferenceExpression
     fn update_synthetic_reference_expression(
@@ -8412,10 +14851,10 @@ pub trait FactoryMethods: Factory {
         this_arg: Option<NodeId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original.data().as_synthetic_reference_expression().expect(
+        let data = original.as_synthetic_reference_expression().expect(
             "UpdateSyntheticReferenceExpression requires SyntheticReferenceExpression payload",
         );
-        if expression == data.expression && this_arg == data.this_arg {
+        if expression == data.expression() && this_arg == data.this_arg() {
             return original_id;
         }
         drop(original);
@@ -8426,11 +14865,10 @@ pub trait FactoryMethods: Factory {
     fn clone_synthetic_reference_expression(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_synthetic_reference_expression()
             .expect("operation requires SyntheticReferenceExpression payload");
-        let expression = data.expression;
-        let this_arg = data.this_arg;
+        let expression = data.expression();
+        let this_arg = data.this_arg();
         drop(original);
         let created = self.new_synthetic_reference_expression(expression, this_arg);
         self.finish_clone(created, original_id)
@@ -8445,7 +14883,7 @@ pub trait FactoryMethods: Factory {
             js_doc_property_tags,
             is_array_type,
         };
-        self.new_node(SyntaxKind::JSDocTypeLiteral.into(), data.into())
+        self.new_js_doc_type_literal_data(SyntaxKind::JSDocTypeLiteral.into(), data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocTypeLiteral
     fn update_js_doc_type_literal(
@@ -8456,11 +14894,10 @@ pub trait FactoryMethods: Factory {
     ) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_literal()
             .expect("UpdateJSDocTypeLiteral requires JSDocTypeLiteral payload");
-        if js_doc_property_tags.same(data.js_doc_property_tags)
-            && is_array_type == data.is_array_type
+        if js_doc_property_tags.same(data.js_doc_property_tags())
+            && is_array_type == data.is_array_type()
         {
             return original_id;
         }
@@ -8472,11 +14909,10 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_type_literal(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_type_literal()
             .expect("operation requires JSDocTypeLiteral payload");
-        let js_doc_property_tags = data.js_doc_property_tags;
-        let is_array_type = data.is_array_type;
+        let js_doc_property_tags = data.js_doc_property_tags();
+        let is_array_type = data.is_array_type();
         drop(original);
         let created = self.new_js_doc_type_literal(js_doc_property_tags, is_array_type);
         self.finish_clone(created, original_id)
@@ -8500,7 +14936,7 @@ pub trait FactoryMethods: Factory {
             type_expression,
             is_name_first,
         };
-        self.new_node(kind, data.into())
+        self.new_js_doc_parameter_or_property_tag_data(kind, data)
     }
     // upstream: tsc/internal/ast/ast_generated.go:NodeFactory.UpdateJSDocParameterOrPropertyTag
     fn update_js_doc_parameter_or_property_tag(
@@ -8514,18 +14950,15 @@ pub trait FactoryMethods: Factory {
         comment: Option<NodeListId>,
     ) -> NodeId {
         let original = self.node(original_id);
-        let data = original
-            .data()
-            .as_js_doc_parameter_or_property_tag()
-            .expect(
-                "UpdateJSDocParameterOrPropertyTag requires JSDocParameterOrPropertyTag payload",
-            );
-        if tag_name == data.tag_name
-            && name == data.name
-            && is_bracketed == data.is_bracketed
-            && type_expression == data.type_expression
-            && is_name_first == data.is_name_first
-            && comment == data.comment
+        let data = original.as_js_doc_parameter_or_property_tag().expect(
+            "UpdateJSDocParameterOrPropertyTag requires JSDocParameterOrPropertyTag payload",
+        );
+        if tag_name == data.tag_name()
+            && name == data.name()
+            && is_bracketed == data.is_bracketed()
+            && type_expression == data.type_expression()
+            && is_name_first == data.is_name_first()
+            && comment == data.comment()
         {
             return original_id;
         }
@@ -8546,16 +14979,15 @@ pub trait FactoryMethods: Factory {
     fn clone_js_doc_parameter_or_property_tag(&mut self, original_id: NodeId) -> NodeId {
         let original = self.node(original_id);
         let data = original
-            .data()
             .as_js_doc_parameter_or_property_tag()
             .expect("operation requires JSDocParameterOrPropertyTag payload");
         let original_kind = original.kind();
-        let tag_name = data.tag_name;
-        let name = data.name;
-        let is_bracketed = data.is_bracketed;
-        let type_expression = data.type_expression;
-        let is_name_first = data.is_name_first;
-        let comment = data.comment;
+        let tag_name = data.tag_name();
+        let name = data.name();
+        let is_bracketed = data.is_bracketed();
+        let type_expression = data.type_expression();
+        let is_name_first = data.is_name_first();
+        let comment = data.comment();
         drop(original);
         let created = self.new_js_doc_parameter_or_property_tag(
             original_kind,
@@ -8573,210 +15005,218 @@ pub trait FactoryMethods: Factory {
         let clone: fn(&mut Self, NodeId) -> NodeId = {
             let original = self.node(original_id);
             match original.data() {
-                NodeData::Token(_) => Self::clone_token,
-                NodeData::Identifier(_) => Self::clone_identifier,
-                NodeData::PrivateIdentifier(_) => Self::clone_private_identifier,
-                NodeData::QualifiedName(_) => Self::clone_qualified_name,
-                NodeData::ComputedPropertyName(_) => Self::clone_computed_property_name,
-                NodeData::Decorator(_) => Self::clone_decorator,
-                NodeData::EmptyStatement(_) => Self::clone_empty_statement,
-                NodeData::IfStatement(_) => Self::clone_if_statement,
-                NodeData::DoStatement(_) => Self::clone_do_statement,
-                NodeData::WhileStatement(_) => Self::clone_while_statement,
-                NodeData::ForStatement(_) => Self::clone_for_statement,
-                NodeData::ForInOrOfStatement(_) => Self::clone_for_in_or_of_statement,
-                NodeData::BreakStatement(_) => Self::clone_break_statement,
-                NodeData::ContinueStatement(_) => Self::clone_continue_statement,
-                NodeData::ReturnStatement(_) => Self::clone_return_statement,
-                NodeData::WithStatement(_) => Self::clone_with_statement,
-                NodeData::SwitchStatement(_) => Self::clone_switch_statement,
-                NodeData::CaseBlock(_) => Self::clone_case_block,
-                NodeData::CaseOrDefaultClause(_) => Self::clone_case_or_default_clause,
-                NodeData::ThrowStatement(_) => Self::clone_throw_statement,
-                NodeData::TryStatement(_) => Self::clone_try_statement,
-                NodeData::CatchClause(_) => Self::clone_catch_clause,
-                NodeData::DebuggerStatement(_) => Self::clone_debugger_statement,
-                NodeData::LabeledStatement(_) => Self::clone_labeled_statement,
-                NodeData::ExpressionStatement(_) => Self::clone_expression_statement,
-                NodeData::Block(_) => Self::clone_block,
-                NodeData::VariableStatement(_) => Self::clone_variable_statement,
-                NodeData::VariableDeclaration(_) => Self::clone_variable_declaration,
-                NodeData::VariableDeclarationList(_) => Self::clone_variable_declaration_list,
-                NodeData::BindingPattern(_) => Self::clone_binding_pattern,
-                NodeData::ParameterDeclaration(_) => Self::clone_parameter_declaration,
-                NodeData::BindingElement(_) => Self::clone_binding_element,
-                NodeData::MissingDeclaration(_) => Self::clone_missing_declaration,
-                NodeData::FunctionDeclaration(_) => Self::clone_function_declaration,
-                NodeData::ClassDeclaration(_) => Self::clone_class_declaration,
-                NodeData::ClassExpression(_) => Self::clone_class_expression,
-                NodeData::HeritageClause(_) => Self::clone_heritage_clause,
-                NodeData::InterfaceDeclaration(_) => Self::clone_interface_declaration,
-                NodeData::TypeAliasDeclaration(_) => Self::clone_type_alias_declaration,
-                NodeData::EnumMember(_) => Self::clone_enum_member,
-                NodeData::EnumDeclaration(_) => Self::clone_enum_declaration,
-                NodeData::ModuleBlock(_) => Self::clone_module_block,
-                NodeData::NotEmittedStatement(_) => Self::clone_not_emitted_statement,
-                NodeData::NotEmittedTypeElement(_) => Self::clone_not_emitted_type_element,
-                NodeData::ImportDeclaration(_) => Self::clone_import_declaration,
-                NodeData::ExternalModuleReference(_) => Self::clone_external_module_reference,
-                NodeData::NamespaceImport(_) => Self::clone_namespace_import,
-                NodeData::NamedImports(_) => Self::clone_named_imports,
-                NodeData::ExportAssignment(_) => Self::clone_export_assignment,
-                NodeData::NamespaceExportDeclaration(_) => Self::clone_namespace_export_declaration,
-                NodeData::NamespaceExport(_) => Self::clone_namespace_export,
-                NodeData::NamedExports(_) => Self::clone_named_exports,
-                NodeData::ExportSpecifier(_) => Self::clone_export_specifier,
-                NodeData::CallSignatureDeclaration(_) => Self::clone_call_signature_declaration,
-                NodeData::ConstructSignatureDeclaration(_) => {
+                NodeDataRead::Token(_) => Self::clone_token,
+                NodeDataRead::Identifier(_) => Self::clone_identifier,
+                NodeDataRead::PrivateIdentifier(_) => Self::clone_private_identifier,
+                NodeDataRead::QualifiedName(_) => Self::clone_qualified_name,
+                NodeDataRead::ComputedPropertyName(_) => Self::clone_computed_property_name,
+                NodeDataRead::Decorator(_) => Self::clone_decorator,
+                NodeDataRead::EmptyStatement(_) => Self::clone_empty_statement,
+                NodeDataRead::IfStatement(_) => Self::clone_if_statement,
+                NodeDataRead::DoStatement(_) => Self::clone_do_statement,
+                NodeDataRead::WhileStatement(_) => Self::clone_while_statement,
+                NodeDataRead::ForStatement(_) => Self::clone_for_statement,
+                NodeDataRead::ForInOrOfStatement(_) => Self::clone_for_in_or_of_statement,
+                NodeDataRead::BreakStatement(_) => Self::clone_break_statement,
+                NodeDataRead::ContinueStatement(_) => Self::clone_continue_statement,
+                NodeDataRead::ReturnStatement(_) => Self::clone_return_statement,
+                NodeDataRead::WithStatement(_) => Self::clone_with_statement,
+                NodeDataRead::SwitchStatement(_) => Self::clone_switch_statement,
+                NodeDataRead::CaseBlock(_) => Self::clone_case_block,
+                NodeDataRead::CaseOrDefaultClause(_) => Self::clone_case_or_default_clause,
+                NodeDataRead::ThrowStatement(_) => Self::clone_throw_statement,
+                NodeDataRead::TryStatement(_) => Self::clone_try_statement,
+                NodeDataRead::CatchClause(_) => Self::clone_catch_clause,
+                NodeDataRead::DebuggerStatement(_) => Self::clone_debugger_statement,
+                NodeDataRead::LabeledStatement(_) => Self::clone_labeled_statement,
+                NodeDataRead::ExpressionStatement(_) => Self::clone_expression_statement,
+                NodeDataRead::Block(_) => Self::clone_block,
+                NodeDataRead::VariableStatement(_) => Self::clone_variable_statement,
+                NodeDataRead::VariableDeclaration(_) => Self::clone_variable_declaration,
+                NodeDataRead::VariableDeclarationList(_) => Self::clone_variable_declaration_list,
+                NodeDataRead::BindingPattern(_) => Self::clone_binding_pattern,
+                NodeDataRead::ParameterDeclaration(_) => Self::clone_parameter_declaration,
+                NodeDataRead::BindingElement(_) => Self::clone_binding_element,
+                NodeDataRead::MissingDeclaration(_) => Self::clone_missing_declaration,
+                NodeDataRead::FunctionDeclaration(_) => Self::clone_function_declaration,
+                NodeDataRead::ClassDeclaration(_) => Self::clone_class_declaration,
+                NodeDataRead::ClassExpression(_) => Self::clone_class_expression,
+                NodeDataRead::HeritageClause(_) => Self::clone_heritage_clause,
+                NodeDataRead::InterfaceDeclaration(_) => Self::clone_interface_declaration,
+                NodeDataRead::TypeAliasDeclaration(_) => Self::clone_type_alias_declaration,
+                NodeDataRead::EnumMember(_) => Self::clone_enum_member,
+                NodeDataRead::EnumDeclaration(_) => Self::clone_enum_declaration,
+                NodeDataRead::ModuleBlock(_) => Self::clone_module_block,
+                NodeDataRead::NotEmittedStatement(_) => Self::clone_not_emitted_statement,
+                NodeDataRead::NotEmittedTypeElement(_) => Self::clone_not_emitted_type_element,
+                NodeDataRead::ImportDeclaration(_) => Self::clone_import_declaration,
+                NodeDataRead::ExternalModuleReference(_) => Self::clone_external_module_reference,
+                NodeDataRead::NamespaceImport(_) => Self::clone_namespace_import,
+                NodeDataRead::NamedImports(_) => Self::clone_named_imports,
+                NodeDataRead::ExportAssignment(_) => Self::clone_export_assignment,
+                NodeDataRead::NamespaceExportDeclaration(_) => {
+                    Self::clone_namespace_export_declaration
+                }
+                NodeDataRead::NamespaceExport(_) => Self::clone_namespace_export,
+                NodeDataRead::NamedExports(_) => Self::clone_named_exports,
+                NodeDataRead::ExportSpecifier(_) => Self::clone_export_specifier,
+                NodeDataRead::CallSignatureDeclaration(_) => Self::clone_call_signature_declaration,
+                NodeDataRead::ConstructSignatureDeclaration(_) => {
                     Self::clone_construct_signature_declaration
                 }
-                NodeData::ConstructorDeclaration(_) => Self::clone_constructor_declaration,
-                NodeData::GetAccessorDeclaration(_) => Self::clone_get_accessor_declaration,
-                NodeData::SetAccessorDeclaration(_) => Self::clone_set_accessor_declaration,
-                NodeData::IndexSignatureDeclaration(_) => Self::clone_index_signature_declaration,
-                NodeData::MethodSignatureDeclaration(_) => Self::clone_method_signature_declaration,
-                NodeData::MethodDeclaration(_) => Self::clone_method_declaration,
-                NodeData::PropertySignatureDeclaration(_) => {
+                NodeDataRead::ConstructorDeclaration(_) => Self::clone_constructor_declaration,
+                NodeDataRead::GetAccessorDeclaration(_) => Self::clone_get_accessor_declaration,
+                NodeDataRead::SetAccessorDeclaration(_) => Self::clone_set_accessor_declaration,
+                NodeDataRead::IndexSignatureDeclaration(_) => {
+                    Self::clone_index_signature_declaration
+                }
+                NodeDataRead::MethodSignatureDeclaration(_) => {
+                    Self::clone_method_signature_declaration
+                }
+                NodeDataRead::MethodDeclaration(_) => Self::clone_method_declaration,
+                NodeDataRead::PropertySignatureDeclaration(_) => {
                     Self::clone_property_signature_declaration
                 }
-                NodeData::PropertyDeclaration(_) => Self::clone_property_declaration,
-                NodeData::SemicolonClassElement(_) => Self::clone_semicolon_class_element,
-                NodeData::ClassStaticBlockDeclaration(_) => {
+                NodeDataRead::PropertyDeclaration(_) => Self::clone_property_declaration,
+                NodeDataRead::SemicolonClassElement(_) => Self::clone_semicolon_class_element,
+                NodeDataRead::ClassStaticBlockDeclaration(_) => {
                     Self::clone_class_static_block_declaration
                 }
-                NodeData::OmittedExpression(_) => Self::clone_omitted_expression,
-                NodeData::KeywordExpression(_) => Self::clone_keyword_expression,
-                NodeData::StringLiteral(_) => Self::clone_string_literal,
-                NodeData::NumericLiteral(_) => Self::clone_numeric_literal,
-                NodeData::BigIntLiteral(_) => Self::clone_big_int_literal,
-                NodeData::RegularExpressionLiteral(_) => Self::clone_regular_expression_literal,
-                NodeData::NoSubstitutionTemplateLiteral(_) => {
+                NodeDataRead::OmittedExpression(_) => Self::clone_omitted_expression,
+                NodeDataRead::KeywordExpression(_) => Self::clone_keyword_expression,
+                NodeDataRead::StringLiteral(_) => Self::clone_string_literal,
+                NodeDataRead::NumericLiteral(_) => Self::clone_numeric_literal,
+                NodeDataRead::BigIntLiteral(_) => Self::clone_big_int_literal,
+                NodeDataRead::RegularExpressionLiteral(_) => Self::clone_regular_expression_literal,
+                NodeDataRead::NoSubstitutionTemplateLiteral(_) => {
                     Self::clone_no_substitution_template_literal
                 }
-                NodeData::BinaryExpression(_) => Self::clone_binary_expression,
-                NodeData::PrefixUnaryExpression(_) => Self::clone_prefix_unary_expression,
-                NodeData::PostfixUnaryExpression(_) => Self::clone_postfix_unary_expression,
-                NodeData::YieldExpression(_) => Self::clone_yield_expression,
-                NodeData::ArrowFunction(_) => Self::clone_arrow_function,
-                NodeData::FunctionExpression(_) => Self::clone_function_expression,
-                NodeData::AsExpression(_) => Self::clone_as_expression,
-                NodeData::SatisfiesExpression(_) => Self::clone_satisfies_expression,
-                NodeData::ConditionalExpression(_) => Self::clone_conditional_expression,
-                NodeData::PropertyAccessExpression(_) => Self::clone_property_access_expression,
-                NodeData::ElementAccessExpression(_) => Self::clone_element_access_expression,
-                NodeData::CallExpression(_) => Self::clone_call_expression,
-                NodeData::NewExpression(_) => Self::clone_new_expression,
-                NodeData::MetaProperty(_) => Self::clone_meta_property,
-                NodeData::NonNullExpression(_) => Self::clone_non_null_expression,
-                NodeData::SpreadElement(_) => Self::clone_spread_element,
-                NodeData::TemplateExpression(_) => Self::clone_template_expression,
-                NodeData::TemplateSpan(_) => Self::clone_template_span,
-                NodeData::TaggedTemplateExpression(_) => Self::clone_tagged_template_expression,
-                NodeData::ParenthesizedExpression(_) => Self::clone_parenthesized_expression,
-                NodeData::ArrayLiteralExpression(_) => Self::clone_array_literal_expression,
-                NodeData::ObjectLiteralExpression(_) => Self::clone_object_literal_expression,
-                NodeData::SpreadAssignment(_) => Self::clone_spread_assignment,
-                NodeData::PropertyAssignment(_) => Self::clone_property_assignment,
-                NodeData::ShorthandPropertyAssignment(_) => {
+                NodeDataRead::BinaryExpression(_) => Self::clone_binary_expression,
+                NodeDataRead::PrefixUnaryExpression(_) => Self::clone_prefix_unary_expression,
+                NodeDataRead::PostfixUnaryExpression(_) => Self::clone_postfix_unary_expression,
+                NodeDataRead::YieldExpression(_) => Self::clone_yield_expression,
+                NodeDataRead::ArrowFunction(_) => Self::clone_arrow_function,
+                NodeDataRead::FunctionExpression(_) => Self::clone_function_expression,
+                NodeDataRead::AsExpression(_) => Self::clone_as_expression,
+                NodeDataRead::SatisfiesExpression(_) => Self::clone_satisfies_expression,
+                NodeDataRead::ConditionalExpression(_) => Self::clone_conditional_expression,
+                NodeDataRead::PropertyAccessExpression(_) => Self::clone_property_access_expression,
+                NodeDataRead::ElementAccessExpression(_) => Self::clone_element_access_expression,
+                NodeDataRead::CallExpression(_) => Self::clone_call_expression,
+                NodeDataRead::NewExpression(_) => Self::clone_new_expression,
+                NodeDataRead::MetaProperty(_) => Self::clone_meta_property,
+                NodeDataRead::NonNullExpression(_) => Self::clone_non_null_expression,
+                NodeDataRead::SpreadElement(_) => Self::clone_spread_element,
+                NodeDataRead::TemplateExpression(_) => Self::clone_template_expression,
+                NodeDataRead::TemplateSpan(_) => Self::clone_template_span,
+                NodeDataRead::TaggedTemplateExpression(_) => Self::clone_tagged_template_expression,
+                NodeDataRead::ParenthesizedExpression(_) => Self::clone_parenthesized_expression,
+                NodeDataRead::ArrayLiteralExpression(_) => Self::clone_array_literal_expression,
+                NodeDataRead::ObjectLiteralExpression(_) => Self::clone_object_literal_expression,
+                NodeDataRead::SpreadAssignment(_) => Self::clone_spread_assignment,
+                NodeDataRead::PropertyAssignment(_) => Self::clone_property_assignment,
+                NodeDataRead::ShorthandPropertyAssignment(_) => {
                     Self::clone_shorthand_property_assignment
                 }
-                NodeData::DeleteExpression(_) => Self::clone_delete_expression,
-                NodeData::TypeOfExpression(_) => Self::clone_type_of_expression,
-                NodeData::VoidExpression(_) => Self::clone_void_expression,
-                NodeData::AwaitExpression(_) => Self::clone_await_expression,
-                NodeData::TypeAssertion(_) => Self::clone_type_assertion,
-                NodeData::KeywordTypeNode(_) => Self::clone_keyword_type_node,
-                NodeData::UnionTypeNode(_) => Self::clone_union_type_node,
-                NodeData::IntersectionTypeNode(_) => Self::clone_intersection_type_node,
-                NodeData::ConditionalTypeNode(_) => Self::clone_conditional_type_node,
-                NodeData::TypeOperatorNode(_) => Self::clone_type_operator_node,
-                NodeData::InferTypeNode(_) => Self::clone_infer_type_node,
-                NodeData::ArrayTypeNode(_) => Self::clone_array_type_node,
-                NodeData::IndexedAccessTypeNode(_) => Self::clone_indexed_access_type_node,
-                NodeData::TypeReferenceNode(_) => Self::clone_type_reference_node,
-                NodeData::ExpressionWithTypeArguments(_) => {
+                NodeDataRead::DeleteExpression(_) => Self::clone_delete_expression,
+                NodeDataRead::TypeOfExpression(_) => Self::clone_type_of_expression,
+                NodeDataRead::VoidExpression(_) => Self::clone_void_expression,
+                NodeDataRead::AwaitExpression(_) => Self::clone_await_expression,
+                NodeDataRead::TypeAssertion(_) => Self::clone_type_assertion,
+                NodeDataRead::KeywordTypeNode(_) => Self::clone_keyword_type_node,
+                NodeDataRead::UnionTypeNode(_) => Self::clone_union_type_node,
+                NodeDataRead::IntersectionTypeNode(_) => Self::clone_intersection_type_node,
+                NodeDataRead::ConditionalTypeNode(_) => Self::clone_conditional_type_node,
+                NodeDataRead::TypeOperatorNode(_) => Self::clone_type_operator_node,
+                NodeDataRead::InferTypeNode(_) => Self::clone_infer_type_node,
+                NodeDataRead::ArrayTypeNode(_) => Self::clone_array_type_node,
+                NodeDataRead::IndexedAccessTypeNode(_) => Self::clone_indexed_access_type_node,
+                NodeDataRead::TypeReferenceNode(_) => Self::clone_type_reference_node,
+                NodeDataRead::ExpressionWithTypeArguments(_) => {
                     Self::clone_expression_with_type_arguments
                 }
-                NodeData::LiteralTypeNode(_) => Self::clone_literal_type_node,
-                NodeData::ThisTypeNode(_) => Self::clone_this_type_node,
-                NodeData::TypePredicateNode(_) => Self::clone_type_predicate_node,
-                NodeData::ImportAttribute(_) => Self::clone_import_attribute,
-                NodeData::ImportAttributes(_) => Self::clone_import_attributes,
-                NodeData::TypeQueryNode(_) => Self::clone_type_query_node,
-                NodeData::MappedTypeNode(_) => Self::clone_mapped_type_node,
-                NodeData::TypeLiteralNode(_) => Self::clone_type_literal_node,
-                NodeData::TupleTypeNode(_) => Self::clone_tuple_type_node,
-                NodeData::NamedTupleMember(_) => Self::clone_named_tuple_member,
-                NodeData::OptionalTypeNode(_) => Self::clone_optional_type_node,
-                NodeData::RestTypeNode(_) => Self::clone_rest_type_node,
-                NodeData::ParenthesizedTypeNode(_) => Self::clone_parenthesized_type_node,
-                NodeData::FunctionTypeNode(_) => Self::clone_function_type_node,
-                NodeData::ConstructorTypeNode(_) => Self::clone_constructor_type_node,
-                NodeData::TemplateHead(_) => Self::clone_template_head,
-                NodeData::TemplateMiddle(_) => Self::clone_template_middle,
-                NodeData::TemplateTail(_) => Self::clone_template_tail,
-                NodeData::TemplateLiteralTypeNode(_) => Self::clone_template_literal_type_node,
-                NodeData::TemplateLiteralTypeSpan(_) => Self::clone_template_literal_type_span,
-                NodeData::PartiallyEmittedExpression(_) => Self::clone_partially_emitted_expression,
-                NodeData::JsxElement(_) => Self::clone_jsx_element,
-                NodeData::JsxAttributes(_) => Self::clone_jsx_attributes,
-                NodeData::JsxNamespacedName(_) => Self::clone_jsx_namespaced_name,
-                NodeData::JsxOpeningElement(_) => Self::clone_jsx_opening_element,
-                NodeData::JsxSelfClosingElement(_) => Self::clone_jsx_self_closing_element,
-                NodeData::JsxFragment(_) => Self::clone_jsx_fragment,
-                NodeData::JsxOpeningFragment(_) => Self::clone_jsx_opening_fragment,
-                NodeData::JsxClosingFragment(_) => Self::clone_jsx_closing_fragment,
-                NodeData::JsxAttribute(_) => Self::clone_jsx_attribute,
-                NodeData::JsxSpreadAttribute(_) => Self::clone_jsx_spread_attribute,
-                NodeData::JsxClosingElement(_) => Self::clone_jsx_closing_element,
-                NodeData::JsxExpression(_) => Self::clone_jsx_expression,
-                NodeData::JsxText(_) => Self::clone_jsx_text,
-                NodeData::SyntaxList(_) => Self::clone_syntax_list,
-                NodeData::JSDoc(_) => Self::clone_js_doc,
-                NodeData::JSDocTypeExpression(_) => Self::clone_js_doc_type_expression,
-                NodeData::JSDocNonNullableType(_) => Self::clone_js_doc_non_nullable_type,
-                NodeData::JSDocNullableType(_) => Self::clone_js_doc_nullable_type,
-                NodeData::JSDocAllType(_) => Self::clone_js_doc_all_type,
-                NodeData::JSDocVariadicType(_) => Self::clone_js_doc_variadic_type,
-                NodeData::JSDocOptionalType(_) => Self::clone_js_doc_optional_type,
-                NodeData::JSDocTypeTag(_) => Self::clone_js_doc_type_tag,
-                NodeData::JSDocUnknownTag(_) => Self::clone_js_doc_unknown_tag,
-                NodeData::JSDocTemplateTag(_) => Self::clone_js_doc_template_tag,
-                NodeData::JSDocReturnTag(_) => Self::clone_js_doc_return_tag,
-                NodeData::JSDocPublicTag(_) => Self::clone_js_doc_public_tag,
-                NodeData::JSDocPrivateTag(_) => Self::clone_js_doc_private_tag,
-                NodeData::JSDocProtectedTag(_) => Self::clone_js_doc_protected_tag,
-                NodeData::JSDocReadonlyTag(_) => Self::clone_js_doc_readonly_tag,
-                NodeData::JSDocOverrideTag(_) => Self::clone_js_doc_override_tag,
-                NodeData::JSDocDeprecatedTag(_) => Self::clone_js_doc_deprecated_tag,
-                NodeData::JSDocSeeTag(_) => Self::clone_js_doc_see_tag,
-                NodeData::JSDocImplementsTag(_) => Self::clone_js_doc_implements_tag,
-                NodeData::JSDocAugmentsTag(_) => Self::clone_js_doc_augments_tag,
-                NodeData::JSDocSatisfiesTag(_) => Self::clone_js_doc_satisfies_tag,
-                NodeData::JSDocThrowsTag(_) => Self::clone_js_doc_throws_tag,
-                NodeData::JSDocThisTag(_) => Self::clone_js_doc_this_tag,
-                NodeData::JSDocImportTag(_) => Self::clone_js_doc_import_tag,
-                NodeData::JSDocCallbackTag(_) => Self::clone_js_doc_callback_tag,
-                NodeData::JSDocOverloadTag(_) => Self::clone_js_doc_overload_tag,
-                NodeData::JSDocTypedefTag(_) => Self::clone_js_doc_typedef_tag,
-                NodeData::JSDocSignature(_) => Self::clone_js_doc_signature,
-                NodeData::JSDocNameReference(_) => Self::clone_js_doc_name_reference,
-                NodeData::ModuleDeclaration(_) => Self::clone_module_declaration,
-                NodeData::ImportEqualsDeclaration(_) => Self::clone_import_equals_declaration,
-                NodeData::ExportDeclaration(_) => Self::clone_export_declaration,
-                NodeData::ImportTypeNode(_) => Self::clone_import_type_node,
-                NodeData::ImportClause(_) => Self::clone_import_clause,
-                NodeData::ImportSpecifier(_) => Self::clone_import_specifier,
-                NodeData::JSDocText(_) => Self::clone_js_doc_text,
-                NodeData::JSDocLink(_) => Self::clone_js_doc_link,
-                NodeData::JSDocLinkPlain(_) => Self::clone_js_doc_link_plain,
-                NodeData::JSDocLinkCode(_) => Self::clone_js_doc_link_code,
-                NodeData::TypeParameterDeclaration(_) => Self::clone_type_parameter_declaration,
-                NodeData::SyntheticReferenceExpression(_) => {
+                NodeDataRead::LiteralTypeNode(_) => Self::clone_literal_type_node,
+                NodeDataRead::ThisTypeNode(_) => Self::clone_this_type_node,
+                NodeDataRead::TypePredicateNode(_) => Self::clone_type_predicate_node,
+                NodeDataRead::ImportAttribute(_) => Self::clone_import_attribute,
+                NodeDataRead::ImportAttributes(_) => Self::clone_import_attributes,
+                NodeDataRead::TypeQueryNode(_) => Self::clone_type_query_node,
+                NodeDataRead::MappedTypeNode(_) => Self::clone_mapped_type_node,
+                NodeDataRead::TypeLiteralNode(_) => Self::clone_type_literal_node,
+                NodeDataRead::TupleTypeNode(_) => Self::clone_tuple_type_node,
+                NodeDataRead::NamedTupleMember(_) => Self::clone_named_tuple_member,
+                NodeDataRead::OptionalTypeNode(_) => Self::clone_optional_type_node,
+                NodeDataRead::RestTypeNode(_) => Self::clone_rest_type_node,
+                NodeDataRead::ParenthesizedTypeNode(_) => Self::clone_parenthesized_type_node,
+                NodeDataRead::FunctionTypeNode(_) => Self::clone_function_type_node,
+                NodeDataRead::ConstructorTypeNode(_) => Self::clone_constructor_type_node,
+                NodeDataRead::TemplateHead(_) => Self::clone_template_head,
+                NodeDataRead::TemplateMiddle(_) => Self::clone_template_middle,
+                NodeDataRead::TemplateTail(_) => Self::clone_template_tail,
+                NodeDataRead::TemplateLiteralTypeNode(_) => Self::clone_template_literal_type_node,
+                NodeDataRead::TemplateLiteralTypeSpan(_) => Self::clone_template_literal_type_span,
+                NodeDataRead::PartiallyEmittedExpression(_) => {
+                    Self::clone_partially_emitted_expression
+                }
+                NodeDataRead::JsxElement(_) => Self::clone_jsx_element,
+                NodeDataRead::JsxAttributes(_) => Self::clone_jsx_attributes,
+                NodeDataRead::JsxNamespacedName(_) => Self::clone_jsx_namespaced_name,
+                NodeDataRead::JsxOpeningElement(_) => Self::clone_jsx_opening_element,
+                NodeDataRead::JsxSelfClosingElement(_) => Self::clone_jsx_self_closing_element,
+                NodeDataRead::JsxFragment(_) => Self::clone_jsx_fragment,
+                NodeDataRead::JsxOpeningFragment(_) => Self::clone_jsx_opening_fragment,
+                NodeDataRead::JsxClosingFragment(_) => Self::clone_jsx_closing_fragment,
+                NodeDataRead::JsxAttribute(_) => Self::clone_jsx_attribute,
+                NodeDataRead::JsxSpreadAttribute(_) => Self::clone_jsx_spread_attribute,
+                NodeDataRead::JsxClosingElement(_) => Self::clone_jsx_closing_element,
+                NodeDataRead::JsxExpression(_) => Self::clone_jsx_expression,
+                NodeDataRead::JsxText(_) => Self::clone_jsx_text,
+                NodeDataRead::SyntaxList(_) => Self::clone_syntax_list,
+                NodeDataRead::JSDoc(_) => Self::clone_js_doc,
+                NodeDataRead::JSDocTypeExpression(_) => Self::clone_js_doc_type_expression,
+                NodeDataRead::JSDocNonNullableType(_) => Self::clone_js_doc_non_nullable_type,
+                NodeDataRead::JSDocNullableType(_) => Self::clone_js_doc_nullable_type,
+                NodeDataRead::JSDocAllType(_) => Self::clone_js_doc_all_type,
+                NodeDataRead::JSDocVariadicType(_) => Self::clone_js_doc_variadic_type,
+                NodeDataRead::JSDocOptionalType(_) => Self::clone_js_doc_optional_type,
+                NodeDataRead::JSDocTypeTag(_) => Self::clone_js_doc_type_tag,
+                NodeDataRead::JSDocUnknownTag(_) => Self::clone_js_doc_unknown_tag,
+                NodeDataRead::JSDocTemplateTag(_) => Self::clone_js_doc_template_tag,
+                NodeDataRead::JSDocReturnTag(_) => Self::clone_js_doc_return_tag,
+                NodeDataRead::JSDocPublicTag(_) => Self::clone_js_doc_public_tag,
+                NodeDataRead::JSDocPrivateTag(_) => Self::clone_js_doc_private_tag,
+                NodeDataRead::JSDocProtectedTag(_) => Self::clone_js_doc_protected_tag,
+                NodeDataRead::JSDocReadonlyTag(_) => Self::clone_js_doc_readonly_tag,
+                NodeDataRead::JSDocOverrideTag(_) => Self::clone_js_doc_override_tag,
+                NodeDataRead::JSDocDeprecatedTag(_) => Self::clone_js_doc_deprecated_tag,
+                NodeDataRead::JSDocSeeTag(_) => Self::clone_js_doc_see_tag,
+                NodeDataRead::JSDocImplementsTag(_) => Self::clone_js_doc_implements_tag,
+                NodeDataRead::JSDocAugmentsTag(_) => Self::clone_js_doc_augments_tag,
+                NodeDataRead::JSDocSatisfiesTag(_) => Self::clone_js_doc_satisfies_tag,
+                NodeDataRead::JSDocThrowsTag(_) => Self::clone_js_doc_throws_tag,
+                NodeDataRead::JSDocThisTag(_) => Self::clone_js_doc_this_tag,
+                NodeDataRead::JSDocImportTag(_) => Self::clone_js_doc_import_tag,
+                NodeDataRead::JSDocCallbackTag(_) => Self::clone_js_doc_callback_tag,
+                NodeDataRead::JSDocOverloadTag(_) => Self::clone_js_doc_overload_tag,
+                NodeDataRead::JSDocTypedefTag(_) => Self::clone_js_doc_typedef_tag,
+                NodeDataRead::JSDocSignature(_) => Self::clone_js_doc_signature,
+                NodeDataRead::JSDocNameReference(_) => Self::clone_js_doc_name_reference,
+                NodeDataRead::ModuleDeclaration(_) => Self::clone_module_declaration,
+                NodeDataRead::ImportEqualsDeclaration(_) => Self::clone_import_equals_declaration,
+                NodeDataRead::ExportDeclaration(_) => Self::clone_export_declaration,
+                NodeDataRead::ImportTypeNode(_) => Self::clone_import_type_node,
+                NodeDataRead::ImportClause(_) => Self::clone_import_clause,
+                NodeDataRead::ImportSpecifier(_) => Self::clone_import_specifier,
+                NodeDataRead::JSDocText(_) => Self::clone_js_doc_text,
+                NodeDataRead::JSDocLink(_) => Self::clone_js_doc_link,
+                NodeDataRead::JSDocLinkPlain(_) => Self::clone_js_doc_link_plain,
+                NodeDataRead::JSDocLinkCode(_) => Self::clone_js_doc_link_code,
+                NodeDataRead::TypeParameterDeclaration(_) => Self::clone_type_parameter_declaration,
+                NodeDataRead::SyntheticReferenceExpression(_) => {
                     Self::clone_synthetic_reference_expression
                 }
-                NodeData::JSDocTypeLiteral(_) => Self::clone_js_doc_type_literal,
-                NodeData::JSDocParameterOrPropertyTag(_) => {
+                NodeDataRead::JSDocTypeLiteral(_) => Self::clone_js_doc_type_literal,
+                NodeDataRead::JSDocParameterOrPropertyTag(_) => {
                     Self::clone_js_doc_parameter_or_property_tag
                 }
                 _ => return None,

@@ -1,6 +1,7 @@
 use crate::{
-    arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, Counters, Error,
-    FileId, NodeId, NodeRecord, StorageHandle, StorageRead, StorageTransaction, SymbolId,
+    arena::Arena, bundle::Root, counters::Track, lazy::LazyArena, ArenaId, AuxId, AuxiliaryRead,
+    CoreScopeMut, Counters, Error, FileId, NodeId, NodeParentRecord, NodeRecord, StorageHandle,
+    StorageRead, StorageTransaction, SymbolId,
 };
 use std::{
     collections::HashMap,
@@ -15,6 +16,42 @@ pub struct StorageBuilder<N: NodeRecord, S = ()> {
     pub(crate) counters: Counters,
 }
 
+/// Checked exclusive core records, disjoint from immutable auxiliary/payload data.
+/// This borrow cannot allocate, publish, or resolve imported and lazy records.
+pub struct CoreNodesMut<'a, N>(&'a mut Arena<N>);
+impl<N> CoreNodesMut<'_, N> {
+    pub fn id(&self) -> ArenaId {
+        self.0.id
+    }
+    pub fn get(&self, id: NodeId) -> Result<&N, Error> {
+        self.0.get(id.arena(), id.slot())
+    }
+    pub fn get_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
+        self.0.get_mut(id.arena(), id.slot())
+    }
+}
+
+/// Read-only construction data paired with an exclusive core-record borrow.
+pub struct CoreDataRead<'a, N: NodeRecord> {
+    auxiliary: &'a Arena<N::CoreAux>,
+    store: &'a N::Store,
+    source: &'a SourceText,
+}
+impl<'a, N: NodeRecord> CoreDataRead<'a, N> {
+    pub fn auxiliary_arena(&self) -> ArenaId {
+        self.auxiliary.id
+    }
+    pub fn auxiliary(&self, id: AuxId) -> Result<&'a N::CoreAux, Error> {
+        self.auxiliary.get(id.arena(), id.slot())
+    }
+    pub fn store(&self) -> &'a N::Store {
+        self.store
+    }
+    pub fn source(&self) -> &'a SourceText {
+        self.source
+    }
+}
+
 // Only the imported capability requires shared payloads. Keeping that bound on
 // this private object preserves Send-only exclusive builders with no imports.
 trait RetainedImport<N: NodeRecord, S>: Send + Sync {
@@ -26,6 +63,8 @@ impl<N, S> RetainedImport<N, S> for StorageHandle<N, S>
 where
     N: NodeRecord + Send + Sync,
     N::Aux: Send + Sync,
+    N::CoreAux: Send + Sync,
+    N::Store: Send + Sync,
     S: Send + Sync,
 {
     fn owner(&self) -> &StorageOwner<N, S> {
@@ -55,6 +94,7 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
                 core: Arena::new(counters),
                 symbols: Arena::new(counters),
                 auxiliary: Arena::new(counters),
+                store: N::Store::default(),
                 lazy: LazyArena::new(counters),
                 source,
                 position_map: OnceLock::new(),
@@ -74,6 +114,166 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn view(&self) -> StorageView<'_, N, S> {
         self.owner.view()
     }
+    pub fn store(&self) -> &N::Store {
+        &self.owner.store
+    }
+    pub fn store_mut(&mut self) -> &mut N::Store {
+        &mut self.owner.store
+    }
+    pub fn store_and_source_mut(&mut self) -> (&mut N::Store, &SourceText) {
+        (&mut self.owner.store, &self.owner.source)
+    }
+    /// Open this exclusive core with a fresh invariant scope. Checked local
+    /// handles cannot escape or be used with any other scope, even on this same
+    /// builder. The callback does not grant growth or publication capabilities.
+    /// Writes are not rolled back on error or unwind; the caller must decide
+    /// whether a failed operation permits retaining the exclusive builder.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// let escaped = builder.with_core_scope(|scope| scope.check(id).unwrap());
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut first = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let mut second = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = first.push(Node::new(0, ()));
+    /// second.push(Node::new(0, ()));
+    /// first.with_core_scope(|first| {
+    ///     let local = first.check(id).unwrap();
+    ///     second.with_core_scope(|mut second| second.get_mut(local).kind = 1);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// builder.with_core_scope(|mut scope| {
+    ///     let local = scope.check(id).unwrap();
+    ///     let read = scope.get(local);
+    ///     scope.get_mut(local).kind = 1;
+    ///     assert_eq!(read.kind, 0);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// let id = builder.push(Node::new(0, ()));
+    /// builder.with_core_scope(|mut scope| {
+    ///     let local = scope.check(id).unwrap();
+    ///     let view = scope.view();
+    ///     scope.get_mut(local).kind = 1;
+    ///     assert_eq!(view.core_node(id).unwrap().kind, 0);
+    /// });
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    /// builder.with_core_scope(|scope| {
+    ///     builder.push(Node::new(0, ()));
+    ///     let _ = scope.source();
+    /// });
+    /// ```
+    #[inline]
+    pub fn with_core_scope<R>(
+        &mut self,
+        operation: impl for<'brand> FnOnce(CoreScopeMut<'brand, '_, N, S>) -> R,
+    ) -> R {
+        operation(CoreScopeMut::new(self))
+    }
+
+    #[inline]
+    pub(crate) fn core_slot(&self, slot: u32) -> Result<&N, Error> {
+        self.owner.core.get_slot(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_slot_mut(&mut self, slot: u32) -> Result<&mut N, Error> {
+        self.owner.core.get_slot_mut(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_auxiliary_slot(&self, slot: u32) -> Result<&N::CoreAux, Error> {
+        self.owner.auxiliary.get_slot(slot)
+    }
+
+    #[inline]
+    pub(crate) fn core_slot_store_and_source_mut(
+        &mut self,
+        slot: u32,
+    ) -> Result<(&mut N, &mut N::Store, &SourceText), Error> {
+        Ok((
+            self.owner.core.get_slot_mut(slot)?,
+            &mut self.owner.store,
+            &self.owner.source,
+        ))
+    }
+    /// Split exclusive core records from immutable construction data. Both
+    /// halves borrow this builder; neither can grow storage or escape its owner.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Node, NodeId, StorageBuilder};
+    /// fn grow(builder: &mut StorageBuilder<Node<()>>, id: NodeId) {
+    ///     let (mut nodes, data) = builder.split_core_mut();
+    ///     let node = nodes.get_mut(id).unwrap();
+    ///     builder.push(Node::new(0, ()));
+    ///     node.kind = data.source().len() as u32;
+    /// }
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Node, StorageBuilder};
+    /// fn dispose(mut builder: StorageBuilder<Node<()>>) {
+    ///     let (_, data) = builder.split_core_mut();
+    ///     let source = data.source();
+    ///     drop(builder);
+    ///     let _ = source.as_bytes();
+    /// }
+    /// ```
+    pub fn split_core_mut(&mut self) -> (CoreNodesMut<'_, N>, CoreDataRead<'_, N>) {
+        (
+            CoreNodesMut(&mut self.owner.core),
+            CoreDataRead {
+                auxiliary: &self.owner.auxiliary,
+                store: &self.owner.store,
+                source: &self.owner.source,
+            },
+        )
+    }
+    /// Borrow a checked core header and its payload storage exclusively together.
+    pub fn node_and_store_mut(&mut self, id: NodeId) -> Result<(&mut N, &mut N::Store), Error> {
+        Ok((
+            self.owner.core.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+        ))
+    }
+    pub fn node_store_and_source_mut(
+        &mut self,
+        id: NodeId,
+    ) -> Result<(&mut N, &mut N::Store, &SourceText), Error> {
+        Ok((
+            self.owner.core.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+            &self.owner.source,
+        ))
+    }
+    /// Resolve a core auxiliary record before exposing either mutable part.
+    /// Failed owner or slot checks leave the payload store unborrowed.
+    pub fn aux_and_store_mut(
+        &mut self,
+        id: AuxId,
+    ) -> Result<(&mut N::CoreAux, &mut N::Store), Error> {
+        Ok((
+            self.owner.auxiliary.get_mut(id.arena(), id.slot())?,
+            &mut self.owner.store,
+        ))
+    }
     /// Retain a previously published file and its complete mapped bundle.
     /// Imports are flattened and deduplicated at this explicit ownership boundary;
     /// ordinary lookup only borrows the selected owner. Published-only inputs
@@ -82,6 +282,8 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::CoreAux: Send + Sync + 'static,
+        N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
         if self.owner.imported_arenas.contains_key(&file.core.id) {
@@ -120,16 +322,25 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
     pub fn push(&mut self, node: N) -> NodeId {
         NodeId::new(self.owner.core.id, self.owner.core.push(node))
     }
-    pub fn push_aux(&mut self, value: N::Aux) -> AuxId {
+    pub fn push_aux(&mut self, value: N::CoreAux) -> AuxId {
         AuxId::new(self.owner.auxiliary.id, self.owner.auxiliary.push(value))
     }
     pub fn push_symbol(&mut self, symbol: S) -> SymbolId {
         SymbolId::new(self.owner.symbols.id, self.owner.symbols.push(symbol))
     }
+    /// Whether all existing graph storage belongs to this exclusive core owner.
+    /// Eager JSDoc cache entries may refer to core nodes without lazy allocations.
+    pub fn is_core_only(&self) -> bool {
+        self.owner.imports.is_empty() && !self.owner.lazy.has_records()
+    }
+    /// Checked core access without imported-owner or lazy-arena routing.
+    pub fn core_node(&self, id: NodeId) -> Result<&N, Error> {
+        self.owner.core.get(id.arena(), id.slot())
+    }
     pub fn node_mut(&mut self, id: NodeId) -> Result<&mut N, Error> {
         self.owner.core.get_mut(id.arena(), id.slot())
     }
-    pub fn aux_mut(&mut self, id: AuxId) -> Result<&mut N::Aux, Error> {
+    pub fn aux_mut(&mut self, id: AuxId) -> Result<&mut N::CoreAux, Error> {
         self.owner.auxiliary.get_mut(id.arena(), id.slot())
     }
     pub fn symbol_mut(&mut self, id: SymbolId) -> Result<&mut S, Error> {
@@ -189,7 +400,8 @@ impl<N: NodeRecord, S> StorageBuilder<N, S> {
 pub struct StorageOwner<N: NodeRecord, S = ()> {
     pub(crate) core: Arena<N>,
     pub(crate) symbols: Arena<S>,
-    pub(crate) auxiliary: Arena<N::Aux>,
+    pub(crate) auxiliary: Arena<N::CoreAux>,
+    pub(crate) store: N::Store,
     pub(crate) lazy: LazyArena<N>,
     source: SourceText,
     position_map: OnceLock<PositionMap>,
@@ -219,6 +431,8 @@ impl<N: NodeRecord, S> StorageOwner<N, S> {
     where
         N: Send + Sync + 'static,
         N::Aux: Send + Sync + 'static,
+        N::CoreAux: Send + Sync + 'static,
+        N::Store: Send + Sync + 'static,
         S: Send + Sync + 'static,
     {
         if self.imported_arenas.contains_key(&file.core.id) {
@@ -265,6 +479,9 @@ impl<N: NodeRecord, S> StorageOwner<N, S> {
     }
     pub fn source_text(&self) -> &SourceText {
         &self.source
+    }
+    pub fn store(&self) -> &N::Store {
+        &self.store
     }
     pub fn position_map(&self) -> &PositionMap {
         self.position_map
@@ -322,7 +539,10 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             retention: ViewRetention::Handle(handle),
         }
     }
-    pub(crate) fn for_arena(self, arena: ArenaId) -> Result<Self, Error> {
+    /// Select an arena's physical owner within the retained graph, without
+    /// reading a node or acquiring the lazy directory lock. This establishes
+    /// retention only: it does not validate any record slot or publication.
+    pub fn for_arena(self, arena: ArenaId) -> Result<Self, Error> {
         let contains = |owner: &&StorageOwner<N, S>| {
             owner.core.id == arena
                 || owner.lazy_arena() == arena
@@ -383,11 +603,17 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn core_nodes(self) -> impl Iterator<Item = &'a N> {
         self.owner.core.values()
     }
-    pub fn core_auxiliary(self) -> impl Iterator<Item = &'a N::Aux> {
+    pub fn core_auxiliary(self) -> impl Iterator<Item = &'a N::CoreAux> {
         self.owner.auxiliary.values()
     }
     pub fn id(self) -> FileId {
         self.owner.id()
+    }
+    /// Borrow the selected physical owner without cloning a retaining handle.
+    /// The borrow keeps this view's lifetime; it does not inherit the caller's
+    /// wider routing capability for other bundle members or imported owners.
+    pub fn physical_owner(self) -> &'a StorageOwner<N, S> {
+        self.owner
     }
     pub fn metadata(self) -> Option<AuxId> {
         self.owner.metadata
@@ -399,6 +625,9 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn source(self) -> &'a SourceText {
         self.owner.source_text()
     }
+    pub fn store(self) -> &'a N::Store {
+        &self.owner.store
+    }
     pub fn position_map(self) -> &'a PositionMap {
         self.owner.position_map()
     }
@@ -408,8 +637,32 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     pub fn lazy_auxiliary_arena(self) -> ArenaId {
         self.owner.lazy_auxiliary_arena()
     }
+    pub fn auxiliary_arena(self) -> ArenaId {
+        self.owner.auxiliary_arena()
+    }
+    /// Borrow only the selected owner's core record. Retained imports and lazy
+    /// identities require general routing through `node` instead.
+    ///
+    /// ```compile_fail
+    /// use ts_arena::{Counters, Node, StorageBuilder};
+    /// fn escaped() -> &'static Node<()> {
+    ///     let mut builder = StorageBuilder::<Node<()>>::new(std::sync::Arc::from(&b""[..]), &Counters::new());
+    ///     let id = builder.push(Node::new(0, ()));
+    ///     builder.view().core_node(id).unwrap()
+    /// }
+    /// ```
+    #[inline]
+    pub fn core_node(self, id: NodeId) -> Result<&'a N, Error> {
+        self.owner.core.get(id.arena(), id.slot())
+    }
     pub fn node(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         self.for_arena(id.arena())?.node_here(id)
+    }
+    /// Resolve a node and its physical owner together. The selected view keeps
+    /// the caller's retention context; this performs the slot read only once.
+    pub fn node_with_owner(self, id: NodeId) -> Result<(StorageRead<'a, N>, Self), Error> {
+        let owner = self.for_arena(id.arena())?;
+        Ok((owner.node_here(id)?, owner))
     }
     fn node_here(self, id: NodeId) -> Result<StorageRead<'a, N>, Error> {
         if id.arena() == self.owner.core.id {
@@ -418,16 +671,24 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
             Ok(StorageRead::lazy(self.owner.lazy.node(id)?))
         }
     }
-    pub fn aux(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
+    pub fn aux(self, id: AuxId) -> Result<AuxiliaryRead<'a, N>, Error> {
         self.for_arena(id.arena())?.aux_here(id)
     }
-    fn aux_here(self, id: AuxId) -> Result<StorageRead<'a, N::Aux>, Error> {
+    /// Resolve an auxiliary record and its physical owner in one routing step.
+    /// The returned view borrows the original retention context.
+    pub fn aux_with_owner(self, id: AuxId) -> Result<(AuxiliaryRead<'a, N>, Self), Error> {
+        let owner = self.for_arena(id.arena())?;
+        Ok((owner.aux_here(id)?, owner))
+    }
+    fn aux_here(self, id: AuxId) -> Result<AuxiliaryRead<'a, N>, Error> {
         if id.arena() == self.owner.auxiliary.id {
-            Ok(StorageRead::borrowed(
+            Ok(AuxiliaryRead::Core(
                 self.owner.auxiliary.get_slot(id.slot())?,
             ))
         } else {
-            Ok(StorageRead::lazy(self.owner.lazy.aux(id)?))
+            Ok(AuxiliaryRead::Lazy(StorageRead::lazy(
+                self.owner.lazy.aux(id)?,
+            )))
         }
     }
     /// Cache-only lookup. It never invokes a parser or allocates nodes.
@@ -453,13 +714,10 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
         initialize: impl FnOnce(&mut StorageTransaction<'_, N>) -> Result<Vec<NodeId>, Error>,
     ) -> Result<Arc<[NodeId]>, Error> {
         let selected = self.for_node_owner(parent)?;
-        selected.owner.lazy.jsdoc(
-            None,
-            parent,
-            &selected.owner.core,
-            &selected.owner.auxiliary,
-            initialize,
-        )
+        selected
+            .owner
+            .lazy
+            .jsdoc(None, parent, selected.owner, initialize)
     }
     /// Initialize in the selected source's storage on the calling thread. The
     /// parent must belong to that owner; the source key is independent of it.
@@ -471,27 +729,47 @@ impl<'a, N: NodeRecord, S> StorageView<'a, N, S> {
     ) -> Result<Arc<[NodeId]>, Error> {
         let selected = self.for_node_owner(source)?;
         selected.node_here(parent)?;
-        selected.owner.lazy.jsdoc(
-            Some(source),
-            parent,
-            &selected.owner.core,
-            &selected.owner.auxiliary,
-            initialize,
-        )
+        selected
+            .owner
+            .lazy
+            .jsdoc(Some(source), parent, selected.owner, initialize)
     }
     pub fn try_token_record(
         self,
         key: crate::TokenKey,
         kind: u32,
         initialize: impl FnOnce() -> N,
-    ) -> Result<StorageRead<'a, N>, Error> {
+    ) -> Result<StorageRead<'a, N>, Error>
+    where
+        N: NodeParentRecord,
+    {
         let selected = self.for_node_owner(key.parent)?;
         let parent = selected.node(key.parent)?;
         let id = selected.owner.lazy.token(
             key,
             kind,
             parent.storage_reparsed(),
-            selected.owner.source().len(),
+            selected.owner,
+            initialize,
+        )?;
+        self.node(id)
+    }
+    /// Initialize a token and its auxiliary payload under the same publication
+    /// lock. The callback prepares the parent link with its owner context; a
+    /// cache hit skips it, and an error or panic publishes none of its staging.
+    pub fn try_token_prepared(
+        self,
+        key: crate::TokenKey,
+        kind: u32,
+        initialize: impl FnOnce(&mut StorageTransaction<'_, N>, NodeId) -> Result<N, Error>,
+    ) -> Result<StorageRead<'a, N>, Error> {
+        let selected = self.for_node_owner(key.parent)?;
+        let parent = selected.node(key.parent)?;
+        let id = selected.owner.lazy.token_prepared(
+            key,
+            kind,
+            parent.storage_reparsed(),
+            selected.owner,
             initialize,
         )?;
         self.node(id)
@@ -502,6 +780,31 @@ mod tests {
     use super::*;
     use crate::Node;
     use std::sync::Barrier;
+
+    #[test]
+    fn core_split_keeps_auxiliary_borrows_live_during_checked_header_mutation() {
+        let counters = Counters::new();
+        let mut builder =
+            StorageBuilder::<Node<()>>::new(Arc::from(b"source".as_slice()), &counters);
+        let id = builder.push(Node::new(1, ()));
+        let auxiliary = builder.push_aux(());
+        let mut foreign = StorageBuilder::<Node<()>>::new(Arc::from([]), &counters);
+        let foreign_id = foreign.push(Node::new(2, ()));
+        let missing = NodeId::from_parts(id.arena(), u32::MAX).unwrap();
+        let missing_foreign = NodeId::from_parts(foreign_id.arena(), u32::MAX).unwrap();
+        {
+            let (mut nodes, data) = builder.split_core_mut();
+            let record = data.auxiliary(auxiliary).unwrap();
+            nodes.get_mut(id).unwrap().kind = 3;
+            assert_eq!(nodes.get(id).unwrap().kind, 3);
+            assert!(std::ptr::eq(record, data.auxiliary(auxiliary).unwrap()));
+            assert_eq!(data.source().as_bytes(), b"source");
+            assert_eq!(nodes.get_mut(missing), Err(Error::InvalidSlot));
+            assert_eq!(nodes.get_mut(missing_foreign), Err(Error::WrongOwner));
+            assert_eq!(nodes.get(foreign_id), Err(Error::WrongOwner));
+        }
+        assert_eq!(builder.core_node(id).unwrap().kind, 3);
+    }
 
     #[test]
     fn position_map_is_initialized_on_demand_and_shared_between_threads() {
@@ -539,6 +842,35 @@ mod tests {
 mod construction_tests {
     use super::*;
     use crate::Node;
+
+    #[test]
+    fn selected_core_reads_borrow_and_reject_other_namespaces_before_slots() {
+        let counters = Counters::new();
+        let mut imported = StorageBuilder::<Node<()>>::new(Arc::from(&b"imported"[..]), &counters);
+        let foreign = imported.push(Node::new(1, ()));
+        let mut builder = StorageBuilder::<Node<()>>::new(Arc::from(&b"local"[..]), &counters);
+        let local = builder.push(Node::new(2, ()));
+        builder.retain_file(imported.finish());
+        let view = builder.view();
+        assert!(std::ptr::eq(
+            view.core_node(local).unwrap(),
+            builder.core_node(local).unwrap(),
+        ));
+        let missing = NodeId::from_parts(local.arena(), u32::MAX).unwrap();
+        assert!(matches!(view.core_node(missing), Err(Error::InvalidSlot)));
+        assert!(matches!(view.core_node(foreign), Err(Error::WrongOwner)));
+        let missing_foreign = NodeId::from_parts(foreign.arena(), u32::MAX).unwrap();
+        assert!(matches!(
+            view.core_node(missing_foreign),
+            Err(Error::WrongOwner)
+        ));
+        let lazy = NodeId::from_parts(view.lazy_arena(), 1).unwrap();
+        assert!(matches!(view.core_node(lazy), Err(Error::WrongOwner)));
+        assert_eq!(view.node(foreign).unwrap().kind, 1);
+        let selected = view.for_arena(foreign.arena()).unwrap();
+        assert_eq!(selected.core_node(foreign).unwrap().kind, 1);
+        assert!(matches!(selected.core_node(local), Err(Error::WrongOwner)));
+    }
 
     #[test]
     fn construction_transfers_requested_map_and_lazy_arena_without_reinitializing() {

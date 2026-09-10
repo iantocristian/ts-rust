@@ -16,8 +16,10 @@ class PrerequisiteTests(unittest.TestCase):
         cls.frozen=json.loads((graph.ROOT/"data/s07/bindworkload-probes.json").read_bytes())
         cls.source={"sha256":"a"*64,"files":{"production.rs":"b"*64}}
         cls.binaries={"go":"c"*64,"rust":"d"*64,"rust_allocation":"e"*64}
+        cls.configuration={"/external/.cargo/config.toml":"f"*64}
         cls.report={"version":1,"diagnostic_subset":False,"source_stable":True,"parity":1,"files":13094,
             "source_fingerprint":cls.source,"source_fingerprint_after":cls.source,
+            "cargo_configuration":cls.configuration,"cargo_configuration_after":cls.configuration,
             "binary_sha256":{"oracle":cls.binaries["go"],"rust":cls.binaries["rust"]},
             "binary_sha256_after":{"oracle":cls.binaries["go"],"rust":cls.binaries["rust"]},
             **{key:cls.frozen[key] for key in ("expected_scalars","input_sha256","options_sha256","workload_sha256")},
@@ -26,7 +28,7 @@ class PrerequisiteTests(unittest.TestCase):
                 "results":[{"index":index,"equal":True,"raw_exact":False,"first_difference":None} for index in range(13094)]} for workers in (1,8)]}
 
     def validate(self,report):
-        return graph.validate_measurement_prerequisite(report,self.source,self.binaries)
+        return graph.validate_measurement_prerequisite(report,self.source,self.binaries,self.configuration)
 
     def test_complete_two_mode_control(self):
         from s07_benchmark_inputs import loaded_input_digest
@@ -38,6 +40,10 @@ class PrerequisiteTests(unittest.TestCase):
             "unstable":lambda r:r.update(source_stable=False),
             "stale_source":lambda r:r["source_fingerprint"].update(sha256="f"*64),
             "stale_source_after":lambda r:r.update(source_fingerprint_after={}),
+            "missing_configuration":lambda r:r.pop("cargo_configuration"),
+            "missing_configuration_after":lambda r:r.pop("cargo_configuration_after"),
+            "stale_configuration":lambda r:r.update(cargo_configuration={}),
+            "changed_configuration_after":lambda r:r.update(cargo_configuration_after={}),
             "stale_binary":lambda r:r["binary_sha256"].update(rust="f"*64),
             "changed_binary_after":lambda r:r["binary_sha256_after"].update(oracle="f"*64),
             "missing_mode":lambda r:r["runs"].pop(),
@@ -62,6 +68,13 @@ class PrerequisiteTests(unittest.TestCase):
     def test_allocation_binary_cannot_replace_normal_binary(self):
         binaries={**self.binaries,"rust":self.binaries["rust_allocation"]}
         with self.assertRaises(ValueError):graph.validate_measurement_prerequisite(self.report,self.source,binaries)
+
+    def test_legacy_diagnostic_protocol_does_not_qualify_native_capture(self):
+        report=copy.deepcopy(self.report)
+        del report["cargo_configuration"];del report["cargo_configuration_after"]
+        graph.validate_measurement_prerequisite(report,self.source,self.binaries)
+        with self.assertRaisesRegex(ValueError,"Cargo configuration"):
+            self.validate(report)
 
     def test_missing_frozen_inventory_fails_closed(self):
         with patch.object(Path,"read_bytes",side_effect=FileNotFoundError):

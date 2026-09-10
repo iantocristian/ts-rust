@@ -24,10 +24,10 @@ impl<F: ParserFactory> Parser<'_, F> {
             let literal = self
                 .factory
                 .node(span)
-                .data()
+                .data_source()
                 .as_template_span()
                 .expect("template span payload")
-                .literal
+                .literal()
                 .expect("parsed template literal");
             if self.factory.node(literal).kind() != SyntaxKind::TemplateMiddle {
                 break;

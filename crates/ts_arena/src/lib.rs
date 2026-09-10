@@ -21,18 +21,19 @@ mod scratch;
 pub use bundle::{StorageBundle, StorageHandle};
 pub use counters::{Counters, Counts};
 pub use error::Error;
-pub use file::{StorageBuilder, StorageOwner, StorageView};
+pub use file::{CoreDataRead, CoreNodesMut, StorageBuilder, StorageOwner, StorageView};
 pub use ids::{ArenaId, AuxId, FileId, NodeId, SymbolId};
 pub use initialization::{InitializationDomain, InitializationGuard};
 pub use lazy::{StorageTransaction, TokenKey};
 pub use lease::{CheckerIdentity, CheckerLease, Generation};
-pub use node::{Node, NodeRecord};
+pub use node::{Node, NodeParentRecord, NodeRecord};
 pub use node_slots::NodeSlots;
 pub use owned::{OwnedArena, SymbolArena};
 pub use refs::{
-    CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead, StorageSymbolRef,
+    AuxiliaryRead, CachedNodes, RecordRef, RetainedRecord, RetainedStorageSymbol, StorageRead,
+    StorageSymbolRef,
 };
-pub use scope::{LocalNode, StorageLocalArena, StorageScope};
+pub use scope::{CoreScopeMut, LocalNode, StorageLocalArena, StorageScope};
 pub use scratch::ScratchOwner;
 
 #[cfg(any(test, feature = "harness"))]

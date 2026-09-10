@@ -1,5 +1,8 @@
 //! Pinned frontends export facts; these Rust emitters own Rust syntax only.
 mod ast;
+mod ast_compact;
+mod ast_local_read;
+mod ast_read;
 mod ast_runtime;
 mod diagnostics;
 mod encoder;

@@ -7,7 +7,7 @@ use crate::{
     TYPE_ACQUISITION_OPTIONS,
 };
 use std::sync::Arc;
-use ts_ast::{Diagnostic, NodeData, NodeId, SyntaxKind as K};
+use ts_ast::{Diagnostic, NodeDataRead, NodeId, SyntaxKind as K};
 use ts_core::{CompilerOptions, Tristate};
 use ts_diagnostics::{self as d, Message};
 use ts_jsstring::JsString;
@@ -74,23 +74,22 @@ pub(crate) fn diagnostic(
 }
 pub(crate) fn initializer(config: &TsConfigSourceFile, property: NodeId) -> Option<NodeId> {
     let read = config.file.view().node(property).expect("config property");
-    let NodeData::PropertyAssignment(data) = read.data() else {
+    let NodeDataRead::PropertyAssignment(data) = read.data() else {
         return None;
     };
-    data.initializer
+    data.initializer()
 }
 pub(crate) fn array_elements(config: &TsConfigSourceFile, node: NodeId) -> Vec<NodeId> {
     let view = config.file.view();
     let read = view.node(node).expect("config array");
-    let NodeData::ArrayLiteralExpression(data) = read.data() else {
+    let NodeDataRead::ArrayLiteralExpression(data) = read.data() else {
         return vec![];
     };
-    data.elements.map_or_else(Vec::new, |list| {
+    data.elements().map_or_else(Vec::new, |list| {
         view.node_slice(view.list(list).expect("array list").nodes())
             .expect("array elements")
             .iter()
             .flatten()
-            .copied()
             .collect()
     })
 }
@@ -108,28 +107,28 @@ fn array_string(config: &TsConfigSourceFile, key: &[u8], value: &[u8]) -> Option
     // ForEachPropertyAssignment continues after a callback returns nil.
     let root = config.object()?;
     let read = view.node(root).expect("config object");
-    let NodeData::ObjectLiteralExpression(data) = read.data() else {
+    let NodeDataRead::ObjectLiteralExpression(data) = read.data() else {
         return None;
     };
     for node in view
-        .node_slice(view.list(data.properties?).ok()?.nodes())
+        .node_slice(view.list(data.properties()?).ok()?.nodes())
         .ok()?
         .iter()
         .flatten()
     {
-        let read = view.node(*node).ok()?;
-        let NodeData::PropertyAssignment(data) = read.data() else {
+        let read = view.node(node).ok()?;
+        let NodeDataRead::PropertyAssignment(data) = read.data() else {
             continue;
         };
         if data
-            .name
+            .name()
             .and_then(|name| crate::property_name(config, name))
             .is_none_or(|name| name.as_bytes() != key)
         {
             continue;
         }
         for element in data
-            .initializer
+            .initializer()
             .into_iter()
             .flat_map(|node| array_elements(config, node))
         {

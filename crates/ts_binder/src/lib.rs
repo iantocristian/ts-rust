@@ -1,5 +1,12 @@
 //! File binding and hook-driven name/reference resolution at the pinned source.
+mod backend;
+mod local;
+#[cfg(test)]
+mod local_tests;
 mod state;
+mod symbol_access;
+mod table_access;
+mod target;
 pub use state::ContainerFlags;
 pub(crate) use state::{ActiveLabel, Binder};
 
@@ -20,6 +27,7 @@ pub(crate) fn checked<T>(result: Result<T, ts_arena::Error>) -> T {
 
 mod binary_trampoline;
 mod bindings;
+mod container_classification;
 mod containers;
 mod declarations;
 mod diagnostics;
@@ -27,6 +35,7 @@ mod dispatch;
 mod expando;
 mod expressions;
 mod flow;
+mod flow_access;
 mod modules;
 pub mod name_resolver;
 mod recursion;
@@ -56,14 +65,42 @@ fn bind_source_file_worker(
     source: ts_ast::NodeId,
 ) -> Result<(), ts_ast::BindError> {
     file.bind_with(source, |builder| {
-        let mut binder = Binder::new(builder);
-        binder.unreachable_flow = Some(binder.new_flow_node(ts_ast::flow_flags::UNREACHABLE));
-        binder.bind(Some(source));
-        binder.bind_deferred_expando_assignments();
-        binder.builder.set_symbol_count(binder.symbol_count);
+        initialize_binding(builder);
         Ok(())
     })?;
     Ok(())
+}
+
+/// Bind the exclusive parser result before publishing its completed syntax.
+/// Unusual constructed owners select the existing shared-publication backend.
+pub fn bind_parsed_file(
+    parsed: ts_ast::ParsedFile,
+) -> Result<ts_ast::CompletedFile, ts_ast::BindError> {
+    ts_parser::on_parser_worker(|| {
+        parsed.bind_and_publish(|builder| {
+            initialize_binding(builder);
+            Ok(())
+        })
+    })
+}
+
+fn initialize_binding(builder: &mut ts_ast::BindBuilder<'_>) {
+    if builder
+        .with_local_scope(|local| {
+            run_binding(Binder::from_backend(backend::Backend::Local(local)));
+        })
+        .is_none()
+    {
+        run_binding(Binder::new(builder));
+    }
+}
+
+fn run_binding(mut binder: Binder<'_, '_, '_>) {
+    let source = binder.file;
+    binder.unreachable_flow = Some(binder.new_flow_node(ts_ast::flow_flags::UNREACHABLE));
+    binder.bind(Some(source));
+    binder.bind_deferred_expando_assignments();
+    binder.builder.set_symbol_count(binder.symbol_count);
 }
 
 #[cfg(test)]
@@ -71,3 +108,6 @@ mod recursion_tests;
 
 #[cfg(test)]
 mod bound_factory_tests;
+
+#[cfg(test)]
+mod exclusive_tests;

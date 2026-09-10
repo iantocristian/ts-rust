@@ -175,10 +175,10 @@ impl<F: ParserFactory> Parser<'_, F> {
                 break;
             }
             unwrapped = data
-                .data()
+                .data_source()
                 .as_parenthesized_type_node()
                 .expect("parenthesized type payload")
-                .r#type;
+                .r#type();
         }
         if !allow_ambiguity
             && !matches!(
@@ -234,32 +234,32 @@ impl<F: ParserFactory> Parser<'_, F> {
             let (parameters, r#type) = match data.kind().known() {
                 Some(SyntaxKind::TypeReference) => {
                     return self.node_is_missing(
-                        data.data()
+                        data.data_source()
                             .as_type_reference_node()
                             .expect("type reference payload")
-                            .type_name,
+                            .type_name(),
                     );
                 }
                 Some(SyntaxKind::FunctionType) => {
                     let d = data
-                        .data()
+                        .data_source()
                         .as_function_type_node()
                         .expect("function type payload");
-                    (d.parameters, d.r#type)
+                    (d.parameters(), d.r#type())
                 }
                 Some(SyntaxKind::ConstructorType) => {
                     let d = data
-                        .data()
+                        .data_source()
                         .as_constructor_type_node()
                         .expect("constructor type payload");
-                    (d.parameters, d.r#type)
+                    (d.parameters(), d.r#type())
                 }
                 Some(SyntaxKind::ParenthesizedType) => {
                     node = data
-                        .data()
+                        .data_source()
                         .as_parenthesized_type_node()
                         .expect("parenthesized type payload")
-                        .r#type
+                        .r#type()
                         .expect("parsed parenthesized type");
                     continue;
                 }

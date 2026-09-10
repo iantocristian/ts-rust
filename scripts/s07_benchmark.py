@@ -38,7 +38,7 @@ def source_fingerprint():
     for directory in ("scripts/s07_oracle", "tools/s07/benchmark", ".cargo"):
         sources.update(p for p in (ROOT / directory).rglob("*") if p.is_file() and "__pycache__" not in p.parts)
     sources.update(ROOT.glob("scripts/s07_benchmark*.py"))
-    sources.update(ROOT / name for name in ("Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "data/upstream.json", "data/s04/toolchains.toml", "data/s07/vscode-files.json", "data/s07/vscode-parse-options.json", "data/s07/bindworkload-probes.json", "data/workloads.toml", "scripts/s07_binder.py", "scripts/s07_inventory.py", "scripts/s04.py", "scripts/s04_common.py", "scripts/s04_runtime.py", "scripts/s04_ownership.py", "scripts/s06_protocol.py", "scripts/s06_process.py"))
+    sources.update(ROOT / name for name in ("Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "data/upstream.json", "data/s04/toolchains.toml", "data/s07/vscode-files.json", "data/s07/vscode-parse-options.json", "data/s07/bindworkload-probes.json", "data/workloads.toml", "status/experiments.toml", "scripts/s07_binder.py", "scripts/s07_inventory.py", "scripts/s04.py", "scripts/s04_common.py", "scripts/s04_runtime.py", "scripts/s04_ownership.py", "scripts/s06_protocol.py", "scripts/s06_process.py"))
     sources = {path for path in sources if path.exists()}
     files = {str(path.relative_to(ROOT)): sha(path.read_bytes()) for path in sorted(sources)}
     return {"sha256": sha(json.dumps(files, sort_keys=True, separators=(",", ":")).encode()), "files": files}
@@ -179,10 +179,22 @@ def build_rust(instrumented=False):
     args = ["cargo", "+"+stable, "build", "--release", "--locked", "--package", "ts_bench", "--bin", "ts-bench", "--target", host, "--message-format=json-render-diagnostics", *release_configuration(env)]
     if instrumented:
         args.extend(["--features", "allocation"])
-    executable = rust_executable(command(args, cwd=ROOT, env=env), ROOT / "crates/ts_bench/Cargo.toml", instrumented)
     destination = CACHE / "s07-benchmark" / ("rust-benchmark-allocation" if instrumented else "rust-benchmark")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(executable, destination)
+    # Diagnostic checkouts can share package identities and a target directory.
+    # Cargo may then report a fresh artifact whose dep-info still names that
+    # other checkout. A source snapshot does not prove those bytes were built.
+    # Use an empty target directory for each measured executable, overriding
+    # both caller output/intermediate configuration; retain registry caches.
+    (ROOT / "target").mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="s07-native-build-", dir=ROOT / "target") as temporary:
+        build_directory = Path(temporary).resolve()
+        args.extend(["--target-dir", str(build_directory),
+                     "--config", "build.build-dir=" + json.dumps(str(build_directory))])
+        executable = rust_executable(command(args, cwd=ROOT, env=env), ROOT / "crates/ts_bench/Cargo.toml", instrumented)
+        if not executable.resolve().is_relative_to(build_directory):
+            raise ValueError("Cargo benchmark artifact escaped its isolated build directory")
+        shutil.copyfile(executable, destination)
     destination.chmod(0o755)
     return destination, env
 

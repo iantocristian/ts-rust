@@ -1,7 +1,7 @@
+use crate::flow_access::BindingFlow;
 use std::collections::HashSet;
 use ts_ast::{
-    AstView, BindBuilder, FlowId, JsString, NodeBinding, NodeId, NodeRead, SymbolId, SymbolTable,
-    SymbolTableId,
+    AstView, BindBuilder, JsString, NodeId, NodeRead, SymbolId, SymbolTable, SymbolTableId,
 };
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -26,45 +26,56 @@ pub(crate) struct ExpandoAssignmentInfo {
     pub block_scope_container: Option<NodeId>,
 }
 #[derive(Debug)]
-pub(crate) struct ActiveLabel {
+pub(crate) struct ActiveLabel<'scope> {
     pub next: Option<usize>,
-    pub break_target: Option<FlowId>,
-    pub continue_target: Option<FlowId>,
+    pub break_target: Option<BindingFlow<'scope>>,
+    pub continue_target: Option<BindingFlow<'scope>>,
     pub name: JsString,
     pub referenced: bool,
 }
 
-pub(crate) struct Binder<'build, 'ast> {
-    pub builder: &'build mut BindBuilder<'ast>,
+pub(crate) struct Binder<'build, 'scope, 'ast> {
+    pub builder: crate::backend::Backend<'build, 'scope, 'ast>,
     pub file: NodeId,
-    pub unreachable_flow: Option<FlowId>,
+    pub unreachable_flow: Option<BindingFlow<'scope>>,
     pub container: Option<NodeId>,
     pub this_container: Option<NodeId>,
     pub block_scope_container: Option<NodeId>,
     pub last_container: Option<NodeId>,
-    pub current_flow: Option<FlowId>,
-    pub current_break_target: Option<FlowId>,
-    pub current_continue_target: Option<FlowId>,
-    pub current_return_target: Option<FlowId>,
-    pub current_true_target: Option<FlowId>,
-    pub current_false_target: Option<FlowId>,
-    pub current_exception_target: Option<FlowId>,
-    pub pre_switch_case_flow: Option<FlowId>,
+    pub current_flow: Option<BindingFlow<'scope>>,
+    pub current_break_target: Option<BindingFlow<'scope>>,
+    pub current_continue_target: Option<BindingFlow<'scope>>,
+    pub current_return_target: Option<BindingFlow<'scope>>,
+    pub current_true_target: Option<BindingFlow<'scope>>,
+    pub current_false_target: Option<BindingFlow<'scope>>,
+    pub current_exception_target: Option<BindingFlow<'scope>>,
+    pub pre_switch_case_flow: Option<BindingFlow<'scope>>,
     pub active_label_list: Option<usize>,
-    pub labels: Vec<ActiveLabel>,
+    pub labels: Vec<ActiveLabel<'scope>>,
     pub emit_flags: u32,
     pub seen_this_keyword: bool,
     pub has_explicit_return: bool,
     pub has_flow_effects: bool,
     pub in_assignment_pattern: bool,
     pub seen_parse_error: bool,
+    pub source_has_parse_errors: bool,
+    pub source_is_external_module: bool,
     pub symbol_count: isize,
     pub not_const_enum_only_modules: HashSet<SymbolId>,
     pub expando_assignments: Vec<ExpandoAssignmentInfo>,
 }
-impl<'build, 'ast> Binder<'build, 'ast> {
+impl<'build, 'scope, 'ast> Binder<'build, 'scope, 'ast> {
     pub fn new(builder: &'build mut BindBuilder<'ast>) -> Self {
+        Self::from_backend(crate::backend::Backend::Checked(builder))
+    }
+    pub fn from_backend(builder: crate::backend::Backend<'build, 'scope, 'ast>) -> Self {
         let file = builder.source();
+        let source = builder
+            .view()
+            .source_file(file)
+            .expect("validated binding source");
+        let source_has_parse_errors = !source.diagnostics.is_empty();
+        let source_is_external_module = source.external_module_indicator.is_some();
         Self {
             builder,
             file,
@@ -89,12 +100,14 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             has_flow_effects: false,
             in_assignment_pattern: false,
             seen_parse_error: false,
+            source_has_parse_errors,
+            source_is_external_module,
             symbol_count: 0,
             not_const_enum_only_modules: HashSet::new(),
             expando_assignments: Vec::new(),
         }
     }
-    pub fn parsed_view(&self) -> AstView<'ast> {
+    pub fn parsed_view(&self) -> AstView<'_> {
         self.builder.parsed_view()
     }
     pub fn view(&self) -> AstView<'_> {
@@ -103,10 +116,43 @@ impl<'build, 'ast> Binder<'build, 'ast> {
     pub fn n(&self, id: NodeId) -> NodeRead<'_> {
         self.builder.node(id).expect("binder node is retained")
     }
-    pub fn binding_mut(&mut self, id: NodeId) -> &mut NodeBinding {
+    pub fn set_node_symbol(&mut self, id: NodeId, value: Option<SymbolId>) {
         self.builder
-            .binding_mut(id)
-            .expect("binder writes its own file")
+            .set_node_symbol(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_local_symbol(&mut self, id: NodeId, value: Option<SymbolId>) {
+        self.builder
+            .set_node_local_symbol(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_locals(&mut self, id: NodeId, value: Option<SymbolTableId>) {
+        self.builder
+            .set_node_locals(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_next_container(&mut self, id: NodeId, value: Option<NodeId>) {
+        self.builder
+            .set_node_next_container(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_end_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
+        self.builder
+            .set_node_end_flow(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_return_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
+        self.builder
+            .set_node_return_flow(id, value)
+            .expect("binder writes its own file");
+    }
+    pub fn set_node_fallthrough_flow(&mut self, id: NodeId, value: Option<BindingFlow<'scope>>) {
+        let value = value.map(|flow| self.flow_id(flow));
+        self.builder
+            .set_node_fallthrough_flow(id, value)
+            .expect("binder writes its own file");
     }
     pub fn symbol(&self, node: NodeId) -> Option<SymbolId> {
         self.builder
@@ -118,16 +164,15 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             .node_locals(node)
             .expect("binder node is retained")
     }
-    pub fn table(&self, table: SymbolTableId) -> &SymbolTable {
+    pub fn table(&self, table: SymbolTableId) -> ts_ast::SymbolTableRead<'_> {
         self.builder
             .tables()
             .get(table)
             .expect("binder symbol table belongs to result")
     }
-    pub fn table_mut(&mut self, table: SymbolTableId) -> &mut SymbolTable {
+    pub fn table_mut(&mut self, table: SymbolTableId) -> ts_ast::SymbolTableMut<'_> {
         self.builder
-            .tables_mut()
-            .get_mut(table)
+            .table_mut(table)
             .expect("binder symbol table belongs to result")
     }
     // port: tsc/internal/ast/utilities.go:GetLocals
@@ -139,16 +184,15 @@ impl<'build, 'ast> Binder<'build, 'ast> {
             ts_ast::is_locals_container(&self.n(node)),
             "locals-container payload required"
         );
-        let table = self.builder.tables_mut().alloc(SymbolTable::new());
-        self.binding_mut(node).locals = Some(table);
+        let table = self.builder.alloc_table(SymbolTable::new());
+        self.set_node_locals(node, Some(table));
         table
     }
     pub fn set_flags(&mut self, node: NodeId, flags: u32) {
         if self.n(node).flags() != flags {
             self.builder
-                .node_mut(node)
-                .expect("binder writes its own file")
-                .set_flags(flags);
+                .set_node_flags(node, flags)
+                .expect("binder writes its own file");
         }
     }
     pub fn text(&self, node: NodeId) -> JsString {

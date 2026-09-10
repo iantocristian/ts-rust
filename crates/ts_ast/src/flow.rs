@@ -2,7 +2,7 @@
 //! identities; cycles never create an owning reference back to the bind result.
 
 use crate::{NodeId, NodeKind, SyntaxKind};
-use ts_arena::{ArenaId, AuxId, Counters, Error, OwnedArena};
+use ts_arena::{ArenaId, AuxId, Error};
 use ts_core::TextRange;
 
 pub type FlowFlags = u32;
@@ -110,8 +110,8 @@ impl FlowReduceLabelData {
     }
 }
 
-macro_rules! flow_store {
-    ($id:ident, $store:ident, $value:ty) => {
+macro_rules! flow_id {
+    ($id:ident) => {
         /// A checked-owner input identity, never an ownership capability.
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
         pub struct $id(AuxId);
@@ -125,43 +125,22 @@ macro_rules! flow_store {
             pub fn slot(self) -> u32 {
                 self.0.slot()
             }
-        }
-        #[derive(Debug)]
-        pub struct $store(OwnedArena<$value>);
-        impl $store {
-            pub fn new(counters: &Counters) -> Self {
-                Self(OwnedArena::new(counters))
-            }
-            pub fn id(&self) -> ArenaId {
-                self.0.id()
-            }
-            pub fn len(&self) -> usize {
-                self.0.len()
-            }
-            pub fn is_empty(&self) -> bool {
-                self.0.is_empty()
-            }
-            pub fn push(&mut self, value: $value) -> $id {
-                $id(self.0.push(value))
-            }
-            pub fn get(&self, id: $id) -> Result<&$value, Error> {
-                self.0.get(id.0)
-            }
-            pub fn get_mut(&mut self, id: $id) -> Result<&mut $value, Error> {
-                self.0.get_mut(id.0)
-            }
-            pub fn iter(&self) -> impl Iterator<Item = ($id, &$value)> {
-                self.0.iter().map(|(id, value)| ($id(id), value))
+            pub(crate) fn from_parts(arena: ArenaId, slot: u32) -> Result<Self, Error> {
+                AuxId::from_parts(arena, slot).map(Self)
             }
         }
     };
 }
-flow_store!(FlowId, FlowNodes, FlowNode);
-flow_store!(FlowListId, FlowLists, FlowList);
+flow_id!(FlowId);
+flow_id!(FlowListId);
+
+mod storage;
+pub use storage::{FlowListMut, FlowListRead, FlowLists, FlowNodeMut, FlowNodeRead, FlowNodes};
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ts_arena::Counters;
 
     #[test]
     fn synthetic_payloads_keep_discriminants_nil_edges_and_go_int32_narrowing() {
@@ -192,7 +171,7 @@ mod tests {
             });
             nodes.get_mut(label).unwrap().antecedents = Some(list);
             lists.get_mut(list).unwrap().next = Some(list);
-            assert_eq!(lists.get(list).unwrap().flow, Some(label));
+            assert_eq!(lists.get(list).unwrap().flow(), Some(label));
             let other_nodes = FlowNodes::new(&counters);
             let other_lists = FlowLists::new(&counters);
             assert!(matches!(other_nodes.get(label), Err(Error::WrongOwner)));

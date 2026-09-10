@@ -7,7 +7,7 @@ use crate::*;
 use std::ops::ControlFlow;
 
 // upstream: tsc/internal/ast/ast_generated.go:IsToken
-pub fn is_token(node: &Node) -> bool {
+pub fn is_token(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -182,11 +182,11 @@ pub fn is_token(node: &Node) -> bool {
     )
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsIdentifier
-pub fn is_identifier(node: &Node) -> bool {
+pub fn is_identifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::Identifier))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPrivateIdentifier
-pub fn is_private_identifier(node: &Node) -> bool {
+pub fn is_private_identifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::PrivateIdentifier))
 }
 impl QualifiedNameData {
@@ -202,7 +202,7 @@ impl QualifiedNameData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsQualifiedName
-pub fn is_qualified_name(node: &Node) -> bool {
+pub fn is_qualified_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::QualifiedName))
 }
 impl ComputedPropertyNameData {
@@ -215,7 +215,7 @@ impl ComputedPropertyNameData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsComputedPropertyName
-pub fn is_computed_property_name(node: &Node) -> bool {
+pub fn is_computed_property_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ComputedPropertyName))
 }
 impl DecoratorData {
@@ -228,11 +228,11 @@ impl DecoratorData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsDecorator
-pub fn is_decorator(node: &Node) -> bool {
+pub fn is_decorator(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::Decorator))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsEmptyStatement
-pub fn is_empty_statement(node: &Node) -> bool {
+pub fn is_empty_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::EmptyStatement))
 }
 impl IfStatementData {
@@ -251,7 +251,7 @@ impl IfStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsIfStatement
-pub fn is_if_statement(node: &Node) -> bool {
+pub fn is_if_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::IfStatement))
 }
 impl DoStatementData {
@@ -267,7 +267,7 @@ impl DoStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsDoStatement
-pub fn is_do_statement(node: &Node) -> bool {
+pub fn is_do_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::DoStatement))
 }
 impl WhileStatementData {
@@ -283,7 +283,7 @@ impl WhileStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsWhileStatement
-pub fn is_while_statement(node: &Node) -> bool {
+pub fn is_while_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::WhileStatement))
 }
 impl ForStatementData {
@@ -305,7 +305,7 @@ impl ForStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsForStatement
-pub fn is_for_statement(node: &Node) -> bool {
+pub fn is_for_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ForStatement))
 }
 impl ForInOrOfStatementData {
@@ -327,11 +327,11 @@ impl ForInOrOfStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsForInStatement
-pub fn is_for_in_statement(node: &Node) -> bool {
+pub fn is_for_in_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ForInStatement))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsForOfStatement
-pub fn is_for_of_statement(node: &Node) -> bool {
+pub fn is_for_of_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ForOfStatement))
 }
 impl BreakStatementData {
@@ -344,7 +344,7 @@ impl BreakStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsBreakStatement
-pub fn is_break_statement(node: &Node) -> bool {
+pub fn is_break_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::BreakStatement))
 }
 impl ContinueStatementData {
@@ -357,7 +357,7 @@ impl ContinueStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsContinueStatement
-pub fn is_continue_statement(node: &Node) -> bool {
+pub fn is_continue_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ContinueStatement))
 }
 impl ReturnStatementData {
@@ -370,7 +370,7 @@ impl ReturnStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsReturnStatement
-pub fn is_return_statement(node: &Node) -> bool {
+pub fn is_return_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ReturnStatement))
 }
 impl WithStatementData {
@@ -386,7 +386,7 @@ impl WithStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsWithStatement
-pub fn is_with_statement(node: &Node) -> bool {
+pub fn is_with_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::WithStatement))
 }
 impl SwitchStatementData {
@@ -402,7 +402,7 @@ impl SwitchStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSwitchStatement
-pub fn is_switch_statement(node: &Node) -> bool {
+pub fn is_switch_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SwitchStatement))
 }
 impl CaseBlockData {
@@ -415,7 +415,7 @@ impl CaseBlockData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsCaseBlock
-pub fn is_case_block(node: &Node) -> bool {
+pub fn is_case_block(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::CaseBlock))
 }
 impl CaseOrDefaultClauseData {
@@ -431,11 +431,11 @@ impl CaseOrDefaultClauseData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsCaseClause
-pub fn is_case_clause(node: &Node) -> bool {
+pub fn is_case_clause(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::CaseClause))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsDefaultClause
-pub fn is_default_clause(node: &Node) -> bool {
+pub fn is_default_clause(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::DefaultClause))
 }
 impl ThrowStatementData {
@@ -448,7 +448,7 @@ impl ThrowStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsThrowStatement
-pub fn is_throw_statement(node: &Node) -> bool {
+pub fn is_throw_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ThrowStatement))
 }
 impl TryStatementData {
@@ -467,7 +467,7 @@ impl TryStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTryStatement
-pub fn is_try_statement(node: &Node) -> bool {
+pub fn is_try_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TryStatement))
 }
 impl CatchClauseData {
@@ -483,11 +483,11 @@ impl CatchClauseData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsCatchClause
-pub fn is_catch_clause(node: &Node) -> bool {
+pub fn is_catch_clause(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::CatchClause))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsDebuggerStatement
-pub fn is_debugger_statement(node: &Node) -> bool {
+pub fn is_debugger_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::DebuggerStatement))
 }
 impl LabeledStatementData {
@@ -503,7 +503,7 @@ impl LabeledStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsLabeledStatement
-pub fn is_labeled_statement(node: &Node) -> bool {
+pub fn is_labeled_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::LabeledStatement))
 }
 impl ExpressionStatementData {
@@ -516,7 +516,7 @@ impl ExpressionStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExpressionStatement
-pub fn is_expression_statement(node: &Node) -> bool {
+pub fn is_expression_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ExpressionStatement))
 }
 impl BlockData {
@@ -529,7 +529,7 @@ impl BlockData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsBlock
-pub fn is_block(node: &Node) -> bool {
+pub fn is_block(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::Block))
 }
 impl VariableStatementData {
@@ -545,7 +545,7 @@ impl VariableStatementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsVariableStatement
-pub fn is_variable_statement(node: &Node) -> bool {
+pub fn is_variable_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::VariableStatement))
 }
 impl VariableDeclarationData {
@@ -573,7 +573,7 @@ impl VariableDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsVariableDeclaration
-pub fn is_variable_declaration(node: &Node) -> bool {
+pub fn is_variable_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::VariableDeclaration))
 }
 impl VariableDeclarationListData {
@@ -586,7 +586,7 @@ impl VariableDeclarationListData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsVariableDeclarationList
-pub fn is_variable_declaration_list(node: &Node) -> bool {
+pub fn is_variable_declaration_list(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::VariableDeclarationList)
@@ -602,11 +602,11 @@ impl BindingPatternData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsObjectBindingPattern
-pub fn is_object_binding_pattern(node: &Node) -> bool {
+pub fn is_object_binding_pattern(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ObjectBindingPattern))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsArrayBindingPattern
-pub fn is_array_binding_pattern(node: &Node) -> bool {
+pub fn is_array_binding_pattern(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ArrayBindingPattern))
 }
 impl ParameterDeclarationData {
@@ -640,7 +640,7 @@ impl ParameterDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsParameterDeclaration
-pub fn is_parameter_declaration(node: &Node) -> bool {
+pub fn is_parameter_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::Parameter))
 }
 impl BindingElementData {
@@ -668,7 +668,7 @@ impl BindingElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsBindingElement
-pub fn is_binding_element(node: &Node) -> bool {
+pub fn is_binding_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::BindingElement))
 }
 impl MissingDeclarationData {
@@ -681,7 +681,7 @@ impl MissingDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsMissingDeclaration
-pub fn is_missing_declaration(node: &Node) -> bool {
+pub fn is_missing_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::MissingDeclaration))
 }
 impl FunctionDeclarationData {
@@ -721,7 +721,7 @@ impl FunctionDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsFunctionDeclaration
-pub fn is_function_declaration(node: &Node) -> bool {
+pub fn is_function_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::FunctionDeclaration))
 }
 impl ClassDeclarationData {
@@ -752,7 +752,7 @@ impl ClassDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsClassDeclaration
-pub fn is_class_declaration(node: &Node) -> bool {
+pub fn is_class_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ClassDeclaration))
 }
 impl ClassExpressionData {
@@ -783,7 +783,7 @@ impl ClassExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsClassExpression
-pub fn is_class_expression(node: &Node) -> bool {
+pub fn is_class_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ClassExpression))
 }
 impl HeritageClauseData {
@@ -796,7 +796,7 @@ impl HeritageClauseData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsHeritageClause
-pub fn is_heritage_clause(node: &Node) -> bool {
+pub fn is_heritage_clause(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::HeritageClause))
 }
 impl InterfaceDeclarationData {
@@ -827,7 +827,7 @@ impl InterfaceDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsInterfaceDeclaration
-pub fn is_interface_declaration(node: &Node) -> bool {
+pub fn is_interface_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::InterfaceDeclaration))
 }
 impl TypeAliasDeclarationData {
@@ -855,11 +855,11 @@ impl TypeAliasDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeAliasDeclaration
-pub fn is_type_alias_declaration(node: &Node) -> bool {
+pub fn is_type_alias_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeAliasDeclaration))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSTypeAliasDeclaration
-pub fn is_js_type_alias_declaration(node: &Node) -> bool {
+pub fn is_js_type_alias_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::JSTypeAliasDeclaration)
@@ -884,7 +884,7 @@ impl EnumMemberData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsEnumMember
-pub fn is_enum_member(node: &Node) -> bool {
+pub fn is_enum_member(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::EnumMember))
 }
 impl EnumDeclarationData {
@@ -909,7 +909,7 @@ impl EnumDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsEnumDeclaration
-pub fn is_enum_declaration(node: &Node) -> bool {
+pub fn is_enum_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::EnumDeclaration))
 }
 impl ModuleBlockData {
@@ -922,15 +922,15 @@ impl ModuleBlockData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsModuleBlock
-pub fn is_module_block(node: &Node) -> bool {
+pub fn is_module_block(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ModuleBlock))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNotEmittedStatement
-pub fn is_not_emitted_statement(node: &Node) -> bool {
+pub fn is_not_emitted_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NotEmittedStatement))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNotEmittedTypeElement
-pub fn is_not_emitted_type_element(node: &Node) -> bool {
+pub fn is_not_emitted_type_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NotEmittedTypeElement))
 }
 impl ImportDeclarationData {
@@ -952,11 +952,11 @@ impl ImportDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportDeclaration
-pub fn is_import_declaration(node: &Node) -> bool {
+pub fn is_import_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportDeclaration))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSImportDeclaration
-pub fn is_js_import_declaration(node: &Node) -> bool {
+pub fn is_js_import_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSImportDeclaration))
 }
 impl ExternalModuleReferenceData {
@@ -969,7 +969,7 @@ impl ExternalModuleReferenceData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExternalModuleReference
-pub fn is_external_module_reference(node: &Node) -> bool {
+pub fn is_external_module_reference(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ExternalModuleReference)
@@ -991,7 +991,7 @@ impl NamespaceImportData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamespaceImport
-pub fn is_namespace_import(node: &Node) -> bool {
+pub fn is_namespace_import(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NamespaceImport))
 }
 impl NamedImportsData {
@@ -1004,7 +1004,7 @@ impl NamedImportsData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamedImports
-pub fn is_named_imports(node: &Node) -> bool {
+pub fn is_named_imports(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NamedImports))
 }
 impl ExportAssignmentData {
@@ -1023,7 +1023,7 @@ impl ExportAssignmentData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExportAssignment
-pub fn is_export_assignment(node: &Node) -> bool {
+pub fn is_export_assignment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ExportAssignment))
 }
 impl NamespaceExportDeclarationData {
@@ -1045,7 +1045,7 @@ impl NamespaceExportDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamespaceExportDeclaration
-pub fn is_namespace_export_declaration(node: &Node) -> bool {
+pub fn is_namespace_export_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::NamespaceExportDeclaration)
@@ -1067,7 +1067,7 @@ impl NamespaceExportData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamespaceExport
-pub fn is_namespace_export(node: &Node) -> bool {
+pub fn is_namespace_export(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NamespaceExport))
 }
 impl NamedExportsData {
@@ -1080,7 +1080,7 @@ impl NamedExportsData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamedExports
-pub fn is_named_exports(node: &Node) -> bool {
+pub fn is_named_exports(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NamedExports))
 }
 impl ExportSpecifierData {
@@ -1102,7 +1102,7 @@ impl ExportSpecifierData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExportSpecifier
-pub fn is_export_specifier(node: &Node) -> bool {
+pub fn is_export_specifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ExportSpecifier))
 }
 impl CallSignatureDeclarationData {
@@ -1121,7 +1121,7 @@ impl CallSignatureDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsCallSignatureDeclaration
-pub fn is_call_signature_declaration(node: &Node) -> bool {
+pub fn is_call_signature_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::CallSignature))
 }
 impl ConstructSignatureDeclarationData {
@@ -1140,7 +1140,7 @@ impl ConstructSignatureDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsConstructSignatureDeclaration
-pub fn is_construct_signature_declaration(node: &Node) -> bool {
+pub fn is_construct_signature_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ConstructSignature))
 }
 impl ConstructorDeclarationData {
@@ -1168,7 +1168,7 @@ impl ConstructorDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsConstructorDeclaration
-pub fn is_constructor_declaration(node: &Node) -> bool {
+pub fn is_constructor_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::Constructor))
 }
 impl GetAccessorDeclarationData {
@@ -1205,7 +1205,7 @@ impl GetAccessorDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsGetAccessorDeclaration
-pub fn is_get_accessor_declaration(node: &Node) -> bool {
+pub fn is_get_accessor_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::GetAccessor))
 }
 impl SetAccessorDeclarationData {
@@ -1242,7 +1242,7 @@ impl SetAccessorDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSetAccessorDeclaration
-pub fn is_set_accessor_declaration(node: &Node) -> bool {
+pub fn is_set_accessor_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SetAccessor))
 }
 impl IndexSignatureDeclarationData {
@@ -1261,7 +1261,7 @@ impl IndexSignatureDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsIndexSignatureDeclaration
-pub fn is_index_signature_declaration(node: &Node) -> bool {
+pub fn is_index_signature_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::IndexSignature))
 }
 impl MethodSignatureDeclarationData {
@@ -1295,7 +1295,7 @@ impl MethodSignatureDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsMethodSignatureDeclaration
-pub fn is_method_signature_declaration(node: &Node) -> bool {
+pub fn is_method_signature_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::MethodSignature))
 }
 impl MethodDeclarationData {
@@ -1338,7 +1338,7 @@ impl MethodDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsMethodDeclaration
-pub fn is_method_declaration(node: &Node) -> bool {
+pub fn is_method_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::MethodDeclaration))
 }
 impl PropertySignatureDeclarationData {
@@ -1369,7 +1369,7 @@ impl PropertySignatureDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPropertySignatureDeclaration
-pub fn is_property_signature_declaration(node: &Node) -> bool {
+pub fn is_property_signature_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::PropertySignature))
 }
 impl PropertyDeclarationData {
@@ -1400,11 +1400,11 @@ impl PropertyDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPropertyDeclaration
-pub fn is_property_declaration(node: &Node) -> bool {
+pub fn is_property_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::PropertyDeclaration))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSemicolonClassElement
-pub fn is_semicolon_class_element(node: &Node) -> bool {
+pub fn is_semicolon_class_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SemicolonClassElement))
 }
 impl ClassStaticBlockDeclarationData {
@@ -1420,18 +1420,18 @@ impl ClassStaticBlockDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsClassStaticBlockDeclaration
-pub fn is_class_static_block_declaration(node: &Node) -> bool {
+pub fn is_class_static_block_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ClassStaticBlockDeclaration)
     )
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsOmittedExpression
-pub fn is_omitted_expression(node: &Node) -> bool {
+pub fn is_omitted_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::OmittedExpression))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsKeywordExpression
-pub fn is_keyword_expression(node: &Node) -> bool {
+pub fn is_keyword_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -1445,26 +1445,26 @@ pub fn is_keyword_expression(node: &Node) -> bool {
     )
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsStringLiteral
-pub fn is_string_literal(node: &Node) -> bool {
+pub fn is_string_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::StringLiteral))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNumericLiteral
-pub fn is_numeric_literal(node: &Node) -> bool {
+pub fn is_numeric_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NumericLiteral))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsBigIntLiteral
-pub fn is_big_int_literal(node: &Node) -> bool {
+pub fn is_big_int_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::BigIntLiteral))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsRegularExpressionLiteral
-pub fn is_regular_expression_literal(node: &Node) -> bool {
+pub fn is_regular_expression_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::RegularExpressionLiteral)
     )
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNoSubstitutionTemplateLiteral
-pub fn is_no_substitution_template_literal(node: &Node) -> bool {
+pub fn is_no_substitution_template_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::NoSubstitutionTemplateLiteral)
@@ -1492,7 +1492,7 @@ impl BinaryExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsBinaryExpression
-pub fn is_binary_expression(node: &Node) -> bool {
+pub fn is_binary_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::BinaryExpression))
 }
 impl PrefixUnaryExpressionData {
@@ -1505,7 +1505,7 @@ impl PrefixUnaryExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPrefixUnaryExpression
-pub fn is_prefix_unary_expression(node: &Node) -> bool {
+pub fn is_prefix_unary_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::PrefixUnaryExpression))
 }
 impl PostfixUnaryExpressionData {
@@ -1518,7 +1518,7 @@ impl PostfixUnaryExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPostfixUnaryExpression
-pub fn is_postfix_unary_expression(node: &Node) -> bool {
+pub fn is_postfix_unary_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::PostfixUnaryExpression)
@@ -1537,7 +1537,7 @@ impl YieldExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsYieldExpression
-pub fn is_yield_expression(node: &Node) -> bool {
+pub fn is_yield_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::YieldExpression))
 }
 impl ArrowFunctionData {
@@ -1568,7 +1568,7 @@ impl ArrowFunctionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsArrowFunction
-pub fn is_arrow_function(node: &Node) -> bool {
+pub fn is_arrow_function(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ArrowFunction))
 }
 impl FunctionExpressionData {
@@ -1608,7 +1608,7 @@ impl FunctionExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsFunctionExpression
-pub fn is_function_expression(node: &Node) -> bool {
+pub fn is_function_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::FunctionExpression))
 }
 impl AsExpressionData {
@@ -1624,7 +1624,7 @@ impl AsExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsAsExpression
-pub fn is_as_expression(node: &Node) -> bool {
+pub fn is_as_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::AsExpression))
 }
 impl SatisfiesExpressionData {
@@ -1640,7 +1640,7 @@ impl SatisfiesExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSatisfiesExpression
-pub fn is_satisfies_expression(node: &Node) -> bool {
+pub fn is_satisfies_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SatisfiesExpression))
 }
 impl ConditionalExpressionData {
@@ -1665,7 +1665,7 @@ impl ConditionalExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsConditionalExpression
-pub fn is_conditional_expression(node: &Node) -> bool {
+pub fn is_conditional_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ConditionalExpression))
 }
 impl PropertyAccessExpressionData {
@@ -1690,7 +1690,7 @@ impl PropertyAccessExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPropertyAccessExpression
-pub fn is_property_access_expression(node: &Node) -> bool {
+pub fn is_property_access_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::PropertyAccessExpression)
@@ -1712,7 +1712,7 @@ impl ElementAccessExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsElementAccessExpression
-pub fn is_element_access_expression(node: &Node) -> bool {
+pub fn is_element_access_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ElementAccessExpression)
@@ -1737,7 +1737,7 @@ impl CallExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsCallExpression
-pub fn is_call_expression(node: &Node) -> bool {
+pub fn is_call_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::CallExpression))
 }
 impl NewExpressionData {
@@ -1756,7 +1756,7 @@ impl NewExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNewExpression
-pub fn is_new_expression(node: &Node) -> bool {
+pub fn is_new_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NewExpression))
 }
 impl MetaPropertyData {
@@ -1775,7 +1775,7 @@ impl MetaPropertyData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsMetaProperty
-pub fn is_meta_property(node: &Node) -> bool {
+pub fn is_meta_property(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::MetaProperty))
 }
 impl NonNullExpressionData {
@@ -1788,7 +1788,7 @@ impl NonNullExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNonNullExpression
-pub fn is_non_null_expression(node: &Node) -> bool {
+pub fn is_non_null_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NonNullExpression))
 }
 impl SpreadElementData {
@@ -1801,7 +1801,7 @@ impl SpreadElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSpreadElement
-pub fn is_spread_element(node: &Node) -> bool {
+pub fn is_spread_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SpreadElement))
 }
 impl TemplateExpressionData {
@@ -1817,7 +1817,7 @@ impl TemplateExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateExpression
-pub fn is_template_expression(node: &Node) -> bool {
+pub fn is_template_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateExpression))
 }
 impl TemplateSpanData {
@@ -1833,7 +1833,7 @@ impl TemplateSpanData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateSpan
-pub fn is_template_span(node: &Node) -> bool {
+pub fn is_template_span(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateSpan))
 }
 impl TaggedTemplateExpressionData {
@@ -1855,7 +1855,7 @@ impl TaggedTemplateExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTaggedTemplateExpression
-pub fn is_tagged_template_expression(node: &Node) -> bool {
+pub fn is_tagged_template_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::TaggedTemplateExpression)
@@ -1871,7 +1871,7 @@ impl ParenthesizedExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsParenthesizedExpression
-pub fn is_parenthesized_expression(node: &Node) -> bool {
+pub fn is_parenthesized_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ParenthesizedExpression)
@@ -1887,7 +1887,7 @@ impl ArrayLiteralExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsArrayLiteralExpression
-pub fn is_array_literal_expression(node: &Node) -> bool {
+pub fn is_array_literal_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ArrayLiteralExpression)
@@ -1903,7 +1903,7 @@ impl ObjectLiteralExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsObjectLiteralExpression
-pub fn is_object_literal_expression(node: &Node) -> bool {
+pub fn is_object_literal_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ObjectLiteralExpression)
@@ -1919,7 +1919,7 @@ impl SpreadAssignmentData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSpreadAssignment
-pub fn is_spread_assignment(node: &Node) -> bool {
+pub fn is_spread_assignment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SpreadAssignment))
 }
 impl PropertyAssignmentData {
@@ -1950,7 +1950,7 @@ impl PropertyAssignmentData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPropertyAssignment
-pub fn is_property_assignment(node: &Node) -> bool {
+pub fn is_property_assignment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::PropertyAssignment))
 }
 impl ShorthandPropertyAssignmentData {
@@ -1984,7 +1984,7 @@ impl ShorthandPropertyAssignmentData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsShorthandPropertyAssignment
-pub fn is_shorthand_property_assignment(node: &Node) -> bool {
+pub fn is_shorthand_property_assignment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ShorthandPropertyAssignment)
@@ -2000,7 +2000,7 @@ impl DeleteExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsDeleteExpression
-pub fn is_delete_expression(node: &Node) -> bool {
+pub fn is_delete_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::DeleteExpression))
 }
 impl TypeOfExpressionData {
@@ -2013,7 +2013,7 @@ impl TypeOfExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeOfExpression
-pub fn is_type_of_expression(node: &Node) -> bool {
+pub fn is_type_of_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeOfExpression))
 }
 impl VoidExpressionData {
@@ -2026,7 +2026,7 @@ impl VoidExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsVoidExpression
-pub fn is_void_expression(node: &Node) -> bool {
+pub fn is_void_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::VoidExpression))
 }
 impl AwaitExpressionData {
@@ -2039,7 +2039,7 @@ impl AwaitExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsAwaitExpression
-pub fn is_await_expression(node: &Node) -> bool {
+pub fn is_await_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::AwaitExpression))
 }
 impl TypeAssertionData {
@@ -2055,14 +2055,14 @@ impl TypeAssertionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeAssertion
-pub fn is_type_assertion(node: &Node) -> bool {
+pub fn is_type_assertion(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::TypeAssertionExpression)
     )
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsKeywordTypeNode
-pub fn is_keyword_type_node(node: &Node) -> bool {
+pub fn is_keyword_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -2091,7 +2091,7 @@ impl UnionTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsUnionTypeNode
-pub fn is_union_type_node(node: &Node) -> bool {
+pub fn is_union_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::UnionType))
 }
 impl IntersectionTypeNodeData {
@@ -2104,7 +2104,7 @@ impl IntersectionTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsIntersectionTypeNode
-pub fn is_intersection_type_node(node: &Node) -> bool {
+pub fn is_intersection_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::IntersectionType))
 }
 impl ConditionalTypeNodeData {
@@ -2126,7 +2126,7 @@ impl ConditionalTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsConditionalTypeNode
-pub fn is_conditional_type_node(node: &Node) -> bool {
+pub fn is_conditional_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ConditionalType))
 }
 impl TypeOperatorNodeData {
@@ -2139,7 +2139,7 @@ impl TypeOperatorNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeOperatorNode
-pub fn is_type_operator_node(node: &Node) -> bool {
+pub fn is_type_operator_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeOperator))
 }
 impl InferTypeNodeData {
@@ -2152,7 +2152,7 @@ impl InferTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsInferTypeNode
-pub fn is_infer_type_node(node: &Node) -> bool {
+pub fn is_infer_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::InferType))
 }
 impl ArrayTypeNodeData {
@@ -2165,7 +2165,7 @@ impl ArrayTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsArrayTypeNode
-pub fn is_array_type_node(node: &Node) -> bool {
+pub fn is_array_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ArrayType))
 }
 impl IndexedAccessTypeNodeData {
@@ -2181,7 +2181,7 @@ impl IndexedAccessTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsIndexedAccessTypeNode
-pub fn is_indexed_access_type_node(node: &Node) -> bool {
+pub fn is_indexed_access_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::IndexedAccessType))
 }
 impl TypeReferenceNodeData {
@@ -2197,7 +2197,7 @@ impl TypeReferenceNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeReferenceNode
-pub fn is_type_reference_node(node: &Node) -> bool {
+pub fn is_type_reference_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeReference))
 }
 impl ExpressionWithTypeArgumentsData {
@@ -2213,7 +2213,7 @@ impl ExpressionWithTypeArgumentsData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExpressionWithTypeArguments
-pub fn is_expression_with_type_arguments(node: &Node) -> bool {
+pub fn is_expression_with_type_arguments(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ExpressionWithTypeArguments)
@@ -2229,11 +2229,11 @@ impl LiteralTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsLiteralTypeNode
-pub fn is_literal_type_node(node: &Node) -> bool {
+pub fn is_literal_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::LiteralType))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsThisTypeNode
-pub fn is_this_type_node(node: &Node) -> bool {
+pub fn is_this_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ThisType))
 }
 impl TypePredicateNodeData {
@@ -2252,7 +2252,7 @@ impl TypePredicateNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypePredicateNode
-pub fn is_type_predicate_node(node: &Node) -> bool {
+pub fn is_type_predicate_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypePredicate))
 }
 impl ImportAttributeData {
@@ -2274,7 +2274,7 @@ impl ImportAttributeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportAttribute
-pub fn is_import_attribute(node: &Node) -> bool {
+pub fn is_import_attribute(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportAttribute))
 }
 impl ImportAttributesData {
@@ -2287,7 +2287,7 @@ impl ImportAttributesData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportAttributes
-pub fn is_import_attributes(node: &Node) -> bool {
+pub fn is_import_attributes(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportAttributes))
 }
 impl TypeQueryNodeData {
@@ -2303,7 +2303,7 @@ impl TypeQueryNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeQueryNode
-pub fn is_type_query_node(node: &Node) -> bool {
+pub fn is_type_query_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeQuery))
 }
 impl MappedTypeNodeData {
@@ -2331,7 +2331,7 @@ impl MappedTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsMappedTypeNode
-pub fn is_mapped_type_node(node: &Node) -> bool {
+pub fn is_mapped_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::MappedType))
 }
 impl TypeLiteralNodeData {
@@ -2344,7 +2344,7 @@ impl TypeLiteralNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeLiteralNode
-pub fn is_type_literal_node(node: &Node) -> bool {
+pub fn is_type_literal_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeLiteral))
 }
 impl TupleTypeNodeData {
@@ -2357,7 +2357,7 @@ impl TupleTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTupleTypeNode
-pub fn is_tuple_type_node(node: &Node) -> bool {
+pub fn is_tuple_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TupleType))
 }
 impl NamedTupleMemberData {
@@ -2385,7 +2385,7 @@ impl NamedTupleMemberData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsNamedTupleMember
-pub fn is_named_tuple_member(node: &Node) -> bool {
+pub fn is_named_tuple_member(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::NamedTupleMember))
 }
 impl OptionalTypeNodeData {
@@ -2398,7 +2398,7 @@ impl OptionalTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsOptionalTypeNode
-pub fn is_optional_type_node(node: &Node) -> bool {
+pub fn is_optional_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::OptionalType))
 }
 impl RestTypeNodeData {
@@ -2411,7 +2411,7 @@ impl RestTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsRestTypeNode
-pub fn is_rest_type_node(node: &Node) -> bool {
+pub fn is_rest_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::RestType))
 }
 impl ParenthesizedTypeNodeData {
@@ -2424,7 +2424,7 @@ impl ParenthesizedTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsParenthesizedTypeNode
-pub fn is_parenthesized_type_node(node: &Node) -> bool {
+pub fn is_parenthesized_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ParenthesizedType))
 }
 impl FunctionTypeNodeData {
@@ -2443,7 +2443,7 @@ impl FunctionTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsFunctionTypeNode
-pub fn is_function_type_node(node: &Node) -> bool {
+pub fn is_function_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::FunctionType))
 }
 impl ConstructorTypeNodeData {
@@ -2465,19 +2465,19 @@ impl ConstructorTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsConstructorTypeNode
-pub fn is_constructor_type_node(node: &Node) -> bool {
+pub fn is_constructor_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ConstructorType))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateHead
-pub fn is_template_head(node: &Node) -> bool {
+pub fn is_template_head(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateHead))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateMiddle
-pub fn is_template_middle(node: &Node) -> bool {
+pub fn is_template_middle(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateMiddle))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateTail
-pub fn is_template_tail(node: &Node) -> bool {
+pub fn is_template_tail(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateTail))
 }
 impl TemplateLiteralTypeNodeData {
@@ -2493,7 +2493,7 @@ impl TemplateLiteralTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateLiteralTypeNode
-pub fn is_template_literal_type_node(node: &Node) -> bool {
+pub fn is_template_literal_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TemplateLiteralType))
 }
 impl TemplateLiteralTypeSpanData {
@@ -2509,7 +2509,7 @@ impl TemplateLiteralTypeSpanData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTemplateLiteralTypeSpan
-pub fn is_template_literal_type_span(node: &Node) -> bool {
+pub fn is_template_literal_type_span(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::TemplateLiteralTypeSpan)
@@ -2525,7 +2525,7 @@ impl SyntheticExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSyntheticExpression
-pub fn is_synthetic_expression(node: &Node) -> bool {
+pub fn is_synthetic_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SyntheticExpression))
 }
 impl PartiallyEmittedExpressionData {
@@ -2538,7 +2538,7 @@ impl PartiallyEmittedExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsPartiallyEmittedExpression
-pub fn is_partially_emitted_expression(node: &Node) -> bool {
+pub fn is_partially_emitted_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::PartiallyEmittedExpression)
@@ -2560,7 +2560,7 @@ impl JsxElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxElement
-pub fn is_jsx_element(node: &Node) -> bool {
+pub fn is_jsx_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxElement))
 }
 impl JsxAttributesData {
@@ -2573,7 +2573,7 @@ impl JsxAttributesData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxAttributes
-pub fn is_jsx_attributes(node: &Node) -> bool {
+pub fn is_jsx_attributes(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxAttributes))
 }
 impl JsxNamespacedNameData {
@@ -2595,7 +2595,7 @@ impl JsxNamespacedNameData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxNamespacedName
-pub fn is_jsx_namespaced_name(node: &Node) -> bool {
+pub fn is_jsx_namespaced_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxNamespacedName))
 }
 impl JsxOpeningElementData {
@@ -2614,7 +2614,7 @@ impl JsxOpeningElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxOpeningElement
-pub fn is_jsx_opening_element(node: &Node) -> bool {
+pub fn is_jsx_opening_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxOpeningElement))
 }
 impl JsxSelfClosingElementData {
@@ -2633,7 +2633,7 @@ impl JsxSelfClosingElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxSelfClosingElement
-pub fn is_jsx_self_closing_element(node: &Node) -> bool {
+pub fn is_jsx_self_closing_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxSelfClosingElement))
 }
 impl JsxFragmentData {
@@ -2652,15 +2652,15 @@ impl JsxFragmentData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxFragment
-pub fn is_jsx_fragment(node: &Node) -> bool {
+pub fn is_jsx_fragment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxFragment))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxOpeningFragment
-pub fn is_jsx_opening_fragment(node: &Node) -> bool {
+pub fn is_jsx_opening_fragment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxOpeningFragment))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxClosingFragment
-pub fn is_jsx_closing_fragment(node: &Node) -> bool {
+pub fn is_jsx_closing_fragment(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxClosingFragment))
 }
 impl JsxAttributeData {
@@ -2682,7 +2682,7 @@ impl JsxAttributeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxAttribute
-pub fn is_jsx_attribute(node: &Node) -> bool {
+pub fn is_jsx_attribute(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxAttribute))
 }
 impl JsxSpreadAttributeData {
@@ -2695,7 +2695,7 @@ impl JsxSpreadAttributeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxSpreadAttribute
-pub fn is_jsx_spread_attribute(node: &Node) -> bool {
+pub fn is_jsx_spread_attribute(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxSpreadAttribute))
 }
 impl JsxClosingElementData {
@@ -2708,7 +2708,7 @@ impl JsxClosingElementData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxClosingElement
-pub fn is_jsx_closing_element(node: &Node) -> bool {
+pub fn is_jsx_closing_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxClosingElement))
 }
 impl JsxExpressionData {
@@ -2724,11 +2724,11 @@ impl JsxExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxExpression
-pub fn is_jsx_expression(node: &Node) -> bool {
+pub fn is_jsx_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxExpression))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJsxText
-pub fn is_jsx_text(node: &Node) -> bool {
+pub fn is_jsx_text(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JsxText))
 }
 impl SyntaxListData {
@@ -2739,7 +2739,7 @@ impl SyntaxListData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSyntaxList
-pub fn is_syntax_list(node: &Node) -> bool {
+pub fn is_syntax_list(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SyntaxList))
 }
 impl JSDocData {
@@ -2755,7 +2755,7 @@ impl JSDocData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDoc
-pub fn is_js_doc(node: &Node) -> bool {
+pub fn is_js_doc(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDoc))
 }
 impl JSDocTypeExpressionData {
@@ -2768,7 +2768,7 @@ impl JSDocTypeExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocTypeExpression
-pub fn is_js_doc_type_expression(node: &Node) -> bool {
+pub fn is_js_doc_type_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocTypeExpression))
 }
 impl JSDocNonNullableTypeData {
@@ -2781,7 +2781,7 @@ impl JSDocNonNullableTypeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocNonNullableType
-pub fn is_js_doc_non_nullable_type(node: &Node) -> bool {
+pub fn is_js_doc_non_nullable_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocNonNullableType))
 }
 impl JSDocNullableTypeData {
@@ -2794,11 +2794,11 @@ impl JSDocNullableTypeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocNullableType
-pub fn is_js_doc_nullable_type(node: &Node) -> bool {
+pub fn is_js_doc_nullable_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocNullableType))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocAllType
-pub fn is_js_doc_all_type(node: &Node) -> bool {
+pub fn is_js_doc_all_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocAllType))
 }
 impl JSDocVariadicTypeData {
@@ -2811,7 +2811,7 @@ impl JSDocVariadicTypeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocVariadicType
-pub fn is_js_doc_variadic_type(node: &Node) -> bool {
+pub fn is_js_doc_variadic_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocVariadicType))
 }
 impl JSDocOptionalTypeData {
@@ -2824,7 +2824,7 @@ impl JSDocOptionalTypeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocOptionalType
-pub fn is_js_doc_optional_type(node: &Node) -> bool {
+pub fn is_js_doc_optional_type(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocOptionalType))
 }
 impl JSDocTypeTagData {
@@ -2843,7 +2843,7 @@ impl JSDocTypeTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocTypeTag
-pub fn is_js_doc_type_tag(node: &Node) -> bool {
+pub fn is_js_doc_type_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocTypeTag))
 }
 impl JSDocUnknownTagData {
@@ -2859,7 +2859,7 @@ impl JSDocUnknownTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocUnknownTag
-pub fn is_js_doc_unknown_tag(node: &Node) -> bool {
+pub fn is_js_doc_unknown_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocUnknownTag))
 }
 impl JSDocTemplateTagData {
@@ -2881,7 +2881,7 @@ impl JSDocTemplateTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocTemplateTag
-pub fn is_js_doc_template_tag(node: &Node) -> bool {
+pub fn is_js_doc_template_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocTemplateTag))
 }
 impl JSDocReturnTagData {
@@ -2900,7 +2900,7 @@ impl JSDocReturnTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocReturnTag
-pub fn is_js_doc_return_tag(node: &Node) -> bool {
+pub fn is_js_doc_return_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocReturnTag))
 }
 impl JSDocPublicTagData {
@@ -2916,7 +2916,7 @@ impl JSDocPublicTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocPublicTag
-pub fn is_js_doc_public_tag(node: &Node) -> bool {
+pub fn is_js_doc_public_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocPublicTag))
 }
 impl JSDocPrivateTagData {
@@ -2932,7 +2932,7 @@ impl JSDocPrivateTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocPrivateTag
-pub fn is_js_doc_private_tag(node: &Node) -> bool {
+pub fn is_js_doc_private_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocPrivateTag))
 }
 impl JSDocProtectedTagData {
@@ -2948,7 +2948,7 @@ impl JSDocProtectedTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocProtectedTag
-pub fn is_js_doc_protected_tag(node: &Node) -> bool {
+pub fn is_js_doc_protected_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocProtectedTag))
 }
 impl JSDocReadonlyTagData {
@@ -2964,7 +2964,7 @@ impl JSDocReadonlyTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocReadonlyTag
-pub fn is_js_doc_readonly_tag(node: &Node) -> bool {
+pub fn is_js_doc_readonly_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocReadonlyTag))
 }
 impl JSDocOverrideTagData {
@@ -2980,7 +2980,7 @@ impl JSDocOverrideTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocOverrideTag
-pub fn is_js_doc_override_tag(node: &Node) -> bool {
+pub fn is_js_doc_override_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocOverrideTag))
 }
 impl JSDocDeprecatedTagData {
@@ -2996,7 +2996,7 @@ impl JSDocDeprecatedTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocDeprecatedTag
-pub fn is_js_doc_deprecated_tag(node: &Node) -> bool {
+pub fn is_js_doc_deprecated_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocDeprecatedTag))
 }
 impl JSDocSeeTagData {
@@ -3015,7 +3015,7 @@ impl JSDocSeeTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocSeeTag
-pub fn is_js_doc_see_tag(node: &Node) -> bool {
+pub fn is_js_doc_see_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocSeeTag))
 }
 impl JSDocImplementsTagData {
@@ -3034,7 +3034,7 @@ impl JSDocImplementsTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocImplementsTag
-pub fn is_js_doc_implements_tag(node: &Node) -> bool {
+pub fn is_js_doc_implements_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocImplementsTag))
 }
 impl JSDocAugmentsTagData {
@@ -3053,7 +3053,7 @@ impl JSDocAugmentsTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocAugmentsTag
-pub fn is_js_doc_augments_tag(node: &Node) -> bool {
+pub fn is_js_doc_augments_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocAugmentsTag))
 }
 impl JSDocSatisfiesTagData {
@@ -3072,7 +3072,7 @@ impl JSDocSatisfiesTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocSatisfiesTag
-pub fn is_js_doc_satisfies_tag(node: &Node) -> bool {
+pub fn is_js_doc_satisfies_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocSatisfiesTag))
 }
 impl JSDocThrowsTagData {
@@ -3091,7 +3091,7 @@ impl JSDocThrowsTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocThrowsTag
-pub fn is_js_doc_throws_tag(node: &Node) -> bool {
+pub fn is_js_doc_throws_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocThrowsTag))
 }
 impl JSDocThisTagData {
@@ -3110,7 +3110,7 @@ impl JSDocThisTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocThisTag
-pub fn is_js_doc_this_tag(node: &Node) -> bool {
+pub fn is_js_doc_this_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocThisTag))
 }
 impl JSDocImportTagData {
@@ -3135,7 +3135,7 @@ impl JSDocImportTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocImportTag
-pub fn is_js_doc_import_tag(node: &Node) -> bool {
+pub fn is_js_doc_import_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocImportTag))
 }
 impl JSDocCallbackTagData {
@@ -3163,7 +3163,7 @@ impl JSDocCallbackTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocCallbackTag
-pub fn is_js_doc_callback_tag(node: &Node) -> bool {
+pub fn is_js_doc_callback_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocCallbackTag))
 }
 impl JSDocOverloadTagData {
@@ -3182,7 +3182,7 @@ impl JSDocOverloadTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocOverloadTag
-pub fn is_js_doc_overload_tag(node: &Node) -> bool {
+pub fn is_js_doc_overload_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocOverloadTag))
 }
 impl JSDocTypedefTagData {
@@ -3210,7 +3210,7 @@ impl JSDocTypedefTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocTypedefTag
-pub fn is_js_doc_typedef_tag(node: &Node) -> bool {
+pub fn is_js_doc_typedef_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocTypedefTag))
 }
 impl JSDocSignatureData {
@@ -3229,7 +3229,7 @@ impl JSDocSignatureData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocSignature
-pub fn is_js_doc_signature(node: &Node) -> bool {
+pub fn is_js_doc_signature(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocSignature))
 }
 impl JSDocNameReferenceData {
@@ -3248,11 +3248,11 @@ impl JSDocNameReferenceData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocNameReference
-pub fn is_js_doc_name_reference(node: &Node) -> bool {
+pub fn is_js_doc_name_reference(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocNameReference))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSourceFile
-pub fn is_source_file(node: &Node) -> bool {
+pub fn is_source_file(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::SourceFile))
 }
 impl ModuleDeclarationData {
@@ -3280,7 +3280,7 @@ impl ModuleDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsModuleDeclaration
-pub fn is_module_declaration(node: &Node) -> bool {
+pub fn is_module_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ModuleDeclaration))
 }
 impl ImportEqualsDeclarationData {
@@ -3305,7 +3305,7 @@ impl ImportEqualsDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportEqualsDeclaration
-pub fn is_import_equals_declaration(node: &Node) -> bool {
+pub fn is_import_equals_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::ImportEqualsDeclaration)
@@ -3330,7 +3330,7 @@ impl ExportDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsExportDeclaration
-pub fn is_export_declaration(node: &Node) -> bool {
+pub fn is_export_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ExportDeclaration))
 }
 impl ImportTypeNodeData {
@@ -3352,7 +3352,7 @@ impl ImportTypeNodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportTypeNode
-pub fn is_import_type_node(node: &Node) -> bool {
+pub fn is_import_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportType))
 }
 impl ImportClauseData {
@@ -3374,7 +3374,7 @@ impl ImportClauseData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportClause
-pub fn is_import_clause(node: &Node) -> bool {
+pub fn is_import_clause(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportClause))
 }
 impl ImportSpecifierData {
@@ -3396,11 +3396,11 @@ impl ImportSpecifierData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsImportSpecifier
-pub fn is_import_specifier(node: &Node) -> bool {
+pub fn is_import_specifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::ImportSpecifier))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocText
-pub fn is_js_doc_text(node: &Node) -> bool {
+pub fn is_js_doc_text(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocText))
 }
 impl JSDocLinkData {
@@ -3419,7 +3419,7 @@ impl JSDocLinkData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocLink
-pub fn is_js_doc_link(node: &Node) -> bool {
+pub fn is_js_doc_link(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocLink))
 }
 impl JSDocLinkPlainData {
@@ -3438,7 +3438,7 @@ impl JSDocLinkPlainData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocLinkPlain
-pub fn is_js_doc_link_plain(node: &Node) -> bool {
+pub fn is_js_doc_link_plain(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocLinkPlain))
 }
 impl JSDocLinkCodeData {
@@ -3457,7 +3457,7 @@ impl JSDocLinkCodeData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocLinkCode
-pub fn is_js_doc_link_code(node: &Node) -> bool {
+pub fn is_js_doc_link_code(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocLinkCode))
 }
 impl TypeParameterDeclarationData {
@@ -3488,7 +3488,7 @@ impl TypeParameterDeclarationData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsTypeParameterDeclaration
-pub fn is_type_parameter_declaration(node: &Node) -> bool {
+pub fn is_type_parameter_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::TypeParameter))
 }
 impl SyntheticReferenceExpressionData {
@@ -3504,7 +3504,7 @@ impl SyntheticReferenceExpressionData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsSyntheticReferenceExpression
-pub fn is_synthetic_reference_expression(node: &Node) -> bool {
+pub fn is_synthetic_reference_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(SyntaxKind::SyntheticReferenceExpression)
@@ -3518,7 +3518,7 @@ impl JSDocTypeLiteralData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocTypeLiteral
-pub fn is_js_doc_type_literal(node: &Node) -> bool {
+pub fn is_js_doc_type_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocTypeLiteral))
 }
 impl JSDocParameterOrPropertyTagData {
@@ -3555,184 +3555,2172 @@ impl JSDocParameterOrPropertyTagData {
     }
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocParameterTag
-pub fn is_js_doc_parameter_tag(node: &Node) -> bool {
+pub fn is_js_doc_parameter_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocParameterTag))
 }
 // upstream: tsc/internal/ast/ast_generated.go:IsJSDocPropertyTag
-pub fn is_js_doc_property_tag(node: &Node) -> bool {
+pub fn is_js_doc_property_tag(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(SyntaxKind::JSDocPropertyTag))
 }
+// upstream: tsc/internal/ast/ast_generated.go:Node.ForEachChild
+pub fn for_each_child_generated(
+    node: &(impl NodeAccess + ?Sized),
+    visitor: &mut impl ChildVisitor,
+) -> ControlFlow<()> {
+    match node.kind().known() {
+        Some(SyntaxKind::QualifiedName) => node
+            .data_source()
+            .as_qualified_name()
+            .expect("QualifiedName kind requires QualifiedName payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ComputedPropertyName) => node
+            .data_source()
+            .as_computed_property_name()
+            .expect("ComputedPropertyName kind requires ComputedPropertyName payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::Decorator) => node
+            .data_source()
+            .as_decorator()
+            .expect("Decorator kind requires Decorator payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::IfStatement) => node
+            .data_source()
+            .as_if_statement()
+            .expect("IfStatement kind requires IfStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::DoStatement) => node
+            .data_source()
+            .as_do_statement()
+            .expect("DoStatement kind requires DoStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::WhileStatement) => node
+            .data_source()
+            .as_while_statement()
+            .expect("WhileStatement kind requires WhileStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ForStatement) => node
+            .data_source()
+            .as_for_statement()
+            .expect("ForStatement kind requires ForStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => node
+            .data_source()
+            .as_for_in_or_of_statement()
+            .expect("ForInOrOfStatement kind requires ForInOrOfStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::BreakStatement) => node
+            .data_source()
+            .as_break_statement()
+            .expect("BreakStatement kind requires BreakStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ContinueStatement) => node
+            .data_source()
+            .as_continue_statement()
+            .expect("ContinueStatement kind requires ContinueStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ReturnStatement) => node
+            .data_source()
+            .as_return_statement()
+            .expect("ReturnStatement kind requires ReturnStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::WithStatement) => node
+            .data_source()
+            .as_with_statement()
+            .expect("WithStatement kind requires WithStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SwitchStatement) => node
+            .data_source()
+            .as_switch_statement()
+            .expect("SwitchStatement kind requires SwitchStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::CaseBlock) => node
+            .data_source()
+            .as_case_block()
+            .expect("CaseBlock kind requires CaseBlock payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => node
+            .data_source()
+            .as_case_or_default_clause()
+            .expect("CaseOrDefaultClause kind requires CaseOrDefaultClause payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ThrowStatement) => node
+            .data_source()
+            .as_throw_statement()
+            .expect("ThrowStatement kind requires ThrowStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TryStatement) => node
+            .data_source()
+            .as_try_statement()
+            .expect("TryStatement kind requires TryStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::CatchClause) => node
+            .data_source()
+            .as_catch_clause()
+            .expect("CatchClause kind requires CatchClause payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::LabeledStatement) => node
+            .data_source()
+            .as_labeled_statement()
+            .expect("LabeledStatement kind requires LabeledStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExpressionStatement) => node
+            .data_source()
+            .as_expression_statement()
+            .expect("ExpressionStatement kind requires ExpressionStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::Block) => node
+            .data_source()
+            .as_block()
+            .expect("Block kind requires Block payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::VariableStatement) => node
+            .data_source()
+            .as_variable_statement()
+            .expect("VariableStatement kind requires VariableStatement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::VariableDeclaration) => node
+            .data_source()
+            .as_variable_declaration()
+            .expect("VariableDeclaration kind requires VariableDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::VariableDeclarationList) => node
+            .data_source()
+            .as_variable_declaration_list()
+            .expect("VariableDeclarationList kind requires VariableDeclarationList payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => node
+            .data_source()
+            .as_binding_pattern()
+            .expect("BindingPattern kind requires BindingPattern payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::Parameter) => node
+            .data_source()
+            .as_parameter_declaration()
+            .expect("ParameterDeclaration kind requires ParameterDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::BindingElement) => node
+            .data_source()
+            .as_binding_element()
+            .expect("BindingElement kind requires BindingElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::MissingDeclaration) => node
+            .data_source()
+            .as_missing_declaration()
+            .expect("MissingDeclaration kind requires MissingDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::FunctionDeclaration) => node
+            .data_source()
+            .as_function_declaration()
+            .expect("FunctionDeclaration kind requires FunctionDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ClassDeclaration) => node
+            .data_source()
+            .as_class_declaration()
+            .expect("ClassDeclaration kind requires ClassDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ClassExpression) => node
+            .data_source()
+            .as_class_expression()
+            .expect("ClassExpression kind requires ClassExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::HeritageClause) => node
+            .data_source()
+            .as_heritage_clause()
+            .expect("HeritageClause kind requires HeritageClause payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::InterfaceDeclaration) => node
+            .data_source()
+            .as_interface_declaration()
+            .expect("InterfaceDeclaration kind requires InterfaceDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => node
+            .data_source()
+            .as_type_alias_declaration()
+            .expect("TypeAliasDeclaration kind requires TypeAliasDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::EnumMember) => node
+            .data_source()
+            .as_enum_member()
+            .expect("EnumMember kind requires EnumMember payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::EnumDeclaration) => node
+            .data_source()
+            .as_enum_declaration()
+            .expect("EnumDeclaration kind requires EnumDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ModuleBlock) => node
+            .data_source()
+            .as_module_block()
+            .expect("ModuleBlock kind requires ModuleBlock payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => node
+            .data_source()
+            .as_import_declaration()
+            .expect("ImportDeclaration kind requires ImportDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExternalModuleReference) => node
+            .data_source()
+            .as_external_module_reference()
+            .expect("ExternalModuleReference kind requires ExternalModuleReference payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamespaceImport) => node
+            .data_source()
+            .as_namespace_import()
+            .expect("NamespaceImport kind requires NamespaceImport payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamedImports) => node
+            .data_source()
+            .as_named_imports()
+            .expect("NamedImports kind requires NamedImports payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExportAssignment) => node
+            .data_source()
+            .as_export_assignment()
+            .expect("ExportAssignment kind requires ExportAssignment payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamespaceExportDeclaration) => node
+            .data_source()
+            .as_namespace_export_declaration()
+            .expect("NamespaceExportDeclaration kind requires NamespaceExportDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamespaceExport) => node
+            .data_source()
+            .as_namespace_export()
+            .expect("NamespaceExport kind requires NamespaceExport payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamedExports) => node
+            .data_source()
+            .as_named_exports()
+            .expect("NamedExports kind requires NamedExports payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExportSpecifier) => node
+            .data_source()
+            .as_export_specifier()
+            .expect("ExportSpecifier kind requires ExportSpecifier payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::CallSignature) => node
+            .data_source()
+            .as_call_signature_declaration()
+            .expect("CallSignatureDeclaration kind requires CallSignatureDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ConstructSignature) => node
+            .data_source()
+            .as_construct_signature_declaration()
+            .expect(
+                "ConstructSignatureDeclaration kind requires ConstructSignatureDeclaration payload",
+            )
+            .for_each_child(visitor),
+        Some(SyntaxKind::Constructor) => node
+            .data_source()
+            .as_constructor_declaration()
+            .expect("ConstructorDeclaration kind requires ConstructorDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::GetAccessor) => node
+            .data_source()
+            .as_get_accessor_declaration()
+            .expect("GetAccessorDeclaration kind requires GetAccessorDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SetAccessor) => node
+            .data_source()
+            .as_set_accessor_declaration()
+            .expect("SetAccessorDeclaration kind requires SetAccessorDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::IndexSignature) => node
+            .data_source()
+            .as_index_signature_declaration()
+            .expect("IndexSignatureDeclaration kind requires IndexSignatureDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::MethodSignature) => node
+            .data_source()
+            .as_method_signature_declaration()
+            .expect("MethodSignatureDeclaration kind requires MethodSignatureDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::MethodDeclaration) => node
+            .data_source()
+            .as_method_declaration()
+            .expect("MethodDeclaration kind requires MethodDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PropertySignature) => node
+            .data_source()
+            .as_property_signature_declaration()
+            .expect(
+                "PropertySignatureDeclaration kind requires PropertySignatureDeclaration payload",
+            )
+            .for_each_child(visitor),
+        Some(SyntaxKind::PropertyDeclaration) => node
+            .data_source()
+            .as_property_declaration()
+            .expect("PropertyDeclaration kind requires PropertyDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ClassStaticBlockDeclaration) => node
+            .data_source()
+            .as_class_static_block_declaration()
+            .expect("ClassStaticBlockDeclaration kind requires ClassStaticBlockDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::BinaryExpression) => node
+            .data_source()
+            .as_binary_expression()
+            .expect("BinaryExpression kind requires BinaryExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PrefixUnaryExpression) => node
+            .data_source()
+            .as_prefix_unary_expression()
+            .expect("PrefixUnaryExpression kind requires PrefixUnaryExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PostfixUnaryExpression) => node
+            .data_source()
+            .as_postfix_unary_expression()
+            .expect("PostfixUnaryExpression kind requires PostfixUnaryExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::YieldExpression) => node
+            .data_source()
+            .as_yield_expression()
+            .expect("YieldExpression kind requires YieldExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ArrowFunction) => node
+            .data_source()
+            .as_arrow_function()
+            .expect("ArrowFunction kind requires ArrowFunction payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::FunctionExpression) => node
+            .data_source()
+            .as_function_expression()
+            .expect("FunctionExpression kind requires FunctionExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::AsExpression) => node
+            .data_source()
+            .as_as_expression()
+            .expect("AsExpression kind requires AsExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SatisfiesExpression) => node
+            .data_source()
+            .as_satisfies_expression()
+            .expect("SatisfiesExpression kind requires SatisfiesExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ConditionalExpression) => node
+            .data_source()
+            .as_conditional_expression()
+            .expect("ConditionalExpression kind requires ConditionalExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PropertyAccessExpression) => node
+            .data_source()
+            .as_property_access_expression()
+            .expect("PropertyAccessExpression kind requires PropertyAccessExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ElementAccessExpression) => node
+            .data_source()
+            .as_element_access_expression()
+            .expect("ElementAccessExpression kind requires ElementAccessExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::CallExpression) => node
+            .data_source()
+            .as_call_expression()
+            .expect("CallExpression kind requires CallExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NewExpression) => node
+            .data_source()
+            .as_new_expression()
+            .expect("NewExpression kind requires NewExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::MetaProperty) => node
+            .data_source()
+            .as_meta_property()
+            .expect("MetaProperty kind requires MetaProperty payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NonNullExpression) => node
+            .data_source()
+            .as_non_null_expression()
+            .expect("NonNullExpression kind requires NonNullExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SpreadElement) => node
+            .data_source()
+            .as_spread_element()
+            .expect("SpreadElement kind requires SpreadElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TemplateExpression) => node
+            .data_source()
+            .as_template_expression()
+            .expect("TemplateExpression kind requires TemplateExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TemplateSpan) => node
+            .data_source()
+            .as_template_span()
+            .expect("TemplateSpan kind requires TemplateSpan payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TaggedTemplateExpression) => node
+            .data_source()
+            .as_tagged_template_expression()
+            .expect("TaggedTemplateExpression kind requires TaggedTemplateExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ParenthesizedExpression) => node
+            .data_source()
+            .as_parenthesized_expression()
+            .expect("ParenthesizedExpression kind requires ParenthesizedExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ArrayLiteralExpression) => node
+            .data_source()
+            .as_array_literal_expression()
+            .expect("ArrayLiteralExpression kind requires ArrayLiteralExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ObjectLiteralExpression) => node
+            .data_source()
+            .as_object_literal_expression()
+            .expect("ObjectLiteralExpression kind requires ObjectLiteralExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SpreadAssignment) => node
+            .data_source()
+            .as_spread_assignment()
+            .expect("SpreadAssignment kind requires SpreadAssignment payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PropertyAssignment) => node
+            .data_source()
+            .as_property_assignment()
+            .expect("PropertyAssignment kind requires PropertyAssignment payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ShorthandPropertyAssignment) => node
+            .data_source()
+            .as_shorthand_property_assignment()
+            .expect("ShorthandPropertyAssignment kind requires ShorthandPropertyAssignment payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::DeleteExpression) => node
+            .data_source()
+            .as_delete_expression()
+            .expect("DeleteExpression kind requires DeleteExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeOfExpression) => node
+            .data_source()
+            .as_type_of_expression()
+            .expect("TypeOfExpression kind requires TypeOfExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::VoidExpression) => node
+            .data_source()
+            .as_void_expression()
+            .expect("VoidExpression kind requires VoidExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::AwaitExpression) => node
+            .data_source()
+            .as_await_expression()
+            .expect("AwaitExpression kind requires AwaitExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeAssertionExpression) => node
+            .data_source()
+            .as_type_assertion()
+            .expect("TypeAssertion kind requires TypeAssertion payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::UnionType) => node
+            .data_source()
+            .as_union_type_node()
+            .expect("UnionTypeNode kind requires UnionTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::IntersectionType) => node
+            .data_source()
+            .as_intersection_type_node()
+            .expect("IntersectionTypeNode kind requires IntersectionTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ConditionalType) => node
+            .data_source()
+            .as_conditional_type_node()
+            .expect("ConditionalTypeNode kind requires ConditionalTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeOperator) => node
+            .data_source()
+            .as_type_operator_node()
+            .expect("TypeOperatorNode kind requires TypeOperatorNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::InferType) => node
+            .data_source()
+            .as_infer_type_node()
+            .expect("InferTypeNode kind requires InferTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ArrayType) => node
+            .data_source()
+            .as_array_type_node()
+            .expect("ArrayTypeNode kind requires ArrayTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::IndexedAccessType) => node
+            .data_source()
+            .as_indexed_access_type_node()
+            .expect("IndexedAccessTypeNode kind requires IndexedAccessTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeReference) => node
+            .data_source()
+            .as_type_reference_node()
+            .expect("TypeReferenceNode kind requires TypeReferenceNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExpressionWithTypeArguments) => node
+            .data_source()
+            .as_expression_with_type_arguments()
+            .expect("ExpressionWithTypeArguments kind requires ExpressionWithTypeArguments payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::LiteralType) => node
+            .data_source()
+            .as_literal_type_node()
+            .expect("LiteralTypeNode kind requires LiteralTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypePredicate) => node
+            .data_source()
+            .as_type_predicate_node()
+            .expect("TypePredicateNode kind requires TypePredicateNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportAttribute) => node
+            .data_source()
+            .as_import_attribute()
+            .expect("ImportAttribute kind requires ImportAttribute payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportAttributes) => node
+            .data_source()
+            .as_import_attributes()
+            .expect("ImportAttributes kind requires ImportAttributes payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeQuery) => node
+            .data_source()
+            .as_type_query_node()
+            .expect("TypeQueryNode kind requires TypeQueryNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::MappedType) => node
+            .data_source()
+            .as_mapped_type_node()
+            .expect("MappedTypeNode kind requires MappedTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeLiteral) => node
+            .data_source()
+            .as_type_literal_node()
+            .expect("TypeLiteralNode kind requires TypeLiteralNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TupleType) => node
+            .data_source()
+            .as_tuple_type_node()
+            .expect("TupleTypeNode kind requires TupleTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::NamedTupleMember) => node
+            .data_source()
+            .as_named_tuple_member()
+            .expect("NamedTupleMember kind requires NamedTupleMember payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::OptionalType) => node
+            .data_source()
+            .as_optional_type_node()
+            .expect("OptionalTypeNode kind requires OptionalTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::RestType) => node
+            .data_source()
+            .as_rest_type_node()
+            .expect("RestTypeNode kind requires RestTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ParenthesizedType) => node
+            .data_source()
+            .as_parenthesized_type_node()
+            .expect("ParenthesizedTypeNode kind requires ParenthesizedTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::FunctionType) => node
+            .data_source()
+            .as_function_type_node()
+            .expect("FunctionTypeNode kind requires FunctionTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ConstructorType) => node
+            .data_source()
+            .as_constructor_type_node()
+            .expect("ConstructorTypeNode kind requires ConstructorTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TemplateLiteralType) => node
+            .data_source()
+            .as_template_literal_type_node()
+            .expect("TemplateLiteralTypeNode kind requires TemplateLiteralTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TemplateLiteralTypeSpan) => node
+            .data_source()
+            .as_template_literal_type_span()
+            .expect("TemplateLiteralTypeSpan kind requires TemplateLiteralTypeSpan payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SyntheticExpression) => node
+            .data_source()
+            .as_synthetic_expression()
+            .expect("SyntheticExpression kind requires SyntheticExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::PartiallyEmittedExpression) => node
+            .data_source()
+            .as_partially_emitted_expression()
+            .expect("PartiallyEmittedExpression kind requires PartiallyEmittedExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxElement) => node
+            .data_source()
+            .as_jsx_element()
+            .expect("JsxElement kind requires JsxElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxAttributes) => node
+            .data_source()
+            .as_jsx_attributes()
+            .expect("JsxAttributes kind requires JsxAttributes payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxNamespacedName) => node
+            .data_source()
+            .as_jsx_namespaced_name()
+            .expect("JsxNamespacedName kind requires JsxNamespacedName payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxOpeningElement) => node
+            .data_source()
+            .as_jsx_opening_element()
+            .expect("JsxOpeningElement kind requires JsxOpeningElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxSelfClosingElement) => node
+            .data_source()
+            .as_jsx_self_closing_element()
+            .expect("JsxSelfClosingElement kind requires JsxSelfClosingElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxFragment) => node
+            .data_source()
+            .as_jsx_fragment()
+            .expect("JsxFragment kind requires JsxFragment payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxAttribute) => node
+            .data_source()
+            .as_jsx_attribute()
+            .expect("JsxAttribute kind requires JsxAttribute payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxSpreadAttribute) => node
+            .data_source()
+            .as_jsx_spread_attribute()
+            .expect("JsxSpreadAttribute kind requires JsxSpreadAttribute payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxClosingElement) => node
+            .data_source()
+            .as_jsx_closing_element()
+            .expect("JsxClosingElement kind requires JsxClosingElement payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JsxExpression) => node
+            .data_source()
+            .as_jsx_expression()
+            .expect("JsxExpression kind requires JsxExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SyntaxList) => node
+            .data_source()
+            .as_syntax_list()
+            .expect("SyntaxList kind requires SyntaxList payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDoc) => node
+            .data_source()
+            .as_js_doc()
+            .expect("JSDoc kind requires JSDoc payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocTypeExpression) => node
+            .data_source()
+            .as_js_doc_type_expression()
+            .expect("JSDocTypeExpression kind requires JSDocTypeExpression payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocNonNullableType) => node
+            .data_source()
+            .as_js_doc_non_nullable_type()
+            .expect("JSDocNonNullableType kind requires JSDocNonNullableType payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocNullableType) => node
+            .data_source()
+            .as_js_doc_nullable_type()
+            .expect("JSDocNullableType kind requires JSDocNullableType payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocVariadicType) => node
+            .data_source()
+            .as_js_doc_variadic_type()
+            .expect("JSDocVariadicType kind requires JSDocVariadicType payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocOptionalType) => node
+            .data_source()
+            .as_js_doc_optional_type()
+            .expect("JSDocOptionalType kind requires JSDocOptionalType payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocTypeTag) => node
+            .data_source()
+            .as_js_doc_type_tag()
+            .expect("JSDocTypeTag kind requires JSDocTypeTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocUnknownTag) => node
+            .data_source()
+            .as_js_doc_unknown_tag()
+            .expect("JSDocUnknownTag kind requires JSDocUnknownTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocTemplateTag) => node
+            .data_source()
+            .as_js_doc_template_tag()
+            .expect("JSDocTemplateTag kind requires JSDocTemplateTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocReturnTag) => node
+            .data_source()
+            .as_js_doc_return_tag()
+            .expect("JSDocReturnTag kind requires JSDocReturnTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocPublicTag) => node
+            .data_source()
+            .as_js_doc_public_tag()
+            .expect("JSDocPublicTag kind requires JSDocPublicTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocPrivateTag) => node
+            .data_source()
+            .as_js_doc_private_tag()
+            .expect("JSDocPrivateTag kind requires JSDocPrivateTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocProtectedTag) => node
+            .data_source()
+            .as_js_doc_protected_tag()
+            .expect("JSDocProtectedTag kind requires JSDocProtectedTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocReadonlyTag) => node
+            .data_source()
+            .as_js_doc_readonly_tag()
+            .expect("JSDocReadonlyTag kind requires JSDocReadonlyTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocOverrideTag) => node
+            .data_source()
+            .as_js_doc_override_tag()
+            .expect("JSDocOverrideTag kind requires JSDocOverrideTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocDeprecatedTag) => node
+            .data_source()
+            .as_js_doc_deprecated_tag()
+            .expect("JSDocDeprecatedTag kind requires JSDocDeprecatedTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocSeeTag) => node
+            .data_source()
+            .as_js_doc_see_tag()
+            .expect("JSDocSeeTag kind requires JSDocSeeTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocImplementsTag) => node
+            .data_source()
+            .as_js_doc_implements_tag()
+            .expect("JSDocImplementsTag kind requires JSDocImplementsTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocAugmentsTag) => node
+            .data_source()
+            .as_js_doc_augments_tag()
+            .expect("JSDocAugmentsTag kind requires JSDocAugmentsTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocSatisfiesTag) => node
+            .data_source()
+            .as_js_doc_satisfies_tag()
+            .expect("JSDocSatisfiesTag kind requires JSDocSatisfiesTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocThrowsTag) => node
+            .data_source()
+            .as_js_doc_throws_tag()
+            .expect("JSDocThrowsTag kind requires JSDocThrowsTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocThisTag) => node
+            .data_source()
+            .as_js_doc_this_tag()
+            .expect("JSDocThisTag kind requires JSDocThisTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocImportTag) => node
+            .data_source()
+            .as_js_doc_import_tag()
+            .expect("JSDocImportTag kind requires JSDocImportTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocCallbackTag) => node
+            .data_source()
+            .as_js_doc_callback_tag()
+            .expect("JSDocCallbackTag kind requires JSDocCallbackTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocOverloadTag) => node
+            .data_source()
+            .as_js_doc_overload_tag()
+            .expect("JSDocOverloadTag kind requires JSDocOverloadTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocTypedefTag) => node
+            .data_source()
+            .as_js_doc_typedef_tag()
+            .expect("JSDocTypedefTag kind requires JSDocTypedefTag payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocSignature) => node
+            .data_source()
+            .as_js_doc_signature()
+            .expect("JSDocSignature kind requires JSDocSignature payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocNameReference) => node
+            .data_source()
+            .as_js_doc_name_reference()
+            .expect("JSDocNameReference kind requires JSDocNameReference payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SourceFile) => node
+            .data_source()
+            .as_source_file()
+            .expect("SourceFile kind requires SourceFile payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ModuleDeclaration) => node
+            .data_source()
+            .as_module_declaration()
+            .expect("ModuleDeclaration kind requires ModuleDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportEqualsDeclaration) => node
+            .data_source()
+            .as_import_equals_declaration()
+            .expect("ImportEqualsDeclaration kind requires ImportEqualsDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ExportDeclaration) => node
+            .data_source()
+            .as_export_declaration()
+            .expect("ExportDeclaration kind requires ExportDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportType) => node
+            .data_source()
+            .as_import_type_node()
+            .expect("ImportTypeNode kind requires ImportTypeNode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportClause) => node
+            .data_source()
+            .as_import_clause()
+            .expect("ImportClause kind requires ImportClause payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::ImportSpecifier) => node
+            .data_source()
+            .as_import_specifier()
+            .expect("ImportSpecifier kind requires ImportSpecifier payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocLink) => node
+            .data_source()
+            .as_js_doc_link()
+            .expect("JSDocLink kind requires JSDocLink payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocLinkPlain) => node
+            .data_source()
+            .as_js_doc_link_plain()
+            .expect("JSDocLinkPlain kind requires JSDocLinkPlain payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocLinkCode) => node
+            .data_source()
+            .as_js_doc_link_code()
+            .expect("JSDocLinkCode kind requires JSDocLinkCode payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::TypeParameter) => node
+            .data_source()
+            .as_type_parameter_declaration()
+            .expect("TypeParameterDeclaration kind requires TypeParameterDeclaration payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::SyntheticReferenceExpression) => node
+            .data_source()
+            .as_synthetic_reference_expression()
+            .expect(
+                "SyntheticReferenceExpression kind requires SyntheticReferenceExpression payload",
+            )
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocTypeLiteral) => node
+            .data_source()
+            .as_js_doc_type_literal()
+            .expect("JSDocTypeLiteral kind requires JSDocTypeLiteral payload")
+            .for_each_child(visitor),
+        Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => node
+            .data_source()
+            .as_js_doc_parameter_or_property_tag()
+            .expect("JSDocParameterOrPropertyTag kind requires JSDocParameterOrPropertyTag payload")
+            .for_each_child(visitor),
+        _ => ControlFlow::Continue(()),
+    }
+}
 impl Node {
-    // upstream: tsc/internal/ast/ast_generated.go:Node.ForEachChild
     pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {
-        match self.kind().known() {
-            Some(SyntaxKind::QualifiedName) => self.data().as_qualified_name().expect("QualifiedName kind requires QualifiedName payload").for_each_child(visitor),
-            Some(SyntaxKind::ComputedPropertyName) => self.data().as_computed_property_name().expect("ComputedPropertyName kind requires ComputedPropertyName payload").for_each_child(visitor),
-            Some(SyntaxKind::Decorator) => self.data().as_decorator().expect("Decorator kind requires Decorator payload").for_each_child(visitor),
-            Some(SyntaxKind::IfStatement) => self.data().as_if_statement().expect("IfStatement kind requires IfStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::DoStatement) => self.data().as_do_statement().expect("DoStatement kind requires DoStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::WhileStatement) => self.data().as_while_statement().expect("WhileStatement kind requires WhileStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::ForStatement) => self.data().as_for_statement().expect("ForStatement kind requires ForStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => self.data().as_for_in_or_of_statement().expect("ForInOrOfStatement kind requires ForInOrOfStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::BreakStatement) => self.data().as_break_statement().expect("BreakStatement kind requires BreakStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::ContinueStatement) => self.data().as_continue_statement().expect("ContinueStatement kind requires ContinueStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::ReturnStatement) => self.data().as_return_statement().expect("ReturnStatement kind requires ReturnStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::WithStatement) => self.data().as_with_statement().expect("WithStatement kind requires WithStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::SwitchStatement) => self.data().as_switch_statement().expect("SwitchStatement kind requires SwitchStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::CaseBlock) => self.data().as_case_block().expect("CaseBlock kind requires CaseBlock payload").for_each_child(visitor),
-            Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => self.data().as_case_or_default_clause().expect("CaseOrDefaultClause kind requires CaseOrDefaultClause payload").for_each_child(visitor),
-            Some(SyntaxKind::ThrowStatement) => self.data().as_throw_statement().expect("ThrowStatement kind requires ThrowStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::TryStatement) => self.data().as_try_statement().expect("TryStatement kind requires TryStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::CatchClause) => self.data().as_catch_clause().expect("CatchClause kind requires CatchClause payload").for_each_child(visitor),
-            Some(SyntaxKind::LabeledStatement) => self.data().as_labeled_statement().expect("LabeledStatement kind requires LabeledStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::ExpressionStatement) => self.data().as_expression_statement().expect("ExpressionStatement kind requires ExpressionStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::Block) => self.data().as_block().expect("Block kind requires Block payload").for_each_child(visitor),
-            Some(SyntaxKind::VariableStatement) => self.data().as_variable_statement().expect("VariableStatement kind requires VariableStatement payload").for_each_child(visitor),
-            Some(SyntaxKind::VariableDeclaration) => self.data().as_variable_declaration().expect("VariableDeclaration kind requires VariableDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::VariableDeclarationList) => self.data().as_variable_declaration_list().expect("VariableDeclarationList kind requires VariableDeclarationList payload").for_each_child(visitor),
-            Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => self.data().as_binding_pattern().expect("BindingPattern kind requires BindingPattern payload").for_each_child(visitor),
-            Some(SyntaxKind::Parameter) => self.data().as_parameter_declaration().expect("ParameterDeclaration kind requires ParameterDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::BindingElement) => self.data().as_binding_element().expect("BindingElement kind requires BindingElement payload").for_each_child(visitor),
-            Some(SyntaxKind::MissingDeclaration) => self.data().as_missing_declaration().expect("MissingDeclaration kind requires MissingDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::FunctionDeclaration) => self.data().as_function_declaration().expect("FunctionDeclaration kind requires FunctionDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ClassDeclaration) => self.data().as_class_declaration().expect("ClassDeclaration kind requires ClassDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ClassExpression) => self.data().as_class_expression().expect("ClassExpression kind requires ClassExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::HeritageClause) => self.data().as_heritage_clause().expect("HeritageClause kind requires HeritageClause payload").for_each_child(visitor),
-            Some(SyntaxKind::InterfaceDeclaration) => self.data().as_interface_declaration().expect("InterfaceDeclaration kind requires InterfaceDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => self.data().as_type_alias_declaration().expect("TypeAliasDeclaration kind requires TypeAliasDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::EnumMember) => self.data().as_enum_member().expect("EnumMember kind requires EnumMember payload").for_each_child(visitor),
-            Some(SyntaxKind::EnumDeclaration) => self.data().as_enum_declaration().expect("EnumDeclaration kind requires EnumDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ModuleBlock) => self.data().as_module_block().expect("ModuleBlock kind requires ModuleBlock payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => self.data().as_import_declaration().expect("ImportDeclaration kind requires ImportDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ExternalModuleReference) => self.data().as_external_module_reference().expect("ExternalModuleReference kind requires ExternalModuleReference payload").for_each_child(visitor),
-            Some(SyntaxKind::NamespaceImport) => self.data().as_namespace_import().expect("NamespaceImport kind requires NamespaceImport payload").for_each_child(visitor),
-            Some(SyntaxKind::NamedImports) => self.data().as_named_imports().expect("NamedImports kind requires NamedImports payload").for_each_child(visitor),
-            Some(SyntaxKind::ExportAssignment) => self.data().as_export_assignment().expect("ExportAssignment kind requires ExportAssignment payload").for_each_child(visitor),
-            Some(SyntaxKind::NamespaceExportDeclaration) => self.data().as_namespace_export_declaration().expect("NamespaceExportDeclaration kind requires NamespaceExportDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::NamespaceExport) => self.data().as_namespace_export().expect("NamespaceExport kind requires NamespaceExport payload").for_each_child(visitor),
-            Some(SyntaxKind::NamedExports) => self.data().as_named_exports().expect("NamedExports kind requires NamedExports payload").for_each_child(visitor),
-            Some(SyntaxKind::ExportSpecifier) => self.data().as_export_specifier().expect("ExportSpecifier kind requires ExportSpecifier payload").for_each_child(visitor),
-            Some(SyntaxKind::CallSignature) => self.data().as_call_signature_declaration().expect("CallSignatureDeclaration kind requires CallSignatureDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ConstructSignature) => self.data().as_construct_signature_declaration().expect("ConstructSignatureDeclaration kind requires ConstructSignatureDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::Constructor) => self.data().as_constructor_declaration().expect("ConstructorDeclaration kind requires ConstructorDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::GetAccessor) => self.data().as_get_accessor_declaration().expect("GetAccessorDeclaration kind requires GetAccessorDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::SetAccessor) => self.data().as_set_accessor_declaration().expect("SetAccessorDeclaration kind requires SetAccessorDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::IndexSignature) => self.data().as_index_signature_declaration().expect("IndexSignatureDeclaration kind requires IndexSignatureDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::MethodSignature) => self.data().as_method_signature_declaration().expect("MethodSignatureDeclaration kind requires MethodSignatureDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::MethodDeclaration) => self.data().as_method_declaration().expect("MethodDeclaration kind requires MethodDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::PropertySignature) => self.data().as_property_signature_declaration().expect("PropertySignatureDeclaration kind requires PropertySignatureDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::PropertyDeclaration) => self.data().as_property_declaration().expect("PropertyDeclaration kind requires PropertyDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ClassStaticBlockDeclaration) => self.data().as_class_static_block_declaration().expect("ClassStaticBlockDeclaration kind requires ClassStaticBlockDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::BinaryExpression) => self.data().as_binary_expression().expect("BinaryExpression kind requires BinaryExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::PrefixUnaryExpression) => self.data().as_prefix_unary_expression().expect("PrefixUnaryExpression kind requires PrefixUnaryExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::PostfixUnaryExpression) => self.data().as_postfix_unary_expression().expect("PostfixUnaryExpression kind requires PostfixUnaryExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::YieldExpression) => self.data().as_yield_expression().expect("YieldExpression kind requires YieldExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ArrowFunction) => self.data().as_arrow_function().expect("ArrowFunction kind requires ArrowFunction payload").for_each_child(visitor),
-            Some(SyntaxKind::FunctionExpression) => self.data().as_function_expression().expect("FunctionExpression kind requires FunctionExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::AsExpression) => self.data().as_as_expression().expect("AsExpression kind requires AsExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::SatisfiesExpression) => self.data().as_satisfies_expression().expect("SatisfiesExpression kind requires SatisfiesExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ConditionalExpression) => self.data().as_conditional_expression().expect("ConditionalExpression kind requires ConditionalExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::PropertyAccessExpression) => self.data().as_property_access_expression().expect("PropertyAccessExpression kind requires PropertyAccessExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ElementAccessExpression) => self.data().as_element_access_expression().expect("ElementAccessExpression kind requires ElementAccessExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::CallExpression) => self.data().as_call_expression().expect("CallExpression kind requires CallExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::NewExpression) => self.data().as_new_expression().expect("NewExpression kind requires NewExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::MetaProperty) => self.data().as_meta_property().expect("MetaProperty kind requires MetaProperty payload").for_each_child(visitor),
-            Some(SyntaxKind::NonNullExpression) => self.data().as_non_null_expression().expect("NonNullExpression kind requires NonNullExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::SpreadElement) => self.data().as_spread_element().expect("SpreadElement kind requires SpreadElement payload").for_each_child(visitor),
-            Some(SyntaxKind::TemplateExpression) => self.data().as_template_expression().expect("TemplateExpression kind requires TemplateExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::TemplateSpan) => self.data().as_template_span().expect("TemplateSpan kind requires TemplateSpan payload").for_each_child(visitor),
-            Some(SyntaxKind::TaggedTemplateExpression) => self.data().as_tagged_template_expression().expect("TaggedTemplateExpression kind requires TaggedTemplateExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ParenthesizedExpression) => self.data().as_parenthesized_expression().expect("ParenthesizedExpression kind requires ParenthesizedExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ArrayLiteralExpression) => self.data().as_array_literal_expression().expect("ArrayLiteralExpression kind requires ArrayLiteralExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::ObjectLiteralExpression) => self.data().as_object_literal_expression().expect("ObjectLiteralExpression kind requires ObjectLiteralExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::SpreadAssignment) => self.data().as_spread_assignment().expect("SpreadAssignment kind requires SpreadAssignment payload").for_each_child(visitor),
-            Some(SyntaxKind::PropertyAssignment) => self.data().as_property_assignment().expect("PropertyAssignment kind requires PropertyAssignment payload").for_each_child(visitor),
-            Some(SyntaxKind::ShorthandPropertyAssignment) => self.data().as_shorthand_property_assignment().expect("ShorthandPropertyAssignment kind requires ShorthandPropertyAssignment payload").for_each_child(visitor),
-            Some(SyntaxKind::DeleteExpression) => self.data().as_delete_expression().expect("DeleteExpression kind requires DeleteExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeOfExpression) => self.data().as_type_of_expression().expect("TypeOfExpression kind requires TypeOfExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::VoidExpression) => self.data().as_void_expression().expect("VoidExpression kind requires VoidExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::AwaitExpression) => self.data().as_await_expression().expect("AwaitExpression kind requires AwaitExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeAssertionExpression) => self.data().as_type_assertion().expect("TypeAssertion kind requires TypeAssertion payload").for_each_child(visitor),
-            Some(SyntaxKind::UnionType) => self.data().as_union_type_node().expect("UnionTypeNode kind requires UnionTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::IntersectionType) => self.data().as_intersection_type_node().expect("IntersectionTypeNode kind requires IntersectionTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ConditionalType) => self.data().as_conditional_type_node().expect("ConditionalTypeNode kind requires ConditionalTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeOperator) => self.data().as_type_operator_node().expect("TypeOperatorNode kind requires TypeOperatorNode payload").for_each_child(visitor),
-            Some(SyntaxKind::InferType) => self.data().as_infer_type_node().expect("InferTypeNode kind requires InferTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ArrayType) => self.data().as_array_type_node().expect("ArrayTypeNode kind requires ArrayTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::IndexedAccessType) => self.data().as_indexed_access_type_node().expect("IndexedAccessTypeNode kind requires IndexedAccessTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeReference) => self.data().as_type_reference_node().expect("TypeReferenceNode kind requires TypeReferenceNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ExpressionWithTypeArguments) => self.data().as_expression_with_type_arguments().expect("ExpressionWithTypeArguments kind requires ExpressionWithTypeArguments payload").for_each_child(visitor),
-            Some(SyntaxKind::LiteralType) => self.data().as_literal_type_node().expect("LiteralTypeNode kind requires LiteralTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TypePredicate) => self.data().as_type_predicate_node().expect("TypePredicateNode kind requires TypePredicateNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportAttribute) => self.data().as_import_attribute().expect("ImportAttribute kind requires ImportAttribute payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportAttributes) => self.data().as_import_attributes().expect("ImportAttributes kind requires ImportAttributes payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeQuery) => self.data().as_type_query_node().expect("TypeQueryNode kind requires TypeQueryNode payload").for_each_child(visitor),
-            Some(SyntaxKind::MappedType) => self.data().as_mapped_type_node().expect("MappedTypeNode kind requires MappedTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeLiteral) => self.data().as_type_literal_node().expect("TypeLiteralNode kind requires TypeLiteralNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TupleType) => self.data().as_tuple_type_node().expect("TupleTypeNode kind requires TupleTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::NamedTupleMember) => self.data().as_named_tuple_member().expect("NamedTupleMember kind requires NamedTupleMember payload").for_each_child(visitor),
-            Some(SyntaxKind::OptionalType) => self.data().as_optional_type_node().expect("OptionalTypeNode kind requires OptionalTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::RestType) => self.data().as_rest_type_node().expect("RestTypeNode kind requires RestTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ParenthesizedType) => self.data().as_parenthesized_type_node().expect("ParenthesizedTypeNode kind requires ParenthesizedTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::FunctionType) => self.data().as_function_type_node().expect("FunctionTypeNode kind requires FunctionTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ConstructorType) => self.data().as_constructor_type_node().expect("ConstructorTypeNode kind requires ConstructorTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TemplateLiteralType) => self.data().as_template_literal_type_node().expect("TemplateLiteralTypeNode kind requires TemplateLiteralTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::TemplateLiteralTypeSpan) => self.data().as_template_literal_type_span().expect("TemplateLiteralTypeSpan kind requires TemplateLiteralTypeSpan payload").for_each_child(visitor),
-            Some(SyntaxKind::SyntheticExpression) => self.data().as_synthetic_expression().expect("SyntheticExpression kind requires SyntheticExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::PartiallyEmittedExpression) => self.data().as_partially_emitted_expression().expect("PartiallyEmittedExpression kind requires PartiallyEmittedExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxElement) => self.data().as_jsx_element().expect("JsxElement kind requires JsxElement payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxAttributes) => self.data().as_jsx_attributes().expect("JsxAttributes kind requires JsxAttributes payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxNamespacedName) => self.data().as_jsx_namespaced_name().expect("JsxNamespacedName kind requires JsxNamespacedName payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxOpeningElement) => self.data().as_jsx_opening_element().expect("JsxOpeningElement kind requires JsxOpeningElement payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxSelfClosingElement) => self.data().as_jsx_self_closing_element().expect("JsxSelfClosingElement kind requires JsxSelfClosingElement payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxFragment) => self.data().as_jsx_fragment().expect("JsxFragment kind requires JsxFragment payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxAttribute) => self.data().as_jsx_attribute().expect("JsxAttribute kind requires JsxAttribute payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxSpreadAttribute) => self.data().as_jsx_spread_attribute().expect("JsxSpreadAttribute kind requires JsxSpreadAttribute payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxClosingElement) => self.data().as_jsx_closing_element().expect("JsxClosingElement kind requires JsxClosingElement payload").for_each_child(visitor),
-            Some(SyntaxKind::JsxExpression) => self.data().as_jsx_expression().expect("JsxExpression kind requires JsxExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::SyntaxList) => self.data().as_syntax_list().expect("SyntaxList kind requires SyntaxList payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDoc) => self.data().as_js_doc().expect("JSDoc kind requires JSDoc payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocTypeExpression) => self.data().as_js_doc_type_expression().expect("JSDocTypeExpression kind requires JSDocTypeExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocNonNullableType) => self.data().as_js_doc_non_nullable_type().expect("JSDocNonNullableType kind requires JSDocNonNullableType payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocNullableType) => self.data().as_js_doc_nullable_type().expect("JSDocNullableType kind requires JSDocNullableType payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocVariadicType) => self.data().as_js_doc_variadic_type().expect("JSDocVariadicType kind requires JSDocVariadicType payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocOptionalType) => self.data().as_js_doc_optional_type().expect("JSDocOptionalType kind requires JSDocOptionalType payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocTypeTag) => self.data().as_js_doc_type_tag().expect("JSDocTypeTag kind requires JSDocTypeTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocUnknownTag) => self.data().as_js_doc_unknown_tag().expect("JSDocUnknownTag kind requires JSDocUnknownTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocTemplateTag) => self.data().as_js_doc_template_tag().expect("JSDocTemplateTag kind requires JSDocTemplateTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocReturnTag) => self.data().as_js_doc_return_tag().expect("JSDocReturnTag kind requires JSDocReturnTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocPublicTag) => self.data().as_js_doc_public_tag().expect("JSDocPublicTag kind requires JSDocPublicTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocPrivateTag) => self.data().as_js_doc_private_tag().expect("JSDocPrivateTag kind requires JSDocPrivateTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocProtectedTag) => self.data().as_js_doc_protected_tag().expect("JSDocProtectedTag kind requires JSDocProtectedTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocReadonlyTag) => self.data().as_js_doc_readonly_tag().expect("JSDocReadonlyTag kind requires JSDocReadonlyTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocOverrideTag) => self.data().as_js_doc_override_tag().expect("JSDocOverrideTag kind requires JSDocOverrideTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocDeprecatedTag) => self.data().as_js_doc_deprecated_tag().expect("JSDocDeprecatedTag kind requires JSDocDeprecatedTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocSeeTag) => self.data().as_js_doc_see_tag().expect("JSDocSeeTag kind requires JSDocSeeTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocImplementsTag) => self.data().as_js_doc_implements_tag().expect("JSDocImplementsTag kind requires JSDocImplementsTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocAugmentsTag) => self.data().as_js_doc_augments_tag().expect("JSDocAugmentsTag kind requires JSDocAugmentsTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocSatisfiesTag) => self.data().as_js_doc_satisfies_tag().expect("JSDocSatisfiesTag kind requires JSDocSatisfiesTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocThrowsTag) => self.data().as_js_doc_throws_tag().expect("JSDocThrowsTag kind requires JSDocThrowsTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocThisTag) => self.data().as_js_doc_this_tag().expect("JSDocThisTag kind requires JSDocThisTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocImportTag) => self.data().as_js_doc_import_tag().expect("JSDocImportTag kind requires JSDocImportTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocCallbackTag) => self.data().as_js_doc_callback_tag().expect("JSDocCallbackTag kind requires JSDocCallbackTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocOverloadTag) => self.data().as_js_doc_overload_tag().expect("JSDocOverloadTag kind requires JSDocOverloadTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocTypedefTag) => self.data().as_js_doc_typedef_tag().expect("JSDocTypedefTag kind requires JSDocTypedefTag payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocSignature) => self.data().as_js_doc_signature().expect("JSDocSignature kind requires JSDocSignature payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocNameReference) => self.data().as_js_doc_name_reference().expect("JSDocNameReference kind requires JSDocNameReference payload").for_each_child(visitor),
-            Some(SyntaxKind::SourceFile) => self.data().as_source_file().expect("SourceFile kind requires SourceFile payload").for_each_child(visitor),
-            Some(SyntaxKind::ModuleDeclaration) => self.data().as_module_declaration().expect("ModuleDeclaration kind requires ModuleDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportEqualsDeclaration) => self.data().as_import_equals_declaration().expect("ImportEqualsDeclaration kind requires ImportEqualsDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ExportDeclaration) => self.data().as_export_declaration().expect("ExportDeclaration kind requires ExportDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportType) => self.data().as_import_type_node().expect("ImportTypeNode kind requires ImportTypeNode payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportClause) => self.data().as_import_clause().expect("ImportClause kind requires ImportClause payload").for_each_child(visitor),
-            Some(SyntaxKind::ImportSpecifier) => self.data().as_import_specifier().expect("ImportSpecifier kind requires ImportSpecifier payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocLink) => self.data().as_js_doc_link().expect("JSDocLink kind requires JSDocLink payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocLinkPlain) => self.data().as_js_doc_link_plain().expect("JSDocLinkPlain kind requires JSDocLinkPlain payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocLinkCode) => self.data().as_js_doc_link_code().expect("JSDocLinkCode kind requires JSDocLinkCode payload").for_each_child(visitor),
-            Some(SyntaxKind::TypeParameter) => self.data().as_type_parameter_declaration().expect("TypeParameterDeclaration kind requires TypeParameterDeclaration payload").for_each_child(visitor),
-            Some(SyntaxKind::SyntheticReferenceExpression) => self.data().as_synthetic_reference_expression().expect("SyntheticReferenceExpression kind requires SyntheticReferenceExpression payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocTypeLiteral) => self.data().as_js_doc_type_literal().expect("JSDocTypeLiteral kind requires JSDocTypeLiteral payload").for_each_child(visitor),
-            Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => self.data().as_js_doc_parameter_or_property_tag().expect("JSDocParameterOrPropertyTag kind requires JSDocParameterOrPropertyTag payload").for_each_child(visitor),
+        for_each_child_generated(self, visitor)
+    }
+}
+impl NodeRead<'_> {
+    pub fn for_each_child_generated(&self, visitor: &mut impl ChildVisitor) -> ControlFlow<()> {
+        for_each_child_generated(self, visitor)
+    }
+}
+impl AstPayloadStore {
+    pub(crate) fn for_each_stored_child(
+        &self,
+        kind: NodeKind,
+        shape: u16,
+        ordinal: u32,
+        end: i32,
+        context: crate::compact::CompactContext<'_>,
+        visitor: &mut impl ChildVisitor,
+    ) -> ControlFlow<()> {
+        match kind.known() {
+            Some(SyntaxKind::QualifiedName) => {
+                assert!(
+                    shape == 3,
+                    "QualifiedName kind requires QualifiedName payload"
+                );
+                self.read_qualified_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ComputedPropertyName) => {
+                assert!(
+                    shape == 4,
+                    "ComputedPropertyName kind requires ComputedPropertyName payload"
+                );
+                self.read_computed_property_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Decorator) => {
+                assert!(shape == 5, "Decorator kind requires Decorator payload");
+                self.read_decorator(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IfStatement) => {
+                assert!(shape == 7, "IfStatement kind requires IfStatement payload");
+                self.read_if_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::DoStatement) => {
+                assert!(shape == 8, "DoStatement kind requires DoStatement payload");
+                self.read_do_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::WhileStatement) => {
+                assert!(
+                    shape == 9,
+                    "WhileStatement kind requires WhileStatement payload"
+                );
+                self.read_while_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ForStatement) => {
+                assert!(
+                    shape == 10,
+                    "ForStatement kind requires ForStatement payload"
+                );
+                self.read_for_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement) => {
+                assert!(
+                    shape == 11,
+                    "ForInOrOfStatement kind requires ForInOrOfStatement payload"
+                );
+                self.read_for_in_or_of_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BreakStatement) => {
+                assert!(
+                    shape == 12,
+                    "BreakStatement kind requires BreakStatement payload"
+                );
+                self.read_break_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ContinueStatement) => {
+                assert!(
+                    shape == 13,
+                    "ContinueStatement kind requires ContinueStatement payload"
+                );
+                self.read_continue_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ReturnStatement) => {
+                assert!(
+                    shape == 14,
+                    "ReturnStatement kind requires ReturnStatement payload"
+                );
+                self.read_return_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::WithStatement) => {
+                assert!(
+                    shape == 15,
+                    "WithStatement kind requires WithStatement payload"
+                );
+                self.read_with_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SwitchStatement) => {
+                assert!(
+                    shape == 16,
+                    "SwitchStatement kind requires SwitchStatement payload"
+                );
+                self.read_switch_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CaseBlock) => {
+                assert!(shape == 17, "CaseBlock kind requires CaseBlock payload");
+                self.read_case_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CaseClause | SyntaxKind::DefaultClause) => {
+                assert!(
+                    shape == 18,
+                    "CaseOrDefaultClause kind requires CaseOrDefaultClause payload"
+                );
+                self.read_case_or_default_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ThrowStatement) => {
+                assert!(
+                    shape == 19,
+                    "ThrowStatement kind requires ThrowStatement payload"
+                );
+                self.read_throw_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TryStatement) => {
+                assert!(
+                    shape == 20,
+                    "TryStatement kind requires TryStatement payload"
+                );
+                self.read_try_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CatchClause) => {
+                assert!(shape == 21, "CatchClause kind requires CatchClause payload");
+                self.read_catch_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::LabeledStatement) => {
+                assert!(
+                    shape == 23,
+                    "LabeledStatement kind requires LabeledStatement payload"
+                );
+                self.read_labeled_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExpressionStatement) => {
+                assert!(
+                    shape == 24,
+                    "ExpressionStatement kind requires ExpressionStatement payload"
+                );
+                self.read_expression_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Block) => {
+                assert!(shape == 25, "Block kind requires Block payload");
+                self.read_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableStatement) => {
+                assert!(
+                    shape == 26,
+                    "VariableStatement kind requires VariableStatement payload"
+                );
+                self.read_variable_statement(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableDeclaration) => {
+                assert!(
+                    shape == 27,
+                    "VariableDeclaration kind requires VariableDeclaration payload"
+                );
+                self.read_variable_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VariableDeclarationList) => {
+                assert!(
+                    shape == 28,
+                    "VariableDeclarationList kind requires VariableDeclarationList payload"
+                );
+                self.read_variable_declaration_list(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern) => {
+                assert!(
+                    shape == 29,
+                    "BindingPattern kind requires BindingPattern payload"
+                );
+                self.read_binding_pattern(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Parameter) => {
+                assert!(
+                    shape == 30,
+                    "ParameterDeclaration kind requires ParameterDeclaration payload"
+                );
+                self.read_parameter_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BindingElement) => {
+                assert!(
+                    shape == 31,
+                    "BindingElement kind requires BindingElement payload"
+                );
+                self.read_binding_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MissingDeclaration) => {
+                assert!(
+                    shape == 32,
+                    "MissingDeclaration kind requires MissingDeclaration payload"
+                );
+                self.read_missing_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionDeclaration) => {
+                assert!(
+                    shape == 33,
+                    "FunctionDeclaration kind requires FunctionDeclaration payload"
+                );
+                self.read_function_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassDeclaration) => {
+                assert!(
+                    shape == 34,
+                    "ClassDeclaration kind requires ClassDeclaration payload"
+                );
+                self.read_class_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassExpression) => {
+                assert!(
+                    shape == 35,
+                    "ClassExpression kind requires ClassExpression payload"
+                );
+                self.read_class_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::HeritageClause) => {
+                assert!(
+                    shape == 36,
+                    "HeritageClause kind requires HeritageClause payload"
+                );
+                self.read_heritage_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::InterfaceDeclaration) => {
+                assert!(
+                    shape == 37,
+                    "InterfaceDeclaration kind requires InterfaceDeclaration payload"
+                );
+                self.read_interface_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeAliasDeclaration | SyntaxKind::JSTypeAliasDeclaration) => {
+                assert!(
+                    shape == 38,
+                    "TypeAliasDeclaration kind requires TypeAliasDeclaration payload"
+                );
+                self.read_type_alias_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::EnumMember) => {
+                assert!(shape == 39, "EnumMember kind requires EnumMember payload");
+                self.read_enum_member(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::EnumDeclaration) => {
+                assert!(
+                    shape == 40,
+                    "EnumDeclaration kind requires EnumDeclaration payload"
+                );
+                self.read_enum_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ModuleBlock) => {
+                assert!(shape == 41, "ModuleBlock kind requires ModuleBlock payload");
+                self.read_module_block(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration) => {
+                assert!(
+                    shape == 44,
+                    "ImportDeclaration kind requires ImportDeclaration payload"
+                );
+                self.read_import_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExternalModuleReference) => {
+                assert!(
+                    shape == 45,
+                    "ExternalModuleReference kind requires ExternalModuleReference payload"
+                );
+                self.read_external_module_reference(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceImport) => {
+                assert!(
+                    shape == 46,
+                    "NamespaceImport kind requires NamespaceImport payload"
+                );
+                self.read_namespace_import(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedImports) => {
+                assert!(
+                    shape == 47,
+                    "NamedImports kind requires NamedImports payload"
+                );
+                self.read_named_imports(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportAssignment) => {
+                assert!(
+                    shape == 48,
+                    "ExportAssignment kind requires ExportAssignment payload"
+                );
+                self.read_export_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceExportDeclaration) => {
+                assert!(
+                    shape == 49,
+                    "NamespaceExportDeclaration kind requires NamespaceExportDeclaration payload"
+                );
+                self.read_namespace_export_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamespaceExport) => {
+                assert!(
+                    shape == 50,
+                    "NamespaceExport kind requires NamespaceExport payload"
+                );
+                self.read_namespace_export(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedExports) => {
+                assert!(
+                    shape == 51,
+                    "NamedExports kind requires NamedExports payload"
+                );
+                self.read_named_exports(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportSpecifier) => {
+                assert!(
+                    shape == 52,
+                    "ExportSpecifier kind requires ExportSpecifier payload"
+                );
+                self.read_export_specifier(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CallSignature) => {
+                assert!(
+                    shape == 53,
+                    "CallSignatureDeclaration kind requires CallSignatureDeclaration payload"
+                );
+                self.read_call_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConstructSignature) => {
+                assert!(shape == 54, "ConstructSignatureDeclaration kind requires ConstructSignatureDeclaration payload");
+                self.read_construct_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::Constructor) => {
+                assert!(
+                    shape == 55,
+                    "ConstructorDeclaration kind requires ConstructorDeclaration payload"
+                );
+                self.read_constructor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::GetAccessor) => {
+                assert!(
+                    shape == 56,
+                    "GetAccessorDeclaration kind requires GetAccessorDeclaration payload"
+                );
+                self.read_get_accessor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SetAccessor) => {
+                assert!(
+                    shape == 57,
+                    "SetAccessorDeclaration kind requires SetAccessorDeclaration payload"
+                );
+                self.read_set_accessor_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IndexSignature) => {
+                assert!(
+                    shape == 58,
+                    "IndexSignatureDeclaration kind requires IndexSignatureDeclaration payload"
+                );
+                self.read_index_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MethodSignature) => {
+                assert!(
+                    shape == 59,
+                    "MethodSignatureDeclaration kind requires MethodSignatureDeclaration payload"
+                );
+                self.read_method_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MethodDeclaration) => {
+                assert!(
+                    shape == 60,
+                    "MethodDeclaration kind requires MethodDeclaration payload"
+                );
+                self.read_method_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertySignature) => {
+                assert!(shape == 61, "PropertySignatureDeclaration kind requires PropertySignatureDeclaration payload");
+                self.read_property_signature_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyDeclaration) => {
+                assert!(
+                    shape == 62,
+                    "PropertyDeclaration kind requires PropertyDeclaration payload"
+                );
+                self.read_property_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ClassStaticBlockDeclaration) => {
+                assert!(
+                    shape == 64,
+                    "ClassStaticBlockDeclaration kind requires ClassStaticBlockDeclaration payload"
+                );
+                self.read_class_static_block_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::BinaryExpression) => {
+                assert!(
+                    shape == 72,
+                    "BinaryExpression kind requires BinaryExpression payload"
+                );
+                self.read_binary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PrefixUnaryExpression) => {
+                assert!(
+                    shape == 73,
+                    "PrefixUnaryExpression kind requires PrefixUnaryExpression payload"
+                );
+                self.read_prefix_unary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PostfixUnaryExpression) => {
+                assert!(
+                    shape == 74,
+                    "PostfixUnaryExpression kind requires PostfixUnaryExpression payload"
+                );
+                self.read_postfix_unary_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::YieldExpression) => {
+                assert!(
+                    shape == 75,
+                    "YieldExpression kind requires YieldExpression payload"
+                );
+                self.read_yield_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrowFunction) => {
+                assert!(
+                    shape == 76,
+                    "ArrowFunction kind requires ArrowFunction payload"
+                );
+                self.read_arrow_function(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionExpression) => {
+                assert!(
+                    shape == 77,
+                    "FunctionExpression kind requires FunctionExpression payload"
+                );
+                self.read_function_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::AsExpression) => {
+                assert!(
+                    shape == 78,
+                    "AsExpression kind requires AsExpression payload"
+                );
+                self.read_as_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SatisfiesExpression) => {
+                assert!(
+                    shape == 79,
+                    "SatisfiesExpression kind requires SatisfiesExpression payload"
+                );
+                self.read_satisfies_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConditionalExpression) => {
+                assert!(
+                    shape == 80,
+                    "ConditionalExpression kind requires ConditionalExpression payload"
+                );
+                self.read_conditional_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyAccessExpression) => {
+                assert!(
+                    shape == 81,
+                    "PropertyAccessExpression kind requires PropertyAccessExpression payload"
+                );
+                self.read_property_access_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ElementAccessExpression) => {
+                assert!(
+                    shape == 82,
+                    "ElementAccessExpression kind requires ElementAccessExpression payload"
+                );
+                self.read_element_access_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::CallExpression) => {
+                assert!(
+                    shape == 83,
+                    "CallExpression kind requires CallExpression payload"
+                );
+                self.read_call_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NewExpression) => {
+                assert!(
+                    shape == 84,
+                    "NewExpression kind requires NewExpression payload"
+                );
+                self.read_new_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MetaProperty) => {
+                assert!(
+                    shape == 85,
+                    "MetaProperty kind requires MetaProperty payload"
+                );
+                self.read_meta_property(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NonNullExpression) => {
+                assert!(
+                    shape == 86,
+                    "NonNullExpression kind requires NonNullExpression payload"
+                );
+                self.read_non_null_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SpreadElement) => {
+                assert!(
+                    shape == 87,
+                    "SpreadElement kind requires SpreadElement payload"
+                );
+                self.read_spread_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateExpression) => {
+                assert!(
+                    shape == 88,
+                    "TemplateExpression kind requires TemplateExpression payload"
+                );
+                self.read_template_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateSpan) => {
+                assert!(
+                    shape == 89,
+                    "TemplateSpan kind requires TemplateSpan payload"
+                );
+                self.read_template_span(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TaggedTemplateExpression) => {
+                assert!(
+                    shape == 90,
+                    "TaggedTemplateExpression kind requires TaggedTemplateExpression payload"
+                );
+                self.read_tagged_template_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ParenthesizedExpression) => {
+                assert!(
+                    shape == 91,
+                    "ParenthesizedExpression kind requires ParenthesizedExpression payload"
+                );
+                self.read_parenthesized_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrayLiteralExpression) => {
+                assert!(
+                    shape == 92,
+                    "ArrayLiteralExpression kind requires ArrayLiteralExpression payload"
+                );
+                self.read_array_literal_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ObjectLiteralExpression) => {
+                assert!(
+                    shape == 93,
+                    "ObjectLiteralExpression kind requires ObjectLiteralExpression payload"
+                );
+                self.read_object_literal_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SpreadAssignment) => {
+                assert!(
+                    shape == 94,
+                    "SpreadAssignment kind requires SpreadAssignment payload"
+                );
+                self.read_spread_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PropertyAssignment) => {
+                assert!(
+                    shape == 95,
+                    "PropertyAssignment kind requires PropertyAssignment payload"
+                );
+                self.read_property_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ShorthandPropertyAssignment) => {
+                assert!(
+                    shape == 96,
+                    "ShorthandPropertyAssignment kind requires ShorthandPropertyAssignment payload"
+                );
+                self.read_shorthand_property_assignment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::DeleteExpression) => {
+                assert!(
+                    shape == 97,
+                    "DeleteExpression kind requires DeleteExpression payload"
+                );
+                self.read_delete_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeOfExpression) => {
+                assert!(
+                    shape == 98,
+                    "TypeOfExpression kind requires TypeOfExpression payload"
+                );
+                self.read_type_of_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::VoidExpression) => {
+                assert!(
+                    shape == 99,
+                    "VoidExpression kind requires VoidExpression payload"
+                );
+                self.read_void_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::AwaitExpression) => {
+                assert!(
+                    shape == 100,
+                    "AwaitExpression kind requires AwaitExpression payload"
+                );
+                self.read_await_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeAssertionExpression) => {
+                assert!(
+                    shape == 101,
+                    "TypeAssertion kind requires TypeAssertion payload"
+                );
+                self.read_type_assertion(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::UnionType) => {
+                assert!(
+                    shape == 103,
+                    "UnionTypeNode kind requires UnionTypeNode payload"
+                );
+                self.read_union_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IntersectionType) => {
+                assert!(
+                    shape == 104,
+                    "IntersectionTypeNode kind requires IntersectionTypeNode payload"
+                );
+                self.read_intersection_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConditionalType) => {
+                assert!(
+                    shape == 105,
+                    "ConditionalTypeNode kind requires ConditionalTypeNode payload"
+                );
+                self.read_conditional_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeOperator) => {
+                assert!(
+                    shape == 106,
+                    "TypeOperatorNode kind requires TypeOperatorNode payload"
+                );
+                self.read_type_operator_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::InferType) => {
+                assert!(
+                    shape == 107,
+                    "InferTypeNode kind requires InferTypeNode payload"
+                );
+                self.read_infer_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ArrayType) => {
+                assert!(
+                    shape == 108,
+                    "ArrayTypeNode kind requires ArrayTypeNode payload"
+                );
+                self.read_array_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::IndexedAccessType) => {
+                assert!(
+                    shape == 109,
+                    "IndexedAccessTypeNode kind requires IndexedAccessTypeNode payload"
+                );
+                self.read_indexed_access_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeReference) => {
+                assert!(
+                    shape == 110,
+                    "TypeReferenceNode kind requires TypeReferenceNode payload"
+                );
+                self.read_type_reference_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExpressionWithTypeArguments) => {
+                assert!(
+                    shape == 111,
+                    "ExpressionWithTypeArguments kind requires ExpressionWithTypeArguments payload"
+                );
+                self.read_expression_with_type_arguments(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::LiteralType) => {
+                assert!(
+                    shape == 112,
+                    "LiteralTypeNode kind requires LiteralTypeNode payload"
+                );
+                self.read_literal_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypePredicate) => {
+                assert!(
+                    shape == 114,
+                    "TypePredicateNode kind requires TypePredicateNode payload"
+                );
+                self.read_type_predicate_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportAttribute) => {
+                assert!(
+                    shape == 115,
+                    "ImportAttribute kind requires ImportAttribute payload"
+                );
+                self.read_import_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportAttributes) => {
+                assert!(
+                    shape == 116,
+                    "ImportAttributes kind requires ImportAttributes payload"
+                );
+                self.read_import_attributes(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeQuery) => {
+                assert!(
+                    shape == 117,
+                    "TypeQueryNode kind requires TypeQueryNode payload"
+                );
+                self.read_type_query_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::MappedType) => {
+                assert!(
+                    shape == 118,
+                    "MappedTypeNode kind requires MappedTypeNode payload"
+                );
+                self.read_mapped_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeLiteral) => {
+                assert!(
+                    shape == 119,
+                    "TypeLiteralNode kind requires TypeLiteralNode payload"
+                );
+                self.read_type_literal_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TupleType) => {
+                assert!(
+                    shape == 120,
+                    "TupleTypeNode kind requires TupleTypeNode payload"
+                );
+                self.read_tuple_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::NamedTupleMember) => {
+                assert!(
+                    shape == 121,
+                    "NamedTupleMember kind requires NamedTupleMember payload"
+                );
+                self.read_named_tuple_member(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::OptionalType) => {
+                assert!(
+                    shape == 122,
+                    "OptionalTypeNode kind requires OptionalTypeNode payload"
+                );
+                self.read_optional_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::RestType) => {
+                assert!(
+                    shape == 123,
+                    "RestTypeNode kind requires RestTypeNode payload"
+                );
+                self.read_rest_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ParenthesizedType) => {
+                assert!(
+                    shape == 124,
+                    "ParenthesizedTypeNode kind requires ParenthesizedTypeNode payload"
+                );
+                self.read_parenthesized_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::FunctionType) => {
+                assert!(
+                    shape == 125,
+                    "FunctionTypeNode kind requires FunctionTypeNode payload"
+                );
+                self.read_function_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ConstructorType) => {
+                assert!(
+                    shape == 126,
+                    "ConstructorTypeNode kind requires ConstructorTypeNode payload"
+                );
+                self.read_constructor_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateLiteralType) => {
+                assert!(
+                    shape == 130,
+                    "TemplateLiteralTypeNode kind requires TemplateLiteralTypeNode payload"
+                );
+                self.read_template_literal_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TemplateLiteralTypeSpan) => {
+                assert!(
+                    shape == 131,
+                    "TemplateLiteralTypeSpan kind requires TemplateLiteralTypeSpan payload"
+                );
+                self.read_template_literal_type_span(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntheticExpression) => {
+                assert!(
+                    shape == 132,
+                    "SyntheticExpression kind requires SyntheticExpression payload"
+                );
+                self.read_synthetic_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::PartiallyEmittedExpression) => {
+                assert!(
+                    shape == 133,
+                    "PartiallyEmittedExpression kind requires PartiallyEmittedExpression payload"
+                );
+                self.read_partially_emitted_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxElement) => {
+                assert!(shape == 134, "JsxElement kind requires JsxElement payload");
+                self.read_jsx_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxAttributes) => {
+                assert!(
+                    shape == 135,
+                    "JsxAttributes kind requires JsxAttributes payload"
+                );
+                self.read_jsx_attributes(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxNamespacedName) => {
+                assert!(
+                    shape == 136,
+                    "JsxNamespacedName kind requires JsxNamespacedName payload"
+                );
+                self.read_jsx_namespaced_name(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxOpeningElement) => {
+                assert!(
+                    shape == 137,
+                    "JsxOpeningElement kind requires JsxOpeningElement payload"
+                );
+                self.read_jsx_opening_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxSelfClosingElement) => {
+                assert!(
+                    shape == 138,
+                    "JsxSelfClosingElement kind requires JsxSelfClosingElement payload"
+                );
+                self.read_jsx_self_closing_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxFragment) => {
+                assert!(
+                    shape == 139,
+                    "JsxFragment kind requires JsxFragment payload"
+                );
+                self.read_jsx_fragment(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxAttribute) => {
+                assert!(
+                    shape == 142,
+                    "JsxAttribute kind requires JsxAttribute payload"
+                );
+                self.read_jsx_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxSpreadAttribute) => {
+                assert!(
+                    shape == 143,
+                    "JsxSpreadAttribute kind requires JsxSpreadAttribute payload"
+                );
+                self.read_jsx_spread_attribute(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxClosingElement) => {
+                assert!(
+                    shape == 144,
+                    "JsxClosingElement kind requires JsxClosingElement payload"
+                );
+                self.read_jsx_closing_element(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JsxExpression) => {
+                assert!(
+                    shape == 145,
+                    "JsxExpression kind requires JsxExpression payload"
+                );
+                self.read_jsx_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntaxList) => {
+                assert!(shape == 147, "SyntaxList kind requires SyntaxList payload");
+                self.read_syntax_list(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDoc) => {
+                assert!(shape == 148, "JSDoc kind requires JSDoc payload");
+                self.read_js_doc(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeExpression) => {
+                assert!(
+                    shape == 149,
+                    "JSDocTypeExpression kind requires JSDocTypeExpression payload"
+                );
+                self.read_js_doc_type_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNonNullableType) => {
+                assert!(
+                    shape == 150,
+                    "JSDocNonNullableType kind requires JSDocNonNullableType payload"
+                );
+                self.read_js_doc_non_nullable_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNullableType) => {
+                assert!(
+                    shape == 151,
+                    "JSDocNullableType kind requires JSDocNullableType payload"
+                );
+                self.read_js_doc_nullable_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocVariadicType) => {
+                assert!(
+                    shape == 153,
+                    "JSDocVariadicType kind requires JSDocVariadicType payload"
+                );
+                self.read_js_doc_variadic_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOptionalType) => {
+                assert!(
+                    shape == 154,
+                    "JSDocOptionalType kind requires JSDocOptionalType payload"
+                );
+                self.read_js_doc_optional_type(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeTag) => {
+                assert!(
+                    shape == 155,
+                    "JSDocTypeTag kind requires JSDocTypeTag payload"
+                );
+                self.read_js_doc_type_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocUnknownTag) => {
+                assert!(
+                    shape == 156,
+                    "JSDocUnknownTag kind requires JSDocUnknownTag payload"
+                );
+                self.read_js_doc_unknown_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTemplateTag) => {
+                assert!(
+                    shape == 157,
+                    "JSDocTemplateTag kind requires JSDocTemplateTag payload"
+                );
+                self.read_js_doc_template_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocReturnTag) => {
+                assert!(
+                    shape == 158,
+                    "JSDocReturnTag kind requires JSDocReturnTag payload"
+                );
+                self.read_js_doc_return_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocPublicTag) => {
+                assert!(
+                    shape == 159,
+                    "JSDocPublicTag kind requires JSDocPublicTag payload"
+                );
+                self.read_js_doc_public_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocPrivateTag) => {
+                assert!(
+                    shape == 160,
+                    "JSDocPrivateTag kind requires JSDocPrivateTag payload"
+                );
+                self.read_js_doc_private_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocProtectedTag) => {
+                assert!(
+                    shape == 161,
+                    "JSDocProtectedTag kind requires JSDocProtectedTag payload"
+                );
+                self.read_js_doc_protected_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocReadonlyTag) => {
+                assert!(
+                    shape == 162,
+                    "JSDocReadonlyTag kind requires JSDocReadonlyTag payload"
+                );
+                self.read_js_doc_readonly_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOverrideTag) => {
+                assert!(
+                    shape == 163,
+                    "JSDocOverrideTag kind requires JSDocOverrideTag payload"
+                );
+                self.read_js_doc_override_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocDeprecatedTag) => {
+                assert!(
+                    shape == 164,
+                    "JSDocDeprecatedTag kind requires JSDocDeprecatedTag payload"
+                );
+                self.read_js_doc_deprecated_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSeeTag) => {
+                assert!(
+                    shape == 165,
+                    "JSDocSeeTag kind requires JSDocSeeTag payload"
+                );
+                self.read_js_doc_see_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocImplementsTag) => {
+                assert!(
+                    shape == 166,
+                    "JSDocImplementsTag kind requires JSDocImplementsTag payload"
+                );
+                self.read_js_doc_implements_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocAugmentsTag) => {
+                assert!(
+                    shape == 167,
+                    "JSDocAugmentsTag kind requires JSDocAugmentsTag payload"
+                );
+                self.read_js_doc_augments_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSatisfiesTag) => {
+                assert!(
+                    shape == 168,
+                    "JSDocSatisfiesTag kind requires JSDocSatisfiesTag payload"
+                );
+                self.read_js_doc_satisfies_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocThrowsTag) => {
+                assert!(
+                    shape == 169,
+                    "JSDocThrowsTag kind requires JSDocThrowsTag payload"
+                );
+                self.read_js_doc_throws_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocThisTag) => {
+                assert!(
+                    shape == 170,
+                    "JSDocThisTag kind requires JSDocThisTag payload"
+                );
+                self.read_js_doc_this_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocImportTag) => {
+                assert!(
+                    shape == 171,
+                    "JSDocImportTag kind requires JSDocImportTag payload"
+                );
+                self.read_js_doc_import_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocCallbackTag) => {
+                assert!(
+                    shape == 172,
+                    "JSDocCallbackTag kind requires JSDocCallbackTag payload"
+                );
+                self.read_js_doc_callback_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocOverloadTag) => {
+                assert!(
+                    shape == 173,
+                    "JSDocOverloadTag kind requires JSDocOverloadTag payload"
+                );
+                self.read_js_doc_overload_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypedefTag) => {
+                assert!(
+                    shape == 174,
+                    "JSDocTypedefTag kind requires JSDocTypedefTag payload"
+                );
+                self.read_js_doc_typedef_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocSignature) => {
+                assert!(
+                    shape == 175,
+                    "JSDocSignature kind requires JSDocSignature payload"
+                );
+                self.read_js_doc_signature(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocNameReference) => {
+                assert!(
+                    shape == 176,
+                    "JSDocNameReference kind requires JSDocNameReference payload"
+                );
+                self.read_js_doc_name_reference(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SourceFile) => {
+                assert!(shape == 177, "SourceFile kind requires SourceFile payload");
+                self.read_source_file(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ModuleDeclaration) => {
+                assert!(
+                    shape == 178,
+                    "ModuleDeclaration kind requires ModuleDeclaration payload"
+                );
+                self.read_module_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportEqualsDeclaration) => {
+                assert!(
+                    shape == 179,
+                    "ImportEqualsDeclaration kind requires ImportEqualsDeclaration payload"
+                );
+                self.read_import_equals_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ExportDeclaration) => {
+                assert!(
+                    shape == 180,
+                    "ExportDeclaration kind requires ExportDeclaration payload"
+                );
+                self.read_export_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportType) => {
+                assert!(
+                    shape == 181,
+                    "ImportTypeNode kind requires ImportTypeNode payload"
+                );
+                self.read_import_type_node(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportClause) => {
+                assert!(
+                    shape == 182,
+                    "ImportClause kind requires ImportClause payload"
+                );
+                self.read_import_clause(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::ImportSpecifier) => {
+                assert!(
+                    shape == 183,
+                    "ImportSpecifier kind requires ImportSpecifier payload"
+                );
+                self.read_import_specifier(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLink) => {
+                assert!(shape == 185, "JSDocLink kind requires JSDocLink payload");
+                self.read_js_doc_link(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLinkPlain) => {
+                assert!(
+                    shape == 186,
+                    "JSDocLinkPlain kind requires JSDocLinkPlain payload"
+                );
+                self.read_js_doc_link_plain(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocLinkCode) => {
+                assert!(
+                    shape == 187,
+                    "JSDocLinkCode kind requires JSDocLinkCode payload"
+                );
+                self.read_js_doc_link_code(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::TypeParameter) => {
+                assert!(
+                    shape == 188,
+                    "TypeParameterDeclaration kind requires TypeParameterDeclaration payload"
+                );
+                self.read_type_parameter_declaration(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::SyntheticReferenceExpression) => {
+                assert!(shape == 189, "SyntheticReferenceExpression kind requires SyntheticReferenceExpression payload");
+                self.read_synthetic_reference_expression(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocTypeLiteral) => {
+                assert!(
+                    shape == 190,
+                    "JSDocTypeLiteral kind requires JSDocTypeLiteral payload"
+                );
+                self.read_js_doc_type_literal(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
+            Some(SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag) => {
+                assert!(
+                    shape == 191,
+                    "JSDocParameterOrPropertyTag kind requires JSDocParameterOrPropertyTag payload"
+                );
+                self.read_js_doc_parameter_or_property_tag(ordinal, context, end)
+                    .for_each_child(visitor)
+            }
             _ => ControlFlow::Continue(()),
         }
     }

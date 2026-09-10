@@ -1,14 +1,15 @@
 //! Source syntax classification and parent/edge utilities. Graph reads retain
 //! the caller's ownership checks; pure predicates preserve the open Kind domain.
+use crate::NodeAccess;
 use crate::{
-    modifier_flags, node_flags, AstView, Node, NodeId, NodeKind, SourceFileRead, SourceFileState,
-    SyntaxKind as K,
+    modifier_flags, node_flags, AstView, NodeId, NodeKind, NodeRead, SourceFileRead,
+    SourceFileState, SyntaxKind as K,
 };
 use ts_arena::Error;
 use ts_core::TextRange;
 
 /// port: tsc/internal/ast/utilities.go:IsObjectBindingOrAssignmentElement
-pub fn is_object_binding_or_assignment_element(node: &Node) -> bool {
+pub fn is_object_binding_or_assignment_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -21,9 +22,13 @@ pub fn is_object_binding_or_assignment_element(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsPropertyNameLiteral
-pub fn is_property_name_literal(node: &Node) -> bool {
+pub fn is_property_name_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_property_name_literal_kind(node.kind())
+}
+
+pub fn is_property_name_literal_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(
             K::Identifier | K::StringLiteral | K::NoSubstitutionTemplateLiteral | K::NumericLiteral
         )
@@ -31,7 +36,7 @@ pub fn is_property_name_literal(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsPropertyName
-pub fn is_property_name(node: &Node) -> bool {
+pub fn is_property_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -45,7 +50,7 @@ pub fn is_property_name(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsClassElement
-pub fn is_class_element(node: &Node) -> bool {
+pub fn is_class_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -62,15 +67,19 @@ pub fn is_class_element(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsMethodOrAccessor
-pub fn is_method_or_accessor(node: &Node) -> bool {
+pub fn is_method_or_accessor(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_method_or_accessor_kind(node.kind())
+}
+
+pub fn is_method_or_accessor_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(K::MethodDeclaration | K::GetAccessor | K::SetAccessor)
     )
 }
 
 /// port: tsc/internal/ast/utilities.go:IsTypeElement
-pub fn is_type_element(node: &Node) -> bool {
+pub fn is_type_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -87,7 +96,7 @@ pub fn is_type_element(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsObjectLiteralElement
-pub fn is_object_literal_element(node: &Node) -> bool {
+pub fn is_object_literal_element(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -102,7 +111,7 @@ pub fn is_object_literal_element(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsJsxChild
-pub fn is_jsx_child(node: &Node) -> bool {
+pub fn is_jsx_child(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -116,7 +125,7 @@ pub fn is_jsx_child(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:CanHaveSymbol
-pub fn can_have_symbol(node: &Node) -> bool {
+pub fn can_have_symbol(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -181,7 +190,7 @@ pub fn can_have_symbol(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:CanHaveIllegalModifiers
-pub fn can_have_illegal_modifiers(node: &Node) -> bool {
+pub fn can_have_illegal_modifiers(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -195,7 +204,7 @@ pub fn can_have_illegal_modifiers(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:CanHaveModifiers
-pub fn can_have_modifiers(node: &Node) -> bool {
+pub fn can_have_modifiers(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(
@@ -315,20 +324,24 @@ pub fn is_statement_kind_but_not_declaration_kind(kind: NodeKind) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsBindingPattern
-pub fn is_binding_pattern(node: &Node) -> bool {
+pub fn is_binding_pattern(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_binding_pattern_kind(node.kind())
+}
+
+pub fn is_binding_pattern_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(K::ObjectBindingPattern | K::ArrayBindingPattern)
     )
 }
 
 /// port: tsc/internal/ast/utilities.go:IsAccessor
-pub fn is_accessor(node: &Node) -> bool {
+pub fn is_accessor(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(K::GetAccessor | K::SetAccessor))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsMemberName
-pub fn is_member_name(node: &Node) -> bool {
+pub fn is_member_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::Identifier | K::PrivateIdentifier)
@@ -336,33 +349,45 @@ pub fn is_member_name(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsEntityName
-pub fn is_entity_name(node: &Node) -> bool {
+pub fn is_entity_name(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(node.kind().known(), Some(K::Identifier | K::QualifiedName))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsBooleanLiteral
-pub fn is_boolean_literal(node: &Node) -> bool {
-    matches!(node.kind().known(), Some(K::TrueKeyword | K::FalseKeyword))
+pub fn is_boolean_literal(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_boolean_literal_kind(node.kind())
+}
+
+pub fn is_boolean_literal_kind(kind: NodeKind) -> bool {
+    matches!(kind.known(), Some(K::TrueKeyword | K::FalseKeyword))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsStringLiteralLike
-pub fn is_string_literal_like(node: &Node) -> bool {
+pub fn is_string_literal_like(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_string_literal_like_kind(node.kind())
+}
+
+pub fn is_string_literal_like_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral)
     )
 }
 
 /// port: tsc/internal/ast/utilities.go:IsStringOrNumericLiteralLike
-pub fn is_string_or_numeric_literal_like(node: &Node) -> bool {
+pub fn is_string_or_numeric_literal_like(node: &(impl NodeAccess + ?Sized)) -> bool {
+    is_string_or_numeric_literal_like_kind(node.kind())
+}
+
+pub fn is_string_or_numeric_literal_like_kind(kind: NodeKind) -> bool {
     matches!(
-        node.kind().known(),
+        kind.known(),
         Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral | K::NumericLiteral)
     )
 }
 
 /// port: tsc/internal/ast/utilities.go:IsAssertionExpression
-pub fn is_assertion_expression(node: &Node) -> bool {
+pub fn is_assertion_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::TypeAssertionExpression | K::AsExpression)
@@ -370,7 +395,7 @@ pub fn is_assertion_expression(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsAccessExpression
-pub fn is_access_expression(node: &Node) -> bool {
+pub fn is_access_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::PropertyAccessExpression | K::ElementAccessExpression)
@@ -378,7 +403,7 @@ pub fn is_access_expression(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsClassLike
-pub fn is_class_like(node: &Node) -> bool {
+pub fn is_class_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ClassDeclaration | K::ClassExpression)
@@ -386,7 +411,7 @@ pub fn is_class_like(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsClassOrInterfaceLike
-pub fn is_class_or_interface_like(node: &Node) -> bool {
+pub fn is_class_or_interface_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ClassDeclaration | K::ClassExpression | K::InterfaceDeclaration)
@@ -394,7 +419,7 @@ pub fn is_class_or_interface_like(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsJsxAttributeLike
-pub fn is_jsx_attribute_like(node: &Node) -> bool {
+pub fn is_jsx_attribute_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::JsxAttribute | K::JsxSpreadAttribute)
@@ -402,7 +427,7 @@ pub fn is_jsx_attribute_like(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsFunctionExpressionOrArrowFunction
-pub fn is_function_expression_or_arrow_function(node: &Node) -> bool {
+pub fn is_function_expression_or_arrow_function(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::FunctionExpression | K::ArrowFunction)
@@ -410,7 +435,7 @@ pub fn is_function_expression_or_arrow_function(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsModuleOrEnumDeclaration
-pub fn is_module_or_enum_declaration(node: &Node) -> bool {
+pub fn is_module_or_enum_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ModuleDeclaration | K::EnumDeclaration)
@@ -418,7 +443,7 @@ pub fn is_module_or_enum_declaration(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:IsImportOrExportSpecifier
-pub fn is_import_or_export_specifier(node: &Node) -> bool {
+pub fn is_import_or_export_specifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ImportSpecifier | K::ExportSpecifier)
@@ -426,37 +451,37 @@ pub fn is_import_or_export_specifier(node: &Node) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:NodeIsSynthesized
-pub fn node_is_synthesized(node: &Node) -> bool {
+pub fn node_is_synthesized(node: &(impl NodeAccess + ?Sized)) -> bool {
     range_is_synthesized(node.range())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsModifier
-pub fn is_modifier(node: &Node) -> bool {
+pub fn is_modifier(node: &(impl NodeAccess + ?Sized)) -> bool {
     crate::is_modifier_kind(node.kind())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsModifierLike
-pub fn is_modifier_like(node: &Node) -> bool {
+pub fn is_modifier_like(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_modifier(node) || node.kind() == K::Decorator
 }
 
 /// port: tsc/internal/ast/utilities.go:IsLiteralExpression
-pub fn is_literal_expression(node: &Node) -> bool {
+pub fn is_literal_expression(node: &(impl NodeAccess + ?Sized)) -> bool {
     crate::is_literal_kind(node.kind())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsDeclarationStatement
-pub fn is_declaration_statement(node: &Node) -> bool {
+pub fn is_declaration_statement(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_declaration_statement_kind(node.kind())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsStatementButNotDeclaration
-pub fn is_statement_but_not_declaration(node: &Node) -> bool {
+pub fn is_statement_but_not_declaration(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_statement_kind_but_not_declaration_kind(node.kind())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsTypeNode
-pub fn is_type_node(node: &Node) -> bool {
+pub fn is_type_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_type_node_kind(node.kind())
 }
 
@@ -471,49 +496,50 @@ pub fn range_is_synthesized(range: TextRange) -> bool {
 }
 
 /// port: tsc/internal/ast/utilities.go:NodeKindIs
-pub fn node_kind_is(node: &Node, kinds: &[NodeKind]) -> bool {
+pub fn node_kind_is(node: &(impl NodeAccess + ?Sized), kinds: &[NodeKind]) -> bool {
     kinds.contains(&node.kind())
 }
 
 /// port: tsc/internal/ast/utilities.go:IsForInOrOfStatement
-pub fn is_for_in_or_of_statement(node: Option<&Node>) -> bool {
-    node.is_some_and(|node| {
-        matches!(
-            node.kind().known(),
-            Some(K::ForInStatement | K::ForOfStatement)
-        )
-    })
+pub fn is_for_in_or_of_statement(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
+    node.is_some_and(|node| is_for_in_or_of_statement_kind(node.kind()))
+}
+
+pub fn is_for_in_or_of_statement_kind(kind: NodeKind) -> bool {
+    matches!(kind.known(), Some(K::ForInStatement | K::ForOfStatement))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsFunctionLikeDeclaration
-pub fn is_function_like_declaration(node: Option<&Node>) -> bool {
+pub fn is_function_like_declaration(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| is_function_like_declaration_kind(node.kind()))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsFunctionLike
-pub fn is_function_like(node: Option<&Node>) -> bool {
+pub fn is_function_like(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| is_function_like_kind(node.kind()))
 }
 
 /// port: tsc/internal/ast/utilities.go:IsFunctionLikeOrClassStaticBlockDeclaration
-pub fn is_function_like_or_class_static_block_declaration(node: Option<&Node>) -> bool {
+pub fn is_function_like_or_class_static_block_declaration(
+    node: Option<&(impl NodeAccess + ?Sized)>,
+) -> bool {
     node.is_some_and(|node| {
         is_function_like(Some(node)) || node.kind() == K::ClassStaticBlockDeclaration
     })
 }
 
 /// port: tsc/internal/ast/utilities.go:IsFunctionOrSourceFile
-pub fn is_function_or_source_file(node: &Node) -> bool {
+pub fn is_function_or_source_file(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_function_like(Some(node)) || node.kind() == K::SourceFile
 }
 
 /// port: tsc/internal/ast/utilities.go:IsInJSFile
-pub fn is_in_js_file(node: Option<&Node>) -> bool {
+pub fn is_in_js_file(node: Option<&(impl NodeAccess + ?Sized)>) -> bool {
     node.is_some_and(|node| node.flags() & node_flags::JAVA_SCRIPT_FILE != 0)
 }
 
 /// port: tsc/internal/ast/utilities.go:IsInJsonFile
-pub fn is_in_json_file(node: &Node) -> bool {
+pub fn is_in_json_file(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.flags() & node_flags::JSON_FILE != 0
 }
 
@@ -581,7 +607,7 @@ pub fn find_last_visible_node(
 pub fn find_ancestor(
     view: AstView<'_>,
     mut node: Option<NodeId>,
-    mut callback: impl FnMut(&Node) -> bool,
+    mut callback: impl FnMut(&NodeRead<'_>) -> bool,
 ) -> Result<Option<NodeId>, Error> {
     while let Some(id) = node {
         let current = view.node(id)?;
@@ -596,7 +622,7 @@ pub fn find_ancestor(
 pub fn find_many_ancestors(
     view: AstView<'_>,
     mut node: Option<NodeId>,
-    callbacks: &mut [&mut dyn FnMut(&Node) -> bool],
+    callbacks: &mut [&mut dyn FnMut(&NodeRead<'_>) -> bool],
 ) -> Result<Vec<Option<NodeId>>, Error> {
     let mut ancestors = vec![None; callbacks.len()];
     let mut found = 0;
@@ -644,7 +670,7 @@ pub fn to_find_ancestor_result(value: bool) -> FindAncestorResult {
 pub fn find_ancestor_or_quit(
     view: AstView<'_>,
     mut node: Option<NodeId>,
-    mut callback: impl FnMut(&Node) -> FindAncestorResult,
+    mut callback: impl FnMut(&NodeRead<'_>) -> FindAncestorResult,
 ) -> Result<Option<NodeId>, Error> {
     while let Some(id) = node {
         let current = view.node(id)?;
@@ -680,7 +706,7 @@ pub fn get_source_file_of_node(
     let found = find_ancestor_kind(view, node, K::SourceFile.into())?;
     if let Some(id) = found {
         view.node(id)?
-            .data()
+            .data_source()
             .as_source_file()
             .expect("SourceFile payload");
     }
@@ -688,7 +714,7 @@ pub fn get_source_file_of_node(
 }
 /// port: tsc/internal/ast/utilities.go:GetContainingClass
 pub fn get_containing_class(view: AstView<'_>, node: NodeId) -> Result<Option<NodeId>, Error> {
-    find_ancestor(view, view.node(node)?.parent(), is_class_like)
+    find_ancestor(view, view.node(node)?.parent(), |node| is_class_like(node))
 }
 /// port: tsc/internal/ast/utilities.go:WalkUpParenthesizedExpressions
 pub fn walk_up_parenthesized_expressions(
@@ -719,11 +745,8 @@ pub fn walk_up_parenthesized_types(
     Ok(node)
 }
 /// port: tsc/internal/ast/utilities.go:GetRootDeclaration
-pub fn get_root_declaration(view: AstView<'_>, mut node: NodeId) -> Result<NodeId, Error> {
-    while view.node(node)?.kind() == K::BindingElement {
-        node = parent(view, parent(view, node)?)?;
-    }
-    Ok(node)
+pub fn get_root_declaration(view: AstView<'_>, node: NodeId) -> Result<NodeId, Error> {
+    crate::declaration_helpers::root_declaration(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:WalkUpBindingElementsAndPatterns
 pub fn walk_up_binding_elements_and_patterns(
@@ -859,10 +882,14 @@ pub fn is_object_literal_or_class_expression_method_or_accessor(
 ) -> Result<bool, Error> {
     let n = view.node(node)?;
     Ok(is_method_or_accessor(&n)
-        && matches!(
-            view.node(required(n.parent()))?.kind().known(),
-            Some(K::ObjectLiteralExpression | K::ClassExpression)
-        ))
+        && is_object_literal_or_class_expression_kind(view.node(required(n.parent()))?.kind()))
+}
+
+pub fn is_object_literal_or_class_expression_kind(kind: NodeKind) -> bool {
+    matches!(
+        kind.known(),
+        Some(K::ObjectLiteralExpression | K::ClassExpression)
+    )
 }
 /// port: tsc/internal/ast/utilities.go:IsFunctionOrModuleBlock
 pub fn is_function_or_module_block(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
@@ -877,28 +904,28 @@ pub fn is_function_or_module_block(view: AstView<'_>, node: NodeId) -> Result<bo
     )
 }
 /// port: tsc/internal/ast/utilities.go:IsGlobalScopeAugmentation
-pub fn is_global_scope_augmentation(node: &Node) -> bool {
+pub fn is_global_scope_augmentation(node: &(impl NodeAccess + ?Sized)) -> bool {
     node.kind() == K::ModuleDeclaration
         && node
-            .data()
+            .data_source()
             .as_module_declaration()
             .expect("ModuleDeclaration payload")
-            .keyword
+            .keyword()
             == K::GlobalKeyword
 }
 /// port: tsc/internal/ast/utilities.go:IsAnyImportSyntax
-pub fn is_any_import_syntax(node: &Node) -> bool {
+pub fn is_any_import_syntax(node: &(impl NodeAccess + ?Sized)) -> bool {
     matches!(
         node.kind().known(),
         Some(K::ImportDeclaration | K::ImportEqualsDeclaration)
     )
 }
 /// port: tsc/internal/ast/utilities.go:IsImportNode
-pub fn is_import_node(node: &Node) -> bool {
+pub fn is_import_node(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_any_import_syntax(node) || node.kind() == K::JSImportDeclaration
 }
 /// port: tsc/internal/ast/utilities.go:IsAnyImportOrReExport
-pub fn is_any_import_or_re_export(node: &Node) -> bool {
+pub fn is_any_import_or_re_export(node: &(impl NodeAccess + ?Sized)) -> bool {
     is_import_node(node) || node.kind() == K::ExportDeclaration
 }
 
@@ -962,7 +989,7 @@ pub fn is_type_node_kind(kind: NodeKind) -> bool {
 }
 /// port: tsc/internal/ast/utilities.go:HasSyntacticModifier
 pub fn has_syntactic_modifier(view: AstView<'_>, node: NodeId, flags: u32) -> Result<bool, Error> {
-    Ok(view.node(node)?.modifier_flags(view)? & flags != 0)
+    crate::declaration_helpers::has_modifier(&view, node, flags)
 }
 /// port: tsc/internal/ast/utilities.go:HasAccessorModifier
 pub fn has_accessor_modifier(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
@@ -997,38 +1024,21 @@ pub fn is_parameter_property_declaration(
 }
 /// port: tsc/internal/ast/utilities.go:GetCombinedModifierFlags
 pub fn get_combined_modifier_flags(view: AstView<'_>, node: NodeId) -> Result<u32, Error> {
-    let id = get_root_declaration(view, node)?;
-    let root = view.node(id)?;
-    let mut flags = root.modifier_flags(view)?;
-    let mut current = Some(id);
-    if root.kind() == K::VariableDeclaration {
-        current = root.parent();
-    }
-    if let Some(id) = current {
-        let n = view.node(id)?;
-        if n.kind() == K::VariableDeclarationList {
-            flags |= n.modifier_flags(view)?;
-            current = n.parent();
-        }
-    }
-    if let Some(id) = current {
-        let n = view.node(id)?;
-        if n.kind() == K::VariableStatement {
-            flags |= n.modifier_flags(view)?;
-        }
-    }
-    Ok(flags)
+    crate::declaration_helpers::combined_modifier_flags(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsEnumConst
 pub fn is_enum_const(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
     Ok(get_combined_modifier_flags(view, node)? & modifier_flags::CONST != 0)
 }
-fn binary_operator(view: AstView<'_>, node: &Node) -> Result<NodeKind, Error> {
+fn binary_operator(
+    view: AstView<'_>,
+    node: &(impl NodeAccess + ?Sized),
+) -> Result<NodeKind, Error> {
     let op = required(
-        node.data()
+        node.data_source()
             .as_binary_expression()
             .expect("BinaryExpression payload")
-            .operator_token,
+            .operator_token(),
     );
     Ok(view.node(op)?.kind())
 }
@@ -1037,23 +1047,18 @@ pub fn is_logical_or_coalescing_binary_expression(
     view: AstView<'_>,
     node: NodeId,
 ) -> Result<bool, Error> {
-    let n = view.node(node)?;
-    Ok(n.kind() == K::BinaryExpression
-        && is_logical_or_coalescing_binary_operator(binary_operator(view, &n)?))
+    crate::syntax_helpers::is_logical_or_coalescing_binary_expression(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsLogicalOrCoalescingAssignmentExpression
 pub fn is_logical_or_coalescing_assignment_expression(
     view: AstView<'_>,
     node: NodeId,
 ) -> Result<bool, Error> {
-    let n = view.node(node)?;
-    Ok(n.kind() == K::BinaryExpression
-        && crate::is_logical_or_coalescing_assignment_operator(binary_operator(view, &n)?))
+    crate::syntax_helpers::is_logical_or_coalescing_assignment_expression(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsNullishCoalesce
 pub fn is_nullish_coalesce(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
-    let n = view.node(node)?;
-    Ok(n.kind() == K::BinaryExpression && binary_operator(view, &n)? == K::QuestionQuestionToken)
+    crate::syntax_helpers::is_nullish_coalesce(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsCommaExpression
 pub fn is_comma_expression(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
@@ -1071,78 +1076,34 @@ pub fn is_instance_of_expression(view: AstView<'_>, node: NodeId) -> Result<bool
 }
 /// port: tsc/internal/ast/utilities.go:IsSignedNumericLiteral
 pub fn is_signed_numeric_literal(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
-    let n = view.node(node)?;
-    if n.kind() != K::PrefixUnaryExpression {
-        return Ok(false);
-    }
-    let data = n
-        .data()
-        .as_prefix_unary_expression()
-        .expect("PrefixUnaryExpression payload");
-    Ok(
-        matches!(data.operator.known(), Some(K::PlusToken | K::MinusToken))
-            && view.node(required(data.operand))?.kind() == K::NumericLiteral,
-    )
+    crate::declaration_helpers::signed_numeric_literal(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsOptionalChain
-pub fn is_optional_chain(node: &Node) -> bool {
-    node.flags() & node_flags::OPTIONAL_CHAIN != 0
-        && matches!(
-            node.kind().known(),
-            Some(
-                K::PropertyAccessExpression
-                    | K::ElementAccessExpression
-                    | K::CallExpression
-                    | K::NonNullExpression
-            )
-        )
+pub fn is_optional_chain(node: &(impl NodeAccess + ?Sized)) -> bool {
+    crate::syntax_helpers::is_optional_chain(node)
 }
 /// port: tsc/internal/ast/utilities.go:getQuestionDotToken
-pub fn get_question_dot_token(node: &Node) -> Option<NodeId> {
+pub fn get_question_dot_token(node: &(impl NodeAccess + ?Sized)) -> Option<NodeId> {
     node.question_dot_token()
 }
 /// port: tsc/internal/ast/utilities.go:IsOptionalChainRoot
-pub fn is_optional_chain_root(node: &Node) -> bool {
-    is_optional_chain(node)
-        && node.kind() != K::NonNullExpression
-        && get_question_dot_token(node).is_some()
+pub fn is_optional_chain_root(node: &(impl NodeAccess + ?Sized)) -> bool {
+    crate::syntax_helpers::is_optional_chain_root(node)
 }
 /// port: tsc/internal/ast/utilities.go:IsOutermostOptionalChain
 pub fn is_outermost_optional_chain(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
-    let p = view.node(parent(view, node)?)?;
-    Ok(!is_optional_chain(&p) || is_optional_chain_root(&p) || p.expression() != Some(node))
+    crate::syntax_helpers::is_outermost_optional_chain(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsExpressionOfOptionalChainRoot
 pub fn is_expression_of_optional_chain_root(
     view: AstView<'_>,
     node: NodeId,
 ) -> Result<bool, Error> {
-    let p = view.node(parent(view, node)?)?;
-    Ok(is_optional_chain_root(&p) && p.expression() == Some(node))
+    crate::syntax_helpers::is_expression_of_optional_chain_root(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsLogicalExpression
-pub fn is_logical_expression(view: AstView<'_>, mut node: NodeId) -> Result<bool, Error> {
-    loop {
-        let n = view.node(node)?;
-        if n.kind() == K::ParenthesizedExpression {
-            node = required(n.expression());
-        } else if n.kind() == K::PrefixUnaryExpression
-            && n.data()
-                .as_prefix_unary_expression()
-                .expect("PrefixUnaryExpression payload")
-                .operator
-                == K::ExclamationToken
-        {
-            node = required(
-                n.data()
-                    .as_prefix_unary_expression()
-                    .expect("PrefixUnaryExpression payload")
-                    .operand,
-            );
-        } else {
-            return is_logical_or_coalescing_binary_expression(view, node);
-        }
-    }
+pub fn is_logical_expression(view: AstView<'_>, node: NodeId) -> Result<bool, Error> {
+    crate::syntax_helpers::is_logical_expression(&view, node)
 }
 /// port: tsc/internal/ast/utilities.go:IsPrivateIdentifierClassElementDeclaration
 pub fn is_private_identifier_class_element_declaration(

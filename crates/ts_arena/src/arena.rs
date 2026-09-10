@@ -89,6 +89,10 @@ impl<T> Arena<T> {
         if arena != self.id {
             return Err(Error::WrongOwner);
         }
+        self.get_slot_mut(slot)
+    }
+
+    pub(crate) fn get_slot_mut(&mut self, slot: u32) -> Result<&mut T, Error> {
         let index = slot.checked_sub(1).ok_or(Error::InvalidSlot)? as usize;
         if index >= self.len {
             return Err(Error::InvalidSlot);

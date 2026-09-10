@@ -308,6 +308,27 @@ class TableTests(unittest.TestCase):
                 self.assertEqual(tables.render(self.valid, "0"*40), b"rendered")
                 self.assertEqual(command.call_args.args[0], ["rustfmt", "--edition", "2024"])
 
+    def test_keyword_emitter_preserves_utf8_and_escaped_bytes_in_rust(self):
+        exported = copy.deepcopy(self.valid)
+        fixtures = [('quote"', 41), ("\\", 42), ("tab\n\0\b\f", 43), ("é😀", 44)]
+        for text, kind in fixtures:
+            exported["scanner"]["keywords"][text] = kind
+            exported["scanner"]["tokens"][text] = kind
+        generated = tables.render(exported, "0" * 40)
+        assertions = []
+        for text, kind in fixtures:
+            byte_array = "&[" + ", ".join(str(byte) for byte in text.encode("utf-8")) + "]"
+            assertions.append(f"assert_eq!(keyword_kind({byte_array}), Some({kind}));")
+            assertions.append(f"assert!(KEYWORDS.iter().any(|(text, kind)| text.as_bytes() == {byte_array} && *kind == {kind}));")
+        assertions.append("assert_eq!(keyword_kind(&[255]), None);")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, executable = root / "keywords.rs", root / "keywords"
+            source.write_bytes(b"#![allow(dead_code)]\n" + generated +
+                               ("fn main() {\n" + "\n".join(assertions) + "\n}\n").encode())
+            tables.command(["rustc", "--edition", "2021", str(source), "-o", str(executable)], cwd=tables.ROOT)
+            tables.command([str(executable)], cwd=root)
+
 
 if __name__ == "__main__":
     unittest.main()

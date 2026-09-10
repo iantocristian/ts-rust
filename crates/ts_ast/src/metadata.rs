@@ -8,7 +8,7 @@ use crate::{
     MappedDiagnosticDirective, NodeId, Pragma,
 };
 use std::ops::{Deref, Range};
-use ts_arena::{AuxId, Error, StorageRead};
+use ts_arena::{AuxId, Error};
 
 #[derive(Debug)]
 pub enum SourceMetadataData {
@@ -70,7 +70,7 @@ macro_rules! metadata_slice {
             }
         }
         pub struct $read<'a> {
-            record: Option<StorageRead<'a, AstStorageData>>,
+            record: Option<crate::auxiliary::AuxRead<'a>>,
             start: usize,
             len: usize,
         }
@@ -79,10 +79,10 @@ macro_rules! metadata_slice {
             fn deref(&self) -> &Self::Target {
                 match &self.record {
                     None => &[],
-                    Some(record) => match &**record {
-                        AstStorageData::SourceMetadata(SourceMetadataData::$variant(values)) => {
-                            &values[self.start..self.start + self.len]
-                        }
+                    Some(record) => match record.full() {
+                        Some(AstStorageData::SourceMetadata(SourceMetadataData::$variant(
+                            values,
+                        ))) => &values[self.start..self.start + self.len],
                         _ => unreachable!("validated source metadata backing"),
                     },
                 }
@@ -93,7 +93,7 @@ macro_rules! metadata_slice {
                 let len = u32::try_from(values.len()).map_err(|_| Error::InvalidSlot)?;
                 let data = SourceMetadataData::$variant(values.into_boxed_slice());
                 data.validate(self.view())?;
-                let backing = self.storage.push_aux(AstStorageData::SourceMetadata(data));
+                let backing = self.push_auxiliary(AstStorageData::SourceMetadata(data));
                 Ok($name {
                     backing: Some(backing),
                     start: 0,
@@ -106,7 +106,7 @@ macro_rules! metadata_slice {
                 let Some(backing) = slice.backing else {
                     return Ok(&mut []);
                 };
-                match self.storage.aux_mut(backing)? {
+                match self.auxiliary_mut(backing)? {
                     AstStorageData::SourceMetadata(SourceMetadataData::$variant(values)) => values
                         .get_mut(slice.start as usize..slice.start as usize + slice.len as usize)
                         .ok_or(Error::InvalidSlot),
@@ -116,13 +116,14 @@ macro_rules! metadata_slice {
         }
         impl<'a> AstView<'a> {
             pub fn $access(self, slice: $name) -> Result<$read<'a>, Error> {
-                let record = slice.backing.map(|id| self.0.aux(id)).transpose()?;
+                let record = slice.backing.map(|id| self.auxiliary(id)).transpose()?;
                 if let Some(record) = &record {
-                    match &**record {
-                        AstStorageData::SourceMetadata(SourceMetadataData::$variant(values))
-                            if (slice.start as usize)
-                                .checked_add(slice.len as usize)
-                                .is_some_and(|end| end <= values.len()) => {}
+                    match record.full() {
+                        Some(AstStorageData::SourceMetadata(SourceMetadataData::$variant(
+                            values,
+                        ))) if (slice.start as usize)
+                            .checked_add(slice.len as usize)
+                            .is_some_and(|end| end <= values.len()) => {}
                         _ => return Err(Error::InvalidGraph),
                     }
                 } else if slice.start != 0 || slice.len != 0 {

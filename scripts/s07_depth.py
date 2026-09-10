@@ -63,9 +63,14 @@ def native_rows(output, inventory):
         for field in required-{'id','terminal_failure'}:
             if type(row[field]) is not int or row[field] < 0:
                 raise ValueError('invalid depth counter: '+field)
-        if row['guard_entries'] <= 500:
+        # The unwind probe aborts immediately after its first real stack growth.
+        # Its entry count depends on the native frame size, not completed depth;
+        # still require the guard, actual growth and terminal failure together.
+        injected_unwind = spec.get('terminal_failure') is True
+        minimum_entries = 0 if injected_unwind else 500
+        if row['guard_entries'] <= minimum_entries:
             raise ValueError('native depth guard was not exercised')
-        if spec.get('require_growth') and row['actual_segment_growths'] <= 0:
+        if (spec.get('require_growth') or injected_unwind) and row['actual_segment_growths'] <= 0:
             raise ValueError('actual segment growth was not observed')
         if spec.get('require_binary') and (row['binary_nodes'] < 20000 or row['max_binary_frames'] <= 20000):
             raise ValueError('binary continuation stack was not exercised')

@@ -18,6 +18,7 @@ mod jsdoc;
 mod json;
 mod jsx;
 mod lazy_jsdoc;
+mod list_buffer;
 mod lists;
 mod modifiers;
 mod orchestration;

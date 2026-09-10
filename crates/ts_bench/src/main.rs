@@ -13,7 +13,7 @@ use std::{
     thread,
     time::Instant,
 };
-use ts_ast::{BoundFile, ExternalModuleIndicatorOptions, JsString, SourceFileParseOptions};
+use ts_ast::{CompletedFile, ExternalModuleIndicatorOptions, JsString, SourceFileParseOptions};
 use ts_jsstring::SourceText;
 
 #[cfg(feature = "allocation")]
@@ -90,10 +90,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(
             "{}",
             serde_json::json!({
-                "node": std::mem::size_of::<ts_ast::Node>(),
-                "node_data": std::mem::size_of::<ts_ast::NodeData>(),
-                "node_binding": std::mem::size_of::<ts_ast::NodeBinding>(),
+                "owned_construction_node": std::mem::size_of::<ts_ast::Node>(),
+                "owned_construction_payload": std::mem::size_of::<ts_ast::NodeData>(),
+                "owned_binding_snapshot": std::mem::size_of::<ts_ast::NodeBinding>(),
                 "auxiliary": std::mem::size_of::<ts_ast::AstStorageData>(),
+                "retained_core_total": "unavailable: use allocator and RSS captures; construction sizes do not describe compact headers and rows",
                 "node_list": std::mem::size_of::<ts_ast::NodeList>(),
                 "symbol": std::mem::size_of::<ts_ast::Symbol>(),
                 "flow_node": std::mem::size_of::<ts_ast::FlowNode>(),
@@ -110,13 +111,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .transpose()?;
     let graph_mode =
         args.len() == 4 && (graph_argument == Some("--graphs") || graph_index.is_some());
-    if args.len() != 3 && !graph_mode {
+    let local_binding_paths = args.len() == 4 && graph_argument == Some("--local-binding-paths");
+    let binding_paths =
+        local_binding_paths || args.len() == 4 && graph_argument == Some("--binding-paths");
+    if args.len() != 3 && !graph_mode && !binding_paths {
         return Err(
-            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX]"
+            "usage: ts_bench INPUTS.json WORKERS (1 or 8) [--graphs | --graph-records=INDEX | --binding-paths | --local-binding-paths]"
                 .into(),
         );
     }
-    if graph_mode && cfg!(any(feature = "allocation", feature = "profile")) {
+    if (graph_mode || binding_paths) && cfg!(any(feature = "allocation", feature = "profile")) {
         return Err("graph reporting requires the uninstrumented binary".into());
     }
     let workers: usize = args[2].to_str().ok_or("invalid worker count")?.parse()?;
@@ -168,7 +172,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let finished = &finished;
             let release = &release;
             handles.push(ts_parser::spawn_parser_worker(scope, move || {
-                let mut retained: Vec<BoundFile> = Vec::with_capacity(file_count.div_ceil(workers));
+                let mut retained: Vec<CompletedFile> =
+                    Vec::with_capacity(file_count.div_ceil(workers));
                 let mut failure = None;
                 ready.wait();
                 while let Ok(index) = receive.recv() {
@@ -182,10 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             input.script_kind,
                             input.options.clone(),
                         );
-                        let source = parsed.root();
-                        let file = parsed.publish_unbound();
-                        ts_binder::bind_source_file(&file, source)
-                            .expect("workload binding must complete")
+                        ts_binder::bind_parsed_file(parsed).expect("workload binding must complete")
                     }));
                     match outcome {
                         Ok(file) => retained.push(file),
@@ -260,6 +262,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if report.files != file_count {
             return Err("workload file count mismatch".into());
         }
+        if binding_paths {
+            let local = files
+                .iter()
+                .flatten()
+                .filter(|file| file.bound_with_local_scope())
+                .count();
+            let exclusive = files
+                .iter()
+                .flatten()
+                .filter(|file| file.bound_in_place())
+                .count();
+            let mut paths = serde_json::json!({
+                "version": 1, "workers": workers, "files": file_count,
+                "bound_in_place_files": exclusive, "fallback_files": file_count - exclusive,
+                "loaded_input_sha256": report.loaded_input_sha256,
+            });
+            if local_binding_paths {
+                paths["local_scope_files"] = local.into();
+                paths["checked_scope_files"] = (file_count - local).into();
+            }
+            println!("{paths}");
+            std::hint::black_box(&files);
+            return Ok(());
+        }
         if graph_mode {
             let stdout = io::stdout();
             let mut stdout = io::BufWriter::new(stdout.lock());
@@ -307,7 +333,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     *total += count;
                 }
-                for (_, binding) in file.view().result().bindings() {
+                for (_, binding) in file.view().result().bindings(file.view().ast()) {
                     bindings += 1;
                     if binding.symbol.is_none()
                         && binding.local_symbol.is_none()

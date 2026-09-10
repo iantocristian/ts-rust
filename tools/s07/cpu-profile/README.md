@@ -1,5 +1,13 @@
 # S07 CPU diagnosis
 
+The adapters below preserve the original S07 published-file binding path. S07-bis
+now uses consuming parse → bind → publish on eligible files, so these adapters
+must not be used to attribute the current production path without updating and
+revalidating them. The first compact-storage diagnosis instead samples the exact
+frozen normal benchmark executable; see its
+[result record](../../../docs/S07-bis-compact-storage.md). That capture has no
+explicit phase wrappers and makes no exact exclusive phase-attribution claim.
+
 These adapters profile the frozen parse-and-bind workload at one and eight
 workers. They retain the benchmark's per-file parse → publish → bind order,
 bounded round-robin queues, and all completed file roots through the endpoint.
@@ -55,3 +63,18 @@ the Go comparison measures the combined label/timer/profiler effect. These
 small diagnostic samples do not replace the existing seven-sample acceptance
 measurements. Raw traces stay under `target/`; summaries and a reviewed report
 record the conclusions separately.
+
+## Offline bind-only comparison
+
+`compare_bind.py` selects consuming-bind ancestry from the current archived
+normal Rust capture and `phase=bind` from all three archived one-worker Go
+profiles. It reports self, inclusive and immediate-caller weights with bind-only
+denominators, verifies input hashes and cross-checks native pprof flat rows.
+It does not rebuild, capture or time a compiler. See the
+[comparison and limits](../../../docs/S07-bis-bind-cpu-comparison.md) and its
+[archive/reproduction instructions](../performance-experiments/results/2026-09-09-bind-only-comparison/README.md).
+
+```sh
+python3 -m unittest discover -s tools/s07/cpu-profile -p test_compare_bind.py -v
+python3 tools/s07/cpu-profile/compare_bind.py --output target/s07-bis/bind-only-comparison/reproduced.json
+```

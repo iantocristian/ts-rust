@@ -1,5 +1,5 @@
 //! Config syntax ownership and the exact tsoptions property/range operations.
-use ts_ast::{AstFile, Diagnostic, NodeData, NodeId, SourceFileParseOptions, SyntaxKind as K};
+use ts_ast::{AstFile, Diagnostic, NodeDataRead, NodeId, SourceFileParseOptions, SyntaxKind as K};
 use ts_core::{ScriptKind, TextRange};
 use ts_diagnostics::Message;
 use ts_jsstring::{JsString, SourceText};
@@ -33,14 +33,14 @@ impl TsConfigSourceFile {
     pub fn object(&self) -> Option<NodeId> {
         let view = self.file.view();
         let node = view.node(self.root).expect("config source owner");
-        let NodeData::SourceFile(data) = node.data() else {
+        let NodeDataRead::SourceFile(data) = node.data() else {
             return None;
         };
-        let list = view.list(data.statements?).expect("config statements");
+        let list = view.list(data.statements()?).expect("config statements");
         let nodes = view
             .node_slice(list.nodes())
             .expect("config statement slice");
-        let first = nodes.first().copied().flatten()?;
+        let first = nodes.first().flatten()?;
         let expression = view
             .node(first)
             .expect("config expression statement")
@@ -60,10 +60,10 @@ pub fn find_property(config: &TsConfigSourceFile, path: &[&[u8]]) -> Option<Node
         result = Some(property);
         if index + 1 < path.len() {
             let node = config.file.view().node(property).expect("config property");
-            let NodeData::PropertyAssignment(data) = node.data() else {
+            let NodeDataRead::PropertyAssignment(data) = node.data() else {
                 unreachable!("property lookup returns an assignment")
             };
-            object = data.initializer?;
+            object = data.initializer()?;
         }
     }
     result
@@ -78,21 +78,21 @@ pub fn find_property_in_object(
 ) -> Option<NodeId> {
     let view = config.file.view();
     let node = view.node(object).expect("config object owner");
-    let NodeData::ObjectLiteralExpression(data) = node.data() else {
+    let NodeDataRead::ObjectLiteralExpression(data) = node.data() else {
         return None;
     };
-    let list = view.list(data.properties?).expect("config properties");
+    let list = view.list(data.properties()?).expect("config properties");
     let nodes = view
         .node_slice(list.nodes())
         .expect("config property slice");
     for property in nodes.iter().flatten() {
-        let node = view.node(*property).expect("config property");
-        let NodeData::PropertyAssignment(data) = node.data() else {
+        let node = view.node(property).expect("config property");
+        let NodeDataRead::PropertyAssignment(data) = node.data() else {
             continue;
         };
-        if let Some(name) = data.name.and_then(|name| property_name(config, name)) {
+        if let Some(name) = data.name().and_then(|name| property_name(config, name)) {
             if keys.iter().any(|key| *key == name.as_bytes()) {
-                return Some(*property);
+                return Some(property);
             }
         }
     }
@@ -128,16 +128,16 @@ pub fn property_name(config: &TsConfigSourceFile, node: NodeId) -> Option<JsStri
             })
         }
         Some(K::JsxNamespacedName) => {
-            let NodeData::JsxNamespacedName(data) = read.data() else {
+            let NodeDataRead::JsxNamespacedName(data) = read.data() else {
                 unreachable!("JSX name payload")
             };
             let mut result = view
-                .node_text(data.namespace?)
+                .node_text(data.namespace()?)
                 .expect("namespace text")
                 .as_bytes()
                 .to_vec();
             result.push(b':');
-            result.extend_from_slice(view.node_text(data.name?).expect("name text").as_bytes());
+            result.extend_from_slice(view.node_text(data.name()?).expect("name text").as_bytes());
             Some(JsString::from_bytes(result))
         }
         _ => None,
@@ -176,12 +176,15 @@ mod tests {
         );
         let property = find_property(&config, &[b"compilerOptions"]).unwrap();
         let read = config.file.view().node(property).unwrap();
-        let NodeData::PropertyAssignment(data) = read.data() else {
+        let NodeDataRead::PropertyAssignment(data) = read.data() else {
             panic!("expected property")
         };
-        let selected =
-            find_property_in_object(&config, data.initializer.unwrap(), &[b"target", b"strict"])
-                .unwrap();
+        let selected = find_property_in_object(
+            &config,
+            data.initializer().unwrap(),
+            &[b"target", b"strict"],
+        )
+        .unwrap();
         let node = config.file.view().node(selected).unwrap();
         assert_eq!(
             property_name(&config, node.name().unwrap())

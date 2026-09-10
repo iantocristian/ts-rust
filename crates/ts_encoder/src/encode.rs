@@ -8,7 +8,8 @@ use crate::{
 use std::{collections::BTreeMap, sync::Arc};
 use ts_arena::Error;
 use ts_ast::{
-    AstView, JsDocProvider, Node, NodeId, NodeIndexCache, NodeKind, SourceFileState, SyntaxKind,
+    AstView, JsDocProvider, NodeAccess, NodeId, NodeIndexCache, NodeKind, SourceFileState,
+    SyntaxKind,
 };
 use ts_jsstring::PositionMap;
 
@@ -316,7 +317,7 @@ fn node_indices(
 fn node_data(
     view: AstView<'_>,
     id: NodeId,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
     strings: &mut StringTable<'_>,
     positions: &PositionMap,
     extended: &mut Vec<u8>,
@@ -339,7 +340,7 @@ fn node_data(
 fn record_source_file(
     view: AstView<'_>,
     id: NodeId,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
     strings: &mut StringTable<'_>,
     positions: &PositionMap,
     extended: &mut Vec<u8>,
@@ -427,7 +428,7 @@ fn record_source_file(
 fn record_extended(
     view: AstView<'_>,
     id: NodeId,
-    node: &Node,
+    node: &(impl NodeAccess + ?Sized),
     strings: &mut StringTable<'_>,
     positions: &PositionMap,
     extended: &mut Vec<u8>,
@@ -439,8 +440,8 @@ fn record_extended(
                 .data()
                 .$access()
                 .expect("literal payload matches Go kind");
-            let text = strings.add(n.text.as_bytes(), node.kind(), node.pos(), node.end());
-            words(extended, [text, n.$flag as u32]);
+            let text = strings.add(n.text(), node.kind(), node.pos(), node.end());
+            words(extended, [text, n.$flag() as u32]);
         }};
     }
     macro_rules! template {
@@ -449,9 +450,9 @@ fn record_extended(
                 .data()
                 .$access()
                 .expect("template payload matches Go kind");
-            let text = strings.add(n.text.as_bytes(), node.kind(), node.pos(), node.end());
-            let raw = strings.add(n.raw_text.as_bytes(), node.kind(), node.pos(), node.end());
-            words(extended, [text, raw, n.template_flags as u32]);
+            let text = strings.add(n.text(), node.kind(), node.pos(), node.end());
+            let raw = strings.add(n.raw_text(), node.kind(), node.pos(), node.end());
+            words(extended, [text, raw, n.template_flags() as u32]);
         }};
     }
     match node.kind().known() {

@@ -41,7 +41,7 @@ fn check(
         Some(n) if n == children[3] => "e",
         _ => panic!("unregistered fixture child"),
     };
-    let nodes = |ns: &[Option<NodeId>]| ns.iter().map(|n| id(*n)).collect::<Vec<_>>().join(",");
+    let nodes = |ns: &NodeSliceRead<'_>| ns.iter().map(id).collect::<Vec<_>>().join(",");
     let list = |ns: Option<NodeListId>| {
         ns.map_or_else(
             || "nil".into(),

@@ -68,7 +68,7 @@ impl JsDocProvider for ParserJsDocProvider {
                         comment.loc.end(),
                         pos,
                     ) {
-                        Factory::node_mut(&mut parser.factory, parsed).set_parent(Some(parent));
+                        Factory::set_node_parent(&mut parser.factory, parsed, Some(parent));
                         roots.push(parsed);
                         pos = parser.factory.node(parsed).range().end();
                     }

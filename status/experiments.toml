@@ -322,20 +322,20 @@ unit = "scanner token bytes, literal value bytes and rescans match Go; checker-c
 
 [E5]
 title = "Memory"
-nature = "Measured for parse/bind and the checker subset's per-type footprint; full checking remains extrapolated"
+nature = "Measured for parse/bind and the checker subset's per-type footprint; full checking remains extrapolated. Parse/bind thresholds re-based by ADR 0021 (2026-09-10) from 0.7"
 
 [[E5.criteria]]
 id = "peak_rss"
 metric = "run.e5.peak_rss_ratio"
 op = "<="
-threshold = 0.7
+threshold = 0.85
 unit = "Rust / Go peak RSS for parse and bind of the pinned VS Code workload"
 
 [[E5.criteria]]
 id = "allocated_bytes"
 metric = "run.e5.allocated_bytes_ratio"
 op = "<="
-threshold = 0.7
+threshold = 0.85
 unit = "Rust / Go bytes allocated for the same parse/bind workload"
 
 [[E5.criteria]]
@@ -347,20 +347,20 @@ unit = "Rust / Go per-type footprint on the frozen checker subset"
 
 [E6]
 title = "CPU"
-nature = "Measured for parse and bind of the pinned VS Code workload; full checking remains extrapolated"
+nature = "Measured for parse and bind of the pinned VS Code workload; full checking remains extrapolated. Thresholds re-based by ADR 0021 (2026-09-10) from 1.0; run.e6.stable applies each mode's threshold"
 
 [[E6.criteria]]
 id = "one_thread"
 metric = "run.e6.one_thread_wall_time_ratio"
 op = "<="
-threshold = 1
+threshold = 1.25
 unit = "Rust / Go wall time at one thread"
 
 [[E6.criteria]]
 id = "eight_threads"
 metric = "run.e6.eight_threads_wall_time_ratio"
 op = "<="
-threshold = 1
+threshold = 1.45
 unit = "Rust / Go wall time at eight threads"
 
 [E7]

@@ -2,7 +2,10 @@
 use crate::{Program, ProgramFile};
 use std::collections::HashMap;
 use ts_arena::{ArenaId, Counters, Error, SymbolArena, SymbolId};
-use ts_ast::{AstView, NodeBinding, NodeId, Symbol, SymbolFlags, SymbolTable, SymbolTableId};
+use ts_ast::{
+    AstView, DeclarationRead, NodeBinding, NodeId, Symbol, SymbolFlags, SymbolRef, SymbolTableId,
+    SymbolTableRead,
+};
 use ts_binder::name_resolver::ResolverHost;
 use ts_jsstring::JsString;
 #[derive(Default)]
@@ -64,9 +67,9 @@ impl ResolverHost for ProgramResolverHost<'_> {
             .ok_or(Error::WrongOwner)?;
         self.program.files()[i].bound().view().node_binding(node)
     }
-    fn symbol(&self, symbol: SymbolId) -> Result<&Symbol, Error> {
+    fn symbol(&self, symbol: SymbolId) -> Result<SymbolRef<'_>, Error> {
         if symbol.arena() == self.transient.id() {
-            return self.transient.get(symbol);
+            return self.transient.get(symbol).map(SymbolRef::Owned);
         }
         let &i = self
             .program
@@ -74,9 +77,13 @@ impl ResolverHost for ProgramResolverHost<'_> {
             .symbols
             .get(&symbol.arena())
             .ok_or(Error::WrongOwner)?;
-        self.program.files()[i].bound().view().symbol(symbol)
+        self.program.files()[i]
+            .bound()
+            .view()
+            .symbol(symbol)
+            .map(SymbolRef::Stored)
     }
-    fn table(&self, table: SymbolTableId) -> Result<&SymbolTable, Error> {
+    fn table(&self, table: SymbolTableId) -> Result<SymbolTableRead<'_>, Error> {
         let &i = self
             .program
             .owners
@@ -90,10 +97,10 @@ impl ResolverHost for ProgramResolverHost<'_> {
             .tables()
             .get(table)
     }
-    fn declarations(&self, symbol: SymbolId) -> Result<&[Option<NodeId>], Error> {
+    fn declarations(&self, symbol: SymbolId) -> Result<DeclarationRead<'_>, Error> {
         if symbol.arena() == self.transient.id() {
             self.transient.get(symbol)?;
-            return Ok(&[]);
+            return Ok(DeclarationRead::empty(self.transient.id()));
         }
         let &i = self
             .program
@@ -104,7 +111,7 @@ impl ResolverHost for ProgramResolverHost<'_> {
         let view = self.program.files()[i].bound().view();
         view.result()
             .declarations()
-            .get(view.symbol(symbol)?.declarations)
+            .get(view.symbol(symbol)?.declarations())
     }
     fn new_transient_symbol(
         &mut self,

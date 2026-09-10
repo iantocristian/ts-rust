@@ -89,7 +89,7 @@ impl Parser<'_, AstBuilder> {
             "Expected end of file token from scanner."
         );
         statements.append(&mut self.reparse_list);
-        let list = self.new_node_list(TextRange::new(pos, end), statements);
+        let list = self.new_parsed_node_list(TextRange::new(pos, end), statements);
         let mut root = self.factory.new_source_file(
             self.opts.clone(),
             self.source_owner.clone(),
@@ -174,8 +174,7 @@ impl Parser<'_, AstBuilder> {
             file.has_lazy_jsdoc = !matches!(self.script_kind, ScriptKind::JS | ScriptKind::JSX);
             file.reparsed_clones.clone_from(&self.reparsed_clones);
         }
-        let node = Factory::node_mut(&mut self.factory, root);
-        node.set_flags(node.flags() | self.source_flags);
+        Factory::add_node_flags(&mut self.factory, root, self.source_flags);
         self.set_external_module_indicator(root);
     }
     // The Go finish path creates a new map after both initial parse and optional
@@ -218,10 +217,10 @@ impl Parser<'_, AstBuilder> {
         );
         let (old_statements, eof) = {
             let node = self.factory.node(root);
-            let file = node.data().as_source_file().expect("source payload");
+            let file = node.data_source().as_source_file().expect("source payload");
             (
-                file.statements.expect("parsed source statements"),
-                file.end_of_file_token,
+                file.statements().expect("parsed source statements"),
+                file.end_of_file_token(),
             )
         };
         let original_nodes = self.factory.read_list(old_statements).nodes();
@@ -231,12 +230,23 @@ impl Parser<'_, AstBuilder> {
         let mut i = 0;
         while i < self.possible_await_spans.len() {
             let next = self.possible_await_spans[i];
-            let previous =
-                self.factory.read_nodes(original_nodes)[after].expect("source statement");
-            let next_node =
-                self.factory.read_nodes(original_nodes)[next].expect("source statement");
+            let previous = self
+                .factory
+                .read_nodes(original_nodes)
+                .at(after)
+                .expect("source statement");
+            let next_node = self
+                .factory
+                .read_nodes(original_nodes)
+                .at(next)
+                .expect("source statement");
             statements.extend(
-                self.factory.read_nodes(original_nodes)[after..next]
+                self.factory
+                    .read_nodes(
+                        original_nodes
+                            .slice(after..next)
+                            .expect("source statement range"),
+                    )
                     .iter()
                     .map(|id| id.expect("source statement")),
             );
@@ -266,7 +276,10 @@ impl Parser<'_, AstBuilder> {
                     self.next_token();
                 }
                 if after < original_nodes.len() {
-                    let last = self.factory.read_nodes(original_nodes)[after - 1]
+                    let last = self
+                        .factory
+                        .read_nodes(original_nodes)
+                        .at(after - 1)
                         .expect("last await statement");
                     let end = self.factory.node(statement).range().end();
                     let previous_end = self.factory.node(last).range().end();
@@ -288,10 +301,18 @@ impl Parser<'_, AstBuilder> {
             i += 2;
         }
         if after < original_nodes.len() {
-            let previous =
-                self.factory.read_nodes(original_nodes)[after].expect("source statement");
+            let previous = self
+                .factory
+                .read_nodes(original_nodes)
+                .at(after)
+                .expect("source statement");
             statements.extend(
-                self.factory.read_nodes(original_nodes)[after..]
+                self.factory
+                    .read_nodes(
+                        original_nodes
+                            .slice(after..original_nodes.len())
+                            .expect("source statement range"),
+                    )
                     .iter()
                     .map(|id| id.expect("source statement")),
             );
@@ -314,8 +335,12 @@ impl Parser<'_, AstBuilder> {
         );
         let nodes = self.factory.read_list(list).nodes();
         for i in 0..nodes.len() {
-            let node = self.factory.read_nodes(nodes)[i].expect("source statement");
-            Factory::node_mut(&mut self.factory, node).set_parent(Some(root));
+            let node = self
+                .factory
+                .read_nodes(nodes)
+                .at(i)
+                .expect("source statement");
+            Factory::set_node_parent(&mut self.factory, node, Some(root));
         }
         root
     }

@@ -8,10 +8,9 @@ Status: reviewed on 7 September 2026; dispositions below precede implementation.
 
 S05 implements the byte scanner used by the parser and language service, not a
 new interpretation of TypeScript's lexical grammar. The authorities are the
-pinned Go functions, `docs/design/text.md`, ADRs 0011/0013/0015/0016/0017/0018,
-and `docs/CODEX-RUST-GUIDELINES.md`. Preserve the observable recovery behavior
-as well as successful tokens. No mismatch is accepted by changing a baseline
-or loosening a comparator.
+pinned Go functions, `docs/design/text.md`, and ADRs 0011/0013/0015/0016/0017/0018.
+Preserve the observable recovery behavior as well as successful tokens. No
+mismatch is accepted by changing a baseline or loosening a comparator.
 
 | Sprint requirement | Concrete deliverable | Independent acceptance |
 | --- | --- | --- |

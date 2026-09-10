@@ -1,6 +1,8 @@
 use crate::tokens::token_is_identifier_or_keyword;
 use crate::{Parser, ParserFactory, ParsingContext};
-use ts_ast::{node_flags, FactoryMethods, JsString, NodeData, NodeId, NodeListId, SyntaxKind as K};
+use ts_ast::{
+    node_flags, FactoryMethods, JsString, NodeDataRead, NodeId, NodeListId, SyntaxKind as K,
+};
 use ts_core::TextRange;
 use ts_diagnostics as diag;
 
@@ -764,8 +766,8 @@ impl<F: ParserFactory> Parser<'_, F> {
             let span = self.parse_template_type_span();
             list.push(span);
             let literal = match self.factory.node(span).data() {
-                NodeData::TemplateLiteralTypeSpan(data) => {
-                    data.literal.expect("template span has literal")
+                NodeDataRead::TemplateLiteralTypeSpan(data) => {
+                    data.literal().expect("template span has literal")
                 }
                 _ => unreachable!("new template span payload"),
             };
