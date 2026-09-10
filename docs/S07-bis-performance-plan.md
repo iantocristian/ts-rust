@@ -1,6 +1,10 @@
 # S07-bis: measured storage and CPU improvements
 
-Status: the [bounded drain/hash follow-on](S07-bis-drain-hash-result.md) is complete
+Status: the [fresh ADR 0021 capture](S07-bis-gate-rebase.md) passes the four
+owner-approved performance criteria, including both CPU confidence bounds.
+All local evidence is current and S07 passes. Four-target CI is reported on PR #12.
+
+The [bounded drain/hash follow-on](S07-bis-drain-hash-result.md) is complete
 and **unretained**. It passes correctness and both full workload graph modes,
 but CPU ratio intervals are 0.954296–1.008483 / 0.894933–1.022502 and memory is
 effectively unchanged. The fixed runner reports `regressing_or_uncertain`;
@@ -400,9 +404,12 @@ Because the benchmark scripts and the threshold ledger are part of every
 capture's source fingerprint, the acceptance capture and its E5/E6 evidence are
 stale once the decision is applied. S07-4 can close on one fresh paired capture of
 the retained implementation at the revision containing the decision, under the
-standard sequence. That capture and four-target CI are pending. The measured margins to the new
-thresholds are 0.015 (one worker) and 0.007 (eight workers) on the upper bounds;
-a miss is recorded and reported, not re-sampled.
+standard sequence. The [fresh capture](S07-bis-gate-rebase.md) of `9ff695b`
+passes: CPU 1.232309 / 1.346110, upper bounds 1.242925 / 1.387920; memory
+ratios at most 0.738071. It retains all 84 samples after the prescribed
+one-worker extensions. S07 passes after refreshing correctness evidence and correcting the old
+ownership-count and mapping-location bookkeeping. Four-target CI is reported
+on PR #12. A future miss is recorded and reported, not re-sampled.
 
 Open questions, without a new experiment commitment, are the eight-worker scaling
 difference (4.4× against Go's 5.0×), the 653 ms one-worker elapsed gap, and residual

@@ -30,12 +30,12 @@ class OwnershipScope(unittest.TestCase):
         }.issubset(self.manifest["common"]["binding_publication"]["cases"]))
         self.assertEqual(len(self.manifest["common"]["exclusive_binding"]["cases"]), 10)
         self.assertEqual(len(self.manifest["common"]["core_validation_proof"]["cases"]), 9)
-        for name, count in (("local_ast", 10), ("local_ast_core", 17), ("local_binder", 6),
+        for name, count in (("local_ast", 10), ("local_ast_core", 21), ("local_binder", 9),
                             ("local_flow_ids", 2), ("local_symbol_ids", 3)):
             self.assertEqual(len(self.manifest["common"][name]["cases"]), count)
         report = {"metrics": {}}
         publish_metrics(report, self.modes, self.manifest)
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 76)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 83)
 
     def test_missing_or_retargeted_common_inventory_is_rejected(self):
         for name in COMMON:
@@ -138,7 +138,7 @@ class OwnershipScope(unittest.TestCase):
                 publish_metrics(report, modes, self.manifest)
                 self.assertFalse(report["metrics"]["shared_bound_file"])
                 self.assertFalse(report["metrics"]["retained_snapshot_edit"])
-                self.assertEqual(report["metrics"]["program_ownership_tests"], 59)
+                self.assertEqual(report["metrics"]["program_ownership_tests"], 62)
 
     def test_all_suites_execute_in_every_mode_with_unchanged_instrumentation_arguments(self):
         suites = {**self.manifest["common"], **self.manifest["groups"]}
@@ -193,7 +193,7 @@ class OwnershipScope(unittest.TestCase):
         self.assertFalse(report["metrics"]["shared_bound_file"])
         self.assertFalse(report["metrics"]["retained_snapshot_edit"])
         self.assertFalse(report["metrics"]["shared_bound_file_miri"])
-        self.assertEqual(report["metrics"]["program_ownership_tests"], 66)
+        self.assertEqual(report["metrics"]["program_ownership_tests"], 73)
 
     def test_each_common_suite_is_required_in_each_mode(self):
         for mode in MODES:
@@ -232,7 +232,7 @@ class OwnershipScope(unittest.TestCase):
                     publish_metrics(report, modes, self.manifest)
                     self.assertFalse(report["metrics"]["shared_bound_file"])
                     self.assertFalse(report["metrics"]["retained_snapshot_edit"])
-                    self.assertEqual(report["metrics"]["program_ownership_tests"], 59)
+                    self.assertEqual(report["metrics"]["program_ownership_tests"], 66)
 
     def test_old_two_group_success_shape_and_nonboolean_observations_fail(self):
         old = {mode: {group: True for group in GROUPS} for mode in MODES}
