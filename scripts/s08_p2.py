@@ -221,7 +221,7 @@ def compare(directory, actual_path, output):
             if not same_json_value(expected,result):mismatches.append({'section':section,'id':expected[key]})
     result={'version':1,'matched':not missing and not mismatches,'unsupported_operations':missing,'mismatches':mismatches,
             'native_observation_sha256':report['observation_sha256'],'actual_sha256':digest(Path(actual_path).read_bytes()),
-            'scope':'Named checkpoint exact comparison only; source-language diagnostics are compared payloads, never Unsupported or omitted work'}
+            'scope':spec['scope']}
     with Path(output).open('xb') as destination:destination.write(canonical(result)+b'\n')
     print(json.dumps(result,sort_keys=True))
     return result

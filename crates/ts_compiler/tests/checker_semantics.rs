@@ -642,3 +642,51 @@ fn primitive_union_diagnostics_preserve_literal_target_spelling() {
         .unwrap()
         .is_empty());
 }
+
+#[test]
+fn union_constituents_are_checked_even_after_reduction_and_on_retry() {
+    for text in [
+        "type U = { a: string; a: number } | string;",
+        "type U = string | { a: string; a: number };",
+        "type U = unknown | ({ a: string; a: number } | string);",
+        "type U = { a: Missing } | string;",
+        "type U = unknown | { a: Missing };",
+    ] {
+        let (owner, source) = checker(text.as_bytes(), options());
+        let first = owner.operation().unwrap().semantic_diagnostics(source);
+        assert!(
+            matches!(first, Err(Error::Unsupported(_))),
+            "{text}: {first:?}"
+        );
+        for _ in 0..2 {
+            assert_eq!(
+                owner.operation().unwrap().semantic_diagnostics(source),
+                first
+            );
+        }
+    }
+    // Checking follows source order, before construction sorts/reduces types.
+    for (text, expected) in [
+        (
+            "type U = { a: string; a: number } | string[];",
+            "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
+        ),
+        (
+            "type U = string[] | { a: string; a: number };",
+            "checkSourceElementWorker: statement/type family",
+        ),
+    ] {
+        let (owner, source) = checker(text.as_bytes(), options());
+        assert_eq!(
+            owner.operation().unwrap().semantic_diagnostics(source),
+            Err(Error::Unsupported(expected))
+        );
+    }
+    let (owner, source) = checker(b"type U = { a: string } | number;", options());
+    assert!(owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap()
+        .is_empty());
+}

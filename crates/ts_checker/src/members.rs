@@ -254,8 +254,13 @@ impl CheckerState {
         self.symbol_mut(result)?.declarations = declaration_list;
         if !nonuniform_value {
             if let Some(value) = first_value {
+                // Go inherits the raw declaration symbol's parent, before
+                // checker-local merges or late-bound resolution.
                 let source_symbol = self
-                    .get_symbol_of_declaration(value)?
+                    .program()?
+                    .bound(value)?
+                    .node_binding(value)?
+                    .and_then(|binding| binding.symbol)
                     .ok_or(Error::MissingLink("property declaration symbol"))?;
                 let parent = self.symbol(source_symbol)?.parent();
                 let result = self.symbol_mut(result)?;

@@ -1,11 +1,14 @@
 """P2 protocol never treats missing operations or partial inventories as parity."""
 import copy
+import contextlib
+import io
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from s08_p2 import MODES, PHASES, ROOT, SPEC, canonical, digest, specification, validate
+from s08_p2 import MODES, PHASES, ROOT, SPEC, canonical, compare, digest, specification, validate
 from s04_common import strict_json_loads
 
 
@@ -34,6 +37,29 @@ class P2Protocol(unittest.TestCase):
 
     def test_complete_inventory_can_be_validated(self):
         self.assertEqual(validate(*self.fixture()),[])
+
+    def test_comparison_scope_comes_from_the_frozen_request(self):
+        for scope in ('Historical P2 scope', 'Named P3 scope'):
+            spec,observed=self.fixture()
+            spec['scope']=scope
+            request=canonical(spec)+b'\n'
+            observed['request_sha256']=digest(request)
+            native=canonical(observed)+b'\n'
+            observed['rust_ownership']={'scope':'Rust-only lifetime checks','programs':[
+                {'id':p['id'],'state':'executed','program_survives_retained_result':True,
+                 'retained_display_unchanged':True,'program_released_after_result_drop':True}
+                for p in spec['programs']]}
+            with self.subTest(scope=scope), tempfile.TemporaryDirectory() as tmp:
+                directory=Path(tmp)
+                (directory/'requests.json').write_bytes(request)
+                (directory/'observations.json').write_bytes(native)
+                (directory/'report.json').write_bytes(canonical({'sources':{},
+                    'request_sha256':digest(request),'observation_sha256':digest(native)}))
+                (directory/'actual.json').write_bytes(canonical(observed)+b'\n')
+                with contextlib.redirect_stdout(io.StringIO()):
+                    result=compare(directory,directory/'actual.json',directory/'verified.json')
+                self.assertTrue(result['matched'])
+                self.assertEqual(result['scope'],scope)
 
     def test_options_and_execution_modes_are_explicit(self):
         for key,value in (('noLib',False),('strict',False),('module','commonjs'),('strict',1)):

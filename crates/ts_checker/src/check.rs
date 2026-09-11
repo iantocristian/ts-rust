@@ -157,9 +157,9 @@ impl CheckerState {
             Some(K::ParenthesizedType) => {
                 self.check_source_element(required(read.type_node(), "parenthesized type")?)
             }
+            Some(K::UnionType) => self.check_union_type(node),
             Some(
-                K::UnionType
-                | K::TypeReference
+                K::TypeReference
                 | K::LiteralType
                 | K::AnyKeyword
                 | K::UnknownKeyword
@@ -184,6 +184,27 @@ impl CheckerState {
                 "checkSourceElementWorker: statement/type family",
             )),
         }
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.checkUnionOrIntersectionType
+    fn check_union_type(&mut self, node: NodeId) -> Result<(), Error> {
+        let view = self.ast(node)?;
+        let list = required(
+            view.node(node)?
+                .data_source()
+                .as_union_type_node()
+                .ok_or(ts_arena::Error::InvalidGraph)?
+                .types(),
+            "union types",
+        )?;
+        let constituents: Vec<_> = view.node_slice(view.list(list)?.nodes())?.iter().collect();
+        // Check the source children before construction can reduce or reorder
+        // the union. A cached type is not a completed declaration check.
+        for constituent in constituents {
+            self.check_source_element(required(constituent, "union constituent")?)?;
+        }
+        self.get_type_from_type_node(node)?;
+        Ok(())
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkTypeAliasDeclaration

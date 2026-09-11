@@ -306,6 +306,60 @@
           "operation": "declared_type"
         }
       ]
+    },
+    {
+      "id": "union-duplicate-properties",
+      "files": {
+        "/case.ts": "type U = { a: string; a: number } | string;\n"
+      },
+      "roots": [
+        "/case.ts"
+      ],
+      "queries": [
+        {
+          "id": "U",
+          "file": "/case.ts",
+          "declaration": "U",
+          "target": "name",
+          "operation": "declared_type"
+        }
+      ]
+    },
+    {
+      "id": "union-missing-type",
+      "files": {
+        "/case.ts": "type U = { a: Missing } | string;\n"
+      },
+      "roots": [
+        "/case.ts"
+      ],
+      "queries": [
+        {
+          "id": "U",
+          "file": "/case.ts",
+          "declaration": "U",
+          "target": "name",
+          "operation": "declared_type"
+        }
+      ]
+    },
+    {
+      "id": "inline-union-control",
+      "files": {
+        "/case.ts": "type U = { a: string } | number;\n"
+      },
+      "roots": [
+        "/case.ts"
+      ],
+      "queries": [
+        {
+          "id": "U",
+          "file": "/case.ts",
+          "declaration": "U",
+          "target": "name",
+          "operation": "declared_type"
+        }
+      ]
     }
   ],
   "merge": {
