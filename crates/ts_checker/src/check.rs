@@ -157,6 +157,7 @@ impl CheckerState {
             Some(K::ParenthesizedType) => {
                 self.check_source_element(required(read.type_node(), "parenthesized type")?)
             }
+            Some(K::UnionType) => self.check_union_type(node),
             Some(
                 K::TypeReference
                 | K::LiteralType
@@ -183,6 +184,27 @@ impl CheckerState {
                 "checkSourceElementWorker: statement/type family",
             )),
         }
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.checkUnionOrIntersectionType
+    fn check_union_type(&mut self, node: NodeId) -> Result<(), Error> {
+        let view = self.ast(node)?;
+        let list = required(
+            view.node(node)?
+                .data_source()
+                .as_union_type_node()
+                .ok_or(ts_arena::Error::InvalidGraph)?
+                .types(),
+            "union types",
+        )?;
+        let constituents: Vec<_> = view.node_slice(view.list(list)?.nodes())?.iter().collect();
+        // Check the source children before construction can reduce or reorder
+        // the union. A cached type is not a completed declaration check.
+        for constituent in constituents {
+            self.check_source_element(required(constituent, "union constituent")?)?;
+        }
+        self.get_type_from_type_node(node)?;
+        Ok(())
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkTypeAliasDeclaration
@@ -275,7 +297,7 @@ impl CheckerState {
                 "checkVariableLikeDeclaration: binding/computed/private name",
             ));
         }
-        if read.question_token(self.ast(node)?)?.is_some() {
+        if !property && read.question_token(self.ast(node)?)?.is_some() {
             return Err(Error::Unsupported(
                 "checkVariableLikeDeclaration: optional declaration",
             ));
@@ -461,6 +483,27 @@ impl CheckerState {
             // constituents of the canonical boolean type in non-strict mode.
             return Ok(true);
         }
+        if (s | t) & tf::UNION != 0
+            && self.is_primitive_union(source)?
+            && self.is_primitive_union(target)?
+        {
+            if s & tf::UNION != 0 {
+                let types = self.types.union(source)?.types.clone();
+                for &ty in types.iter() {
+                    if !self.source_type_assignable(ty, target, active)? {
+                        return Ok(false);
+                    }
+                }
+                return Ok(true);
+            }
+            let types = self.types.union(target)?.types.clone();
+            for &ty in types.iter() {
+                if self.source_type_assignable(source, ty, active)? {
+                    return Ok(true);
+                }
+            }
+            return Ok(false);
+        }
         if s & tf::OBJECT != 0 && t & tf::OBJECT != 0 {
             if active.contains(&(source, target)) {
                 return Err(Error::Unsupported("recursive structured type relation"));
@@ -481,6 +524,21 @@ impl CheckerState {
             ));
         }
         Ok(false)
+    }
+
+    // The primitive slice can use all-source/any-target constituent relations
+    // without structural matching, constraints or recursive assumptions.
+    fn is_primitive_union(&self, ty: TypeId) -> Result<bool, Error> {
+        let flags = self.types.flags(ty)?;
+        if flags & tf::UNION != 0 {
+            for &ty in self.types.union(ty)?.types.iter() {
+                if !self.is_primitive_union(ty)? {
+                    return Ok(false);
+                }
+            }
+            return Ok(true);
+        }
+        Ok(flags & tf::STRUCTURED_OR_INSTANTIABLE == 0)
     }
 
     // port: tsc/internal/checker/relater.go:Relater.propertiesRelatedTo
@@ -592,6 +650,28 @@ impl CheckerState {
         Ok(())
     }
 
+    // port: tsc/internal/checker/relater.go:Checker.typeCouldHaveTopLevelSingletonTypes
+    fn type_could_have_top_level_singletons(&self, ty: TypeId) -> Result<bool, Error> {
+        let flags = self.types.flags(ty)?;
+        if flags & tf::BOOLEAN != 0 {
+            return Ok(false);
+        }
+        if flags & tf::UNION_OR_INTERSECTION != 0 {
+            for &ty in self.types.types_of(ty)? {
+                if self.type_could_have_top_level_singletons(ty)? {
+                    return Ok(true);
+                }
+            }
+            return Ok(false);
+        }
+        if flags & tf::INSTANTIABLE != 0 {
+            return Err(Error::Unsupported(
+                "typeCouldHaveTopLevelSingletonTypes: constraint",
+            ));
+        }
+        Ok(flags & (tf::UNIT | tf::TEMPLATE_LITERAL | tf::STRING_MAPPING) != 0)
+    }
+
     // port: tsc/internal/checker/relater.go:Checker.checkTypeAssignableTo
     // port: tsc/internal/checker/relater.go:Relater.reportRelationError
     fn check_assignable_at(
@@ -605,7 +685,9 @@ impl CheckerState {
         }
         let source_flags = self.types.flags(source)?;
         let target_flags = self.types.flags(target)?;
-        let source_for_error = if target_flags & (tf::NEVER | tf::UNIT) == 0 {
+        let source_for_error = if target_flags & tf::NEVER == 0
+            && !self.type_could_have_top_level_singletons(target)?
+        {
             if source_flags & tf::STRING_LITERAL != 0 {
                 self.builtins.string_type
             } else if source_flags & tf::NUMBER_LITERAL != 0 {

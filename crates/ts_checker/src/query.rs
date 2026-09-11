@@ -17,6 +17,9 @@ pub(crate) struct QueryState {
     pub global_types: crate::types::Map<&'static str, TypeId>,
     pub references: LinkStore<SymbolId, SymbolFlags>,
     pub scope_changes: LinkStore<NodeId, ts_core::Tristate>,
+    /// The union-only slice of deferredSymbolLinks.constituents. The containing
+    /// type lives in valueSymbolLinks; no owning references back to the checker.
+    pub deferred_property_types: LinkStore<SymbolId, Option<crate::TypeList>>,
 }
 
 fn required<T>(value: Option<T>, name: &'static str) -> Result<T, Error> {
@@ -492,6 +495,7 @@ impl CheckerState {
             return Ok(*ty);
         }
         let ty = match read.kind().known() {
+            Some(K::UnionType) => self.get_type_from_union_type_node(node)?,
             Some(K::ParenthesizedType) => {
                 return self
                     .get_type_from_type_node(required(read.type_node(), "parenthesized type")?)
@@ -594,6 +598,32 @@ impl CheckerState {
                 }));
         }
         Ok(None)
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.getTypeFromUnionTypeNode
+    fn get_type_from_union_type_node(&mut self, node: NodeId) -> Result<TypeId, Error> {
+        let alias = self.alias_for_type_node(node)?;
+        let view = self.ast(node)?;
+        let list = required(
+            view.node(node)?
+                .data_source()
+                .as_union_type_node()
+                .ok_or(ts_arena::Error::InvalidGraph)?
+                .types(),
+            "union types",
+        )?;
+        let nodes = view
+            .node_slice(view.list(list)?.nodes())?
+            .iter()
+            .collect::<Vec<_>>();
+        let mut types = Vec::with_capacity(nodes.len());
+        for node in nodes {
+            types.push(self.get_type_from_type_node(required(node, "union constituent")?)?);
+        }
+        let alias = alias
+            .map(|alias| self.types.push_alias(alias))
+            .transpose()?;
+        self.get_union_type_ex(&types, crate::UnionReduction::Literal, alias, None)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkExpressionCached
@@ -917,11 +947,11 @@ impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.getTypeOfSymbol
     pub(crate) fn get_type_of_symbol(&mut self, symbol: SymbolId) -> Result<TypeId, Error> {
         let read = self.symbol(symbol)?;
+        if read.check_flags() & check_flags::DEFERRED_TYPE != 0 {
+            return self.get_type_of_symbol_with_deferred_type(symbol);
+        }
         if read.check_flags()
-            & (check_flags::DEFERRED_TYPE
-                | check_flags::INSTANTIATED
-                | check_flags::MAPPED
-                | check_flags::REVERSE_MAPPED)
+            & (check_flags::INSTANTIATED | check_flags::MAPPED | check_flags::REVERSE_MAPPED)
             != 0
         {
             return Err(Error::Unsupported("getTypeOfSymbol: transformed symbol"));
@@ -1101,6 +1131,20 @@ impl CheckerState {
         &mut self,
         ty: TypeId,
     ) -> Result<Vec<SymbolId>, Error> {
+        let Some(apparent) = self.apparent_primitive_type(ty)? else {
+            return Ok(Vec::new());
+        };
+        self.resolve_type_members(apparent)?;
+        Ok(self
+            .types
+            .structured(apparent)?
+            .properties
+            .as_deref()
+            .unwrap_or_default()
+            .to_vec())
+    }
+
+    pub(crate) fn apparent_primitive_type(&self, ty: TypeId) -> Result<Option<TypeId>, Error> {
         let flags = self.types.flags(ty)?;
         let name = if flags & tf::STRING_LIKE != 0 {
             Some("String")
@@ -1118,7 +1162,7 @@ impl CheckerState {
             return Err(Error::Unsupported("getPropertiesOfType: apparent type"));
         };
         let Some(name) = name else {
-            return Ok(Vec::new());
+            return Ok(None);
         };
         let apparent = self
             .query
@@ -1128,13 +1172,6 @@ impl CheckerState {
             .ok_or(Error::Unsupported(
                 "getApparentType without program initialization",
             ))?;
-        self.resolve_type_members(apparent)?;
-        Ok(self
-            .types
-            .structured(apparent)?
-            .properties
-            .as_deref()
-            .unwrap_or_default()
-            .to_vec())
+        Ok(Some(apparent))
     }
 }

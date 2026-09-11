@@ -174,14 +174,15 @@ def validate(spec, observed, *, allow_unsupported=False, require_rust_ownership=
     return missing
 
 
-def capture(directory):
+def capture(directory, spec_path=SPEC):
+    spec_path=str((ROOT/spec_path).resolve().relative_to(ROOT))
     directory=Path(directory).resolve();directory.mkdir(parents=True,exist_ok=False)
     upstream=verified_upstream();env=go_environment()
-    spec=specification(strict_json_loads((ROOT/SPEC).read_bytes()));raw=canonical(spec)+b'\n'
+    spec=specification(strict_json_loads((ROOT/spec_path).read_bytes()));raw=canonical(spec)+b'\n'
     (directory/'requests.json').write_bytes(raw)
     driver=directory/'s08_p2_test.go';driver.write_bytes((ROOT/DRIVER).read_bytes())
     (directory/'overlay.json').write_bytes(canonical({'Replace':{str(upstream/'tsc/internal/checker/s08_p2_test.go'):str(driver)}})+b'\n')
-    source_names=(SPEC,DRIVER,'scripts/s08_p2.py','scripts/s04.py','scripts/s04_common.py','scripts/s04_runtime.py','scripts/s08_oracle.py','data/s04/toolchains.toml','data/upstream.json')
+    source_names=(spec_path,DRIVER,'scripts/s08_p2.py','scripts/s04.py','scripts/s04_common.py','scripts/s04_runtime.py','scripts/s08_oracle.py','data/s04/toolchains.toml','data/upstream.json')
     sources={name:digest((ROOT/name).read_bytes()) for name in source_names}
     for name in sources:
         snapshot=directory/'source-snapshot'/name;snapshot.parent.mkdir(parents=True,exist_ok=True);snapshot.write_bytes((ROOT/name).read_bytes())
@@ -195,7 +196,7 @@ def capture(directory):
     observed=strict_json_loads((directory/'observations.json').read_bytes());validate(spec,observed)
     verified_upstream()
     if any(digest((ROOT/name).read_bytes())!=value for name,value in sources.items()):raise ValueError('P2 source changed during observation')
-    report={'version':1,'scope':'Named P2 original-Go semantic/display/diagnostic and merge observations; no P0 refreeze or full E2 acceptance claim',
+    report={'version':1,'scope':spec['scope'],
             'pin':strict_json_loads((ROOT/'data/upstream.json').read_bytes())['pin'],'sources':sources,
             'request_sha256':digest(raw),'observation_sha256':digest((directory/'observations.json').read_bytes()),
             'runtime':{k:observed[k] for k in ('go','goos','goarch')},'programs':len(spec['programs']),
@@ -220,7 +221,7 @@ def compare(directory, actual_path, output):
             if not same_json_value(expected,result):mismatches.append({'section':section,'id':expected[key]})
     result={'version':1,'matched':not missing and not mismatches,'unsupported_operations':missing,'mismatches':mismatches,
             'native_observation_sha256':report['observation_sha256'],'actual_sha256':digest(Path(actual_path).read_bytes()),
-            'scope':'Named P2 exact comparison only; source-language diagnostics are compared payloads, never Unsupported or omitted work'}
+            'scope':spec['scope']}
     with Path(output).open('xb') as destination:destination.write(canonical(result)+b'\n')
     print(json.dumps(result,sort_keys=True))
     return result
@@ -229,10 +230,11 @@ def compare(directory, actual_path, output):
 def main():
     parser=argparse.ArgumentParser(description=__doc__);sub=parser.add_subparsers(dest='operation',required=True)
     native=sub.add_parser('capture');native.add_argument('--output',type=Path,required=True)
+    native.add_argument('--spec',default=SPEC,help='repository-relative named checkpoint request file')
     check=sub.add_parser('compare');check.add_argument('--native',type=Path,required=True);check.add_argument('--actual',type=Path,required=True);check.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
     try:
-        if args.operation=='capture':capture(args.output)
+        if args.operation=='capture':capture(args.output,args.spec)
         elif not compare(args.native,args.actual,args.output)['matched']:return 1
     except (OSError,ValueError,TypeError,KeyError,subprocess.TimeoutExpired) as error:
         print(f'S08 P2 failed: {error}',file=sys.stderr);return 1

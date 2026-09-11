@@ -128,11 +128,7 @@ fn source_check_failure_after_a_diagnostic_stays_failed_across_operations() {
 fn source_check_rejects_unported_grammar_relations_and_options() {
     for (text, expected) in [
         (
-            b"interface A { value?: number }".as_slice(),
-            "checkVariableLikeDeclaration: optional declaration",
-        ),
-        (
-            b"interface A { value: number; value: string }",
+            b"interface A { value: number; value: string }".as_slice(),
             "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
         ),
         (
@@ -521,4 +517,176 @@ fn unsupported_variable_widening_does_not_rebuild_a_successful_cached_initialize
         Err(Error::Unsupported(_))
     ));
     assert_eq!((op.type_count(), op.symbol_count()), before);
+}
+
+#[test]
+fn union_property_normalization_is_deferred_and_repeated_identity_is_stable() {
+    let (owner, program, _) = fixture(b"type A = { value: 'a' }; type B = { value: 'b' }; type C = { value: 'c' }; type U = A | B | C;", options());
+    let declarations = declarations(&program);
+    let mut op = owner.operation().unwrap();
+    // Resolve the three property types first. Discovering U's property should
+    // create only its deferred symbol, with no normalized value union yet.
+    for &declaration in &declarations[..3] {
+        let symbol = op
+            .get_symbol_at_location(declaration_name(&program, declaration))
+            .unwrap()
+            .unwrap();
+        let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+        let property = op.properties_of_type(ty).unwrap()[0];
+        op.get_type_of_symbol(property).unwrap();
+    }
+    let symbol = op
+        .get_symbol_at_location(declaration_name(&program, declarations[3]))
+        .unwrap()
+        .unwrap();
+    let union = op.get_declared_type_of_symbol(symbol).unwrap();
+    let before = op.type_count();
+    let properties = op.properties_of_type(union).unwrap();
+    assert_eq!(properties.len(), 1);
+    assert_eq!(
+        op.type_count(),
+        before,
+        "discovery must defer the property type union"
+    );
+    assert_ne!(
+        op.symbol(properties[0]).unwrap().check_flags() & ts_ast::check_flags::DEFERRED_TYPE,
+        0
+    );
+    let ty = op.get_type_of_symbol(properties[0]).unwrap();
+    assert_eq!(op.type_count(), before + 1);
+    assert_eq!(
+        op.type_to_string(ty, 0).unwrap().as_bytes(),
+        b"\"a\" | \"b\" | \"c\""
+    );
+    let counts = (op.type_count(), op.symbol_count());
+    for _ in 0..3 {
+        assert_eq!(op.properties_of_type(union).unwrap(), properties);
+        assert_eq!(op.get_type_of_symbol(properties[0]).unwrap(), ty);
+        assert_eq!((op.type_count(), op.symbol_count()), counts);
+    }
+}
+
+#[test]
+fn union_property_failure_does_not_publish_a_partial_property_list() {
+    let (owner, program, _) = fixture(b"type A = { good: string; bad: string[] }; type B = { good: number; bad: number[] }; type U = A | B;", options());
+    let name = declaration_name(&program, declarations(&program)[2]);
+    let mut op = owner.operation().unwrap();
+    let symbol = op.get_symbol_at_location(name).unwrap().unwrap();
+    let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+    let mut previous_counts = None;
+    for _ in 0..3 {
+        assert!(matches!(
+            op.properties_of_type(ty),
+            Err(Error::Unsupported("getTypeFromTypeNodeWorker: type family"))
+        ));
+        let counts = (op.type_count(), op.symbol_count());
+        if let Some(previous) = previous_counts {
+            assert_eq!(counts, previous);
+        }
+        previous_counts = Some(counts);
+    }
+}
+
+#[test]
+fn recursive_union_properties_keep_the_original_type_on_a_small_stack() {
+    std::thread::Builder::new().stack_size(512 * 1024).spawn(|| {
+        let (owner, program, _) = fixture(b"type A = { next: U; a: string }; type B = { next: U; b: number }; type U = A | B;", options());
+        let mut op = owner.operation().unwrap();
+        let symbol = op.get_symbol_at_location(declaration_name(&program, declarations(&program)[2])).unwrap().unwrap();
+        let union = op.get_declared_type_of_symbol(symbol).unwrap();
+        let properties = op.properties_of_type(union).unwrap();
+        assert_eq!(properties.len(), 1);
+        assert_eq!(op.symbol(properties[0]).unwrap().name_bytes(), b"next");
+        assert_eq!(op.get_type_of_symbol(properties[0]).unwrap(), union);
+        assert_eq!(op.properties_of_type(union).unwrap(), properties);
+        assert!(op.semantic_diagnostics(program.file(b"/main.ts").unwrap().source()).unwrap().is_empty());
+    }).unwrap().join().unwrap();
+}
+
+#[test]
+fn primitive_union_diagnostics_preserve_literal_target_spelling() {
+    let (owner, source) = checker(b"type Allowed = string | number; let good: Allowed = 1; let bad: Allowed = true; let wrong: 'a' | 'b' = 'c';", options());
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(
+        diagnostics.iter().map(|d| d.code).collect::<Vec<_>>(),
+        [2322, 2322]
+    );
+    assert_eq!(
+        diagnostics[0]
+            .message_args
+            .iter()
+            .map(JsString::as_bytes)
+            .collect::<Vec<_>>(),
+        [b"boolean".as_slice(), b"Allowed"]
+    );
+    assert_eq!(
+        diagnostics[1]
+            .message_args
+            .iter()
+            .map(JsString::as_bytes)
+            .collect::<Vec<_>>(),
+        [b"\"c\"".as_slice(), b"\"a\" | \"b\""]
+    );
+    let (owner, source) = checker(
+        b"type A = { value?: number }; type B = { value: string }; type U = A | B;",
+        options(),
+    );
+    assert!(owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap()
+        .is_empty());
+}
+
+#[test]
+fn union_constituents_are_checked_even_after_reduction_and_on_retry() {
+    for text in [
+        "type U = { a: string; a: number } | string;",
+        "type U = string | { a: string; a: number };",
+        "type U = unknown | ({ a: string; a: number } | string);",
+        "type U = { a: Missing } | string;",
+        "type U = unknown | { a: Missing };",
+    ] {
+        let (owner, source) = checker(text.as_bytes(), options());
+        let first = owner.operation().unwrap().semantic_diagnostics(source);
+        assert!(
+            matches!(first, Err(Error::Unsupported(_))),
+            "{text}: {first:?}"
+        );
+        for _ in 0..2 {
+            assert_eq!(
+                owner.operation().unwrap().semantic_diagnostics(source),
+                first
+            );
+        }
+    }
+    // Checking follows source order, before construction sorts/reduces types.
+    for (text, expected) in [
+        (
+            "type U = { a: string; a: number } | string[];",
+            "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
+        ),
+        (
+            "type U = string[] | { a: string; a: number };",
+            "checkSourceElementWorker: statement/type family",
+        ),
+    ] {
+        let (owner, source) = checker(text.as_bytes(), options());
+        assert_eq!(
+            owner.operation().unwrap().semantic_diagnostics(source),
+            Err(Error::Unsupported(expected))
+        );
+    }
+    let (owner, source) = checker(b"type U = { a: string } | number;", options());
+    assert!(owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap()
+        .is_empty());
 }

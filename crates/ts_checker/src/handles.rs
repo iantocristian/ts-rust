@@ -222,19 +222,10 @@ impl Operation<'_> {
 
     pub fn properties_of_type(&mut self, ty: TypeRef) -> Result<Vec<SymbolRef>, Error> {
         let ty = self.check_type(ty)?;
-        if self.state().types.flags(ty)? & crate::type_flags::OBJECT == 0 {
-            return self
-                .state_mut()
-                .properties_of_primitive_type(ty)
-                .and_then(|values| values.into_iter().map(|id| self.symbol_ref(id)).collect());
-        }
-        self.state_mut().resolve_type_members(ty)?;
-        let properties = self.state().types.structured(ty)?.properties.clone();
-        properties
-            .as_deref()
-            .unwrap_or_default()
-            .iter()
-            .map(|&id| self.symbol_ref(id))
+        self.state_mut()
+            .get_properties_of_type(ty)?
+            .into_iter()
+            .map(|id| self.symbol_ref(id))
             .collect()
     }
 

@@ -289,23 +289,12 @@ pub struct TupleData {
 #[derive(Debug, Default)]
 pub struct UnionOrIntersectionMembers {
     pub structured: StructuredMembers,
-    #[allow(
-        dead_code,
-        reason = "P3 union/intersection property cache; retained in the P1 record layout"
-    )]
     pub property_cache: Option<SymbolTableId>,
     #[allow(
         dead_code,
         reason = "P3 property-augmentation cache; retained in the P1 record layout"
     )]
     pub property_cache_without_function_property_augment: Option<SymbolTableId>,
-    #[cfg_attr(
-        not(any(test, feature = "storage-pilot")),
-        allow(
-            dead_code,
-            reason = "P3 union/intersection property list; the P1 census charges the retained list"
-        )
-    )]
     pub resolved_properties: Option<SymbolList>,
 }
 
