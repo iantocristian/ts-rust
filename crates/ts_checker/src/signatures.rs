@@ -66,14 +66,12 @@ impl SignatureStore {
         self.signatures.len()
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.signatures.is_empty()
-    }
-
+    #[cfg(any(test, feature = "storage-pilot"))]
     pub fn index_info_count(&self) -> usize {
         self.index_infos.len()
     }
 
+    #[cfg(any(test, feature = "storage-pilot"))]
     pub fn predicate_count(&self) -> usize {
         self.predicates.len()
     }
@@ -147,18 +145,14 @@ impl SignatureStore {
             .ok_or(Error::Arena(ts_arena::Error::InvalidSlot))
     }
 
-    pub fn get_mut(&mut self, id: SignatureId) -> Result<&mut Signature, Error> {
-        id.index(0)
-            .and_then(|index| self.signatures.get_mut(index))
-            .ok_or(Error::Arena(ts_arena::Error::InvalidSlot))
-    }
-
+    #[cfg(any(test, feature = "storage-pilot"))]
     pub fn index_info(&self, id: IndexInfoId) -> Result<&IndexInfo, Error> {
         id.index(0)
             .and_then(|index| self.index_infos.get(index))
             .ok_or(Error::Arena(ts_arena::Error::InvalidSlot))
     }
 
+    #[cfg(any(test, feature = "storage-pilot"))]
     pub fn predicate(&self, id: TypePredicateId) -> Result<&TypePredicate, Error> {
         id.index(0)
             .and_then(|index| self.predicates.get(index))

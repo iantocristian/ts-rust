@@ -15,8 +15,23 @@ use ts_arena::{NodeId, SymbolId};
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TypeSystemEntity {
     Symbol(SymbolId),
+    #[cfg_attr(
+        not(test),
+        allow(
+            dead_code,
+            reason = "P3 resolution entity; P1 cycle tests retain the complete entity schema"
+        )
+    )]
     Type(TypeId),
+    #[allow(
+        dead_code,
+        reason = "P3 signature resolution entity retained by the P1 cycle-guard schema"
+    )]
     Signature(SignatureId),
+    #[allow(
+        dead_code,
+        reason = "P3/P4 node resolution entity retained by the P1 cycle-guard schema"
+    )]
     Node(NodeId),
 }
 
@@ -54,16 +69,13 @@ impl ResolutionStack {
         Self::default()
     }
 
+    #[cfg(test)]
     pub fn depth(&self) -> usize {
         self.resolutions.len()
     }
 
-    /// The index below which cycle searches do not look (`Checker.resolutionStart`).
-    pub fn resolution_start(&self) -> usize {
-        self.resolution_start
-    }
-
     /// Sets the search floor and returns the previous one for restoration.
+    #[cfg(test)]
     pub fn set_resolution_start(&mut self, start: usize) -> usize {
         std::mem::replace(&mut self.resolution_start, start)
     }

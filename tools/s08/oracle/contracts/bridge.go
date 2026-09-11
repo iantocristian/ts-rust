@@ -107,7 +107,9 @@ func S08ObserveRelation(c *Checker, file *ast.SourceFile, actions []S08RelationA
 		observations = append(observations, map[string]any{"action": action, "result": result, "ternary_calls": ternaries, "diagnostics": S08Diagnostics(diagnostics), "before": before, "after": S08State(c)})
 	}
 	// Display is deliberately after the relation sequence, so it cannot warm member
-	// resolution before the cold relation operation. No numeric type IDs are compared.
+	// resolution before the first relation operation. Type lookup above is setup
+	// and may populate relation caches; the fixture spec classifies that state.
+	// No numeric type IDs are compared.
 	names := make([]string, 0, len(types))
 	for name := range types {
 		names = append(names, name)

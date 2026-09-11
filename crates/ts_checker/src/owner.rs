@@ -48,6 +48,27 @@ impl CheckerOwner {
         &self.identity
     }
 
+    /// Owns the program for every query and retained result. Its source files
+    /// are already bound; initialization writes only checker-owned state.
+    pub fn for_program(
+        identity: Arc<CheckerIdentity>,
+        counters: &Counters,
+        host: Arc<dyn crate::CheckerHost>,
+    ) -> Result<Self, Error> {
+        let options = host.options();
+        let options = CheckerOptions {
+            strict_null_checks: options.strict_option_value(options.strict_null_checks),
+            exact_optional_property_types: options.exact_optional_property_types.is_true(),
+        };
+        let mut state = CheckerState::new(&identity, counters, options)?;
+        state.program = Some(crate::program::ProgramContext::new(host));
+        state.initialize_program()?;
+        Ok(Self {
+            identity,
+            state: Mutex::new(state),
+        })
+    }
+
     /// Begins an exclusive operation: validates the generation, takes the permit,
     /// then the state. Fails with [`Error::Reentry`] if this thread already holds
     /// an operation on this owner, and with `Retired` once the generation is gone.
@@ -70,6 +91,8 @@ impl CheckerOwner {
 
 /// An exclusive operation scope. Mutable storage never escapes this crate.
 ///
+/// This compile-fail case checks that mutable checker state is crate-private.
+///
 /// ```compile_fail
 /// use ts_checker::Operation;
 /// fn swap_checkers(a: &mut Operation<'_>, b: &mut Operation<'_>) {
@@ -77,9 +100,13 @@ impl CheckerOwner {
 /// }
 /// ```
 ///
+/// Direct store lookup is also crate-private. This proves API privacy, not
+/// compile-time owner branding: public P1 references use exact-owner checks
+/// when an operation imports or resolves them.
+///
 /// ```compile_fail
 /// use ts_checker::{TypeStore, TypeId};
-/// fn foreign_id(store: &TypeStore, id: TypeId) { store.get(id); }
+/// fn private_store_lookup(store: &TypeStore, id: TypeId) { store.get(id); }
 /// ```
 ///
 /// Field order is the drop order: the lease goes

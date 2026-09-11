@@ -134,7 +134,7 @@ impl CheckerState {
                     }
                 } else {
                     // Deferred type references are ordered by source location, then by type mapper.
-                    let c = Self::compare_nodes(node1, node2)?;
+                    let c = self.compare_nodes(node1, node2)?;
                     if c != Ordering::Equal {
                         return Ok(c);
                     }
@@ -288,9 +288,8 @@ impl CheckerState {
         };
         Ok(self
             .symbol(s1)?
-            .name
-            .as_bytes()
-            .cmp(self.symbol(s2)?.name.as_bytes()))
+            .name_bytes()
+            .cmp(self.symbol(s2)?.name_bytes()))
     }
 
     // port: tsc/internal/checker/utilities.go:getTypeNameSymbol
@@ -390,35 +389,50 @@ impl CheckerState {
         };
         let sym1 = self.symbol(s1)?;
         let sym2 = self.symbol(s2)?;
-        // Declaration lists are read through their owning file's store (P2); two
-        // declared symbols therefore compare through `compare_nodes` below.
-        let (has1, has2) = (!sym1.declarations.is_empty(), !sym2.declarations.is_empty());
+        let (has1, has2) = (
+            !sym1.declarations().is_empty(),
+            !sym2.declarations().is_empty(),
+        );
         match (has1, has2) {
             (true, true) => {
-                return Err(Error::Unsupported("compareNodes"));
+                let first1 = self.declaration_slice(sym1.declarations())?.at(0);
+                let first2 = self.declaration_slice(sym2.declarations())?.at(0);
+                let order = self.compare_nodes(first1, first2)?;
+                if order != Ordering::Equal {
+                    return Ok(order);
+                }
             }
             (true, false) => return Ok(Ordering::Less),
             (false, true) => return Ok(Ordering::Greater),
             (false, false) => {}
         }
-        let c = sym1.name.as_bytes().cmp(sym2.name.as_bytes());
+        let c = sym1.name_bytes().cmp(sym2.name_bytes());
         if c != Ordering::Equal {
             return Ok(c);
         }
         // Fall back to symbol IDs. This is a last resort that should happen only when symbols have
         // no declaration and duplicate names.
-        Ok(ts_ast::runtime_symbol_id(sym1).cmp(&ts_ast::runtime_symbol_id(sym2)))
+        Ok(ts_ast::runtime_symbol_id(&sym1).cmp(&ts_ast::runtime_symbol_id(&sym2)))
     }
 
-    /// Node order is file index then position; both need the retained program
-    /// and node reads (P2). Distinct nodes are a named failure until then.
-    fn compare_nodes(n1: Option<NodeId>, n2: Option<NodeId>) -> Result<Ordering, Error> {
+    // port: tsc/internal/checker/utilities.go:Checker.compareNodes
+    fn compare_nodes(&self, n1: Option<NodeId>, n2: Option<NodeId>) -> Result<Ordering, Error> {
         match (n1, n2) {
             (None, None) => Ok(Ordering::Equal),
             (None, Some(_)) => Ok(Ordering::Greater),
             (Some(_), None) => Ok(Ordering::Less),
             (Some(a), Some(b)) if a == b => Ok(Ordering::Equal),
-            (Some(_), Some(_)) => Err(Error::Unsupported("compareNodes")),
+            (Some(a), Some(b)) => {
+                let v1 = self.ast(a)?;
+                let v2 = self.ast(b)?;
+                let s1 = ts_ast::utilities::get_source_file_of_node(v1, Some(a))?;
+                let s2 = ts_ast::utilities::get_source_file_of_node(v2, Some(b))?;
+                if s1 != s2 {
+                    let program = self.program()?;
+                    return Ok(program.file_index(s1).cmp(&program.file_index(s2)));
+                }
+                Ok(v1.node(a)?.pos().cmp(&v2.node(b)?.pos()))
+            }
         }
     }
 

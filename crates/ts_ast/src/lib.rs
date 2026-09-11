@@ -60,6 +60,7 @@ mod runtime_generated;
 mod runtime_id;
 mod source_cache;
 mod source_file;
+mod source_metadata;
 mod storage;
 mod subtree_facts;
 mod subtree_generated;
@@ -98,6 +99,7 @@ pub use precedence::{get_binary_operator_precedence, operator_precedence};
 pub use runtime_generated::*;
 pub use runtime_id::{existing_runtime_node_id, runtime_node_id};
 pub use source_file::*;
+pub use source_metadata::SourceFileMetaData;
 pub use storage::{
     AstBuilder, AstBundle, AstFile, AstTransaction, AstView, ParsedFile, RetainedNode,
 };

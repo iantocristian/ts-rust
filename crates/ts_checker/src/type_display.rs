@@ -1,13 +1,81 @@
-//! Type display constants and the flag bridge (`tsc/internal/checker/printer.go`).
-//!
-//! `TypeToStringEx` builds a type node through the node builder and prints it
-//! through `ts_printer`; a direct recursive formatter is not the plan. The
-//! functions that do that arrive with the P2 slice. What is fixed now: the
-//! serialization depth bound, the truncation lengths, and the mask that turns
-//! `TypeFormatFlags` into node-builder flags without translation.
+//! Type and symbol display through synthetic AST nodes and `ts_printer`
+//! (`tsc/internal/checker/printer.go`). The builder and its emit context are
+//! operation scratch; the returned bytes keep no synthetic storage alive.
 
-use crate::{type_format_flags, TypeAlias, TypeFormatFlags, TypeId};
+use crate::{type_format_flags, CheckerState, Error, TypeAlias, TypeFormatFlags, TypeId};
 use ts_arena::SymbolId;
+use ts_ast::JsString;
+use ts_printer::{EmitTextWriter, Printer, PrinterOptions, SingleLineStringWriter, TextWriter};
+
+impl CheckerState {
+    // port: tsc/internal/checker/printer.go:Checker.typeToStringEx
+    pub(crate) fn type_to_string(
+        &mut self,
+        ty: TypeId,
+        flags: TypeFormatFlags,
+    ) -> Result<JsString, Error> {
+        if self.serialization_level >= MAX_SERIALIZATION_LEVEL as u32 {
+            return Ok(JsString::from_bytes(b"?".as_slice()));
+        }
+        let no_truncation = flags & type_format_flags::NO_TRUNCATION != 0
+            || self
+                .program
+                .as_ref()
+                .is_some_and(|program| program.host.options().no_error_truncation.is_true());
+        let mut combined = to_node_builder_flags(flags) | ts_nodebuilder::flags::IGNORE_ERRORS;
+        if no_truncation {
+            combined |= ts_nodebuilder::flags::NO_TRUNCATION;
+        }
+        self.serialization_level += 1;
+        let mut builder = crate::node_builder::NodeBuilder::new(self, combined);
+        let node = builder.type_node(ty);
+        builder.checker.serialization_level -= 1;
+        let node = node?;
+        let printer = Printer::new(
+            PrinterOptions {
+                remove_comments: true,
+                ..Default::default()
+            },
+            &builder.emit,
+        );
+        let newline = if flags & type_format_flags::MULTILINE_OBJECT_LITERALS != 0 {
+            b"\n".as_slice()
+        } else {
+            b"".as_slice()
+        };
+        let mut writer = TextWriter::new(newline, 0);
+        printer.write(builder.ast.view(), node, None, &mut writer)?;
+        let maximum = if no_truncation {
+            NO_TRUNCATION_MAXIMUM_TRUNCATION_LENGTH
+        } else {
+            DEFAULT_MAXIMUM_TRUNCATION_LENGTH
+        } * 2;
+        let mut text = writer.text().to_vec();
+        if !text.is_empty() && text.len() >= maximum {
+            text.truncate(maximum - 3);
+            text.extend_from_slice(b"...");
+        }
+        Ok(JsString::from_bytes(text))
+    }
+
+    // port: tsc/internal/checker/printer.go:Checker.symbolToString
+    pub(crate) fn symbol_to_string(&mut self, symbol: SymbolId) -> Result<JsString, Error> {
+        let mut builder =
+            crate::node_builder::NodeBuilder::new(self, ts_nodebuilder::flags::IGNORE_ERRORS);
+        let node = builder.symbol_node(symbol)?;
+        let printer = Printer::new(
+            PrinterOptions {
+                remove_comments: true,
+                omit_trailing_semicolon: true,
+                ..Default::default()
+            },
+            &builder.emit,
+        );
+        let mut writer = SingleLineStringWriter::new();
+        printer.write(builder.ast.view(), node, None, &mut writer)?;
+        Ok(JsString::from_bytes(writer.text().to_vec()))
+    }
+}
 
 /// Nested type serialization (diagnostics requesting types requesting members)
 /// returns `"?"` beyond this depth (`checker.go`, `maxSerializationLevel`).
@@ -25,14 +93,247 @@ pub fn to_node_builder_flags(flags: TypeFormatFlags) -> ts_nodebuilder::Flags {
 
 /// Upstream's nil-tolerant accessor: an absent alias has no symbol.
 // port: tsc/internal/checker/types.go:TypeAlias.Symbol
-#[allow(dead_code, reason = "alias display callers arrive in P2")]
 pub(crate) fn alias_symbol(alias: Option<&TypeAlias>) -> Option<SymbolId> {
     alias.map(|alias| alias.symbol)
 }
 
 /// Upstream's nil-tolerant accessor: an absent alias has no type arguments.
 // port: tsc/internal/checker/types.go:TypeAlias.TypeArguments
-#[allow(dead_code, reason = "alias display callers arrive in P2")]
 pub(crate) fn alias_type_arguments(alias: Option<&TypeAlias>) -> &[TypeId] {
     alias.map_or(&[], |alias| &alias.type_arguments)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{object_flags, CheckerOptions};
+    use std::sync::Arc;
+    use ts_arena::{CheckerIdentity, Counters, Generation};
+    use ts_ast::{check_flags, symbol_flags, SymbolTable};
+
+    fn checker() -> (CheckerState, Counters) {
+        let counters = Counters::new();
+        let identity = CheckerIdentity::new(Generation::new(&counters), &counters);
+        let state = CheckerState::new(
+            &identity,
+            &counters,
+            CheckerOptions {
+                strict_null_checks: true,
+                exact_optional_property_types: true,
+            },
+        )
+        .unwrap();
+        (state, counters)
+    }
+
+    #[test]
+    fn literal_display_uses_the_printer_for_escaping_and_preserves_freshness() {
+        let (mut state, counters) = checker();
+        let literal = state
+            .get_string_literal_type(JsString::from_bytes("hé\n\"".as_bytes()))
+            .unwrap();
+        let fresh = state.get_fresh_type_of_literal_type(literal).unwrap();
+        let number = state
+            .get_number_literal_type(ts_jsnum::Number::new(-42.0))
+            .unwrap();
+        let bigint = state
+            .get_big_int_literal_type(ts_jsnum::PseudoBigInt::new(b"42", true))
+            .unwrap();
+        let before = counters.snapshot();
+        for ty in [literal, fresh] {
+            assert_eq!(
+                state.type_to_string(ty, 0).unwrap().as_bytes(),
+                "\"hé\\n\\\"\"".as_bytes()
+            );
+            assert_eq!(
+                state
+                    .type_to_string(
+                        ty,
+                        type_format_flags::USE_SINGLE_QUOTES_FOR_STRING_LITERAL_TYPE
+                    )
+                    .unwrap()
+                    .as_bytes(),
+                "'hé\\n\"'".as_bytes()
+            );
+        }
+        assert_eq!(state.type_to_string(number, 0).unwrap().as_bytes(), b"-42");
+        assert_eq!(state.type_to_string(bigint, 0).unwrap().as_bytes(), b"-42n");
+        assert_eq!(
+            state
+                .type_to_string(state.builtins.boolean_type, 0)
+                .unwrap()
+                .as_bytes(),
+            b"boolean"
+        );
+        assert_eq!(
+            counters.snapshot(),
+            before,
+            "display releases its synthetic AST"
+        );
+    }
+
+    #[test]
+    fn alias_expansion_preserves_optional_readonly_and_quoted_property_names() {
+        let (mut state, _) = checker();
+        let property = state
+            .new_symbol(
+                symbol_flags::PROPERTY | symbol_flags::OPTIONAL,
+                JsString::from_bytes(b"field-name".as_slice()),
+            )
+            .unwrap();
+        state.symbol_mut(property).unwrap().check_flags |= check_flags::READONLY;
+        let ty = state
+            .get_union_type(&[state.builtins.number_type, state.builtins.missing_type])
+            .unwrap();
+        state
+            .value_symbol_links
+            .get_or_default(property)
+            .resolved_type = Some(ty);
+        let members = state.alloc_symbol_table(SymbolTable::from([(
+            JsString::from_bytes(b"field-name".as_slice()),
+            Some(property),
+        )]));
+        let object = state
+            .new_anonymous_type(None, Some(members), &[], &[], &[])
+            .unwrap();
+        let alias = state
+            .new_symbol(
+                symbol_flags::TYPE_ALIAS,
+                JsString::from_bytes(b"Shape".as_slice()),
+            )
+            .unwrap();
+        let alias = state
+            .types
+            .push_alias(TypeAlias {
+                symbol: alias,
+                type_arguments: Arc::from([]),
+            })
+            .unwrap();
+        state.types.get_mut(object).unwrap().alias = Some(alias);
+        assert_eq!(
+            state.type_to_string(object, 0).unwrap().as_bytes(),
+            b"Shape"
+        );
+        assert_eq!(
+            state
+                .type_to_string(object, type_format_flags::IN_TYPE_ALIAS)
+                .unwrap()
+                .as_bytes(),
+            b"{ readonly \"field-name\"?: number; }"
+        );
+
+        let other = state
+            .new_anonymous_type(None, Some(members), &[], &[], &[])
+            .unwrap();
+        let other_symbol = state
+            .new_symbol(
+                symbol_flags::TYPE_ALIAS,
+                JsString::from_bytes(b"Shape".as_slice()),
+            )
+            .unwrap();
+        let other_alias = state
+            .types
+            .push_alias(TypeAlias {
+                symbol: other_symbol,
+                type_arguments: Arc::from([]),
+            })
+            .unwrap();
+        state.types.get_mut(other).unwrap().alias = Some(other_alias);
+        let union = state.get_union_type(&[object, other]).unwrap();
+        assert!(matches!(
+            state.type_to_string(union, 0),
+            Err(Error::Unsupported(
+                "mapToTypeNodes: colliding names require qualified display"
+            ))
+        ));
+        // The source permits duplicate spellings when both types share the
+        // same alias record; only distinct references need qualification.
+        state.types.get_mut(other).unwrap().alias = Some(alias);
+        assert_eq!(
+            state.type_to_string(union, 0).unwrap().as_bytes(),
+            b"Shape | Shape"
+        );
+        state.types.get_mut(object).unwrap().object_flags |=
+            object_flags::FRESH_LITERAL | object_flags::OBJECT_LITERAL;
+        assert_eq!(
+            state
+                .type_to_string(object, type_format_flags::IN_TYPE_ALIAS)
+                .unwrap()
+                .as_bytes(),
+            b"{ readonly \"field-name\"?: number; }"
+        );
+    }
+
+    #[test]
+    fn display_limits_match_source_byte_boundaries_and_errors_restore_serialization_level() {
+        let (mut state, _) = checker();
+        for (length, expected_length) in [(317, 319), (318, 320)] {
+            let literal = state
+                .get_string_literal_type(JsString::from_bytes(vec![b'x'; length]))
+                .unwrap();
+            let display = state.type_to_string(literal, 0).unwrap();
+            assert_eq!(display.len(), expected_length);
+            assert_eq!(display.as_bytes().ends_with(b"..."), length == 318);
+            let untruncated = state
+                .type_to_string(literal, type_format_flags::NO_TRUNCATION)
+                .unwrap();
+            assert_eq!(untruncated.len(), length + 2);
+            assert!(untruncated.as_bytes().ends_with(b"\""));
+        }
+        state.serialization_level = MAX_SERIALIZATION_LEVEL as u32;
+        assert_eq!(
+            state
+                .type_to_string(state.builtins.number_type, 0)
+                .unwrap()
+                .as_bytes(),
+            b"?"
+        );
+        assert_eq!(state.serialization_level, MAX_SERIALIZATION_LEVEL as u32);
+        state.serialization_level = 0;
+        assert!(matches!(
+            state.type_to_string(state.builtins.unresolved_type, 0),
+            Err(Error::Unsupported("unresolved type synthetic comment"))
+        ));
+        assert_eq!(state.serialization_level, 0);
+        assert_eq!(
+            state
+                .type_to_string(state.builtins.number_type, 0)
+                .unwrap()
+                .as_bytes(),
+            b"number"
+        );
+    }
+
+    #[test]
+    fn object_elision_starts_above_160_and_preserves_the_last_property() {
+        for length in [153, 154] {
+            let (mut state, _) = checker();
+            let first_name = "a".repeat(length);
+            let mut properties = Vec::new();
+            for name in [first_name.as_str(), "b", "c", "d", "e", "z"] {
+                let symbol = state
+                    .new_symbol(
+                        symbol_flags::PROPERTY,
+                        JsString::from_bytes(name.as_bytes()),
+                    )
+                    .unwrap();
+                state
+                    .value_symbol_links
+                    .get_or_default(symbol)
+                    .resolved_type = Some(state.builtins.number_type);
+                properties.push(symbol);
+            }
+            let object = state.new_anonymous_type(None, None, &[], &[], &[]).unwrap();
+            state.types.structured_mut(object).unwrap().properties = Some(properties.into());
+            let expected = if length == 154 {
+                format!("{{ {first_name}: number; ... 4 more ...; z: number; }}")
+            } else {
+                format!("{{ {first_name}: number; b: number; c: number; d: number; e: number; z: number; }}")
+            };
+            assert_eq!(
+                state.type_to_string(object, 0).unwrap().as_bytes(),
+                expected.as_bytes()
+            );
+        }
+    }
 }

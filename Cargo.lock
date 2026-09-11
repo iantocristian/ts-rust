@@ -430,14 +430,20 @@ dependencies = [
  "hashbrown",
  "mimalloc",
  "serde_json",
+ "stacker",
  "ts_arena",
  "ts_ast",
+ "ts_binder",
  "ts_core",
+ "ts_diagnostics",
  "ts_jsnum",
  "ts_jsstring",
  "ts_module",
  "ts_nodebuilder",
+ "ts_printer",
+ "ts_scanner",
  "ts_tsoptions",
+ "ts_vfs",
 ]
 
 [[package]]
@@ -451,6 +457,7 @@ dependencies = [
  "ts_ast",
  "ts_binder",
  "ts_bundled",
+ "ts_checker",
  "ts_core",
  "ts_diagnostics",
  "ts_jsstring",

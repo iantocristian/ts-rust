@@ -83,6 +83,8 @@ impl CheckerIdentity {
         if ACTIVE_LEASES.with(|active| active.borrow().contains(&self.id)) {
             return Err(Error::Reentry);
         }
+        #[cfg(test)]
+        tests::observe_contention(&self.operation);
         let permit = self.operation.lock().map_err(|_| {
             self.generation.retire();
             Error::Retired
@@ -110,7 +112,10 @@ impl Drop for CheckerLease<'_> {
             // sharing this generation. Poison is only a defensive backstop.
             self.owner.generation.retire();
         }
-        ACTIVE_LEASES.with(|active| active.borrow_mut().retain(|id| *id != self.owner.id));
+        // A lease can live in TLS initialized before ACTIVE_LEASES, in which
+        // case its reentry record has already gone away during thread teardown.
+        let _ =
+            ACTIVE_LEASES.try_with(|active| active.borrow_mut().retain(|id| *id != self.owner.id));
     }
 }
 
@@ -145,6 +150,110 @@ impl CheckerLease<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+    use std::sync::{mpsc, OnceLock, TryLockError};
+
+    thread_local! {
+        static CONTENTION_PROBE: RefCell<Option<mpsc::Sender<()>>> = const { RefCell::new(None) };
+        static HELD_LEASE: RefCell<Option<TlsLease>> = const { RefCell::new(None) };
+    }
+
+    // Installed only on the contender's thread. A failed try_lock establishes
+    // that acquisition was actually attempted while another lease held the
+    // permit; the lease still uses the production blocking lock afterwards.
+    pub(super) fn observe_contention(operation: &Mutex<()>) {
+        CONTENTION_PROBE.with(|probe| {
+            if let Some(probe) = probe.borrow_mut().take() {
+                assert!(matches!(
+                    operation.try_lock(),
+                    Err(TryLockError::WouldBlock)
+                ));
+                probe.send(()).unwrap();
+            }
+        });
+    }
+
+    struct TlsLease {
+        lease: Option<CheckerLease<'static>>,
+        dropped: mpsc::Sender<(bool, bool)>,
+    }
+
+    impl Drop for TlsLease {
+        fn drop(&mut self) {
+            let records_destroyed = ACTIVE_LEASES.try_with(|_| ()).is_err();
+            // Catch the old destructor panic so this regression fails an
+            // assertion instead of aborting the entire test process.
+            let dropped_without_panic =
+                catch_unwind(AssertUnwindSafe(|| drop(self.lease.take()))).is_ok();
+            self.dropped
+                .send((records_destroyed, dropped_without_panic))
+                .unwrap();
+        }
+    }
+
+    #[test]
+    fn a_contended_lease_acquires_after_the_held_permit_is_released() {
+        let counters = Counters::new();
+        let identity = CheckerIdentity::new(Generation::new(&counters), &counters);
+        let held = identity.lease().unwrap();
+        let (attempted, attempted_rx) = mpsc::channel();
+        let (finished, finished_rx) = mpsc::channel();
+        let contender = {
+            let identity = identity.clone();
+            std::thread::spawn(move || {
+                CONTENTION_PROBE.with(|probe| *probe.borrow_mut() = Some(attempted));
+                let lease = identity.lease();
+                finished.send(lease.is_ok()).unwrap();
+            })
+        };
+        attempted_rx.recv().unwrap();
+        assert!(matches!(
+            finished_rx.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+        drop(held);
+        assert!(finished_rx.recv().unwrap());
+        contender.join().unwrap();
+        assert!(identity.lease().is_ok());
+    }
+
+    #[test]
+    fn a_tls_held_lease_drops_after_the_reentry_records_are_destroyed() {
+        static IDENTITY: OnceLock<Arc<CheckerIdentity>> = OnceLock::new();
+        let identity = IDENTITY.get_or_init(|| {
+            let counters = Counters::new();
+            CheckerIdentity::new(Generation::new(&counters), &counters)
+        });
+        let (dropped, dropped_rx) = mpsc::channel();
+        std::thread::spawn(move || {
+            // TLS destructors run in reverse initialization order: initialize
+            // the holder before acquiring a lease initializes ACTIVE_LEASES.
+            HELD_LEASE.with(|holder| assert!(holder.borrow().is_none()));
+            let lease = identity.lease().unwrap();
+            HELD_LEASE.with(|holder| {
+                *holder.borrow_mut() = Some(TlsLease {
+                    lease: Some(lease),
+                    dropped,
+                });
+            });
+        })
+        .join()
+        .unwrap();
+        let (records_destroyed, dropped_without_panic) = dropped_rx.recv().unwrap();
+        assert!(
+            records_destroyed,
+            "the regression must exercise TLS teardown"
+        );
+        assert!(
+            dropped_without_panic,
+            "lease cleanup must tolerate destroyed TLS"
+        );
+        assert_eq!(identity.generation().validate(), Ok(()));
+        assert!(
+            identity.lease().is_ok(),
+            "thread teardown releases the permit"
+        );
+    }
 
     #[test]
     fn identity_adopts_its_symbol_arena_exactly_once() {

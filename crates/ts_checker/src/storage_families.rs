@@ -594,8 +594,8 @@ impl Live {
         Ok(match root {
             Root::Symbol(id) => {
                 let symbol = state.symbol(id)?;
-                json!({"kind": "symbol", "flags": symbol.flags, "check_flags": symbol.check_flags,
-                    "name_hex": hex(symbol.name.as_bytes())})
+                json!({"kind": "symbol", "flags": symbol.flags(), "check_flags": symbol.check_flags(),
+                    "name_hex": hex(symbol.name_bytes())})
             }
             Root::Signature(id) => {
                 let signature = state.signatures.get(id)?;
@@ -633,14 +633,14 @@ impl Live {
         row.insert(
             "symbol_name_hex".into(),
             match record.symbol {
-                Some(symbol) => json!(hex(state.symbol(symbol)?.name.as_bytes())),
+                Some(symbol) => json!(hex(state.symbol(symbol)?.name_bytes())),
                 None => Value::Null,
             },
         );
         if let Some(alias) = state.types.alias_of(id)? {
             row.insert(
                 "alias_symbol_name_hex".into(),
-                json!(hex(state.symbol(alias.symbol)?.name.as_bytes())),
+                json!(hex(state.symbol(alias.symbol)?.name_bytes())),
             );
             row.insert("alias_args".into(), json!(ids(&alias.type_arguments)));
         } else {
@@ -779,7 +779,7 @@ impl Live {
         properties
             .iter()
             .map(|symbol| {
-                let name = hex(self.state.symbol(*symbol)?.name.as_bytes());
+                let name = hex(self.state.symbol(*symbol)?.name_bytes());
                 let resolved = self
                     .state
                     .value_symbol_links

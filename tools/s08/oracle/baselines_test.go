@@ -38,6 +38,19 @@ type s08Request struct {
 
 func s08Hash(raw []byte) string { value := sha256.Sum256(raw); return hex.EncodeToString(value[:]) }
 
+func s08Failure(row map[string]any, reason, message string) {
+	stage := row["execution_stage"].(string)
+	state := "harness_failed"
+	if strings.HasPrefix(stage, "native_") {
+		state = "upstream_failed"
+		if reason == "panic" || reason == "assertion" {
+			reason = "native_" + reason
+		}
+	}
+	row["state"] = state
+	row["failure"] = map[string]string{"stage": stage, "reason": reason, "message": message}
+}
+
 func s08Diagnostics(values []*ast.Diagnostic) []map[string]any {
 	result := make([]map[string]any, 0, len(values))
 	for _, d := range values {
@@ -97,56 +110,85 @@ func TestS08Baselines(t *testing.T) {
 	defer output.Close()
 	encoder := json.NewEncoder(output)
 	for _, request := range requests {
-		row := map[string]any{"id": request.ID, "acceptance_tier": request.AcceptanceTier, "state": "not_executed", "queries": []tsbaseline.S08Query{}}
+		row := map[string]any{"id": request.ID, "acceptance_tier": request.AcceptanceTier, "state": "not_executed", "execution_stage": "harness_input", "queries": []tsbaseline.S08Query{}}
 		complete := false
 		t.Run(request.ID, func(t *testing.T) {
 			defer func() {
 				if value := recover(); value != nil {
 					row["panic"] = fmt.Sprint(value)
-					t.Error("upstream panic", value)
+					s08Failure(row, "panic", fmt.Sprint(value))
+					t.Error("baseline panic", value)
 				}
 				if t.Failed() {
-					row["state"] = "upstream_failed"
+					if row["failure"] == nil {
+						s08Failure(row, "assertion", "test assertion failed; see go.stdout")
+					}
 				} else if !complete {
-					if t.Skipped() {
+					if t.Skipped() && row["execution_stage"] == "native_option_guard" {
 						row["state"] = "upstream_skipped"
 					} else {
-						row["state"] = "upstream_failed"
+						row["execution_stage"] = "harness_incomplete"
+						s08Failure(row, "incomplete", "baseline execution exited before completion")
 					}
 				}
 				harnessutil.S08ObserveDiagnostics = nil
+				harnessutil.S08ObserveStage = nil
+				harnessutil.S08ObserveOptionRejection = nil
 				tsbaseline.S08Queries = nil
 			}()
+			stage := func(next string) func() {
+				previous := row["execution_stage"]
+				if t.Failed() && row["failure"] == nil {
+					s08Failure(row, "assertion", "test assertion failed; see go.stdout")
+				}
+				row["execution_stage"] = next
+				return func() { row["execution_stage"] = previous }
+			}
+			fail := func(reason string, values ...any) {
+				s08Failure(row, reason, fmt.Sprint(values...))
+				t.Fatal(values...)
+			}
+			harnessutil.S08ObserveStage = stage
+			harnessutil.S08ObserveOptionRejection = func(message string) {
+				s08Failure(row, "option_rejected", message)
+			}
 			path := filepath.Join(repo.RootPath(), strings.TrimPrefix(request.Path, "tsc/"))
 			original, err := os.ReadFile(path)
 			if err != nil {
-				t.Fatal(err)
+				fail("source_read", err)
 			}
 			if s08Hash(original) != request.RawSHA256 {
-				t.Fatal("physical source digest differs")
+				fail("source_digest", "physical source digest differs")
 			}
 			loaded, ok := osvfs.FS().ReadFile(path)
 			if !ok || s08Hash([]byte(loaded)) != request.LoadedSHA256 {
-				t.Fatal("loaded source digest differs")
+				fail("source_digest", "loaded source digest differs")
 			}
 			row["raw_sha256"] = s08Hash(original)
 			row["loaded_sha256"] = s08Hash([]byte(loaded))
 			row["native_runner_skipped"] = slices.Contains(skippedTests, tspath.GetBaseFileName(path))
 			harnessutil.S08ObserveDiagnostics = func(pre, post []*ast.Diagnostic) {
+				restore := harnessutil.S08EnterObservation()
 				row["pre_diagnostics"] = s08Diagnostics(pre)
 				row["post_diagnostics"] = s08Diagnostics(post)
+				restore()
 			}
+			stage("native_parse")
 			payload := makeUnitsFromTest(loaded, path)
 			configuration := &harnessutil.NamedTestConfiguration{Config: request.Settings, Name: request.ConfigurationName}
+			stage("native_setup")
 			c := newCompilerTest(t, request.ID, path, &payload, configuration)
+			stage("harness_identity")
 			if c.configuredName != request.ConfiguredName {
-				t.Fatal("configured name drift", c.configuredName)
+				fail("configured_name", "configured name drift", c.configuredName)
 			}
 			row["options"] = c.options
 			row["harness_options"] = c.harnessOptions
 			if request.AcceptanceTier != "informational" || os.Getenv("S08_INCLUDE_INFORMATIONAL") != "1" {
+				stage("native_option_guard")
 				harnessutil.SkipUnsupportedCompilerOptions(t, c.options)
 			}
+			stage("harness_observation")
 			files := make([]map[string]any, 0)
 			for _, f := range c.result.Program.GetSourceFiles() {
 				files = append(files, map[string]any{"name": f.FileName(), "path": string(f.Path()), "sha256": s08Hash([]byte(f.Text())), "bytes": len(f.Text())})
@@ -155,11 +197,14 @@ func TestS08Baselines(t *testing.T) {
 			row["diagnostics"] = s08Diagnostics(c.result.Diagnostics)
 			errorValue := baseline.NoContent
 			if len(c.result.Diagnostics) > 0 {
+				stage("native_error_baseline")
 				errorValue = tsbaseline.GetErrorBaseline(t, core.Concatenate(c.tsConfigFiles, core.Concatenate(c.toBeCompiled, c.otherFiles)), diagnosticwriter.WrapASTDiagnostics(c.result.Diagnostics), diagnosticwriter.CompareASTDiagnostics, c.options.Pretty.IsTrue())
 			}
+			stage("harness_observation")
 			row["errors"] = tsbaseline.S08BaselineValue(errorValue)
 			for _, d := range c.result.Diagnostics {
 				if d.Code() == -1 {
+					stage("native_error_baseline")
 					t.Fatal("source diagnostic assertion (-1)")
 				}
 			}
@@ -169,9 +214,18 @@ func TestS08Baselines(t *testing.T) {
 				allFiles := core.Filter(core.Concatenate(c.toBeCompiled, c.otherFiles), func(f *harnessutil.TestFile) bool { return c.result.Program.GetSourceFile(f.UnitName) != nil })
 				header := tspath.GetPathFromPathComponents(tspath.GetPathComponentsRelativeTo(repo.TestDataPath(), path, tspath.ComparePathsOptions{}))
 				tsbaseline.S08Queries = []tsbaseline.S08Query{}
+				stage("native_type_symbol")
 				row["types"], row["symbols"] = tsbaseline.S08TypeSymbolBaselines(c.result.Program, allFiles, header, len(c.result.Diagnostics) > 0)
+				stage("harness_observation")
 				row["queries"] = tsbaseline.S08Queries
 			}
+			if t.Failed() {
+				// Preserve the stage of a nonfatal native assertion even if the
+				// source returned and later observation steps completed.
+				row["execution_stage"] = row["failure"].(map[string]string)["stage"]
+				return
+			}
+			stage("complete")
 			row["state"] = "executed"
 			complete = true
 		})

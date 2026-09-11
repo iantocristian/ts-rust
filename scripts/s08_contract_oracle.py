@@ -7,7 +7,7 @@ from s04 import go_environment,verified_upstream
 from s04_common import strict_json_loads
 from s08_baselines import replace_exact
 from s08_oracle import ROOT,canonical,digest
-from s08_contracts import fields, hex_bytes
+from s08_contracts import fields, hex_bytes, relation_start_spec
 
 SPEC='tools/s08/contracts/relations.json'
 BRIDGE='tools/s08/oracle/contracts/bridge.go'
@@ -20,11 +20,12 @@ RESIDUALS='tools/s08/contracts/residuals.json'
 def requests(spec):
     fields(spec,'version scope options modes sequence_per_mode report_errors cases')
     if spec['version']!=1 or type(spec['cases']) is not list or not spec['cases']:raise ValueError('invalid fixture specification')
-    if spec['modes']!=['identity','assignable','subtype','strict_subtype','comparable'] or spec['sequence_per_mode']!=['A-to-B-cold','A-to-B-repeat','B-to-A','A-to-A'] or spec['report_errors'] is not True:raise ValueError('relation protocol changed')
+    if spec['modes']!=['identity','assignable','subtype','strict_subtype','comparable'] or spec['sequence_per_mode']!=['A-to-B-first','A-to-B-repeat','B-to-A','A-to-A'] or spec['report_errors'] is not True:raise ValueError('relation protocol changed')
     if canonical(spec['options'])!=canonical({'target':'ESNext','module':'ESNext','strict':True,'skipLibCheck':True}):raise ValueError('fixture options changed')
     result=[];seen=set()
     for case in spec['cases']:
-        if set(case)-{'id','source','capabilities','expected_diagnostic_codes','files','allow_js'}:raise ValueError('unknown relation fixture field')
+        if set(case)-{'id','source','capabilities','expected_diagnostic_codes','files','allow_js','setup','starting_cache_entries','first_call','resolved_primitive'}:raise ValueError('unknown relation fixture field')
+        relation_start_spec(case)
         if type(case['id']) is not str or type(case['source']) is not str or type(case['capabilities']) is not list or any(type(v) is not str for v in case['capabilities']):raise ValueError('malformed relation fixture')
         if type(case.get('allow_js',False)) is not bool or type(case['expected_diagnostic_codes']) is not list or any(type(v) is not int or v<=0 for v in case['expected_diagnostic_codes']):raise ValueError('invalid fixture options/diagnostics')
         if any(not p.startswith('/') or p=='/fixture.ts' or '..' in Path(p).parts or type(t) is not str for p,t in case.get('files',{}).items()):raise ValueError('invalid fixture extra file')

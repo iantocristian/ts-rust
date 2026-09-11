@@ -6,31 +6,36 @@ from s08_inventory import sites
 from s08_oracle import ROOT, canonical, digest
 
 REVIEW = 'tools/s08/inventory/review.json'
+IDENTITY_FIELDS = ('caller', 'file', 'line', 'column', 'kind', 'signature', 'value')
 
 
-def boundary(site):
-    file, signature, value = site['file'], site['signature'], site['value']
-    if 'reflect.' in signature or 'reflect.' in value:
-        return 'reflection_runtime'
-    if (file.startswith('internal/collections/') or 'iter.Seq[' in value
-            or value.startswith(('maps.Keys[','maps.Values['))
-            or ('MultiMap[' in value and ').Values(' in value)):
-        return 'iterator_continuation'
-    if file == 'internal/compiler/program.go' and 'CheckerPool' in signature:
-        return 'checker_pool_factory'
-    if file == 'internal/ast/ast.go' and signature.endswith(' T'):
-        return 'encoder_generic_template'
-    if file.startswith('internal/sourcemap/'):
-        return 'source_map_host'
-    if 'ExtendedConfigCacheEntry' in signature:
-        return 'extended_config_cache'
-    if file == 'internal/diagnostics/diagnostics.go' and 'language.' in signature:
-        return 'locale_matcher'
-    if file.startswith(('internal/contentmapper/', 'internal/ipc/')) and ('ctx' not in value and 'context.Context' not in value):
-        return 'mapper_process_runtime'
-    if signature in ('func() error', 'func() <-chan struct{}') and file.startswith(('internal/checker/', 'internal/compiler/', 'internal/execute/', 'internal/ipc/')):
-        return 'context_runtime'
-    raise ValueError('unreviewed unresolved callback: ' + str(site))
+def site_identity(site):
+    """Decoded source identity; dictionary indices and target resolution are not identity."""
+    if any(key not in site for key in IDENTITY_FIELDS):
+        raise ValueError('incomplete unresolved callback identity')
+    return {key: site[key] for key in IDENTITY_FIELDS}
+
+
+def reviewed_boundaries(review):
+    approved = {}
+    for row in review['unresolved_sites']:
+        if (set(row) != {'identity', 'boundary'} or set(row['identity']) != set(IDENTITY_FIELDS)
+                or row['boundary'] not in review['callback_boundaries']):
+            raise ValueError('invalid reviewed callback boundary')
+        key = canonical(site_identity(row['identity']))
+        if key in approved:
+            raise ValueError('duplicate reviewed callback identity')
+        approved[key] = row['boundary']
+    return approved
+
+
+def boundary(site, approved=None):
+    if approved is None:
+        approved = reviewed_boundaries(strict_json_loads((ROOT / REVIEW).read_bytes()))
+    key = canonical(site_identity(site))
+    if key not in approved:
+        raise ValueError('unreviewed unresolved callback: ' + str(site_identity(site)))
+    return approved[key]
 
 
 def prepare(closure):
@@ -76,12 +81,20 @@ def prepare(closure):
             raise ValueError('unmapped project source: ' + file)
         source_homes.append(dict(file=file, home=home, status=status))
     unresolved = []
+    approved = reviewed_boundaries(review)
+    seen = set()
     for site in sites(closure):
         if site['targets']:
             continue
-        category = boundary(site)
-        unresolved.append(dict(site=site['index'], identity_sha256=digest(canonical(site)),
+        category = boundary(site, approved)
+        identity = canonical(site_identity(site))
+        if identity in seen:
+            raise ValueError('duplicate unresolved callback identity')
+        seen.add(identity)
+        unresolved.append(dict(site=site['index'], identity_sha256=digest(identity),
                                boundary=category, resolution=review['callback_boundaries'][category]))
+    if seen != set(approved):
+        raise ValueError('reviewed callback identity absent from unresolved closure')
     interfaces = []
     for interface, members in closure['interfaces'].items():
         for member in members:

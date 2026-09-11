@@ -2,6 +2,7 @@
 //! Every successful `Program::load` represents an executed loader closure;
 //! unsupported source operations fail with a named boundary.
 mod cache;
+mod checker_host;
 mod include_reason;
 mod output_paths;
 mod program_diagnostics;
@@ -11,9 +12,10 @@ mod loader;
 mod metadata;
 mod resolver_host;
 pub use cache::{FileCache, ProgramFile};
+pub use checker_host::ProgramCheckerHost;
 pub use loader::{Error, Program, ProgramOptions, Resolution, TypeResolution};
-pub use metadata::SourceFileMetaData;
 pub use resolver_host::ProgramResolverHost;
+pub use ts_ast::SourceFileMetaData;
 
 #[cfg(test)]
 mod boundary_tests;

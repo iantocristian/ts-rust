@@ -2,6 +2,9 @@
 from s08_oracle import canonical, digest
 
 MODES = ('identity', 'assignable', 'subtype', 'strict_subtype', 'comparable')
+COUNTERS = ('types_created', 'signatures_created', 'instantiations')
+FIRST_CALL_CLASSES = ('cold_lazy_resolution', 'cold_cache_evaluation',
+                      'uncached_shortcut', 'primitive_identity_shortcut')
 
 
 def fields(value, names):
@@ -56,6 +59,65 @@ def state(row):
             raise ValueError('cache flags are not canonical')
 
 
+def relation_start_spec(definition):
+    """Validate authored classifications separately from the native action request."""
+    fields(definition.get('starting_cache_entries'), ' '.join(MODES))
+    fields(definition.get('first_call'), ' '.join(MODES))
+    for entries in definition['starting_cache_entries'].values():
+        integer(entries)
+    populated = {mode for mode, entries in definition['starting_cache_entries'].items() if entries}
+    expected_setup = ('type_resolution_populates_assignable_cache' if populated == {'assignable'}
+                      else 'type_resolution_with_empty_caches' if not populated else None)
+    if expected_setup is None or definition.get('setup') != expected_setup:
+        raise ValueError('setup classification contradicts declared cache state')
+    classes = definition['first_call'].values()
+    if any(value not in FIRST_CALL_CLASSES for value in classes):
+        raise ValueError('unknown first relation classification')
+    if 'primitive_identity_shortcut' in classes:
+        if (definition.get('resolved_primitive') != 'number'
+                or set(classes) != {'primitive_identity_shortcut'}):
+            raise ValueError('primitive identity fixture must declare number in every mode')
+    elif 'resolved_primitive' in definition:
+        raise ValueError('unexpected primitive identity expectation')
+
+
+def relation_start(definition, group, mode):
+    """Check setup and actual first-call work without assuming a cache hit or allocation."""
+    first = group['actions'][0]
+    before, after = first['before'], first['after']
+    lookup = group['before_lookup']
+    if any(cache['entries'] for cache in lookup['caches'].values()):
+        raise ValueError('fresh checker relation cache is already populated')
+    if any(before[key] < lookup[key] for key in COUNTERS):
+        raise ValueError('native setup counter decreased')
+    if {name: cache['entries'] for name, cache in before['caches'].items()} != definition['starting_cache_entries']:
+        raise ValueError('relation starting cache state differs from declaration: ' + definition['id'])
+    classification = definition['first_call'][mode]
+    created = any(after[key] > before[key] for key in COUNTERS)
+    cache_changed = before['caches'] != after['caches']
+    if classification.startswith('cold_') or classification == 'uncached_shortcut':
+        if any(cache['entries'] for cache in before['caches'].values()):
+            raise ValueError('declared cold/uncached relation was prewarmed during setup')
+    if classification == 'cold_lazy_resolution':
+        if not created:
+            raise ValueError('declared cold relation omitted lazy creation/resolution work')
+    elif classification == 'cold_cache_evaluation':
+        if created or not cache_changed or after['caches'][mode]['entries'] <= before['caches'][mode]['entries']:
+            raise ValueError('declared cold cache evaluation changed its work class')
+    elif classification == 'uncached_shortcut':
+        if before != after:
+            raise ValueError('declared uncached shortcut changed relation state')
+    elif classification == 'primitive_identity_shortcut':
+        # Both declarations resolve to the native number intrinsic. The unrelated
+        # assignable entry created by ReturnType setup does not make this a hit.
+        if (group['display_hex'] != {'A': b'number'.hex(), 'B': b'number'.hex()}
+                or group['type_flags'] != {'A': 64, 'B': 64}):
+            raise ValueError('primitive identity declarations no longer resolve to number')
+        if any(action['before'] != action['after'] or not action['result']
+               for action in group['actions']):
+            raise ValueError('primitive identity shortcut changed state or outcome')
+
+
 def ordering(rows):
     if type(rows) is not list or len(rows) % 12:
         raise ValueError('ordering requires reverse, ten shuffles and pairwise matrix')
@@ -93,6 +155,7 @@ def validate(spec, request, text_spec, residual_spec, observed):
     if [r['id'] for r in observed['rows']] != [r['id'] for r in request]:
         raise ValueError('missing, extra or reordered native fixture')
     for definition, case, actual in zip(spec['cases'], request, observed['rows'], strict=True):
+        relation_start_spec(definition)
         fields(actual, 'id state groups diagnostics global_diagnostics')
         if actual['state'] != 'executed' or len(actual['groups']) != len(MODES):
             raise ValueError('unexecuted native fixture or missing relation mode')
@@ -130,9 +193,10 @@ def validate(spec, request, text_spec, residual_spec, observed):
                     raise ValueError('relation result contradicts native ternary')
                 if index and action['before'] != group['actions'][index - 1]['after']:
                     raise ValueError('broken cold/repeat state sequence')
-                for counter in ('types_created', 'signatures_created', 'instantiations'):
+                for counter in COUNTERS:
                     if action['after'][counter] < action['before'][counter]:
                         raise ValueError('native cumulative counter decreased')
+            relation_start(definition, group, MODES[mode_index])
     fields(observed['supplemental'], 'residuals text')
     residuals = observed['supplemental']['residuals']
     if set(residuals) != set(residual_spec['cases']):

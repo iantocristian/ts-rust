@@ -70,7 +70,7 @@ The additional frozen artifacts are:
 | `supplemental-observations.json.xz`, `supplemental-report.json` | Original native relations/state, diagnostics, comparator residuals and printer bytes |
 | `type-footprint.json` | Exact census membership, logical type denominator and shared-allocation attribution; 0.80 unchanged |
 | `checker-workload.json` | Fixed acceptance work, lifecycle, phase/allocator endpoints and sampling |
-| `relater-fixtures.json` | Cold/repeated stateful relation workload and reference/ID comparison protocol |
+| `relater-fixtures.json` | Declared setup and first/repeated relation workload classes, including cold lazy work and primitive shortcuts, plus the reference/ID comparison protocol |
 | `ownership-fixtures.json` | Rust design/recursion scenarios, pending production execution; P2 suppression debt |
 
 ```sh
@@ -96,3 +96,8 @@ Native observation hooks are never linked into timing binaries.
 Small P0 native command/request/output evidence is stored under
 `tools/s08/results/p0-contracts/`. Existing baseline/provenance archives are reused;
 the large raw static graph and derived query cache are not duplicated in git.
+
+P2's first end-to-end queries and shared-file merges are recorded in
+[`p2/README.md`](p2/README.md) and [the checkpoint record](../../docs/S08-P2.md).
+Its small archive is separate from the frozen P0 corpus and does not satisfy
+S08's full acceptance or measurement gates.

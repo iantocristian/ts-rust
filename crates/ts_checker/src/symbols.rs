@@ -9,7 +9,10 @@
 
 use crate::{CheckerState, Error};
 use ts_arena::SymbolId;
-use ts_ast::{symbol_flags, CheckFlags, JsString, Symbol, SymbolFlags, SymbolTable, SymbolTableId};
+use ts_ast::{
+    symbol_flags, CheckFlags, DeclarationRead, DeclarationSlice, JsString, Symbol, SymbolFlags,
+    SymbolRef, SymbolTable, SymbolTableId, SymbolTableRead,
+};
 
 impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.newSymbol
@@ -36,29 +39,51 @@ impl CheckerState {
         Ok(result)
     }
 
-    /// A symbol this checker can read: its own transient symbols now, file
-    /// symbols through the retained program in P2.
-    pub(crate) fn symbol(&self, id: SymbolId) -> Result<&Symbol, Error> {
-        if id.arena() != self.symbols.id() {
-            return Err(Error::Unsupported("file symbol access"));
+    pub(crate) fn symbol(&self, id: SymbolId) -> Result<SymbolRef<'_>, Error> {
+        if id.arena() == self.symbols.id() {
+            return Ok(SymbolRef::Owned(self.symbols.get(id)?));
         }
-        Ok(self.symbols.get(id)?)
+        Ok(self.program()?.symbol(id)?)
     }
 
     pub(crate) fn symbol_mut(&mut self, id: SymbolId) -> Result<&mut Symbol, Error> {
         if id.arena() != self.symbols.id() {
-            return Err(Error::Unsupported("file symbol access"));
+            return Err(ts_arena::Error::WrongOwner.into());
         }
         Ok(self.symbols.get_mut(id)?)
     }
 
     /// `ast.GetSymbolId`: the lazily assigned runtime identity cache keys use.
     pub(crate) fn symbol_runtime_id(&self, id: SymbolId) -> Result<u64, Error> {
-        Ok(ts_ast::runtime_symbol_id(self.symbol(id)?))
+        Ok(ts_ast::runtime_symbol_id(&self.symbol(id)?))
     }
 
     /// Allocates a member table owned by this checker.
     pub(crate) fn alloc_symbol_table(&mut self, table: SymbolTable) -> SymbolTableId {
         self.tables.alloc(table)
+    }
+
+    pub(crate) fn table(&self, id: SymbolTableId) -> Result<SymbolTableRead<'_>, Error> {
+        if id.arena() == self.tables.id() {
+            return Ok(self.tables.get(id)?);
+        }
+        Ok(self.program()?.table(id)?)
+    }
+
+    pub(crate) fn declaration_slice(
+        &self,
+        slice: DeclarationSlice,
+    ) -> Result<DeclarationRead<'_>, Error> {
+        if slice
+            .backing_id()
+            .is_none_or(|id| id.arena() == self.declarations.id())
+        {
+            return Ok(self.declarations.get(slice)?);
+        }
+        Ok(self.program()?.declarations(slice)?)
+    }
+
+    pub(crate) fn symbol_declarations(&self, id: SymbolId) -> Result<DeclarationRead<'_>, Error> {
+        self.declaration_slice(self.symbol(id)?.declarations())
     }
 }

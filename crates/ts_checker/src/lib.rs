@@ -2,9 +2,7 @@
 //! signatures over S07's immutable bound files, with `.types` and `.errors.txt`
 //! parity on the frozen subset as S08's acceptance.
 //!
-//! This is the S08 scaffold plus the P1 storage families. It fixes the contracts
-//! the port builds on and ports the leaf mechanisms every later family depends
-//! on. What exists:
+//! S08 P1 storage plus P2's first production semantic slice. What exists:
 //!
 //! - [`CheckerOwner`]: one owner, one exclusive operation, the reserved checker
 //!   identity adopted as the symbol arena exactly once (ADR 0007, plan §4.1).
@@ -24,57 +22,47 @@
 //! - Flags and enums transcribed from `types.go`, checked against values read
 //!   out of the pinned Go package (`data/s08/checker-flag-observations.json`).
 //! - [`CheckerHost`]: the program surface the checker requires, mapped method by
-//!   method to what the loader already provides and what P2 still owes.
+//!   method to the retained compiler program.
 //!
-//! Relations, program checking, declared types of source symbols, mapped types,
-//! instantiation and diagnostics remain pending; asking for one is a named
-//! `Error::Unsupported`, never a default.
+//! - Program initialization, checker-local source-symbol merges, primitive and
+//!   anonymous-object source queries, and bounded source checking with structured
+//!   diagnostics. Type display builds syntax through `ts_nodebuilder` and prints
+//!   it through `ts_printer`.
+//!
+//! Compound source types, full relations/body checking, loaded generic library
+//! operations and declaration emit remain pending. Unported branches return
+//! named `Error::Unsupported` failures. The named P2 programs do not certify the
+//! frozen E2 denominator; see `docs/S08-P2.md`.
 //!
 //! Design notes: `docs/design/symbols.md`, `docs/design/ownership.md`; plan:
 //! `docs/S08-implementation-plan.md`.
 
+mod check;
 mod compare;
 mod construct;
+mod diagnostics;
 mod flags;
 mod handles;
 mod host;
-#[allow(
-    dead_code,
-    reason = "the numeric id readers of alias, index-info and predicate ids are used by the P2 display and diagnostics families"
-)]
 mod ids;
 mod init;
 mod key;
 mod links;
+mod merge;
+mod name_resolution;
+mod node_builder;
 mod owner;
-#[allow(
-    dead_code,
-    reason = "resolution callers arrive with the first semantic checker slice"
-)]
+mod program;
+mod program_init;
+mod query;
 mod resolution;
-#[allow(
-    dead_code,
-    reason = "signature readers arrive with the P3 signatures family"
-)]
 mod signatures;
-#[allow(
-    dead_code,
-    reason = "state accessors are consumed by the P2 query slice"
-)]
 mod state;
 mod symbols;
 mod template;
 mod type_display;
-#[allow(
-    dead_code,
-    reason = "payload fields written here are read by the P2/P3 type families"
-)]
 mod types;
 mod union;
-#[allow(
-    dead_code,
-    reason = "value link fields beyond resolvedType are read by the P2 query slice"
-)]
 mod value_links;
 
 #[cfg(any(test, feature = "storage-pilot"))]
@@ -89,7 +77,7 @@ pub mod storage_pilot;
 pub use flags::*;
 pub use handles::{
     MemberSpec, NodeRef, RetainedNode, RetainedSignature, RetainedSymbol, RetainedType,
-    RetainedTypeList, SignatureRef, TypeRef,
+    RetainedTypeList, SignatureRef, SymbolRef, TypeRef,
 };
 pub use host::CheckerHost;
 pub(crate) use ids::{AliasId, IndexInfoId, SignatureId, TypeId, TypePredicateId};
@@ -98,13 +86,13 @@ pub use init::BUILTIN_TYPE_NAMES;
 pub(crate) use key::CacheKey;
 pub use links::{LinkKey, LinkStore};
 pub use owner::{CheckerOwner, Operation};
+#[cfg(test)]
+use resolution::TypeResolution;
 pub use resolution::TypeSystemPropertyName;
-#[allow(
-    unused_imports,
-    reason = "remaining private resolution consumers arrive in P2"
-)]
-pub(crate) use resolution::{ResolutionStack, TypeResolution, TypeSystemEntity};
-pub(crate) use signatures::{IndexInfo, Signature, SignatureStore, TypePredicate};
+pub(crate) use resolution::{ResolutionStack, TypeSystemEntity};
+#[cfg(any(test, feature = "storage-pilot"))]
+pub(crate) use signatures::{IndexInfo, Signature};
+pub(crate) use signatures::{SignatureStore, TypePredicate};
 pub use state::CheckerOptions;
 pub(crate) use state::CheckerState;
 #[cfg(test)]
@@ -114,17 +102,13 @@ pub use type_display::{
     NO_TRUNCATION_MAXIMUM_TRUNCATION_LENGTH,
 };
 pub use types::{element_flags, ElementFlags, TypeKind};
-#[allow(
-    unused_imports,
-    reason = "payload families are consumed as their constructors and the census land"
-)]
 pub(crate) use types::{
-    IndexInfoList, InterfaceData, IntersectionData, IntrinsicData, LiteralData, LiteralValue,
-    NumberKey, ObjectData, Payload, ReferenceData, SignatureList, StructuredMembers, SymbolList,
-    TemplateLiteralData, TupleData, TupleElementInfo, TypeAlias, TypeCaches, TypeList,
-    TypeParameterData, TypeRecord, TypeStore, UnionData, UnionOfUnionKey,
-    UnionOrIntersectionMembers, UniqueEsSymbolData,
+    InterfaceData, IntrinsicData, LiteralData, LiteralValue, NumberKey, ObjectData, Payload,
+    ReferenceData, SymbolList, TemplateLiteralData, TupleData, TupleElementInfo, TypeAlias,
+    TypeList, TypeParameterData, TypeStore, UnionData, UnionOfUnionKey, UnionOrIntersectionMembers,
 };
+#[cfg(any(test, feature = "storage-pilot"))]
+pub(crate) use types::{StructuredMembers, TypeRecord};
 pub use union::UnionReduction;
 pub(crate) use value_links::ValueSymbolLinks;
 
@@ -133,6 +117,7 @@ pub(crate) use value_links::ValueSymbolLinks;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
     Arena(ts_arena::Error),
+    Printer(ts_printer::Error),
     /// The same thread asked for a second operation on an owner whose operation
     /// it already holds. Detected before waiting; ordinary contention waits.
     Reentry,
@@ -159,10 +144,17 @@ impl From<ts_arena::Error> for Error {
     }
 }
 
+impl From<ts_printer::Error> for Error {
+    fn from(error: ts_printer::Error) -> Self {
+        Self::Printer(error)
+    }
+}
+
 impl std::fmt::Display for Error {
     fn fmt(&self, output: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Arena(error) => error.fmt(output),
+            Self::Printer(error) => error.fmt(output),
             Self::Reentry => {
                 output.write_str("the checker operation is already held by this thread")
             }
