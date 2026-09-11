@@ -30,8 +30,14 @@ fn page_position(index: usize) -> (usize, usize) {
 
 impl<T> Arena<T> {
     pub(crate) fn new(counters: &Counters) -> Self {
+        Self::with_id(next_arena(), counters)
+    }
+
+    /// Storage for an identity reserved elsewhere. Callers hand out each reserved
+    /// identity exactly once; `CheckerIdentity` enforces that for checkers.
+    pub(crate) fn with_id(id: ArenaId, counters: &Counters) -> Self {
         Self {
-            id: next_arena(),
+            id,
             pages: Vec::new(),
             len: 0,
             counters: counters.clone(),
@@ -71,6 +77,17 @@ impl<T> Arena<T> {
             .values
             .get(offset)
             .ok_or(Error::InvalidSlot)
+    }
+
+    /// Bytes the page vectors hold or reserve, plus the page directory; the
+    /// storage census charges these, not `len * size_of::<T>()`.
+    pub(crate) fn structural_bytes(&self) -> usize {
+        self.pages.capacity() * size_of::<Page<T>>()
+            + self
+                .pages
+                .iter()
+                .map(|page| page.values.capacity() * size_of::<T>())
+                .sum::<usize>()
     }
 
     pub(crate) fn counters(&self) -> &Counters {

@@ -1,0 +1,76 @@
+{
+  "acceptance_variants": 9369,
+  "accounting": {
+    "baseline": "Program AST, binder symbols/flow, file text and completed loader state exist before checking. Report them as bound-input storage. Preallocating or preinterning checker/type work before the boundary does not make it bound-input storage; it remains charged to the checker/type family.",
+    "complete": "Census adapter reports every encountered allocation family. A missing size, unknown allocation extent, unsupported map family or unassigned shared allocation makes the result unavailable, never zero.",
+    "concrete_types": "Enumerate every native TypeData kind and Rust counterpart. Go embedded Type header is part of each concrete object, never counted twice. Type pointers, data-interface words and Rust locators are charged as stored.",
+    "exclusive": "One bucket per allocation. Type-owned caches belong in type storage; reference-only relation-cache backing is a separate bucket. Referenced Type records remain in type storage. No required storage is excluded from both.",
+    "external_allocator_slack": "Report native allocator size-class/metadata slack separately from structural storage. The primary census includes container/page slack, not undocumented runtime allocator metadata. Neither side may silently charge one and omit the other.",
+    "other_buckets": [
+      "signatures",
+      "checker-created/merged symbols",
+      "node and symbol links",
+      "relation caches",
+      "builder AST and printer state",
+      "diagnostic/output buffers",
+      "other named checker allocations"
+    ],
+    "owned": [
+      "type headers and concrete payloads",
+      "aliases and alias argument lists",
+      "type-owned literal/name text allocations",
+      "type/member/index-info and mapper backing attributable to types",
+      "type intern/cache key and value backing, buckets/control bytes and directory capacity",
+      "Rust type pages, locators, escape tables and unused or unreachable retained slots"
+    ],
+    "shared": "Deduplicate by physical allocation identity and full allocation extent, not slice start or pointer alone. Overlapping/subslices must map to one allocation extent. Charge mixed allocations completely to the most specific owning family; type-shared backing has precedence over other checker buckets. Retained source backing is assigned to bound inputs and explicitly reported there.",
+    "unit": "structural storage bytes: concrete allocation object size plus actual backing capacity, directories and control metadata; count each underlying allocation once"
+  },
+  "adapter_work": "P1 implements a real per-family census over the Go typed closure first. The 524-type pilot and fixed unsafe.Sizeof records are diagnostic inputs only; neither supplies this gate.",
+  "aggregation": "Sum bytes and logical type counts over all 9,369 variant checkpoints, then compute aggregate means. Do not average variant ratios. Both type counts and Go storage denominator must be positive.",
+  "checkpoints": [
+    "after bound input preparation, before checker construction",
+    "after the complete variant diagnostic/query/display schedule, with checker and all escaping results live",
+    "after releasing the checker, results, builder generations and bound roots (leak diagnostic, not gate denominator)"
+  ],
+  "denominator": {
+    "alias": "TypeAlias is charged storage, not an additional logical Type",
+    "cycles": "identity visited set",
+    "excluded": [
+      "unoccupied capacity",
+      "unreachable occupied arena records",
+      "observer-created all-types registry",
+      "type count counters without a reachable record"
+    ],
+    "rule": "Unreachable occupied arena records are still charged in the numerator. Do not create dummy records or retain extra semantic roots to improve mean bytes. Report actual created/reachable/occupied/capacity counts separately and explain cross-runtime differences.",
+    "unit": "unique semantically reachable Type identities, per live checker"
+  },
+  "inputs": {
+    "data/s07/e2-acceptance.json": "5c42e555ddaa6eaef03b8f718d84d7cb40bb3c2148e861c8e7a3cbeedce0593d",
+    "data/s07/subset.json": "8539ce8af2f0cd5245554114e8d257805fe266e46fcabbb4ac220d5bcd2c4f2a",
+    "data/s08/baseline-requests.json": "b348aed7bd34fa8fdfe2c579204ed0340ed6887c7fd0e58f77f791d97ca11f89"
+  },
+  "observations": [
+    "per-family requested allocation traffic, retained storage, freed traffic, allocation calls and capacities",
+    "raw Go heap/runtime endpoints with explicit GC outside timing",
+    "raw Rust live/requested allocation endpoints after dropping temporaries",
+    "type/signature/alias/mapper/cache counts, all roots and instance identities",
+    "whole-checker totals alongside type-storage statistic"
+  ],
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "roots": [
+    "live checker semantic fields and caches (including interning caches)",
+    "query result handles retained by the fixed request protocol",
+    "synthetic nodes/original links required by those results"
+  ],
+  "schedule": "query-contract.json; identical ordered acceptance work and checker lifecycle to checker-workload.json",
+  "scope": "P0 execution contract; no Rust completion or measurement result",
+  "statistic": "(sum Rust charged_type_storage_bytes / sum Rust logical_retained_types) / (sum Go charged_type_storage_bytes / sum Go logical_retained_types)",
+  "threshold": {
+    "amendment_required": true,
+    "criterion": "E5.type_footprint",
+    "ledger": "status/experiments.toml",
+    "maximum": 0.8
+  },
+  "version": 1
+}

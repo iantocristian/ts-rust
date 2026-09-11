@@ -9,6 +9,8 @@ pub enum Error {
     TokenKindMismatch { cached: u32, requested: u32 },
     ReparsedParent,
     InvalidTokenRange,
+    IdentityAdopted,
+    Reentry,
 }
 
 impl std::fmt::Display for Error {
@@ -26,6 +28,12 @@ impl std::fmt::Display for Error {
             }
             Self::ReparsedParent => output.write_str("cannot create token for a reparsed parent"),
             Self::InvalidTokenRange => output.write_str("token range is outside the source text"),
+            Self::Reentry => {
+                output.write_str("the checker identity is already leased by this thread")
+            }
+            Self::IdentityAdopted => {
+                output.write_str("the checker identity already adopted its symbol arena")
+            }
         }
     }
 }

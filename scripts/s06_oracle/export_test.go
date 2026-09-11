@@ -128,6 +128,30 @@ type s06Variant struct {
 // package type metadata contributes; case sensitivity determines tspath.Path.
 var s06ParseSettings = []string{"target", "module", "moduledetection", "moduleresolution", "jsx", "usecasesensitivefilenames"}
 
+// Match newCompilerTest's partition before CompileFilesEx inserts roots then
+// auxiliary files. Source-order insertion changes duplicate virtual filenames.
+// Shared by S06 parser-input extraction and S07 program-request assembly.
+func s06ProgramUnits(payload *testCaseContent, config map[string]string, cwd string) (inputs, other []*testUnit) {
+	units := payload.testUnitData
+	if payload.tsConfig != nil {
+		for _, unit := range units {
+			if slices.Contains(payload.tsConfig.ParsedConfig.FileNames, tspath.GetNormalizedAbsolutePath(unit.name, cwd)) {
+				inputs = append(inputs, unit)
+			} else {
+				other = append(other, unit)
+			}
+		}
+		return
+	}
+	if len(units) != 0 {
+		last := units[len(units)-1]
+		if config["noimplicitreferences"] != "" || strings.Contains(last.content, requireStr) || referencesRegex.MatchString(last.content) {
+			return units[len(units)-1:], units[:len(units)-1]
+		}
+	}
+	return units, nil
+}
+
 func s06Resolve(t *testing.T, result *s06Case, loaded, physical string) {
 	t.Helper()
 	payload := makeUnitsFromTest(loaded, physical)
@@ -192,15 +216,9 @@ func s06Resolve(t *testing.T, result *s06Case, loaded, physical string) {
 			}
 		}
 		files := map[string]any{}
-		for i, unit := range result.Units {
-			if i == configIndex {
-				continue
-			}
-			text, err := hex.DecodeString(unit.TextHex)
-			if err != nil {
-				t.Fatal(err)
-			}
-			files[tspath.GetNormalizedAbsolutePath(unit.Name, cwd)] = text
+		inputs, otherUnits := s06ProgramUnits(&payload, config, cwd)
+		for _, unit := range slices.Concat(inputs, otherUnits) {
+			files[tspath.GetNormalizedAbsolutePath(unit.name, cwd)] = []byte(unit.content)
 		}
 		for from, to := range result.Symlinks {
 			files[tspath.GetNormalizedAbsolutePath(from, cwd)] = vfstest.Symlink(tspath.GetNormalizedAbsolutePath(to, cwd))

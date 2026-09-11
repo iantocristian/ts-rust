@@ -223,6 +223,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04d056b875a9d2e6cb9a61d127afee9ac5999b9f87bcb32079d1318e505be714"
 
 [[package]]
+name = "s08_relater_prototype"
+version = "0.1.0"
+
+[[package]]
 name = "serde"
 version = "1.0.229"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -419,6 +423,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_checker"
+version = "0.1.0"
+dependencies = [
+ "cap",
+ "hashbrown",
+ "mimalloc",
+ "serde_json",
+ "ts_arena",
+ "ts_ast",
+ "ts_core",
+ "ts_jsnum",
+ "ts_jsstring",
+ "ts_module",
+ "ts_nodebuilder",
+ "ts_tsoptions",
+]
+
+[[package]]
 name = "ts_compiler"
 version = "0.1.0"
 dependencies = [
@@ -499,6 +521,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_nodebuilder"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "ts_ast",
+]
+
+[[package]]
 name = "ts_parser"
 version = "0.1.0"
 dependencies = [
@@ -511,6 +541,18 @@ dependencies = [
  "ts_diagnostics",
  "ts_encoder",
  "ts_jsnum",
+ "ts_jsstring",
+ "ts_scanner",
+]
+
+[[package]]
+name = "ts_printer"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "ts_arena",
+ "ts_ast",
+ "ts_core",
  "ts_jsstring",
  "ts_scanner",
 ]

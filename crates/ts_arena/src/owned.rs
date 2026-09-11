@@ -20,6 +20,10 @@ macro_rules! owned_arena {
             pub fn is_empty(&self) -> bool {
                 self.len() == 0
             }
+            /// Reserved record bytes and directory bytes, for storage censuses.
+            pub fn structural_bytes(&self) -> usize {
+                self.0.structural_bytes()
+            }
             pub fn push(&mut self, value: T) -> $id {
                 $id::new(self.0.id, self.0.push(value))
             }
@@ -60,6 +64,14 @@ macro_rules! owned_arena {
 }
 owned_arena!(OwnedArena, AuxId);
 owned_arena!(SymbolArena, SymbolId);
+
+impl<T> SymbolArena<T> {
+    /// Storage numbered with an identity reserved by a `CheckerIdentity`, which
+    /// hands each reservation out exactly once.
+    pub(crate) fn with_id(id: ArenaId, counters: &Counters) -> Self {
+        Self(Arena::with_id(id, counters))
+    }
+}
 
 #[cfg(test)]
 mod tests {

@@ -187,24 +187,18 @@ func s07Variants(t *testing.T, c *s06Case, physical, loaded string) []s07Variant
 		r.Request = s07LoadRequest{Cwd: v.CurrentDirectory, CaseSensitive: harness.UseCaseSensitiveFileNames, Files: map[string]string{}, Symlinks: map[string]string{}, Roots: []string{}, Options: options}
 		// Input assembly is the pinned compiler-runner fixture boundary at
 		// compiler_runner.go:296-344; the compiler loader itself runs separately.
-		units := payload.testUnitData
-		lastOnly := false
+		inputs, otherUnits := s06ProgramUnits(&payload, config, v.CurrentDirectory)
 		includeFixtureLib := false
-		if len(units) != 0 && payload.tsConfig == nil {
-			last := units[len(units)-1]
-			lastOnly = config["noimplicitreferences"] != "" || strings.Contains(last.content, requireStr) || referencesRegex.MatchString(last.content)
-		}
-		for i, unit := range units {
+		for _, unit := range slices.Concat(inputs, otherUnits) {
 			name := tspath.GetNormalizedAbsolutePath(unit.name, v.CurrentDirectory)
 			r.Request.Files[name] = hex.EncodeToString([]byte(unit.content))
-			root := !lastOnly || i == len(units)-1
-			if payload.tsConfig != nil {
-				root = slices.Contains(payload.tsConfig.ParsedConfig.FileNames, name)
-			}
-			if root && strings.Contains(unit.content, "/.lib/") {
+		}
+		for _, unit := range inputs {
+			name := tspath.GetNormalizedAbsolutePath(unit.name, v.CurrentDirectory)
+			if strings.Contains(unit.content, "/.lib/") {
 				includeFixtureLib = true
 			}
-			if root && !tspath.FileExtensionIs(name, tspath.ExtensionJson) && !tspath.FileExtensionIs(name, tspath.ExtensionTsBuildInfo) {
+			if !tspath.FileExtensionIs(name, tspath.ExtensionJson) && !tspath.FileExtensionIs(name, tspath.ExtensionTsBuildInfo) {
 				r.Request.Roots = append(r.Request.Roots, name)
 			}
 		}
