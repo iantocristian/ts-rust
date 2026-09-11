@@ -201,6 +201,81 @@
           "file": "/objects.ts"
         }
       ]
+    },
+    {
+      "id": "readonly-and-grammar",
+      "files": {
+        "/review.ts": "const a = 1; a = 2; const let: number;\n"
+      },
+      "roots": [
+        "/review.ts"
+      ],
+      "queries": [
+        {
+          "id": "a.name",
+          "file": "/review.ts",
+          "declaration": "a",
+          "target": "name",
+          "operation": "type_at_location"
+        }
+      ]
+    },
+    {
+      "id": "reference-name-and-display",
+      "files": {
+        "/review.ts": "type Foo = number; let x: Foo; type Hex = { a: 0x10 }; type Quoted = { \"field-name\": \"line\\ntext\" };\n"
+      },
+      "roots": [
+        "/review.ts"
+      ],
+      "queries": [
+        {
+          "id": "x.annotation_name",
+          "file": "/review.ts",
+          "declaration": "x",
+          "target": "annotation_name",
+          "operation": "type_at_location"
+        },
+        {
+          "id": "x.annotation",
+          "file": "/review.ts",
+          "declaration": "x",
+          "target": "annotation",
+          "operation": "type_at_location"
+        },
+        {
+          "id": "Hex.name",
+          "file": "/review.ts",
+          "declaration": "Hex",
+          "target": "name",
+          "operation": "declared_type"
+        },
+        {
+          "id": "Quoted.name",
+          "file": "/review.ts",
+          "declaration": "Quoted",
+          "target": "name",
+          "operation": "declared_type"
+        }
+      ]
+    },
+    {
+      "id": "contextual-object-initializer",
+      "files": {
+        "/review.ts": "let value: { field: number } = { field: 1 };\n"
+      },
+      "roots": [
+        "/review.ts"
+      ],
+      "queries": [
+        {
+          "id": "value.name",
+          "file": "/review.ts",
+          "declaration": "value",
+          "target": "name",
+          "operation": "type_at_location"
+        }
+      ]
     }
   ],
   "merge": {

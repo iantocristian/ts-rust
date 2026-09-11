@@ -253,14 +253,16 @@ func p2Declaration(file *ast.SourceFile, name string) *ast.Node {
 	}
 	return found
 }
-func p2BasicType(c *checker.Checker, typ *checker.Type, enclosing *ast.Node) map[string]any {
-	return map[string]any{"flags": uint32(typ.Flags()), "object_flags": uint32(typ.ObjectFlags()), "display_hex": p2Hex(c.TypeToString(typ)), "in_alias_display_hex": p2Hex(c.TypeToStringEx(typ, enclosing, checker.TypeFormatFlagsInTypeAlias, nil))}
+func p2BasicType(c *checker.Checker, typ *checker.Type) map[string]any {
+	// P2 exercises context-free display on both sides. Enclosing-declaration
+	// name qualification and annotation reuse belong to the later display slice.
+	return map[string]any{"flags": uint32(typ.Flags()), "object_flags": uint32(typ.ObjectFlags()), "display_hex": p2Hex(c.TypeToString(typ)), "in_alias_display_hex": p2Hex(c.TypeToStringEx(typ, nil, checker.TypeFormatFlagsInTypeAlias, nil))}
 }
-func p2Type(c *checker.Checker, typ *checker.Type, enclosing *ast.Node, g *p2Symbols) map[string]any {
-	result := p2BasicType(c, typ, enclosing)
+func p2Type(c *checker.Checker, typ *checker.Type, g *p2Symbols) map[string]any {
+	result := p2BasicType(c, typ)
 	properties := []map[string]any{}
 	for _, symbol := range c.GetPropertiesOfType(typ) {
-		properties = append(properties, map[string]any{"symbol": g.snapshot(symbol), "type": p2BasicType(c, c.GetTypeOfSymbol(symbol), enclosing)})
+		properties = append(properties, map[string]any{"symbol": g.snapshot(symbol), "type": p2BasicType(c, c.GetTypeOfSymbol(symbol))})
 	}
 	result["properties"] = properties
 	return result
@@ -277,6 +279,8 @@ func p2QueryResult(c *checker.Checker, p *compiler.Program, q p2Query) map[strin
 		node = decl.Name()
 	case "annotation":
 		node = decl.Type()
+	case "annotation_name":
+		node = decl.Type().AsTypeReferenceNode().TypeName
 	case "initializer":
 		node = decl.Initializer()
 	default:
@@ -302,7 +306,7 @@ func p2QueryResult(c *checker.Checker, p *compiler.Program, q p2Query) map[strin
 		panic("native query returned no type")
 	}
 	g := p2SymbolIDs(p.SourceFiles(), "query")
-	return map[string]any{"id": q.ID, "state": "executed", "node": p2Node(node), "symbol": g.snapshot(symbol), "type": p2Type(c, typ, decl, g)}
+	return map[string]any{"id": q.ID, "state": "executed", "node": p2Node(node), "symbol": g.snapshot(symbol), "type": p2Type(c, typ, g)}
 }
 func p2AllDiagnostics(t *testing.T, p *compiler.Program, c *checker.Checker) map[string]any {
 	ctx := context.Background()
@@ -360,7 +364,7 @@ func p2ObserveMerged(c *checker.Checker, p *compiler.Program, request p2Merge, l
 	typ := c.GetDeclaredTypeOfSymbol(symbol)
 	g := p2SymbolIDs(p.SourceFiles(), label)
 	base := p.GetSourceFile(request.Shared).AsNode().Locals()[request.Symbol]
-	return p2Merged{row: map[string]any{"checker": label, "via": path, "symbol": g.snapshot(symbol), "type": p2Type(c, typ, decl, g), "merged_is_bound_base": symbol == base}, symbol: symbol, typ: typ}
+	return p2Merged{row: map[string]any{"checker": label, "via": path, "symbol": g.snapshot(symbol), "type": p2Type(c, typ, g), "merged_is_bound_base": symbol == base}, symbol: symbol, typ: typ}
 }
 func p2ObserveMerge(t *testing.T, request p2Merge, mode string) map[string]any {
 	host := p2Host(request.Files)

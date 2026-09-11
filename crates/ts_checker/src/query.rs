@@ -128,7 +128,7 @@ impl CheckerState {
                 name.as_bytes(),
                 if type_reference { sf::TYPE } else { sf::VALUE },
                 None,
-                false,
+                true,
             )?;
             if type_reference && result.is_none() {
                 return Err(Error::Unsupported("getUnresolvedSymbolForEntityName"));
@@ -215,11 +215,14 @@ impl CheckerState {
                         self.get_type_of_symbol(symbol)
                     };
                 }
-                if matches!(
-                    parent_read.kind().known(),
-                    Some(K::TypeReference | K::QualifiedName)
-                ) {
-                    return self.get_type_from_type_node(parent);
+                if kind == K::Identifier && parent_read.kind() == K::TypeReference {
+                    // At this pin, IsPartOfTypeNode selects the identifier
+                    // itself; getTypeFromTypeNodeWorker falls back to errorType.
+                    // Querying the complete reference is a different operation.
+                    return Ok(self.builtins.error_type);
+                }
+                if parent_read.kind() == K::QualifiedName {
+                    return Err(Error::Unsupported("getTypeOfNode: qualified name context"));
                 }
             }
             if ts_ast::utilities::is_type_node(&read) {
@@ -591,6 +594,20 @@ impl CheckerState {
                 }));
         }
         Ok(None)
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.checkExpressionCached
+    // port: tsc/internal/checker/checker.go:Checker.checkExpressionCachedEx
+    pub(crate) fn check_expression_cached(&mut self, node: NodeId) -> Result<TypeId, Error> {
+        if let Some(Some(ty)) = self.query.type_nodes.try_get(node) {
+            return Ok(*ty);
+        }
+        // P2 implements normal checking only and rejects flow-dependent
+        // expressions. When flow checking is added, a cache fill must save,
+        // clear and restore flowLoopStack/flowTypeCache as upstream does.
+        let ty = self.check_expression(node)?;
+        *self.query.type_nodes.get_or_default(node) = Some(ty);
+        Ok(ty)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkExpressionWorker
@@ -991,7 +1008,24 @@ impl CheckerState {
             return Ok(ty);
         }
         if let Some(initializer) = initializer {
-            let ty = self.check_expression(initializer)?;
+            // checkDeclarationInitializer bypasses the cache for quick literal
+            // types. Other supported initializers use the normal-mode cache.
+            let kind = self.ast(initializer)?.node(initializer)?.kind();
+            let ty = if matches!(
+                kind.known(),
+                Some(
+                    K::StringLiteral
+                        | K::NoSubstitutionTemplateLiteral
+                        | K::NumericLiteral
+                        | K::BigIntLiteral
+                        | K::TrueKeyword
+                        | K::FalseKeyword
+                )
+            ) {
+                self.check_expression(initializer)?
+            } else {
+                self.check_expression_cached(initializer)?
+            };
             if self.types.flags(ty)? & (tf::NULL | tf::UNDEFINED) != 0
                 || self.types.get(ty)?.object_flags & of::REQUIRES_WIDENING != 0
             {

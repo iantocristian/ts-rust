@@ -405,3 +405,120 @@ fn lazy_jsdoc_type_names_do_not_resolve_as_ordinary_wrapper_interfaces() {
         );
     }
 }
+
+#[test]
+fn readonly_and_const_grammar_errors_do_not_cascade_into_unrelated_checks() {
+    for (text, codes) in [
+        (b"const a = 1; a = 2;".as_slice(), vec![2588]),
+        (b"const let: number;", vec![1155]),
+        // An ordinary let declaration still runs its name grammar check.
+        (b"let let: number;", vec![2480]),
+    ] {
+        let (owner, source) = checker(text, options());
+        for _ in 0..2 {
+            let actual = owner
+                .operation()
+                .unwrap()
+                .semantic_diagnostics(source)
+                .unwrap();
+            assert_eq!(actual.iter().map(|d| d.code).collect::<Vec<_>>(), codes);
+        }
+    }
+    let (owner, source) = checker(
+        b"const a = 1; a = 1n;",
+        CompilerOptions {
+            target: ScriptTarget::ES2019,
+            ..options()
+        },
+    );
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(
+        diagnostics.iter().map(|d| d.code).collect::<Vec<_>>(),
+        [2588, 2737],
+        "a readonly left side must not suppress right-side grammar errors"
+    );
+}
+
+#[test]
+fn reference_identifier_and_whole_reference_preserve_distinct_native_queries() {
+    let (owner, program, _) = fixture(b"type Foo = number; type Alias = Foo;", options());
+    let view = program.file(b"/main.ts").unwrap().bound().view().ast();
+    let declaration = declarations(&program)[1];
+    let reference = view.node(declaration).unwrap().type_node().unwrap();
+    let name = view
+        .node(reference)
+        .unwrap()
+        .data_source()
+        .as_type_reference_node()
+        .unwrap()
+        .type_name()
+        .unwrap();
+    let mut op = owner.operation().unwrap();
+    assert_eq!(
+        op.get_type_at_location(name).unwrap(),
+        op.builtin_type("errorType").unwrap()
+    );
+    assert_eq!(
+        op.get_type_at_location(reference).unwrap(),
+        op.builtin_type("numberType").unwrap()
+    );
+    let symbol = op.get_symbol_at_location(name).unwrap().unwrap();
+    assert_eq!(
+        op.get_declared_type_of_symbol(symbol).unwrap(),
+        op.builtin_type("numberType").unwrap()
+    );
+}
+
+#[test]
+fn unsupported_variable_widening_does_not_rebuild_a_successful_cached_initializer() {
+    let (owner, program, _) = fixture(b"let value = { field: 1 };", options());
+    let file = program.file(b"/main.ts").unwrap();
+    let view = file.bound().view().ast();
+    let statement = declarations(&program)[0];
+    let list = view
+        .node(statement)
+        .unwrap()
+        .data_source()
+        .as_variable_statement()
+        .unwrap()
+        .declaration_list()
+        .unwrap();
+    let declarations = view
+        .node(list)
+        .unwrap()
+        .data_source()
+        .as_variable_declaration_list()
+        .unwrap()
+        .declarations()
+        .unwrap();
+    let declaration = view
+        .node_slice(view.list(declarations).unwrap().nodes())
+        .unwrap()
+        .at(0)
+        .unwrap();
+    let name = view.node(declaration).unwrap().name().unwrap();
+    let mut op = owner.operation().unwrap();
+    let symbol = op.get_symbol_at_location(name).unwrap().unwrap();
+    let unsupported = Err(Error::Unsupported(
+        "widenTypeForVariableLikeDeclaration: auto/null/object widening",
+    ));
+    assert_eq!(op.get_type_of_symbol(symbol), unsupported);
+    let before = (op.type_count(), op.symbol_count());
+    for _ in 0..2 {
+        assert_eq!(op.get_type_of_symbol(symbol), unsupported);
+        assert_eq!(
+            (op.type_count(), op.symbol_count()),
+            before,
+            "retrying widening must reuse the checked initializer's type and property symbols"
+        );
+    }
+    assert!(matches!(
+        op.semantic_diagnostics(file.source()),
+        Err(Error::Unsupported(_))
+    ));
+    assert_eq!((op.type_count(), op.symbol_count()), before);
+}

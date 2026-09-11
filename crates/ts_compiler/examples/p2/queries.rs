@@ -38,7 +38,11 @@ pub fn declaration(program: &Program, path: &str, name: &str) -> Result<NodeId> 
 pub fn basic_type(op: &mut Operation<'_>, typ: TypeRef) -> Result<Value> {
     let flags = op.type_flags(typ)?;
     let object_flags = op.type_object_flags(typ)?;
-    let display = op.type_to_string(typ, type_format_flags::NONE)?;
+    let display = op.type_to_string(
+        typ,
+        type_format_flags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
+            | type_format_flags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE,
+    )?;
     let alias = op.type_to_string(typ, type_format_flags::IN_TYPE_ALIAS)?;
     Ok(
         json!({"flags":flags,"object_flags":object_flags,"display_hex":hex(display.as_bytes()),"in_alias_display_hex":hex(alias.as_bytes())}),
@@ -71,6 +75,16 @@ fn query(program: &Program, op: &mut Operation<'_>, request: &Value) -> Result<(
     let node = match text(&request["target"])? {
         "name" => declaration.name(),
         "annotation" => declaration.type_node(),
+        "annotation_name" => {
+            let annotation = declaration
+                .type_node()
+                .ok_or_else(|| Error::Protocol("query annotation absent".into()))?;
+            ast.node(annotation)?
+                .data_source()
+                .as_type_reference_node()
+                .ok_or_else(|| Error::Protocol("query annotation is not a reference".into()))?
+                .type_name()
+        }
         "initializer" => declaration.initializer(),
         _ => return Err(Error::Protocol("unknown query target".into())),
     }

@@ -308,8 +308,7 @@ impl CheckerState {
                     messages::X_0_declarations_must_be_initialized,
                     vec![JsString::from_bytes(b"const".as_slice())],
                 )?;
-            }
-            if flags & nf::BLOCK_SCOPED != 0
+            } else if flags & nf::BLOCK_SCOPED != 0
                 && self.ast(name)?.node_text(name)?.as_bytes() == b"let"
             {
                 self.error_at(Some(name), messages::X_let_is_not_allowed_to_be_used_as_a_name_in_let_or_const_declarations, vec![])?;
@@ -329,7 +328,7 @@ impl CheckerState {
         }
         let target = self.get_type_of_symbol(symbol)?;
         if let Some(initializer) = initializer {
-            let source = self.check_expression(initializer)?;
+            let source = self.check_expression_cached(initializer)?;
             self.check_assignable_at(source, target, node)?;
         }
         Ok(())
@@ -400,6 +399,10 @@ impl CheckerState {
                 messages::Cannot_assign_to_0_because_it_is_a_constant,
                 vec![text],
             )?;
+            // checkIdentifier returns errorType for a readonly assignment.
+            // The right side has already been checked; do not also relate it
+            // to the constant's literal type.
+            return Ok(());
         }
         let left_type = self.get_type_of_symbol(symbol)?;
         self.check_assignable_at(right_type, left_type, left)

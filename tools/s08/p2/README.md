@@ -1,6 +1,6 @@
 # Named S08 P2 native fixtures
 
-`requests.json` fixes three real programs, 23 type queries and four merge modes.
+`requests.json` fixes six real programs, 29 type queries and four merge modes.
 Options explicitly set `strict: true` and `noLib: true`; the original checker
 applies the effective strict defaults. No library declarations or missing-global
 diagnostic filters are injected.
@@ -32,6 +32,13 @@ symbols. Separate checks observe pointer identity, shared-file identity, repeate
 result identity and the before/after bound-file snapshot.
 
 Every query retains native default and InTypeAlias display bytes and properties.
+Both display calls use no enclosing declaration. Rust supplies the two default
+flags used by Go's `TypeToString`; alias expansion passes only `InTypeAlias` on
+both sides. This fixture does not cover contextual name qualification or source
+annotation reuse. The `annotation_name` selector queries a reference's name
+separately from its full annotation, preserving the pinned error-type result.
+The additional programs cover readonly/const grammar short-circuiting, hex and
+quoted display spellings, and contextual object initialization.
 Diagnostics retain all structured fields and config/program/syntactic/bind/
 semantic/global phases, their sorted combined payload, and original error-baseline
 bytes. Source-language errors are observations; `unsupported` is a distinct

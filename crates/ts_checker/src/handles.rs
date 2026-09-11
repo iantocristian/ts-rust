@@ -238,6 +238,10 @@ impl Operation<'_> {
             .collect()
     }
 
+    /// Context-free `TypeToStringEx`: flags are explicit and there is no
+    /// enclosing declaration. Go's `TypeToString` defaults are
+    /// `ALLOW_UNIQUE_ES_SYMBOL_TYPE | USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE`.
+    /// Context-sensitive qualification/annotation reuse is not implemented yet.
     pub fn type_to_string(
         &mut self,
         ty: TypeRef,

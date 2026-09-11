@@ -42,7 +42,7 @@ def specification(spec):
         for query in program['queries']:
             fields(query, 'id file declaration target operation')
             if (query['file'] not in program['files'] or not query['declaration']
-                    or query['target'] not in ('name','annotation','initializer')
+                    or query['target'] not in ('name','annotation','annotation_name','initializer')
                     or query['operation'] not in ('type_at_location','declared_type')
                     or (query['operation'] == 'declared_type' and query['target'] != 'name')):
                 raise ValueError('invalid P2 query selector')
