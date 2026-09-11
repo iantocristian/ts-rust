@@ -542,7 +542,10 @@ dependencies = [
 name = "ts_printer"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
+ "ts_arena",
  "ts_ast",
+ "ts_core",
  "ts_jsstring",
  "ts_scanner",
 ]

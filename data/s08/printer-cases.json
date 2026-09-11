@@ -1,0 +1,2278 @@
+{
+ "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+ "scope": "Hand-written synthetic type-display trees; printed by the pinned Go printer to freeze expected bytes for the Rust printer",
+ "cases": [
+  {
+   "name": "keyword_string",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "KeywordType",
+    "keyword": "StringKeyword"
+   }
+  },
+  {
+   "name": "keyword_all",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "UnionType",
+    "types": [
+     {
+      "kind": "KeywordType",
+      "keyword": "AnyKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "UnknownKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "NumberKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "BigIntKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "ObjectKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "BooleanKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "SymbolKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "VoidKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "UndefinedKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "NeverKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "IntrinsicKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "literal_string_double",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "StringLiteral",
+     "text": "hello"
+    }
+   }
+  },
+  {
+   "name": "literal_string_single_quote",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "StringLiteral",
+     "text": "it's",
+     "singleQuote": true
+    }
+   }
+  },
+  {
+   "name": "literal_string_escapes",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "StringLiteral",
+     "text": "a\"b\\c\n\t\u0000é😀 "
+    }
+   }
+  },
+  {
+   "name": "literal_string_never_ascii_escape",
+   "options": {
+    "remove_comments": true,
+    "never_ascii_escape": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "StringLiteral",
+     "text": "héllo 😀"
+    }
+   }
+  },
+  {
+   "name": "literal_number",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "NumericLiteral",
+     "text": "42"
+    }
+   }
+  },
+  {
+   "name": "literal_negative_number",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "PrefixUnary",
+     "operator": "MinusToken",
+     "operand": {
+      "kind": "NumericLiteral",
+      "text": "1"
+     }
+    }
+   }
+  },
+  {
+   "name": "literal_double_minus",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "PrefixUnary",
+     "operator": "MinusToken",
+     "operand": {
+      "kind": "PrefixUnary",
+      "operator": "MinusToken",
+      "operand": {
+       "kind": "NumericLiteral",
+       "text": "1"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "literal_bigint",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "BigIntLiteral",
+     "text": "123n"
+    }
+   }
+  },
+  {
+   "name": "literal_boolean_null",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "UnionType",
+    "types": [
+     {
+      "kind": "LiteralType",
+      "literal": {
+       "kind": "KeywordExpression",
+       "keyword": "TrueKeyword"
+      }
+     },
+     {
+      "kind": "LiteralType",
+      "literal": {
+       "kind": "KeywordExpression",
+       "keyword": "FalseKeyword"
+      }
+     },
+     {
+      "kind": "LiteralType",
+      "literal": {
+       "kind": "KeywordExpression",
+       "keyword": "NullKeyword"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "literal_template",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "LiteralType",
+    "literal": {
+     "kind": "NoSubstitutionTemplateLiteral",
+     "text": "tpl`x"
+    }
+   }
+  },
+  {
+   "name": "reference_simple",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeReference",
+    "typeName": {
+     "kind": "Identifier",
+     "text": "Foo"
+    },
+    "typeArguments": null
+   }
+  },
+  {
+   "name": "reference_qualified_generic",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeReference",
+    "typeName": {
+     "kind": "QualifiedName",
+     "left": {
+      "kind": "QualifiedName",
+      "left": {
+       "kind": "Identifier",
+       "text": "ns"
+      },
+      "right": {
+       "kind": "Identifier",
+       "text": "inner"
+      }
+     },
+     "right": {
+      "kind": "Identifier",
+      "text": "Map"
+     }
+    },
+    "typeArguments": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "T"
+      },
+      "typeArguments": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "reference_empty_type_arguments",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeReference",
+    "typeName": {
+     "kind": "Identifier",
+     "text": "Foo"
+    },
+    "typeArguments": []
+   }
+  },
+  {
+   "name": "array_simple",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ArrayType",
+    "elementType": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "array_of_union_parenthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ArrayType",
+    "elementType": {
+     "kind": "UnionType",
+     "types": [
+      {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      },
+      {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "array_of_function_parenthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ArrayType",
+    "elementType": {
+     "kind": "FunctionType",
+     "typeParameters": null,
+     "parameters": [],
+     "type": {
+      "kind": "KeywordType",
+      "keyword": "VoidKeyword"
+     }
+    }
+   }
+  },
+  {
+   "name": "array_of_typeof_synthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ArrayType",
+    "elementType": {
+     "kind": "TypeQuery",
+     "exprName": {
+      "kind": "Identifier",
+      "text": "x"
+     },
+     "typeArguments": null
+    }
+   }
+  },
+  {
+   "name": "array_of_keyof",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ArrayType",
+    "elementType": {
+     "kind": "TypeOperator",
+     "operator": "KeyOfKeyword",
+     "type": {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "T"
+      },
+      "typeArguments": null
+     }
+    }
+   }
+  },
+  {
+   "name": "readonly_array",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeOperator",
+    "operator": "ReadonlyKeyword",
+    "type": {
+     "kind": "ArrayType",
+     "elementType": {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     }
+    }
+   }
+  },
+  {
+   "name": "keyof_union_parenthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeOperator",
+    "operator": "KeyOfKeyword",
+    "type": {
+     "kind": "UnionType",
+     "types": [
+      {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "A"
+       },
+       "typeArguments": null
+      },
+      {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "B"
+       },
+       "typeArguments": null
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "unique_symbol",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeOperator",
+    "operator": "UniqueKeyword",
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "SymbolKeyword"
+    }
+   }
+  },
+  {
+   "name": "union_with_function_member",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "UnionType",
+    "types": [
+     {
+      "kind": "FunctionType",
+      "typeParameters": null,
+      "parameters": [],
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "VoidKeyword"
+      }
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "intersection_of_unions",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "IntersectionType",
+    "types": [
+     {
+      "kind": "UnionType",
+      "types": [
+       {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "A"
+        },
+        "typeArguments": null
+       },
+       {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "B"
+        },
+        "typeArguments": null
+       }
+      ]
+     },
+     {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "C"
+      },
+      "typeArguments": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "union_in_intersection_position",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "UnionType",
+    "types": [
+     {
+      "kind": "IntersectionType",
+      "types": [
+       {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "A"
+        },
+        "typeArguments": null
+       },
+       {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "B"
+        },
+        "typeArguments": null
+       }
+      ]
+     },
+     {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "C"
+      },
+      "typeArguments": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "tuple_simple",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "singleLine": true,
+    "elements": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "NumberKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "tuple_empty",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "singleLine": true,
+    "elements": []
+   }
+  },
+  {
+   "name": "tuple_multiline_flag_without_newline",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "elements": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "NumberKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "tuple_multiline_with_newline",
+   "options": {
+    "remove_comments": true,
+    "new_line": "\n",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "elements": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     {
+      "kind": "KeywordType",
+      "keyword": "NumberKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "tuple_named_optional_rest",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "singleLine": true,
+    "elements": [
+     {
+      "kind": "NamedTupleMember",
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "NamedTupleMember",
+      "name": {
+       "kind": "Identifier",
+       "text": "b"
+      },
+      "question": true,
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     },
+     {
+      "kind": "NamedTupleMember",
+      "name": {
+       "kind": "Identifier",
+       "text": "rest"
+      },
+      "dotDotDot": true,
+      "type": {
+       "kind": "ArrayType",
+       "elementType": {
+        "kind": "KeywordType",
+        "keyword": "BooleanKeyword"
+       }
+      }
+     },
+     {
+      "kind": "OptionalType",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "RestType",
+      "type": {
+       "kind": "ArrayType",
+       "elementType": {
+        "kind": "KeywordType",
+        "keyword": "NumberKeyword"
+       }
+      }
+     },
+     {
+      "kind": "OptionalType",
+      "type": {
+       "kind": "UnionType",
+       "types": [
+        {
+         "kind": "KeywordType",
+         "keyword": "StringKeyword"
+        },
+        {
+         "kind": "KeywordType",
+         "keyword": "NumberKeyword"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "type_literal_empty",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "singleLine": true,
+    "members": []
+   }
+  },
+  {
+   "name": "type_literal_single_line",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "singleLine": true,
+    "members": [
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": [
+       "ReadonlyKeyword"
+      ],
+      "name": {
+       "kind": "Identifier",
+       "text": "b"
+      },
+      "question": true,
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "StringLiteral",
+       "text": "quoted-name"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "BooleanKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "NumericLiteral",
+       "text": "0"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "AnyKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "ComputedPropertyName",
+       "expression": {
+        "kind": "PropertyAccess",
+        "expression": {
+         "kind": "Identifier",
+         "text": "Symbol"
+        },
+        "name": {
+         "kind": "Identifier",
+         "text": "iterator"
+        }
+       }
+      },
+      "type": null
+     },
+     {
+      "kind": "MethodSignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "m"
+      },
+      "typeParameters": [
+       {
+        "kind": "TypeParameter",
+        "modifiers": null,
+        "name": {
+         "kind": "Identifier",
+         "text": "T"
+        },
+        "constraint": {
+         "kind": "KeywordType",
+         "keyword": "StringKeyword"
+        },
+        "default": {
+         "kind": "KeywordType",
+         "keyword": "NeverKeyword"
+        }
+       }
+      ],
+      "parameters": [
+       {
+        "kind": "Parameter",
+        "modifiers": null,
+        "name": {
+         "kind": "Identifier",
+         "text": "x"
+        },
+        "type": {
+         "kind": "TypeReference",
+         "typeName": {
+          "kind": "Identifier",
+          "text": "T"
+         },
+         "typeArguments": null
+        }
+       }
+      ],
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "VoidKeyword"
+      }
+     },
+     {
+      "kind": "MethodSignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "opt"
+      },
+      "question": true,
+      "typeParameters": null,
+      "parameters": [],
+      "type": null
+     },
+     {
+      "kind": "IndexSignature",
+      "modifiers": [
+       "ReadonlyKeyword"
+      ],
+      "parameters": [
+       {
+        "kind": "Parameter",
+        "modifiers": null,
+        "name": {
+         "kind": "Identifier",
+         "text": "key"
+        },
+        "type": {
+         "kind": "KeywordType",
+         "keyword": "StringKeyword"
+        }
+       }
+      ],
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     },
+     {
+      "kind": "CallSignature",
+      "typeParameters": null,
+      "parameters": [
+       {
+        "kind": "Parameter",
+        "modifiers": null,
+        "dotDotDot": true,
+        "name": {
+         "kind": "Identifier",
+         "text": "args"
+        },
+        "type": {
+         "kind": "ArrayType",
+         "elementType": {
+          "kind": "KeywordType",
+          "keyword": "AnyKeyword"
+         }
+        }
+       }
+      ],
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "UnknownKeyword"
+      }
+     },
+     {
+      "kind": "ConstructSignature",
+      "typeParameters": null,
+      "parameters": [
+       {
+        "kind": "Parameter",
+        "modifiers": null,
+        "name": {
+         "kind": "Identifier",
+         "text": "p"
+        },
+        "question": true,
+        "type": null
+       }
+      ],
+      "type": {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "X"
+       },
+       "typeArguments": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "type_literal_multiline_with_newline",
+   "options": {
+    "remove_comments": true,
+    "new_line": "\n",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "members": [
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "b"
+      },
+      "type": {
+       "kind": "TypeLiteral",
+       "members": [
+        {
+         "kind": "PropertySignature",
+         "modifiers": null,
+         "name": {
+          "kind": "Identifier",
+          "text": "c"
+         },
+         "type": {
+          "kind": "KeywordType",
+          "keyword": "NumberKeyword"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "type_literal_multiline_empty_newline",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "members": [
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "type_literal_multiline_empty_members",
+   "options": {
+    "remove_comments": true,
+    "new_line": "\n",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "members": []
+   }
+  },
+  {
+   "name": "function_type_full",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "FunctionType",
+    "typeParameters": [
+     {
+      "kind": "TypeParameter",
+      "modifiers": [
+       "ConstKeyword"
+      ],
+      "name": {
+       "kind": "Identifier",
+       "text": "T"
+      },
+      "constraint": null,
+      "default": null
+     },
+     {
+      "kind": "TypeParameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "U"
+      },
+      "constraint": {
+       "kind": "ArrayType",
+       "elementType": {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "T"
+        },
+        "typeArguments": null
+       }
+      },
+      "default": null
+     }
+    ],
+    "parameters": [
+     {
+      "kind": "Parameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "T"
+       },
+       "typeArguments": null
+      }
+     },
+     {
+      "kind": "Parameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "b"
+      },
+      "question": true,
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "Parameter",
+      "modifiers": null,
+      "dotDotDot": true,
+      "name": {
+       "kind": "Identifier",
+       "text": "rest"
+      },
+      "type": {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "U"
+       },
+       "typeArguments": null
+      }
+     }
+    ],
+    "type": {
+     "kind": "FunctionType",
+     "typeParameters": null,
+     "parameters": [],
+     "type": {
+      "kind": "KeywordType",
+      "keyword": "VoidKeyword"
+     }
+    }
+   }
+  },
+  {
+   "name": "function_type_no_return",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "FunctionType",
+    "typeParameters": null,
+    "parameters": [],
+    "type": null
+   }
+  },
+  {
+   "name": "constructor_type_abstract",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConstructorType",
+    "modifiers": [
+     "AbstractKeyword"
+    ],
+    "typeParameters": null,
+    "parameters": [
+     {
+      "kind": "Parameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "x"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     }
+    ],
+    "type": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "C"
+     },
+     "typeArguments": null
+    }
+   }
+  },
+  {
+   "name": "parameter_with_initializer",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "FunctionType",
+    "typeParameters": null,
+    "parameters": [
+     {
+      "kind": "Parameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "x"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      },
+      "initializer": {
+       "kind": "NumericLiteral",
+       "text": "1"
+      }
+     }
+    ],
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "VoidKeyword"
+    }
+   }
+  },
+  {
+   "name": "parenthesized_type",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ParenthesizedType",
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "indexed_access",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "IndexedAccessType",
+    "objectType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "indexType": {
+     "kind": "LiteralType",
+     "literal": {
+      "kind": "StringLiteral",
+      "text": "key"
+     }
+    }
+   }
+  },
+  {
+   "name": "indexed_access_of_union",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "IndexedAccessType",
+    "objectType": {
+     "kind": "UnionType",
+     "types": [
+      {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "A"
+       },
+       "typeArguments": null
+      },
+      {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "B"
+       },
+       "typeArguments": null
+      }
+     ]
+    },
+    "indexType": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "typeof_qualified",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeQuery",
+    "exprName": {
+     "kind": "QualifiedName",
+     "left": {
+      "kind": "Identifier",
+      "text": "a"
+     },
+     "right": {
+      "kind": "Identifier",
+      "text": "b"
+     }
+    },
+    "typeArguments": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "typeof_property_access",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeQuery",
+    "exprName": {
+     "kind": "PropertyAccess",
+     "expression": {
+      "kind": "Identifier",
+      "text": "a"
+     },
+     "name": {
+      "kind": "Identifier",
+      "text": "b"
+     }
+    },
+    "typeArguments": null
+   }
+  },
+  {
+   "name": "this_type_and_predicates",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "singleLine": true,
+    "elements": [
+     {
+      "kind": "ThisType"
+     },
+     {
+      "kind": "TypePredicate",
+      "parameterName": {
+       "kind": "Identifier",
+       "text": "x"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "TypePredicate",
+      "asserts": true,
+      "parameterName": {
+       "kind": "Identifier",
+       "text": "x"
+      },
+      "type": null
+     },
+     {
+      "kind": "TypePredicate",
+      "asserts": true,
+      "parameterName": {
+       "kind": "ThisType"
+      },
+      "type": {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "T"
+       },
+       "typeArguments": null
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "conditional_type",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "extendsType": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    },
+    "trueType": {
+     "kind": "LiteralType",
+     "literal": {
+      "kind": "NumericLiteral",
+      "text": "1"
+     }
+    },
+    "falseType": {
+     "kind": "LiteralType",
+     "literal": {
+      "kind": "NumericLiteral",
+      "text": "2"
+     }
+    }
+   }
+  },
+  {
+   "name": "conditional_in_extends_parenthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "extendsType": {
+     "kind": "ConditionalType",
+     "checkType": {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "U"
+      },
+      "typeArguments": null
+     },
+     "extendsType": {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     "trueType": {
+      "kind": "KeywordType",
+      "keyword": "NumberKeyword"
+     },
+     "falseType": {
+      "kind": "KeywordType",
+      "keyword": "BooleanKeyword"
+     }
+    },
+    "trueType": {
+     "kind": "KeywordType",
+     "keyword": "NeverKeyword"
+    },
+    "falseType": {
+     "kind": "KeywordType",
+     "keyword": "UnknownKeyword"
+    }
+   }
+  },
+  {
+   "name": "conditional_check_union_parenthesized",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "FunctionType",
+     "typeParameters": null,
+     "parameters": [],
+     "type": {
+      "kind": "KeywordType",
+      "keyword": "VoidKeyword"
+     }
+    },
+    "extendsType": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    },
+    "trueType": {
+     "kind": "KeywordType",
+     "keyword": "NeverKeyword"
+    },
+    "falseType": {
+     "kind": "KeywordType",
+     "keyword": "UnknownKeyword"
+    }
+   }
+  },
+  {
+   "name": "infer_in_extends",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "extendsType": {
+     "kind": "ArrayType",
+     "elementType": {
+      "kind": "InferType",
+      "typeParameter": {
+       "kind": "TypeParameter",
+       "modifiers": null,
+       "name": {
+        "kind": "Identifier",
+        "text": "U"
+       },
+       "constraint": null,
+       "default": null
+      }
+     }
+    },
+    "trueType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "U"
+     },
+     "typeArguments": null
+    },
+    "falseType": {
+     "kind": "KeywordType",
+     "keyword": "NeverKeyword"
+    }
+   }
+  },
+  {
+   "name": "infer_constrained_in_function_return_in_extends",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "extendsType": {
+     "kind": "FunctionType",
+     "typeParameters": null,
+     "parameters": [],
+     "type": {
+      "kind": "InferType",
+      "typeParameter": {
+       "kind": "TypeParameter",
+       "modifiers": null,
+       "name": {
+        "kind": "Identifier",
+        "text": "U"
+       },
+       "constraint": {
+        "kind": "KeywordType",
+        "keyword": "StringKeyword"
+       },
+       "default": null
+      }
+     }
+    },
+    "trueType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "U"
+     },
+     "typeArguments": null
+    },
+    "falseType": {
+     "kind": "KeywordType",
+     "keyword": "NeverKeyword"
+    }
+   }
+  },
+  {
+   "name": "infer_constrained_in_array_in_extends",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ConditionalType",
+    "checkType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    },
+    "extendsType": {
+     "kind": "ArrayType",
+     "elementType": {
+      "kind": "InferType",
+      "typeParameter": {
+       "kind": "TypeParameter",
+       "modifiers": null,
+       "name": {
+        "kind": "Identifier",
+        "text": "U"
+       },
+       "constraint": {
+        "kind": "KeywordType",
+        "keyword": "StringKeyword"
+       },
+       "default": null
+      }
+     }
+    },
+    "trueType": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "U"
+     },
+     "typeArguments": null
+    },
+    "falseType": {
+     "kind": "KeywordType",
+     "keyword": "NeverKeyword"
+    }
+   }
+  },
+  {
+   "name": "mapped_type_single_line",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "MappedType",
+    "singleLine": true,
+    "readonlyToken": "ReadonlyKeyword",
+    "typeParameter": {
+     "kind": "TypeParameter",
+     "modifiers": null,
+     "name": {
+      "kind": "Identifier",
+      "text": "K"
+     },
+     "constraint": {
+      "kind": "TypeOperator",
+      "operator": "KeyOfKeyword",
+      "type": {
+       "kind": "TypeReference",
+       "typeName": {
+        "kind": "Identifier",
+        "text": "T"
+       },
+       "typeArguments": null
+      }
+     },
+     "default": null
+    },
+    "nameType": null,
+    "questionToken": "QuestionToken",
+    "type": {
+     "kind": "IndexedAccessType",
+     "objectType": {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "T"
+      },
+      "typeArguments": null
+     },
+     "indexType": {
+      "kind": "TypeReference",
+      "typeName": {
+       "kind": "Identifier",
+       "text": "K"
+      },
+      "typeArguments": null
+     }
+    },
+    "members": null
+   }
+  },
+  {
+   "name": "mapped_type_plus_minus_as_multiline",
+   "options": {
+    "remove_comments": true,
+    "new_line": "\n",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "MappedType",
+    "readonlyToken": "MinusToken",
+    "typeParameter": {
+     "kind": "TypeParameter",
+     "modifiers": null,
+     "name": {
+      "kind": "Identifier",
+      "text": "K"
+     },
+     "constraint": {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     },
+     "default": null
+    },
+    "nameType": {
+     "kind": "TemplateLiteralType",
+     "head": {
+      "kind": "TemplateHead",
+      "text": "get",
+      "rawText": "get"
+     },
+     "spans": [
+      {
+       "kind": "TemplateLiteralTypeSpan",
+       "type": {
+        "kind": "TypeReference",
+        "typeName": {
+         "kind": "Identifier",
+         "text": "K"
+        },
+        "typeArguments": null
+       },
+       "literal": {
+        "kind": "TemplateTail",
+        "text": "",
+        "rawText": ""
+       }
+      }
+     ]
+    },
+    "questionToken": "PlusToken",
+    "type": null,
+    "members": null
+   }
+  },
+  {
+   "name": "template_literal_type",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TemplateLiteralType",
+    "head": {
+     "kind": "TemplateHead",
+     "text": "a",
+     "rawText": "a"
+    },
+    "spans": [
+     {
+      "kind": "TemplateLiteralTypeSpan",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      },
+      "literal": {
+       "kind": "TemplateMiddle",
+       "text": "b`",
+       "rawText": "b\\`"
+      }
+     },
+     {
+      "kind": "TemplateLiteralTypeSpan",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      },
+      "literal": {
+       "kind": "TemplateTail",
+       "text": "c${",
+       "rawText": ""
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "import_type",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ImportType",
+    "isTypeOf": true,
+    "argument": {
+     "kind": "LiteralType",
+     "literal": {
+      "kind": "StringLiteral",
+      "text": "./mod"
+     }
+    },
+    "qualifier": {
+     "kind": "QualifiedName",
+     "left": {
+      "kind": "Identifier",
+      "text": "a"
+     },
+     "right": {
+      "kind": "Identifier",
+      "text": "B"
+     }
+    },
+    "typeArguments": [
+     {
+      "kind": "KeywordType",
+      "keyword": "StringKeyword"
+     }
+    ]
+   }
+  },
+  {
+   "name": "import_type_plain",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "ImportType",
+    "isTypeOf": false,
+    "argument": {
+     "kind": "LiteralType",
+     "literal": {
+      "kind": "StringLiteral",
+      "text": "mod"
+     }
+    },
+    "qualifier": null,
+    "typeArguments": null
+   }
+  },
+  {
+   "name": "pseudo_type_property_access_with_type_arguments",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "PropertyAccess",
+    "expression": {
+     "kind": "ExpressionWithTypeArguments",
+     "expression": {
+      "kind": "Identifier",
+      "text": "f"
+     },
+     "typeArguments": [
+      {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     ]
+    },
+    "name": {
+     "kind": "Identifier",
+     "text": "C"
+    }
+   }
+  },
+  {
+   "name": "numeric_property_access_dot_dot",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "PropertyAccess",
+    "expression": {
+     "kind": "NumericLiteral",
+     "text": "1"
+    },
+    "name": {
+     "kind": "Identifier",
+     "text": "toString"
+    }
+   }
+  },
+  {
+   "name": "numeric_property_access_with_dot",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "PropertyAccess",
+    "expression": {
+     "kind": "NumericLiteral",
+     "text": "1.5"
+    },
+    "name": {
+     "kind": "Identifier",
+     "text": "toString"
+    }
+   }
+  },
+  {
+   "name": "identifier_root",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "Identifier",
+    "text": "foo"
+   }
+  },
+  {
+   "name": "private_identifier_root",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "PrivateIdentifier",
+    "text": "#secret"
+   }
+  },
+  {
+   "name": "qualified_name_single_line_writer_omit_semicolon",
+   "options": {
+    "remove_comments": true,
+    "omit_trailing_semicolon": true,
+    "new_line": "",
+    "writer": "single_line"
+   },
+   "tree": {
+    "kind": "QualifiedName",
+    "left": {
+     "kind": "Identifier",
+     "text": "ns"
+    },
+    "right": {
+     "kind": "Identifier",
+     "text": "value"
+    }
+   }
+  },
+  {
+   "name": "type_literal_omit_trailing_semicolon",
+   "options": {
+    "remove_comments": true,
+    "omit_trailing_semicolon": true,
+    "new_line": "",
+    "writer": "single_line"
+   },
+   "tree": {
+    "kind": "TypeLiteral",
+    "singleLine": true,
+    "members": [
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "a"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "PropertySignature",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "b"
+      },
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "property_signature_root_omit_semicolon",
+   "options": {
+    "remove_comments": true,
+    "omit_trailing_semicolon": true,
+    "new_line": "",
+    "writer": "single_line"
+   },
+   "tree": {
+    "kind": "PropertySignature",
+    "modifiers": [
+     "ReadonlyKeyword"
+    ],
+    "name": {
+     "kind": "Identifier",
+     "text": "a"
+    },
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "property_signature_root_with_semicolon",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "PropertySignature",
+    "modifiers": null,
+    "name": {
+     "kind": "Identifier",
+     "text": "a"
+    },
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "type_parameter_root",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TypeParameter",
+    "modifiers": [
+     "InKeyword",
+     "OutKeyword"
+    ],
+    "name": {
+     "kind": "Identifier",
+     "text": "T"
+    },
+    "constraint": {
+     "kind": "KeywordType",
+     "keyword": "ObjectKeyword"
+    },
+    "default": {
+     "kind": "TypeLiteral",
+     "singleLine": true,
+     "members": []
+    }
+   }
+  },
+  {
+   "name": "parameter_root",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "Parameter",
+    "modifiers": [
+     "PublicKeyword",
+     "ReadonlyKeyword"
+    ],
+    "name": {
+     "kind": "Identifier",
+     "text": "x"
+    },
+    "question": true,
+    "type": {
+     "kind": "KeywordType",
+     "keyword": "StringKeyword"
+    }
+   }
+  },
+  {
+   "name": "call_signature_root",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "CallSignature",
+    "typeParameters": [
+     {
+      "kind": "TypeParameter",
+      "modifiers": null,
+      "name": {
+       "kind": "Identifier",
+       "text": "T"
+      },
+      "constraint": null,
+      "default": null
+     }
+    ],
+    "parameters": [],
+    "type": {
+     "kind": "TypeReference",
+     "typeName": {
+      "kind": "Identifier",
+      "text": "T"
+     },
+     "typeArguments": null
+    }
+   }
+  },
+  {
+   "name": "keyword_expression_root_true",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "KeywordExpression",
+    "keyword": "TrueKeyword"
+   }
+  },
+  {
+   "name": "jsdoc_types",
+   "options": {
+    "remove_comments": true,
+    "new_line": "",
+    "writer": "text"
+   },
+   "tree": {
+    "kind": "TupleType",
+    "singleLine": true,
+    "elements": [
+     {
+      "kind": "JSDocNullableType",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "StringKeyword"
+      }
+     },
+     {
+      "kind": "JSDocNonNullableType",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "NumberKeyword"
+      }
+     },
+     {
+      "kind": "JSDocOptionalType",
+      "type": {
+       "kind": "KeywordType",
+       "keyword": "BooleanKeyword"
+      }
+     },
+     {
+      "kind": "JSDocVariadicType",
+      "type": {
+       "kind": "UnionType",
+       "types": [
+        {
+         "kind": "KeywordType",
+         "keyword": "StringKeyword"
+        },
+        {
+         "kind": "KeywordType",
+         "keyword": "NumberKeyword"
+        }
+       ]
+      }
+     },
+     {
+      "kind": "JSDocAllType"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -9,6 +9,8 @@ separately and never selected from Rust's successful output.
 | `checker-flag-observations.json` | Every constant of `TypeFlags`, `ObjectFlags`, `SignatureFlags`, `TypeFormatFlags`, `SymbolFormatFlags`, `VarianceFlags`, `AccessFlags`, `NodeCheckFlags`, `ContextFlags`, `ParseFlags`, `ExternalEmitHelpers`, `Ternary` and `TypeSystemPropertyName` in `internal/checker`, `Flags` and `InternalFlags` in `internal/nodebuilder`, the type-display constants, and `unsafe.Sizeof` of the checker's type, signature and symbol records | Two test files added through `go test -overlay` (the checkout is not modified) read the values out of the compiled pinned packages and write them as JSON; the Rust flag ports assert equality in `crates/ts_checker/src/flag_tests.rs` and `crates/ts_nodebuilder/src/tests.rs` |
 | `flag-requests.json` | Names of the 289 constants and 23 fixed records observed by the scaffold | Observation inventory only, with no copied expected numeric values; `scripts/s08_flags.py` compiles the named Go expressions and compares the whole result with the unchanged fixture |
 | `baseline-requests.json` | Phase obligations, baseline enablement, reference inventory and provenance for all 10,728 eligible variants | `scripts/s08.py freeze`; frozen S07 variants joined by exact ID to compiled Go `GetEmitDeclarations()` observations, with input/source hashes. This is not a node-level query schedule or an executed baseline result |
+| `printer-cases.json` | 71 hand-written synthetic type-display trees: every type node kind, type members, parameters, type parameters, entity names, literal-type expressions, the writer and trailing-semicolon variants `TypeToStringEx` and `SymbolToStringEx` use | Authored; the schema is the one `tools/s08/oracle/printer_test.go` and `crates/ts_printer/src/printer_tests.rs` both build from |
+| `printer-observations.json` | The pinned Go printer's bytes for each case, plus the printer's emit-flag, list-format, literal-text-flag, type-precedence and newline constants | `scripts/s08_printer.py --output <new dir> --freeze`; a `go test -overlay` run of the printer test against the pinned `internal/printer`; `crates/ts_printer` replays every case and asserts byte equality |
 | `storage-pilot.json` | 1,307 intrinsic/string/fresh constructor actions | Two intrinsics; 261 unique strings (empty, ASCII, surrogate WTF-8, malformed byte, emoji and 256 numbered names); duplicate interning, repeated fresh lookup and fresh-of-fresh for each string. This crosses growth boundaries and exercises identity/byte preservation; it is not a representative subset workload |
 
 The struct sizes are the Go layout on the recording host (darwin/arm64, the
@@ -25,6 +27,7 @@ python3 scripts/s08_flags.py --output target/s08/flags-review
 python3 scripts/s08.py check --output target/s08/phases-review
 python3 scripts/s08_storage.py --output target/s08/storage-review
 python3 scripts/s08_baselines.py --output target/s08/baselines-review
+python3 scripts/s08_printer.py --output target/s08/printer-review
 python3 scripts/s08_baselines.py --review-capture target/s08/baselines-review --output target/s08/baselines-review-inventory.json
 python3 -m unittest discover -s scripts/tests -p test_s08.py
 ```
