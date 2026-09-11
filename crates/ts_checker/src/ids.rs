@@ -4,6 +4,7 @@
 //! own (ADR 0007, plan §4.1). Retention and cross-checker validation are the
 //! owner's job; these values only index this checker's stores.
 
+use crate::Error;
 use std::num::NonZeroU32;
 
 macro_rules! local_id {
@@ -18,6 +19,27 @@ macro_rules! local_id {
             pub fn get(self) -> u32 {
                 self.0.get()
             }
+            pub(crate) fn new(value: u32) -> Option<Self> {
+                NonZeroU32::new(value).map(Self)
+            }
+            /// The next id for a store holding `len` records above `base`.
+            /// Exhaustion is an error before any record is written.
+            pub(crate) fn next(base: u32, len: usize) -> Result<Self, Error> {
+                u32::try_from(len)
+                    .ok()
+                    .and_then(|len| len.checked_add(base))
+                    .and_then(|value| value.checked_add(1))
+                    .and_then(Self::new)
+                    .ok_or(Error::IdExhausted)
+            }
+            /// The record index for a store whose ids start above `base`.
+            pub(crate) fn index(self, base: u32) -> Option<usize> {
+                self.0
+                    .get()
+                    .checked_sub(base)
+                    .and_then(|value| value.checked_sub(1))
+                    .map(|value| value as usize)
+            }
         }
     };
 }
@@ -30,21 +52,12 @@ local_id!(
     SignatureId,
     "A signature in one checker's signature store (`checker.SignatureId`)."
 );
-
-impl TypeId {
-    pub(crate) fn new(value: u32) -> Option<Self> {
-        NonZeroU32::new(value).map(Self)
-    }
-    pub(crate) fn index(self) -> usize {
-        self.0.get() as usize - 1
-    }
-}
-
-impl SignatureId {
-    /// Minted by the signature store, which arrives with the P3 signatures
-    /// family; until then only tests construct one.
-    #[cfg_attr(not(test), allow(dead_code))]
-    pub(crate) fn new(value: u32) -> Option<Self> {
-        NonZeroU32::new(value).map(Self)
-    }
-}
+local_id!(AliasId, "A `TypeAlias` record in one checker's type store.");
+local_id!(
+    IndexInfoId,
+    "An `IndexInfo` record in one checker's signature store."
+);
+local_id!(
+    TypePredicateId,
+    "A `TypePredicate` record in one checker's signature store."
+);

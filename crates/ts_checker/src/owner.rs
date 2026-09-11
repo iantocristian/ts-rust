@@ -8,52 +8,19 @@
 //! symbol or relation edge.
 //!
 //! Reentry on the same thread is a bug in the caller, not contention, and is
-//! reported before waiting: the thread-local set of active identity leases answers it
-//! without touching the lock. Contention from another thread waits normally.
-//! A panic inside an operation retires the shared generation before the permit
-//! is released (`CheckerLease`'s drop does this); the poisoned state lock is a
-//! backstop, never the recovery mechanism.
+//! reported before waiting: the thread-local set of active identity leases
+//! answers it without touching the lock. Contention from another thread waits
+//! normally. A panic inside an operation retires the shared generation before
+//! the permit is released (`CheckerLease`'s drop does this); the poisoned state
+//! lock is a backstop, never the recovery mechanism.
 //!
 //! Two lock acquisitions per operation is a known cost of reusing the `ts_arena`
 //! permit unchanged. Operations are per query, not per node; P1 measures it and
 //! folds the state into the permit if it shows.
 
-use crate::{Error, ResolutionStack, TypeStore};
+use crate::{CheckerOptions, CheckerState, Error};
 use std::sync::{Arc, Mutex, MutexGuard};
-use ts_arena::{CheckerIdentity, CheckerLease, Counters, SymbolArena};
-use ts_ast::Symbol;
-
-/// Everything a checker mutates. Reachable only through an [`Operation`].
-#[allow(dead_code, reason = "private state is completed by the P1/P2 families")]
-pub(crate) struct CheckerState {
-    /// Checker-owned symbols: merged clones, transient and synthetic symbols.
-    /// Its arena identity is the checker identity (`CheckerIdentity::id`).
-    symbols: SymbolArena<Symbol>,
-    types: TypeStore,
-    resolution: ResolutionStack,
-}
-
-#[allow(dead_code, reason = "private state is completed by the P1/P2 families")]
-impl CheckerState {
-    pub fn symbols(&self) -> &SymbolArena<Symbol> {
-        &self.symbols
-    }
-    pub fn symbols_mut(&mut self) -> &mut SymbolArena<Symbol> {
-        &mut self.symbols
-    }
-    pub fn types(&self) -> &TypeStore {
-        &self.types
-    }
-    pub fn types_mut(&mut self) -> &mut TypeStore {
-        &mut self.types
-    }
-    pub fn resolution(&self) -> &ResolutionStack {
-        &self.resolution
-    }
-    pub fn resolution_mut(&mut self) -> &mut ResolutionStack {
-        &mut self.resolution
-    }
-}
+use ts_arena::{CheckerIdentity, CheckerLease, Counters};
 
 pub struct CheckerOwner {
     identity: Arc<CheckerIdentity>,
@@ -61,18 +28,19 @@ pub struct CheckerOwner {
 }
 
 impl CheckerOwner {
-    /// Adopts the identity's reserved arena number as the checker symbol arena.
-    /// Each identity can back one owner; a second attempt fails with
-    /// `IdentityAdopted` rather than minting a second, inconsistent identity.
-    pub fn new(identity: Arc<CheckerIdentity>, counters: &Counters) -> Result<Self, Error> {
-        let symbols = identity.adopt_symbol_arena(counters)?;
+    /// Adopts the identity's reserved arena number as the checker symbol arena
+    /// and creates the types every checker starts with. Each identity can back
+    /// one owner; a second attempt fails with `IdentityAdopted` rather than
+    /// minting a second, inconsistent identity.
+    pub fn new(
+        identity: Arc<CheckerIdentity>,
+        counters: &Counters,
+        options: CheckerOptions,
+    ) -> Result<Self, Error> {
+        let state = CheckerState::new(&identity, counters, options)?;
         Ok(Self {
             identity,
-            state: Mutex::new(CheckerState {
-                symbols,
-                types: TypeStore::new(),
-                resolution: ResolutionStack::new(),
-            }),
+            state: Mutex::new(state),
         })
     }
 
@@ -83,13 +51,20 @@ impl CheckerOwner {
     /// Begins an exclusive operation: validates the generation, takes the permit,
     /// then the state. Fails with [`Error::Reentry`] if this thread already holds
     /// an operation on this owner, and with `Retired` once the generation is gone.
-    pub fn operation(&self) -> Result<Operation<'_>, Error> {
+    ///
+    /// The owner is shared through an `Arc` so results can retain it
+    /// (`Operation::retain_type` and friends).
+    pub fn operation(self: &Arc<Self>) -> Result<Operation<'_>, Error> {
         let lease = self.identity.lease()?;
         let state = self.state.lock().map_err(|_| {
             self.identity.generation().retire();
             Error::Arena(ts_arena::Error::Retired)
         })?;
-        Ok(Operation { lease, state })
+        Ok(Operation {
+            owner: self,
+            lease,
+            state,
+        })
     }
 }
 
@@ -110,19 +85,21 @@ impl CheckerOwner {
 /// Field order is the drop order: the lease goes
 /// first so a panicking unwind retires the generation before the state unlocks.
 pub struct Operation<'a> {
+    owner: &'a Arc<CheckerOwner>,
     lease: CheckerLease<'a>,
     state: MutexGuard<'a, CheckerState>,
 }
 
 impl Operation<'_> {
+    pub fn owner(&self) -> &Arc<CheckerOwner> {
+        self.owner
+    }
     pub fn lease(&self) -> &CheckerLease<'_> {
         &self.lease
     }
-    #[allow(dead_code, reason = "private state access used by the P1/P2 families")]
     pub(crate) fn state(&self) -> &CheckerState {
         &self.state
     }
-    #[allow(dead_code, reason = "private state access used by the P1/P2 families")]
     pub(crate) fn state_mut(&mut self) -> &mut CheckerState {
         &mut self.state
     }
