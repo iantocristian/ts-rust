@@ -290,10 +290,6 @@ pub struct TupleData {
 pub struct UnionOrIntersectionMembers {
     pub structured: StructuredMembers,
     pub property_cache: Option<SymbolTableId>,
-    #[allow(
-        dead_code,
-        reason = "P3 property-augmentation cache; retained in the P1 record layout"
-    )]
     pub property_cache_without_function_property_augment: Option<SymbolTableId>,
     pub resolved_properties: Option<SymbolList>,
 }
@@ -303,13 +299,6 @@ pub struct UnionOrIntersectionMembers {
 pub struct UnionData {
     pub common: UnionOrIntersectionMembers,
     pub types: TypeList,
-    #[cfg_attr(
-        not(any(test, feature = "storage-pilot")),
-        allow(
-            dead_code,
-            reason = "P3 union reduction link; the P1 census retains and charges its reachability"
-        )
-    )]
     pub resolved_reduced_type: Option<TypeId>,
     pub regular_type: Option<TypeId>,
     /// Denormalized union, intersection or index type in which the union originates.
@@ -412,10 +401,6 @@ pub(crate) enum Payload {
     Interface(InterfaceData),
     Tuple(TupleData),
     Union(UnionData),
-    #[allow(
-        dead_code,
-        reason = "P3 intersection constructor; the P1 census retains this payload family"
-    )]
     Intersection(IntersectionData),
     TypeParameter(TypeParameterData),
     TemplateLiteral(TemplateLiteralData),
@@ -455,13 +440,6 @@ pub struct TypeCaches {
     pub union_types: Map<CacheKey, TypeId>,
     pub union_of_union_types: Map<UnionOfUnionKey, TypeId>,
     pub tuple_types: Map<CacheKey, TypeId>,
-    #[cfg_attr(
-        not(any(test, feature = "storage-pilot")),
-        allow(
-            dead_code,
-            reason = "P3 intersection interning cache; the P1 census charges its allocation and reachability"
-        )
-    )]
     pub intersection_types: Map<CacheKey, TypeId>,
     pub template_literal_types: Map<CacheKey, TypeId>,
 }
@@ -662,10 +640,38 @@ impl TypeStore {
     payload_accessors!(write tuple_mut, tuples, Tuple, TupleData);
     payload_accessors!(read union, unions, Union, UnionData);
     payload_accessors!(write union_mut, unions, Union, UnionData);
-    payload_accessors!(
-        read #[cfg(any(test, feature = "storage-pilot"))]
-        intersection, intersections, Intersection, IntersectionData
-    );
+    payload_accessors!(read intersection, intersections, Intersection, IntersectionData);
+    payload_accessors!(write intersection_mut, intersections, Intersection, IntersectionData);
+
+    pub(crate) fn compound_types(&self, id: TypeId) -> Result<&TypeList, Error> {
+        match self.get(id)?.kind {
+            TypeKind::Union => Ok(&self.union(id)?.types),
+            TypeKind::Intersection => Ok(&self.intersection(id)?.types),
+            _ => Err(invalid()),
+        }
+    }
+
+    pub(crate) fn compound_members(
+        &self,
+        id: TypeId,
+    ) -> Result<&UnionOrIntersectionMembers, Error> {
+        match self.get(id)?.kind {
+            TypeKind::Union => Ok(&self.union(id)?.common),
+            TypeKind::Intersection => Ok(&self.intersection(id)?.common),
+            _ => Err(invalid()),
+        }
+    }
+
+    pub(crate) fn compound_members_mut(
+        &mut self,
+        id: TypeId,
+    ) -> Result<&mut UnionOrIntersectionMembers, Error> {
+        match self.get(id)?.kind {
+            TypeKind::Union => Ok(&mut self.union_mut(id)?.common),
+            TypeKind::Intersection => Ok(&mut self.intersection_mut(id)?.common),
+            _ => Err(invalid()),
+        }
+    }
     payload_accessors!(
         read #[cfg(any(test, feature = "storage-pilot"))]
         type_parameter, type_parameters, TypeParameter, TypeParameterData

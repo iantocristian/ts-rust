@@ -2,7 +2,7 @@
 //! signatures over S07's immutable bound files, with `.types` and `.errors.txt`
 //! parity on the frozen subset as S08's acceptance.
 //!
-//! S08 P1 storage plus P2's first production semantic slice. What exists:
+//! S08 P1 storage and the P2/P3 production semantic slices. What exists:
 //!
 //! - [`CheckerOwner`]: one owner, one exclusive operation, the reserved checker
 //!   identity adopted as the symbol arena exactly once (ADR 0007, plan §4.1).
@@ -16,7 +16,7 @@
 //! - The type-creating prefix of `NewChecker`, and the constructors it and the
 //!   frozen storage trace need: intrinsics, string/number/bigint/boolean
 //!   literals with fresh/regular links, anonymous object types, tuple targets,
-//!   type references, type parameters, unions with literal reduction, template
+//!   type references, type parameters, unions and ordered intersections, template
 //!   literal types, synthetic call signatures and synthetic expressions. Every
 //!   constructor sorts and interns the way upstream does.
 //! - Flags and enums transcribed from `types.go`, checked against values read
@@ -29,10 +29,10 @@
 //!   diagnostics. Type display builds syntax through `ts_nodebuilder` and prints
 //!   it through `ts_printer`.
 //!
-//! Compound source types, full relations/body checking, loaded generic library
+//! Source arrays/tuples, full relations/body checking, loaded generic library
 //! operations and declaration emit remain pending. Unported branches return
 //! named `Error::Unsupported` failures. The named P2 programs do not certify the
-//! frozen E2 denominator; see `docs/S08-P2.md`.
+//! frozen E2 denominator; see `docs/S08-P2.md` and `docs/S08-P3.md`.
 //!
 //! Design notes: `docs/design/symbols.md`, `docs/design/ownership.md`; plan:
 //! `docs/S08-implementation-plan.md`.
@@ -46,6 +46,7 @@ mod handles;
 mod host;
 mod ids;
 mod init;
+mod intersection;
 mod key;
 mod links;
 mod members;
@@ -56,6 +57,7 @@ mod owner;
 mod program;
 mod program_init;
 mod query;
+mod reduction;
 mod resolution;
 mod signatures;
 mod state;

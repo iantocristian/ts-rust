@@ -308,7 +308,7 @@ impl CheckerState {
 
     /// This function assumes the constituent type list is sorted and deduplicated.
     // port: tsc/internal/checker/checker.go:Checker.getUnionTypeFromSortedList
-    fn get_union_type_from_sorted_list(
+    pub(crate) fn get_union_type_from_sorted_list(
         &mut self,
         types: Vec<TypeId>,
         precomputed_object_flags: ObjectFlags,
@@ -482,6 +482,61 @@ impl CheckerState {
                 .map(|(symbol, args)| (*symbol, &args[..])),
         );
         Ok(builder.finish())
+    }
+
+    /// Filters constituents while preserving a denormalized origin when the
+    /// removed constituents can be represented there without changing meaning.
+    // port: tsc/internal/checker/checker.go:Checker.filterType
+    pub(crate) fn filter_type(
+        &mut self,
+        ty: TypeId,
+        predicate: &mut dyn FnMut(&Self, TypeId) -> Result<bool, Error>,
+    ) -> Result<TypeId, Error> {
+        let record = *self.types.get(ty)?;
+        if record.flags & type_flags::UNION != 0 {
+            let types = self.types.union(ty)?.types.clone();
+            let mut filtered = Vec::new();
+            for &part in types.iter() {
+                if predicate(self, part)? {
+                    filtered.push(part);
+                }
+            }
+            if filtered.len() == types.len() {
+                return Ok(ty);
+            }
+            let mut new_origin = None;
+            if let Some(origin) = self.types.union(ty)?.origin {
+                if self.types.flags(origin)? & type_flags::UNION != 0 {
+                    let origin_types = self.types.union(origin)?.types.clone();
+                    let mut origin_filtered = Vec::new();
+                    for &part in origin_types.iter() {
+                        if self.types.flags(part)? & type_flags::UNION != 0
+                            || predicate(self, part)?
+                        {
+                            origin_filtered.push(part);
+                        }
+                    }
+                    if origin_types.len() - origin_filtered.len() == types.len() - filtered.len() {
+                        if origin_filtered.len() == 1 {
+                            return Ok(origin_filtered[0]);
+                        }
+                        new_origin =
+                            Some(self.new_union_type(object_flags::NONE, origin_filtered.into())?);
+                    }
+                }
+            }
+            return self.get_union_type_from_sorted_list(
+                filtered,
+                record.object_flags
+                    & (object_flags::PRIMITIVE_UNION | object_flags::CONTAINS_INTERSECTIONS),
+                None,
+                new_origin,
+            );
+        }
+        if record.flags & type_flags::NEVER != 0 || predicate(self, ty)? {
+            return Ok(ty);
+        }
+        Ok(self.builtins.never_type)
     }
 
     /// Applies `f` to each constituent of a union (or to a non-union type) and

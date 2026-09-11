@@ -1,7 +1,8 @@
-//! Property discovery over source object types and unions. All synthesized
+//! Property discovery over source object types, unions and intersections. All synthesized
 //! symbols, declaration lists and cache entries belong to the checker.
 
 use crate::{object_flags as of, type_flags as tf, CheckerState, Error, TypeId};
+use std::collections::HashSet;
 use ts_arena::SymbolId;
 use ts_ast::{
     check_flags as cf, modifier_flags as mf, symbol_flags as sf, JsString, SymbolTable,
@@ -11,9 +12,10 @@ use ts_ast::{
 impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.getPropertiesOfType
     pub(crate) fn get_properties_of_type(&mut self, ty: TypeId) -> Result<Vec<SymbolId>, Error> {
+        let ty = self.get_reduced_type(ty)?;
         let flags = self.types.flags(ty)?;
-        if flags & tf::UNION != 0 && flags & tf::BOOLEAN == 0 {
-            return self.get_properties_of_union_type(ty);
+        if flags & tf::UNION_OR_INTERSECTION != 0 && flags & tf::BOOLEAN == 0 {
+            return self.get_properties_of_union_or_intersection_type(ty);
         }
         if flags & tf::OBJECT == 0 {
             return self.properties_of_primitive_type(ty);
@@ -29,33 +31,41 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.getPropertiesOfUnionOrIntersectionType
-    fn get_properties_of_union_type(&mut self, ty: TypeId) -> Result<Vec<SymbolId>, Error> {
-        if let Some(properties) = &self.types.union(ty)?.common.resolved_properties {
+    pub(crate) fn get_properties_of_union_or_intersection_type(
+        &mut self,
+        ty: TypeId,
+    ) -> Result<Vec<SymbolId>, Error> {
+        if let Some(properties) = &self.types.compound_members(ty)?.resolved_properties {
             return Ok(properties.to_vec());
         }
-        let types = self.types.union(ty)?.types.clone();
-        let first = *types
-            .first()
-            .ok_or(Error::MissingLink("union constituent"))?;
-        // With no index signatures, upstream enumerates only the first
-        // constituent. Other types are visited only to resolve those names.
-        self.require_plain_members(first)?;
-        let candidates = self.get_properties_of_type(first)?;
-        let mut properties = Vec::with_capacity(candidates.len());
-        for prop in candidates {
-            let name = self.symbol(prop)?.name_to_owned();
-            if let Some(property) = self.get_union_property(ty, name)? {
-                properties.push(property);
+        let is_union = self.types.flags(ty)? & tf::UNION != 0;
+        let types = self.types.compound_types(ty)?.clone();
+        let mut checked = HashSet::new();
+        let mut properties = Vec::new();
+        for &current in types.iter() {
+            self.require_plain_members(current)?;
+            for prop in self.get_properties_of_type(current)? {
+                let name = self.symbol(prop)?.name_to_owned();
+                if checked.insert(name.clone()) {
+                    if let Some(property) = self.get_compound_property(ty, name, !is_union)? {
+                        properties.push(property);
+                    }
+                }
+            }
+            // The supported constituents have no index signatures, so unions
+            // enumerate only the first; intersections enumerate all of them.
+            if is_union {
+                break;
             }
         }
-        self.types.union_mut(ty)?.common.resolved_properties = Some(properties.clone().into());
+        self.types.compound_members_mut(ty)?.resolved_properties = Some(properties.clone().into());
         Ok(properties)
     }
 
     fn require_plain_members(&mut self, ty: TypeId) -> Result<(), Error> {
         let flags = self.types.flags(ty)?;
-        if flags & tf::UNION != 0 && flags & tf::BOOLEAN == 0 {
-            let types = self.types.union(ty)?.types.clone();
+        if flags & tf::UNION_OR_INTERSECTION != 0 && flags & tf::BOOLEAN == 0 {
+            let types = self.types.compound_types(ty)?.clone();
             for &ty in types.iter() {
                 self.require_plain_members(ty)?;
             }
@@ -75,11 +85,26 @@ impl CheckerState {
 
     // The reached data-property branch of getPropertyOfTypeEx. Function
     // augmentation is rejected by require_plain_members, not silently ignored.
-    fn constituent_property(&mut self, ty: TypeId, name: &[u8]) -> Result<Option<SymbolId>, Error> {
+    fn constituent_property(
+        &mut self,
+        ty: TypeId,
+        name: &[u8],
+        skip_augment: bool,
+    ) -> Result<Option<SymbolId>, Error> {
+        let ty = self.get_reduced_type(ty)?;
         self.require_plain_members(ty)?;
         let flags = self.types.flags(ty)?;
+        if flags & tf::INTERSECTION != 0 {
+            if let Some(prop) = self.get_compound_property(ty, JsString::from_bytes(name), true)? {
+                return Ok(Some(prop));
+            }
+            if !skip_augment {
+                return self.get_compound_property(ty, JsString::from_bytes(name), false);
+            }
+            return Ok(None);
+        }
         if flags & tf::UNION != 0 && flags & tf::BOOLEAN == 0 {
-            return self.get_union_property(ty, JsString::from_bytes(name));
+            return self.get_compound_property(ty, JsString::from_bytes(name), skip_augment);
         }
         let object = if flags & tf::OBJECT != 0 {
             Some(ty)
@@ -89,6 +114,9 @@ impl CheckerState {
         if let Some(ty) = object {
             if let Some(prop) = self.object_property(ty, name)? {
                 return Ok(Some(prop));
+            }
+            if skip_augment {
+                return Ok(None);
             }
             if let Some(&object) = self.query.global_types.get("Object") {
                 if object != ty {
@@ -113,47 +141,86 @@ impl CheckerState {
 
     // port: tsc/internal/checker/checker.go:Checker.getPropertyOfUnionOrIntersectionType
     // port: tsc/internal/checker/checker.go:Checker.getUnionOrIntersectionProperty
-    fn get_union_property(
+    fn get_compound_property(
         &mut self,
         ty: TypeId,
         name: JsString,
+        skip_augment: bool,
     ) -> Result<Option<SymbolId>, Error> {
-        if let Some(cache) = self.types.union(ty)?.common.property_cache {
+        let common = self.types.compound_members(ty)?;
+        let cache = if skip_augment {
+            common.property_cache_without_function_property_augment
+        } else {
+            common.property_cache
+        };
+        if let Some(cache) = cache {
             if let Some(prop) = self.table(cache)?.get(name.as_bytes()).flatten() {
                 return Ok(
                     (self.symbol(prop)?.check_flags() & cf::READ_PARTIAL == 0).then_some(prop)
                 );
             }
         }
-        let Some(prop) = self.create_union_property(ty, &name)? else {
+        let Some(prop) = self.create_compound_property(ty, &name, skip_augment)? else {
             return Ok(None);
         };
-        let cache = if let Some(cache) = self.types.union(ty)?.common.property_cache {
-            cache
+        let cache = self.compound_property_cache(ty, skip_augment)?;
+        self.tables.get_mut(cache)?.insert(name.clone(), Some(prop));
+        let flags = self.symbol(prop)?.check_flags();
+        if skip_augment && flags & cf::PARTIAL == 0 {
+            let augmented = self.compound_property_cache(ty, false)?;
+            if self
+                .table(augmented)?
+                .get(name.as_bytes())
+                .flatten()
+                .is_none()
+            {
+                self.tables.get_mut(augmented)?.insert(name, Some(prop));
+            }
+        }
+        Ok((flags & cf::READ_PARTIAL == 0).then_some(prop))
+    }
+
+    fn compound_property_cache(
+        &mut self,
+        ty: TypeId,
+        skip_augment: bool,
+    ) -> Result<ts_ast::SymbolTableId, Error> {
+        let common = self.types.compound_members(ty)?;
+        let cache = if skip_augment {
+            common.property_cache_without_function_property_augment
         } else {
-            let cache = self.alloc_symbol_table(SymbolTable::new());
-            self.types.union_mut(ty)?.common.property_cache = Some(cache);
-            cache
+            common.property_cache
         };
-        self.tables.get_mut(cache)?.insert(name, Some(prop));
-        Ok((self.symbol(prop)?.check_flags() & cf::READ_PARTIAL == 0).then_some(prop))
+        if let Some(cache) = cache {
+            return Ok(cache);
+        }
+        let cache = self.alloc_symbol_table(SymbolTable::new());
+        let common = self.types.compound_members_mut(ty)?;
+        if skip_augment {
+            common.property_cache_without_function_property_augment = Some(cache);
+        } else {
+            common.property_cache = Some(cache);
+        }
+        Ok(cache)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.createUnionOrIntersectionProperty
-    fn create_union_property(
+    fn create_compound_property(
         &mut self,
         containing: TypeId,
         name: &JsString,
+        skip_augment: bool,
     ) -> Result<Option<SymbolId>, Error> {
-        let types = self.types.union(containing)?.types.clone();
+        let types = self.types.compound_types(containing)?.clone();
+        let is_union = self.types.flags(containing)? & tf::UNION != 0;
         let mut props = Vec::new();
-        let mut optional = 0;
-        let mut flags = 0;
+        let mut optional = if is_union { 0 } else { sf::OPTIONAL };
+        let mut flags = if is_union { 0 } else { cf::READONLY };
         for &current in types.iter() {
             if self.is_error_type(current)? || self.types.flags(current)? & tf::NEVER != 0 {
                 continue;
             }
-            if let Some(prop) = self.constituent_property(current, name.as_bytes())? {
+            if let Some(prop) = self.constituent_property(current, name.as_bytes(), skip_augment)? {
                 let read = self.symbol(prop)?;
                 if read.flags() & sf::PROPERTY == 0 || read.flags() & sf::ACCESSOR != 0 {
                     return Err(Error::Unsupported("union property: method/accessor"));
@@ -163,7 +230,11 @@ impl CheckerState {
                         "union property: instantiated/mapped symbol",
                     ));
                 }
-                optional |= read.flags() & sf::OPTIONAL;
+                if is_union {
+                    optional |= read.flags() & sf::OPTIONAL;
+                } else {
+                    optional &= read.flags();
+                }
                 let mut readonly = read.check_flags() & cf::READONLY != 0;
                 if read.check_flags() & cf::SYNTHETIC == 0 {
                     if let Some(declaration) = read.value_declaration() {
@@ -183,18 +254,20 @@ impl CheckerState {
                         readonly |= modifiers & mf::READONLY != 0;
                     }
                 }
-                if readonly {
+                if is_union && readonly {
                     flags |= cf::READONLY;
+                } else if !is_union && !readonly {
+                    flags &= !cf::READONLY;
                 }
                 flags |= cf::CONTAINS_PUBLIC | cf::CONTAINS_WRITE_PUBLIC;
                 if !props.contains(&prop) {
                     props.push(prop);
                 }
-            } else if self.types.get(current)?.object_flags & of::OBJECT_LITERAL != 0 {
+            } else if is_union && self.types.get(current)?.object_flags & of::OBJECT_LITERAL != 0 {
                 return Err(Error::Unsupported(
                     "union property: object literal write-partial type",
                 ));
-            } else {
+            } else if is_union {
                 flags |= cf::READ_PARTIAL;
             }
         }
@@ -275,7 +348,11 @@ impl CheckerState {
             self.symbol_mut(result)?.check_flags |= cf::DEFERRED_TYPE;
             *self.query.deferred_property_types.get_or_default(result) = Some(prop_types.into());
         } else {
-            let ty = self.get_union_type(&prop_types)?;
+            let ty = if is_union {
+                self.get_union_type(&prop_types)?
+            } else {
+                self.get_intersection_type(&prop_types)?
+            };
             self.value_symbol_links.get_or_default(result).resolved_type = Some(ty);
         }
         Ok(Some(result))
@@ -322,7 +399,16 @@ impl CheckerState {
                 "deferred property: non-union constituents",
             ))?
             .clone();
-        let ty = self.get_union_type(&types)?;
+        let containing = self
+            .value_symbol_links
+            .try_get(symbol)
+            .and_then(|links| links.containing_type)
+            .ok_or(Error::MissingLink("deferred property containing type"))?;
+        let ty = if self.types.flags(containing)? & tf::UNION != 0 {
+            self.get_union_type(&types)?
+        } else {
+            self.get_intersection_type(&types)?
+        };
         self.value_symbol_links.get_or_default(symbol).resolved_type = Some(ty);
         Ok(ty)
     }

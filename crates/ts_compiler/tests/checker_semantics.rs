@@ -644,13 +644,15 @@ fn primitive_union_diagnostics_preserve_literal_target_spelling() {
 }
 
 #[test]
-fn union_constituents_are_checked_even_after_reduction_and_on_retry() {
+fn compound_constituents_are_checked_even_after_reduction_and_on_retry() {
     for text in [
         "type U = { a: string; a: number } | string;",
         "type U = string | { a: string; a: number };",
         "type U = unknown | ({ a: string; a: number } | string);",
         "type U = { a: Missing } | string;",
         "type U = unknown | { a: Missing };",
+        "type U = unknown & { a: string; a: number };",
+        "type U = never & { a: Missing };",
     ] {
         let (owner, source) = checker(text.as_bytes(), options());
         let first = owner.operation().unwrap().semantic_diagnostics(source);
@@ -689,4 +691,152 @@ fn union_constituents_are_checked_even_after_reduction_and_on_retry() {
         .semantic_diagnostics(source)
         .unwrap()
         .is_empty());
+}
+
+#[test]
+fn intersection_discriminant_reduction_is_lazy_and_raw_display_is_available() {
+    use ts_checker::{object_flags as of, type_format_flags as ff};
+    let (owner, program, _) = fixture(
+        b"type A = { tag: 'a' }; type B = { tag: 'b' }; type I = A & B;",
+        options(),
+    );
+    let mut op = owner.operation().unwrap();
+    let symbol = op
+        .get_symbol_at_location(declaration_name(&program, declarations(&program)[2]))
+        .unwrap()
+        .unwrap();
+    let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+    assert_eq!(
+        op.type_object_flags(ty).unwrap() & of::IS_NEVER_INTERSECTION_COMPUTED,
+        0
+    );
+    assert_eq!(
+        op.type_to_string(ty, ff::NO_TYPE_REDUCTION | ff::IN_TYPE_ALIAS)
+            .unwrap()
+            .as_bytes(),
+        b"A & B"
+    );
+    assert_eq!(
+        op.type_object_flags(ty).unwrap() & of::IS_NEVER_INTERSECTION_COMPUTED,
+        0
+    );
+    assert_eq!(op.type_to_string(ty, 0).unwrap().as_bytes(), b"never");
+    assert_ne!(
+        op.type_object_flags(ty).unwrap() & of::IS_NEVER_INTERSECTION,
+        0
+    );
+    assert!(op.properties_of_type(ty).unwrap().is_empty());
+    let counts = (op.type_count(), op.symbol_count());
+    for _ in 0..3 {
+        assert_eq!(op.type_to_string(ty, 0).unwrap().as_bytes(), b"never");
+        assert_eq!(
+            op.type_to_string(ty, ff::NO_TYPE_REDUCTION | ff::IN_TYPE_ALIAS)
+                .unwrap()
+                .as_bytes(),
+            b"A & B"
+        );
+        assert_eq!((op.type_count(), op.symbol_count()), counts);
+    }
+}
+
+#[test]
+fn failed_intersection_reduction_clears_its_computed_flag_on_every_retry() {
+    let (owner, program, _) = fixture(b"type A = { good: string; bad: string[] }; type B = { good: number; bad: number[] }; type I = A & B;", options());
+    let mut op = owner.operation().unwrap();
+    let symbol = op
+        .get_symbol_at_location(declaration_name(&program, declarations(&program)[2]))
+        .unwrap()
+        .unwrap();
+    let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+    let mut counts = None;
+    for _ in 0..3 {
+        assert!(matches!(
+            op.properties_of_type(ty),
+            Err(Error::Unsupported("getTypeFromTypeNodeWorker: type family"))
+        ));
+        assert!(matches!(
+            op.type_to_string(ty, 0),
+            Err(Error::Unsupported("getTypeFromTypeNodeWorker: type family"))
+        ));
+        assert_eq!(
+            op.type_object_flags(ty).unwrap()
+                & ts_checker::object_flags::IS_NEVER_INTERSECTION_COMPUTED,
+            0
+        );
+        let current = (op.type_count(), op.symbol_count());
+        if let Some(counts) = counts {
+            assert_eq!(current, counts);
+        }
+        counts = Some(current);
+    }
+}
+
+#[test]
+fn deferred_intersection_property_builds_an_intersection_and_caches_its_identity() {
+    let (owner, program, _) = fixture(b"type PA = { a: string }; type PB = { b: number }; type PC = { c: boolean }; type A = { value: PA }; type B = { value: PB }; type C = { value: PC }; type I = A & B & C;", options());
+    let declarations = declarations(&program);
+    let mut op = owner.operation().unwrap();
+    for &declaration in &declarations[3..6] {
+        let symbol = op
+            .get_symbol_at_location(declaration_name(&program, declaration))
+            .unwrap()
+            .unwrap();
+        let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+        let property = op.properties_of_type(ty).unwrap()[0];
+        op.get_type_of_symbol(property).unwrap();
+    }
+    let symbol = op
+        .get_symbol_at_location(declaration_name(&program, declarations[6]))
+        .unwrap()
+        .unwrap();
+    let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+    let before = op.type_count();
+    let properties = op.properties_of_type(ty).unwrap();
+    assert_eq!(properties.len(), 1);
+    assert_ne!(
+        op.symbol(properties[0]).unwrap().check_flags() & ts_ast::check_flags::DEFERRED_TYPE,
+        0
+    );
+    assert_eq!(
+        op.type_count(),
+        before,
+        "property discovery must defer normalization"
+    );
+    let value = op.get_type_of_symbol(properties[0]).unwrap();
+    assert_eq!(op.type_count(), before + 1);
+    assert_eq!(
+        op.type_flags(value).unwrap(),
+        ts_checker::type_flags::INTERSECTION
+    );
+    assert_eq!(
+        op.type_to_string(value, 0).unwrap().as_bytes(),
+        b"PA & PB & PC"
+    );
+    let counts = (op.type_count(), op.symbol_count());
+    for _ in 0..3 {
+        assert_eq!(op.properties_of_type(ty).unwrap(), properties);
+        assert_eq!(op.get_type_of_symbol(properties[0]).unwrap(), value);
+        assert_eq!((op.type_count(), op.symbol_count()), counts);
+    }
+}
+
+#[test]
+fn recursive_intersection_properties_preserve_order_and_identity_on_a_small_stack() {
+    std::thread::Builder::new().stack_size(512 * 1024).spawn(|| {
+        let (owner, program, _) = fixture(b"type A = { next: I; a: string }; type B = { next: I; b: number }; type I = A & B;", options());
+        let mut op = owner.operation().unwrap();
+        let symbol = op.get_symbol_at_location(declaration_name(&program, declarations(&program)[2])).unwrap().unwrap();
+        let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+        let properties = op.properties_of_type(ty).unwrap();
+        let names: Vec<_> = properties.iter().map(|&prop| op.symbol(prop).unwrap().name_bytes().to_vec()).collect();
+        assert_eq!(names, [b"next".to_vec(), b"a".to_vec(), b"b".to_vec()]);
+        // Native displays next as A & B, not I: intersection construction
+        // flattens I & I and interns an unaliased A & B result.
+        let next = op.get_type_of_symbol(properties[0]).unwrap();
+        assert_ne!(next, ty);
+        assert_eq!(op.type_to_string(next, 0).unwrap().as_bytes(), b"A & B");
+        assert_eq!(op.get_type_of_symbol(properties[0]).unwrap(), next);
+        assert_eq!(op.properties_of_type(ty).unwrap(), properties);
+        assert!(op.semantic_diagnostics(program.file(b"/main.ts").unwrap().source()).unwrap().is_empty());
+    }).unwrap().join().unwrap();
 }
