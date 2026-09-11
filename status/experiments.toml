@@ -23,21 +23,21 @@ unit = "manifest and options match the committed denominator; no skipped cases"
 
 [E2]
 title = "Checker slice"
-nature = "Measured on the frozen subset; throughput, allocations and retained memory are reported separately from parser results"
+nature = "Measured on the owner-amended E2 acceptance partition; native skips and rejected-option differentials are informational only (S07-3-2026-09-11-native-baseline-authority); throughput, allocations and retained memory are reported separately from parser results"
 
 [[E2.criteria]]
 id = "types_parity"
 metric = "run.e2.types_parity"
 op = "=="
 threshold = 1
-unit = "matching .types baselines / frozen subset"
+unit = "matching .types outcomes / E2 acceptance variants"
 
 [[E2.criteria]]
 id = "errors_parity"
 metric = "run.e2.errors_parity"
 op = "=="
 threshold = 1
-unit = "matching .errors.txt baselines / frozen subset"
+unit = "matching .errors.txt outcomes / E2 acceptance variants"
 
 [[E2.criteria]]
 id = "comparators"
@@ -51,7 +51,7 @@ id = "frozen_subset"
 metric = "run.e2.frozen_subset"
 op = "=="
 threshold = true
-unit = "the checked-in subset rule, manifest, options and exclusions match the committed denominator; no skipped cases (PLAN.md, section 13, item 16)"
+unit = "the complete source inventory and owner-approved E2 acceptance/informational partition match the committed S07-3 review; no missing required variants"
 
 [[E2.criteria]]
 id = "divergences_approved"

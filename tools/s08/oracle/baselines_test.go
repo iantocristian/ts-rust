@@ -33,6 +33,7 @@ type s08Request struct {
 	Settings          map[string]string `json:"settings"`
 	ConfigurationName string            `json:"configuration_name"`
 	ConfiguredName    string            `json:"configured_name"`
+	AcceptanceTier    string            `json:"acceptance_tier"`
 }
 
 func s08Hash(raw []byte) string { value := sha256.Sum256(raw); return hex.EncodeToString(value[:]) }
@@ -84,7 +85,7 @@ func TestS08Baselines(t *testing.T) {
 	}
 	seen := map[string]bool{}
 	for _, request := range requests {
-		if request.ID == "" || seen[request.ID] {
+		if request.ID == "" || seen[request.ID] || (request.AcceptanceTier != "acceptance" && request.AcceptanceTier != "informational") {
 			t.Fatal("empty/duplicate request")
 		}
 		seen[request.ID] = true
@@ -96,7 +97,7 @@ func TestS08Baselines(t *testing.T) {
 	defer output.Close()
 	encoder := json.NewEncoder(output)
 	for _, request := range requests {
-		row := map[string]any{"id": request.ID, "state": "not_executed", "queries": []tsbaseline.S08Query{}}
+		row := map[string]any{"id": request.ID, "acceptance_tier": request.AcceptanceTier, "state": "not_executed", "queries": []tsbaseline.S08Query{}}
 		complete := false
 		t.Run(request.ID, func(t *testing.T) {
 			defer func() {
@@ -143,7 +144,9 @@ func TestS08Baselines(t *testing.T) {
 			}
 			row["options"] = c.options
 			row["harness_options"] = c.harnessOptions
-			harnessutil.SkipUnsupportedCompilerOptions(t, c.options)
+			if request.AcceptanceTier != "informational" || os.Getenv("S08_INCLUDE_INFORMATIONAL") != "1" {
+				harnessutil.SkipUnsupportedCompilerOptions(t, c.options)
+			}
 			files := make([]map[string]any, 0)
 			for _, f := range c.result.Program.GetSourceFiles() {
 				files = append(files, map[string]any{"name": f.FileName(), "path": string(f.Path()), "sha256": s08Hash([]byte(f.Text())), "bytes": len(f.Text())})

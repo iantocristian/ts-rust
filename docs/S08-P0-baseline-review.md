@@ -1,6 +1,8 @@
 # S08 P0: baseline authority review
 
-Status: **review required; proposals below are not applied** (2026-09-11).
+Status: **historical review, resolved by the owner's [accepted amendment](S08-acceptance-amendment.md)** (2026-09-11).
+The proposals below preserve the reviewed alternatives; the owner chose
+informational, non-gating treatment instead of ordinary required projected cases.
 PR: [#13](https://github.com/iantocristian/ts-rust/pull/13).
 Upstream: `1f70213d4922b434345f639b441681e470c7cfc1`; Go 1.27.1, darwin/arm64.
 

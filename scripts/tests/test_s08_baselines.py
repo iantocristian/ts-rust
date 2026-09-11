@@ -12,7 +12,7 @@ from s08_baselines import canonical, digest, replace_exact, review_capture, vali
 class BaselineObservationContract(unittest.TestCase):
     def fixture(self):
         variant={"id":"case#0","options":{},"harness_options":{"NoTypesAndSymbols":False},"dependency_closure":[0]}
-        request={"id":"case#0","raw_sha256":"raw","loaded_sha256":"loaded"}
+        request={"id":"case#0","raw_sha256":"raw","loaded_sha256":"loaded","acceptance_tier":"acceptance"}
         query={"operation":"GetTypeAtLocation","file":"a.ts","kind":1,"pos":0,"end":1}
         result={**request,"state":"executed","options":{},"harness_options":variant["harness_options"],
                 "files":[{"name":"a.ts","path":"a.ts","bytes":1,"sha256":"source"}],
@@ -28,6 +28,11 @@ class BaselineObservationContract(unittest.TestCase):
         args=self.fixture()
         args[2][0]["types"]={"state":"content","text_hex":""}
         self.assertEqual(validate_observations(*args),[])
+
+    def test_execution_cannot_promote_an_informational_case_into_acceptance(self):
+        args=self.fixture()
+        args[1][0]["acceptance_tier"]="informational"
+        with self.assertRaises(ValueError):validate_observations(*args)
 
     def test_missing_duplicate_and_wrong_input_fail(self):
         rows,requests,results,files=self.fixture()

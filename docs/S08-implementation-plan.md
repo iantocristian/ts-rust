@@ -38,15 +38,18 @@ construction. `run.e2` currently verifies only the source-selected
 denominator. `CheckerIdentity`/`CheckerLease` are generic identity and permit
 primitives, not a concrete checker or retained-type API.
 
-The fixed denominator is **10,728 effective variants**, selected from 12,721
-physical cases, with **111 loaded library identities and 675 checker obligation
+The source inventory has **10,728 effective variants**, selected from 12,721
+physical cases. The owner-approved S07-3 amendment makes **9,369 variants E2
+acceptance** and retains **1,359 as informational differentials without an E2
+gate**; see [the accepted amendment](S08-acceptance-amendment.md). The source
+closure retains **111 loaded library identities and 675 checker obligation
 records**. The obligation records are syntax/dependency observations, explicitly
 not evidence of executed checker operations. They include generics, overloads,
 mapped and conditional types, inference, indexed access, template literal types
 and JSDoc in loaded declarations. A shallow implementation of literals, objects
 and unions cannot certify this denominator.
 
-What the denominator holds, from the frozen rule's own counts: nine syntax
+What the complete source inventory holds, before the E2 acceptance partition: nine syntax
 families have no eligible variant at all, because the rule excludes every variant
 containing them in test sources: explicit type parameters (2,628 excluded
 variants), decorators (765), JSX (455), indexed-access types (393), mapped types
@@ -63,6 +66,8 @@ libraries bring `Array<T>`, `Promise<T>`, the lib's mapped and conditional helpe
 types and generic signatures, so instantiation, type-argument inference at every
 call to a generic library signature and the relations they need are required work.
 
+The following restriction applies within the owner-approved acceptance boundary.
+Informational variants do not create required checker implementation work.
 Do not change the source selection, effective options, library closure, malformed
 cases, `skipLibCheck`, `noCheck`, or baseline eligibility to accommodate Rust.
 Port the operations these programs and their actual queries require. A selected
@@ -292,11 +297,14 @@ S08 storage must already permit correct reclamation.
 
 ### 5.1 Baseline authority
 
-**P0 execution review (2026-09-11):** the full native capture found 1,315 harness
-option-policy skips, 34 option rejections and one input-closure discrepancy.
-[The concrete authority proposal](S08-P0-baseline-review.md) is pending review;
-it is not an approved exception to this contract. Keep all 10,728 IDs and leave
-the final query freeze open until that review is resolved.
+**Owner decision (2026-09-11):** [S07-3 is amended](S08-acceptance-amendment.md).
+Correct the duplicate-file input ordering. The 9,369 native-eligible variants
+remain required for E2. Native option-policy skips, rejected-option variants and
+filename skips form an explicit 1,359-variant informational partition. Real
+outputs may be collected beyond selection guards, but their mismatches, failures
+or unavailable output never affect E2. Rejected options remain explicit; do not
+project them into ordinary required semantic cases. The original review record
+is retained as history, superseded by this decision.
 
 Build an oracle around the pinned compiler runner and
 `internal/testutil/tsbaseline/{type_symbol_baseline,error_baseline}.go`. Use
@@ -307,7 +315,9 @@ baselines: old-baseline fixups are not permission to normalize Rust/Go output.
 Freeze every variant, ordered input/option identity, query request and expected
 baseline eligibility. The source runner's `NoTypesAndSymbols` and
 `baseline.NoContent` behavior must have explicit outcome records. All 10,728
-variants remain represented; an expected absent baseline is not a skipped row,
+variants remain represented with an explicit tier. Every acceptance variant must
+have its required outcomes; informational execution may be unavailable. Within
+acceptance, an expected absent baseline is not a skipped row,
 and absence must not be confused with an empty file or an unimplemented query.
 Report actual emitted-baseline and query counts alongside the fixed denominator.
 
@@ -317,6 +327,10 @@ Reproduce it, including the diagnostic/checking phase that precedes it. Freeze
 direct pull-query traces separately; query order can change lazy identities and
 must not be altered to match output. Compare structured type/symbol observations
 for localization and final baseline bytes for acceptance.
+Native numeric type IDs are capture-local diagnostics, not expected cross-run
+values. The two amendment captures already differ in twelve ID fields while
+their ordered actions and semantic outputs match. Freeze the actions; compare
+identity relationships within each owner without rewriting raw observations.
 
 For errors include configuration, options, program, syntax, binding, grammar and
 semantic diagnostics in the source-prescribed selection/order. Preserve message
@@ -441,6 +455,9 @@ existing S04 leaf, S05 scanner and S06 encoder evidence scopes.
 
 ## 6. Measurement design and experiment limits
 
+Use the acceptance partition for the required checker query/workload and type
+census manifests. Informational differentials do not enlarge those gates. The
+S07 parse/bind workload and E7/E8 selection remain unchanged by this amendment.
 Freeze the methodology and request manifests in P0, before Rust results can
 influence case selection or endpoints. Implement one Go-first census and one
 small production storage pilot. The definitive measurements use the completed
@@ -595,7 +612,7 @@ oracle helpers instead of creating another subtly different framework.
 
 | Producer | S08 change | Preservation obligation |
 | --- | --- | --- |
-| `e2` | Extend source-only verification with baseline parity, comparators, type display, recursion and divergence validation; one record contains all required metrics | Preserve the exact S07 frozen-subset validator and all 10,728 required outcome IDs; an implemented subset cannot certify E2 |
+| `e2` | Extend source-only verification with baseline parity, comparators, type display, recursion and divergence validation; one record contains all required metrics | Preserve the exact S07 source/partition validator; require every one of the 9,369 acceptance IDs; keep informational outcomes outside E2 aggregation |
 | `e3` | Add `data/s08/ownership-cases.json` and real checker-merge scenarios to the existing instrumented orchestration | Aggregate existing S04/S06/S07 scopes; retain all earlier assertions; only publish a shared criterion when every implemented required contributor passes |
 | `e4` | Compose existing leaf results with a new exact S08 literal/printer inventory | Keep leaf/scanner/encoder consumers and denominators intact; new metrics require production integration, not old helper observations |
 | `e5` | Compose independently validated parse/bind and type-footprint captures | Keep both S07 memory ratios and provenance; add `type_footprint_ratio` from the new subset census, not a guessed value |
@@ -647,7 +664,8 @@ of the node builder and grammar checks; they leave the bulk of `checker.go`
 (32,523), `relater.go` (5,044), `flow.go` (2,761), `inference.go` (1,684) and
 `grammarchecks.go` (2,230). S08 is the entry to the Phase 2 critical path and is
 not time-boxed the way S07 was. Each checkpoint reports the pass count over the
-10,728-variant denominator and the named families still failing; a partial
+9,369-variant acceptance denominator and the named families still failing;
+informational results are reported separately; a partial
 increment ends with explicit remaining work. The scaffold committed with this
 revision is P1's starting point, not a P1 result.
 

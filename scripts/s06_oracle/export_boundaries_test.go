@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/microsoft/TypeScript/tsc/internal/testutil/harnessutil"
 )
 
 func s06TestInput(t *testing.T, source, logical string) s06Case {
@@ -16,6 +18,22 @@ func s06TestInput(t *testing.T, source, logical string) s06Case {
 		t.Fatal(err)
 	}
 	return s06Extract(t, file, source, logical)
+}
+
+func TestS06DuplicateFileMatchesNativeProgram(t *testing.T) {
+	source := "// @target: es2015\n// @module: commonjs\n// @noLib: true\n// @noEmit: true\n// @filename: dep.ts\nexport const x = 1;\n// @filename: main.ts\n// @filename: main.ts\nimport x = require('./dep');"
+	got := s06TestInput(t, source, "duplicate-input")
+	payload := makeUnitsFromTest(source, "/duplicate.ts")
+	native := newCompilerTest(t, "duplicate-input", "/duplicate.ts", &payload, &harnessutil.NamedTestConfiguration{Config: got.Configurations[0]})
+	file := native.result.Program.GetSourceFile("/.src/main.ts")
+	if file == nil || file.Text() != "" || native.result.Program.GetSourceFile("/.src/dep.ts") != nil {
+		t.Fatal("native root-before-auxiliary duplicate behavior changed")
+	}
+	for _, input := range got.Variants[0].Inputs {
+		if input.Filename == "/.src/main.ts" && input.TextHex != hex.EncodeToString([]byte(file.Text())) {
+			t.Fatal("extracted duplicate differs from actual native program")
+		}
+	}
 }
 
 func TestS06LoadingBoundaries(t *testing.T) {

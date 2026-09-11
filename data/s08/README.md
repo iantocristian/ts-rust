@@ -42,8 +42,12 @@ the outcome inventory was completed, not that checking or parity passed.
 `--review-capture` verifies source snapshots and request/observation hashes,
 compares available inputs and complete pre/post diagnostics, and writes a named
 review inventory. It refuses partial captures and existing output paths.
-The first full capture's contract conflict requires
-[review](../../docs/S08-P0-baseline-review.md) before freezing expected queries.
+The first full capture's conflict is resolved by the
+[owner-approved amendment](../../docs/S08-acceptance-amendment.md).
+Every request now carries an acceptance/informational tier. Use
+`--include-informational` to collect available raw Go outputs beyond selection
+guards for informational cases; their failures and mismatches never enter E2.
+The 34 native option rejections remain explicit failures in that tier.
 
 Checkpoint results, including the unusable first Go retained-memory endpoint,
 are documented in `docs/S08-P0-P1.md` and archived under `tools/s08/results/`.

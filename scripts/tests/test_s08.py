@@ -10,6 +10,9 @@ from s08_manifest import eligible, make_manifest, optional_bool, phase_requests,
 
 
 class S08Contracts(unittest.TestCase):
+    def acceptance(self, subset):
+        return {"amendment":"approved", "variants":[{"id":v["id"],"tier":"acceptance","reasons":[]} for _,v in eligible(subset)]}
+
     def fixture(self):
         variant = {
             "id": "case/default", "disposition": "eligible", "configuration": [],
@@ -51,7 +54,7 @@ class S08Contracts(unittest.TestCase):
     def test_absent_reference_never_suppresses_a_requested_phase(self):
         subset = self.fixture()
         policy = [{"id": "case/default", "declaration_requested": True}]
-        result = make_manifest(subset, eligible(subset), policy, {})
+        result = make_manifest(subset, eligible(subset), policy, {}, self.acceptance(subset))
         row = result["requests"][0]
         self.assertEqual(row["reference_baselines"], [])
         self.assertIn("declaration", row["diagnostic_phases"])
@@ -60,20 +63,35 @@ class S08Contracts(unittest.TestCase):
         self.assertFalse(result["result_contract"]["reference_absence_proves_no_content"])
         self.assertFalse(result["result_contract"]["not_implemented_passes"])
         subset["cases"][0]["variants"][0]["harness_options"]["NoTypesAndSymbols"] = True
-        disabled = make_manifest(subset, eligible(subset), policy, {})
+        disabled = make_manifest(subset, eligible(subset), policy, {}, self.acceptance(subset))
         self.assertFalse(disabled["requests"][0]["type_baseline_requested"])
         self.assertEqual(disabled["counts"]["type_baseline_requested"], 0)
 
     def test_dependencies_and_options_are_bound_and_wrong_join_fails(self):
         subset = self.fixture()
         policy = [{"id": "case/default", "declaration_requested": True}]
-        before = make_manifest(subset, eligible(subset), policy, {})["requests"][0]
+        before = make_manifest(subset, eligible(subset), policy, {}, self.acceptance(subset))["requests"][0]
         changed = copy.deepcopy(subset)
         changed["file_observations"][0]["sha256"] = "different"
-        after = make_manifest(changed, eligible(changed), policy, {})["requests"][0]
+        after = make_manifest(changed, eligible(changed), policy, {}, self.acceptance(changed))["requests"][0]
         self.assertNotEqual(before["dependency_closure_sha256"], after["dependency_closure_sha256"])
         with self.assertRaises(ValueError):
-            make_manifest(subset, eligible(subset), [dict(policy[0], id="wrong")], {})
+            make_manifest(subset, eligible(subset), [dict(policy[0], id="wrong")], {}, self.acceptance(subset))
+
+    def test_informational_phase_requests_do_not_enter_acceptance_counts(self):
+        subset=self.fixture()
+        variant=copy.deepcopy(subset["cases"][0]["variants"][0])
+        variant["id"]="case/informational"
+        subset["cases"][0]["variants"].append(variant)
+        acceptance=self.acceptance(subset)
+        acceptance["variants"][1].update(tier="informational",reasons=["native_option_guard"])
+        policy=[{"id":v["id"],"declaration_requested":True} for _,v in eligible(subset)]
+        manifest=make_manifest(subset,eligible(subset),policy,{},acceptance)
+        self.assertEqual(manifest["counts"]["variants"],2)
+        self.assertEqual(manifest["counts"]["acceptance"],1)
+        self.assertEqual(manifest["counts"]["informational"],1)
+        self.assertEqual(manifest["counts"]["acceptance_diagnostic_phases"]["declaration"],1)
+        self.assertFalse(manifest["result_contract"]["informational_outcomes_affect_e2"])
 
     def test_go_names_cannot_inject_source(self):
         self.assertEqual(identifier("TypeFlagsStringLiteral"), "TypeFlagsStringLiteral")

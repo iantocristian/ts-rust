@@ -36,7 +36,9 @@ def run_overlay(directory, package, source, request, test_name):
     overlay = directory / "overlay.json"
     overlay.write_bytes(canonical({"Replace": {str(virtual): str(source_path)}}))
     env.update(S08_REQUESTS=str(request_path), S08_OUTPUT=str(output))
-    stdout = command(["go", "test", "-trimpath", "-mod=readonly", "-overlay", str(overlay),
+    repo_flags = ([f"-gcflags=github.com/microsoft/TypeScript/tsc/internal/repo=-trimpath={directory}/unmatched-prefix"]
+                  if package == "testrunner" else [])
+    stdout = command(["go", "test", "-trimpath", "-mod=readonly", *repo_flags, "-overlay", str(overlay),
                       f"./internal/{package}", "-run", f"^{test_name}$", "-count=1",
                       "-timeout=5m"], cwd=upstream / "tsc", env=env)
     (directory / "go-test.stdout").write_bytes(stdout)

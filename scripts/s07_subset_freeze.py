@@ -7,6 +7,7 @@ from s04 import verified_upstream
 from s04_common import strict_json_loads
 from s07_subset import ROOT, PIN, TABLES, classify, json_bytes, sha256, table
 from s07_operation_validation import validate_operation_matrix
+from s07_acceptance import load_partition, POLICY, OBSERVATIONS
 
 
 CAPABILITIES = {
@@ -168,8 +169,14 @@ def documents(observations, loader_observations):
     for fixture in rule["mandatory_fixtures"]["rows"]:
         if fixture.get("primary_case") and not any(i.startswith(fixture["primary_case"]+"#configuration=") for i in eligible):
             raise ValueError("mandatory stress family has no eligible witness: " + fixture["id"])
+    subset = {"version": 1, "pin": PIN, "cases": result["cases"], "file_observations": file_table}
+    acceptance = load_partition(subset)
+    rule["e2_acceptance"] = {"amendment":acceptance["amendment"], "path":POLICY,
+                             "sha256":sha256((ROOT/POLICY).read_bytes()),
+                             "observations":OBSERVATIONS, "counts":acceptance["counts"],
+                             "scope":acceptance["scope"]}
     return {"subset-rule.json": rule,
-            "subset.json": {"version": 1, "pin": PIN, "cases": result["cases"], "file_observations": file_table},
+            "subset.json": subset,
             "checker-obligations.json": obligations}
 
 

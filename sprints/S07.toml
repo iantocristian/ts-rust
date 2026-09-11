@@ -6,6 +6,10 @@
 #   run.e5.allocated_bytes_ratio     Rust / Go bytes allocated for the same workload
 #   run.e6.one_thread_wall_time_ratio, run.e6.eight_threads_wall_time_ratio
 #   run.e2.frozen_subset             the checked-in rule, manifest, options and exclusions match the denominator
+# Owner amendment S07-3-2026-09-11-native-baseline-authority: the source inventory
+# remains intact. data/s07/e2-acceptance.json separately marks native skips and
+# rejected-option variants informational, outside E2 checker acceptance. These
+# rows still participate in S07 loader/binder coverage and E7/E8 source selection.
 # The VS Code commit is pinned in data/workloads.toml and declared as an input of e5 and e6.
 id = "S07"
 title = "Binder, resolution slice, program host, parse-and-bind benchmark"

@@ -16,12 +16,14 @@ from s04 import go_environment, same_json_value, verified_upstream
 from s04_common import strict_json_loads
 from s08_manifest import eligible
 from s08_oracle import ROOT, canonical, digest
+from s07_acceptance import load_partition, POLICY, OBSERVATIONS
 
 BRIDGES = ROOT / "tools/s08/oracle"
 
 
 def requests_from_subset(subset, smoke=False, case_id=None):
     rows = eligible(subset)
+    tiers = {v["id"]:v["tier"] for v in load_partition(subset)["variants"]}
     if case_id is not None:
         rows = [(c, v) for c, v in rows if v["id"] == case_id]
         if len(rows) != 1:
@@ -46,6 +48,7 @@ def requests_from_subset(subset, smoke=False, case_id=None):
         if label and (not label.startswith("(") or not label.endswith(")")):
             raise ValueError("invalid configuration label")
         requests.append({"id":variant["id"], "path":case["source"]["path"],
+                         "acceptance_tier":tiers[variant["id"]],
                          "raw_sha256":case["source"]["raw_sha256"],
                          "loaded_sha256":case["source"]["loaded_sha256"],
                          "settings":case["source"]["configurations"][variant["configuration"]],
@@ -93,6 +96,8 @@ def validate_observations(rows, requests, observed, file_observations):
     for (case, variant), request, result in zip(rows, requests, observed, strict=True):
         if result["state"] not in ("executed", "upstream_failed", "upstream_skipped"):
             raise ValueError("unclassified source outcome")
+        if result["acceptance_tier"] != request["acceptance_tier"] or request["acceptance_tier"] not in ("acceptance","informational"):
+            raise ValueError("observation changed its acceptance tier")
         if result["state"] == "executed" and "panic" in result:
             raise ValueError("panicking observation cannot be executed successfully")
         for key in ("raw_sha256", "loaded_sha256"):
@@ -141,7 +146,7 @@ def validate_observations(rows, requests, observed, file_observations):
     return mismatches
 
 
-def capture(directory, smoke=False, case_id=None):
+def capture(directory, smoke=False, case_id=None, include_informational=False):
     directory = Path(directory).resolve()
     directory.mkdir(parents=True,exist_ok=False)
     upstream = verified_upstream()
@@ -161,7 +166,8 @@ def capture(directory, smoke=False, case_id=None):
     inputs = {name:digest((ROOT/name).read_bytes()) for name in (
         "data/s07/subset.json","data/s08/baseline-requests.json","data/upstream.json",
         "scripts/s08_baselines.py","scripts/s04.py","scripts/s04_common.py","scripts/s04_runtime.py",
-        "scripts/tracking-bootstrap.py","scripts/s08_manifest.py","scripts/s08_oracle.py","data/s04/toolchains.toml")}
+        "scripts/tracking-bootstrap.py","scripts/s08_manifest.py","scripts/s08_oracle.py","data/s04/toolchains.toml",
+        "scripts/s07_acceptance.py",POLICY,OBSERVATIONS,"tools/s08/oracle/acceptance_policy_test.go")}
     inputs.update({str(path.relative_to(ROOT)):digest(path.read_bytes()) for path in BRIDGES.glob("*baseline*.go")})
     inputs["tools/s08/oracle/diagnostics_observer.go"] = digest((BRIDGES/"diagnostics_observer.go").read_bytes())
     for name in inputs:
@@ -169,6 +175,7 @@ def capture(directory, smoke=False, case_id=None):
         snapshot.parent.mkdir(parents=True,exist_ok=True)
         snapshot.write_bytes((ROOT/name).read_bytes())
     env.update(S08_REQUESTS=str(directory/"requests.json"),S08_OUTPUT=str(directory/"observations.ndjson"),S08_SUMMARY=str(directory/"go-summary.json"))
+    env["S08_INCLUDE_INFORMATIONAL"] = "1" if include_informational else "0"
     # repo.RootPath intentionally requires this one package's physical filename.
     repo_flag = "-gcflags=github.com/microsoft/TypeScript/tsc/internal/repo=-trimpath="+str(directory/"unmatched-prefix")
     command = ["go","test","-trimpath","-mod=readonly",repo_flag,"-overlay",str(directory/"overlay.json"),"./internal/testrunner",
@@ -189,11 +196,13 @@ def capture(directory, smoke=False, case_id=None):
     verified_upstream()
     if any(digest((ROOT/name).read_bytes())!=value for name,value in inputs.items()):
         raise ValueError("capture inputs changed")
-    report = {"version":1,"pin":subset["pin"],"smoke":smoke,"case_id":case_id,"source_inputs":inputs,
+    report = {"version":2,"pin":subset["pin"],"smoke":smoke,"case_id":case_id,"source_inputs":inputs,
+              "include_informational":include_informational,
               "request_sha256":digest(raw),"observation_sha256":digest((directory/"observations.ndjson").read_bytes()),
               "requests":len(requests),"states":dict(states),"test_exit":completed.returncode,
+              "states_by_tier":{tier:dict(Counter(r["state"] for r in observed if r["acceptance_tier"]==tier)) for tier in ("acceptance","informational")},
               "query_operations":dict(Counter(query["operation"] for row in observed for query in row["queries"])),
-              "mismatches":mismatches, "scope":"Native raw baseline generation and walker pulls; no Rust comparison or S08 acceptance claim",
+              "mismatches":mismatches, "scope":"Pinned raw baseline generation and walker pulls; informational outcomes cannot affect E2; no Rust comparison or S08 acceptance claim",
               "go":summary}
     (directory/"report.json").write_bytes(canonical(report)+b"\n")
     print(json.dumps({key:value for key,value in report.items() if key not in ("source_inputs",)},sort_keys=True))
@@ -249,6 +258,7 @@ def review_capture(directory, output):
 if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--include-informational",action="store_true",help="collect available baselines beyond native option guards for informational cases only")
     selection=parser.add_mutually_exclusive_group()
     selection.add_argument("--smoke",action="store_true")
     selection.add_argument("--case",dest="case_id",help="one exact frozen variant ID, for diagnosis only")
@@ -258,7 +268,7 @@ if __name__=="__main__":
         if args.review_capture:
             review_capture(args.review_capture,args.output)
         else:
-            capture(args.output,args.smoke,args.case_id)
+            capture(args.output,args.smoke,args.case_id,args.include_informational)
     except (OSError,ValueError,RuntimeError,KeyError,TypeError,subprocess.TimeoutExpired) as error:
         print(f"S08 baseline capture failed: {error}",file=sys.stderr)
         raise SystemExit(1) from error

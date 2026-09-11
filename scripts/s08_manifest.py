@@ -5,11 +5,12 @@ from pathlib import Path
 
 from s04_common import strict_json_loads
 from s08_oracle import ROOT, canonical, digest, run_overlay
+from s07_acceptance import load_partition, POLICY, OBSERVATIONS, select_acceptance
 
 INPUTS = ("data/s07/subset.json", "data/s07/subset-rule.json", "data/s07/subset-review.json",
-          "data/s07/checker-obligations.json", "data/upstream.json")
+          "data/s07/checker-obligations.json", "data/upstream.json", POLICY, OBSERVATIONS)
 PHASE_SOURCE = "tools/s08/oracle/phase_policy_test.go"
-SOURCES = (PHASE_SOURCE, "scripts/s08.py", "scripts/s08_manifest.py", "scripts/s08_oracle.py",
+SOURCES = (PHASE_SOURCE, "scripts/s08.py", "scripts/s08_manifest.py", "scripts/s08_oracle.py", "scripts/s07_acceptance.py",
            "scripts/s04.py", "scripts/s04_common.py", "scripts/s04_runtime.py",
            "scripts/tracking-bootstrap.py", "data/s04/toolchains.toml", ".gitmodules")
 
@@ -54,10 +55,10 @@ def validate_policy(requests, report):
     return rows
 
 
-def make_manifest(subset, rows, policy, inputs):
+def make_manifest(subset, rows, policy, inputs, acceptance):
     requests = []
-    for (case, variant), phase in zip(rows, policy, strict=True):
-        if phase["id"] != variant["id"]:
+    for (case, variant), phase, disposition in zip(rows, policy, acceptance["variants"], strict=True):
+        if phase["id"] != variant["id"] or disposition["id"] != variant["id"]:
             raise ValueError("phase joined to the wrong variant")
         harness = variant["harness_options"]
         for key in ("NoTypesAndSymbols", "CaptureSuggestions"):
@@ -80,21 +81,28 @@ def make_manifest(subset, rows, policy, inputs):
                 subset["file_observations"][index] for index in variant["dependency_closure"]])),
             "diagnostic_phases": phases, "type_baseline_requested": not harness["NoTypesAndSymbols"],
             "reference_baselines": references,
+            "acceptance_tier": disposition["tier"], "informational_reasons": disposition["reasons"],
         })
     counts = Counter(phase for row in requests for phase in row["diagnostic_phases"])
+    required = select_acceptance(requests, acceptance["variants"])
     return {
         "version": 1, "pin": subset["pin"], "inputs": inputs,
         "scope": "Required phases derived from frozen S07 variants and pinned Go option policy; no semantic execution or parity claim",
         "declaration_decision": "execute required declaration diagnostics inside S08",
+        "acceptance_amendment": acceptance["amendment"],
         "result_contract": {
             "phase_outcomes": ["executed", "not_requested", "failed", "not_implemented"],
             "baseline_outcomes": ["content", "no_content", "disabled", "failed", "not_implemented"],
             "not_implemented_passes": False,
             "reference_absence_proves_no_content": False,
             "pre_post_emit_comparison": "complete sorted diagnostic payloads; equal counts alone are insufficient",
+            "informational_outcomes_affect_e2": False,
         },
         "counts": {"variants": len(requests), "diagnostic_phases": dict(sorted(counts.items())),
-                   "type_baseline_requested": sum(row["type_baseline_requested"] for row in requests)},
+                   "type_baseline_requested": sum(row["type_baseline_requested"] for row in requests),
+                   "acceptance":len(required), "informational":len(requests)-len(required),
+                   "acceptance_diagnostic_phases":dict(sorted(Counter(p for row in required for p in row["diagnostic_phases"]).items())),
+                   "acceptance_type_baseline_requested":sum(row["type_baseline_requested"] for row in required)},
         "requests": requests,
     }
 
@@ -113,7 +121,7 @@ def prepare(directory):
     requests = phase_requests(rows)
     report = run_overlay(directory / "go-phases", "core", (ROOT / PHASE_SOURCE).read_text(), requests, "TestS08PhasePolicy")
     policy = validate_policy(requests, report)
-    manifest = make_manifest(subset, rows, policy, inputs)
+    manifest = make_manifest(subset, rows, policy, inputs, load_partition(subset))
     if inputs != {name: digest((ROOT / name).read_bytes()) for name in inputs}:
         raise ValueError("manifest inputs changed during observation")
     (directory / "baseline-requests.candidate.json").write_bytes(canonical(manifest) + b"\n")
