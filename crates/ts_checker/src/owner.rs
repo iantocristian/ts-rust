@@ -70,6 +70,8 @@ impl CheckerOwner {
 
 /// An exclusive operation scope. Mutable storage never escapes this crate.
 ///
+/// This compile-fail case checks that mutable checker state is crate-private.
+///
 /// ```compile_fail
 /// use ts_checker::Operation;
 /// fn swap_checkers(a: &mut Operation<'_>, b: &mut Operation<'_>) {
@@ -77,9 +79,13 @@ impl CheckerOwner {
 /// }
 /// ```
 ///
+/// Direct store lookup is also crate-private. This proves API privacy, not
+/// compile-time owner branding: public P1 references use exact-owner checks
+/// when an operation imports or resolves them.
+///
 /// ```compile_fail
 /// use ts_checker::{TypeStore, TypeId};
-/// fn foreign_id(store: &TypeStore, id: TypeId) { store.get(id); }
+/// fn private_store_lookup(store: &TypeStore, id: TypeId) { store.get(id); }
 /// ```
 ///
 /// Field order is the drop order: the lease goes

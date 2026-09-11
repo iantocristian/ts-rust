@@ -53,7 +53,7 @@ def action(query,files):
 def extract_capture(directory):
     """Materialize only authenticated final-capture members, never tar paths blindly."""
     directory=Path(directory);directory.mkdir(parents=True,exist_ok=False)
-    wanted={'requests.json','observations.ndjson','report.json'}
+    wanted={'requests.json','observations.ndjson','report.json','go.stdout','go.stderr'}
     found=set()
     for archive in (ARCHIVE,ARCHIVE.replace('baselines.tar.xz','provenance.tar.xz')):
         manifest=strict_json_loads((ROOT/(archive+'.manifest.json')).read_bytes())

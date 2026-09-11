@@ -8,9 +8,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from s04_common import strict_json_loads
+from s08_audit import boundary, prepare as audit, reviewed_boundaries, site_identity
 from s08_contracts import compare, diagnostics, ordering, state, validate
 from s08_contract_oracle import requests
 from s08_inventory import compact, sites
@@ -68,6 +70,62 @@ class P0ProtocolTests(unittest.TestCase):
         altered['rows'][6]['groups'][1]['actions'][1]['before']['types_created'] += 1
         with self.assertRaises(ValueError):
             self.validate(altered)
+
+    def test_setup_populated_number_fixtures_are_identity_shortcuts(self):
+        for case_id in ('flow-return-inference', 'jsdoc-module'):
+            definition = next(row for row in self.spec['cases'] if row['id'] == case_id)
+            actual = next(row for row in self.observed['rows'] if row['id'] == case_id)
+            self.assertEqual(set(definition['first_call'].values()), {'primitive_identity_shortcut'})
+            for group in actual['groups']:
+                first = group['actions'][0]
+                self.assertEqual(group['display_hex'], {'A': b'number'.hex(), 'B': b'number'.hex()})
+                self.assertEqual(group['before_lookup']['caches']['assignable']['entries'], 0)
+                self.assertEqual(first['before']['caches']['assignable']['entries'], 1)
+                self.assertEqual(first['before'], first['after'])
+            for mutation in ('setup_cache', 'fresh_cache', 'resolved_type', 'first_call_work'):
+                altered = copy.deepcopy(self.observed)
+                group = next(row for row in altered['rows'] if row['id'] == case_id)['groups'][1]
+                if mutation == 'setup_cache':
+                    group['actions'][0]['before']['caches']['assignable'] = dict(entries=0, result_flags=[])
+                elif mutation == 'fresh_cache':
+                    group['before_lookup']['caches']['assignable'] = dict(entries=1, result_flags=[1])
+                elif mutation == 'resolved_type':
+                    group['display_hex']['A'] = b'string'.hex()
+                else:
+                    for action_row in group['actions']:
+                        action_row['after']['types_created'] += 1
+                    for action_row in group['actions'][1:]:
+                        action_row['before']['types_created'] += 1
+                with self.subTest(case=case_id, mutation=mutation), self.assertRaises(ValueError):
+                    self.validate(altered)
+
+    def test_declared_cold_lazy_work_and_starting_state_are_enforced(self):
+        altered = copy.deepcopy(self.observed)
+        group = altered['rows'][6]['groups'][1]
+        # Keep state continuity and valid counters while omitting the first call's
+        # lazy work. The declared class must reject this independently of compare().
+        for action_row in group['actions']:
+            action_row['before'] = copy.deepcopy(group['actions'][0]['before'])
+            action_row['after'] = copy.deepcopy(group['actions'][0]['before'])
+        with self.assertRaises(ValueError):
+            self.validate(altered)
+        altered = copy.deepcopy(self.observed)
+        group = altered['rows'][0]['groups'][1]
+        for action_row in group['actions']:
+            for endpoint in ('before', 'after'):
+                action_row[endpoint]['caches']['identity'] = dict(entries=1, result_flags=[1])
+        with self.assertRaises(ValueError):
+            self.validate(altered)
+        for mutation in ('missing', 'cache_hit', 'lazy_without_work'):
+            spec = copy.deepcopy(self.spec)
+            if mutation == 'missing':
+                del spec['cases'][0]['starting_cache_entries']
+            elif mutation == 'cache_hit':
+                spec['cases'][14]['first_call']['assignable'] = 'cache_hit'
+            else:
+                spec['cases'][0]['first_call']['assignable'] = 'cold_lazy_resolution'
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                validate(spec, requests(spec), self.text, self.residuals, self.observed)
 
     def test_complete_diagnostic_payload_and_panic_reason_are_compared(self):
         altered = copy.deepcopy(self.observed)
@@ -164,9 +222,42 @@ class P0ProtocolTests(unittest.TestCase):
                 type_mean_ratio(bad, complete)
 
     def test_unknown_typed_boundary_requires_review(self):
-        from s08_audit import boundary
         with self.assertRaises(ValueError):
             boundary(dict(file='internal/checker/new.go', signature='func() *NewType', value='newHost.NewType'))
+
+
+class TypedBoundaryReviewTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.closure = load('data/s08/dependency-closure.json.xz')
+        cls.review = load('tools/s08/inventory/review.json')
+        cls.unresolved = [site for site in sites(cls.closure) if not site['targets']]
+
+    def test_exact_frozen_allowlist_uses_decoded_source_identity(self):
+        approved = reviewed_boundaries(self.review)
+        self.assertEqual(len(approved), 77)
+        self.assertEqual(len(self.unresolved), 77)
+        for site in self.unresolved:
+            self.assertEqual(boundary(site, approved), boundary(dict(site, index=999999), approved))
+            self.assertNotIn('index', site_identity(site))
+            self.assertNotIn('targets', site_identity(site))
+        self.assertEqual(audit(self.closure)['counts']['reviewed_static_boundaries'], 77)
+
+    def test_new_identity_matching_an_existing_category_pattern_fails(self):
+        approved = reviewed_boundaries(self.review)
+        for category in ('reflection_runtime', 'source_map_host', 'iterator_continuation', 'context_runtime'):
+            site = next(site for site in self.unresolved if boundary(site, approved) == category)
+            for field, value in (('line', site['line'] + 1), ('caller', site['caller'] + '.new')):
+                with self.subTest(category=category, field=field), self.assertRaises(ValueError):
+                    boundary(dict(site, **{field: value}), approved)
+
+    def test_duplicate_or_stale_allowlist_entries_fail(self):
+        review = copy.deepcopy(self.review)
+        review['unresolved_sites'].append(review['unresolved_sites'][0])
+        with self.assertRaises(ValueError):
+            reviewed_boundaries(review)
+        with patch('s08_audit.sites', return_value=self.unresolved[1:]), self.assertRaises(ValueError):
+            audit(self.closure)
 
 
 @unittest.skipUnless(os.environ.get('S08_NATIVE_TESTS') == '1', 'opt-in pinned Go typed-tool integration')

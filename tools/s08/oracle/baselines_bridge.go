@@ -33,6 +33,7 @@ func s08Query(operation string, walker *typeWriterWalker, node *ast.Node) S08Que
 
 func s08GetTypeAtLocation(walker *typeWriterWalker, c *checker.Checker, node *ast.Node) *checker.Type {
 	result := c.GetTypeAtLocation(node)
+	restore := harnessutil.S08EnterObservation()
 	q := s08Query("GetTypeAtLocation", walker, node)
 	if result == nil {
 		q.Absent = true
@@ -41,10 +42,12 @@ func s08GetTypeAtLocation(walker *typeWriterWalker, c *checker.Checker, node *as
 		q.TypeID = uint32(result.Id())
 	}
 	S08Queries = append(S08Queries, q)
+	restore()
 	return result
 }
 
 func s08RecordDisplay(operation string, walker *typeWriterWalker, node *ast.Node, typ *checker.Type, flags, internalFlags uint32) {
+	restore := harnessutil.S08EnterObservation()
 	q := s08Query(operation, walker, node)
 	if typ != nil {
 		q.TypeID = uint32(typ.Id())
@@ -52,13 +55,16 @@ func s08RecordDisplay(operation string, walker *typeWriterWalker, node *ast.Node
 	q.Flags = flags
 	q.InternalFlags = internalFlags
 	S08Queries = append(S08Queries, q)
+	restore()
 }
 
 func s08GetSymbolAtLocation(walker *typeWriterWalker, c *checker.Checker, node *ast.Node) *ast.Symbol {
 	result := c.GetSymbolAtLocation(node)
+	restore := harnessutil.S08EnterObservation()
 	q := s08Query("GetSymbolAtLocation", walker, node)
 	q.Absent = result == nil
 	S08Queries = append(S08Queries, q)
+	restore()
 	return result
 }
 
@@ -68,10 +74,13 @@ type S08Baseline struct {
 }
 
 func S08BaselineValue(value string) S08Baseline {
+	restore := harnessutil.S08EnterObservation()
 	if value == baseline.NoContent {
+		restore()
 		return S08Baseline{State: "no_content"}
 	}
 	text := hex.EncodeToString([]byte(value))
+	restore()
 	return S08Baseline{State: "content", TextHex: &text}
 }
 

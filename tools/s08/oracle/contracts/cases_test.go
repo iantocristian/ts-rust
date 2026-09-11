@@ -78,8 +78,9 @@ func TestS08Contracts(t *testing.T) {
 			if file == nil {
 				t.Fatal("missing source")
 			}
-			// Independent checker per relation mode; shared bound inputs. The first call
-			// in each group is cold and the immediately repeated call sees that cache.
+			// Independent checker per relation mode; shared bound inputs. Type lookup
+			// is setup, then the immediate repeat sees the first call's resulting state.
+			// The fixture spec distinguishes cold work from primitive shortcuts.
 			groups := [][]checker.S08RelationAction{}
 			for i := 0; i < len(request.Actions); {
 				j := i + 1

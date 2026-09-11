@@ -68,13 +68,17 @@ explicit scope guards. Declaration-diagnostic callbacks are pending actual
 implementation, not waived as general Phase 3 emission.
 
 There are **77 static sites without a CHA target**. The audit does not conceal
-that limitation or call them executed coverage. Every site has a stable identity
-and reviewed boundary: runtime cancellation/reflection/locale operations,
+that limitation or call them executed coverage. `review.json` explicitly lists
+all 77 decoded source identities and their reviewed boundaries: runtime
+cancellation/reflection/locale operations,
 iterator continuations, an unused pool-factory override, an overincluded generic
 encoder template, pre-checker extended-config caching, source-map host callbacks,
 or excluded mapper transport. The review explains their source role and required
-implementation checkpoint. A newly unresolved site fails preparation until
-classified. Matching method names are navigation aids, not a dispatch proof.
+implementation checkpoint. Identity includes caller, file, line, column, call
+kind, signature and value; the incidental call-table index is excluded. A newly
+unresolved identity fails preparation even when its file or signature matches an
+existing category. Duplicate or stale allowlist entries also fail. Matching
+method names are navigation aids, not a dispatch proof.
 A native integration test independently checks direct calls, instantiated generic
 calls, interface dispatch, package initialization and a callback passed to an
 external library; a missing root is an error.
@@ -84,11 +88,22 @@ external library; a missing root is an error.
 All comparisons execute the original Go algorithms through access-only overlays.
 The relation observer records native ternaries immediately after `isRelatedToEx`;
 it does not implement a substitute relation. Each mode gets a fresh checker,
-then cold A→B, immediate repeat, B→A and A→A. Display follows the relation sequence,
-and ordinary diagnostics use another fresh checker, so neither prewarms the
-cold relation. Ordered diagnostics include keys, arguments, chains and related
+resolves A and B during setup, then runs first A→B, immediate repeat, B→A and A→A.
+Display follows the relation sequence, and ordinary diagnostics use another
+fresh checker, so neither prewarms those actions. Ordered diagnostics include keys, arguments, chains and related
 information. Cache counts/flag multisets and creation/instantiation counters
 record state, not allocator measurements.
+
+The specification declares each fixture's setup cache entries and first-call
+class per mode. The validator requires empty caches before declared-type lookup
+and checks the declared state after lookup. Cold lazy cases must retain creation
+or instantiation work in the first relation; cold cache evaluations create cache
+entries without requiring type allocations. Uncached shortcuts have their own
+class. `flow-return-inference` and `jsdoc-module` resolve A = B = `number` during
+setup, which populates one assignable-cache entry. Their subsequent relations
+take the primitive/identity shortcut without changing counters or caches; these
+semantic fixtures do not demonstrate cache hits or cold lazy work. No cache is
+cleared to manufacture a cold starting state.
 
 The cases cover object members, recursive positive and negative relations,
 unions/intersections, tuple flags, signatures/variance, lazy generics, mapped,
@@ -138,8 +153,9 @@ The four authored manifests freeze the decisions before Rust results:
   retained checkpoints. Output digests/counts prove the full work ran. Report
   unstable batches; no repeat-until-good sampling. Checker metrics still have
   measurement-presence gates, not new performance thresholds.
-- `relater-fixtures.json`: the same source-backed cold/repeated lazy work for the
+- `relater-fixtures.json`: the same source-backed setup and first/repeated work for the
   production ID relater and isolated reference/interior-mutability alternative.
+  Per-mode classes distinguish actual cold/lazy work from semantic shortcuts.
   Setup and relation costs are separate; throughput is reference/ID. No
   precomputed matrix, delegation, leaked storage or bypass of lazy allocation.
   P1 must prove a safe construction/mutation API before the full experiment.
@@ -162,13 +178,25 @@ agreement with the unchanged experiment ledger. Adversarial tests cover every
 output class: missing/reordered work, forged success/counts, broken cold/repeat
 state, omitted diagnostic chains, wrong panic reasons, malformed bytes,
 incomplete ordering matrices and unusable measurement denominators. Independent native closure and supplemental captures reproduce the frozen
-semantics exactly. All 13 focused tests pass, including the opt-in typed Go
+semantics exactly. The initial freeze passed all 13 focused tests, including the opt-in typed Go
 integration test. The full self-test producer passes 64 tracker tests and 356
 Python tests (the native integration test is opt-in there and was run separately).
 The archive also retains the exact native commands, requests,
 raw observations, logs and access bridges.
 Reproduction commands and the compact evidence archive are listed in
 [`data/s08/README.md`](../data/s08/README.md).
+
+The bounded P0 cleanup reused the frozen typed closure and all 21 supplemental
+observations. Decoded boundary identities and setup/first-call classifications
+change review metadata and validators; the native request bytes and observation
+bytes remain identical. The audit, authored relater methodology and source
+fingerprints were refrozen, including the observer's comment-only corrections;
+`supplemental-report.json` retains the original capture source fingerprints and
+records the observation reuse. Its focused validator run passes 17 tests with
+the native typed-tool integration test skipped; it does not repeat the full
+corpus or native CI checks. The non-native P0 check revalidates the authenticated
+existing archive and regenerates the same 1,438,509-action projection with zero
+capture mismatches; all P0 counts remain unchanged.
 
 The next checkpoint is P1: complete owner-bound result handles and lifetime
 contracts; implement the actual Go per-family census and extend the production

@@ -70,7 +70,7 @@ The additional frozen artifacts are:
 | `supplemental-observations.json.xz`, `supplemental-report.json` | Original native relations/state, diagnostics, comparator residuals and printer bytes |
 | `type-footprint.json` | Exact census membership, logical type denominator and shared-allocation attribution; 0.80 unchanged |
 | `checker-workload.json` | Fixed acceptance work, lifecycle, phase/allocator endpoints and sampling |
-| `relater-fixtures.json` | Cold/repeated stateful relation workload and reference/ID comparison protocol |
+| `relater-fixtures.json` | Declared setup and first/repeated relation workload classes, including cold lazy work and primitive shortcuts, plus the reference/ID comparison protocol |
 | `ownership-fixtures.json` | Rust design/recursion scenarios, pending production execution; P2 suppression debt |
 
 ```sh

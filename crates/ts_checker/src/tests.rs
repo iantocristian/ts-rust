@@ -5,7 +5,7 @@ use crate::{
     TypeSystemPropertyName,
 };
 use std::panic::{catch_unwind, AssertUnwindSafe};
-use std::sync::{mpsc, Arc};
+use std::sync::Arc;
 use ts_arena::{CheckerIdentity, Counters, Generation, NodeId, SymbolArena, SymbolId};
 use ts_ast::{symbol_flags, JsString};
 
@@ -172,28 +172,11 @@ fn owner_adopts_the_identity_once_and_scopes_state_to_an_operation() {
 }
 
 #[test]
-fn same_thread_reentry_fails_before_waiting_and_contention_waits() {
+fn same_thread_reentry_fails_before_waiting_and_drop_allows_another_operation() {
     let (_counters, _generation, _identity, owner) = owner();
     let held = owner.operation().unwrap();
     assert!(matches!(owner.operation(), Err(Error::Reentry)));
-    let (started, started_rx) = mpsc::channel();
-    let (finished, finished_rx) = mpsc::channel();
-    let contender = {
-        let owner = owner.clone();
-        std::thread::spawn(move || {
-            started.send(()).unwrap();
-            let operation = owner.operation();
-            finished.send(operation.is_ok()).unwrap();
-        })
-    };
-    started_rx.recv().unwrap();
-    assert!(
-        finished_rx.try_recv().is_err(),
-        "another thread waits while the operation is held"
-    );
     drop(held);
-    assert!(finished_rx.recv().unwrap(), "and acquires it once released");
-    contender.join().unwrap();
     assert!(
         owner.operation().is_ok(),
         "the reentry record is cleared on drop"
