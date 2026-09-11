@@ -1,0 +1,237 @@
+{
+  "version": 1,
+  "scope": "Named P2 semantic/display/diagnostic and independent merge fixtures; no full S08 acceptance claim",
+  "options": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "noLib": true
+  },
+  "programs": [
+    {
+      "id": "primitive-and-literal-aliases",
+      "files": {
+        "/primitive.ts": "type Text = string;\ntype Count = number;\ntype Flag = boolean;\ntype Nothing = undefined;\ntype Empty = null;\ntype Greeting = \"hello\";\ntype Answer = 42;\ntype Enabled = true;\n"
+      },
+      "roots": [
+        "/primitive.ts"
+      ],
+      "queries": [
+        {
+          "id": "Text.name.declared_type",
+          "declaration": "Text",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Count.name.declared_type",
+          "declaration": "Count",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Flag.name.declared_type",
+          "declaration": "Flag",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Nothing.name.declared_type",
+          "declaration": "Nothing",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Empty.name.declared_type",
+          "declaration": "Empty",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Greeting.name.declared_type",
+          "declaration": "Greeting",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Answer.name.declared_type",
+          "declaration": "Answer",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        },
+        {
+          "id": "Enabled.name.declared_type",
+          "declaration": "Enabled",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/primitive.ts"
+        }
+      ]
+    },
+    {
+      "id": "variables-and-failing-assignment",
+      "files": {
+        "/variables.ts": "let count: number = 1;\nlet label: string = \"ok\";\nlet inferred = 2;\nconst exact = \"literal\";\nlet bad: number = \"wrong\";\ncount = \"also wrong\";\n"
+      },
+      "roots": [
+        "/variables.ts"
+      ],
+      "queries": [
+        {
+          "id": "count.name.type_at_location",
+          "declaration": "count",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "count.annotation.type_at_location",
+          "declaration": "count",
+          "target": "annotation",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "count.initializer.type_at_location",
+          "declaration": "count",
+          "target": "initializer",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "label.name.type_at_location",
+          "declaration": "label",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "label.initializer.type_at_location",
+          "declaration": "label",
+          "target": "initializer",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "inferred.name.type_at_location",
+          "declaration": "inferred",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "exact.name.type_at_location",
+          "declaration": "exact",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "exact.initializer.type_at_location",
+          "declaration": "exact",
+          "target": "initializer",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "bad.name.type_at_location",
+          "declaration": "bad",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        },
+        {
+          "id": "bad.initializer.type_at_location",
+          "declaration": "bad",
+          "target": "initializer",
+          "operation": "type_at_location",
+          "file": "/variables.ts"
+        }
+      ]
+    },
+    {
+      "id": "anonymous-object-aliases",
+      "files": {
+        "/objects.ts": "type RecordShape = { label: string; count: number };\ntype LiteralShape = { tag: \"ready\"; active: true };\nlet value: RecordShape = { label: \"ok\", count: 1 };\n"
+      },
+      "roots": [
+        "/objects.ts"
+      ],
+      "queries": [
+        {
+          "id": "RecordShape.name.declared_type",
+          "declaration": "RecordShape",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/objects.ts"
+        },
+        {
+          "id": "LiteralShape.name.declared_type",
+          "declaration": "LiteralShape",
+          "target": "name",
+          "operation": "declared_type",
+          "file": "/objects.ts"
+        },
+        {
+          "id": "value.name.type_at_location",
+          "declaration": "value",
+          "target": "name",
+          "operation": "type_at_location",
+          "file": "/objects.ts"
+        },
+        {
+          "id": "value.annotation.type_at_location",
+          "declaration": "value",
+          "target": "annotation",
+          "operation": "type_at_location",
+          "file": "/objects.ts"
+        },
+        {
+          "id": "value.initializer.type_at_location",
+          "declaration": "value",
+          "target": "initializer",
+          "operation": "type_at_location",
+          "file": "/objects.ts"
+        }
+      ]
+    }
+  ],
+  "merge": {
+    "id": "shared-interface-checker-local-merges",
+    "files": {
+      "/base.ts": "interface Shared { base: string }\n",
+      "/a.ts": "interface Shared { a: number }\n",
+      "/b.ts": "interface Shared { b: boolean }\n"
+    },
+    "shared": "/base.ts",
+    "symbol": "Shared",
+    "modes": [
+      "single-checker",
+      "repeated",
+      "separate-checker",
+      "concurrent"
+    ],
+    "single_roots": [
+      "/base.ts",
+      "/a.ts",
+      "/b.ts"
+    ],
+    "independent_roots": {
+      "A": [
+        "/base.ts",
+        "/a.ts"
+      ],
+      "B": [
+        "/base.ts",
+        "/b.ts"
+      ]
+    }
+  }
+}

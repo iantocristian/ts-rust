@@ -96,3 +96,8 @@ Native observation hooks are never linked into timing binaries.
 Small P0 native command/request/output evidence is stored under
 `tools/s08/results/p0-contracts/`. Existing baseline/provenance archives are reused;
 the large raw static graph and derived query cache are not duplicated in git.
+
+P2's first end-to-end queries and shared-file merges are recorded in
+[`p2/README.md`](p2/README.md) and [the checkpoint record](../../docs/S08-P2.md).
+Its small archive is separate from the frozen P0 corpus and does not satisfy
+S08's full acceptance or measurement gates.

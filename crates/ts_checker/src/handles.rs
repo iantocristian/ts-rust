@@ -42,6 +42,19 @@ pub struct SignatureRef {
     id: SignatureId,
 }
 
+/// A source or transient symbol interpreted by one exact checker. The raw AST
+/// identity alone cannot distinguish two checkers' merged interpretations.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct SymbolRef {
+    owner: ArenaId,
+    id: SymbolId,
+}
+impl SymbolRef {
+    pub fn id(self) -> SymbolId {
+        self.id
+    }
+}
+
 impl SignatureRef {
     pub fn id(self) -> u32 {
         self.id.get()
@@ -146,6 +159,130 @@ pub struct MemberSpec<'a> {
 }
 
 impl Operation<'_> {
+    /// Imports the exact identity only if the checker retains its symbol store.
+    /// This preserves raw symbol observation, like Go's symbol-taking APIs;
+    /// it does not substitute a merged clone. Source name/location queries
+    /// return this checker's merged symbol when one exists.
+    pub fn symbol_ref(&self, id: SymbolId) -> Result<SymbolRef, Error> {
+        self.lease().validate_identity(self.checker())?;
+        self.state().symbol(id)?;
+        Ok(SymbolRef {
+            owner: self.checker(),
+            id,
+        })
+    }
+
+    fn check_symbol_ref(&self, symbol: SymbolRef) -> Result<SymbolId, Error> {
+        self.lease().validate_identity(symbol.owner)?;
+        self.state().symbol(symbol.id)?;
+        Ok(symbol.id)
+    }
+
+    pub fn get_symbol_at_location(&mut self, node: NodeId) -> Result<Option<SymbolRef>, Error> {
+        let symbol = self.state_mut().get_symbol_at_location(node)?;
+        symbol.map(|symbol| self.symbol_ref(symbol)).transpose()
+    }
+
+    pub fn get_type_at_location(&mut self, node: NodeId) -> Result<TypeRef, Error> {
+        let ty = self.state_mut().get_type_at_location(node)?;
+        Ok(self.type_ref(ty))
+    }
+
+    pub fn get_declared_type_of_symbol(&mut self, symbol: SymbolRef) -> Result<TypeRef, Error> {
+        let symbol = self.check_symbol_ref(symbol)?;
+        let ty = self.state_mut().get_declared_type_of_symbol(symbol)?;
+        Ok(self.type_ref(ty))
+    }
+
+    pub fn get_type_of_symbol(&mut self, symbol: SymbolRef) -> Result<TypeRef, Error> {
+        let symbol = self.check_symbol_ref(symbol)?;
+        let ty = self.state_mut().get_type_of_symbol(symbol)?;
+        Ok(self.type_ref(ty))
+    }
+
+    pub fn symbol(&self, symbol: SymbolRef) -> Result<ts_ast::SymbolRef<'_>, Error> {
+        let symbol = self.check_symbol_ref(symbol)?;
+        self.state().symbol(symbol)
+    }
+
+    pub fn symbol_declarations(
+        &self,
+        symbol: SymbolRef,
+    ) -> Result<ts_ast::DeclarationRead<'_>, Error> {
+        let symbol = self.check_symbol_ref(symbol)?;
+        self.state().symbol_declarations(symbol)
+    }
+
+    pub fn symbol_table(
+        &self,
+        table: ts_ast::SymbolTableId,
+    ) -> Result<ts_ast::SymbolTableRead<'_>, Error> {
+        self.state().table(table)
+    }
+
+    pub fn properties_of_type(&mut self, ty: TypeRef) -> Result<Vec<SymbolRef>, Error> {
+        let ty = self.check_type(ty)?;
+        if self.state().types.flags(ty)? & crate::type_flags::OBJECT == 0 {
+            return self
+                .state_mut()
+                .properties_of_primitive_type(ty)
+                .and_then(|values| values.into_iter().map(|id| self.symbol_ref(id)).collect());
+        }
+        self.state_mut().resolve_type_members(ty)?;
+        let properties = self.state().types.structured(ty)?.properties.clone();
+        properties
+            .as_deref()
+            .unwrap_or_default()
+            .iter()
+            .map(|&id| self.symbol_ref(id))
+            .collect()
+    }
+
+    pub fn type_to_string(
+        &mut self,
+        ty: TypeRef,
+        flags: crate::TypeFormatFlags,
+    ) -> Result<JsString, Error> {
+        let ty = self.check_type(ty)?;
+        self.state_mut().type_to_string(ty, flags)
+    }
+
+    pub fn global_diagnostics(&mut self) -> Result<Vec<ts_ast::Diagnostic>, Error> {
+        Ok(self
+            .state_mut()
+            .diagnostics_for_file(None)?
+            .into_iter()
+            .cloned()
+            .collect())
+    }
+
+    pub fn semantic_diagnostics(
+        &mut self,
+        source: NodeId,
+    ) -> Result<Vec<ts_ast::Diagnostic>, Error> {
+        self.state_mut().check_source_file(source)?;
+        Ok(self
+            .state_mut()
+            .diagnostics_for_file(Some(source))?
+            .into_iter()
+            .cloned()
+            .collect())
+    }
+
+    /// Suggestions already produced by queries/checking. This does not execute
+    /// the additional unused-code pass of Go's GetSuggestionDiagnostics.
+    pub fn recorded_suggestions(
+        &mut self,
+        source: NodeId,
+    ) -> Result<Vec<ts_ast::Diagnostic>, Error> {
+        Ok(self
+            .state_mut()
+            .suggestions_for_file(Some(source))?
+            .into_iter()
+            .cloned()
+            .collect())
+    }
+
     fn checker(&self) -> ArenaId {
         self.owner().identity().id()
     }

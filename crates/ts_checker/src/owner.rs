@@ -48,6 +48,27 @@ impl CheckerOwner {
         &self.identity
     }
 
+    /// Owns the program for every query and retained result. Its source files
+    /// are already bound; initialization writes only checker-owned state.
+    pub fn for_program(
+        identity: Arc<CheckerIdentity>,
+        counters: &Counters,
+        host: Arc<dyn crate::CheckerHost>,
+    ) -> Result<Self, Error> {
+        let options = host.options();
+        let options = CheckerOptions {
+            strict_null_checks: options.strict_option_value(options.strict_null_checks),
+            exact_optional_property_types: options.exact_optional_property_types.is_true(),
+        };
+        let mut state = CheckerState::new(&identity, counters, options)?;
+        state.program = Some(crate::program::ProgramContext::new(host));
+        state.initialize_program()?;
+        Ok(Self {
+            identity,
+            state: Mutex::new(state),
+        })
+    }
+
     /// Begins an exclusive operation: validates the generation, takes the permit,
     /// then the state. Fails with [`Error::Reentry`] if this thread already holds
     /// an operation on this owner, and with `Retired` once the generation is gone.

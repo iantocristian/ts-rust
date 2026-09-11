@@ -8,7 +8,7 @@ use crate::{
     ValueSymbolLinks,
 };
 use ts_arena::{CheckerIdentity, Counters, NodeId, SymbolArena, SymbolId};
-use ts_ast::{AstBuilder, Symbol, SymbolTables};
+use ts_ast::{AstBuilder, DeclarationLists, Symbol, SymbolTables};
 use ts_jsstring::SourceText;
 
 /// The compiler options the P1 constructors read. `strictNullChecks` and
@@ -21,7 +21,9 @@ pub struct CheckerOptions {
 }
 
 pub(crate) struct CheckerState {
+    pub(crate) counters: Counters,
     pub(crate) options: CheckerOptions,
+    pub(crate) program: Option<crate::program::ProgramContext>,
     /// Checker-owned symbols: merged clones, transient and synthetic symbols.
     /// Its arena identity is the checker identity (`CheckerIdentity::id`).
     pub(crate) symbols: SymbolArena<Symbol>,
@@ -29,6 +31,13 @@ pub(crate) struct CheckerState {
     pub(crate) symbol_count: u32,
     /// Member tables the checker builds; disposed with the owner.
     pub(crate) tables: SymbolTables,
+    pub(crate) declarations: DeclarationLists,
+    pub(crate) merged_symbols: crate::types::Map<SymbolId, SymbolId>,
+    pub(crate) diagnostics: crate::diagnostics::DiagnosticStore,
+    pub(crate) suggestions: crate::diagnostics::DiagnosticStore,
+    pub(crate) serialization_level: u32,
+    pub(crate) query: crate::query::QueryState,
+    pub(crate) source_checks: crate::types::Map<NodeId, crate::check::SourceCheckStatus>,
     pub(crate) types: TypeStore,
     pub(crate) signatures: SignatureStore,
     pub(crate) resolution: ResolutionStack,
@@ -66,10 +75,19 @@ impl CheckerState {
         let symbols = identity.adopt_symbol_arena(counters)?;
         let builtins = Builtins::uninitialized(symbols.id());
         Ok(Self {
+            counters: counters.clone(),
             options,
+            program: None,
             symbols,
             symbol_count: 0,
             tables: SymbolTables::new(counters),
+            declarations: DeclarationLists::new(counters),
+            merged_symbols: crate::types::Map::default(),
+            diagnostics: crate::diagnostics::DiagnosticStore::default(),
+            suggestions: crate::diagnostics::DiagnosticStore::default(),
+            serialization_level: 0,
+            query: crate::query::QueryState::default(),
+            source_checks: crate::types::Map::default(),
             types: TypeStore::new(),
             signatures: SignatureStore::new(),
             resolution: ResolutionStack::new(),
@@ -80,22 +98,16 @@ impl CheckerState {
         })
     }
 
+    #[cfg(test)]
     pub fn symbols(&self) -> &SymbolArena<Symbol> {
         &self.symbols
     }
+    #[cfg(test)]
     pub fn types(&self) -> &TypeStore {
         &self.types
     }
-    pub fn signatures(&self) -> &SignatureStore {
-        &self.signatures
-    }
-    pub fn resolution(&self) -> &ResolutionStack {
-        &self.resolution
-    }
+    #[cfg(test)]
     pub fn resolution_mut(&mut self) -> &mut ResolutionStack {
         &mut self.resolution
-    }
-    pub(crate) fn builtins(&self) -> &Builtins {
-        &self.builtins
     }
 }

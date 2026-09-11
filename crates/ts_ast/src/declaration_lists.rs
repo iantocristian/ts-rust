@@ -279,36 +279,42 @@ impl DeclarationLists {
         slice: DeclarationSlice,
         node: Option<NodeId>,
     ) -> Result<DeclarationSlice, Error> {
+        self.append_all(slice, &[node])
+    }
+
+    /// Append one source slice in a single growth operation. Repeating the
+    /// singleton operation would allocate different intermediate backings and
+    /// can produce a different final capacity from Go's batch append.
+    pub fn append_all(
+        &mut self,
+        slice: DeclarationSlice,
+        values: &[Option<NodeId>],
+    ) -> Result<DeclarationSlice, Error> {
         let old = self.range(slice)?;
-        let len = slice.len.checked_add(1).ok_or(Error::InvalidSlot)?;
-        if slice.len == 0 && slice.capacity == 0 {
-            // A valid zero-capacity header has no elements. Go's first pointer
-            // slice allocation has capacity one, whether its old header was nil.
-            return self.alloc_one(node);
+        if values.is_empty() {
+            return Ok(slice);
         }
+        let added = u32::try_from(values.len()).map_err(|_| Error::InvalidSlot)?;
+        let len = slice.len.checked_add(added).ok_or(Error::InvalidSlot)?;
         if len <= slice.capacity {
             let id = slice.backing.expect("nonzero capacity has backing");
             let backing = self.backings.get(id)?;
             let index = slice.start as usize + slice.len();
-            if index >= backing.capacity as usize {
+            if index + values.len() > backing.capacity as usize {
                 return Err(Error::InvalidSlot);
             }
             let index = backing.start + index;
-            self.observe_node(node);
-            self.pages.set(self.node_arena(), index, node)?;
+            for (offset, &node) in values.iter().enumerate() {
+                self.observe_node(node);
+                self.pages.set(self.node_arena(), index + offset, node)?;
+            }
             return Ok(DeclarationSlice { len, ..slice });
         }
         let capacity = declaration_growth_capacity(len as usize, slice.capacity())?;
-        self.observe_node(node);
-        let arena = self.node_arena();
-        let copied_len = u32::try_from(old.len() + 1).map_err(|_| Error::InvalidSlot)?;
-        if old.is_empty() {
-            let mut first = Some(node);
-            let backing = self
-                .pages
-                .append_iter(arena, (0..capacity).map(|_| first.take().flatten()))?;
-            return Ok(self.allocate_header(backing.start, copied_len, capacity as u32));
+        for &node in values {
+            self.observe_node(node);
         }
+        let arena = self.node_arena();
         // Keep old backing cells observable. Reserve a new full-capacity range,
         // then copy semantic values directly without a transient Vec or box.
         let backing = self.pages.append_iter(arena, (0..capacity).map(|_| None))?;
@@ -319,8 +325,52 @@ impl DeclarationLists {
                 .expect("validated declaration backing cell");
             self.pages.set(arena, backing.start + index, value)?;
         }
-        self.pages.set(arena, backing.start + old.len(), node)?;
-        Ok(self.allocate_header(backing.start, copied_len, capacity as u32))
+        for (offset, &node) in values.iter().enumerate() {
+            self.pages
+                .set(arena, backing.start + old.len() + offset, node)?;
+        }
+        Ok(self.allocate_header(backing.start, len, capacity as u32))
+    }
+
+    /// Append to an imported, capped source header without copying its backing
+    /// until the append is nonempty. `existing` is the source owner's validated
+    /// read of `slice`; this operation never writes into that owner's pages.
+    ///
+    /// An uncapped header is rejected because its next Go append could write
+    /// through shared source capacity. Callers must first restrict capacity to
+    /// length, as `Checker.cloneSymbol` does.
+    pub fn append_imported(
+        &mut self,
+        slice: DeclarationSlice,
+        existing: DeclarationRead<'_>,
+        values: &[Option<NodeId>],
+    ) -> Result<DeclarationSlice, Error> {
+        if existing.len() != slice.len() || slice.capacity() != slice.len() {
+            return Err(Error::InvalidSlot);
+        }
+        if values.is_empty() {
+            return Ok(slice);
+        }
+        let len = slice
+            .len()
+            .checked_add(values.len())
+            .ok_or(Error::InvalidSlot)?;
+        let capacity = declaration_growth_capacity(len, slice.capacity())?;
+        for node in existing.iter().chain(values.iter().copied()) {
+            self.observe_node(node);
+        }
+        let arena = self.node_arena();
+        let backing = self.pages.append_iter(
+            arena,
+            (0..capacity).map(|index| {
+                if index < existing.len() {
+                    existing.at(index)
+                } else {
+                    values.get(index - existing.len()).copied().flatten()
+                }
+            }),
+        )?;
+        Ok(self.allocate_header(backing.start, len as u32, capacity as u32))
     }
     pub fn append_if_unique(
         &mut self,
@@ -468,6 +518,90 @@ mod tests {
         let singleton = lists.alloc_one(Some(first)).unwrap();
         assert_eq!((singleton.len(), singleton.capacity()), (1, 1));
         assert_eq!(lists.get(singleton).unwrap().at(0), Some(first));
+    }
+
+    #[test]
+    fn batch_append_preserves_shared_slack_and_uses_one_new_backing() {
+        let counters = Counters::new();
+        let node = NodeId::from_parts(arena(&counters), 1).unwrap();
+        let mut lists = DeclarationLists::new(&counters);
+        let original = lists.alloc_with_capacity(vec![Some(node)], 4).unwrap();
+        let alias = original.slice(0..4).unwrap();
+        let appended = lists
+            .append_all(original, &[None, Some(node), None])
+            .unwrap();
+        assert_eq!(appended.backing_id(), original.backing_id());
+        assert_eq!(
+            lists.get(alias).unwrap().to_vec(),
+            [Some(node), None, Some(node), None]
+        );
+        let capped = appended.slice_with_capacity(0..4, 4).unwrap();
+        let count = lists.iter().count();
+        let grown = lists.append_all(capped, &[Some(node); 12]).unwrap();
+        assert_eq!(lists.iter().count(), count + 1);
+        assert_eq!((grown.len(), grown.capacity()), (16, 16));
+        assert_ne!(grown.backing_id(), original.backing_id());
+        lists.set(grown, 0, None).unwrap();
+        assert_eq!(lists.get(alias).unwrap().at(0), Some(node));
+    }
+
+    #[test]
+    fn imported_capped_headers_stay_shared_until_nonempty_append() {
+        let counters = Counters::new();
+        let node = NodeId::from_parts(arena(&counters), 1).unwrap();
+        let mut source = DeclarationLists::new(&counters);
+        let mut target = DeclarationLists::new(&counters);
+        let original = source
+            .alloc_with_capacity(vec![Some(node), None], 8)
+            .unwrap();
+        let capped = original.slice_with_capacity(0..2, 2).unwrap();
+        assert_eq!(
+            target
+                .append_imported(capped, source.get(capped).unwrap(), &[])
+                .unwrap(),
+            capped,
+        );
+        assert_eq!(target.iter().count(), 0);
+        let private = target
+            .append_imported(capped, source.get(capped).unwrap(), &[Some(node); 6])
+            .unwrap();
+        assert_eq!(target.iter().count(), 1);
+        assert_eq!((private.len(), private.capacity()), (8, 8));
+        assert_eq!(
+            target.get(private).unwrap().to_vec(),
+            [
+                Some(node),
+                None,
+                Some(node),
+                Some(node),
+                Some(node),
+                Some(node),
+                Some(node),
+                Some(node)
+            ]
+        );
+        target.set(private, 0, None).unwrap();
+        assert_eq!(source.get(original).unwrap().at(0), Some(node));
+        assert_eq!(
+            target.append_imported(original, source.get(original).unwrap(), &[None]),
+            Err(Error::InvalidSlot)
+        );
+        let nil = DeclarationSlice::empty();
+        assert!(target
+            .append_imported(nil, source.get(nil).unwrap(), &[])
+            .unwrap()
+            .is_nil());
+        let empty = source.alloc(Vec::new()).unwrap();
+        assert_eq!(
+            target
+                .append_imported(empty, source.get(empty).unwrap(), &[])
+                .unwrap(),
+            empty
+        );
+        let singleton = target
+            .append_imported(nil, source.get(nil).unwrap(), &[None])
+            .unwrap();
+        assert_eq!((singleton.len(), singleton.capacity()), (1, 1));
     }
 
     #[test]

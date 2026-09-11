@@ -93,6 +93,10 @@ pub enum LiteralValue {
     Boolean(bool),
     BigInt(PseudoBigInt),
     /// A computed enum member whose value is not known.
+    #[allow(
+        dead_code,
+        reason = "P4 computed enum literal; retained in the P1 literal schema"
+    )]
     ComputedEnum,
 }
 
@@ -112,6 +116,13 @@ pub struct LiteralData {
 
 #[derive(Debug)]
 pub struct UniqueEsSymbolData {
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P4 unique-symbol display name; the P1 census charges its owned bytes"
+        )
+    )]
     pub name: JsString,
 }
 
@@ -119,6 +130,13 @@ pub struct UniqueEsSymbolData {
 /// shared by object, union and intersection types.
 #[derive(Debug, Default)]
 pub struct StructuredMembers {
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 constraint resolution link; the P1 census retains and charges its reachability"
+        )
+    )]
     pub resolved_base_constraint: Option<TypeId>,
     pub members: Option<SymbolTableId>,
     pub properties: Option<SymbolList>,
@@ -126,6 +144,13 @@ pub struct StructuredMembers {
     pub signatures: Option<SignatureList>,
     pub call_signature_count: u32,
     pub index_infos: Option<IndexInfoList>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 abstract-constructor filtering link; the P1 census tracks its reachability"
+        )
+    )]
     pub object_type_without_abstract_construct_signatures: Option<TypeId>,
 }
 
@@ -154,15 +179,58 @@ pub struct InterfaceData {
     pub reference: ReferenceData,
     /// Type parameters (outer + local + thisType).
     pub all_type_parameters: Option<TypeList>,
+    #[allow(
+        dead_code,
+        reason = "P3 outer type-parameter partition; retained in the P1 interface record layout"
+    )]
     pub outer_type_parameter_count: u32,
     pub this_type: Option<TypeId>,
+    #[allow(
+        dead_code,
+        reason = "P3 base-type resolution state; retained in the P1 interface record layout"
+    )]
     pub base_types_resolved: bool,
     pub declared_members_resolved: bool,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 base-constructor resolution link; the P1 census tracks its reachability"
+        )
+    )]
     pub resolved_base_constructor_type: Option<TypeId>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 interface base-type list; the P1 census charges its allocation and reachability"
+        )
+    )]
     pub resolved_base_types: Option<TypeList>,
     pub declared_members: Option<SymbolTableId>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 interface call signatures; the P1 census charges the retained list"
+        )
+    )]
     pub declared_call_signatures: Option<SignatureList>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 interface construct signatures; the P1 census charges the retained list"
+        )
+    )]
     pub declared_construct_signatures: Option<SignatureList>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 interface index information; the P1 census charges the retained list"
+        )
+    )]
     pub declared_index_infos: Option<IndexInfoList>,
 }
 
@@ -171,24 +239,6 @@ impl InterfaceData {
     pub fn type_parameters(&self) -> &[TypeId] {
         match &self.all_type_parameters {
             Some(all) if !all.is_empty() => &all[..all.len() - 1],
-            _ => &[],
-        }
-    }
-
-    // port: tsc/internal/checker/types.go:InterfaceType.OuterTypeParameters
-    pub fn outer_type_parameters(&self) -> &[TypeId] {
-        match &self.all_type_parameters {
-            Some(all) if !all.is_empty() => &all[..self.outer_type_parameter_count as usize],
-            _ => &[],
-        }
-    }
-
-    // port: tsc/internal/checker/types.go:InterfaceType.LocalTypeParameters
-    pub fn local_type_parameters(&self) -> &[TypeId] {
-        match &self.all_type_parameters {
-            Some(all) if !all.is_empty() => {
-                &all[self.outer_type_parameter_count as usize..all.len() - 1]
-            }
             _ => &[],
         }
     }
@@ -239,8 +289,23 @@ pub struct TupleData {
 #[derive(Debug, Default)]
 pub struct UnionOrIntersectionMembers {
     pub structured: StructuredMembers,
+    #[allow(
+        dead_code,
+        reason = "P3 union/intersection property cache; retained in the P1 record layout"
+    )]
     pub property_cache: Option<SymbolTableId>,
+    #[allow(
+        dead_code,
+        reason = "P3 property-augmentation cache; retained in the P1 record layout"
+    )]
     pub property_cache_without_function_property_augment: Option<SymbolTableId>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 union/intersection property list; the P1 census charges the retained list"
+        )
+    )]
     pub resolved_properties: Option<SymbolList>,
 }
 
@@ -249,13 +314,34 @@ pub struct UnionOrIntersectionMembers {
 pub struct UnionData {
     pub common: UnionOrIntersectionMembers,
     pub types: TypeList,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 union reduction link; the P1 census retains and charges its reachability"
+        )
+    )]
     pub resolved_reduced_type: Option<TypeId>,
     pub regular_type: Option<TypeId>,
     /// Denormalized union, intersection or index type in which the union originates.
     pub origin: Option<TypeId>,
     /// Property with unique unit type that exists in every object/intersection in the union.
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 discriminant-property cache; the P1 census charges its owned bytes"
+        )
+    )]
     pub key_property_name: Option<JsString>,
     /// Constituents keyed by unit type discriminants.
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 discriminant-constituent cache; the P1 census charges its allocation and reachability"
+        )
+    )]
     pub constituent_map: Option<Box<Map<TypeId, TypeId>>>,
 }
 
@@ -264,24 +350,59 @@ pub struct UnionData {
 pub struct IntersectionData {
     pub common: UnionOrIntersectionMembers,
     pub types: TypeList,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 intersection apparent-type link; the P1 census tracks its reachability"
+        )
+    )]
     pub resolved_apparent_type: Option<TypeId>,
     /// Instantiation with type parameters mapped to the never type.
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 intersection instantiation link; the P1 census tracks its reachability"
+        )
+    )]
     pub unique_literal_filled_instantiation: Option<TypeId>,
 }
 
 /// `TypeParameter`. The type mapper arrives with instantiation (P3).
 #[derive(Debug, Default)]
 pub struct TypeParameterData {
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 constraint resolution link; the P1 census retains and charges its reachability"
+        )
+    )]
     pub resolved_base_constraint: Option<TypeId>,
     pub constraint: Option<TypeId>,
     pub target: Option<TypeId>,
     pub is_this_type: bool,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 generic default-type link; the P1 census tracks its reachability"
+        )
+    )]
     pub resolved_default_type: Option<TypeId>,
 }
 
 /// `TemplateLiteralType`: `texts` is always one longer than `types`.
 #[derive(Debug)]
 pub struct TemplateLiteralData {
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 constraint resolution link; the P1 census retains and charges its reachability"
+        )
+    )]
     pub resolved_base_constraint: Option<TypeId>,
     pub texts: Arc<[JsString]>,
     pub types: TypeList,
@@ -292,12 +413,20 @@ pub struct TemplateLiteralData {
 pub(crate) enum Payload {
     Intrinsic(IntrinsicData),
     Literal(LiteralData),
+    #[allow(
+        dead_code,
+        reason = "P4 unique-symbol constructor; the P1 census retains this payload family"
+    )]
     UniqueEsSymbol(UniqueEsSymbolData),
     Anonymous(ObjectData),
     Reference(ReferenceData),
     Interface(InterfaceData),
     Tuple(TupleData),
     Union(UnionData),
+    #[allow(
+        dead_code,
+        reason = "P3 intersection constructor; the P1 census retains this payload family"
+    )]
     Intersection(IntersectionData),
     TypeParameter(TypeParameterData),
     TemplateLiteral(TemplateLiteralData),
@@ -337,6 +466,13 @@ pub struct TypeCaches {
     pub union_types: Map<CacheKey, TypeId>,
     pub union_of_union_types: Map<UnionOfUnionKey, TypeId>,
     pub tuple_types: Map<CacheKey, TypeId>,
+    #[cfg_attr(
+        not(any(test, feature = "storage-pilot")),
+        allow(
+            dead_code,
+            reason = "P3 intersection interning cache; the P1 census charges its allocation and reachability"
+        )
+    )]
     pub intersection_types: Map<CacheKey, TypeId>,
     pub template_literal_types: Map<CacheKey, TypeId>,
 }
@@ -370,7 +506,8 @@ fn row(row: u32) -> usize {
 }
 
 macro_rules! payload_accessors {
-    ($get:ident, $get_mut:ident, $table:ident, $kind:ident, $data:ty) => {
+    (read $(#[$attr:meta])* $get:ident, $table:ident, $kind:ident, $data:ty) => {
+        $(#[$attr])*
         pub fn $get(&self, id: TypeId) -> Result<&$data, Error> {
             let record = self.get(id)?;
             if record.kind != TypeKind::$kind {
@@ -382,6 +519,8 @@ macro_rules! payload_accessors {
             self.$table.get(row(record.payload_row)).ok_or_else(invalid)
         }
 
+    };
+    (write $get_mut:ident, $table:ident, $kind:ident, $data:ty) => {
         pub fn $get_mut(&mut self, id: TypeId) -> Result<&mut $data, Error> {
             let record = *self.get(id)?;
             if record.kind != TypeKind::$kind {
@@ -415,14 +554,6 @@ impl TypeStore {
     /// Types created so far (`Checker.TypeCount`).
     pub fn len(&self) -> usize {
         self.records.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.records.is_empty()
-    }
-
-    pub fn alias_count(&self) -> usize {
-        self.aliases.len()
     }
 
     /// The id the next `new_type` call will issue.
@@ -535,59 +666,23 @@ impl TypeStore {
             .transpose()
     }
 
+    payload_accessors!(read intrinsic, intrinsics, Intrinsic, IntrinsicData);
+    payload_accessors!(read literal, literals, Literal, LiteralData);
+    payload_accessors!(write literal_mut, literals, Literal, LiteralData);
+    payload_accessors!(read tuple, tuples, Tuple, TupleData);
+    payload_accessors!(write tuple_mut, tuples, Tuple, TupleData);
+    payload_accessors!(read union, unions, Union, UnionData);
+    payload_accessors!(write union_mut, unions, Union, UnionData);
     payload_accessors!(
-        intrinsic,
-        intrinsic_mut,
-        intrinsics,
-        Intrinsic,
-        IntrinsicData
-    );
-    payload_accessors!(literal, literal_mut, literals, Literal, LiteralData);
-    payload_accessors!(
-        unique_es_symbol,
-        unique_es_symbol_mut,
-        unique_symbols,
-        UniqueEsSymbol,
-        UniqueEsSymbolData
-    );
-    payload_accessors!(anonymous, anonymous_mut, anonymous, Anonymous, ObjectData);
-    payload_accessors!(
-        reference,
-        reference_mut,
-        references,
-        Reference,
-        ReferenceData
+        read #[cfg(any(test, feature = "storage-pilot"))]
+        intersection, intersections, Intersection, IntersectionData
     );
     payload_accessors!(
-        interface_data,
-        interface_data_mut,
-        interfaces,
-        Interface,
-        InterfaceData
+        read #[cfg(any(test, feature = "storage-pilot"))]
+        type_parameter, type_parameters, TypeParameter, TypeParameterData
     );
-    payload_accessors!(tuple, tuple_mut, tuples, Tuple, TupleData);
-    payload_accessors!(union, union_mut, unions, Union, UnionData);
-    payload_accessors!(
-        intersection,
-        intersection_mut,
-        intersections,
-        Intersection,
-        IntersectionData
-    );
-    payload_accessors!(
-        type_parameter,
-        type_parameter_mut,
-        type_parameters,
-        TypeParameter,
-        TypeParameterData
-    );
-    payload_accessors!(
-        template_literal,
-        template_literal_mut,
-        template_literals,
-        TemplateLiteral,
-        TemplateLiteralData
-    );
+    payload_accessors!(write type_parameter_mut, type_parameters, TypeParameter, TypeParameterData);
+    payload_accessors!(read template_literal, template_literals, TemplateLiteral, TemplateLiteralData);
 
     /// `Type.AsObjectType()`: the `ObjectType` part of any object kind.
     pub fn object(&self, id: TypeId) -> Result<&ObjectData, Error> {
@@ -608,7 +703,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsObjectType",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -632,7 +727,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsObjectType",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -651,7 +746,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsTypeReference",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -674,7 +769,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsTypeReference",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -691,7 +786,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsInterfaceType",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -707,7 +802,7 @@ impl TypeStore {
                 return Err(Error::UnexpectedType {
                     context: "AsInterfaceType",
                     kind,
-                })
+                });
             }
         }
         .ok_or_else(invalid)
@@ -771,7 +866,7 @@ impl TypeStore {
             TypeKind::Index | TypeKind::StringMapping => {
                 return Err(Error::Unsupported(
                     "Type.Target for index and string mapping types",
-                ))
+                ));
             }
             _ => return Ok(id),
         };

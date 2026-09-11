@@ -267,7 +267,6 @@ impl CheckerState {
         construct_signatures: &[SignatureId],
         index_infos: &[IndexInfoId],
     ) -> Result<(), Error> {
-        self.types.get_mut(t)?.object_flags |= object_flags::MEMBERS_RESOLVED;
         let container = self.types.get(t)?.symbol;
         let properties = self.get_named_members(members, container)?;
         let data = self.types.structured_mut(t)?;
@@ -287,6 +286,9 @@ impl CheckerState {
         } else {
             Some(Arc::from(index_infos))
         };
+        // An unsupported member read must not leave the completion bit set:
+        // a later query would otherwise skip the same unfinished operation.
+        self.types.get_mut(t)?.object_flags |= object_flags::MEMBERS_RESOLVED;
         Ok(())
     }
 
@@ -301,13 +303,14 @@ impl CheckerState {
         let Some(members) = members else {
             return Ok(None);
         };
-        let table = self.tables.get(members)?;
+        let table = self.table(members)?;
         if table.is_empty() {
             return Ok(None);
         }
         let container_is_class_like = match container {
             Some(container) => {
-                self.symbol(container)?.flags & (symbol_flags::CLASS | symbol_flags::INTERFACE) != 0
+                self.symbol(container)?.flags() & (symbol_flags::CLASS | symbol_flags::INTERFACE)
+                    != 0
             }
             None => false,
         };
@@ -361,7 +364,7 @@ impl CheckerState {
         symbol: SymbolId,
         _include_type_only_members: bool,
     ) -> Result<bool, Error> {
-        let flags = self.symbol(symbol)?.flags;
+        let flags = self.symbol(symbol)?.flags();
         if flags & symbol_flags::VALUE != 0 {
             return Ok(true);
         }
@@ -371,14 +374,21 @@ impl CheckerState {
         Ok(false)
     }
 
-    /// Needs declaration locations, which arrive with the checker's node reads (P2).
+    // port: tsc/internal/checker/checker.go:Checker.isDeclarationContainedBy
     fn is_declaration_contained_by(
         &self,
         symbol: SymbolId,
-        _container: SymbolId,
+        container: SymbolId,
     ) -> Result<bool, Error> {
-        if self.symbol(symbol)?.value_declaration.is_some() {
-            return Err(Error::Unsupported("isDeclarationContainedBy"));
+        if let Some(declaration) = self.symbol(symbol)?.value_declaration() {
+            let node = self.ast(declaration)?.node(declaration)?;
+            for declaration in self.symbol_declarations(container)?.iter().flatten() {
+                let containing = self.ast(declaration)?.node(declaration)?;
+                // Source compares ranges, without an extra same-file condition.
+                if node.pos() >= containing.pos() && node.end() <= containing.end() {
+                    return Ok(true);
+                }
+            }
         }
         Ok(false)
     }
@@ -481,7 +491,7 @@ impl CheckerState {
                     self.value_symbol_links
                         .get_or_default(property)
                         .resolved_type = Some(type_parameter);
-                    let name = self.symbol(property)?.name.clone();
+                    let name = self.symbol(property)?.name_to_owned();
                     members.insert(name, Some(property));
                 }
             }

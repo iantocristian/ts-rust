@@ -1,15 +1,12 @@
 use crate::Error;
-use ts_ast::{AstView, ExternalModuleIndicatorOptions, NodeDataRead, NodeId, SyntaxKind as K};
+use ts_ast::{
+    AstView, ExternalModuleIndicatorOptions, NodeDataRead, NodeId, SourceFileMetaData,
+    SyntaxKind as K,
+};
 use ts_core::{CompilerOptions, JsxEmit, ModuleDetectionKind, ModuleKind, ModuleResolutionKind};
 use ts_jsstring::JsString;
 use ts_module::Resolver;
 use ts_tspath as path;
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct SourceFileMetaData {
-    pub package_json_type: JsString,
-    pub package_json_directory: JsString,
-    pub implied_node_format: ModuleKind,
-}
 pub(crate) fn load(
     resolver: &mut Resolver,
     name: &[u8],
@@ -71,6 +68,95 @@ pub(crate) fn implied_for_emit(
         return ModuleKind::ESNEXT;
     }
     ModuleKind::NONE
+}
+
+/// port: tsc/internal/ast/utilities.go:GetEmitModuleFormatOfFileWorker
+pub(crate) fn emit_format(
+    name: &[u8],
+    options: &CompilerOptions,
+    meta: &SourceFileMetaData,
+) -> ModuleKind {
+    let implied = implied_for_emit(name, options.emit_module_kind(), meta);
+    if implied == ModuleKind::NONE {
+        options.emit_module_kind()
+    } else {
+        implied
+    }
+}
+
+/// This describes emitted syntax, independent of resolution-mode attributes and
+/// the module resolver's mode selection.
+/// port: tsc/internal/compiler/fileloader.go:getEmitSyntaxForUsageLocationWorker
+pub(crate) fn emit_syntax(
+    view: AstView<'_>,
+    name: &[u8],
+    meta: &SourceFileMetaData,
+    usage: NodeId,
+    options: &CompilerOptions,
+) -> Result<ModuleKind, ts_arena::Error> {
+    let node = view.node(usage)?;
+    if !matches!(
+        node.kind().known(),
+        Some(K::StringLiteral | K::NoSubstitutionTemplateLiteral)
+    ) {
+        return Err(ts_arena::Error::InvalidGraph);
+    }
+    let parent = node.parent().ok_or(ts_arena::Error::InvalidGraph)?;
+    let parent_node = view.node(parent)?;
+    let import_equals = if parent_node.kind() == K::ExternalModuleReference {
+        parent_node
+            .parent()
+            .map(|id| {
+                view.node(id)
+                    .map(|node| node.kind() == K::ImportEqualsDeclaration)
+            })
+            .transpose()?
+            .unwrap_or(false)
+    } else {
+        false
+    };
+    if ts_ast::utilities_middle::is_require_call(view, &parent_node, false)? || import_equals {
+        return Ok(ModuleKind::COMMON_JS);
+    }
+    let emit = emit_format(name, options, meta);
+    let expression_parent =
+        ts_ast::utilities::walk_up_parenthesized_expressions(view, Some(parent))?
+            .ok_or(ts_arena::Error::InvalidGraph)?;
+    let expression_parent = view.node(expression_parent)?;
+    let import_call = if let NodeDataRead::CallExpression(call) = expression_parent.data() {
+        let expression = call.expression().ok_or(ts_arena::Error::InvalidGraph)?;
+        let expression_node = view.node(expression)?;
+        expression_node.kind() == K::ImportKeyword
+            || if let NodeDataRead::MetaProperty(meta) = expression_node.data() {
+                meta.keyword_token() == K::ImportKeyword
+                    && view.node_text(expression)?.as_bytes() == b"defer"
+            } else {
+                false
+            }
+    } else {
+        false
+    };
+    if import_call {
+        // port: tsc/internal/ast/utilities.go:ShouldTransformImportCall
+        let module = options.emit_module_kind();
+        return Ok(
+            if !(ModuleKind::NODE16..=ModuleKind::NODE_NEXT).contains(&module)
+                && module != ModuleKind::PRESERVE
+                && emit < ModuleKind::ES2015
+            {
+                ModuleKind::COMMON_JS
+            } else {
+                ModuleKind::ESNEXT
+            },
+        );
+    }
+    Ok(if emit == ModuleKind::COMMON_JS {
+        ModuleKind::COMMON_JS
+    } else if emit.is_non_node_esm() || emit == ModuleKind::PRESERVE {
+        ModuleKind::ESNEXT
+    } else {
+        ModuleKind::NONE
+    })
 }
 /// port: tsc/internal/ast/parseoptions.go:GetExternalModuleIndicatorOptions
 pub(crate) fn indicator(

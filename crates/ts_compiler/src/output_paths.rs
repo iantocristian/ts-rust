@@ -81,16 +81,27 @@ pub(crate) fn source_in_new_directory(
 }
 /// port: tsc/internal/compiler/emitter.go:sourceFileMayBeEmitted
 pub(crate) fn may_emit(file: &ProgramFile, program: &Program) -> Result<bool, Error> {
+    Ok(may_emit_with_force_dts(file, program, false)?)
+}
+
+pub(crate) fn may_emit_with_force_dts(
+    file: &ProgramFile,
+    program: &Program,
+    force_dts_emit: bool,
+) -> Result<bool, ts_arena::Error> {
     let source = file.bound().view().source_file()?;
     let options = program.options();
     if options.no_emit_for_js_files.is_true() && source.is_js() || source.is_declaration_file {
         return Ok(false);
     }
-    if !source.content_mapper().is_empty() && !options.emit_declarations() {
+    if !source.content_mapper().is_empty() && !force_dts_emit && !options.emit_declarations() {
         return Ok(false);
     }
     if program.is_external_library(source.parse_options().path.as_bytes()) {
         return Ok(false);
+    }
+    if force_dts_emit {
+        return Ok(true);
     }
     // Project-reference and mapper execution are excluded by the S07 operation
     // boundary before a Program is constructed; no reference redirect is hidden.

@@ -8,17 +8,12 @@ use crate::Error;
 use std::num::NonZeroU32;
 
 macro_rules! local_id {
-    ($name:ident, $doc:literal) => {
+    ($name:ident, $doc:literal $(, #[$index_attr:meta])*) => {
         #[doc = $doc]
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
         #[repr(transparent)]
         pub struct $name(NonZeroU32);
         impl $name {
-            /// The upstream numeric id; only for display, ordering fallbacks and
-            /// diagnostics, never for reconstructing a handle elsewhere.
-            pub fn get(self) -> u32 {
-                self.0.get()
-            }
             pub(crate) fn new(value: u32) -> Option<Self> {
                 NonZeroU32::new(value).map(Self)
             }
@@ -33,6 +28,7 @@ macro_rules! local_id {
                     .ok_or(Error::IdExhausted)
             }
             /// The record index for a store whose ids start above `base`.
+            $(#[$index_attr])*
             pub(crate) fn index(self, base: u32) -> Option<usize> {
                 self.0
                     .get()
@@ -55,9 +51,24 @@ local_id!(
 local_id!(AliasId, "A `TypeAlias` record in one checker's type store.");
 local_id!(
     IndexInfoId,
-    "An `IndexInfo` record in one checker's signature store."
+    "An `IndexInfo` record in one checker's signature store.",
+    #[cfg(any(test, feature = "storage-pilot"))]
 );
 local_id!(
     TypePredicateId,
-    "A `TypePredicate` record in one checker's signature store."
+    "A `TypePredicate` record in one checker's signature store.",
+    #[cfg(any(test, feature = "storage-pilot"))]
 );
+
+impl TypeId {
+    /// The upstream numeric id, never a cross-checker ownership handle.
+    pub fn get(self) -> u32 {
+        self.0.get()
+    }
+}
+impl SignatureId {
+    /// The upstream numeric id, never a cross-checker ownership handle.
+    pub fn get(self) -> u32 {
+        self.0.get()
+    }
+}
