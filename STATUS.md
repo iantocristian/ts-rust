@@ -264,7 +264,7 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 | oracle | current | [result](status/evidence/087049288e769f42de71aeab0228772c9ee2695359597af760055afdeb01f1db.json) |
 | program | current | [result](status/evidence/4bb29fc53082d6c4067cdaa9ce3cd8852ab5867aa9d4803f7ba50a36509dd0fd.json) |
 | scanner | stale: source, pin, command or inputs changed | [result](status/evidence/892280d5dbaf40c6508d7e4e3d3182fee73a260b3d58fdb422a5f978a9dc6fc5.json) |
-| selftest | current | [result](status/evidence/87c8583c0ad0ca1e1e8c932b2d7c6916a0171582af07c2a6bd4827357cfe2195.json) |
+| selftest | current | [result](status/evidence/c47146285285f3e563e94d2ebc2167f4a429b7ced6dcb7375da66bf1252dc374.json) |
 | workspace | current | [result](status/evidence/aede797a622ef7d919caae40f290f25ad24c25c70a118a5d81665081cf0459bd.json) |
 
 ## Sprints

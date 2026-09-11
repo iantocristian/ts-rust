@@ -1,0 +1,89 @@
+{
+  "acceptance_variants": 9369,
+  "allocation": "Separate allocation executable with the identical schedule; per-variant requested-byte/call deltas include growth, temporary lists, diagnostics, node building and printing. Checkpoint before result drop. Sum raw endpoints/deltas over the fixed variants; observer allocation is outside instrumented intervals.",
+  "driver": "Serial variant order from the acceptance partition. Prepare and bind each variant before its checker interval, retain its bound roots and escaping outputs through that variant checkpoint, then release before preparing the next. Sum per-variant checker intervals for one full-workload sample; do not retain all programs concurrently or pool checker state across variants.",
+  "excluded": [
+    "loading, parsing, binding and input validation",
+    "request decoding and archive decompression",
+    "JSON transport, digest calculation and baseline decorations",
+    "post-window census, explicit GC and result/owner teardown"
+  ],
+  "gates": "Measurement presence/domain only. No new numerical checker performance target. Positive finite throughput and positive usable Go byte denominators are mandatory; valid unfavorable results are reported.",
+  "inputs": {
+    "data/s07/e2-acceptance.json": "5c42e555ddaa6eaef03b8f718d84d7cb40bb3c2148e861c8e7a3cbeedce0593d",
+    "data/s07/subset.json": "8539ce8af2f0cd5245554114e8d257805fe266e46fcabbb4ac220d5bcd2c4f2a",
+    "data/s08/baseline-requests.json": "b348aed7bd34fa8fdfe2c579204ed0340ed6887c7fd0e58f77f791d97ca11f89"
+  },
+  "operations": [
+    "native checker construction at original acquisition points",
+    "requested program, syntactic, semantic, suggestion and declaration diagnostics in native order",
+    "every frozen walker type/symbol query and type-node/symbol display call",
+    "capture complete result bytes and diagnostics through production checker/builder/printer"
+  ],
+  "output": "Retain produced bytes/results inside the measured work; hash them outside the interval and verify exact ordered action counts and outcome contracts. Missing, extra, skipped, not-implemented, timed-out and panicking required work invalidate the sample; NoContent is accepted only where Go observed it. Rust gaps are not a reduced workload.",
+  "phase_authority": "baseline-requests.json and pinned harness CompileFiles/GetPreEmitDiagnostics/DoTypeAndSymbolBaseline; retain native ordering and per-file checker acquisition",
+  "phase_timer": "Diagnostic executable uses nested exclusive clocks for initialization, checking/query and display. Child display time is subtracted from the enclosing query clock; sums must match the enclosing checker interval within timer overhead. Include declaration diagnostics in checking. Normal timing binary has no observer or allocation tracking.",
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "prerequisite": "Full graph, baseline, ownership and text parity; the scaffold and storage pilot are ineligible.",
+  "provenance": [
+    "pin and exact source snapshot digests",
+    "input/partition/query/methodology/divergence digests",
+    "effective options and ordered loaded-file identities",
+    "normal, phase and allocation executable paths/SHA256 and build commands",
+    "toolchain/runtime/allocator identity and host configuration",
+    "raw samples, endpoint counters, outcomes and per-sample output digests"
+  ],
+  "query_schedule": "query-contract.json (deterministic projection of the authenticated native archive)",
+  "ratios": {
+    "allocated_bytes": "Rust / Go",
+    "elapsed": "Rust / Go, <1 faster",
+    "retained_bytes": "Rust / Go",
+    "throughput": "Rust / Go, >1 faster"
+  },
+  "retained": "At each variant: keep identical bound roots and query outputs through before/after endpoints; explicit Go GC outside timing, Rust temporary drop before after-endpoint. Record raw runtime endpoints and structural census; baseline subtraction is valid only with identical still-live inputs and positive usable Go delta. Negative/zero Go denominator yields unavailable.",
+  "sampling": {
+    "host": "one designated quiet native host, never hosted CI for timing; record OS/arch, CPU, memory, allocator and load",
+    "measured_order": [
+      [
+        "Go",
+        "Rust"
+      ],
+      [
+        "Rust",
+        "Go"
+      ],
+      [
+        "Go",
+        "Rust"
+      ],
+      [
+        "Rust",
+        "Go"
+      ],
+      [
+        "Go",
+        "Rust"
+      ],
+      [
+        "Rust",
+        "Go"
+      ],
+      [
+        "Go",
+        "Rust"
+      ]
+    ],
+    "measured_samples_per_runtime": 7,
+    "processes": "one fresh process per runtime sample; identical fixed work, no within-process arbitrary repeats",
+    "stability": "Report coefficient of variation and max/min of full-workload elapsed plus raw samples. Flag max/min > 1.10 as unstable; keep the completed batch and disclose the flag. No automatic retry/extension or selective sample removal.",
+    "statistic": "median of seven complete per-runtime sample totals; throughput is completed fixed work / summed checker seconds",
+    "warmup_order": [
+      "Go",
+      "Rust"
+    ],
+    "warmups_per_runtime": 1,
+    "workers": 1
+  },
+  "scope": "P0 execution contract; no Rust completion or measurement result",
+  "version": 1
+}

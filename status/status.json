@@ -16,8 +16,8 @@
       "S04_RUSTUP_HOME": ""
     },
     "host": "macos-aarch64",
-    "revision": "051aad6d51d3aeec83bec0f853abecaf36fa6fe5",
-    "source_sha256": "c62bd5684b34e2cb8451999f115b67aba951c4bb1792d432ddd6ca58b7a0be67",
+    "revision": "1babca08bbb6225105f2f8d842830e318ebaafe1",
+    "source_sha256": "247c4de0dc6b65501afa94f6d9953300fe2354f7c3f8ac6f41e744053cec93fc",
     "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
     "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1"
   },
@@ -38,7 +38,7 @@
     "oracle": "status/evidence/087049288e769f42de71aeab0228772c9ee2695359597af760055afdeb01f1db.json",
     "program": "status/evidence/4bb29fc53082d6c4067cdaa9ce3cd8852ab5867aa9d4803f7ba50a36509dd0fd.json",
     "scanner": "status/evidence/892280d5dbaf40c6508d7e4e3d3182fee73a260b3d58fdb422a5f978a9dc6fc5.json",
-    "selftest": "status/evidence/87c8583c0ad0ca1e1e8c932b2d7c6916a0171582af07c2a6bd4827357cfe2195.json",
+    "selftest": "status/evidence/c47146285285f3e563e94d2ebc2167f4a429b7ced6dcb7375da66bf1252dc374.json",
     "workspace": "status/evidence/aede797a622ef7d919caae40f290f25ad24c25c70a118a5d81665081cf0459bd.json"
   },
   "evidence_states": {

@@ -1,0 +1,70 @@
+{
+  "coverage": "21 source fixtures, five separate relation caches, cold A→B, immediate repeated A→B, B→A, A→A; full diagnostics, native ternaries and observed before/after state",
+  "endpoints": "Setup includes source semantic graph and per-mode checker creation; relation interval begins before first cold action and includes all four actions/lazy resolution. Separate setup/relation requested traffic and live backing. Keep graph/results alive at after-checkpoints; raw before/after endpoint recording is mandatory.",
+  "execution": "Fresh checker per mode, source types resolved immediately before that group, no display/diagnostics prewarming. Build required generic, signature and lazy member machinery; relations that create types must create them during the operation. Display and independent diagnostic validation follow, outside relation timing.",
+  "forbidden": [
+    "precomputed relation matrix",
+    "delegation to production relater",
+    "sealing/pre-resolving lazy graphs to bypass relation allocations",
+    "new unsafe, lifetime transmute or leaked graph storage"
+  ],
+  "implementations": [
+    "production ID and &mut self relater",
+    "tools/s08/relater-prototype: isolated stable arena reference/interior mutability algorithm"
+  ],
+  "observation_source": "supplemental-observations.json.xz",
+  "pin": "1f70213d4922b434345f639b441681e470c7cfc1",
+  "proof": "P1 records safe construction and mutation scopes, retained graph/result ownership and failure behavior before building the full reference alternative.",
+  "ratios": {
+    "allocated_bytes": "reference / ID",
+    "elapsed": "reference / ID",
+    "retained_bytes": "reference / ID",
+    "throughput": "reference prototype / ID implementation, >1 faster"
+  },
+  "request_sha256": "c67e2dd0c3145df36a98682382be4a5093893b875a2fdf2afd65bfa22c82cea1",
+  "request_source": "tools/s08/contracts/relations.json",
+  "sampling": {
+    "fixed_work": "one ordered pass of all fixture/mode groups per fresh process; aggregate separately measured setup and relation intervals. If timer resolution is inadequate, report unavailable and review a protocol amendment before collecting comparison results; no result-dependent repeat count.",
+    "measured_order": [
+      [
+        "ID",
+        "reference"
+      ],
+      [
+        "reference",
+        "ID"
+      ],
+      [
+        "ID",
+        "reference"
+      ],
+      [
+        "reference",
+        "ID"
+      ],
+      [
+        "ID",
+        "reference"
+      ],
+      [
+        "reference",
+        "ID"
+      ],
+      [
+        "ID",
+        "reference"
+      ]
+    ],
+    "measured_samples_per_runtime": 7,
+    "stability": "Same max/min > 1.10 flag and complete-batch retention as checker-workload.json; no selective omission or automatic extension",
+    "warmup_order": [
+      "ID",
+      "reference"
+    ],
+    "warmups_per_runtime": 1
+  },
+  "scope": "Supplemental isolated relater contract; never changes E2 primary denominator",
+  "state_comparison": "Boolean and ternary outcomes, ordered diagnostics, cache flag multisets and cold/repeat allocation/resolution transitions. Do not compare raw native TypeIds. Native type/signature/instantiation counts are semantic diagnostic expectations; explain any representation-only count difference explicitly rather than normalizing it silently.",
+  "verdict": "Parity first, then one complete measured comparison. An unfavorable valid result meets the experiment obligation, but does not authorize production promotion.",
+  "version": 1
+}

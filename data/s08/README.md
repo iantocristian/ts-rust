@@ -52,8 +52,41 @@ The 34 native option rejections remain explicit failures in that tier.
 Checkpoint results, including the unusable first Go retained-memory endpoint,
 are documented in `docs/S08-P0-P1.md` and archived under `tools/s08/results/`.
 
-Planned additions, each frozen at P0 before any Rust result exists (plan §§5–6):
-`type-footprint.json` (census membership and sharing rules), `checker-workload.json`
-(the fixed query schedule for `checkerbench`), `relater-fixtures.json`, the
-node-level baseline/query schedule beyond the phase manifest above, and
-`ownership-cases.json` for the checker-merge E3 scenarios.
+P0 is complete; see [the checkpoint record](../../docs/S08-P0-completion.md).
+The additional frozen artifacts are:
+
+| File | Contract |
+| --- | --- |
+| `p0-contract.json` | Exact artifact/source fingerprints and derived counts; no sprint metric |
+| `dependency-closure.json.xz`, `dependency-closure-report.json` | Dictionary-encoded typed conservative closure, audit target and native source identities |
+| `dependency-audit.json` | All 675 S07 obligation IDs, 134 interface members, source homes and 77 reviewed static boundary sites |
+| `query-contract.json` | 1,438,509 ordered acceptance actions projected from the authenticated existing archive; derived schedule stays under `target/` |
+| `supplemental-observations.json.xz`, `supplemental-report.json` | Original native relations/state, diagnostics, comparator residuals and printer bytes |
+| `type-footprint.json` | Exact census membership, logical type denominator and shared-allocation attribution; 0.80 unchanged |
+| `checker-workload.json` | Fixed acceptance work, lifecycle, phase/allocator endpoints and sampling |
+| `relater-fixtures.json` | Cold/repeated stateful relation workload and reference/ID comparison protocol |
+| `ownership-fixtures.json` | Rust design/recursion scenarios, pending production execution; P2 suppression debt |
+
+```sh
+# Verify frozen contracts from existing archives, with no baseline recapture.
+python3 scripts/s08_p0.py check --output target/s08/p0-check
+# Also independently regenerate native typed and supplemental observations.
+python3 scripts/s08_p0.py check --native --output target/s08/p0-native-check
+# Native static audit alone (fixed linux/amd64 build-tag selection).
+python3 scripts/s08_inventory.py check
+# Generate a new candidate, review its diff, then explicitly freeze it.
+python3 scripts/s08_p0.py prepare --output target/s08/p0-candidate
+python3 scripts/s08_p0.py freeze --candidate target/s08/p0-candidate/candidate
+# Includes an opt-in small typed Go module integration test.
+S08_NATIVE_TESTS=1 python3 -m unittest discover -s scripts/tests -p test_s08_p0.py
+```
+
+Each output directory must be new. `--capture <final-capture-directory>` may
+reuse local decoded input, but still verifies it against the committed archive.
+The source snapshot, ordered input identities and full capture review remain
+mandatory. Derived schedules are prepared outside every measured interval.
+Native observation hooks are never linked into timing binaries.
+
+Small P0 native command/request/output evidence is stored under
+`tools/s08/results/p0-contracts/`. Existing baseline/provenance archives are reused;
+the large raw static graph and derived query cache are not duplicated in git.
