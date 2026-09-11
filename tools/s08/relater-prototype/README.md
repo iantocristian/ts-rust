@@ -37,14 +37,16 @@ actions of every mode (`data/s08/supplemental-observations.json.xz`). A
 ## Failure behavior recorded
 
 - A panicking resolver unwinds through `catch_unwind`, publishes no partial
-  members and caches no relation; the graph stays usable. Production retires the
-  generation instead (ADR 0012); the prototype shows the storage is not corrupt.
+  members and caches no relation. Its cell rejects subsequent reads with
+  `Error::ResolutionFailed`; a consumed resolver never becomes an empty object.
+  Other cells stay usable. Production retires the generation instead (ADR 0012).
 - An escaped `Rc<TypeCell>` outlives the graph but its edges do not: following
   one fails with `Error::Released`. The production design therefore couples every
   escaped result to its owner (ADR 0007), which the reference alternative must
   keep: results would be `(Arc<Graph>, Rc<TypeCell>)`, never a bare cell.
 - Reading a member whose declared type was never created is
-  `Error::UndeclaredMember`, not an empty default.
+  `Error::UndeclaredMember`; subsequent reads remain failed rather than publishing
+  an empty default.
 
 ## What it does not do
 

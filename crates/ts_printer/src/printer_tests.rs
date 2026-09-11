@@ -537,6 +537,54 @@ fn printer_matches_the_pinned_go_printer_on_every_case() {
     );
 }
 
+#[test]
+fn identifier_source_text_requires_the_same_source_file_not_just_owner() {
+    let counters = Counters::new();
+    let first_text = SourceText::from_bytes(&b"other___"[..]);
+    let second_text = SourceText::from_bytes(&br"\u0062ar"[..]);
+    let mut ast = AstBuilder::new(first_text.clone(), &counters);
+    let first = ast.new_source_file(
+        ts_ast::SourceFileParseOptions {
+            file_name: JsString::from_bytes(&b"/first.ts"[..]),
+            ..Default::default()
+        },
+        first_text,
+        None,
+        None,
+    );
+    let second = ast.new_source_file(
+        ts_ast::SourceFileParseOptions {
+            file_name: JsString::from_bytes(&b"/second.ts"[..]),
+            ..Default::default()
+        },
+        second_text,
+        None,
+        None,
+    );
+    let identifier = ast.new_identifier(JsString::from_bytes(&b"bar"[..]));
+    {
+        let mut node = ast.node_mut(identifier).unwrap();
+        node.set_range(TextRange::new(0, 8));
+        node.set_parent(Some(second));
+    }
+    let context = EmitContext::new();
+    let mut printer = Printer::new(
+        PrinterOptions {
+            remove_comments: true,
+            ..Default::default()
+        },
+        &context,
+    );
+    // Go's getTextOfNode copies raw source spelling only from the node's own
+    // SourceFile; sibling SourceFiles can share one storage owner.
+    let sibling_text = printer.emit(ast.view(), identifier, Some(first)).unwrap();
+    assert_eq!(sibling_text, b"bar");
+    let own_text = printer.emit(ast.view(), identifier, Some(second)).unwrap();
+    assert_eq!(own_text, br"\u0062ar");
+    let without_source = printer.emit(ast.view(), identifier, None).unwrap();
+    assert_eq!(without_source, b"bar");
+}
+
 fn constants(kind: &str) -> serde_json::Map<String, Value> {
     let observed: Value = serde_json::from_str(OBSERVATIONS).expect("observations");
     observed["constants"][kind]

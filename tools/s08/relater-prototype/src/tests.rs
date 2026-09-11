@@ -245,9 +245,11 @@ fn a_panicking_resolver_leaves_the_graph_consistent() {
     );
     // A second attempt on the poisoned type fails explicitly, not silently.
     let again = poisoned.members(&checker.graph);
-    assert!(
-        matches!(again, Ok(members) if members.is_empty()),
-        "the resolver was consumed by the panic; the cell is empty, not corrupt"
+    assert_eq!(again.err(), Some(Error::ResolutionFailed));
+    assert!(poisoned.members.get().is_none());
+    assert_eq!(
+        checker.check_type_related_to(&healthy, &poisoned, Mode::Assignable, true),
+        Err(Error::ResolutionFailed)
     );
 }
 
@@ -262,4 +264,10 @@ fn an_undeclared_member_type_is_an_error_not_a_default() {
         checker.check_type_related_to(&dangling, &other, Mode::Identity, false),
         Err(Error::UndeclaredMember("x"))
     );
+    assert_eq!(
+        checker.check_type_related_to(&dangling, &other, Mode::Identity, false),
+        Err(Error::ResolutionFailed)
+    );
+    assert!(dangling.members.get().is_none());
+    assert_eq!(checker.relation(Mode::Identity).entries(), 0);
 }

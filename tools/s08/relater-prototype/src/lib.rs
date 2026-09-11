@@ -23,9 +23,10 @@
 //!   the cells it points to: after the graph drops, following an edge fails
 //!   explicitly (`Error::Released`). The production design keeps the owner alive
 //!   from every escaped result for exactly this reason (ADR 0007).
-//! - A panic inside a resolver leaves the `OnceCell` empty and the graph
-//!   consistent; the algorithm never holds a `RefMut` across a call that can run
-//!   user code, so unwinding cannot poison shared state.
+//! - A failed or panicking resolver leaves the `OnceCell` empty and its cell
+//!   terminally unresolved. Later reads fail explicitly; consuming the resolver
+//!   never turns failure into an empty object. The algorithm never holds a
+//!   `RefMut` across a call that can run user code.
 #![forbid(unsafe_code)]
 
 use std::cell::{Cell, OnceCell, RefCell};
@@ -78,6 +79,8 @@ pub enum Error {
     Released,
     /// A member resolver referenced a type that was never declared.
     UndeclaredMember(&'static str),
+    /// An object's resolver was consumed by a failed or reentrant resolution.
+    ResolutionFailed,
 }
 
 /// A resolved property of an object type.
@@ -145,11 +148,12 @@ impl TypeCell {
         let resolver = self.resolver.borrow_mut().take();
         let members = match resolver {
             Some(resolver) => resolver(graph, self)?,
+            None if self.flags & flags::OBJECT != 0 => return Err(Error::ResolutionFailed),
             None => Vec::new(),
         };
         self.resolutions.set(self.resolutions.get() + 1);
-        // A resolver that re-entered `members` would have initialized the cell
-        // already; upstream treats that as a cycle, so the later result loses.
+        // A reentrant read sees the consumed resolver and fails above rather
+        // than publishing empty members while the outer resolution is pending.
         Ok(self.members.get_or_init(|| members))
     }
 

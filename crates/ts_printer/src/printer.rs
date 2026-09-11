@@ -860,7 +860,7 @@ impl<'a> Session<'a, '_> {
         let Some((file, _)) = &self.current_source else {
             return Ok(false);
         };
-        Ok(self.node(node)?.owner_id() == self.node(*file)?.owner_id())
+        Ok(ts_ast::utilities::get_source_file_of_node(self.view, Some(node))? == Some(*file))
     }
 
     // port: tsc/internal/printer/printer.go:Printer.emitIdentifierText
