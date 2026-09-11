@@ -12,6 +12,12 @@ use ts_ast::{
 impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.getPropertiesOfType
     pub(crate) fn get_properties_of_type(&mut self, ty: TypeId) -> Result<Vec<SymbolId>, Error> {
+        // Go uses getReducedApparentType here. This slice resolves primitive
+        // wrappers per constituent instead of constructing an apparent
+        // intersection. That is sufficient only while interface `this`, type
+        // parameters and heritage are rejected by get_declared_type_of_interface.
+        // Port the apparent intersection and this-argument substitution before
+        // relaxing those guards; constituent lookup alone cannot substitute `this`.
         let ty = self.get_reduced_type(ty)?;
         let flags = self.types.flags(ty)?;
         if flags & tf::UNION_OR_INTERSECTION != 0 && flags & tf::BOOLEAN == 0 {
@@ -310,7 +316,7 @@ impl CheckerState {
                     .try_get(prop)
                     .and_then(|l| l.name_type);
             }
-            if self.is_literal_type(ty)? {
+            if self.is_literal_type(ty)? || self.is_pattern_literal_type(ty)? {
                 flags |= cf::HAS_LITERAL_TYPE;
             }
             if self.types.flags(ty)? & tf::NEVER != 0 && ty != self.builtins.unique_literal_type {

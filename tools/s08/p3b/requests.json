@@ -743,6 +743,45 @@
           "operation": "declared_type"
         }
       ]
+    },
+    {
+      "id": "intersection-nonprimitive",
+      "files": {
+        "/case.ts": "interface Object { shared: number } type Bare = object; type I = object & { a: string; shared: string }; type Reversed = { a: string; shared: string } & object; type U = { shared: string; b: number } | object;\n"
+      },
+      "roots": [
+        "/case.ts"
+      ],
+      "queries": [
+        {
+          "id": "Bare",
+          "file": "/case.ts",
+          "declaration": "Bare",
+          "target": "name",
+          "operation": "declared_type"
+        },
+        {
+          "id": "I",
+          "file": "/case.ts",
+          "declaration": "I",
+          "target": "name",
+          "operation": "declared_type"
+        },
+        {
+          "id": "Reversed",
+          "file": "/case.ts",
+          "declaration": "Reversed",
+          "target": "name",
+          "operation": "declared_type"
+        },
+        {
+          "id": "U",
+          "file": "/case.ts",
+          "declaration": "U",
+          "target": "name",
+          "operation": "declared_type"
+        }
+      ]
     }
   ],
   "merge": {

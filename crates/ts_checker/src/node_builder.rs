@@ -388,14 +388,18 @@ impl<'a> NodeBuilder<'a> {
                 &[],
             );
         }
+        // An origin can also be an index type (`keyof`). Dispatch on the
+        // substituted type so unported families reach Unsupported rather than
+        // being read through a union/intersection payload accessor.
+        let ty = if record.flags & tf::UNION != 0 {
+            self.checker.types.union(ty)?.origin.unwrap_or(ty)
+        } else {
+            ty
+        };
+        let record = *self.checker.types.get(ty)?;
         if record.flags & tf::UNION_OR_INTERSECTION != 0 {
-            let display_type = if record.flags & tf::UNION != 0 {
-                self.checker.types.union(ty)?.origin.unwrap_or(ty)
-            } else {
-                ty
-            };
-            let is_union = self.checker.types.flags(display_type)? & tf::UNION != 0;
-            let constituents = self.checker.types.compound_types(display_type)?.clone();
+            let is_union = record.flags & tf::UNION != 0;
+            let constituents = self.checker.types.compound_types(ty)?.clone();
             let types = if is_union {
                 self.format_union(&constituents)?
             } else {

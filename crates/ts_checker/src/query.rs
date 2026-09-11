@@ -1188,6 +1188,8 @@ impl CheckerState {
             Some("Boolean")
         } else if flags & (tf::BIG_INT_LIKE | tf::ES_SYMBOL_LIKE) != 0 {
             return Err(Error::Unsupported("getApparentType: deferred global type"));
+        } else if flags & tf::NON_PRIMITIVE != 0 {
+            return Ok(Some(self.builtins.empty_object_type));
         } else if flags & (tf::ANY | tf::UNKNOWN | tf::VOID | tf::UNDEFINED | tf::NULL | tf::NEVER)
             != 0
         {

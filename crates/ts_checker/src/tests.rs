@@ -31,6 +31,67 @@ fn owner() -> (
 }
 
 #[test]
+fn pattern_literal_property_conflicts_reduce_the_intersection() {
+    let (_counters, _generation, _identity, owner) = owner();
+    let mut operation = owner.operation().unwrap();
+    let state = operation.state_mut();
+    let string = state.builtins.string_type;
+    let number = state.builtins.number_type;
+    let pattern = state
+        .get_template_literal_type(
+            &[JsString::from_bytes(b"x".as_slice()), JsString::default()],
+            &[string],
+        )
+        .unwrap();
+    // Source template type nodes are still unsupported. Construct the property
+    // types through the existing checker API to exercise synthesis and reduction,
+    // including the non-literal string/number control from pinned Go's predicate.
+    for (left, is_discriminant) in [(pattern, true), (string, false)] {
+        let mut objects = Vec::new();
+        for ty in [left, number] {
+            let name = JsString::from_bytes(b"a".as_slice());
+            let property = state
+                .new_symbol(symbol_flags::PROPERTY, name.clone())
+                .unwrap();
+            state
+                .value_symbol_links
+                .get_or_default(property)
+                .resolved_type = Some(ty);
+            let mut table = ts_ast::SymbolTable::new();
+            table.insert(name, Some(property));
+            let members = state.alloc_symbol_table(table);
+            objects.push(
+                state
+                    .new_anonymous_type(None, Some(members), &[], &[], &[])
+                    .unwrap(),
+            );
+        }
+        let intersection = state.get_intersection_type(&objects).unwrap();
+        let properties = state
+            .get_properties_of_union_or_intersection_type(intersection)
+            .unwrap();
+        assert_eq!(properties.len(), 1);
+        assert_eq!(
+            state.symbol(properties[0]).unwrap().check_flags()
+                & ts_ast::check_flags::HAS_LITERAL_TYPE
+                != 0,
+            is_discriminant,
+        );
+        assert_eq!(
+            state.get_type_of_symbol(properties[0]).unwrap(),
+            state.builtins.never_type
+        );
+        let expected = if is_discriminant {
+            state.builtins.never_type
+        } else {
+            intersection
+        };
+        assert_eq!(state.get_reduced_type(intersection).unwrap(), expected);
+        assert_eq!(state.get_reduced_type(intersection).unwrap(), expected);
+    }
+}
+
+#[test]
 fn link_store_pages_on_first_use_per_arena_and_distinguishes_absent_entries() {
     let counters = Counters::new();
     let first = SymbolArena::<u32>::new(&counters);
