@@ -423,11 +423,14 @@ name = "ts_checker"
 version = "0.1.0"
 dependencies = [
  "cap",
+ "hashbrown",
  "mimalloc",
  "serde_json",
  "ts_arena",
  "ts_ast",
  "ts_core",
+ "ts_jsnum",
+ "ts_jsstring",
  "ts_module",
  "ts_nodebuilder",
  "ts_tsoptions",

@@ -359,6 +359,29 @@ impl SymbolTables {
             symbols: &mut self.symbols,
         })
     }
+    /// Bytes held or reserved by every table, the table directory and the
+    /// canonical name pool, for storage censuses.
+    pub fn structural_bytes(&self) -> usize {
+        let tables: usize = self
+            .tables
+            .iter()
+            .map(|(_, record)| match record {
+                TableRecord::Compact(table) => table.allocation_size(),
+                TableRecord::Full(table) => table.allocation_size(),
+            })
+            .sum();
+        let names = self.names.bytes.capacity()
+            + self.names.ranges.capacity() * size_of::<NameRange>()
+            + self.names.names.allocation_size()
+            + self.names.wide_ranges.as_ref().map_or(0, |ranges| {
+                size_of::<HashMap<NameId, Range<usize>>>()
+                    + ranges.capacity() * (size_of::<NameId>() + size_of::<Range<usize>>())
+            });
+        self.tables.structural_bytes() + tables + names
+    }
+    pub fn table_count(&self) -> usize {
+        self.tables.len()
+    }
     pub fn iter(&self) -> impl Iterator<Item = (SymbolTableId, SymbolTableRead<'_>)> {
         self.tables.iter().map(|(id, table)| {
             (

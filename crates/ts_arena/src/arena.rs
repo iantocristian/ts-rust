@@ -79,6 +79,17 @@ impl<T> Arena<T> {
             .ok_or(Error::InvalidSlot)
     }
 
+    /// Bytes the page vectors hold or reserve, plus the page directory; the
+    /// storage census charges these, not `len * size_of::<T>()`.
+    pub(crate) fn structural_bytes(&self) -> usize {
+        self.pages.capacity() * size_of::<Page<T>>()
+            + self
+                .pages
+                .iter()
+                .map(|page| page.values.capacity() * size_of::<T>())
+                .sum::<usize>()
+    }
+
     pub(crate) fn counters(&self) -> &Counters {
         &self.counters
     }
