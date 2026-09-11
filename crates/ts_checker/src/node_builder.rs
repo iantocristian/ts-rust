@@ -245,6 +245,11 @@ impl<'a> NodeBuilder<'a> {
     pub(crate) fn type_node(&mut self, ty: TypeId) -> Result<NodeId, Error> {
         let in_alias = self.flags & nf::IN_TYPE_ALIAS != 0;
         self.flags &= !nf::IN_TYPE_ALIAS;
+        let ty = if self.flags & nf::NO_TYPE_REDUCTION == 0 {
+            self.checker.get_reduced_type(ty)?
+        } else {
+            ty
+        };
         let record = *self.checker.types.get(ty)?;
         if record.flags & tf::ANY != 0 {
             if let Some(alias) = self.checker.types.alias_of(ty)?.cloned() {
@@ -383,22 +388,32 @@ impl<'a> NodeBuilder<'a> {
                 &[],
             );
         }
-        if record.flags & tf::UNION != 0 {
-            let union = self.checker.types.union(ty)?;
-            let types = if let Some(origin) = union.origin {
-                if self.checker.types.flags(origin)? & tf::UNION == 0 {
-                    return Err(Error::Unsupported("typeToTypeNode: non-union origin"));
-                }
-                self.checker.types.union(origin)?.types.clone()
+        // An origin can also be an index type (`keyof`). Dispatch on the
+        // substituted type so unported families reach Unsupported rather than
+        // being read through a union/intersection payload accessor.
+        let ty = if record.flags & tf::UNION != 0 {
+            self.checker.types.union(ty)?.origin.unwrap_or(ty)
+        } else {
+            ty
+        };
+        let record = *self.checker.types.get(ty)?;
+        if record.flags & tf::UNION_OR_INTERSECTION != 0 {
+            let is_union = record.flags & tf::UNION != 0;
+            let constituents = self.checker.types.compound_types(ty)?.clone();
+            let types = if is_union {
+                self.format_union(&constituents)?
             } else {
-                union.types.clone()
+                constituents.to_vec()
             };
-            let types = self.format_union(&types)?;
             if types.len() == 1 {
                 return self.type_node(types[0]);
             }
             let nodes = self.type_list(&types, true)?;
-            return Ok(self.ast.new_union_type_node(Some(nodes)));
+            return Ok(if is_union {
+                self.ast.new_union_type_node(Some(nodes))
+            } else {
+                self.ast.new_intersection_type_node(Some(nodes))
+            });
         }
         if record.object_flags & of::ANONYMOUS != 0 {
             return self.object_type(ty);

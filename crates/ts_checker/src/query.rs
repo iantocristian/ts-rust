@@ -17,7 +17,7 @@ pub(crate) struct QueryState {
     pub global_types: crate::types::Map<&'static str, TypeId>,
     pub references: LinkStore<SymbolId, SymbolFlags>,
     pub scope_changes: LinkStore<NodeId, ts_core::Tristate>,
-    /// The union-only slice of deferredSymbolLinks.constituents. The containing
+    /// The union/intersection slice of deferredSymbolLinks.constituents. The containing
     /// type lives in valueSymbolLinks; no owning references back to the checker.
     pub deferred_property_types: LinkStore<SymbolId, Option<crate::TypeList>>,
 }
@@ -495,7 +495,9 @@ impl CheckerState {
             return Ok(*ty);
         }
         let ty = match read.kind().known() {
-            Some(K::UnionType) => self.get_type_from_union_type_node(node)?,
+            Some(K::UnionType | K::IntersectionType) => {
+                self.get_type_from_union_or_intersection_type_node(node)?
+            }
             Some(K::ParenthesizedType) => {
                 return self
                     .get_type_from_type_node(required(read.type_node(), "parenthesized type")?)
@@ -601,16 +603,28 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.getTypeFromUnionTypeNode
-    fn get_type_from_union_type_node(&mut self, node: NodeId) -> Result<TypeId, Error> {
+    // port: tsc/internal/checker/checker.go:Checker.getTypeFromIntersectionTypeNode
+    fn get_type_from_union_or_intersection_type_node(
+        &mut self,
+        node: NodeId,
+    ) -> Result<TypeId, Error> {
         let alias = self.alias_for_type_node(node)?;
         let view = self.ast(node)?;
+        let read = view.node(node)?;
+        let is_union = read.kind() == K::UnionType;
         let list = required(
-            view.node(node)?
-                .data_source()
-                .as_union_type_node()
-                .ok_or(ts_arena::Error::InvalidGraph)?
-                .types(),
-            "union types",
+            if is_union {
+                read.data_source()
+                    .as_union_type_node()
+                    .ok_or(ts_arena::Error::InvalidGraph)?
+                    .types()
+            } else {
+                read.data_source()
+                    .as_intersection_type_node()
+                    .ok_or(ts_arena::Error::InvalidGraph)?
+                    .types()
+            },
+            "compound types",
         )?;
         let nodes = view
             .node_slice(view.list(list)?.nodes())?
@@ -618,12 +632,32 @@ impl CheckerState {
             .collect::<Vec<_>>();
         let mut types = Vec::with_capacity(nodes.len());
         for node in nodes {
-            types.push(self.get_type_from_type_node(required(node, "union constituent")?)?);
+            types.push(self.get_type_from_type_node(required(node, "compound constituent")?)?);
         }
         let alias = alias
             .map(|alias| self.types.push_alias(alias))
             .transpose()?;
-        self.get_union_type_ex(&types, crate::UnionReduction::Literal, alias, None)
+        if is_union {
+            return self.get_union_type_ex(&types, crate::UnionReduction::Literal, alias, None);
+        }
+        let mut flags = 0;
+        if types.len() == 2 {
+            if let Some(empty) = types
+                .iter()
+                .position(|&ty| ty == self.builtins.empty_type_literal_type)
+            {
+                let other = self.types.flags(types[1 - empty])?;
+                if other & tf::TEMPLATE_LITERAL != 0 {
+                    return Err(Error::Unsupported(
+                        "getTypeFromIntersectionTypeNode: pattern literal",
+                    ));
+                }
+                if other & (tf::STRING | tf::NUMBER | tf::BIG_INT) != 0 {
+                    flags = crate::intersection::NO_SUPERTYPE_REDUCTION;
+                }
+            }
+        }
+        self.get_intersection_type_ex(&types, flags, alias)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkExpressionCached
@@ -1154,6 +1188,8 @@ impl CheckerState {
             Some("Boolean")
         } else if flags & (tf::BIG_INT_LIKE | tf::ES_SYMBOL_LIKE) != 0 {
             return Err(Error::Unsupported("getApparentType: deferred global type"));
+        } else if flags & tf::NON_PRIMITIVE != 0 {
+            return Ok(Some(self.builtins.empty_object_type));
         } else if flags & (tf::ANY | tf::UNKNOWN | tf::VOID | tf::UNDEFINED | tf::NULL | tf::NEVER)
             != 0
         {

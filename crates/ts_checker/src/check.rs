@@ -157,7 +157,7 @@ impl CheckerState {
             Some(K::ParenthesizedType) => {
                 self.check_source_element(required(read.type_node(), "parenthesized type")?)
             }
-            Some(K::UnionType) => self.check_union_type(node),
+            Some(K::UnionType | K::IntersectionType) => self.check_union_or_intersection_type(node),
             Some(
                 K::TypeReference
                 | K::LiteralType
@@ -187,21 +187,28 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkUnionOrIntersectionType
-    fn check_union_type(&mut self, node: NodeId) -> Result<(), Error> {
+    fn check_union_or_intersection_type(&mut self, node: NodeId) -> Result<(), Error> {
         let view = self.ast(node)?;
+        let read = view.node(node)?;
         let list = required(
-            view.node(node)?
-                .data_source()
-                .as_union_type_node()
-                .ok_or(ts_arena::Error::InvalidGraph)?
-                .types(),
-            "union types",
+            if read.kind() == K::UnionType {
+                read.data_source()
+                    .as_union_type_node()
+                    .ok_or(ts_arena::Error::InvalidGraph)?
+                    .types()
+            } else {
+                read.data_source()
+                    .as_intersection_type_node()
+                    .ok_or(ts_arena::Error::InvalidGraph)?
+                    .types()
+            },
+            "compound types",
         )?;
         let constituents: Vec<_> = view.node_slice(view.list(list)?.nodes())?.iter().collect();
         // Check the source children before construction can reduce or reorder
-        // the union. A cached type is not a completed declaration check.
+        // the compound type. A cached type is not a completed declaration check.
         for constituent in constituents {
-            self.check_source_element(required(constituent, "union constituent")?)?;
+            self.check_source_element(required(constituent, "compound constituent")?)?;
         }
         self.get_type_from_type_node(node)?;
         Ok(())
