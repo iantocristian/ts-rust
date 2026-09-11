@@ -53,21 +53,33 @@ func TestS08StorageFamilies(t *testing.T) {
 	program := compiler.NewProgram(compiler.ProgramOptions{Config: config, Host: host})
 	program.BindSourceFiles()
 	real, _ := checker.NewChecker(program, nil)
+	var prefixBefore, prefixAfter runtime.MemStats
+	runtime.ReadMemStats(&prefixBefore)
 	replica := checker.S08FamiliesReplica(request.Options)
+	runtime.ReadMemStats(&prefixAfter)
 	realNamed := checker.S08FamiliesNamed(real)
 	replicaNamed := checker.S08FamiliesNamed(replica)
 	if !reflect.DeepEqual(realNamed, replicaNamed) {
 		t.Fatalf("replica named types differ from NewChecker: real %v replica %v", realNamed, replicaNamed)
 	}
 	prefixCounts := checker.S08FamiliesCounts(replica)
-	roots, typeRoots := checker.S08FamiliesTrace(replica, request.Actions)
+	// Transient budget: allocation traffic during the trace, before any census work.
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	executed := checker.S08FamiliesExecute(replica, request.Actions)
+	runtime.ReadMemStats(&after)
+	roots, typeRoots := checker.S08FamiliesObserve(replica, executed)
 	runtime.GC()
 	census := checker.S08FamiliesCensus(replica, typeRoots)
+	allocator := map[string]any{
+		"prefix": map[string]any{"requested_bytes": prefixAfter.TotalAlloc - prefixBefore.TotalAlloc, "mallocs": prefixAfter.Mallocs - prefixBefore.Mallocs},
+		"trace":  map[string]any{"requested_bytes": after.TotalAlloc - before.TotalAlloc, "mallocs": after.Mallocs - before.Mallocs},
+	}
 	sum := sha256.Sum256(raw)
 	output, err := json.Marshal(map[string]any{
 		"request_sha256": hex.EncodeToString(sum[:]), "go": runtime.Version(), "goos": runtime.GOOS, "goarch": runtime.GOARCH,
 		"named": replicaNamed, "real_counts": checker.S08FamiliesCounts(real), "prefix_counts": prefixCounts,
-		"roots": roots, "counts": checker.S08FamiliesCounts(replica), "census": census,
+		"roots": roots, "counts": checker.S08FamiliesCounts(replica), "census": census, "allocator": allocator,
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -344,19 +344,53 @@ impl Prepared {
         Ok(Self { options, actions })
     }
 
-    /// Runs `NewChecker`'s type prefix and then every action. All allocations
-    /// from here to the returned value are the measured interval.
+    /// Runs `NewChecker`'s type prefix and then every action in one step.
     pub fn execute(&self) -> Result<Live, Error> {
+        self.start()?.run()
+    }
+
+    /// Runs `NewChecker`'s type prefix only, so a caller can sample its
+    /// allocator between the prefix and the trace.
+    pub fn start(&self) -> Result<Started<'_>, Error> {
         let counters = Counters::new();
         let generation = Generation::new(&counters);
         let identity = CheckerIdentity::new(generation.clone(), &counters);
-        let mut state = CheckerState::new(&identity, &counters, self.options)?;
+        let state = CheckerState::new(&identity, &counters, self.options)?;
+        Ok(Started {
+            prepared: self,
+            counters,
+            generation,
+            identity,
+            state,
+        })
+    }
+}
+
+/// A checker after `NewChecker`'s prefix, before the trace.
+pub struct Started<'a> {
+    prepared: &'a Prepared,
+    counters: Counters,
+    generation: Generation,
+    identity: Arc<CheckerIdentity>,
+    state: CheckerState,
+}
+
+impl Started<'_> {
+    /// Runs every action; all allocations in here are the trace's interval.
+    pub fn run(self) -> Result<Live, Error> {
+        let Self {
+            prepared,
+            counters,
+            generation,
+            identity,
+            mut state,
+        } = self;
         let prefix_counts = (
             state.types.len(),
             state.symbol_count,
             state.signatures.len(),
         );
-        let mut roots: Vec<Root> = Vec::with_capacity(self.actions.len());
+        let mut roots: Vec<Root> = Vec::with_capacity(prepared.actions.len());
         let type_root = |roots: &[Root], index: usize| -> Result<TypeId, Error> {
             match roots[index] {
                 Root::Type(id) => Ok(id),
@@ -375,7 +409,7 @@ impl Prepared {
                 .map(|index| type_root(roots, *index))
                 .collect()
         };
-        for action in &self.actions {
+        for action in &prepared.actions {
             let root = match action {
                 Action::Builtin(name) => Root::Type(
                     state

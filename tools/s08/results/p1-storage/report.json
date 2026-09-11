@@ -1,6 +1,7 @@
 {
  "limitations": [
-  "Go retained endpoints are replica-map live heap deltas after GC and struct sizes; Rust bytes are capacities and hashbrown allocation sizes",
+  "Go structural bytes are struct sizes, slice and arena-chunk capacities and hinted-replica map allocations; Rust bytes are vector capacities, Arc allocations and hashbrown allocation sizes",
+  "Requested bytes are reported for NewChecker's prefix and for the trace's constructor calls separately: Go as TotalAlloc traffic and malloc calls, Rust as mimalloc requested allocations; neither interval includes observation or census work",
   "The Go checker also creates globalThis's object type and autoArrayType in initializeChecker; the trace checker stops before it and real_counts records the difference",
   "The checker AST arenas are unavailable on both sides and reported as a named gap",
   "No timing conclusion; the subset's type distribution is not modeled"
@@ -22,14 +23,14 @@
   "goarch": "arm64",
   "goos": "darwin"
  },
- "rust_executable_sha256": "732951b7a8864b312138dee65bb518a4a00c78cc182e8c17d9a98222b55b0c70",
+ "rust_executable_sha256": "1707aa8fca4fc7c2a6d927ff298b2c228cbc75371d48505dba720c16d6c6ce5e",
  "rust_version": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
  "scope": "P1 storage families over a checker prepared as NewChecker's type prefix; not the subset census, not E5",
  "source_inputs": {
   ".cargo/config.toml": "716b49c90c25aeeebc4b0359b111a62927d166a1d7f02c4fe83b89d55fb74887",
   ".gitmodules": "7f9e8e0a446a547c56d8444637b3ee73064ce52055bc3c983c05eb13f4331bdd",
-  "Cargo.lock": "ce5a87ea810714a7f6e4b8a20b2d52ce32906ac235d05a8f87d1fe442cfc8827",
-  "Cargo.toml": "5a40be7ad3db7ac0e71548e30708829a7592902928b9cc85a9bfc49e7f83e420",
+  "Cargo.lock": "7be4a8b76b21588c8bb917ef4aa9eb0a7e75cc2677da3b876b8ef82b32fe890a",
+  "Cargo.toml": "a8781e91c79b3c760b27727acfe86c9fedc87d2316db117bd8aa233676b5617a",
   "crates/ts_arena/Cargo.toml": "d6e45a256f941cfd17c47d0a0b0de979d2bf5e3ccce1cb4457ce5cb6958fd395",
   "crates/ts_arena/examples/e3.rs": "d399f7fdaa594018d2888d1f2ffbc2f1c7bd2b742f74bae07d7bf147987c4a5a",
   "crates/ts_arena/src/arena.rs": "3f305536cc7a910c55afaa21381ceccbe59bfec3494bc78b52aeb397c213540b",
@@ -183,7 +184,7 @@
   "crates/ts_bundled/Cargo.toml": "9b1c687e03a49ff0049706417ea38e5b5d34a04ae1a43e037ac501dc880246cc",
   "crates/ts_bundled/src/lib.rs": "ece20c8660e7c21d452b87b630dbefc2e7e4d0628ded6414d6a6c20e85c239cf",
   "crates/ts_checker/Cargo.toml": "2614907c9b72705fc8b2f4ff3c599e6cc5b030e3c50101d3829b5c8eafb5c7b1",
-  "crates/ts_checker/examples/storage_families.rs": "658238cde46f61332413707cf02a023f8754d9014094fff49fe42ca2515a9f4a",
+  "crates/ts_checker/examples/storage_families.rs": "26d5424740f4e29be98752890afcafa11f0fd5e186379bc90fb9ad936209144d",
   "crates/ts_checker/examples/storage_pilot.rs": "3cd077136af3555fa2dfc4a49a2a695f99de8a7b0be1b84856a3e058a2b5767d",
   "crates/ts_checker/src/census.rs": "9ab72f4a9fae2eaa946ec8d0c24a9de504fd127209546b6d9d815cab008d6b2c",
   "crates/ts_checker/src/compare.rs": "dfbbe0044850085c54786d3b1a9e4751aeddf4227266560ef9de69964d222e66",
@@ -202,11 +203,11 @@
   "crates/ts_checker/src/resolution.rs": "c6bdda7129f086adf226cf370509d5e1864b283ee31e5ce071a8b9ef9f68ccc5",
   "crates/ts_checker/src/signatures.rs": "3522bc6d7e4ef8e750ccc8b745434a4f5f6773cd5b41d98fc061c9bd680bd331",
   "crates/ts_checker/src/state.rs": "cff947d3897b393b75a4cdff4a2ef44d65262ba750e4d9f014060d4e6e8662db",
-  "crates/ts_checker/src/storage_families.rs": "dc309eb4d9dfa29fd82db0002f0d5df0e6c4e32eb7319ef377a9bbd15518b6f9",
+  "crates/ts_checker/src/storage_families.rs": "ce27523019fd1897511eb0c02c773fb0fd40e3b6eef49ee5690b57344c562910",
   "crates/ts_checker/src/storage_pilot.rs": "a552394c368fdbae745265d5f426a75c915293e39d302283239adb18234eafcb",
   "crates/ts_checker/src/symbols.rs": "228733e7bb8eab8bdd98f8190fcf341d45b8bb1af8818ff97c2278551394549d",
   "crates/ts_checker/src/template.rs": "5cf100db8c7237d03a5e6b358fb5a2a1d090e2deae9738f45bedca76139b7290",
-  "crates/ts_checker/src/tests.rs": "97dee30729cd941cedfb2fcbf53faba73f6576a8332fb3f9e0b74b21e8709fbc",
+  "crates/ts_checker/src/tests.rs": "efd6a1270feef30bd92831c3a1dec80a2d3d6b781bbf874bdaa4bb6f6fbb2633",
   "crates/ts_checker/src/type_display.rs": "1a8d26753aadbca99ef4197b68945845cae8b36c6b809ac14e5dc0bb44127bce",
   "crates/ts_checker/src/types.rs": "aab8c64c29a9ac09c6f973b3a921b11810fd1c45a7c336ccc41cb8db70570769",
   "crates/ts_checker/src/union.rs": "89b1a05d7da406e741e15f4e1dd12d151e199f28806ab7f1d38e705946428281",
@@ -418,16 +419,26 @@
   "scripts/s04.py": "ef3cc03617912c1f651faad1c1b7ccffb5e8fbade2e3f08a2bf51eadb86dab66",
   "scripts/s04_common.py": "0c9ff31e34d83cbd9c500bb9462631b862a221acfb6f85e4816d1aedbb6a68d7",
   "scripts/s04_runtime.py": "80fe4361129d4fd5ffd7a4a6f3a890ce7a18f06f6c5aaa39a17951ccd6e271d5",
-  "scripts/s08_families.py": "7dfb2931140700d6146f32285cb13f0bcbb1fbed35e549b07fa5ea70b8713028",
+  "scripts/s08_families.py": "197aa7e2514654fc72fd7ce0abded61c65008a2920c52caf6774795ce1ac67d1",
   "scripts/s08_oracle.py": "40f1e75bda1c909fa55f7011ac3b0b324b1e3fd6a0ea1197bfdd686644cc3f7d",
   "scripts/tracking-bootstrap.py": "3eeb28198dd1d9d1e2946cd0435a5b8f2e59c7d6b5b9987e7eafb555bb64c8c7",
-  "tools/s08/oracle/families/bridge.go": "d937a381e58d6885fc8a07914b31cc9d2805b6b22941e2fad179bbbcdad9bc93",
-  "tools/s08/oracle/families/driver_test.go": "5cb00d33bed9256424f868533a672156d75e51e02e40305903343140f81210e4"
+  "tools/s08/oracle/families/bridge.go": "42d9d189b467c593e970c8304587b5a3361dc7cecf1bfda8a95134c1baef8e94",
+  "tools/s08/oracle/families/driver_test.go": "166c828ae49aaf80854318b8dadb4cc95395e96e83c574be44297087abbe98af"
  },
  "traces": [
   {
    "actions": 121,
    "go": {
+    "allocator": {
+     "prefix": {
+      "mallocs": 148,
+      "requested_bytes": 18800
+     },
+     "trace": {
+      "mallocs": 329,
+      "requested_bytes": 35912
+     }
+    },
     "census": {
      "arena_chunks": {
       "signatures": [
@@ -474,11 +485,11 @@
        "count": 0
       },
       "intrinsic": {
-       "bytes": 1802,
+       "bytes": 1808,
        "count": 24
       },
       "literal": {
-       "bytes": 4752,
+       "bytes": 4746,
        "count": 46
       },
       "reference": {
@@ -595,8 +606,15 @@
     "allocator": {
      "live_after": 168689,
      "live_before": 114791,
-     "requested_bytes": 86279,
-     "retained_delta": 53898
+     "prefix": {
+      "requested_bytes": 19331,
+      "retained_delta": 12247
+     },
+     "retained_delta": 53898,
+     "trace": {
+      "requested_bytes": 66948,
+      "retained_delta": 41651
+     }
     },
     "census": {
      "checker_bytes": 50451,
@@ -737,6 +755,16 @@
   {
    "actions": 121,
    "go": {
+    "allocator": {
+     "prefix": {
+      "mallocs": 147,
+      "requested_bytes": 18552
+     },
+     "trace": {
+      "mallocs": 324,
+      "requested_bytes": 34968
+     }
+    },
     "census": {
      "arena_chunks": {
       "signatures": [
@@ -783,11 +811,11 @@
        "count": 0
       },
       "intrinsic": {
-       "bytes": 1937,
+       "bytes": 1943,
        "count": 26
       },
       "literal": {
-       "bytes": 4761,
+       "bytes": 4755,
        "count": 46
       },
       "reference": {
@@ -904,8 +932,15 @@
     "allocator": {
      "live_after": 168525,
      "live_before": 114791,
-     "requested_bytes": 85873,
-     "retained_delta": 53734
+     "prefix": {
+      "requested_bytes": 19138,
+      "retained_delta": 12234
+     },
+     "retained_delta": 53734,
+     "trace": {
+      "requested_bytes": 66735,
+      "retained_delta": 41500
+     }
     },
     "census": {
      "checker_bytes": 50284,

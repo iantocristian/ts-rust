@@ -277,9 +277,14 @@ type s08Root struct {
 	node *ast.Node
 }
 
-// S08FamiliesTrace executes the frozen actions with the original constructors
-// and observes every result.
-func S08FamiliesTrace(c *Checker, actions []S08FamiliesAction) ([]map[string]any, []*Type) {
+// S08FamiliesRoots holds the results of a trace until they are observed.
+type S08FamiliesRoots struct {
+	roots []s08Root
+}
+
+// S08FamiliesExecute runs the frozen actions with the original constructors;
+// observation is separate so allocation traffic can be measured around this call.
+func S08FamiliesExecute(c *Checker, actions []S08FamiliesAction) *S08FamiliesRoots {
 	roots := make([]s08Root, 0, len(actions))
 	typeRoot := func(i int) *Type {
 		if roots[i].t == nil {
@@ -419,6 +424,12 @@ func S08FamiliesTrace(c *Checker, actions []S08FamiliesAction) ([]map[string]any
 		}
 		roots = append(roots, root)
 	}
+	return &S08FamiliesRoots{roots: roots}
+}
+
+// S08FamiliesObserve records every result and returns the type roots the census retains.
+func S08FamiliesObserve(c *Checker, executed *S08FamiliesRoots) ([]map[string]any, []*Type) {
+	roots := executed.roots
 	observations := make([]map[string]any, 0, len(roots))
 	var typeRootsOut []*Type
 	for _, root := range roots {

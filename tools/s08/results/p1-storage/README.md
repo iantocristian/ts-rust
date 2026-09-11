@@ -4,8 +4,9 @@
 run on the recording host (darwin/arm64, Go 1.27.1, Rust 1.97.1 release, locked
 dependencies, mimalloc with requested-allocation counters): per-family structural
 bytes and counts for the Go checker and the Rust checker over the two frozen
-traces in `data/s08/storage-families.json`, the creation counters, the Rust
-allocator endpoints and every source and native input hash.
+traces in `data/s08/storage-families.json`, the creation counters, the
+allocation traffic of `NewChecker`'s prefix and of the trace on both sides, the
+Rust retained endpoints and every source and native input hash.
 
 `capture.tar.xz` retains the raw run: the exact trace requests, the Go overlay
 and command, Go stdout/stderr and observations, and the Rust observations.

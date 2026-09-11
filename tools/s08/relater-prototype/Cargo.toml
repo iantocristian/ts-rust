@@ -1,0 +1,13 @@
+[package]
+name = "s08_relater_prototype"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+description = "S08 feasibility prototype: a relater over stable reference-counted type cells with interior mutability, measured against the ID-based production checker in P7"
+
+[dependencies]
+
+[lints]
+workspace = true

@@ -244,7 +244,7 @@ def capture(directory, freeze):
         rust = strict_json_loads(rust_bytes)
         validate(request, rust, go)
         traces.append({"options": request["options"], "actions": len(request["actions"]), "request_sha256": digest(raw),
-                       "go": {key: go[key] for key in ("prefix_counts", "counts", "real_counts", "census")},
+                       "go": {key: go[key] for key in ("prefix_counts", "counts", "real_counts", "census", "allocator")},
                        "rust": {key: rust[key] for key in ("prefix_counts", "counts", "census", "allocator")}})
         frozen_observations["traces"].append({"options": request["options"], "request_sha256": digest(raw),
                                               "named": go["named"], "roots": go["roots"], "counts": go["counts"],
@@ -265,7 +265,8 @@ def capture(directory, freeze):
               "runtime": {key: frozen_observations[key] for key in ("go", "goos", "goarch")},
               "scope": "P1 storage families over a checker prepared as NewChecker's type prefix; not the subset census, not E5",
               "limitations": [
-                  "Go retained endpoints are replica-map live heap deltas after GC and struct sizes; Rust bytes are capacities and hashbrown allocation sizes",
+                  "Go structural bytes are struct sizes, slice and arena-chunk capacities and hinted-replica map allocations; Rust bytes are vector capacities, Arc allocations and hashbrown allocation sizes",
+                  "Requested bytes are reported for NewChecker's prefix and for the trace's constructor calls separately: Go as TotalAlloc traffic and malloc calls, Rust as mimalloc requested allocations; neither interval includes observation or census work",
                   "The Go checker also creates globalThis's object type and autoArrayType in initializeChecker; the trace checker stops before it and real_counts records the difference",
                   "The checker AST arenas are unavailable on both sides and reported as a named gap",
                   "No timing conclusion; the subset's type distribution is not modeled",
