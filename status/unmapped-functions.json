@@ -751,8 +751,6 @@
       "tsc/internal/checker/checker.go:Checker.checkExportSpecifier",
       "tsc/internal/checker/checker.go:Checker.checkExportsOnMergedDeclarations",
       "tsc/internal/checker/checker.go:Checker.checkExpression",
-      "tsc/internal/checker/checker.go:Checker.checkExpressionCached",
-      "tsc/internal/checker/checker.go:Checker.checkExpressionCachedEx",
       "tsc/internal/checker/checker.go:Checker.checkExpressionEx",
       "tsc/internal/checker/checker.go:Checker.checkExpressionForMutableLocation",
       "tsc/internal/checker/checker.go:Checker.checkExpressionStatement",
