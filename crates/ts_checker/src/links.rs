@@ -11,7 +11,7 @@
 //! handful of arenas a checker touches justifies something flatter; the count
 //! of allocated pages is exposed for that census.
 
-use std::collections::HashMap;
+use std::hash::RandomState;
 use std::marker::PhantomData;
 use ts_arena::{ArenaId, NodeId, SymbolId};
 
@@ -45,7 +45,7 @@ impl LinkKey for SymbolId {
 type Page<V> = Box<[Option<V>]>;
 
 pub struct LinkStore<K: LinkKey, V> {
-    arenas: HashMap<ArenaId, Vec<Option<Page<V>>>>,
+    arenas: hashbrown::HashMap<ArenaId, Vec<Option<Page<V>>>, RandomState>,
     len: usize,
     _key: PhantomData<K>,
 }
@@ -53,7 +53,7 @@ pub struct LinkStore<K: LinkKey, V> {
 impl<K: LinkKey, V> Default for LinkStore<K, V> {
     fn default() -> Self {
         Self {
-            arenas: HashMap::new(),
+            arenas: hashbrown::HashMap::default(),
             len: 0,
             _key: PhantomData,
         }
@@ -77,6 +77,20 @@ impl<K: LinkKey, V> LinkStore<K, V> {
 
     pub fn is_empty(&self) -> bool {
         self.len == 0
+    }
+
+    /// Bytes held by the pages, the per-arena directories and the arena map,
+    /// for storage censuses.
+    pub fn structural_bytes(&self) -> usize {
+        self.arenas.allocation_size()
+            + self
+                .arenas
+                .values()
+                .map(|directory| {
+                    directory.capacity() * size_of::<Option<Page<V>>>()
+                        + directory.iter().flatten().count() * PAGE_SIZE * size_of::<Option<V>>()
+                })
+                .sum::<usize>()
     }
 
     /// Allocated pages across all arenas, for capacity accounting.

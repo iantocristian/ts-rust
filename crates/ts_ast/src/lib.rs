@@ -10,6 +10,7 @@ pub use bind_result::local_bind;
 mod local_bind_tests;
 mod local_read_generated;
 pub use local_read_generated::*;
+pub mod check_flags;
 mod flow;
 mod symbol_access;
 pub mod symbol_flags;

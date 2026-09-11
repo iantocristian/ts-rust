@@ -1,8 +1,12 @@
 //! First P1 vertical slice: actual intrinsic/string construction, interning and
-//! fresh/regular links. This is not the subset's per-type footprint measurement.
+//! fresh/regular links on a bare checker state, numbering types from 1 the way
+//! its Go counterpart (`&Checker{}`) does. This is not the subset's per-type
+//! footprint measurement; the storage-families trace supersedes it for P1.
 
-use crate::{Error, TypeId, TypeStore};
+use crate::{CheckerOptions, CheckerState, Error, LiteralValue, TypeId, TypeKind};
 use serde_json::{json, Value};
+use std::sync::Arc;
+use ts_arena::{CheckerIdentity, Counters, Generation};
 use ts_ast::JsString;
 
 enum Action {
@@ -18,7 +22,10 @@ pub struct Prepared {
 
 /// All returned roots and type storage stay alive at the allocation checkpoint.
 pub struct Live {
-    store: TypeStore,
+    _counters: Counters,
+    _generation: Generation,
+    _identity: Arc<CheckerIdentity>,
+    state: CheckerState,
     roots: Vec<TypeId>,
 }
 
@@ -36,12 +43,7 @@ fn bytes(text: &str) -> Result<Vec<u8>, String> {
 }
 
 pub(crate) fn hex(bytes: &[u8]) -> String {
-    use std::fmt::Write;
-    let mut output = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        write!(&mut output, "{byte:02x}").expect("write to string");
-    }
-    output
+    crate::storage_families::hex(bytes)
 }
 
 impl Prepared {
@@ -90,27 +92,78 @@ impl Prepared {
     }
 
     pub fn execute(&self) -> Result<Live, Error> {
-        let mut store = TypeStore::new();
+        let counters = Counters::new();
+        let generation = Generation::new(&counters);
+        let identity = CheckerIdentity::new(generation.clone(), &counters);
+        let mut state = CheckerState::bare(&identity, &counters, CheckerOptions::default())?;
         let mut roots = Vec::with_capacity(self.actions.len());
         for action in &self.actions {
             let id = match action {
                 Action::Intrinsic(flags, name) => {
-                    store.new_intrinsic_type(*flags, name.clone(), 0)?
+                    state.new_intrinsic_type_ex(*flags, name.as_bytes(), 0)?
                 }
-                Action::String(value) => store.string_literal_type(value.clone())?,
-                Action::Fresh(root) => store.fresh_string_literal_type(roots[*root])?,
+                Action::String(value) => state.get_string_literal_type(value.clone())?,
+                Action::Fresh(root) => {
+                    let root = roots[*root];
+                    if state.types.flags(root)? != crate::type_flags::STRING_LITERAL {
+                        return Err(Error::Unsupported("fresh non-string literal type"));
+                    }
+                    state.get_fresh_type_of_literal_type(root)?
+                }
             };
             roots.push(id);
         }
-        Ok(Live { store, roots })
+        Ok(Live {
+            _counters: counters,
+            _generation: generation,
+            _identity: identity,
+            state,
+            roots,
+        })
     }
 }
 
 impl Live {
     /// Called after allocator counters are sampled so JSON does not enter the interval.
     pub fn observation(&self) -> Value {
-        json!({"roots": self.roots.iter().map(|id| self.store.pilot_observation(*id)).collect::<Vec<_>>(),
-            "census": self.store.pilot_census()})
+        let tables = self.state.types.tables();
+        let roots: Vec<Value> = self
+            .roots
+            .iter()
+            .map(|id| {
+                let record = self.state.types.get(*id).expect("trace root");
+                match record.kind {
+                    TypeKind::Intrinsic => {
+                        let name = &self.state.types.intrinsic(*id).expect("intrinsic").name;
+                        json!({"id": id.get(), "flags": record.flags, "kind": "intrinsic",
+                            "text_hex": hex(name.as_bytes()), "regular": 0, "fresh": 0})
+                    }
+                    TypeKind::Literal => {
+                        let data = self.state.types.literal(*id).expect("literal");
+                        let LiteralValue::String(text) = &data.value else {
+                            unreachable!("pilot only constructs string literal payloads")
+                        };
+                        json!({"id": id.get(), "flags": record.flags, "kind": "string",
+                            "text_hex": hex(text.as_bytes()), "regular": data.regular.get(),
+                            "fresh": data.fresh.map_or(0, TypeId::get)})
+                    }
+                    _ => {
+                        unreachable!("pilot only constructs intrinsic and string literal payloads")
+                    }
+                }
+            })
+            .collect();
+        let caches = &self.state.types.caches;
+        json!({"roots": roots, "census": {
+            "type_records": tables.records.len(), "record_bytes": size_of::<crate::TypeRecord>(),
+            "record_capacity_bytes": tables.records.capacity() * size_of::<crate::TypeRecord>(),
+            "intrinsic_records": tables.intrinsics.len(), "intrinsic_row_bytes": size_of::<crate::IntrinsicData>(),
+            "intrinsic_capacity_bytes": tables.intrinsics.capacity() * size_of::<crate::IntrinsicData>(),
+            "string_records": tables.literals.len(), "string_row_bytes": size_of::<crate::LiteralData>(),
+            "string_capacity_bytes": tables.literals.capacity() * size_of::<crate::LiteralData>(),
+            "string_cache_entries": caches.string_literal_types.len(),
+            "string_cache_capacity": caches.string_literal_types.capacity(),
+        }})
     }
 }
 

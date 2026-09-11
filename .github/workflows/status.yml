@@ -167,8 +167,8 @@ jobs:
       - name: Checker ownership, constructor and type-display contracts
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: |
-          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer --all-features --locked
-          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer --all-features --locked --release
+          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer -p s08_relater_prototype --all-features --locked
+          cargo test -p ts_arena -p ts_checker -p ts_nodebuilder -p ts_printer -p s08_relater_prototype --all-features --locked --release
       - name: Native allocator build and original-request accounting
         if: ${{ !cancelled() && steps.validate.outcome == 'success' }}
         run: |
