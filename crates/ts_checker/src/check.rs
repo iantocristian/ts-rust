@@ -158,7 +158,8 @@ impl CheckerState {
                 self.check_source_element(required(read.type_node(), "parenthesized type")?)
             }
             Some(
-                K::TypeReference
+                K::UnionType
+                | K::TypeReference
                 | K::LiteralType
                 | K::AnyKeyword
                 | K::UnknownKeyword
@@ -275,7 +276,7 @@ impl CheckerState {
                 "checkVariableLikeDeclaration: binding/computed/private name",
             ));
         }
-        if read.question_token(self.ast(node)?)?.is_some() {
+        if !property && read.question_token(self.ast(node)?)?.is_some() {
             return Err(Error::Unsupported(
                 "checkVariableLikeDeclaration: optional declaration",
             ));
@@ -461,6 +462,27 @@ impl CheckerState {
             // constituents of the canonical boolean type in non-strict mode.
             return Ok(true);
         }
+        if (s | t) & tf::UNION != 0
+            && self.is_primitive_union(source)?
+            && self.is_primitive_union(target)?
+        {
+            if s & tf::UNION != 0 {
+                let types = self.types.union(source)?.types.clone();
+                for &ty in types.iter() {
+                    if !self.source_type_assignable(ty, target, active)? {
+                        return Ok(false);
+                    }
+                }
+                return Ok(true);
+            }
+            let types = self.types.union(target)?.types.clone();
+            for &ty in types.iter() {
+                if self.source_type_assignable(source, ty, active)? {
+                    return Ok(true);
+                }
+            }
+            return Ok(false);
+        }
         if s & tf::OBJECT != 0 && t & tf::OBJECT != 0 {
             if active.contains(&(source, target)) {
                 return Err(Error::Unsupported("recursive structured type relation"));
@@ -481,6 +503,21 @@ impl CheckerState {
             ));
         }
         Ok(false)
+    }
+
+    // The primitive slice can use all-source/any-target constituent relations
+    // without structural matching, constraints or recursive assumptions.
+    fn is_primitive_union(&self, ty: TypeId) -> Result<bool, Error> {
+        let flags = self.types.flags(ty)?;
+        if flags & tf::UNION != 0 {
+            for &ty in self.types.union(ty)?.types.iter() {
+                if !self.is_primitive_union(ty)? {
+                    return Ok(false);
+                }
+            }
+            return Ok(true);
+        }
+        Ok(flags & tf::STRUCTURED_OR_INSTANTIABLE == 0)
     }
 
     // port: tsc/internal/checker/relater.go:Relater.propertiesRelatedTo
@@ -592,6 +629,28 @@ impl CheckerState {
         Ok(())
     }
 
+    // port: tsc/internal/checker/relater.go:Checker.typeCouldHaveTopLevelSingletonTypes
+    fn type_could_have_top_level_singletons(&self, ty: TypeId) -> Result<bool, Error> {
+        let flags = self.types.flags(ty)?;
+        if flags & tf::BOOLEAN != 0 {
+            return Ok(false);
+        }
+        if flags & tf::UNION_OR_INTERSECTION != 0 {
+            for &ty in self.types.types_of(ty)? {
+                if self.type_could_have_top_level_singletons(ty)? {
+                    return Ok(true);
+                }
+            }
+            return Ok(false);
+        }
+        if flags & tf::INSTANTIABLE != 0 {
+            return Err(Error::Unsupported(
+                "typeCouldHaveTopLevelSingletonTypes: constraint",
+            ));
+        }
+        Ok(flags & (tf::UNIT | tf::TEMPLATE_LITERAL | tf::STRING_MAPPING) != 0)
+    }
+
     // port: tsc/internal/checker/relater.go:Checker.checkTypeAssignableTo
     // port: tsc/internal/checker/relater.go:Relater.reportRelationError
     fn check_assignable_at(
@@ -605,7 +664,9 @@ impl CheckerState {
         }
         let source_flags = self.types.flags(source)?;
         let target_flags = self.types.flags(target)?;
-        let source_for_error = if target_flags & (tf::NEVER | tf::UNIT) == 0 {
+        let source_for_error = if target_flags & tf::NEVER == 0
+            && !self.type_could_have_top_level_singletons(target)?
+        {
             if source_flags & tf::STRING_LITERAL != 0 {
                 self.builtins.string_type
             } else if source_flags & tf::NUMBER_LITERAL != 0 {

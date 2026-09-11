@@ -48,6 +48,7 @@ mod ids;
 mod init;
 mod key;
 mod links;
+mod members;
 mod merge;
 mod name_resolution;
 mod node_builder;

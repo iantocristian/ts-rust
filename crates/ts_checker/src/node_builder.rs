@@ -100,7 +100,26 @@ impl<'a> NodeBuilder<'a> {
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.symbolToExpression
     pub(crate) fn symbol_node(&mut self, symbol: SymbolId) -> Result<NodeId, Error> {
         if self.flags & ts_nodebuilder::flags::USE_FULLY_QUALIFIED_TYPE != 0 {
-            return Err(Error::Unsupported("getSymbolChain: qualified type display"));
+            let read = self.checker.symbol(symbol)?;
+            if read.parent().is_some() {
+                return Err(Error::Unsupported("getSymbolChain: qualified type display"));
+            }
+            // A global script declaration has no qualifying container. Other
+            // declarations still need the accessibility/container walk.
+            for declaration in self.checker.symbol_declarations(symbol)?.iter().flatten() {
+                let view = self.checker.ast(declaration)?;
+                let parent = view
+                    .node(declaration)?
+                    .parent()
+                    .ok_or(Error::MissingLink("display declaration parent"))?;
+                if view.node(parent)?.kind() != K::SourceFile
+                    || ts_ast::utilities::is_external_or_common_js_module(
+                        &view.source_file(parent)?,
+                    )
+                {
+                    return Err(Error::Unsupported("getSymbolChain: qualified type display"));
+                }
+            }
         }
         let name = self.symbol_name(symbol)?;
         self.approximate_length += name.len() + 1;
