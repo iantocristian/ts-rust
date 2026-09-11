@@ -896,7 +896,6 @@
       "tsc/internal/checker/checker.go:Checker.checkTypeQuery",
       "tsc/internal/checker/checker.go:Checker.checkTypeReferenceNode",
       "tsc/internal/checker/checker.go:Checker.checkTypeReferenceOrImport",
-      "tsc/internal/checker/checker.go:Checker.checkUnionOrIntersectionType",
       "tsc/internal/checker/checker.go:Checker.checkUnusedClassMembers",
       "tsc/internal/checker/checker.go:Checker.checkUnusedIdentifiers",
       "tsc/internal/checker/checker.go:Checker.checkUnusedInferTypeParameter",
