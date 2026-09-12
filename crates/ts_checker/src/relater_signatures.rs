@@ -9,6 +9,7 @@ use crate::{
 const BIVARIANT_CALLBACK: u32 = 1;
 const STRICT_CALLBACK: u32 = 2;
 const CALLBACK: u32 = BIVARIANT_CALLBACK | STRICT_CALLBACK;
+pub(crate) const IGNORE_RETURN_TYPES: u32 = 4;
 const STRICT_ARITY: u32 = 8;
 const STRICT_TOP: u32 = 16;
 
@@ -144,7 +145,7 @@ impl Relater<'_> {
     }
 
     // port: tsc/internal/checker/relater.go:Checker.compareSignaturesRelated
-    fn compare_signatures(
+    pub(crate) fn compare_signatures(
         &mut self,
         mut source: SignatureId,
         target: SignatureId,
@@ -354,6 +355,9 @@ impl Relater<'_> {
                 }
                 return Ok(result);
             }
+        }
+        if mode & IGNORE_RETURN_TYPES != 0 {
+            return Ok(result);
         }
         let target_return = self.checker.non_circular_return_type(target)?;
         if target_return == self.checker.builtins.void_type

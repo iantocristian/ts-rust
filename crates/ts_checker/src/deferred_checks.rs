@@ -1,0 +1,195 @@
+//! Deferred diagnostics carry non-owning identities instead of closures over
+//! the mutable checker. Failed callbacks remain pending and fail again on retry.
+
+use crate::{type_flags as tf, CheckerState, Error, TypeId};
+use ts_arena::NodeId;
+
+#[derive(Clone, Copy)]
+pub(crate) enum DeferredCheck {
+    MissingProperty { name: NodeId, containing: TypeId },
+    Iteration { index: usize },
+    WeakMapSetCollision { node: NodeId },
+    ReflectCollision { node: NodeId },
+}
+
+#[derive(Default)]
+pub(crate) struct DeferredChecks {
+    pub(crate) pending: Vec<DeferredCheck>,
+    pub(crate) cursor: usize,
+    pub(crate) reported_properties: crate::types::Set<NodeId>,
+}
+
+impl CheckerState {
+    pub(crate) fn defer_iteration_diagnostic(&mut self, index: usize) {
+        self.deferred_checks
+            .pending
+            .push(DeferredCheck::Iteration { index });
+    }
+    pub(crate) fn defer_missing_property(&mut self, name: NodeId, containing: TypeId) {
+        self.deferred_checks
+            .pending
+            .push(DeferredCheck::MissingProperty { name, containing });
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.produceDeferredDiagnostics
+    pub(crate) fn check_deferred_diagnostics(&mut self) -> Result<(), Error> {
+        while let Some(&check) = self
+            .deferred_checks
+            .pending
+            .get(self.deferred_checks.cursor)
+        {
+            match check {
+                DeferredCheck::MissingProperty { name, containing } => {
+                    self.report_missing_property(name, containing)?
+                }
+                DeferredCheck::Iteration { index } => self.report_iteration_diagnostic(index)?,
+                DeferredCheck::WeakMapSetCollision { node } => {
+                    self.check_weak_map_set_collision(node)?
+                }
+                DeferredCheck::ReflectCollision { node } => self.check_reflect_collision(node)?,
+            }
+            self.deferred_checks.cursor += 1;
+        }
+        Ok(())
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.reportNonexistentProperty
+    fn report_missing_property(&mut self, name: NodeId, containing: TypeId) -> Result<(), Error> {
+        if self.deferred_checks.reported_properties.contains(&name) {
+            return Ok(());
+        }
+        let text = self.ast(name)?.node_text(name)?.into_js_string();
+        let spelling = ts_scanner::declaration_name_to_string(self.ast(name)?, Some(name))?;
+        let mut child = None;
+        if self.ast(name)?.node(name)?.kind() != ts_ast::SyntaxKind::PrivateIdentifier
+            && self.types.flags(containing)? & (tf::UNION | tf::PRIMITIVE) == tf::UNION
+        {
+            for &part in self.types.compound_types(containing)?.clone().iter() {
+                if self
+                    .constituent_property(part, text.as_bytes(), false)?
+                    .is_none()
+                {
+                    let key = self.get_string_literal_type(text.clone())?;
+                    if self.applicable_index_info(part, key)?.is_none() {
+                        let display =
+                            self.type_to_string(part, crate::type_display::DEFAULT_FLAGS)?;
+                        child = Some(std::sync::Arc::new(self.diagnostic_for_node(
+                            Some(name),
+                            ts_diagnostics::Property_0_does_not_exist_on_type_1,
+                            vec![spelling.clone(), display],
+                        )?));
+                        break;
+                    }
+                }
+            }
+        }
+        let apparent = self.reduced_apparent_type(containing)?;
+        if self.index_type_has_static_property(text.as_bytes(), containing)? {
+            let display = self.type_to_string(containing, crate::type_display::DEFAULT_FLAGS)?;
+            let mut qualified = display.as_bytes().to_vec();
+            qualified.push(b'.');
+            qualified.extend_from_slice(spelling.as_bytes());
+            let message = ts_diagnostics::Property_0_does_not_exist_on_type_1_Did_you_mean_to_access_the_static_member_2_instead;
+            let args = vec![spelling, display, ts_ast::JsString::from_bytes(qualified)];
+            let diagnostic = if child.is_some() {
+                ts_ast::Diagnostic::chain(child, message, args)
+            } else {
+                self.diagnostic_for_node(Some(name), message, args)?
+            };
+            self.add_diagnostic(diagnostic)?;
+            self.deferred_checks.reported_properties.insert(name);
+            return Ok(());
+        }
+        if self
+            .constituent_property(apparent, b"then", false)?
+            .is_some()
+        {
+            return Err(Error::Unsupported(
+                "reportNonexistentProperty: promised type",
+            ));
+        }
+        if let Some(symbol) = self.types.get(apparent)?.symbol {
+            let name = self.symbol(symbol)?.name_bytes();
+            if matches!(
+                name,
+                b"String"
+                    | b"Array"
+                    | b"ReadonlyArray"
+                    | b"Promise"
+                    | b"ObjectConstructor"
+                    | b"NumberConstructor"
+                    | b"SymbolConstructor"
+                    | b"Math"
+            ) {
+                return Err(Error::Unsupported("getSuggestedLibForNonExistentProperty"));
+            }
+        }
+        let properties = self.get_properties_of_type(containing)?;
+        let mut names = Vec::new();
+        for property in properties {
+            if let Some(parent) = self.ast(name)?.node(name)?.parent() {
+                if self.ast(parent)?.node(parent)?.kind()
+                    == ts_ast::SyntaxKind::PropertyAccessExpression
+                {
+                    let receiver = self
+                        .ast(parent)?
+                        .node(parent)?
+                        .expression()
+                        .ok_or(Error::MissingLink("property completion receiver"))?;
+                    let is_super = self.ast(receiver)?.node(receiver)?.kind()
+                        == ts_ast::SyntaxKind::SuperKeyword;
+                    if !self.is_access_property_accessible(
+                        parent, is_super, false, containing, property,
+                    )? {
+                        continue;
+                    }
+                }
+            }
+            names.push((self.symbol(property)?.name_to_owned(), property));
+        }
+        let suggestion = ts_scanner::get_spelling_suggestion_for_strings(
+            text.as_bytes(),
+            names.iter().map(|(name, _)| name.as_bytes()),
+        );
+        let display = self.type_to_string(containing, crate::type_display::DEFAULT_FLAGS)?;
+        let (message, args, suggested) = if let Some(suggestion) = suggestion {
+            let (_, symbol) = names
+                .iter()
+                .find(|(name, _)| name.as_bytes() == suggestion)
+                .ok_or(Error::MissingLink("property suggestion"))?;
+            (
+                ts_diagnostics::Property_0_does_not_exist_on_type_1_Did_you_mean_2,
+                vec![spelling, display, self.symbol(*symbol)?.name_to_owned()],
+                Some(*symbol),
+            )
+        } else {
+            if self.types.flags(containing)? & tf::INTERSECTION != 0 {
+                return Err(Error::Unsupported("elaborateNeverIntersection"));
+            }
+            (
+                ts_diagnostics::Property_0_does_not_exist_on_type_1,
+                vec![spelling, display],
+                None,
+            )
+        };
+        let mut diagnostic = if child.is_some() {
+            ts_ast::Diagnostic::chain(child, message, args)
+        } else {
+            self.diagnostic_for_node(Some(name), message, args)?
+        };
+        if let Some(symbol) = suggested {
+            if let Some(declaration) = self.symbol(symbol)?.value_declaration() {
+                diagnostic.related_information.push(std::sync::Arc::new(
+                    self.diagnostic_for_node(
+                        Some(declaration),
+                        ts_diagnostics::X_0_is_declared_here,
+                        vec![self.symbol(symbol)?.name_to_owned()],
+                    )?,
+                ));
+            }
+        }
+        self.add_diagnostic(diagnostic)?;
+        self.deferred_checks.reported_properties.insert(name);
+        Ok(())
+    }
+}
