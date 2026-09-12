@@ -65,6 +65,12 @@ pub fn all(program: &Program, op: &mut Operation<'_>) -> Result<Value> {
         let source = file.bound().view().source_file()?;
         syntactic.extend_from_slice(source.diagnostics());
         bind.extend_from_slice(source.bind_diagnostics());
+        // The only library-enabled protocol uses skipLibCheck. Match the
+        // compiler's selection before entering checker.GetDiagnostics; lazy
+        // library types reached by source queries still execute normally.
+        if program.config().options.skip_lib_check.is_true() && source.is_declaration_file {
+            continue;
+        }
         match op.semantic_diagnostics(file.source()) {
             Ok(values) => semantic.extend(values),
             Err(error) => {

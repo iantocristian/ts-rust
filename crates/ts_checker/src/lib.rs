@@ -37,33 +37,88 @@
 //! Design notes: `docs/design/symbols.md`, `docs/design/ownership.md`; plan:
 //! `docs/S08-implementation-plan.md`.
 
+mod apparent;
+mod arrays;
 mod check;
+mod check_generics;
+mod check_indexes;
+mod check_type_syntax;
+#[cfg(feature = "relation-probe")]
+mod comparator_probe;
 mod compare;
+mod compound_signatures;
+mod conditional;
+mod constraints;
 mod construct;
 mod diagnostics;
+mod discriminants;
 mod flags;
 mod handles;
 mod host;
 mod ids;
+mod indexes;
+mod infer_candidates;
+mod infer_constraints;
+mod infer_helpers;
+mod infer_matching;
+mod infer_objects;
+mod infer_reverse;
+mod infer_signatures;
+mod infer_templates;
+mod infer_tuples;
+mod infer_types;
+mod inference;
 mod init;
+mod instantiate;
 mod intersection;
 mod key;
+mod late_indexes;
+mod late_members;
 mod links;
+mod mapped;
+mod mapper;
 mod members;
 mod merge;
 mod name_resolution;
 mod node_builder;
+mod normalize;
+mod object_members;
 mod owner;
 mod program;
 mod program_init;
+mod property_symbols;
 mod query;
 mod reduction;
+mod references;
+mod relater;
+mod relater_compound;
+mod relater_conditional;
+mod relater_excess;
+mod relater_mapped;
+mod relater_properties;
+mod relater_signatures;
+mod relater_structure;
+mod relater_tuples;
+mod relater_variance;
+mod relation_error_target;
+mod relation_errors;
+mod relation_helpers;
 mod resolution;
+mod signature_identity;
+mod signature_parameters;
 mod signatures;
+mod source_signatures;
 mod state;
+mod string_mapping;
+mod substitution;
 mod symbols;
 mod template;
+mod template_relation;
+mod union_reduction;
+mod variance;
+pub use relater::RelationKind;
 mod type_display;
+mod type_parameters;
 mod types;
 mod union;
 mod value_links;
@@ -83,7 +138,10 @@ pub use handles::{
     RetainedTypeList, SignatureRef, SymbolRef, TypeRef,
 };
 pub use host::CheckerHost;
-pub(crate) use ids::{AliasId, IndexInfoId, SignatureId, TypeId, TypePredicateId};
+pub(crate) use ids::{
+    AliasId, ConditionalRootId, IndexInfoId, InferenceId, MapperId, RelationFrameId, SignatureId,
+    TypeId, TypePredicateId,
+};
 pub(crate) use init::Builtins;
 pub use init::BUILTIN_TYPE_NAMES;
 pub(crate) use key::CacheKey;

@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/microsoft/TypeScript/tsc/internal/ast"
+	"github.com/microsoft/TypeScript/tsc/internal/bundled"
 	"github.com/microsoft/TypeScript/tsc/internal/checker"
 	"github.com/microsoft/TypeScript/tsc/internal/compiler"
 	"github.com/microsoft/TypeScript/tsc/internal/core"
@@ -57,6 +58,7 @@ type p2Spec struct {
 		Module string `json:"module"`
 		Strict bool   `json:"strict"`
 		NoLib  bool   `json:"noLib"`
+		SkipLibCheck bool `json:"skipLibCheck"`
 	} `json:"options"`
 	Programs []p2Program `json:"programs"`
 	Merge    p2Merge     `json:"merge"`
@@ -294,7 +296,7 @@ func p2QueryResult(c *checker.Checker, p *compiler.Program, q p2Query) map[strin
 	switch q.Operation {
 	case "type_at_location":
 		typ = c.GetTypeAtLocation(node)
-	case "declared_type":
+	case "declared_type", "declared_type_summary":
 		if symbol == nil {
 			panic("declared type lacks symbol")
 		}
@@ -306,12 +308,16 @@ func p2QueryResult(c *checker.Checker, p *compiler.Program, q p2Query) map[strin
 		panic("native query returned no type")
 	}
 	g := p2SymbolIDs(p.SourceFiles(), "query")
+	if q.Operation == "declared_type_summary" {
+		return map[string]any{"id": q.ID, "state": "executed", "node": p2Node(node), "symbol": g.snapshot(symbol), "type": p2BasicType(c, typ)}
+	}
 	return map[string]any{"id": q.ID, "state": "executed", "node": p2Node(node), "symbol": g.snapshot(symbol), "type": p2Type(c, typ, g)}
 }
 func p2AllDiagnostics(t *testing.T, p *compiler.Program, c *checker.Checker) map[string]any {
 	ctx := context.Background()
 	phases := map[string][]*ast.Diagnostic{"config": p.GetConfigFileParsingDiagnostics(), "program": p.GetProgramDiagnostics(), "syntactic": p.GetSyntacticDiagnostics(ctx, nil), "bind": p.GetBindDiagnostics(ctx, nil), "semantic": {}, "global": {}}
 	for _, file := range p.SourceFiles() {
+		if p.SkipTypeChecking(file, false) { continue }
 		phases["semantic"] = append(phases["semantic"], c.GetDiagnostics(ctx, file)...)
 	}
 	phases["global"] = c.GetGlobalDiagnostics()
@@ -339,8 +345,18 @@ func p2AllDiagnostics(t *testing.T, p *compiler.Program, c *checker.Checker) map
 	}
 	return observed
 }
-func p2ObserveProgram(t *testing.T, request p2Program) map[string]any {
-	p := p2NewProgram(p2Host(request.Files), request.Roots)
+func p2ObserveProgram(t *testing.T, request p2Program, libraries bool) map[string]any {
+	var p *compiler.Program
+	if libraries {
+		fs := bundled.WrapFS(vfstest.FromMap(request.Files, true))
+		host := compiler.NewCompilerHost("/", fs, bundled.LibPath(), nil, nil, nil)
+		options := &core.CompilerOptions{Target: core.ScriptTargetESNext, Module: core.ModuleKindESNext, Strict: core.TSTrue, SkipLibCheck: core.TSTrue}
+		config := tsoptions.NewParsedCommandLine(options, request.Roots, nil, tspath.ComparePathsOptions{})
+		p = compiler.NewProgram(compiler.ProgramOptions{Config: config, Host: host})
+		p.BindSourceFiles()
+	} else {
+		p = p2NewProgram(p2Host(request.Files), request.Roots)
+	}
 	c, _ := checker.NewChecker(p, nil)
 	queries := []map[string]any{}
 	for _, q := range request.Queries {
@@ -474,12 +490,12 @@ func TestS08P2(t *testing.T) {
 	if decoder.Decode(new(any)) != io.EOF {
 		t.Fatal("trailing request")
 	}
-	if spec.Version != 1 || spec.Options.Target != "ESNext" || spec.Options.Module != "ESNext" || !spec.Options.Strict || !spec.Options.NoLib {
+	if spec.Version != 1 || spec.Options.Target != "ESNext" || spec.Options.Module != "ESNext" || !spec.Options.Strict || spec.Options.NoLib == spec.Options.SkipLibCheck {
 		t.Fatal("unsupported explicit P2 options")
 	}
 	programs := []map[string]any{}
 	for _, request := range spec.Programs {
-		programs = append(programs, p2ObserveProgram(t, request))
+		programs = append(programs, p2ObserveProgram(t, request, !spec.Options.NoLib))
 	}
 	merges := []map[string]any{}
 	for _, mode := range spec.Merge.Modes {

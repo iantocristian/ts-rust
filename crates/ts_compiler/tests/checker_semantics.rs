@@ -113,13 +113,15 @@ fn source_assignment_diagnostics_match_pinned_native_ranges_and_payload_on_repea
 #[test]
 fn source_check_failure_after_a_diagnostic_stays_failed_across_operations() {
     let (checker, source) = checker(
-        b"let before: number = \"wrong\"; type Later<T> = T;",
+        b"let before: number = \"wrong\"; type Later = typeof before;",
         options(),
     );
     for _ in 0..3 {
         assert_eq!(
             checker.operation().unwrap().semantic_diagnostics(source),
-            Err(Error::Unsupported("checkTypeParameters"))
+            Err(Error::Unsupported(
+                "checkSourceElementWorker: statement/type family"
+            ))
         );
     }
 }
@@ -132,16 +134,8 @@ fn source_check_rejects_unported_grammar_relations_and_options() {
             "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
         ),
         (
-            b"let value: { field: number } = { field: \"wrong\" };",
-            "propertyRelatedTo: incompatible property diagnostic",
-        ),
-        (
-            b"let value: { field: number } = {};",
-            "reportUnmatchedProperty",
-        ),
-        (
             b"let value: { field: number } = { field: 1, extra: 2 };",
-            "hasExcessProperties",
+            "report excess properties: source object expression",
         ),
         (
             b"let value!: number;",
@@ -180,6 +174,30 @@ fn source_check_rejects_unported_grammar_relations_and_options() {
                 "checkSourceFile: noCheck/unused/isolated declaration options"
             ))
         );
+    }
+}
+
+#[test]
+fn source_check_reports_structural_assignment_failures() {
+    for (source, code, child) in [
+        (
+            b"let value: { field: number } = { field: \"wrong\" };".as_slice(),
+            2322,
+            Some(2326),
+        ),
+        (b"let value: { field: number } = {};".as_slice(), 2741, None),
+    ] {
+        let (owner, source) = checker(source, options());
+        for _ in 0..2 {
+            let diagnostics = owner
+                .operation()
+                .unwrap()
+                .semantic_diagnostics(source)
+                .unwrap();
+            assert_eq!(diagnostics.len(), 1);
+            assert_eq!(diagnostics[0].code, code);
+            assert_eq!(diagnostics[0].message_chain.first().map(|d| d.code), child);
+        }
     }
 }
 
@@ -265,7 +283,7 @@ fn source_symbol_references_are_bound_to_the_exact_checker_even_when_source_is_s
 
 #[test]
 fn failed_query_caches_and_resolution_stack_cannot_convert_failure_to_success() {
-    let (owner, program, _) = fixture(b"interface Callable { (value: string): number } interface Generic<T> {} type Failed = string[]; type Good = number;", options());
+    let (owner, program, _) = fixture(b"interface Callable { (value: string): number } interface Generic<T> {} type Failed = typeof value; type Good = number;", options());
     let declarations = declarations(&program);
     for _ in 0..3 {
         let mut op = owner.operation().unwrap();
@@ -274,13 +292,17 @@ fn failed_query_caches_and_resolution_stack_cannot_convert_failure_to_success() 
             .unwrap()
             .unwrap();
         let callable = op.get_declared_type_of_symbol(symbol).unwrap();
-        assert!(matches!(
-            op.properties_of_type(callable),
-            Err(Error::Unsupported(
-                "resolveDeclaredMembers: signatures/index infos"
-            ))
-        ));
-        for &declaration in &declarations[1..3] {
+        assert!(op.properties_of_type(callable).unwrap().is_empty());
+        let generic_symbol = op
+            .get_symbol_at_location(declaration_name(&program, declarations[1]))
+            .unwrap()
+            .unwrap();
+        let generic = op.get_declared_type_of_symbol(generic_symbol).unwrap();
+        assert_ne!(
+            op.type_object_flags(generic).unwrap() & ts_checker::object_flags::REFERENCE,
+            0
+        );
+        for &declaration in &declarations[2..3] {
             let symbol = op
                 .get_symbol_at_location(declaration_name(&program, declaration))
                 .unwrap()
@@ -329,7 +351,7 @@ fn literal_grammar_preserves_bigint_spelling_and_keeps_suggestions_out_of_errors
 }
 
 #[test]
-fn an_outer_generic_interface_never_caches_a_plain_interface_type() {
+fn an_outer_generic_interface_retains_outer_parameters_on_repeated_queries() {
     let (owner, program, _) = fixture(
         b"function outer<T>() { interface Nested { value: T } }",
         options(),
@@ -347,12 +369,18 @@ fn an_outer_generic_interface_never_caches_a_plain_interface_type() {
     for _ in 0..2 {
         let mut op = owner.operation().unwrap();
         let symbol = op.get_symbol_at_location(name).unwrap().unwrap();
-        assert_eq!(
-            op.get_declared_type_of_symbol(symbol),
-            Err(Error::Unsupported(
-                "getOuterTypeParametersOfClassOrInterface"
-            ))
+        let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+        assert_ne!(
+            op.type_object_flags(ty).unwrap() & ts_checker::object_flags::REFERENCE,
+            0
         );
+        let property = op.properties_of_type(ty).unwrap()[0];
+        let value = op.get_type_of_symbol(property).unwrap();
+        assert_eq!(
+            op.type_flags(value).unwrap(),
+            ts_checker::type_flags::TYPE_PARAMETER
+        );
+        assert_eq!(op.type_to_string(value, 0).unwrap().as_bytes(), b"T");
     }
 }
 
@@ -568,7 +596,7 @@ fn union_property_normalization_is_deferred_and_repeated_identity_is_stable() {
 
 #[test]
 fn union_property_failure_does_not_publish_a_partial_property_list() {
-    let (owner, program, _) = fixture(b"type A = { good: string; bad: string[] }; type B = { good: number; bad: number[] }; type U = A | B;", options());
+    let (owner, program, _) = fixture(b"type A = { good: string; bad: typeof missingA }; type B = { good: number; bad: typeof missingB }; type U = A | B;", options());
     let name = declaration_name(&program, declarations(&program)[2]);
     let mut op = owner.operation().unwrap();
     let symbol = op.get_symbol_at_location(name).unwrap().unwrap();
@@ -670,11 +698,11 @@ fn compound_constituents_are_checked_even_after_reduction_and_on_retry() {
     // Checking follows source order, before construction sorts/reduces types.
     for (text, expected) in [
         (
-            "type U = { a: string; a: number } | string[];",
+            "type U = { a: string; a: number } | typeof missing;",
             "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
         ),
         (
-            "type U = string[] | { a: string; a: number };",
+            "type U = typeof missing | { a: string; a: number };",
             "checkSourceElementWorker: statement/type family",
         ),
     ] {
@@ -741,7 +769,7 @@ fn intersection_discriminant_reduction_is_lazy_and_raw_display_is_available() {
 
 #[test]
 fn failed_intersection_reduction_clears_its_computed_flag_on_every_retry() {
-    let (owner, program, _) = fixture(b"type A = { good: string; bad: string[] }; type B = { good: number; bad: number[] }; type I = A & B;", options());
+    let (owner, program, _) = fixture(b"type A = { good: string; bad: typeof missingA }; type B = { good: number; bad: typeof missingB }; type I = A & B;", options());
     let mut op = owner.operation().unwrap();
     let symbol = op
         .get_symbol_at_location(declaration_name(&program, declarations(&program)[2]))

@@ -217,15 +217,13 @@ impl CheckerState {
         } else if object_flags & object_flags::REFERENCE != 0 {
             Payload::Reference(ReferenceData::default())
         } else if object_flags & object_flags::MAPPED != 0 {
-            return Err(Error::Unsupported("newObjectType: MappedType"));
+            Payload::Mapped(crate::types::MappedData::default())
         } else if object_flags & object_flags::REVERSE_MAPPED != 0 {
-            return Err(Error::Unsupported("newObjectType: ReverseMappedType"));
+            Payload::ReverseMapped(crate::types::ReverseMappedData::default())
         } else if object_flags & object_flags::EVOLVING_ARRAY != 0 {
             return Err(Error::Unsupported("newObjectType: EvolvingArrayType"));
         } else if object_flags & object_flags::INSTANTIATION_EXPRESSION_TYPE != 0 {
-            return Err(Error::Unsupported(
-                "newObjectType: InstantiationExpressionType",
-            ));
+            Payload::InstantiationExpression(crate::types::InstantiationExpressionData::default())
         } else if object_flags & object_flags::ANONYMOUS != 0 {
             Payload::Anonymous(ObjectData::default())
         } else {
@@ -441,7 +439,7 @@ impl CheckerState {
         readonly: bool,
     ) -> Result<TypeId, Error> {
         if element_infos.len() == 1 && element_infos[0].flags & element_flags::REST != 0 {
-            return Err(Error::Unsupported("globalArrayType"));
+            return self.array_target(readonly);
         }
         let key = tuple_key(element_infos, readonly);
         if let Some(t) = self.types.caches.tuple_types.get(&key) {
@@ -581,7 +579,7 @@ impl CheckerState {
             // No need to normalize when we only have regular required elements.
             return self.create_type_reference_ex(target, element_types, object_flags);
         }
-        Err(Error::Unsupported("TupleNormalizer"))
+        self.normalize_tuple(target, element_types, object_flags)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.createTypeReference

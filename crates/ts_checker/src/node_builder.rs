@@ -12,6 +12,9 @@ use ts_jsstring::SourceText;
 use ts_nodebuilder::flags as nf;
 use ts_printer::{emit_flags, EmitContext};
 
+#[path = "node_builder_extra.rs"]
+mod extra;
+
 pub(crate) struct NodeBuilder<'a> {
     pub(crate) checker: &'a mut CheckerState,
     pub(crate) ast: AstBuilder,
@@ -20,6 +23,8 @@ pub(crate) struct NodeBuilder<'a> {
     pub(crate) approximate_length: usize,
     truncating: bool,
     visited: Vec<TypeId>,
+    infer_parameters: crate::TypeList,
+    reverse_mapped_stack: Vec<SymbolId>,
 }
 
 impl<'a> NodeBuilder<'a> {
@@ -37,6 +42,8 @@ impl<'a> NodeBuilder<'a> {
             approximate_length: 0,
             truncating: false,
             visited: Vec::new(),
+            infer_parameters: [].into(),
+            reverse_mapped_stack: Vec::new(),
         }
     }
 
@@ -344,6 +351,23 @@ impl<'a> NodeBuilder<'a> {
             };
             return Ok(self.ast.new_literal_type_node(Some(literal)));
         }
+        if record.flags & tf::UNIQUE_ES_SYMBOL != 0 {
+            if self.flags & nf::ALLOW_UNIQUE_ES_SYMBOL_TYPE == 0 {
+                // IsValueSymbolAccessible is true without an enclosing node.
+                let symbol = record
+                    .symbol
+                    .ok_or(Error::MissingLink("unique symbol identity"))?;
+                self.approximate_length += 6;
+                let name = self.symbol_node(symbol)?;
+                self.approximate_length += self.ast.view().node_text(name)?.as_bytes().len() + 1;
+                return Ok(self.ast.new_type_query_node(Some(name), None));
+            }
+            self.approximate_length += 13;
+            let keyword = self.ast.new_keyword_type_node(K::SymbolKeyword.into());
+            return Ok(self
+                .ast
+                .new_type_operator_node(K::UniqueKeyword.into(), Some(keyword)));
+        }
         if record.flags & tf::NULL != 0 {
             self.approximate_length += 4;
             let literal = self.ast.new_keyword_expression(K::NullKeyword.into());
@@ -360,6 +384,12 @@ impl<'a> NodeBuilder<'a> {
                 return Ok(self.keyword(kind, length));
             }
         }
+        if record.flags & tf::TYPE_PARAMETER != 0
+            && self.checker.types.type_parameter(ty)?.is_this_type
+        {
+            self.approximate_length += 4;
+            return Ok(self.ast.new_this_type_node());
+        }
         if !in_alias {
             let alias = self.checker.types.alias_of(ty)?.cloned();
             if let Some(symbol) = crate::type_display::alias_symbol(alias.as_ref()) {
@@ -369,18 +399,48 @@ impl<'a> NodeBuilder<'a> {
                 );
             }
         }
-        if record.object_flags & of::CLASS_OR_INTERFACE != 0 {
-            if !self
-                .checker
-                .types
-                .interface(ty)?
-                .type_parameters()
-                .is_empty()
-            {
+        if record.object_flags & of::REFERENCE != 0 {
+            if self.checker.is_array_type(ty)? || self.checker.is_tuple_type(ty)? {
+                return self.array_or_tuple_node(ty);
+            }
+            let target = self.checker.types.target(ty)?;
+            let arguments = self.checker.get_type_arguments(ty)?;
+            let interface = self.checker.types.interface(target)?;
+            let outer = interface.outer_type_parameter_count as usize;
+            if arguments[..outer] != interface.type_parameters()[..outer] {
                 return Err(Error::Unsupported(
-                    "typeReferenceToTypeNode: generic interface",
+                    "typeReferenceToTypeNode: applied outer arguments",
                 ));
             }
+            let arity = interface.type_parameters().len();
+            return self.type_reference(
+                record
+                    .symbol
+                    .ok_or(Error::MissingLink("reference symbol"))?,
+                &arguments[outer..arity],
+            );
+        }
+        if record.flags & tf::TYPE_PARAMETER != 0 && self.infer_parameters.contains(&ty) {
+            let mut constraint_node = None;
+            if let Some(constraint) = self.checker.constraint_of_type_parameter(ty)? {
+                let inferred = self.checker.inferred_parameter_constraint(ty, true)?;
+                if !match inferred {
+                    Some(inferred) => self.checker.is_type_related_to(
+                        constraint,
+                        inferred,
+                        crate::RelationKind::Identity,
+                    )?,
+                    None => false,
+                } {
+                    constraint_node = Some(self.type_node(constraint)?);
+                }
+            }
+            let parameter = self.type_parameter_node_with_constraint(ty, constraint_node)?;
+            return Ok(self.ast.new_infer_type_node(Some(parameter)));
+        }
+        if record.object_flags & of::CLASS_OR_INTERFACE != 0
+            || record.flags & tf::TYPE_PARAMETER != 0
+        {
             return self.type_reference(
                 record
                     .symbol
@@ -415,8 +475,113 @@ impl<'a> NodeBuilder<'a> {
                 self.ast.new_intersection_type_node(Some(nodes))
             });
         }
-        if record.object_flags & of::ANONYMOUS != 0 {
+        if record.object_flags & (of::ANONYMOUS | of::MAPPED) != 0 {
             return self.object_type(ty);
+        }
+
+        if record.flags & tf::SUBSTITUTION != 0 {
+            let base = self.checker.types.substitution(ty)?.base;
+            if self.checker.is_no_infer_type(ty)? {
+                let symbol = self
+                    .checker
+                    .resolve_name(None, b"NoInfer", sf::TYPE, None, false)?;
+                if let Some(symbol) = symbol {
+                    if self.checker.symbol(symbol)?.flags() & sf::TYPE_ALIAS != 0
+                        && self.checker.get_local_type_parameters(symbol)?.len() == 1
+                    {
+                        return self.type_reference(symbol, &[base]);
+                    }
+                }
+            }
+            return self.type_node(base);
+        }
+        if record.flags & tf::CONDITIONAL != 0 {
+            if self.check_truncation() {
+                return self.elision(b"...");
+            }
+            let data = *self.checker.types.conditional(ty)?;
+            let root = self.checker.conditional_root(data.root)?.clone();
+            if self.flags & nf::GENERATE_NAMES_FOR_SHADOWED_TYPE_PARAMS != 0
+                && root.distributive
+                && self.checker.types.flags(data.check_type)? & tf::TYPE_PARAMETER == 0
+            {
+                return Err(Error::Unsupported(
+                    "conditionalTypeToTypeNode: shadowed distribution parameter",
+                ));
+            }
+            let check = self.type_node(data.check_type)?;
+            self.approximate_length += 15;
+            let previous = std::mem::replace(&mut self.infer_parameters, root.infer_parameters);
+            let extends = self.type_node(data.extends_type);
+            self.infer_parameters = previous;
+            let extends = extends?;
+            let yes = self.checker.conditional_true_type(ty, false)?;
+            let no = self.checker.conditional_false_type(ty)?;
+            let yes = self.type_node(yes)?;
+            let no = self.type_node(no)?;
+            return Ok(self.ast.new_conditional_type_node(
+                Some(check),
+                Some(extends),
+                Some(yes),
+                Some(no),
+            ));
+        }
+        if record.flags & tf::TEMPLATE_LITERAL != 0 {
+            let data = self.checker.types.template_literal(ty)?;
+            let texts = data.texts.clone();
+            let types = data.types.clone();
+            let head = self
+                .ast
+                .new_template_head(texts[0].clone(), JsString::default(), 0);
+            self.emit
+                .add_emit_flags(head, emit_flags::NO_ASCII_ESCAPING);
+            let mut spans = Vec::new();
+            for (index, &ty) in types.iter().enumerate() {
+                let literal = if index + 1 < types.len() {
+                    self.ast
+                        .new_template_middle(texts[index + 1].clone(), JsString::default(), 0)
+                } else {
+                    self.ast
+                        .new_template_tail(texts[index + 1].clone(), JsString::default(), 0)
+                };
+                self.emit
+                    .add_emit_flags(literal, emit_flags::NO_ASCII_ESCAPING);
+                let annotation = self.type_node(ty)?;
+                spans.push(
+                    self.ast
+                        .new_template_literal_type_span(Some(annotation), Some(literal)),
+                );
+            }
+            self.approximate_length += 2;
+            let spans = self.list(spans)?;
+            return Ok(self
+                .ast
+                .new_template_literal_type_node(Some(head), Some(spans)));
+        }
+        if record.flags & tf::STRING_MAPPING != 0 {
+            return self.type_reference(
+                record
+                    .symbol
+                    .ok_or(Error::MissingLink("string mapping display symbol"))?,
+                &[self.checker.types.target(ty)?],
+            );
+        }
+        if record.flags & tf::INDEX != 0 {
+            let target = self.checker.types.index_type(ty)?.target;
+            let operand = self.type_node(target)?;
+            self.approximate_length += 6;
+            return Ok(self
+                .ast
+                .new_type_operator_node(K::KeyOfKeyword.into(), Some(operand)));
+        }
+        if record.flags & tf::INDEXED_ACCESS != 0 {
+            let data = *self.checker.types.indexed_access(ty)?;
+            let object = self.type_node(data.object_type)?;
+            let index = self.type_node(data.index_type)?;
+            self.approximate_length += 2;
+            return Ok(self
+                .ast
+                .new_indexed_access_type_node(Some(object), Some(index)));
         }
         Err(Error::Unsupported(
             "typeToTypeNode: unsupported type family",
@@ -461,9 +626,16 @@ impl<'a> NodeBuilder<'a> {
 
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.createTypeNodeFromObjectType
     fn object_type(&mut self, ty: TypeId) -> Result<NodeId, Error> {
+        if self.checker.is_generic_mapped_type(ty)?
+            || self.checker.types.get(ty)?.object_flags & of::MAPPED != 0
+                && self.checker.types.mapped(ty)?.contains_error
+        {
+            return self.mapped_type_node(ty);
+        }
+
         if let Some(symbol) = self.checker.types.get(ty)?.symbol {
             if self.checker.symbol(symbol)?.flags()
-                & (sf::CLASS | sf::ENUM | sf::VALUE_MODULE | sf::FUNCTION | sf::METHOD)
+                & (sf::CLASS | sf::ENUM | sf::VALUE_MODULE | sf::FUNCTION)
                 != 0
             {
                 return Err(Error::Unsupported("createAnonymousTypeNode: typeof symbol"));
@@ -476,30 +648,67 @@ impl<'a> NodeBuilder<'a> {
         }
         self.checker.resolve_type_members(ty)?;
         let members = self.checker.types.structured(ty)?;
-        if members
-            .signatures
-            .as_ref()
-            .is_some_and(|items| !items.is_empty())
-            || members
-                .index_infos
-                .as_ref()
-                .is_some_and(|items| !items.is_empty())
-        {
-            return Err(Error::Unsupported(
-                "createTypeNodesFromResolvedType: signatures/index infos",
-            ));
-        }
+        let signatures = members.signatures.clone().unwrap_or_default();
+        let call_count = members.call_signature_count as usize;
+        let indexes = members.index_infos.clone().unwrap_or_default();
         let properties = members.properties.clone().unwrap_or_default();
         self.visited.push(ty);
-        let result = self.object_members(&properties);
+        let result = (|| {
+            if properties.is_empty() && indexes.is_empty() && signatures.len() == 1 {
+                return self.signature_node(
+                    signatures[0],
+                    if call_count == 1 {
+                        K::FunctionType
+                    } else {
+                        K::ConstructorType
+                    },
+                    None,
+                    None,
+                );
+            }
+            let mut nodes = Vec::new();
+            for (index, &signature) in signatures.iter().enumerate() {
+                if index >= call_count
+                    && self.checker.signatures.get(signature)?.flags
+                        & crate::signature_flags::ABSTRACT
+                        != 0
+                {
+                    return Err(Error::Unsupported(
+                        "createAnonymousTypeNode: abstract signature intersection",
+                    ));
+                }
+                nodes.push(self.signature_node(
+                    signature,
+                    if index < call_count {
+                        K::CallSignature
+                    } else {
+                        K::ConstructSignature
+                    },
+                    None,
+                    None,
+                )?);
+            }
+            for &index in indexes.iter() {
+                if self.checker.types.object_flags(ty)? & of::REVERSE_MAPPED != 0 {
+                    let placeholder = self.elided_type()?;
+                    nodes.push(self.index_signature_node_with_type(index, Some(placeholder))?);
+                } else {
+                    nodes.push(self.index_signature_node(index)?);
+                }
+            }
+            nodes.extend(self.object_members(&properties)?);
+            let members = self.list(nodes)?;
+            let node = self.ast.new_type_literal_node(Some(members));
+            self.approximate_length += 2;
+            if properties.is_empty() && signatures.is_empty() && indexes.is_empty()
+                || self.flags & nf::MULTILINE_OBJECT_LITERALS == 0
+            {
+                self.emit.set_emit_flags(node, emit_flags::SINGLE_LINE);
+            }
+            Ok(node)
+        })();
         self.visited.pop();
-        let members = self.list(result?)?;
-        let node = self.ast.new_type_literal_node(Some(members));
-        self.approximate_length += 2;
-        if properties.is_empty() || self.flags & nf::MULTILINE_OBJECT_LITERALS == 0 {
-            self.emit.set_emit_flags(node, emit_flags::SINGLE_LINE);
-        }
-        Ok(node)
+        result
     }
 
     fn elided_property(&mut self, text: &[u8]) -> Result<NodeId, Error> {
@@ -514,6 +723,19 @@ impl<'a> NodeBuilder<'a> {
             .new_property_signature_declaration(None, Some(name), None, None, None))
     }
 
+    fn elided_type(&mut self) -> Result<NodeId, Error> {
+        self.approximate_length += 3;
+        if self.flags & nf::NO_TRUNCATION != 0 {
+            return Err(Error::Unsupported(
+                "node builder synthetic type elision comment",
+            ));
+        }
+        let name = self
+            .ast
+            .new_identifier(JsString::from_bytes(b"...".as_slice()));
+        Ok(self.ast.new_type_reference_node(Some(name), None))
+    }
+
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.createTypeNodesFromResolvedType
     fn object_members(&mut self, properties: &[SymbolId]) -> Result<Vec<NodeId>, Error> {
         if !properties.is_empty() && self.check_truncation() {
@@ -526,10 +748,10 @@ impl<'a> NodeBuilder<'a> {
                 members.push(self.elided_property(
                     format!("... {} more ...", properties.len() - display_index).as_bytes(),
                 )?);
-                members.push(self.property(properties[properties.len() - 1])?);
+                members.extend(self.property_elements(properties[properties.len() - 1])?);
                 break;
             }
-            members.push(self.property(property)?);
+            members.extend(self.property_elements(property)?);
         }
         Ok(members)
     }
@@ -539,24 +761,31 @@ impl<'a> NodeBuilder<'a> {
         let read = self.checker.symbol(symbol)?;
         if read.flags() & sf::PROPERTY == 0
             || read.flags() & (sf::METHOD | sf::ACCESSOR | sf::FUNCTION) != 0
-            || read.check_flags() & check_flags::REVERSE_MAPPED != 0
         {
             return Err(Error::Unsupported(
-                "addPropertyToElementList: non-property/accessor/reverse mapping",
+                "addPropertyToElementList: non-property/accessor",
             ));
         }
-        if self
+        let name_type = self
             .checker
             .value_symbol_links
             .try_get(symbol)
-            .is_some_and(|links| links.name_type.is_some())
-        {
-            return Err(Error::Unsupported(
-                "getPropertyNameNodeForSymbolFromNameType",
-            ));
-        }
-        let name = read.name_to_owned();
+            .and_then(|links| links.name_type);
+        let name = match name_type {
+            Some(ty) => {
+                if self.checker.types.flags(ty)? & tf::ENUM_LITERAL != 0 {
+                    return Err(Error::Unsupported(
+                        "property name: accessible enum expression",
+                    ));
+                }
+                self.checker
+                    .index_property_name(ty)?
+                    .unwrap_or(read.name_to_owned())
+            }
+            None => read.name_to_owned(),
+        };
         let optional = read.flags() & sf::OPTIONAL != 0;
+        let reverse = read.check_flags() & check_flags::REVERSE_MAPPED != 0;
         let mut readonly = read.check_flags() & check_flags::READONLY != 0;
         if read.check_flags() & check_flags::SYNTHETIC == 0 {
             if let Some(declaration) = read.value_declaration() {
@@ -577,6 +806,20 @@ impl<'a> NodeBuilder<'a> {
         let property_name =
             if ts_scanner::is_identifier_text(name.as_bytes(), LanguageVariant::STANDARD) {
                 self.ast.new_identifier(name.clone())
+            } else if name_type.is_some()
+                && ts_jsnum::from_string(name.as_bytes())
+                    .to_string()
+                    .as_bytes()
+                    == name.as_bytes()
+                && name.as_bytes().starts_with(b"-")
+            {
+                let number = self
+                    .ast
+                    .new_numeric_literal(JsString::from_bytes(&name.as_bytes()[1..]), 0);
+                let negative = self
+                    .ast
+                    .new_prefix_unary_expression(K::MinusToken.into(), Some(number));
+                self.ast.new_computed_property_name(Some(negative))
             } else if !string_named
                 && ts_jsnum::from_string(name.as_bytes())
                     .to_string()
@@ -596,7 +839,12 @@ impl<'a> NodeBuilder<'a> {
                 )
             };
         self.approximate_length += name.len() + 1;
-        let mut ty = self.checker.get_type_of_symbol(symbol)?;
+        let placeholder = self.reverse_property_placeholder(symbol)?;
+        let mut ty = if placeholder {
+            self.checker.builtins.any_type
+        } else {
+            self.checker.get_type_of_symbol(symbol)?
+        };
         // getNonMissingTypeOfSymbol -> removeMissingType. Undefined remains
         // visible when exactOptionalPropertyTypes is disabled.
         if optional && self.checker.options.exact_optional_property_types {
@@ -608,7 +856,18 @@ impl<'a> NodeBuilder<'a> {
                 })?
                 .unwrap_or(self.checker.builtins.never_type);
         }
-        let type_node = self.type_node(ty)?;
+        let type_node = if placeholder {
+            self.elided_type()?
+        } else {
+            if reverse {
+                self.reverse_mapped_stack.push(symbol);
+            }
+            let result = self.type_node(ty);
+            if reverse {
+                self.reverse_mapped_stack.pop();
+            }
+            result?
+        };
         let question = optional.then(|| self.ast.new_token(K::QuestionToken.into()));
         let modifiers = if readonly {
             self.approximate_length += 9;
@@ -624,6 +883,41 @@ impl<'a> NodeBuilder<'a> {
             Some(type_node),
             None,
         ))
+    }
+
+    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.shouldUsePlaceholderForProperty
+    fn reverse_property_placeholder(&self, symbol: SymbolId) -> Result<bool, Error> {
+        if self.checker.symbol(symbol)?.check_flags() & check_flags::REVERSE_MAPPED == 0 {
+            return Ok(false);
+        }
+        if self.reverse_mapped_stack.contains(&symbol) {
+            return Ok(true);
+        }
+        if let Some(&last) = self.reverse_mapped_stack.last() {
+            if let Some((property_type, _, _)) = self.checker.reverse_symbol_parts(last) {
+                if self.checker.types.object_flags(property_type)? & of::ANONYMOUS == 0 {
+                    return Ok(true);
+                }
+            }
+        }
+        if self.reverse_mapped_stack.len() < 3 {
+            return Ok(false);
+        }
+        let Some((_, mapped, _)) = self.checker.reverse_symbol_parts(symbol) else {
+            return Ok(false);
+        };
+        let Some(mapped_symbol) = self.checker.types.get(mapped)?.symbol else {
+            return Ok(false);
+        };
+        // The pinned loop includes offsets 0..=3, despite the depth name.
+        for &property in self.reverse_mapped_stack.iter().rev().take(4) {
+            if let Some((_, mapped, _)) = self.checker.reverse_symbol_parts(property) {
+                if self.checker.types.get(mapped)?.symbol == Some(mapped_symbol) {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
     }
 
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.isStringNamed

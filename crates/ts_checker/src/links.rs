@@ -79,6 +79,14 @@ impl<K: LinkKey, V> LinkStore<K, V> {
         self.len == 0
     }
 
+    #[cfg(any(test, feature = "storage-pilot"))]
+    pub(crate) fn values(&self) -> impl Iterator<Item = &V> {
+        self.arenas
+            .values()
+            .flat_map(|directory| directory.iter().flatten())
+            .flat_map(|page| page.iter().flatten())
+    }
+
     /// Bytes held by the pages, the per-arena directories and the arena map,
     /// for storage censuses.
     pub fn structural_bytes(&self) -> usize {

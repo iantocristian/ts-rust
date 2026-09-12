@@ -15,22 +15,11 @@ use ts_arena::{NodeId, SymbolId};
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TypeSystemEntity {
     Symbol(SymbolId),
-    #[cfg_attr(
-        not(test),
-        allow(
-            dead_code,
-            reason = "P3 resolution entity; P1 cycle tests retain the complete entity schema"
-        )
-    )]
     Type(TypeId),
-    #[allow(
-        dead_code,
-        reason = "P3 signature resolution entity retained by the P1 cycle-guard schema"
-    )]
     Signature(SignatureId),
     #[allow(
         dead_code,
-        reason = "P3/P4 node resolution entity retained by the P1 cycle-guard schema"
+        reason = "P4 initializer/flow resolution uses node entities; the cycle-guard schema includes them"
     )]
     Node(NodeId),
 }
@@ -69,13 +58,11 @@ impl ResolutionStack {
         Self::default()
     }
 
-    #[cfg(test)]
     pub fn depth(&self) -> usize {
         self.resolutions.len()
     }
 
     /// Sets the search floor and returns the previous one for restoration.
-    #[cfg(test)]
     pub fn set_resolution_start(&mut self, start: usize) -> usize {
         std::mem::replace(&mut self.resolution_start, start)
     }
@@ -134,5 +121,15 @@ impl ResolutionStack {
             .pop()
             .expect("popTypeResolution pairs with a successful pushTypeResolution")
             .result
+    }
+}
+
+#[cfg(any(test, feature = "storage-pilot"))]
+impl ResolutionStack {
+    pub(crate) fn census(&self, census: &mut crate::census::Census) {
+        census.vec_capacity("resolution", &self.resolutions, self.resolutions.capacity());
+    }
+    pub(crate) fn census_entities(&self) -> impl Iterator<Item = TypeSystemEntity> + '_ {
+        self.resolutions.iter().map(|entry| entry.target)
     }
 }
