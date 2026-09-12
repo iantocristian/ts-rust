@@ -159,6 +159,103 @@ pub struct MemberSpec<'a> {
 }
 
 impl Operation<'_> {
+    /// Compares two results owned by this checker in the selected production
+    /// relation. Types retained from another checker are rejected first.
+    pub fn is_type_related_to(
+        &mut self,
+        source: TypeRef,
+        target: TypeRef,
+        mode: crate::RelationKind,
+    ) -> Result<bool, Error> {
+        let source = self.check_type(source)?;
+        let target = self.check_type(target)?;
+        self.state_mut().is_type_related_to(source, target, mode)
+    }
+
+    /// Rust's Ordering preserves the sign of Go's integer comparator. Both
+    /// non-null handles are validated before comparing, including equal refs.
+    pub fn compare_type_order(
+        &self,
+        source: Option<TypeRef>,
+        target: Option<TypeRef>,
+    ) -> Result<std::cmp::Ordering, Error> {
+        let source = source.map(|t| self.check_type(t)).transpose()?;
+        let target = target.map(|t| self.check_type(t)).transpose()?;
+        match (source, target) {
+            (None, None) => Ok(std::cmp::Ordering::Equal),
+            (None, Some(_)) => Ok(std::cmp::Ordering::Less),
+            (Some(_), None) => Ok(std::cmp::Ordering::Greater),
+            (Some(source), Some(target)) => self.state().compare_types(source, target),
+        }
+    }
+
+    /// Constructs only the supplemental comparator-domain records described
+    /// by P0; every result comes from the production comparator.
+    #[cfg(feature = "relation-probe")]
+    pub fn observe_residual_comparators(
+        &mut self,
+        first: NodeId,
+        second: NodeId,
+    ) -> Result<serde_json::Value, Error> {
+        self.state().ast(first)?.node(first)?;
+        self.state().ast(second)?.node(second)?;
+        self.state_mut().residual_comparators(first, second)
+    }
+
+    /// Diagnostic-only access to the frozen relation observation contract.
+    #[cfg(feature = "relation-probe")]
+    pub fn observe_type_relation(
+        &mut self,
+        source: TypeRef,
+        target: TypeRef,
+        mode: crate::RelationKind,
+        error_node: Option<NodeId>,
+    ) -> Result<(bool, Vec<crate::Ternary>, Option<ts_ast::Diagnostic>), Error> {
+        let source = self.check_type(source)?;
+        let target = self.check_type(target)?;
+        let state = self.state_mut();
+        if state.relations.observer.is_some() {
+            return Err(Error::MissingLink("relation observer already installed"));
+        }
+        if let Some(node) = error_node {
+            state.ast(node)?.node(node)?;
+        }
+        state.relations.observer = Some(Vec::new());
+        let result = state.check_type_related_ex(source, target, mode, error_node, None);
+        let calls = state
+            .relations
+            .observer
+            .take()
+            .expect("observer installed above");
+        result.map(|(result, diagnostic)| (result, calls, diagnostic))
+    }
+
+    /// Owned counter/cache snapshot. It cannot warm a type or relation cache.
+    #[cfg(feature = "relation-probe")]
+    pub fn relation_state(&self) -> serde_json::Value {
+        let state = self.state();
+        let mut caches = serde_json::Map::new();
+        for (index, name) in [
+            "identity",
+            "assignable",
+            "subtype",
+            "strict_subtype",
+            "comparable",
+        ]
+        .iter()
+        .enumerate()
+        {
+            let cache = &state.relations.caches[index];
+            let mut flags = cache.values().copied().collect::<Vec<_>>();
+            flags.sort_unstable();
+            caches.insert(
+                (*name).to_string(),
+                serde_json::json!({"entries":cache.len(),"result_flags":flags}),
+            );
+        }
+        serde_json::json!({"types_created":state.types.len(),"signatures_created":state.signatures.len(),"instantiations":state.instantiation.total_count,"caches":caches})
+    }
+
     /// Imports the exact identity only if the checker retains its symbol store.
     /// This preserves raw symbol observation, like Go's symbol-taking APIs;
     /// it does not substitute a merged clone. Source name/location queries

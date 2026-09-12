@@ -7,6 +7,10 @@ use ts_arena::SymbolId;
 use ts_ast::JsString;
 use ts_printer::{EmitTextWriter, Printer, PrinterOptions, SingleLineStringWriter, TextWriter};
 
+// Defaults used by the pinned Checker.TypeToString entry point.
+pub(crate) const DEFAULT_FLAGS: TypeFormatFlags = type_format_flags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
+    | type_format_flags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE;
+
 impl CheckerState {
     // port: tsc/internal/checker/printer.go:Checker.typeToStringEx
     pub(crate) fn type_to_string(
@@ -56,6 +60,67 @@ impl CheckerState {
             text.extend_from_slice(b"...");
         }
         Ok(JsString::from_bytes(text))
+    }
+
+    // port: tsc/internal/checker/printer.go:Checker.signatureToStringEx
+    pub(crate) fn signature_to_string(
+        &mut self,
+        signature: crate::SignatureId,
+    ) -> Result<JsString, Error> {
+        let construct =
+            self.signatures.get(signature)?.flags & crate::signature_flags::CONSTRUCT != 0;
+        let mut builder = crate::node_builder::NodeBuilder::new(
+            self,
+            ts_nodebuilder::flags::IGNORE_ERRORS
+                | ts_nodebuilder::flags::WRITE_TYPE_PARAMETERS_IN_QUALIFIED_NAME,
+        );
+        let node = builder.signature_node(
+            signature,
+            if construct {
+                ts_ast::SyntaxKind::ConstructSignature
+            } else {
+                ts_ast::SyntaxKind::CallSignature
+            },
+            None,
+            None,
+        )?;
+        let printer = Printer::new(
+            PrinterOptions {
+                remove_comments: true,
+                omit_trailing_semicolon: true,
+                never_ascii_escape: true,
+                ..Default::default()
+            },
+            &builder.emit,
+        );
+        let mut writer = SingleLineStringWriter::new();
+        printer.write(builder.ast.view(), node, None, &mut writer)?;
+        Ok(JsString::from_bytes(writer.text().to_vec()))
+    }
+
+    // port: tsc/internal/checker/printer.go:Checker.typePredicateToString
+    pub(crate) fn type_predicate_to_string(
+        &mut self,
+        predicate: crate::TypePredicateId,
+    ) -> Result<JsString, Error> {
+        let mut builder = crate::node_builder::NodeBuilder::new(
+            self,
+            ts_nodebuilder::flags::IGNORE_ERRORS
+                | ts_nodebuilder::flags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE,
+        );
+        let node = builder.predicate_node(predicate)?;
+        let printer = Printer::new(
+            PrinterOptions {
+                remove_comments: true,
+                omit_trailing_semicolon: true,
+                never_ascii_escape: true,
+                ..Default::default()
+            },
+            &builder.emit,
+        );
+        let mut writer = SingleLineStringWriter::new();
+        printer.write(builder.ast.view(), node, None, &mut writer)?;
+        Ok(JsString::from_bytes(writer.text().to_vec()))
     }
 
     // port: tsc/internal/checker/printer.go:Checker.symbolToString

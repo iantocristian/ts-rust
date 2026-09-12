@@ -7,13 +7,13 @@ impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.initializeChecker
     pub(crate) fn initialize_program(&mut self) -> Result<(), Error> {
         let globals = self.builtins.globals.ok_or(Error::MissingLink("globals"))?;
+        let mut augmentations = Vec::new();
+        let mut ambient_modules = Vec::new();
         for index in 0..self.program()?.host.source_file_count() {
             let file = self.program()?.host.source_file(index);
             let view = file.view();
             let source = view.source_file()?;
-            if !source.module_augmentations()?.is_empty() {
-                return Err(Error::Unsupported("mergeModuleAugmentation"));
-            }
+            augmentations.extend(source.module_augmentations()?.iter().flatten().copied());
             if !view.result().pattern_ambient_modules().is_empty() {
                 return Err(Error::Unsupported("mergePatternAmbientModules"));
             }
@@ -36,9 +36,8 @@ impl CheckerState {
                     if read.flags() & sf::MODULE != 0
                         && ts_ast::is_ambient_module_symbol_name(read.name_bytes())
                     {
-                        return Err(Error::Unsupported(
-                            "initializeChecker: deferred ambient modules",
-                        ));
+                        ambient_modules.push(symbol);
+                        continue;
                     }
                     if read.name_bytes() == b"globalThis" {
                         for declaration in self
@@ -64,6 +63,16 @@ impl CheckerState {
                         self.tables.get_mut(globals)?.insert(name, value);
                     }
                 }
+            }
+        }
+        for &name in &augmentations {
+            let declaration = self
+                .ast(name)?
+                .node(name)?
+                .parent()
+                .ok_or(Error::MissingLink("augmentation parent"))?;
+            if ast::is_global_scope_augmentation(&self.ast(declaration)?.node(declaration)?) {
+                self.merge_global_augmentation(declaration)?;
             }
         }
         self.add_undefined_to_globals()?;
@@ -127,6 +136,45 @@ impl CheckerState {
             .insert("anyReadonlyArrayType", any_readonly);
         let this = self.get_global_type("ThisType", 1, false)?;
         self.query.global_types.insert("ThisType", this);
+        for symbol in ambient_modules {
+            self.merge_global_symbol(symbol)?;
+        }
+        for name in augmentations {
+            let declaration = self
+                .ast(name)?
+                .node(name)?
+                .parent()
+                .ok_or(Error::MissingLink("augmentation parent"))?;
+            if !ast::is_global_scope_augmentation(&self.ast(declaration)?.node(declaration)?) {
+                return Err(Error::Unsupported(
+                    "mergeModuleAugmentation: external module resolution",
+                ));
+            }
+        }
+        Ok(())
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.mergeModuleAugmentation
+    fn merge_global_augmentation(&mut self, declaration: ts_arena::NodeId) -> Result<(), Error> {
+        // The raw bound symbol accumulates all augmentations in this file.
+        // Process only its first declaration, before resolving global types.
+        let symbol = self
+            .program()?
+            .bound(declaration)?
+            .node_binding(declaration)?
+            .and_then(|binding| binding.symbol)
+            .ok_or(Error::MissingLink("augmentation symbol"))?;
+        if self.symbol_declarations(symbol)?.first().flatten() != Some(declaration) {
+            return Ok(());
+        }
+        if let Some(exports) = self.symbol(symbol)?.exports() {
+            self.merge_symbol_table(
+                self.builtins.globals.ok_or(Error::MissingLink("globals"))?,
+                exports,
+                false,
+                None,
+            )?;
+        }
         Ok(())
     }
 
@@ -154,7 +202,7 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.getGlobalType
-    fn get_global_type(
+    pub(crate) fn get_global_type(
         &mut self,
         name: &'static str,
         arity: usize,
@@ -218,7 +266,7 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.createTypeFromGenericGlobalType
-    fn type_from_generic_global(
+    pub(crate) fn type_from_generic_global(
         &mut self,
         target: TypeId,
         argument: TypeId,

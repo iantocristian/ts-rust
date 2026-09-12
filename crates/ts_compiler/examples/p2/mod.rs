@@ -129,6 +129,16 @@ pub fn load(
     cache: &mut FileCache,
     counters: &Counters,
 ) -> Result<Arc<Program>> {
+    load_with_libraries(files, roots, cache, counters, false)
+}
+
+pub fn load_with_libraries(
+    files: &Value,
+    roots: &Value,
+    cache: &mut FileCache,
+    counters: &Counters,
+    libraries: bool,
+) -> Result<Arc<Program>> {
     let mut fs = ts_vfs::MemoryBuilder::new(b"/", true);
     for (name, source) in files
         .as_object()
@@ -140,7 +150,16 @@ pub fn load(
         target: ScriptTarget::ESNEXT,
         module: ModuleKind::ESNEXT,
         strict: Tristate::TRUE,
-        no_lib: Tristate::TRUE,
+        no_lib: if libraries {
+            Tristate::FALSE
+        } else {
+            Tristate::TRUE
+        },
+        skip_lib_check: if libraries {
+            Tristate::TRUE
+        } else {
+            Tristate::UNKNOWN
+        },
         ..Default::default()
     };
     let config = ts_tsoptions::ParsedCommandLine::new(
@@ -150,12 +169,21 @@ pub fn load(
             .map(|name| Ok(JsString::from_bytes(text(name)?.as_bytes())))
             .collect::<Result<Vec<_>>>()?,
     );
+    let host: Arc<dyn ts_vfs::FileSystem> = if libraries {
+        Arc::new(ts_bundled::BundledFs::new(Arc::new(fs.finish())))
+    } else {
+        Arc::new(fs.finish())
+    };
     Ok(Arc::new(Program::load(
         ProgramOptions {
             config,
-            host: Arc::new(fs.finish()),
+            host,
             current_directory: JsString::from_bytes(b"/".as_slice()),
-            default_library_path: JsString::from_bytes(b"/no-default-lib".as_slice()),
+            default_library_path: JsString::from_bytes(if libraries {
+                ts_bundled::LIB_PATH
+            } else {
+                b"/no-default-lib"
+            }),
             skip_module_resolution: false,
         },
         cache,
@@ -181,7 +209,9 @@ pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
     let raw = std::fs::read(&args[1])?;
     let spec: Value = serde_json::from_slice(&raw)?;
-    let mut canonical = serde_json::to_vec(&spec)?;
+    // Match the native producer's ensure_ascii=True wire representation.
+    // Serde's default formatter leaves non-ASCII text unescaped.
+    let mut canonical = canonical_ascii_request(&spec)?;
     canonical.push(b'\n');
     // A canonical wire request rejects duplicate keys as well as trailing data;
     // the checked Python producer supplies this exact representation.
@@ -189,8 +219,10 @@ pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         return Err("P2 requires the canonical native request bytes".into());
     }
     if spec["version"] != 1
-        || spec["options"]
+        || (spec["options"]
             != json!({"target":"ESNext","module":"ESNext","strict":true,"noLib":true})
+            && spec["options"]
+                != json!({"target":"ESNext","module":"ESNext","strict":true,"noLib":false,"skipLibCheck":true}))
     {
         return Err("unsupported P2 protocol/options".into());
     }
@@ -200,7 +232,12 @@ pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut ownership = Vec::new();
     for request in array(&spec["programs"])? {
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            queries::program(request, &generation, &counters)
+            queries::program(
+                request,
+                &generation,
+                &counters,
+                spec["options"]["noLib"] == false,
+            )
         }))
         .map_err(|payload| panic_error(payload.as_ref()))
         .and_then(|value| value);
@@ -243,4 +280,21 @@ pub fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     bytes.push(b'\n');
     std::fs::write(&args[2], bytes)?;
     Ok(())
+}
+
+fn canonical_ascii_request(value: &Value) -> serde_json::Result<Vec<u8>> {
+    let serialized = serde_json::to_string(value)?;
+    let mut bytes = Vec::with_capacity(serialized.len());
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    for unit in serialized.encode_utf16() {
+        if unit < 0x7f {
+            bytes.push(unit as u8);
+        } else {
+            bytes.extend_from_slice(b"\\u");
+            for shift in [12, 8, 4, 0] {
+                bytes.push(HEX[usize::from((unit >> shift) & 15)]);
+            }
+        }
+    }
+    Ok(bytes)
 }

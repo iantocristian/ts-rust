@@ -40,6 +40,16 @@ impl EdgePages {
         !self.escapes.is_empty()
     }
 
+    /// Known page/directory bytes and the count of escape entries whose B-tree
+    /// allocation extent is not exposed by std. A census must report that gap.
+    pub(crate) fn storage_bytes(&self) -> (usize, usize) {
+        (
+            self.pages.capacity() * size_of::<Box<[u32; PAGE_WORDS]>>()
+                + self.pages.len() * size_of::<[u32; PAGE_WORDS]>(),
+            self.escapes.len(),
+        )
+    }
+
     /// Read a stored word without namespace decoding. Zero preserves a nil edge.
     /// Local callers must establish `!has_escapes()` before importing nonzero
     /// words as core slots; this method does not resolve an escape sentinel.

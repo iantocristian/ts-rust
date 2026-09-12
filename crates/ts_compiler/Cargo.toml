@@ -6,6 +6,17 @@ rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
+[features]
+relation-probe = ["ts_checker/relation-probe"]
+
+[[example]]
+name = "p3_relations"
+required-features = ["relation-probe"]
+
+[[example]]
+name = "p3_comparators"
+required-features = ["relation-probe"]
+
 [dependencies]
 stacker = "=0.1.25"
 ts_core = { version = "0.1.0", path = "../ts_core" }

@@ -75,7 +75,28 @@ impl NameResolverHooks for Hooks<'_> {
         &mut self,
         node: NodeId,
     ) -> Result<Hook<Option<SymbolId>>, ts_arena::Error> {
-        let result = self.state.get_symbol_of_declaration(node).map(Hook::Value);
+        let result = (|| {
+            let Some(raw) = self.state.raw_declaration_symbol(node)? else {
+                return Ok(Hook::Value(None));
+            };
+            let symbol = self.state.symbol(raw)?;
+            let symbol = if symbol.flags() & sf::CLASS_MEMBER != 0
+                && symbol.name_bytes() == ts_ast::internal_symbol_names::COMPUTED
+            {
+                self.state
+                    .late_members
+                    .symbols
+                    .try_get(raw)
+                    .copied()
+                    .flatten()
+                    .ok_or(Error::Unsupported(
+                        "createNameResolver: unresolved late enclosing symbol",
+                    ))?
+            } else {
+                raw
+            };
+            Ok(Hook::Value(Some(self.state.get_merged_symbol(symbol))))
+        })();
         self.capture(result)
     }
     fn lookup(
@@ -202,6 +223,132 @@ impl NameResolverHooks for Hooks<'_> {
 }
 
 impl CheckerState {
+    // port: tsc/internal/checker/checker.go:Checker.resolveEntityName
+    // port: tsc/internal/checker/checker.go:Checker.resolveQualifiedName
+    pub(crate) fn resolve_entity_name(
+        &mut self,
+        name: NodeId,
+        meaning: SymbolFlags,
+        ignore_errors: bool,
+    ) -> Result<Option<SymbolId>, Error> {
+        use ts_ast::{internal_symbol_names as names, SyntaxKind as K};
+        let read = self.ast(name)?.node(name)?;
+        if read.pos() == read.end() {
+            return Ok(None);
+        }
+        let symbol = if read.kind() == K::Identifier {
+            let text = self.ast(name)?.node_text(name)?.into_js_string();
+            let message = if meaning == sf::NAMESPACE {
+                ts_diagnostics::Cannot_find_namespace_0
+            } else {
+                ts_diagnostics::Cannot_find_name_0
+            };
+            let symbol = self.resolve_name(
+                Some(name),
+                text.as_bytes(),
+                meaning,
+                if meaning == sf::NAMESPACE {
+                    None
+                } else {
+                    (!ignore_errors).then_some(message)
+                },
+                true,
+            )?;
+            if symbol.is_none() && meaning == sf::NAMESPACE {
+                if let Some(alias) =
+                    self.resolve_name(Some(name), text.as_bytes(), sf::ALIAS, None, true)?
+                {
+                    if self.symbol(alias)?.name_bytes() == names::EXPORT_EQUALS {
+                        return Ok(self.symbol(alias)?.parent());
+                    }
+                }
+                if !ignore_errors {
+                    return self.resolve_name(
+                        Some(name),
+                        text.as_bytes(),
+                        meaning,
+                        Some(message),
+                        true,
+                    );
+                }
+            }
+            symbol
+        } else {
+            let (left, right) = match read.kind().known() {
+                Some(K::QualifiedName) => {
+                    let data = read
+                        .data_source()
+                        .as_qualified_name()
+                        .ok_or(Error::MissingLink("qualified name"))?;
+                    (data.left(), data.right())
+                }
+                Some(K::PropertyAccessExpression) => {
+                    let data = read
+                        .data_source()
+                        .as_property_access_expression()
+                        .ok_or(Error::MissingLink("qualified property access"))?;
+                    (data.expression(), read.name())
+                }
+                _ => {
+                    return Err(Error::Unsupported(
+                        "resolveEntityName: unsupported entity syntax",
+                    ))
+                }
+            };
+            let left = left.ok_or(Error::MissingLink("qualified name left"))?;
+            let right = right.ok_or(Error::MissingLink("qualified name right"))?;
+            let Some(namespace) = self.resolve_entity_name(left, sf::NAMESPACE, ignore_errors)?
+            else {
+                return Ok(None);
+            };
+            if namespace == self.builtins.unknown_symbol {
+                return Ok(Some(namespace));
+            }
+            if self.symbol(namespace)?.flags() & sf::ALIAS != 0 {
+                return Err(Error::Unsupported(
+                    "resolveQualifiedName: alias/re-export namespace",
+                ));
+            }
+            let exports = self.symbol(namespace)?.exports();
+            if self.member_symbol(exports, names::EXPORT_STAR)?.is_some() {
+                return Err(Error::Unsupported(
+                    "getExportsOfModule: export-star closure",
+                ));
+            }
+            if let Some(declaration) = self.symbol(namespace)?.value_declaration() {
+                if self.ast(declaration)?.node(declaration)?.flags()
+                    & ts_ast::node_flags::JAVA_SCRIPT_FILE
+                    != 0
+                {
+                    return Err(Error::Unsupported(
+                        "resolveQualifiedName: CommonJS namespace",
+                    ));
+                }
+            }
+            if self.ast(right)?.node(right)?.pos() == self.ast(right)?.node(right)?.end() {
+                return Ok(None);
+            }
+            let text = self.ast(right)?.node_text(right)?.into_js_string();
+            let symbol = self.lookup_symbol(exports, text.as_bytes(), meaning)?;
+            if symbol.is_none() && !ignore_errors {
+                return Err(Error::Unsupported(
+                    "resolveQualifiedName: missing export suggestions and typeof diagnostic",
+                ));
+            }
+            symbol
+        };
+        if let Some(symbol) = symbol {
+            let symbol = self.get_merged_symbol(symbol);
+            if self.symbol(symbol)?.flags() & sf::ALIAS != 0 {
+                return Err(Error::Unsupported(
+                    "resolveEntityName: type-only/alias resolution",
+                ));
+            }
+            return Ok(Some(symbol));
+        }
+        Ok(None)
+    }
+
     // port: tsc/internal/checker/checker.go:Checker.getSymbol
     pub(crate) fn lookup_symbol(
         &self,

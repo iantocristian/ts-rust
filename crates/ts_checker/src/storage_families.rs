@@ -585,7 +585,7 @@ impl Live {
                 "symbols": self.prefix_counts.1,
                 "signatures": self.prefix_counts.2,
             },
-            "census": self.state.census(&type_roots),
+            "census": self.state.census(&type_roots)?,
         }))
     }
 

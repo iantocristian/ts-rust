@@ -25,8 +25,10 @@ def fields(value, expected):
 
 def specification(spec):
     fields(spec, 'version scope options programs merge')
-    if type(spec['version']) is not int or spec['version'] != 1 or not same_json_value(spec['options'], {'target':'ESNext','module':'ESNext','strict':True,'noLib':True}):
-        raise ValueError('P2 requires explicit strict/noLib options')
+    options = ({'target':'ESNext','module':'ESNext','strict':True,'noLib':True},
+               {'target':'ESNext','module':'ESNext','strict':True,'noLib':False,'skipLibCheck':True})
+    if type(spec['version']) is not int or spec['version'] != 1 or not any(same_json_value(spec['options'], value) for value in options):
+        raise ValueError('capability capture requires explicit strict options and declared library checking policy')
     if not spec['programs'] or len({p['id'] for p in spec['programs']}) != len(spec['programs']):
         raise ValueError('empty or duplicate P2 programs')
     for program in spec['programs']:
@@ -43,8 +45,8 @@ def specification(spec):
             fields(query, 'id file declaration target operation')
             if (query['file'] not in program['files'] or not query['declaration']
                     or query['target'] not in ('name','annotation','annotation_name','initializer')
-                    or query['operation'] not in ('type_at_location','declared_type')
-                    or (query['operation'] == 'declared_type' and query['target'] != 'name')):
+                    or query['operation'] not in ('type_at_location','declared_type','declared_type_summary')
+                    or (query['operation'] in ('declared_type','declared_type_summary') and query['target'] != 'name')):
                 raise ValueError('invalid P2 query selector')
     merge = spec['merge']
     fields(merge, 'id files shared symbol modes single_roots independent_roots')
@@ -129,10 +131,12 @@ def validate(spec, observed, *, allow_unsupported=False, require_rust_ownership=
         fields(program,'id state queries diagnostics')
         if [q['id'] for q in program['queries']] != [q['id'] for q in request['queries']]:
             raise ValueError('P2 query inventory differs')
-        for query in program['queries']:
+        for requested, query in zip(request['queries'], program['queries'], strict=True):
             if operation_state(query,path+'/'+query['id'],missing,allow_unsupported):
                 fields(query,'id state node symbol type')
-                fields(query['type'],'flags object_flags display_hex in_alias_display_hex properties')
+                type_fields = 'flags object_flags display_hex in_alias_display_hex'
+                if requested['operation'] != 'declared_type_summary': type_fields += ' properties'
+                fields(query['type'], type_fields)
                 for key in ('display_hex','in_alias_display_hex'):bytes.fromhex(query['type'][key])
         diagnostics(program['diagnostics'],path+'/diagnostics')
     if [m['mode'] for m in observed['merges']] != MODES:

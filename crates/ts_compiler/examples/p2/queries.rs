@@ -1,6 +1,4 @@
-use super::{
-    array, diagnostics, failure, graph, hex, load, node_json, owner, text, view, Error, Result,
-};
+use super::{array, diagnostics, failure, graph, hex, node_json, owner, text, view, Error, Result};
 use serde_json::{json, Value};
 use std::sync::Arc;
 use ts_arena::{Counters, Generation, NodeId};
@@ -35,14 +33,14 @@ pub fn declaration(program: &Program, path: &str, name: &str) -> Result<NodeId> 
     }
     found.ok_or_else(|| Error::Protocol("declaration selector absent".into()))
 }
+const DEFAULT_DISPLAY_FLAGS: ts_checker::TypeFormatFlags =
+    type_format_flags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
+        | type_format_flags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE;
+
 pub fn basic_type(op: &mut Operation<'_>, typ: TypeRef) -> Result<Value> {
     let flags = op.type_flags(typ)?;
     let object_flags = op.type_object_flags(typ)?;
-    let display = op.type_to_string(
-        typ,
-        type_format_flags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
-            | type_format_flags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE,
-    )?;
+    let display = op.type_to_string(typ, DEFAULT_DISPLAY_FLAGS)?;
     let alias = op.type_to_string(typ, type_format_flags::IN_TYPE_ALIAS)?;
     Ok(
         json!({"flags":flags,"object_flags":object_flags,"display_hex":hex(display.as_bytes()),"in_alias_display_hex":hex(alias.as_bytes())}),
@@ -92,15 +90,20 @@ fn query(program: &Program, op: &mut Operation<'_>, request: &Value) -> Result<(
     let symbol = op.get_symbol_at_location(node)?;
     let typ = match text(&request["operation"])? {
         "type_at_location" => op.get_type_at_location(node)?,
-        "declared_type" => op.get_declared_type_of_symbol(
+        "declared_type" | "declared_type_summary" => op.get_declared_type_of_symbol(
             symbol.ok_or_else(|| Error::Protocol("declared type symbol absent".into()))?,
         )?,
         _ => return Err(Error::Protocol("unknown query operation".into())),
     };
     let mut graph = graph::Graph::new(program, "query", None)?;
     let symbol = graph.snapshot(program, Some(op), symbol.map(ts_checker::SymbolRef::id))?;
+    let value = if request["operation"] == "declared_type_summary" {
+        basic_type(op, typ)?
+    } else {
+        type_value(program, op, typ, &mut graph)?
+    };
     Ok((
-        json!({"id":request["id"],"state":"executed","node":node_json(program,Some(node))?,"symbol":symbol,"type":type_value(program,op,typ,&mut graph)?}),
+        json!({"id":request["id"],"state":"executed","node":node_json(program,Some(node))?,"symbol":symbol,"type":value}),
         typ,
     ))
 }
@@ -108,12 +111,14 @@ pub fn program(
     request: &Value,
     generation: &Generation,
     counters: &Counters,
+    libraries: bool,
 ) -> Result<(Value, Value)> {
-    let program = load(
+    let program = super::load_with_libraries(
         &request["files"],
         &request["roots"],
         &mut FileCache::new(),
         counters,
+        libraries,
     )?;
     let weak = Arc::downgrade(&program);
     let owner = owner(program.clone(), generation, counters)?;
@@ -142,7 +147,7 @@ pub fn program(
         let actual = {
             let mut op = retained.owner().operation()?;
             let typ = op.import_type(&retained)?;
-            hex(op.type_to_string(typ, type_format_flags::NONE)?.as_bytes())
+            hex(op.type_to_string(typ, DEFAULT_DISPLAY_FLAGS)?.as_bytes())
         };
         drop(retained);
         json!({"id":request["id"],"state":"executed","program_survives_retained_result":survives,"retained_display_unchanged":json!(actual)==expected,"program_released_after_result_drop":weak.upgrade().is_none()})

@@ -2,8 +2,8 @@
 //! owner; each store still checks the slot. Ordinary reads borrow the retained
 //! host and never clone a file or checker owner.
 
+use crate::types::Map as HashMap;
 use crate::{CheckerHost, CheckerState};
-use std::collections::HashMap;
 use std::sync::Arc;
 use ts_arena::{ArenaId, Error, NodeId, SymbolId};
 use ts_ast::{
@@ -41,11 +41,11 @@ impl ProgramContext {
     pub(crate) fn new(host: Arc<dyn CheckerHost>) -> Self {
         let mut result = Self {
             host,
-            nodes: HashMap::new(),
-            file_indices: HashMap::new(),
-            symbols: HashMap::new(),
-            tables: HashMap::new(),
-            declarations: HashMap::new(),
+            nodes: HashMap::default(),
+            file_indices: HashMap::default(),
+            symbols: HashMap::default(),
+            tables: HashMap::default(),
+            declarations: HashMap::default(),
         };
         for index in 0..result.host.source_file_count() {
             let file = result.host.source_file(index);
@@ -128,5 +128,18 @@ impl ProgramContext {
             .result()
             .declarations()
             .get(slice)
+    }
+}
+
+#[cfg(any(test, feature = "storage-pilot"))]
+impl ProgramContext {
+    pub(crate) fn census(&self, census: &mut crate::census::Census) {
+        // The retained program itself is bound input; these directories are
+        // allocated by the checker and remain charged here.
+        census.map("program_indices", &self.nodes);
+        census.map("program_indices", &self.file_indices);
+        census.map("program_indices", &self.symbols);
+        census.map("program_indices", &self.tables);
+        census.map("program_indices", &self.declarations);
     }
 }

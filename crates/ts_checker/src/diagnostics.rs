@@ -317,3 +317,28 @@ impl CheckerState {
         Ok(())
     }
 }
+
+#[cfg(any(test, feature = "storage-pilot"))]
+impl DiagnosticStore {
+    pub(crate) fn census(&self, census: &mut crate::census::Census) {
+        census.vec_capacity("diagnostics", &self.entries, self.entries.capacity());
+        for entry in &self.entries {
+            census.diagnostic(entry);
+        }
+        census.map("diagnostics", &self.locations);
+        for ((path, _, _), entries) in &self.locations {
+            census.text("diagnostics", path);
+            census.vec_capacity("diagnostics", entries, entries.capacity());
+        }
+        census.map("diagnostics", &self.files);
+        for (path, bucket) in &self.files {
+            census.text("diagnostics", path);
+            census.vec_capacity("diagnostics", &bucket.indices, bucket.indices.capacity());
+        }
+        census.vec_capacity(
+            "diagnostics",
+            &self.globals.indices,
+            self.globals.indices.capacity(),
+        );
+    }
+}

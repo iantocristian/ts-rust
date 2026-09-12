@@ -1,15 +1,15 @@
 //! Structural storage census of one checker, following the accounting frozen in
 //! `data/s08/type-footprint.json`: every allocation is charged once, to one
-//! family, with its full capacity. Type families carge their headers, payload
+//! family, with its full capacity. Type families charge their headers, payload
 //! rows, owned lists, owned text and interning caches; the remaining checker
 //! storage is reported beside them. A family the adapter cannot measure is
 //! listed as unavailable, never charged as zero.
 //!
-//! The Go adapter (`tools/s08/oracle/storage_families_bridge.go`) reports the
-//! same family names over the same live roots, so the two reports compare like
-//! with like.
+//! The Go P1 adapter (`tools/s08/oracle/families/bridge.go`) measures the original
+//! constructor families. P3 adds named Rust measurements; their Go counterparts
+//! remain unmeasured until P7 and are not a footprint comparison.
 
-use crate::{CheckerState, LiteralValue, TypeId, TypeKind, TypeList};
+use crate::{CheckerState, LiteralValue, TypeId};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
 use std::sync::Arc;
@@ -17,6 +17,11 @@ use ts_ast::JsString;
 
 /// `Arc<[T]>` and `Arc<[u8]>` allocations carry the strong and weak counts.
 const ARC_HEADER: usize = 16;
+
+#[path = "census_p3.rs"]
+mod p3;
+#[path = "census_reach.rs"]
+mod reach;
 
 #[derive(Default)]
 struct Family {
@@ -33,25 +38,26 @@ pub(crate) struct Census {
 }
 
 impl Census {
-    fn add(&mut self, family: &'static str, count: usize, bytes: usize) {
+    pub(crate) fn add(&mut self, family: &'static str, count: usize, bytes: usize) {
         let entry = self.families.entry(family).or_default();
         entry.count += count;
         entry.bytes += bytes;
     }
 
-    fn list<T>(&mut self, family: &'static str, list: &Arc<[T]>) {
+    pub(crate) fn list<T>(&mut self, family: &'static str, list: &Arc<[T]>) {
         if self.seen.insert(list.as_ptr() as usize) {
             self.add(family, 0, ARC_HEADER + list.len() * size_of::<T>());
         }
     }
 
-    fn text(&mut self, family: &'static str, text: &JsString) {
-        if self.seen.insert(text.as_bytes().as_ptr() as usize) {
-            self.add(family, 0, ARC_HEADER + text.len());
+    pub(crate) fn text(&mut self, family: &'static str, text: &JsString) {
+        let backing = text.backing_bytes();
+        if self.seen.insert(backing.as_ptr() as usize) {
+            self.add(family, 0, ARC_HEADER + backing.len());
         }
     }
 
-    fn vec_capacity<T>(&mut self, family: &'static str, vec: &[T], capacity: usize) {
+    pub(crate) fn vec_capacity<T>(&mut self, family: &'static str, vec: &[T], capacity: usize) {
         self.add(family, vec.len(), capacity * size_of::<T>());
     }
 
@@ -80,13 +86,18 @@ impl Census {
                 "TypeAlias": size_of::<crate::TypeAlias>(), "Signature": size_of::<crate::Signature>(),
                 "IndexInfo": size_of::<crate::IndexInfo>(), "Symbol": size_of::<ts_ast::Symbol>(),
                 "ValueSymbolLinks": size_of::<crate::ValueSymbolLinks>(), "OptionValueSymbolLinks": size_of::<Option<crate::ValueSymbolLinks>>(),
+                "MappedData": size_of::<crate::types::MappedData>(), "ReverseMappedData": size_of::<crate::types::ReverseMappedData>(),
+                "InstantiationExpressionData": size_of::<crate::types::InstantiationExpressionData>(),
+                "IndexData": size_of::<crate::types::IndexData>(), "IndexedAccessData": size_of::<crate::types::IndexedAccessData>(),
+                "StringMappingData": size_of::<crate::types::StringMappingData>(), "SubstitutionData": size_of::<crate::types::SubstitutionData>(),
+                "ConditionalData": size_of::<crate::types::ConditionalData>(),
             },
         })
     }
 }
 
-/// Every family both runtimes report, so an absent family is a mismatch, not a zero.
-pub(crate) const ALL_FAMILIES: [&str; 23] = [
+/// Every Rust family, including the additions not yet measured by the Go P1 adapter.
+pub(crate) const ALL_FAMILIES: &[&str] = &[
     "type_records",
     "intrinsic",
     "literal",
@@ -99,6 +110,14 @@ pub(crate) const ALL_FAMILIES: [&str; 23] = [
     "intersection",
     "type_parameter",
     "template_literal",
+    "mapped",
+    "reverse_mapped",
+    "instantiation_expression",
+    "index",
+    "indexed_access",
+    "string_mapping",
+    "substitution",
+    "conditional",
     "alias",
     "type_lists",
     "type_caches",
@@ -110,10 +129,23 @@ pub(crate) const ALL_FAMILIES: [&str; 23] = [
     "value_symbol_links",
     "synthetic_expression_links",
     "checker_ast",
+    "mappers",
+    "inference",
+    "relations",
+    "query_links",
+    "conditional_roots",
+    "variance",
+    "late_members",
+    "mapped_symbol_links",
+    "signature_caches",
+    "declarations",
+    "program_indices",
+    "resolution",
+    "diagnostics",
 ];
 
 /// Type families whose bytes sum to the footprint statistic's numerator.
-pub(crate) const TYPE_FAMILIES: [&str; 15] = [
+pub(crate) const TYPE_FAMILIES: &[&str] = &[
     "type_records",
     "intrinsic",
     "literal",
@@ -126,16 +158,34 @@ pub(crate) const TYPE_FAMILIES: [&str; 15] = [
     "intersection",
     "type_parameter",
     "template_literal",
+    "mapped",
+    "reverse_mapped",
+    "instantiation_expression",
+    "index",
+    "indexed_access",
+    "string_mapping",
+    "substitution",
+    "conditional",
     "alias",
     "type_lists",
     "type_caches",
 ];
 
+#[test]
+fn sliced_text_charges_its_full_shared_backing_once() {
+    let text = JsString::from_bytes(vec![b'x'; 4096]);
+    let mut census = Census::default();
+    census.text("literal", &text.slice(12..15).unwrap());
+    census.text("literal", &text.slice(200..201).unwrap());
+    census.text("literal", &text);
+    assert_eq!(census.families["literal"].bytes, ARC_HEADER + 4096);
+}
+
 impl CheckerState {
     /// The census over this checker with `roots` as the retained results.
-    pub(crate) fn census(&self, roots: &[TypeId]) -> Value {
+    pub(crate) fn census(&self, roots: &[TypeId]) -> Result<Value, crate::Error> {
         let mut census = Census::default();
-        for family in ALL_FAMILIES {
+        for &family in ALL_FAMILIES {
             census.add(family, 0, 0);
         }
         let tables = self.types.tables();
@@ -238,6 +288,7 @@ impl CheckerState {
             census.list("type_lists", &alias.type_arguments);
         }
         self.census_caches(&mut census);
+        self.census_p3(&mut census);
 
         // Storage beside the type families.
         census.add(
@@ -269,12 +320,26 @@ impl CheckerState {
             if let Some(list) = &signature.parameters {
                 census.list("signatures", list);
             }
+            if let Some(composite) = &signature.composite {
+                census.list("signatures", &composite.signatures);
+            }
         }
         census.add(
             "index_infos",
             self.signatures.index_info_count(),
             index_info_capacity * size_of::<crate::IndexInfo>(),
         );
+        for index in 0..self.signatures.index_info_count() {
+            let id = crate::IndexInfoId::new(index as u32 + 1).expect("published index info");
+            if let Some(components) = &self
+                .signatures
+                .index_info(id)
+                .expect("published index info")
+                .components
+            {
+                census.list("index_infos", components);
+            }
+        }
         census.add(
             "type_predicates",
             self.signatures.predicate_count(),
@@ -311,8 +376,8 @@ impl CheckerState {
         census.unavailable.push("checker_ast");
 
         let created = self.types.len();
-        let reachable = self.reachable_types(roots);
-        census.finish(&TYPE_FAMILIES, created, reachable)
+        let reachable = self.reachable_types(roots)?;
+        Ok(census.finish(TYPE_FAMILIES, created, reachable))
     }
 
     fn census_structured(
@@ -448,168 +513,5 @@ impl CheckerState {
                 .map(|key| key.len())
                 .sum(),
         );
-    }
-
-    /// Types reachable from the checker's own roots (its named types and
-    /// interning caches) and the retained result roots, through payload edges.
-    pub(crate) fn reachable_types(&self, roots: &[TypeId]) -> usize {
-        let mut visited = vec![false; self.types.len()];
-        let mut stack: Vec<TypeId> = Vec::new();
-        let push = |id: TypeId, stack: &mut Vec<TypeId>| stack.push(id);
-        for name in crate::BUILTIN_TYPE_NAMES {
-            if let Some(id) = self.builtins.type_by_name(name) {
-                push(id, &mut stack);
-            }
-        }
-        for id in roots {
-            push(*id, &mut stack);
-        }
-        let caches = &self.types.caches;
-        for id in caches
-            .string_literal_types
-            .values()
-            .chain(caches.number_literal_types.values())
-            .chain(caches.nan_type.iter())
-            .chain(caches.bigint_literal_types.values())
-            .chain(caches.union_types.values())
-            .chain(caches.union_of_union_types.values())
-            .chain(caches.tuple_types.values())
-            .chain(caches.intersection_types.values())
-            .chain(caches.template_literal_types.values())
-        {
-            push(*id, &mut stack);
-        }
-        let mut count = 0;
-        while let Some(id) = stack.pop() {
-            let Ok(record) = self.types.get(id) else {
-                continue;
-            };
-            let Some(index) = id.index(0) else { continue };
-            if index >= visited.len() || visited[index] {
-                continue;
-            }
-            visited[index] = true;
-            count += 1;
-            if let Some(alias) = record.alias {
-                if let Ok(alias) = self.types.alias(alias) {
-                    stack.extend(alias.type_arguments.iter().copied());
-                }
-            }
-            self.type_edges(id, record.kind, &mut stack);
-        }
-        count
-    }
-
-    fn type_edges(&self, id: TypeId, kind: TypeKind, stack: &mut Vec<TypeId>) {
-        let list = |list: &Option<TypeList>, stack: &mut Vec<TypeId>| {
-            if let Some(list) = list {
-                stack.extend(list.iter().copied());
-            }
-        };
-        let structured = |data: &crate::StructuredMembers, stack: &mut Vec<TypeId>| {
-            stack.extend(data.resolved_base_constraint);
-            stack.extend(data.object_type_without_abstract_construct_signatures);
-            if let Some(properties) = &data.properties {
-                for property in properties.iter() {
-                    if let Some(links) = self.value_symbol_links.try_get(*property) {
-                        stack.extend(links.resolved_type);
-                        stack.extend(links.write_type);
-                        stack.extend(links.name_type);
-                        stack.extend(links.containing_type);
-                    }
-                }
-            }
-            if let Some(signatures) = &data.signatures {
-                for signature in signatures.iter() {
-                    if let Ok(signature) = self.signatures.get(*signature) {
-                        stack.extend(signature.resolved_return_type);
-                        stack.extend(signature.isolated_signature_type);
-                        if let Some(parameters) = &signature.type_parameters {
-                            stack.extend(parameters.iter().copied());
-                        }
-                    }
-                }
-            }
-            if let Some(infos) = &data.index_infos {
-                for info in infos.iter() {
-                    if let Ok(info) = self.signatures.index_info(*info) {
-                        stack.push(info.key_type);
-                        stack.push(info.value_type);
-                    }
-                }
-            }
-        };
-        match kind {
-            TypeKind::Literal => {
-                if let Ok(data) = self.types.literal(id) {
-                    stack.extend(data.fresh);
-                    stack.push(data.regular);
-                }
-            }
-            TypeKind::Anonymous | TypeKind::Reference | TypeKind::Interface | TypeKind::Tuple => {
-                if let Ok(object) = self.types.object(id) {
-                    structured(&object.structured, stack);
-                    stack.extend(object.target);
-                    if let Some(map) = &object.instantiations {
-                        stack.extend(map.values().copied());
-                    }
-                }
-                if let Ok(reference) = self.types.type_reference(id) {
-                    list(&reference.resolved_type_arguments, stack);
-                }
-                if let Ok(interface) = self.types.interface(id) {
-                    list(&interface.all_type_parameters, stack);
-                    list(&interface.resolved_base_types, stack);
-                    stack.extend(interface.this_type);
-                    stack.extend(interface.resolved_base_constructor_type);
-                    if let Some(members) = interface.declared_members {
-                        if let Ok(table) = self.tables.get(members) {
-                            for (_, symbol) in table {
-                                if let Some(links) =
-                                    symbol.and_then(|s| self.value_symbol_links.try_get(s))
-                                {
-                                    stack.extend(links.resolved_type);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            TypeKind::Union => {
-                if let Ok(data) = self.types.union(id) {
-                    structured(&data.common.structured, stack);
-                    stack.extend(data.types.iter().copied());
-                    stack.extend(data.origin);
-                    stack.extend(data.regular_type);
-                    stack.extend(data.resolved_reduced_type);
-                    if let Some(map) = &data.constituent_map {
-                        stack.extend(map.values().copied());
-                    }
-                }
-            }
-            TypeKind::Intersection => {
-                if let Ok(data) = self.types.intersection(id) {
-                    structured(&data.common.structured, stack);
-                    stack.extend(data.types.iter().copied());
-                    stack.extend(data.resolved_apparent_type);
-                    stack.extend(data.unique_literal_filled_instantiation);
-                }
-            }
-            TypeKind::TypeParameter => {
-                if let Ok(data) = self.types.type_parameter(id) {
-                    stack.extend(data.constraint);
-                    stack.extend(data.target);
-                    stack.extend(data.resolved_default_type);
-                    stack.extend(data.resolved_base_constraint);
-                }
-            }
-            TypeKind::TemplateLiteral => {
-                if let Ok(data) = self.types.template_literal(id) {
-                    stack.extend(data.types.iter().copied());
-                    stack.extend(data.resolved_base_constraint);
-                }
-            }
-            _ => {}
-        }
     }
 }

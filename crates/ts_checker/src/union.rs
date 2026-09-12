@@ -123,15 +123,13 @@ impl CheckerState {
             if includes & type_flags::STRING_LITERAL != 0
                 && includes & (type_flags::TEMPLATE_LITERAL | type_flags::STRING_MAPPING) != 0
             {
-                return Err(Error::Unsupported(
-                    "removeStringLiteralsMatchedByTemplateLiterals",
-                ));
+                type_set = self.remove_matched_string_literals(type_set)?;
             }
             if includes & type_flags::INCLUDES_CONSTRAINED_TYPE_VARIABLE != 0 {
-                return Err(Error::Unsupported("removeConstrainedTypeVariables"));
+                type_set = self.remove_constrained_variables(type_set)?;
             }
             if union_reduction == UnionReduction::Subtype {
-                return Err(Error::Unsupported("removeSubtypes"));
+                type_set = self.remove_subtypes(type_set, includes & type_flags::OBJECT != 0)?;
             }
             if type_set.is_empty() {
                 if includes & type_flags::NULL != 0 {

@@ -956,14 +956,59 @@ impl<'a> Session<'a, '_> {
         };
         match self.known_kind(node)? {
             K::Identifier => self.emit_binding_identifier(node),
-            K::ObjectBindingPattern | K::ArrayBindingPattern => {
-                Err(Error::Unsupported("binding patterns"))
-            }
+            K::ObjectBindingPattern | K::ArrayBindingPattern => self.emit_binding_pattern(node),
             kind => Err(Error::UnexpectedKind {
                 context: "BindingName",
                 kind: kind.into(),
             }),
         }
+    }
+
+    // port: tsc/internal/printer/printer.go:Printer.emitObjectBindingPattern
+    // port: tsc/internal/printer/printer.go:Printer.emitArrayBindingPattern
+    fn emit_binding_pattern(&mut self, node: NodeId) -> Result<(), Error> {
+        let read = self.node(node)?;
+        let elements = read.element_list();
+        let object = read.kind() == K::ObjectBindingPattern;
+        self.write_punctuation(if object { b"{" } else { b"[" });
+        self.emit_list(
+            Self::emit_binding_element,
+            node,
+            elements,
+            if object {
+                lf::OBJECT_BINDING_PATTERN_ELEMENTS
+            } else {
+                lf::ARRAY_BINDING_PATTERN_ELEMENTS
+            },
+        )?;
+        self.write_punctuation(if object { b"}" } else { b"]" });
+        Ok(())
+    }
+
+    // port: tsc/internal/printer/printer.go:Printer.emitBindingElement
+    fn emit_binding_element(&mut self, node: NodeId) -> Result<(), Error> {
+        let read = self.node(node)?;
+        let data = read
+            .data_source()
+            .as_binding_element()
+            .ok_or(Error::MissingNode("binding element"))?;
+        let (rest, property, name, initializer) = (
+            data.dot_dot_dot_token(),
+            data.property_name(),
+            data.name(),
+            data.initializer(),
+        );
+        self.emit_token_node(rest)?;
+        if property.is_some() {
+            self.emit_property_name(property)?;
+            self.write_punctuation(b":");
+            self.write_space();
+        }
+        if let Some(name) = name {
+            self.emit_binding_name(Some(name))?;
+            self.emit_initializer(initializer, i64::from(self.node(name)?.end()), node)?;
+        }
+        Ok(())
     }
 
     // port: tsc/internal/printer/printer.go:Printer.emitPropertyName

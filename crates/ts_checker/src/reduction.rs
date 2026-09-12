@@ -65,7 +65,10 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.isDiscriminantWithNeverType
-    fn is_discriminant_with_never_type(&mut self, prop: SymbolId) -> Result<bool, Error> {
+    pub(crate) fn is_discriminant_with_never_type(
+        &mut self,
+        prop: SymbolId,
+    ) -> Result<bool, Error> {
         let symbol = self.symbol(prop)?;
         if symbol.check_flags() & cf::CONTAINS_PRIVATE != 0 {
             return Err(Error::Unsupported(

@@ -11,7 +11,7 @@ use ts_ast::{
 use ts_diagnostics as messages;
 
 // port: tsc/internal/checker/checker.go:getExcludedSymbolFlags
-fn excluded_symbol_flags(value: SymbolFlags) -> SymbolFlags {
+pub(crate) fn excluded_symbol_flags(value: SymbolFlags) -> SymbolFlags {
     let mut result = 0;
     for (flag, excluded) in [
         (
@@ -276,7 +276,7 @@ impl CheckerState {
     }
 
     // port: tsc/internal/binder/binder.go:SetValueDeclaration
-    fn set_merged_value_declaration(
+    pub(crate) fn set_merged_value_declaration(
         &mut self,
         symbol: SymbolId,
         node: NodeId,

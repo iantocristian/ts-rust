@@ -1,8 +1,8 @@
 //! Source checking over bound declarations. Each unsupported semantic branch
 //! fails explicitly; a failed file check never becomes a successful cache hit.
 
-use crate::{object_flags as of, type_flags as tf, type_format_flags, CheckerState, Error, TypeId};
-use ts_arena::{NodeId, SymbolId};
+use crate::{type_flags as tf, CheckerState, Error, TypeId};
+use ts_arena::NodeId;
 use ts_ast::{node_flags as nf, symbol_flags as sf, SyntaxKind as K};
 use ts_core::Tristate;
 use ts_diagnostics as messages;
@@ -89,10 +89,14 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkSourceElementWorker
-    fn check_source_element(&mut self, node: NodeId) -> Result<(), Error> {
-        stacker::maybe_grow(128 * 1024, 2 * 1024 * 1024, || {
+    pub(crate) fn check_source_element(&mut self, node: NodeId) -> Result<(), Error> {
+        let previous = self.current_node.replace(node);
+        self.instantiation.count = 0;
+        let result = stacker::maybe_grow(128 * 1024, 2 * 1024 * 1024, || {
             self.check_source_element_worker(node)
-        })
+        });
+        self.current_node = previous;
+        result
     }
 
     fn check_source_element_worker(&mut self, node: NodeId) -> Result<(), Error> {
@@ -101,8 +105,24 @@ impl CheckerState {
         if read.flags() & nf::HAS_JS_DOC != 0 {
             return Err(Error::Unsupported("checkSourceElement: JSDoc"));
         }
-        if read.modifiers().is_some() {
-            return Err(Error::Unsupported("checkGrammarModifiers"));
+        if let Some(modifiers) = read.modifiers() {
+            let nodes = self.source_list(node, Some(modifiers))?;
+            let readonly = nodes.len() == 1
+                && self.ast(nodes[0])?.node(nodes[0])?.kind() == K::ReadonlyKeyword
+                && matches!(
+                    read.kind().known(),
+                    Some(K::PropertySignature | K::IndexSignature)
+                );
+            let declare = nodes.len() == 1
+                && self.ast(nodes[0])?.node(nodes[0])?.kind() == K::DeclareKeyword
+                && read.kind() == K::VariableStatement
+                && match read.parent() {
+                    Some(parent) => self.ast(parent)?.node(parent)?.kind() == K::SourceFile,
+                    None => false,
+                };
+            if !readonly && !declare {
+                return Err(Error::Unsupported("checkGrammarModifiers"));
+            }
         }
         match read.kind().known() {
             Some(K::VariableStatement) => {
@@ -152,14 +172,46 @@ impl CheckerState {
             Some(K::TypeLiteral) => {
                 self.check_object_type_members(node)?;
                 let ty = self.get_type_from_type_node(node)?;
-                self.resolve_type_members(ty)
+                self.resolve_type_members(ty)?;
+                self.check_source_index_constraints(ty, node)
             }
             Some(K::ParenthesizedType) => {
                 self.check_source_element(required(read.type_node(), "parenthesized type")?)
             }
             Some(K::UnionType | K::IntersectionType) => self.check_union_or_intersection_type(node),
+            Some(K::TypeReference | K::ExpressionWithTypeArguments) => {
+                self.check_type_reference_node(node)
+            }
+            Some(K::TypeParameter) => self.check_type_parameter(node),
+            Some(K::TypePredicate) => self.check_type_predicate(node),
+            Some(K::ConditionalType) => {
+                for child in self.source_children(node)? {
+                    self.check_source_element(child)?;
+                }
+                Ok(())
+            }
+            Some(K::InferType) => self.check_infer_type(node),
+            Some(K::MappedType) => self.check_mapped_type(node),
+            Some(K::TemplateLiteralType) => self.check_template_type(node),
+            Some(K::IndexedAccessType) => self.check_indexed_access_type(node),
             Some(
-                K::TypeReference
+                K::ArrayType
+                | K::TupleType
+                | K::OptionalType
+                | K::RestType
+                | K::NamedTupleMember
+                | K::TypeOperator,
+            ) => self.check_array_tuple_syntax(node),
+            Some(
+                K::FunctionType
+                | K::ConstructorType
+                | K::CallSignature
+                | K::ConstructSignature
+                | K::MethodSignature
+                | K::IndexSignature,
+            ) => self.check_signature_syntax(node),
+            Some(
+                K::ThisType
                 | K::LiteralType
                 | K::AnyKeyword
                 | K::UnknownKeyword
@@ -172,7 +224,8 @@ impl CheckerState {
                 | K::UndefinedKeyword
                 | K::NullKeyword
                 | K::NeverKeyword
-                | K::ObjectKeyword,
+                | K::ObjectKeyword
+                | K::IntrinsicKeyword,
             ) => {
                 self.get_type_from_type_node(node)?;
                 Ok(())
@@ -217,10 +270,8 @@ impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.checkTypeAliasDeclaration
     // port: tsc/internal/checker/checker.go:Checker.checkInterfaceDeclaration
     fn check_type_declaration(&mut self, node: NodeId) -> Result<(), Error> {
+        self.check_type_parameters(node)?;
         let read = self.ast(node)?.node(node)?;
-        if read.type_parameter_list().is_some() {
-            return Err(Error::Unsupported("checkTypeParameters"));
-        }
         let interface = read.kind() == K::InterfaceDeclaration;
         let name = required(read.name(), "type declaration name")?;
         let text = self.ast(name)?.node_text(name)?.into_js_string();
@@ -258,7 +309,8 @@ impl CheckerState {
         if interface {
             let ty = self.get_declared_type_of_symbol(symbol)?;
             self.check_object_type_members(node)?;
-            self.resolve_type_members(ty)
+            self.resolve_type_members(ty)?;
+            self.check_source_index_constraints(ty, node)
         } else {
             let annotation = required(
                 self.ast(node)?.node(node)?.type_node(),
@@ -280,7 +332,17 @@ impl CheckerState {
                 self.get_symbol_of_declaration(member)?,
                 "type member symbol",
             )?;
-            if self.symbol_declarations(symbol)?.len() != 1 {
+            if self.symbol_declarations(symbol)?.len() != 1
+                && !matches!(
+                    self.ast(member)?.node(member)?.kind().known(),
+                    Some(
+                        K::CallSignature
+                            | K::ConstructSignature
+                            | K::MethodSignature
+                            | K::IndexSignature
+                    )
+                )
+            {
                 return Err(Error::Unsupported(
                     "checkObjectTypeForDuplicateDeclarations/subsequent property declarations",
                 ));
@@ -323,6 +385,12 @@ impl CheckerState {
         }
         let initializer = read.initializer();
         let annotation = read.type_node();
+        let ambient = read.flags() & nf::AMBIENT != 0;
+        if ambient && initializer.is_some() {
+            return Err(Error::Unsupported(
+                "checkGrammarInitializer: ambient declaration initializer",
+            ));
+        }
         if property && initializer.is_some() {
             return Err(Error::Unsupported(
                 "checkGrammarProperty: signature initializer",
@@ -331,7 +399,7 @@ impl CheckerState {
         if !property {
             let parent = required(read.parent(), "variable declaration parent")?;
             let flags = self.ast(parent)?.node(parent)?.flags();
-            if flags & nf::CONSTANT != 0 && initializer.is_none() {
+            if flags & nf::CONSTANT != 0 && initializer.is_none() && !ambient {
                 self.error_at(
                     Some(node),
                     messages::X_0_declarations_must_be_initialized,
@@ -437,234 +505,29 @@ impl CheckerState {
         self.check_assignable_at(right_type, left_type, left)
     }
 
-    // port: tsc/internal/checker/relater.go:Checker.isTypeRelatedTo
-    // port: tsc/internal/checker/relater.go:Checker.isSimpleTypeRelatedTo
-    fn source_type_assignable(
+    // The previous slice used a separate limited relation. Every caller now
+    // enters the production assignability cache; recursive work stays in the
+    // relater that owns its assumption stack.
+    pub(crate) fn source_type_assignable(
         &mut self,
         source: TypeId,
         target: TypeId,
-        active: &mut Vec<(TypeId, TypeId)>,
+        _active: &mut Vec<(TypeId, TypeId)>,
     ) -> Result<bool, Error> {
-        let source = self.get_regular_type_of_literal_type(source)?;
-        let target = self.get_regular_type_of_literal_type(target)?;
-        let s = self.types.flags(source)?;
-        let t = self.types.flags(target)?;
-        if source == target
-            || t & tf::ANY != 0
-            || s & tf::NEVER != 0
-            || source == self.builtins.wildcard_type
-            || t & tf::UNKNOWN != 0
-        {
-            return Ok(true);
-        }
-        if t & tf::NEVER != 0 {
-            return Ok(false);
-        }
-        if s & tf::STRING_LIKE != 0 && t & tf::STRING != 0
-            || s & tf::NUMBER_LIKE != 0 && t & tf::NUMBER != 0
-            || s & tf::BIG_INT_LIKE != 0 && t & tf::BIG_INT != 0
-            || s & tf::BOOLEAN_LIKE != 0 && t & tf::BOOLEAN != 0
-            || s & tf::ES_SYMBOL_LIKE != 0 && t & tf::ES_SYMBOL != 0
-        {
-            return Ok(true);
-        }
-        if (s | t) & tf::ENUM_LIKE != 0 {
-            return Err(Error::Unsupported("isSimpleTypeRelatedTo: enum relation"));
-        }
-        if s & tf::UNDEFINED != 0
-            && (!self.options.strict_null_checks && t & tf::UNION_OR_INTERSECTION == 0
-                || t & (tf::UNDEFINED | tf::VOID) != 0)
-            || s & tf::NULL != 0
-                && (!self.options.strict_null_checks && t & tf::UNION_OR_INTERSECTION == 0
-                    || t & tf::NULL != 0)
-            || s & tf::OBJECT != 0 && t & tf::NON_PRIMITIVE != 0
-            || s & tf::ANY != 0
-        {
-            return Ok(true);
-        }
-        if !self.options.strict_null_checks
-            && s & tf::NULLABLE != 0
-            && target == self.builtins.boolean_type
-        {
-            // The native union relation accepts null/undefined into both
-            // constituents of the canonical boolean type in non-strict mode.
-            return Ok(true);
-        }
-        if (s | t) & tf::UNION != 0
-            && self.is_primitive_union(source)?
-            && self.is_primitive_union(target)?
-        {
-            if s & tf::UNION != 0 {
-                let types = self.types.union(source)?.types.clone();
-                for &ty in types.iter() {
-                    if !self.source_type_assignable(ty, target, active)? {
-                        return Ok(false);
-                    }
-                }
-                return Ok(true);
-            }
-            let types = self.types.union(target)?.types.clone();
-            for &ty in types.iter() {
-                if self.source_type_assignable(source, ty, active)? {
-                    return Ok(true);
-                }
-            }
-            return Ok(false);
-        }
-        if s & tf::OBJECT != 0 && t & tf::OBJECT != 0 {
-            if active.contains(&(source, target)) {
-                return Err(Error::Unsupported("recursive structured type relation"));
-            }
-            active.push((source, target));
-            let result = self.plain_properties_assignable(source, target, active);
-            active.pop();
-            return result;
-        }
-        // The canonical boolean union has the primitive boolean meaning. Other
-        // unions and structured/instantiable types require the full relater.
-        let complex = |ty, flags| {
-            ty != self.builtins.boolean_type && flags & tf::STRUCTURED_OR_INSTANTIABLE != 0
-        };
-        if complex(source, s) || complex(target, t) {
-            return Err(Error::Unsupported(
-                "checkTypeRelatedTo: structured/instantiable relation",
-            ));
-        }
-        Ok(false)
-    }
-
-    // The primitive slice can use all-source/any-target constituent relations
-    // without structural matching, constraints or recursive assumptions.
-    fn is_primitive_union(&self, ty: TypeId) -> Result<bool, Error> {
-        let flags = self.types.flags(ty)?;
-        if flags & tf::UNION != 0 {
-            for &ty in self.types.union(ty)?.types.iter() {
-                if !self.is_primitive_union(ty)? {
-                    return Ok(false);
-                }
-            }
-            return Ok(true);
-        }
-        Ok(flags & tf::STRUCTURED_OR_INSTANTIABLE == 0)
-    }
-
-    // port: tsc/internal/checker/relater.go:Relater.propertiesRelatedTo
-    // port: tsc/internal/checker/relater.go:Relater.propertyRelatedTo
-    // The supported branch has required public properties, no signatures or
-    // indices, and no excess properties on fresh literals. All other structural
-    // paths remain explicit boundaries, including richer mismatch diagnostics.
-    fn plain_properties_assignable(
-        &mut self,
-        source: TypeId,
-        target: TypeId,
-        active: &mut Vec<(TypeId, TypeId)>,
-    ) -> Result<bool, Error> {
-        self.resolve_type_members(source)?;
-        self.resolve_type_members(target)?;
-        for ty in [source, target] {
-            let record = self.types.get(ty)?;
-            if record.object_flags & (of::ANONYMOUS | of::INTERFACE) == 0 {
-                return Err(Error::Unsupported("structuredTypeRelatedTo: object family"));
-            }
-            let members = self.types.structured(ty)?;
-            if members
-                .signatures
-                .as_ref()
-                .is_some_and(|list| !list.is_empty())
-                || members
-                    .index_infos
-                    .as_ref()
-                    .is_some_and(|list| !list.is_empty())
-            {
-                return Err(Error::Unsupported(
-                    "structuredTypeRelatedTo: signatures/index signatures",
-                ));
-            }
-        }
-        let sources = self
-            .types
-            .structured(source)?
-            .properties
-            .as_deref()
-            .unwrap_or_default()
-            .to_vec();
-        let targets = self
-            .types
-            .structured(target)?
-            .properties
-            .as_deref()
-            .unwrap_or_default()
-            .to_vec();
-        if self.types.get(source)?.object_flags & of::FRESH_LITERAL != 0 {
-            for &property in &sources {
-                let name = self.symbol(property)?.name_bytes();
-                let table = self.types.structured(target)?.members;
-                if !table
-                    .map(|table| {
-                        self.table(table)
-                            .map(|table| table.get(name).flatten().is_some())
-                    })
-                    .transpose()?
-                    .unwrap_or(false)
-                {
-                    return Err(Error::Unsupported("hasExcessProperties"));
-                }
-            }
-        }
-        for target_property in targets {
-            self.require_plain_property(target_property)?;
-            let name = self.symbol(target_property)?.name_to_owned();
-            let table = self.types.structured(source)?.members;
-            let source_property = table
-                .map(|table| {
-                    self.table(table)
-                        .map(|table| table.get(name.as_bytes()).flatten())
-                })
-                .transpose()?
-                .flatten()
-                .ok_or(Error::Unsupported("reportUnmatchedProperty"))?;
-            self.require_plain_property(source_property)?;
-            let source_type = self.get_type_of_symbol(source_property)?;
-            let target_type = self.get_type_of_symbol(target_property)?;
-            if !self.source_type_assignable(source_type, target_type, active)? {
-                return Err(Error::Unsupported(
-                    "propertyRelatedTo: incompatible property diagnostic",
-                ));
-            }
-        }
-        Ok(true)
-    }
-
-    fn require_plain_property(&self, symbol: SymbolId) -> Result<(), Error> {
-        let read = self.symbol(symbol)?;
-        if read.flags() & sf::PROPERTY == 0 || read.flags() & sf::OPTIONAL != 0 {
-            return Err(Error::Unsupported(
-                "propertyRelatedTo: optional/accessor/method",
-            ));
-        }
-        for node in self.symbol_declarations(symbol)?.iter().flatten() {
-            let declaration = self.ast(node)?.node(node)?;
-            if !matches!(
-                declaration.kind().known(),
-                Some(K::PropertySignature | K::PropertyAssignment)
-            ) || declaration.modifiers().is_some()
-            {
-                return Err(Error::Unsupported(
-                    "propertyRelatedTo: declaration accessibility",
-                ));
-            }
-        }
-        Ok(())
+        self.is_type_related_to(source, target, crate::RelationKind::Assignable)
     }
 
     // port: tsc/internal/checker/relater.go:Checker.typeCouldHaveTopLevelSingletonTypes
-    fn type_could_have_top_level_singletons(&self, ty: TypeId) -> Result<bool, Error> {
+    pub(crate) fn type_could_have_top_level_singletons(
+        &mut self,
+        ty: TypeId,
+    ) -> Result<bool, Error> {
         let flags = self.types.flags(ty)?;
         if flags & tf::BOOLEAN != 0 {
             return Ok(false);
         }
         if flags & tf::UNION_OR_INTERSECTION != 0 {
-            for &ty in self.types.types_of(ty)? {
+            for &ty in self.types.compound_types(ty)?.clone().iter() {
                 if self.type_could_have_top_level_singletons(ty)? {
                     return Ok(true);
                 }
@@ -672,59 +535,33 @@ impl CheckerState {
             return Ok(false);
         }
         if flags & tf::INSTANTIABLE != 0 {
-            return Err(Error::Unsupported(
-                "typeCouldHaveTopLevelSingletonTypes: constraint",
-            ));
+            if let Some(constraint) = self.constraint_of_type(ty)? {
+                if constraint != ty {
+                    return self.type_could_have_top_level_singletons(constraint);
+                }
+            }
         }
         Ok(flags & (tf::UNIT | tf::TEMPLATE_LITERAL | tf::STRING_MAPPING) != 0)
     }
 
     // port: tsc/internal/checker/relater.go:Checker.checkTypeAssignableTo
     // port: tsc/internal/checker/relater.go:Relater.reportRelationError
-    fn check_assignable_at(
+    pub(crate) fn check_assignable_at(
         &mut self,
         source: TypeId,
         target: TypeId,
         node: NodeId,
     ) -> Result<(), Error> {
-        if self.source_type_assignable(source, target, &mut Vec::new())? {
-            return Ok(());
-        }
-        let source_flags = self.types.flags(source)?;
-        let target_flags = self.types.flags(target)?;
-        let source_for_error = if target_flags & tf::NEVER == 0
-            && !self.type_could_have_top_level_singletons(target)?
-        {
-            if source_flags & tf::STRING_LITERAL != 0 {
-                self.builtins.string_type
-            } else if source_flags & tf::NUMBER_LITERAL != 0 {
-                self.builtins.number_type
-            } else if source_flags & tf::BIG_INT_LITERAL != 0 {
-                self.builtins.bigint_type
-            } else if source_flags & tf::BOOLEAN_LITERAL != 0 {
-                self.builtins.boolean_type
-            } else {
-                source
-            }
-        } else {
-            source
-        };
-        let source_name = self.type_to_string(
-            source_for_error,
-            type_format_flags::USE_FULLY_QUALIFIED_TYPE,
-        )?;
-        let target_name =
-            self.type_to_string(target, type_format_flags::USE_FULLY_QUALIFIED_TYPE)?;
-        if source_name == target_name {
-            return Err(Error::Unsupported(
-                "reportRelationError: unrelated types with identical names",
-            ));
-        }
-        self.error_at(
+        let (_, diagnostic) = self.check_type_related_ex(
+            source,
+            target,
+            crate::RelationKind::Assignable,
             Some(node),
-            messages::Type_0_is_not_assignable_to_type_1,
-            vec![source_name, target_name],
+            None,
         )?;
+        if let Some(diagnostic) = diagnostic {
+            self.add_diagnostic(diagnostic)?;
+        }
         Ok(())
     }
 }

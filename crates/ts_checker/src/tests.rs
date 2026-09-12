@@ -31,6 +31,38 @@ fn owner() -> (
 }
 
 #[test]
+fn census_follows_mapper_links_without_resolving_or_rooting_the_arena() {
+    let (_counters, _generation, _identity, owner) = owner();
+    let mut operation = owner.operation().unwrap();
+    let state = operation.state_mut();
+    let before = state.reachable_types(&[]).unwrap();
+    let source = state.new_type_parameter(None).unwrap();
+    let target = state.new_type_parameter(None).unwrap();
+    let mapper = state
+        .alloc_mapper(crate::mapper::Mapper::Simple { source, target })
+        .unwrap();
+    let root = state.new_anonymous_type(None, None, &[], &[], &[]).unwrap();
+    state.types.object_mut(root).unwrap().mapper = Some(mapper);
+    // Occupied records alone are not roots. A retained result keeps its mapper
+    // and both mapper endpoints live, even without a query-cache entry.
+    assert_eq!(state.reachable_types(&[]).unwrap(), before);
+    let created = state.types.len();
+    let report = state.census(&[root]).unwrap();
+    assert_eq!(
+        report["types"]["reachable"].as_u64(),
+        Some((before + 3) as u64)
+    );
+    assert!(report["families"]["mappers"]["bytes"].as_u64().unwrap() > 0);
+    assert_eq!(state.types.len(), created);
+    assert!(state
+        .types
+        .type_parameter(source)
+        .unwrap()
+        .constraint
+        .is_none());
+}
+
+#[test]
 fn pattern_literal_property_conflicts_reduce_the_intersection() {
     let (_counters, _generation, _identity, owner) = owner();
     let mut operation = owner.operation().unwrap();
@@ -537,8 +569,14 @@ fn the_first_queries_of_a_fresh_checker_reuse_new_checker_types() {
     );
     assert_eq!(op.type_flags(fresh).unwrap(), type_flags::STRING_LITERAL);
     assert_eq!(op.builtin_type("noSuchType"), None);
-    assert!(matches!(
-        op.union_type_with(&[string, number], crate::UnionReduction::Subtype),
-        Err(Error::Unsupported("removeSubtypes"))
-    ));
+    assert_eq!(
+        op.union_type_with(&[string, number], crate::UnionReduction::Subtype)
+            .unwrap(),
+        string_or_number
+    );
+    assert_eq!(
+        op.type_count(),
+        count + 1,
+        "subtype reduction reuses the intrinsic union"
+    );
 }
