@@ -21,25 +21,52 @@ fn required<T>(value: Option<T>, name: &'static str) -> Result<T, Error> {
 impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.checkSourceFile
     pub(crate) fn check_source_file(&mut self, source: NodeId) -> Result<(), Error> {
+        let options = self.program()?.host.options();
+        let check_unused = options.no_unused_locals == Tristate::TRUE
+            || options.no_unused_parameters == Tristate::TRUE;
+        self.check_source_file_ex(source, check_unused)
+    }
+
+    /// `checkUnused` is also requested by suggestion collection, which runs the
+    /// unused-identifier pass regardless of the compiler options.
+    pub(crate) fn check_source_file_ex(
+        &mut self,
+        source: NodeId,
+        check_unused: bool,
+    ) -> Result<(), Error> {
         match self.source_checks.get(&source).copied() {
-            Some(SourceCheckStatus::Complete) => return Ok(()),
+            Some(SourceCheckStatus::Complete) => {}
             Some(SourceCheckStatus::Failed(error)) => return Err(error),
             Some(SourceCheckStatus::Checking) => {
                 return Err(Error::Unsupported("recursive checkSourceFile"))
             }
-            None => {}
+            None => {
+                self.source_checks
+                    .insert(source, SourceCheckStatus::Checking);
+                let result = self.check_source_file_worker(source);
+                self.source_checks.insert(
+                    source,
+                    match result {
+                        Ok(()) => SourceCheckStatus::Complete,
+                        Err(error) => SourceCheckStatus::Failed(error),
+                    },
+                );
+                result?;
+            }
         }
-        self.source_checks
-            .insert(source, SourceCheckStatus::Checking);
-        let result = self.check_source_file_worker(source);
-        self.source_checks.insert(
-            source,
-            match result {
-                Ok(()) => SourceCheckStatus::Complete,
-                Err(error) => SourceCheckStatus::Failed(error),
-            },
-        );
-        result
+        if check_unused && !self.query.unused_checked.contains(&source) {
+            // The unused identifiers check relies on a full type check having first been performed
+            if !self.ast(source)?.source_file(source)?.is_declaration_file {
+                let nodes = self
+                    .query
+                    .identifier_check_nodes
+                    .remove(&source)
+                    .unwrap_or_default();
+                self.check_unused_identifiers(nodes)?;
+            }
+            self.query.unused_checked.insert(source);
+        }
+        Ok(())
     }
 
     fn check_source_file_worker(&mut self, source: NodeId) -> Result<(), Error> {
@@ -53,15 +80,8 @@ impl CheckerState {
                 "checkSourceFile: JSX or non-script input",
             ));
         }
-        let options = self.program()?.host.options();
-        if options.no_unused_locals == Tristate::TRUE
-            || options.no_unused_parameters == Tristate::TRUE
-        {
-            return Err(Error::Unsupported(
-                "checkSourceFile: unused declarations pass",
-            ));
-        }
         self.check_grammar_source(source)?;
+        self.query.renamed_binding_elements_in_types.clear();
         let view = self.ast(source)?;
         let statements: Vec<_> = view
             .node_slice(view.node(source)?.statements(view)?)?
@@ -75,6 +95,10 @@ impl CheckerState {
             &self.ast(source)?.source_file(source)?,
         ) {
             self.check_external_module_exports(source)?;
+            self.register_for_unused_identifiers_check(source)?;
+        }
+        if !self.ast(source)?.source_file(source)?.is_declaration_file {
+            self.check_unused_renamed_binding_elements()?;
         }
         self.check_deferred_diagnostics()?;
         self.query.reported_unreachable.clear();
@@ -351,14 +375,19 @@ impl CheckerState {
             let ty = self.get_declared_type_of_symbol(symbol)?;
             self.check_object_type_members(node)?;
             self.resolve_type_members(ty)?;
-            self.check_source_index_constraints(ty, node)
+            self.check_source_index_constraints(ty, node)?;
         } else {
             let annotation = required(
                 self.ast(node)?.node(node)?.type_node(),
                 "type alias annotation",
             )?;
-            self.check_source_element(annotation)
+            if self.ast(annotation)?.node(annotation)?.kind() == K::IntrinsicKeyword {
+                // The `intrinsic` keyword is a leaf type node with no child nodes to check.
+                return Ok(());
+            }
+            self.check_source_element(annotation)?;
         }
+        self.register_for_unused_identifiers_check(node)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkTypeLiteral

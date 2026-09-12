@@ -18,6 +18,9 @@ pub(crate) struct ErrorEntry {
 pub(crate) struct RelationErrors {
     pub chain: Vec<ErrorEntry>,
     pub related: Vec<Arc<Diagnostic>>,
+    /// `Relater.errorNode`; excess-property reporting narrows it to the
+    /// offending property name.
+    pub error_node: Option<NodeId>,
 }
 
 impl Relater<'_> {

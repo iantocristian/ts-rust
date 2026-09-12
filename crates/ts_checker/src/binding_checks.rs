@@ -95,9 +95,12 @@ impl CheckerState {
                     && parameter
                     && !self.parameter_function_body_present(root)?
                 {
-                    return Err(Error::Unsupported(
-                        "checkUnusedRenamedBindingElements: type-only binding rename",
-                    ));
+                    // type F = ({a: string}) => void;
+                    //               ^^^^^^
+                    // variable renaming in function type notation is confusing,
+                    // so we forbid it even if noUnusedLocals is not enabled
+                    self.query.renamed_binding_elements_in_types.push(node);
+                    return Ok(());
                 }
                 if self.ast(property)?.node(property)?.kind() == K::ComputedPropertyName {
                     self.check_computed_property_name(property)?;

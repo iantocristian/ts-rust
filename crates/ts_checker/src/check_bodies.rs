@@ -1120,6 +1120,16 @@ impl CheckerState {
             self.flow.disabled = saved_disabled;
         }
         result?;
+        if let Some(locals) = self
+            .program()?
+            .bound(block)?
+            .node_binding(block)?
+            .and_then(|binding| binding.locals)
+        {
+            if !self.table(locals)?.is_empty() {
+                self.register_for_unused_identifiers_check(block)?;
+            }
+        }
         Ok(())
     }
 

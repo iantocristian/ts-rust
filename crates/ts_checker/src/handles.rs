@@ -361,12 +361,13 @@ impl Operation<'_> {
             .collect())
     }
 
-    /// Suggestions already produced by queries/checking. This does not execute
-    /// the additional unused-code pass of Go's GetSuggestionDiagnostics.
+    /// Suggestions produced by queries and checking, including the
+    /// unused-identifier pass Go's GetSuggestionDiagnostics requests.
     pub fn recorded_suggestions(
         &mut self,
         source: NodeId,
     ) -> Result<Vec<ts_ast::Diagnostic>, Error> {
+        self.state_mut().check_source_file_ex(source, true)?;
         Ok(self
             .state_mut()
             .suggestions_for_file(Some(source))?

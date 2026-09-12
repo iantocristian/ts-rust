@@ -232,6 +232,7 @@ impl CheckerState {
             for member in members {
                 self.check_source_element(member)?;
             }
+            self.register_for_unused_identifiers_check(node)?;
         }
         Ok(())
     }

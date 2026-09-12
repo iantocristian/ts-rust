@@ -277,19 +277,16 @@ impl CheckerState {
                         options.emit_module_kind(),
                         ModuleKind::NODE16 | ModuleKind::NODE18
                     ) {
-                        let sync = host
-                            .get_default_resolution_mode_for_file(file_name.as_bytes())?
-                            == ModuleKind::COMMON_JS;
                         let target_name =
                             file.view().source_file()?.parse_options().file_name.clone();
-                        if sync
-                            && host.get_default_resolution_mode_for_file(target_name.as_bytes())?
-                                == ModuleKind::ESNEXT
-                        {
-                            return Err(Error::Unsupported(
-                                "resolveExternalModule: CommonJS/ESM mismatch details",
-                            ));
-                        }
+                        self.check_module_kind_mismatch(
+                            location,
+                            error,
+                            source,
+                            &file_name,
+                            &target_name,
+                            &module_reference,
+                        )?;
                     }
                 }
                 return self.resolve_attributed_pattern_module(
@@ -642,4 +639,219 @@ fn node_core_module(name: &[u8]) -> bool {
             | b"worker_threads"
             | b"zlib"
     )
+}
+
+impl CheckerState {
+    /// The Node16/Node18 branch of `resolveExternalModule`: a synchronous import
+    /// from a CommonJS file cannot load an ECMAScript module.
+    // port: tsc/internal/checker/checker.go:Checker.resolveExternalModule
+    fn check_module_kind_mismatch(
+        &mut self,
+        location: NodeId,
+        error_node: NodeId,
+        importing_source: NodeId,
+        importing_file_name: &JsString,
+        target_file_name: &JsString,
+        module_reference: &JsString,
+    ) -> Result<(), Error> {
+        let host = self.program()?.host.clone();
+        let view = self.ast(location)?;
+        let in_import_call = ts_ast::utilities::find_ancestor(view, Some(location), |node| {
+            is_import_call(view, node).unwrap_or(false)
+        })?
+        .is_some();
+        let import_equals = ts_ast::utilities::find_ancestor(view, Some(location), |node| {
+            node.kind() == K::ImportEqualsDeclaration
+        })?;
+        let sync = host.get_default_resolution_mode_for_file(importing_file_name.as_bytes())?
+            == ModuleKind::COMMON_JS
+            && !in_import_call
+            || import_equals.is_some();
+        let override_host = ts_ast::utilities::find_ancestor(view, Some(location), |node| {
+            ts_ast::utilities_middle::is_resolution_mode_override_host(Some(node))
+        })?;
+        let has_override = override_host
+            .map(|host| self.has_resolution_mode_override(host))
+            .transpose()?
+            .unwrap_or(false);
+        if !(sync
+            && host.get_default_resolution_mode_for_file(target_file_name.as_bytes())?
+                == ModuleKind::ESNEXT
+            && !has_override)
+        {
+            return Ok(());
+        }
+        if import_equals.is_some() {
+            // ImportEquals in an ESM file resolving to another ESM file
+            self.error_at(
+                Some(error_node),
+                d::Module_0_cannot_be_imported_using_this_construct_The_specifier_only_resolves_to_an_ES_module_which_cannot_be_imported_with_require_Use_an_ECMAScript_import_instead,
+                vec![module_reference.clone()],
+            )?;
+            return Ok(());
+        }
+        // CJS file resolving to an ESM file
+        let details = match try_get_extension_from_path(importing_file_name.as_bytes()) {
+            Some(b".ts" | b".js" | b".tsx" | b".jsx") => {
+                Some(self.mode_mismatch_details(importing_source, error_node)?)
+            }
+            _ => None,
+        };
+        let mut message = d::The_current_file_is_a_CommonJS_module_whose_imports_will_produce_require_calls_however_the_referenced_file_is_an_ECMAScript_module_and_cannot_be_imported_with_require_Consider_writing_a_dynamic_import_0_call_instead;
+        if let Some(host_node) = override_host {
+            let read = self.ast(host_node)?.node(host_node)?;
+            match read.kind().known() {
+                Some(K::ImportDeclaration) => {
+                    let type_only = read
+                        .data_source()
+                        .as_import_declaration()
+                        .and_then(|data| data.import_clause())
+                        .map(|clause| {
+                            Ok::<_, Error>(self.ast(clause)?.node(clause)?.is_type_only())
+                        })
+                        .transpose()?
+                        .unwrap_or(false);
+                    if type_only {
+                        message = d::Type_only_import_of_an_ECMAScript_module_from_a_CommonJS_module_must_have_a_resolution_mode_attribute;
+                    }
+                }
+                Some(K::ImportType) => {
+                    message = d::Type_import_of_an_ECMAScript_module_from_a_CommonJS_module_must_have_a_resolution_mode_attribute;
+                }
+                _ => {}
+            }
+        }
+        let args = vec![module_reference.clone()];
+        let diagnostic = if let Some(details) = details {
+            ts_ast::Diagnostic::chain(Some(std::sync::Arc::new(details)), message, args)
+        } else {
+            self.diagnostic_for_node(Some(error_node), message, args)?
+        };
+        self.add_diagnostic(diagnostic)?;
+        Ok(())
+    }
+
+    // port: tsc/internal/ast/utilities.go:HasResolutionModeOverride
+    fn has_resolution_mode_override(&self, node: NodeId) -> Result<bool, Error> {
+        let read = self.ast(node)?.node(node)?;
+        let attributes = match read.kind().known() {
+            Some(
+                K::ImportType
+                | K::ImportDeclaration
+                | K::JSImportDeclaration
+                | K::ExportDeclaration,
+            ) => self.import_attributes(node)?,
+            _ => None,
+        };
+        let (mode, _) =
+            ts_ast::utilities_middle::import_attributes_resolution_mode_with_invalid_value(
+                self.ast(node)?,
+                attributes,
+            )?;
+        Ok(mode.is_some())
+    }
+
+    /// The repopulate marker Go attaches for incremental builds has no Rust
+    /// counterpart; the message and arguments are the observable payload.
+    // port: tsc/internal/checker/checker.go:Checker.createModeMismatchDetails
+    // port: tsc/internal/checker/utilities.go:CreateModeMismatchDetails
+    fn mode_mismatch_details(
+        &mut self,
+        source: NodeId,
+        error_node: NodeId,
+    ) -> Result<ts_ast::Diagnostic, Error> {
+        let file_name = self
+            .ast(source)?
+            .source_file(source)?
+            .parse_options()
+            .file_name
+            .clone();
+        let target_extension: &[u8] = match try_get_extension_from_path(file_name.as_bytes()) {
+            Some(b".ts") => b".mts",
+            Some(b".js") => b".mjs",
+            _ => b"",
+        };
+        let path = self
+            .ast(source)?
+            .source_file(source)?
+            .parse_options()
+            .path
+            .clone();
+        let meta = self
+            .program()?
+            .host
+            .get_source_file_meta_data(path.as_bytes())?;
+        let package_json_type = meta.package_json_type.clone();
+        let package_json_directory = meta.package_json_directory.clone();
+        let package_json = || {
+            JsString::from_bytes(
+                path::combine(
+                    package_json_directory.as_bytes(),
+                    &[b"package.json".as_slice()],
+                )
+                .as_slice(),
+            )
+        };
+        let (message, args): (&'static Message, Vec<JsString>) = if package_json_directory
+            .is_empty()
+            || !package_json_type.is_empty()
+        {
+            if target_extension.is_empty() {
+                (
+                        d::To_convert_this_file_to_an_ECMAScript_module_create_a_local_package_json_file_with_type_Colon_module,
+                        vec![],
+                    )
+            } else {
+                (
+                        d::To_convert_this_file_to_an_ECMAScript_module_change_its_file_extension_to_0_or_create_a_local_package_json_file_with_type_Colon_module,
+                        vec![JsString::from_bytes(target_extension)],
+                    )
+            }
+        } else if target_extension.is_empty() {
+            (
+                    d::To_convert_this_file_to_an_ECMAScript_module_add_the_field_type_Colon_module_to_0,
+                    vec![package_json()],
+                )
+        } else {
+            (
+                    d::To_convert_this_file_to_an_ECMAScript_module_change_its_file_extension_to_0_or_add_the_field_type_Colon_module_to_1,
+                    vec![JsString::from_bytes(target_extension), package_json()],
+                )
+        };
+        self.diagnostic_for_node(Some(error_node), message, args)
+    }
+}
+
+// port: tsc/internal/ast/utilities.go:IsImportCall
+fn is_import_call(view: ts_ast::AstView<'_>, node: &ts_ast::NodeRead<'_>) -> Result<bool, Error> {
+    if node.kind() != K::CallExpression {
+        return Ok(false);
+    }
+    let Some(expression) = node.expression() else {
+        return Ok(false);
+    };
+    let read = view.node(expression)?;
+    if read.kind() == K::ImportKeyword {
+        return Ok(true);
+    }
+    let Some(meta) = read.data_source().as_meta_property() else {
+        return Ok(false);
+    };
+    Ok(meta.keyword_token() == K::ImportKeyword
+        && meta
+            .name()
+            .map(|name| Ok::<_, Error>(view.node_text(name)?.as_bytes() == b"defer"))
+            .transpose()?
+            .unwrap_or(false))
+}
+
+// port: tsc/internal/tspath/extension.go:TryGetExtensionFromPath
+fn try_get_extension_from_path(path: &[u8]) -> Option<&'static [u8]> {
+    const EXTENSIONS_TO_REMOVE: [&[u8]; 12] = [
+        b".d.ts", b".d.mts", b".d.cts", b".mjs", b".mts", b".cjs", b".cts", b".ts", b".js",
+        b".tsx", b".jsx", b".json",
+    ];
+    EXTENSIONS_TO_REMOVE
+        .into_iter()
+        .find(|extension| path.ends_with(extension))
 }

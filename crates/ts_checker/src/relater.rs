@@ -256,7 +256,10 @@ impl CheckerState {
             frame,
             kind,
             report_errors: false,
-            errors: crate::relation_errors::RelationErrors::default(),
+            errors: crate::relation_errors::RelationErrors {
+                error_node,
+                ..Default::default()
+            },
         };
         relater.report_errors = error_node.is_some() && kind != RelationKind::Identity;
         let result = relater.related_with_head(source, target, BOTH, 0, head);
@@ -296,6 +299,7 @@ impl CheckerState {
                 vec![source, target],
             )?)
         } else {
+            let error_node = relater.errors.error_node;
             relater.error_diagnostic(error_node)?
         };
         Ok((result != tr::FALSE, diagnostic))
@@ -710,12 +714,7 @@ impl Relater<'_> {
                 return Ok(tr::FALSE);
             }
             if intersection & TARGET == 0 {
-                if self.excess_properties(source, target)? {
-                    if self.report_errors {
-                        return Err(Error::Unsupported(
-                            "report excess properties: source object expression",
-                        ));
-                    }
+                if self.excess_properties(source, target, self.report_errors)? {
                     return Ok(tr::FALSE);
                 }
                 if self.no_common_properties(source, target)? {

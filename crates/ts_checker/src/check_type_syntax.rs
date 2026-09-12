@@ -314,6 +314,9 @@ impl CheckerState {
                 self.check_async_return_annotation(node, annotation)?;
             }
         }
+        if !index {
+            self.register_for_unused_identifiers_check(node)?;
+        }
         Ok(())
     }
 
@@ -526,7 +529,7 @@ impl CheckerState {
                 }
             }
         }
-        Ok(())
+        self.register_for_unused_identifiers_check(node)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.areTypeParametersIdentical

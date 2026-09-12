@@ -261,14 +261,42 @@ reporting boundary below. Clippy, formatting, ledger validation and tracking
 views are current. **The full 10,728-variant inventory was not re-run after
 this pass**; build a new immutable snapshot and run it before quoting counts.
 
+**Third pass.** The three largest remaining named boundaries were closed while
+the owner's full inventory re-run was in flight (its binary and snapshot are
+immutable, so these edits do not affect it):
+
+- `checkSourceFile: unused declarations pass` (125): the checker already
+  recorded reference kinds (`query.references`, fed by the resolver's
+  `symbolReferenced` hook and `markPropertyAsReferenced`), so the pass is the
+  `checkUnusedIdentifiers` family in `unused_identifiers.rs` plus
+  `registerForUnusedIdentifiersCheck` at all twelve upstream sites (signature
+  declarations, `infer`, blocks and loops with locals, case blocks, classes and
+  class expressions, namespaces, type aliases, interfaces, external-module source
+  files). `checkUnusedRenamedBindingElements` runs from `checkSourceFile`; the
+  pass itself runs once per file after the type check, as an error under
+  `noUnusedLocals`/`noUnusedParameters` and as a suggestion otherwise
+  (`recorded_suggestions` now requests it, as `GetSuggestionDiagnostics` does).
+- `report excess properties: source object expression` (43): `hasExcessProperties`
+  now reports. `RelationErrors` carries the relater's error node so the property
+  name inside the literal can replace it; `getSuggestionForNonexistentProperty`
+  and `getSpellingSuggestionForName` are ported over the target's property
+  symbols; the JSX attribute branch is the remaining named boundary.
+- `resolveExternalModule: CommonJS/ESM mismatch details` (41): the Node16/Node18
+  branch with `createModeMismatchDetails` as the message chain and the
+  `import =`/type-only/`import type` message selection. Go's repopulate marker
+  (tsbuildinfo only) has no Rust counterpart.
+
+Focused regressions cover each (`checker_semantics.rs`: four unused-pass tests,
+one excess-property test with the spelling suggestion and the discriminated
+union, one Node16 test over a two-file fixture). Clippy, formatting, ledger
+validation and tracking views are current (3,577 functions mapped). **The full
+inventory was not re-run after this pass either.**
+
 Remaining inventory-03 acceptance buckets, largest first, with what each needs:
 
 | Bucket | Variants | Needs |
 | --- | ---: | --- |
-| `checkSourceFile: unused declarations pass` | 125 | `registerForUnusedIdentifiersCheck` at its three named sites and the `checkUnusedIdentifiers` family |
-| `report excess properties: source object expression` | 43 | an error-node override in the relater, `getSuggestionForNonexistentProperty` over property symbols, `filterType` by `isExcessPropertyCheckTarget` |
 | `resolveStructuredTypeMembers: type family` | 45 | the remaining object payload families |
-| `resolveExternalModule: CommonJS/ESM mismatch details` | 41 | the Node16/18 mismatch diagnostic and its related information |
 | `checkExternalEmitHelpers: imported module helpers` | 34 | `tslib` resolution and helper existence checks |
 | `checkGrammarVariableDeclarationList: using contexts` | 34 | `using` declaration grammar |
 | `Node.Text` / `Node.Expression` panics | 39 | faithful to pinned Go; the Rust callers that reach them are the bug |

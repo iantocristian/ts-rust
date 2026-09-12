@@ -28,19 +28,7 @@ impl CheckerState {
         for member in self.source_list(node, self.ast(node)?.node(node)?.member_list())? {
             self.check_source_element(member)?;
         }
-        if self.program()?.host.options().no_unused_locals.is_true()
-            || self
-                .program()?
-                .host
-                .options()
-                .no_unused_parameters
-                .is_true()
-        {
-            return Err(Error::Unsupported(
-                "registerForUnusedIdentifiersCheck: class expression",
-            ));
-        }
-        Ok(())
+        self.register_for_unused_identifiers_check(node)
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkClassExpressionExternalHelpers

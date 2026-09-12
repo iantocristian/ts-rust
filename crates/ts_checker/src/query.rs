@@ -19,6 +19,12 @@ pub(crate) struct QueryState {
     pub global_types: crate::types::Map<&'static str, TypeId>,
     pub global_type_aliases: crate::types::Map<(&'static str, usize, bool), Option<SymbolId>>,
     pub references: LinkStore<SymbolId, SymbolFlags>,
+    /// `sourceFileLinks.identifierCheckNodes`, keyed by source file.
+    pub identifier_check_nodes: crate::types::Map<NodeId, Vec<NodeId>>,
+    /// `sourceFileLinks.unusedChecked`.
+    pub unused_checked: crate::types::Set<NodeId>,
+    /// `Checker.renamedBindingElementsInTypes`.
+    pub renamed_binding_elements_in_types: Vec<NodeId>,
     pub scope_changes: LinkStore<NodeId, ts_core::Tristate>,
     /// The union/intersection slice of deferredSymbolLinks.constituents. The containing
     /// type lives in valueSymbolLinks; no owning references back to the checker.

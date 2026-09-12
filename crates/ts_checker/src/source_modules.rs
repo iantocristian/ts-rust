@@ -50,10 +50,8 @@ impl CheckerState {
         let attributes = data.attributes();
         if let Some(body) = body {
             self.check_source_element(body)?;
-            if !global && self.program()?.host.options().no_unused_locals.is_true() {
-                return Err(Error::Unsupported(
-                    "registerForUnusedIdentifiersCheck: namespace",
-                ));
+            if !global {
+                self.register_for_unused_identifiers_check(node)?;
             }
         }
         if global && !ambient {

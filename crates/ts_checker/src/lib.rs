@@ -370,3 +370,4 @@ mod families_tests;
 mod flag_tests;
 #[cfg(test)]
 mod tests;
+mod unused_identifiers;

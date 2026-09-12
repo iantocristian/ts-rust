@@ -53,7 +53,7 @@ impl CheckerState {
             self.check_expression(incrementor)?;
         }
         self.check_source_element(statement)?;
-        self.statement_unused_boundary(node)
+        self.register_locals_for_unused_check(node)
     }
     // port: tsc/internal/checker/grammarchecks.go:Checker.checkGrammarForInOrForOfStatement
     fn check_grammar_for_in_or_of(&mut self, node: NodeId) -> Result<bool, Error> {
@@ -203,7 +203,7 @@ impl CheckerState {
             self.error_at(Some(expression),d::The_right_hand_side_of_a_for_in_statement_must_be_of_type_any_an_object_type_or_a_type_parameter_but_here_has_type_0,vec![text])?;
         }
         self.check_source_element(statement)?;
-        self.statement_unused_boundary(node)
+        self.register_locals_for_unused_check(node)
     }
     // port: tsc/internal/checker/checker.go:Checker.getIndexTypeOrString
     // port: tsc/internal/checker/checker.go:Checker.getExtractStringType
@@ -268,7 +268,7 @@ impl CheckerState {
             }
         }
         self.check_source_element(statement)?;
-        self.statement_unused_boundary(node)
+        self.register_locals_for_unused_check(node)
     }
     // port: tsc/internal/checker/checker.go:Checker.checkReferenceExpression
     pub(crate) fn check_reference_expression(
@@ -480,7 +480,7 @@ impl CheckerState {
                 }
             }
         }
-        self.statement_unused_boundary(block)
+        self.register_locals_for_unused_check(block)
     }
     // port: tsc/internal/checker/checker.go:Checker.checkLabeledStatement
     pub(crate) fn check_labeled_statement(&mut self, node: NodeId) -> Result<(), Error> {
@@ -624,21 +624,5 @@ impl CheckerState {
             }
         }
         self.check_block_statement(block)
-    }
-    // Registration is observable when unused checking runs. Preserve the pending
-    // phase until the common unused-identifier queue is available.
-    fn statement_unused_boundary(&self, node: NodeId) -> Result<(), Error> {
-        if self.program()?.host.options().no_unused_locals == Tristate::TRUE
-            && self
-                .program()?
-                .bound(node)?
-                .node_binding(node)?
-                .is_some_and(|binding| binding.locals.is_some())
-        {
-            return Err(Error::Unsupported(
-                "registerForUnusedIdentifiersCheck: statement locals",
-            ));
-        }
-        Ok(())
     }
 }
