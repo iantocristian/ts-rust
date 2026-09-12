@@ -323,13 +323,26 @@ Focused regressions cover each (`checker_semantics.rs`; the tslib test asserts a
 single TS2354 per file at the binding name, the `using` tests use a global
 fixture file). **The full inventory was not re-run after this pass.**
 
+**Inventory-04 reading.** The owner's `target/s08/p4-inventory-04` run captured
+the source at bef37fe (before the third and fourth passes): acceptance variants
+completing all phases 8,471 → 8,731, semantic failures 833 → 572, declaration
+failures 58 → 42. Its one new reason, `getContextualType: ... import context`
+(4 import-attribute variants), and the small rises in `report excess properties`
+(+3), `elaborateNeverIntersection` (+1) are not regressions: every one of those
+variants failed earlier in inventory-03 (`checkExpressionWorker` or the JS
+type-alias lookup) and now reaches the next boundary. The import-attribute
+boundary itself is closed by `getContextualImportAttributeType` and
+`isInlineImportAttributes` (`expression_context.rs`), tested against the pinned
+`importAttributes6(module=nodenext)` error baseline. Note for fixtures: under
+`module` node16+ upstream forces every non-declaration file to be a module, so
+global helper declarations for such tests must live in a `.d.ts` file.
+
 Remaining inventory-03 acceptance buckets, largest first, with what each needs:
 
 | Bucket | Variants | Needs |
 | --- | ---: | --- |
 | declaration `getSymbolChain: external module specifier ranking` | 22 | node-builder specifier ranking |
 | `checkSourceFile: JSX or non-script input` | 24 | out of P4 scope |
-| `isInlineImportAttributes` | 20 (+6 declaration) | the import-attribute inline check |
 | `getSuggestedLibForNonExistentProperty` | 19 | the lib suggestion table |
 | `errorOnImplicitAnyModule: package install diagnostic chain` | 14 | the package-install chain |
 | `resolveAlias during mergeSymbol` | 13 | alias resolution inside symbol merging |

@@ -145,7 +145,7 @@ impl CheckerState {
             _ => Ok(None),
         }
     }
-    fn global_import_attributes_type(&mut self) -> Result<TypeId, Error> {
+    pub(crate) fn global_import_attributes_type(&mut self) -> Result<TypeId, Error> {
         if let Some(ty) = self.module_aliases.global_import_attributes {
             return Ok(ty);
         }

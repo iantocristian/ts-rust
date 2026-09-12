@@ -265,16 +265,16 @@ impl CheckerState {
             Some(K::YieldExpression) => {
                 self.contextual_type_for_yield_operand(parent, context_flags)
             }
+            Some(K::ImportAttribute) => self.contextual_import_attribute_type(parent),
             Some(
                 K::Decorator
                 | K::JsxExpression
                 | K::JsxAttribute
                 | K::JsxSpreadAttribute
                 | K::JsxOpeningElement
-                | K::JsxSelfClosingElement
-                | K::ImportAttribute,
+                | K::JsxSelfClosingElement,
             ) => Err(Error::Unsupported(
-                "getContextualType: await/yield/decorator/JSX/import context",
+                "getContextualType: decorator/JSX context",
             )),
             _ => Ok(None),
         }
@@ -406,16 +406,8 @@ impl CheckerState {
         if ts_ast::utilities_middle::is_const_assertion(self.ast(parent)?, &read)? {
             return Ok(true);
         }
-        if self.ast(node)?.node(node)?.kind() == K::ObjectLiteralExpression
-            && read.kind() == K::PropertyAssignment
-        {
-            if let Some(name) = read.name() {
-                if ts_ast::utilities::is_property_name_literal(&self.ast(name)?.node(name)?)
-                    && self.ast(name)?.node_text(name)?.as_bytes() == b"with"
-                {
-                    return Err(Error::Unsupported("isInlineImportAttributes"));
-                }
-            }
+        if self.is_inline_import_attributes(node)? {
+            return Ok(true);
         }
         if self.valid_const_assertion_argument(node)? {
             if let Some(ty) = self.contextual_expression_type(node)? {
@@ -485,5 +477,65 @@ impl CheckerState {
                 .ok_or(Error::MissingLink("widened unique symbol union"));
         }
         Ok(ty)
+    }
+}
+
+impl CheckerState {
+    // port: tsc/internal/checker/checker.go:Checker.getContextualImportAttributeType
+    fn contextual_import_attribute_type(&mut self, node: NodeId) -> Result<Option<TypeId>, Error> {
+        let name = self
+            .ast(node)?
+            .node(node)?
+            .name()
+            .ok_or(Error::MissingLink("import attribute name"))?;
+        let text = self.ast(name)?.node_text(name)?.into_js_string();
+        let global = self.global_import_attributes_type()?;
+        self.type_of_property_of_contextual_type(global, text.as_bytes())
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.isInlineImportAttributes
+    fn is_inline_import_attributes(&self, node: NodeId) -> Result<bool, Error> {
+        let view = self.ast(node)?;
+        let read = view.node(node)?;
+        if read.kind() != K::ObjectLiteralExpression {
+            return Ok(false);
+        }
+        let Some(property) = read.parent() else {
+            return Ok(false);
+        };
+        let property_read = view.node(property)?;
+        if property_read.kind() != K::PropertyAssignment
+            || property_read.initializer() != Some(node)
+        {
+            return Ok(false);
+        }
+        let Some(name) = property_read.name() else {
+            return Ok(false);
+        };
+        let name_read = view.node(name)?;
+        if !(name_read.kind() == K::Identifier
+            || ts_ast::utilities::is_string_literal_like(&name_read))
+            || view.node_text(name)?.as_bytes() != b"with"
+        {
+            return Ok(false);
+        }
+        let Some(options) = property_read.parent() else {
+            return Ok(false);
+        };
+        if view.node(options)?.kind() != K::ObjectLiteralExpression {
+            return Ok(false);
+        }
+        let Some(import_call) = ts_ast::utilities::find_ancestor(view, Some(options), |node| {
+            node.kind() == K::CallExpression
+                && node
+                    .expression()
+                    .and_then(|expression| view.node(expression).ok())
+                    .is_some_and(|expression| expression.kind() == K::ImportKeyword)
+        })?
+        else {
+            return Ok(false);
+        };
+        let arguments = self.source_list(import_call, view.node(import_call)?.argument_list())?;
+        Ok(arguments.len() > 1 && ts_ast::skip_parentheses(view, arguments[1])? == options)
     }
 }

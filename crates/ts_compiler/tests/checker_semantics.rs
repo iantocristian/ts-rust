@@ -1478,3 +1478,75 @@ fn import_helpers_report_a_missing_tslib_once_per_file() {
         }
     }
 }
+
+#[test]
+fn import_attribute_values_are_contextually_typed_and_inline_attributes_are_const_contexts() {
+    let globals: &[u8] = b"interface ImportAttributes { [name: string]: string }
+interface Array<T> { length: number }
+interface RegExp {}
+interface Number { toString(): string }
+";
+    let module = b"import * as thing1 from \"./mod.mjs\" with { field: 0 };
+import * as thing2 from \"./mod.mjs\" with { field: `a` };
+import * as thing3 from \"./mod.mjs\" with { field: /a/g };
+import * as thing4 from \"./mod.mjs\" with { field: [\"a\"] };
+import * as thing5 from \"./mod.mjs\" with { field: { a: 0 } };
+import * as thing6 from \"./mod.mjs\" with { type: \"json\", field: 0..toString() };
+";
+    let nodenext = CompilerOptions {
+        target: ScriptTarget::ES2022,
+        module: ModuleKind::NODE_NEXT,
+        module_resolution: ts_core::ModuleResolutionKind::NODE_NEXT,
+        ..options()
+    };
+    let (owner, program, _) = fixture_files(
+        b"/mod.mts",
+        &[(b"/mod.mts", module), (b"/globals.d.ts", globals)],
+        nodenext.clone(),
+    );
+    let source = program.file(b"/mod.mts").unwrap().source();
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+    let not_assignable = ts_diagnostics::Type_0_is_not_assignable_to_type_1.code;
+    let not_string =
+        ts_diagnostics::Import_attribute_values_must_be_string_literal_expressions.code;
+    // Pinned Go: importAttributes6(module=nodenext).errors.txt, ten errors in source order.
+    assert_eq!(
+        codes,
+        vec![
+            not_assignable,
+            not_string,
+            not_string,
+            not_assignable,
+            not_string,
+            not_assignable,
+            not_string,
+            not_assignable,
+            not_string,
+            not_string
+        ]
+    );
+    assert_eq!(
+        codes_and_args(&diagnostics[..1])[0].1,
+        vec!["{ field: 0; }".to_string(), "ImportAttributes".to_string()],
+        "the attribute value keeps its literal type under the ImportAttributes contextual type"
+    );
+
+    let inline = b"export const loaded = import(\"./mod.mjs\", { with: { type: \"json\" } });\n";
+    let (owner, program, _) = fixture_files(
+        b"/main.mts",
+        &[
+            (b"/main.mts", inline),
+            (b"/mod.mjs", b"export const x = 1;\n"),
+            (b"/globals.ts", globals),
+        ],
+        nodenext,
+    );
+    let source = program.file(b"/main.mts").unwrap().source();
+    let diagnostics = owner.operation().unwrap().semantic_diagnostics(source);
+    assert!(diagnostics.is_ok(), "{diagnostics:?}");
+}
