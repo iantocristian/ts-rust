@@ -263,54 +263,30 @@ impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.checkSignatureDeclaration
     pub(crate) fn check_signature_syntax(&mut self, node: NodeId) -> Result<(), Error> {
         let read = self.ast(node)?.node(node)?;
-        if read.body().is_some() {
-            return Err(Error::Unsupported(
-                "checkSignatureDeclaration: function body",
-            ));
-        }
         let index = read.kind() == K::IndexSignature;
         let parameters = self.source_list(node, read.parameter_list())?;
         let annotation = read.type_node();
         if index {
-            self.check_index_signature_grammar(node, &parameters)?;
-        } else {
-            self.check_parameter_list_grammar(&parameters)?;
+            if !self.check_grammar_modifiers(node)? {
+                self.check_index_signature_grammar(node, &parameters)?;
+            }
+        } else if matches!(
+            read.kind().known(),
+            Some(
+                K::FunctionType
+                    | K::FunctionDeclaration
+                    | K::ConstructorType
+                    | K::CallSignature
+                    | K::Constructor
+                    | K::ConstructSignature
+            )
+        ) {
+            self.check_grammar_function_like(node)?;
         }
         self.check_type_parameters(node)?;
+        self.check_unmatched_jsdoc_parameters(node)?;
         for parameter in parameters {
-            let read = self.ast(parameter)?.node(parameter)?;
-            let name = read.name().ok_or(Error::MissingLink("parameter name"))?;
-            if self.ast(name)?.node(name)?.kind() != K::Identifier {
-                return Err(Error::Unsupported("checkParameter: binding pattern"));
-            }
-            if read.modifiers().is_some() {
-                return Err(Error::Unsupported("checkParameter: property modifiers"));
-            }
-            let annotation = read.type_node();
-            let initializer = read.initializer();
-            let rest = read
-                .data_source()
-                .as_parameter_declaration()
-                .ok_or(Error::MissingLink("parameter"))?
-                .dot_dot_dot_token()
-                .is_some();
-            if let Some(annotation) = annotation {
-                self.check_source_element(annotation)?;
-            }
-            if initializer.is_some() {
-                return Err(Error::Unsupported("checkParameter: initializer"));
-            }
-            let symbol = self
-                .get_symbol_of_declaration(parameter)?
-                .ok_or(Error::MissingLink("parameter symbol"))?;
-            let ty = self.get_type_of_symbol(symbol)?;
-            if rest && !self.is_array_like_type(ty)? {
-                self.error_at(
-                    Some(parameter),
-                    ts_diagnostics::A_rest_parameter_must_be_of_an_array_type,
-                    vec![],
-                )?;
-            }
+            self.check_parameter(parameter)?;
         }
         if let Some(annotation) = annotation {
             self.check_source_element(annotation)?;
@@ -330,11 +306,22 @@ impl CheckerState {
                 }
             }
         }
+        if let Some(annotation) = annotation {
+            let flags = self.body_function_flags(node)?;
+            if flags.1 && self.ast(node)?.node(node)?.body().is_some() {
+                self.check_generator_return_annotation(node, annotation)?;
+            } else if flags.0 {
+                self.check_async_return_annotation(node, annotation)?;
+            }
+        }
         Ok(())
     }
 
     // port: tsc/internal/checker/grammarchecks.go:Checker.checkGrammarParameterList
-    fn check_parameter_list_grammar(&mut self, parameters: &[NodeId]) -> Result<(), Error> {
+    pub(crate) fn check_parameter_list_grammar(
+        &mut self,
+        parameters: &[NodeId],
+    ) -> Result<bool, Error> {
         let mut optional = false;
         for (index, &parameter) in parameters.iter().enumerate() {
             let read = self.ast(parameter)?.node(parameter)?;
@@ -383,10 +370,10 @@ impl CheckerState {
             };
             if let Some((node, diagnostic)) = diagnostic {
                 self.error_at(node, diagnostic, vec![])?;
-                break;
+                return Ok(true);
             }
         }
-        Ok(())
+        Ok(false)
     }
 
     // port: tsc/internal/checker/grammarchecks.go:Checker.checkGrammarIndexSignatureParameters
@@ -524,7 +511,7 @@ impl CheckerState {
                     declarations.push(node);
                 }
             }
-            let result = self.infer_constraints_identical(&declarations, parameter);
+            let result = self.type_parameter_declarations_identical(&declarations, parameter);
             if result.is_err() {
                 self.query.type_parameters_checked.remove(&symbol);
             }
@@ -543,7 +530,7 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/checker.go:Checker.areTypeParametersIdentical
-    fn infer_constraints_identical(
+    pub(crate) fn type_parameter_declarations_identical(
         &mut self,
         declarations: &[ts_arena::NodeId],
         parameter: crate::TypeId,
@@ -714,7 +701,7 @@ impl CheckerState {
     }
 
     // port: tsc/internal/ast/utilities.go:isPartOfTypeExpressionWithTypeArguments
-    fn is_type_heritage_expression(&self, node: NodeId) -> Result<bool, Error> {
+    pub(crate) fn is_type_heritage_expression(&self, node: NodeId) -> Result<bool, Error> {
         let Some(parent) = self.ast(node)?.node(node)?.parent() else {
             return Ok(false);
         };

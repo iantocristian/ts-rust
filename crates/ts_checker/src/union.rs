@@ -488,7 +488,7 @@ impl CheckerState {
     pub(crate) fn filter_type(
         &mut self,
         ty: TypeId,
-        predicate: &mut dyn FnMut(&Self, TypeId) -> Result<bool, Error>,
+        predicate: &mut dyn FnMut(&mut Self, TypeId) -> Result<bool, Error>,
     ) -> Result<TypeId, Error> {
         let record = *self.types.get(ty)?;
         if record.flags & type_flags::UNION != 0 {

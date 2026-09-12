@@ -269,6 +269,15 @@ impl CheckerState {
         let read = self.symbol(symbol)?;
         let flags = read.flags();
         let exports = read.exports();
+        if flags & sf::CLASS != 0 {
+            return self.resolve_class_static_members(ty, symbol);
+        }
+        if flags & sf::ENUM != 0 {
+            return self.resolve_enum_members(ty, symbol);
+        }
+        if flags & sf::VALUE_MODULE != 0 && flags & (sf::FUNCTION | sf::METHOD) == 0 {
+            return self.resolve_namespace_type_members(ty, symbol);
+        }
         let members = if flags & sf::TYPE_LITERAL != 0 {
             self.members_of_symbol(symbol)?
         } else {

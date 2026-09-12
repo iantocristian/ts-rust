@@ -8,6 +8,33 @@ use ts_arena::SymbolId;
 use ts_ast::{check_flags as cf, modifier_flags as mf, symbol_flags as sf};
 
 impl CheckerState {
+    // port: tsc/internal/checker/checker.go:Checker.isValidOverrideOf
+    fn valid_protected_override(
+        &mut self,
+        source: SymbolId,
+        target: SymbolId,
+    ) -> Result<bool, Error> {
+        for target in self.underlying_access_properties(target)? {
+            if self.property_modifiers(target)? & mf::PROTECTED == 0 {
+                continue;
+            }
+            let base = self.property_declaring_class(target)?;
+            let mut derives = false;
+            for source in self.underlying_access_properties(source)? {
+                if let (Some(class), Some(base)) = (self.property_declaring_class(source)?, base) {
+                    if self.has_base_type(class, base)? {
+                        derives = true;
+                        break;
+                    }
+                }
+            }
+            if !derives {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
     // port: tsc/internal/checker/relater.go:Checker.isWeakType
     pub(crate) fn is_weak_type(&mut self, ty: TypeId) -> Result<bool, Error> {
         let flags = self.types.flags(ty)?;
@@ -277,11 +304,66 @@ impl Relater<'_> {
             if self.checker.symbol(source)?.value_declaration()
                 != self.checker.symbol(target)?.value_declaration()
             {
+                if self.report_errors {
+                    let name = self.checker.symbol_to_string(target)?;
+                    if s & t & mf::PRIVATE != 0 {
+                        self.report_error(ts_diagnostics::Types_have_separate_declarations_of_a_private_property_0, vec![name]);
+                    } else {
+                        let (private, public) = if s & mf::PRIVATE != 0 {
+                            (source_object, target_object)
+                        } else {
+                            (target_object, source_object)
+                        };
+                        let private = self
+                            .checker
+                            .type_to_string(private, crate::type_display::DEFAULT_FLAGS)?;
+                        let public = self
+                            .checker
+                            .type_to_string(public, crate::type_display::DEFAULT_FLAGS)?;
+                        self.report_error(
+                            ts_diagnostics::Property_0_is_private_in_type_1_but_not_in_type_2,
+                            vec![name, private, public],
+                        );
+                    }
+                }
                 return Ok(tr::FALSE);
             }
         } else if t & mf::PROTECTED != 0 {
-            return Err(Error::Unsupported("propertyRelatedTo: protected override"));
+            if !self.checker.valid_protected_override(source, target)? {
+                if self.report_errors {
+                    let name = self.checker.symbol_to_string(target)?;
+                    let source = self
+                        .checker
+                        .property_declaring_class(source)?
+                        .unwrap_or(source_object);
+                    let target = self
+                        .checker
+                        .property_declaring_class(target)?
+                        .unwrap_or(target_object);
+                    let source = self
+                        .checker
+                        .type_to_string(source, crate::type_display::DEFAULT_FLAGS)?;
+                    let target = self
+                        .checker
+                        .type_to_string(target, crate::type_display::DEFAULT_FLAGS)?;
+                    self.report_error(ts_diagnostics::Property_0_is_protected_but_type_1_is_not_a_class_derived_from_2, vec![name, source, target]);
+                }
+                return Ok(tr::FALSE);
+            }
         } else if s & mf::PROTECTED != 0 {
+            if self.report_errors {
+                let name = self.checker.symbol_to_string(target)?;
+                let source = self
+                    .checker
+                    .type_to_string(source_object, crate::type_display::DEFAULT_FLAGS)?;
+                let target = self
+                    .checker
+                    .type_to_string(target_object, crate::type_display::DEFAULT_FLAGS)?;
+                self.report_error(
+                    ts_diagnostics::Property_0_is_protected_in_type_1_but_public_in_type_2,
+                    vec![name, source, target],
+                );
+            }
             return Ok(tr::FALSE);
         }
         if self.kind == RelationKind::StrictSubtype

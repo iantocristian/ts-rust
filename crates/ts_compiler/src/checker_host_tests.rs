@@ -348,6 +348,10 @@ fn checker_host_retains_program_and_preserves_foreign_source_and_vfs_errors() {
             "GetRedirectForResolution: project references"
         ))
     ));
+    assert!(host
+        .get_project_reference_from_output_dts(b"main.d.ts")
+        .unwrap()
+        .is_none());
     drop(host);
     assert!(weak.upgrade().is_none());
 }

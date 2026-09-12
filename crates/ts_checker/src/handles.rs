@@ -471,6 +471,19 @@ impl Operation<'_> {
         self.state().kind(id)
     }
 
+    /// Existing computed-name identity, without creating links or resolving a type.
+    /// The operation validates the symbol owner before observing its name type;
+    /// this read is suitable for snapshots that must not warm checker queries.
+    pub fn symbol_name_type(&self, symbol: SymbolRef) -> Result<Option<TypeRef>, Error> {
+        let symbol = self.check_symbol_ref(symbol)?;
+        Ok(self
+            .state()
+            .value_symbol_links
+            .try_get(symbol)
+            .and_then(|links| links.name_type)
+            .map(|ty| self.type_ref(ty)))
+    }
+
     /// The symbol of a type, if it has one.
     pub fn type_symbol(&self, t: TypeRef) -> Result<Option<SymbolId>, Error> {
         let id = self.check_type(t)?;

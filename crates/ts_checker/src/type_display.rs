@@ -125,9 +125,34 @@ impl CheckerState {
 
     // port: tsc/internal/checker/printer.go:Checker.symbolToString
     pub(crate) fn symbol_to_string(&mut self, symbol: SymbolId) -> Result<JsString, Error> {
+        self.symbol_to_string_without_chain(symbol, None)
+    }
+
+    // port: tsc/internal/checker/checker.go:Checker.getFullyQualifiedName
+    pub(crate) fn fully_qualified_name(
+        &mut self,
+        symbol: SymbolId,
+        location: Option<ts_arena::NodeId>,
+    ) -> Result<JsString, Error> {
+        if let Some(parent) = self.symbol(symbol)?.parent() {
+            let parent = self.fully_qualified_name(parent, location)?;
+            let name = self.symbol_to_string(symbol)?;
+            let mut text = parent.as_bytes().to_vec();
+            text.push(b'.');
+            text.extend_from_slice(name.as_bytes());
+            return Ok(JsString::from_bytes(text));
+        }
+        self.symbol_to_string_without_chain(symbol, location)
+    }
+
+    fn symbol_to_string_without_chain(
+        &mut self,
+        symbol: SymbolId,
+        location: Option<ts_arena::NodeId>,
+    ) -> Result<JsString, Error> {
         let mut builder =
             crate::node_builder::NodeBuilder::new(self, ts_nodebuilder::flags::IGNORE_ERRORS);
-        let node = builder.symbol_node(symbol)?;
+        let node = builder.symbol_expression_without_chain(symbol, location)?;
         let printer = Printer::new(
             PrinterOptions {
                 remove_comments: true,
