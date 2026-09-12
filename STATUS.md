@@ -187,24 +187,24 @@ Every criterion is required. Missing or stale evidence leaves the experiment pen
 | E2: Checker slice | relater_throughput | `run.relater.throughput_ratio > 0` measured arena-reference/ID-based relater throughput on identical frozen cases; positive finite measurement, not a speed target | missing | pending |
 | E2: Checker slice | relater_allocated_bytes | `run.relater.allocated_bytes_ratio >= 0` measured arena-reference/ID-based relater allocations with raw samples and positive baseline bytes; required comparison, not a performance target | missing | pending |
 | E2: Checker slice | relater_retained_bytes | `run.relater.retained_bytes_ratio >= 0` measured arena-reference/ID-based retained bytes at the same declared live-root checkpoint; required comparison with positive baseline bytes | missing | pending |
-| E3: Ownership | shared_bound_file | `run.e3.shared_bound_file == true` two programs share a bound file; surviving queries pass after either program drops | missing | pending |
-| E3: Ownership | retained_snapshot_edit | `run.e3.retained_snapshot_edit == true` old and new snapshots answer correctly across an edit | missing | pending |
+| E3: Ownership | shared_bound_file | `run.e3.shared_bound_file == true` two programs share a bound file; surviving queries pass after either program drops | true | pass |
+| E3: Ownership | retained_snapshot_edit | `run.e3.retained_snapshot_edit == true` old and new snapshots answer correctly across an edit | true | pass |
 | E3: Ownership | independent_checker_merges | `run.e3.independent_checker_merges == true` two checkers independently merge declarations over shared files | missing | pending |
-| E3: Ownership | concurrent_lazy_storage | `run.e3.concurrent_lazy_storage == true` same-lock cache lookup/publication, miss recheck and page growth preserve initialized nodes, supplied token parents and file ownership under concurrent first use | missing | pending |
-| E3: Ownership | mapper_bundle_disposal | `run.e3.mapper_bundle_disposal == true` multi-output content-mapper bundles survive varied owner-release orders | missing | pending |
+| E3: Ownership | concurrent_lazy_storage | `run.e3.concurrent_lazy_storage == true` same-lock cache lookup/publication, miss recheck and page growth preserve initialized nodes, supplied token parents and file ownership under concurrent first use | true | pass |
+| E3: Ownership | mapper_bundle_disposal | `run.e3.mapper_bundle_disposal == true` multi-output content-mapper bundles survive varied owner-release orders | true | pass |
 | E3: Ownership | builder_cache_retention | `run.e3.builder_cache_retention == true` cache, persistent emit-table keys/values and returned-handle dependencies retain builder generations; cloning A into B preserves original links after A's cache entry drops | missing | pending |
 | E3: Ownership | checker_result_retention | `run.e3.checker_result_retention == true` retained types, signatures, symbols and lists preserve exact checker identity and storage after lease release or idle-slot replacement, without self-owning cycles | missing | pending |
 | E3: Ownership | checker_ast_retention | `run.e3.checker_ast_retention == true` checker synthetic expressions and signature declarations retain exact-checker type, AST and file/bundle dependencies across builder release | missing | pending |
 | E3: Ownership | api_scratch_disposal | `run.e3.api_scratch_disposal == true` repeated API printing and insertion formatting match Go and release request scratch without synthetic handles or session arena growth | missing | pending |
-| E3: Ownership | id_exhaustion | `run.e3.id_exhaustion == true` node/symbol identity survives the 31-bit boundary; arena and slot allocation reject exhaustion before u32 wrap, reuse or zero-slot publication | missing | pending |
-| E3: Ownership | wrong_owner_rejected | `run.e3.wrong_owner_rejected == true` every wrong-file and wrong-checker handle is rejected, including equal numeric slots in two active checkers of one pool generation | missing | pending |
-| E3: Ownership | stale_and_recycled_ids_rejected | `run.e3.stale_and_recycled_ids_rejected == true` every stale and recycled owner/generation identity is rejected | missing | pending |
-| E3: Ownership | shared_pool_panic_retirement | `run.e3.shared_pool_panic_retirement == true` panic through one snapshot retires the shared pool in all dependent snapshots, projects, leases, retained results and registries; forced publication interleavings commit no retired success or handles and preserve lock order | missing | pending |
-| E3: Ownership | owners_return_to_baseline | `run.e3.live_owner_delta == 0` maximum absolute live-owner count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops | missing | pending |
-| E3: Ownership | allocations_return_to_baseline | `run.e3.live_allocation_delta == 0` maximum absolute live-allocation count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops | missing | pending |
-| E3: Ownership | miri | `run.e3.miri == true` applicable ownership scenarios pass under Miri | missing | pending |
-| E3: Ownership | address_sanitizer | `run.e3.address_sanitizer == true` ownership scenarios pass under AddressSanitizer | missing | pending |
-| E3: Ownership | release_boundaries | `run.e3.release_boundaries == true` release builds reject stale/wrong-owner cache, cross-arena and reentrant handles and suppress results from retired generations; debug assertions also pass | missing | pending |
+| E3: Ownership | id_exhaustion | `run.e3.id_exhaustion == true` node/symbol identity survives the 31-bit boundary; arena and slot allocation reject exhaustion before u32 wrap, reuse or zero-slot publication | true | pass |
+| E3: Ownership | wrong_owner_rejected | `run.e3.wrong_owner_rejected == true` every wrong-file and wrong-checker handle is rejected, including equal numeric slots in two active checkers of one pool generation | true | pass |
+| E3: Ownership | stale_and_recycled_ids_rejected | `run.e3.stale_and_recycled_ids_rejected == true` every stale and recycled owner/generation identity is rejected | true | pass |
+| E3: Ownership | shared_pool_panic_retirement | `run.e3.shared_pool_panic_retirement == true` panic through one snapshot retires the shared pool in all dependent snapshots, projects, leases, retained results and registries; forced publication interleavings commit no retired success or handles and preserve lock order | true | pass |
+| E3: Ownership | owners_return_to_baseline | `run.e3.live_owner_delta == 0` maximum absolute live-owner count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops | 0 | pass |
+| E3: Ownership | allocations_return_to_baseline | `run.e3.live_allocation_delta == 0` maximum absolute live-allocation count deviation from the pre-scenario baseline after final owner, lease, cache, emit-table, retained-result and registry-root drops | 0 | pass |
+| E3: Ownership | miri | `run.e3.miri == true` applicable ownership scenarios pass under Miri | true | pass |
+| E3: Ownership | address_sanitizer | `run.e3.address_sanitizer == true` ownership scenarios pass under AddressSanitizer | true | pass |
+| E3: Ownership | release_boundaries | `run.e3.release_boundaries == true` release builds reject stale/wrong-owner cache, cross-arena and reentrant handles and suppress results from retired generations; debug assertions also pass | true | pass |
 | E4: Strings | source_decoding | `run.e4.source_decoding == true` source bytes, BOM removal and UTF-16 decoding match Go | missing | pending |
 | E4: Strings | diagnostics | `run.scanner.diagnostics == true` scanner and scanned-literal diagnostic callbacks match Go on successful and malformed input; AST diagnostic integration remains separate | missing | pending |
 | E4: Strings | token_literal_bytes | `run.e4.token_literal_bytes == true` token bytes, literal values and literal types match Go, including explicit upstream transformations without added lossy repair | missing | pending |
@@ -255,7 +255,7 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 | deny | stale: source, pin, command or inputs changed | [result](status/evidence/15576dbef02793bf57c9fe6ea001049e7fb50445aee3c5c1a77efa734c3b4caa.json) |
 | e1 | stale: source, pin, command or inputs changed | [result](status/evidence/8475c96bcb9a17161ade95d00164c73369b45b736c4b50a6ce7668b8c78fc027.json) |
 | e2 | current | [result](status/evidence/977685191da1d565651bb44e65255c86f52b936d68275f946998d13efe5ce415.json) |
-| e3 | stale: source, pin, command or inputs changed | [result](status/evidence/c5f349a2e0439f58d74d532183e48e33f428aa984cf85ba0339f93deb734c3ee.json) |
+| e3 | current | [result](status/evidence/44495844cd9abc5fd66c257f927ec9138f9093cb30e9dcf364c8ccd07db2b3b1.json) |
 | e4 | stale: source, pin, command or inputs changed | [result](status/evidence/bd37e12efba7dedbec65804f52dc0fb91fb7efd482b7e65f0349b02e6787ff4e.json) |
 | e5 | stale: source, pin, command or inputs changed | [result](status/evidence/b759d3fd808558dba3f4af4412874a414a65e12198d300fd3fd7b59088a43ff8.json) |
 | e6 | stale: source, pin, command or inputs changed | [result](status/evidence/2b01576766f38e65a440cc933442c5fd7df833d8c89924ff8448797ce8fbf36a.json) |
@@ -346,13 +346,13 @@ Exit checks:
 - [ ] `exp.E4.slice_validity.pass == 1`
 - [ ] `exp.E4.utf8_positions.pass == 1`
 - [ ] `exp.E4.utf16_positions.pass == 1`
-- [ ] `exp.E3.id_exhaustion.pass == 1`
-- [ ] `exp.E3.wrong_owner_rejected.pass == 1`
-- [ ] `exp.E3.stale_and_recycled_ids_rejected.pass == 1`
-- [ ] `exp.E3.concurrent_lazy_storage.pass == 1`
-- [ ] `exp.E3.mapper_bundle_disposal.pass == 1`
-- [ ] `exp.E3.owners_return_to_baseline.pass == 1`
-- [ ] `exp.E3.allocations_return_to_baseline.pass == 1`
+- [x] `exp.E3.id_exhaustion.pass == 1`
+- [x] `exp.E3.wrong_owner_rejected.pass == 1`
+- [x] `exp.E3.stale_and_recycled_ids_rejected.pass == 1`
+- [x] `exp.E3.concurrent_lazy_storage.pass == 1`
+- [x] `exp.E3.mapper_bundle_disposal.pass == 1`
+- [x] `exp.E3.owners_return_to_baseline.pass == 1`
+- [x] `exp.E3.allocations_return_to_baseline.pass == 1`
 - [ ] `run.clippy.clean == true` (unknown metric)
 
 Items:
@@ -360,10 +360,10 @@ Items:
 - [ ] S04-1 ts_jsstring: JsString with Utf8, Wtf8 and Raw classification, BOM decoding, sentinel-aware iteration and byte-slice reclassification (docs/design/text.md, sections 1 and 2)
 - [ ] S04-2 ts_jsstring helpers with Go's replacements: ToLowerJS, ToUpperJS, TruncateByRunes, LowerFirstChar and literal escaping
 - [ ] S04-3 ts_jsstring position maps: PositionMap for the API, the LSP converters, the ECMAScript and LSP line maps and the scanner's line/character conversion, each with its own rounding, clamping and panic behavior
-- [ ] S04-4 ts_arena ids and owners: NonZeroU64 NodeId and SymbolId, the never-reused arena counter with checked exhaustion, file, bundle and scratch owners, leases and release-mode import validation (docs/design/ownership.md, sections 2.1 to 2.3)
-- [ ] S04-5 ts_arena lazy storage: paged lazy arena published under one RwLock with miss recheck and page growth (section 2.4)
-- [ ] S04-6 ts_arena bundles: BundleOwner with non-owning cyclic links, released in every order
-- [ ] S04-7 E3 harness skeleton with live owner and allocation counters; the arena scenarios run under Miri and AddressSanitizer
+- [x] S04-4 ts_arena ids and owners: NonZeroU64 NodeId and SymbolId, the never-reused arena counter with checked exhaustion, file, bundle and scratch owners, leases and release-mode import validation (docs/design/ownership.md, sections 2.1 to 2.3)
+- [x] S04-5 ts_arena lazy storage: paged lazy arena published under one RwLock with miss recheck and page growth (section 2.4)
+- [x] S04-6 ts_arena bundles: BundleOwner with non-owning cyclic links, released in every order
+- [x] S04-7 E3 harness skeleton with live owner and allocation counters; the arena scenarios run under Miri and AddressSanitizer
 
 ### S05 Scanner (open)
 
@@ -404,7 +404,7 @@ Exit checks:
 - [ ] `run.e1.decoder_parity == true` (unknown metric)
 - [ ] `run.e1.ast_runtime == true` (unknown metric)
 - [ ] `run.e1.ast_utilities == true` (unknown metric)
-- [ ] `run.e3.ast_runtime == true` (unknown metric)
+- [x] `run.e3.ast_runtime == true`
 - [ ] `run.e1.depth == true` (unknown metric)
 - [ ] `run.e1.parser_regressions == true` (unknown metric)
 - [ ] `run.e1.decoder_watchdog == true` (unknown metric)
@@ -439,8 +439,8 @@ Exit checks:
 - [ ] `run.bindworkload.parity == 1` (unknown metric)
 - [ ] `run.program.subset_loads == true` (unknown metric)
 - [x] `exp.E2.frozen_subset.pass == 1`
-- [ ] `exp.E3.shared_bound_file.pass == 1`
-- [ ] `exp.E3.retained_snapshot_edit.pass == 1`
+- [x] `exp.E3.shared_bound_file.pass == 1`
+- [x] `exp.E3.retained_snapshot_edit.pass == 1`
 - [ ] `exp.E5.peak_rss.pass == 1`
 - [ ] `exp.E5.allocated_bytes.pass == 1`
 - [ ] `exp.E6.pass == 1`
@@ -454,7 +454,7 @@ Items:
 - [ ] S07-2 ts_core, ts_tsoptions, ts_module and ts_vfs slices; the in-memory program host; pinned lib loading through ts_bundled; unsupported operations fail explicitly and are listed in the slice manifest
 - [x] S07-3 Frozen spike subset (PLAN.md, section 13, item 16): the checked-in rule, manifest, options, exclusions and the dependency operations E2, E7 and E8 need
 - [ ] S07-4 Parse-and-bind benchmark on the pinned VS Code workload, Rust against Go, at 1 and 8 threads, with peak RSS and bytes allocated
-- [ ] S07-5 Program and snapshot owners in the E3 harness: a bound file shared by two programs; an edit while an old snapshot answers
+- [x] S07-5 Program and snapshot owners in the E3 harness: a bound file shared by two programs; an edit while an old snapshot answers
 - [x] S07-6 Function-level traceability for the binder package
 
 ### S08 Checker slice, printer and node builder (open)
@@ -500,7 +500,7 @@ Items:
 - [ ] S09-1 Retained checker results and checker-created AST nodes keep exact checker identity and dependencies after lease release or idle-slot replacement
 - [ ] S09-2 Builder caches and persistent emit side tables retain every arena dependency across generations
 - [ ] S09-3 Request-scoped scratch for API printing and insertion formatting
-- [ ] S09-4 Checker pool, snapshots and API registry under the generation gate (ADR 0012); panic retirement; forced retirement-versus-publication interleavings
+- [x] S09-4 Checker pool, snapshots and API registry under the generation gate (ADR 0012); panic retirement; forced retirement-versus-publication interleavings
 - [ ] S09-5 Every scenario under Miri and AddressSanitizer; owner and allocation counters return to baseline after each final drop
 
 ### S10 WebAssembly and Rust embedding (open)
