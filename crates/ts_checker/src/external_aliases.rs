@@ -39,9 +39,12 @@ impl CheckerState {
     ) -> Result<Option<SymbolId>, Error> {
         let read = self.ast(node)?.node(node)?;
         let kind = read.kind();
-        let specifier = self
-            .module_specifier(node)?
-            .ok_or(Error::MissingLink("external alias specifier"))?;
+        let specifier = match self.require_module_specifier(node)? {
+            Some(specifier) => specifier,
+            None => self
+                .module_specifier(node)?
+                .ok_or(Error::MissingLink("external alias specifier"))?,
+        };
         self.prepare_module_attributes(specifier)?;
         let Some(module) = self.resolve_external_module_name(node, specifier, false)? else {
             return Ok(None);
@@ -73,6 +76,50 @@ impl CheckerState {
     pub(crate) fn prepare_module_attributes(&mut self, specifier: NodeId) -> Result<(), Error> {
         self.import_attributes_type_for_specifier(specifier)?;
         Ok(())
+    }
+    /// The `require("...")` argument of the node's root declaration, which
+    /// upstream reads before falling back to a module specifier. A binding
+    /// element resolves through its root variable declaration.
+    // port: tsc/internal/checker/utilities.go:getExternalModuleRequireArgument
+    // port: tsc/internal/ast/utilities.go:IsVariableDeclarationInitializedToRequire
+    pub(crate) fn require_module_specifier(
+        &mut self,
+        node: NodeId,
+    ) -> Result<Option<NodeId>, Error> {
+        let root = if self.ast(node)?.node(node)?.kind() == K::BindingElement {
+            ts_ast::utilities::get_root_declaration(self.ast(node)?, node)?
+        } else {
+            node
+        };
+        let read = self.ast(root)?.node(root)?;
+        if read.kind() != K::VariableDeclaration
+            || !ts_ast::utilities::is_in_js_file(Some(&read))
+            || read.type_node().is_some()
+        {
+            return Ok(None);
+        }
+        let Some(initializer) = read.initializer() else {
+            return Ok(None);
+        };
+        let Some(list) = read.parent() else {
+            return Ok(None);
+        };
+        let Some(statement) = self.ast(list)?.node(list)?.parent() else {
+            return Ok(None);
+        };
+        let view = self.ast(statement)?;
+        if view.node(statement)?.modifier_flags(view)? & ts_ast::modifier_flags::EXPORT != 0 {
+            return Ok(None);
+        }
+        let view = self.ast(initializer)?;
+        if !ts_ast::utilities_middle::is_require_call(view, &view.node(initializer)?, true)? {
+            return Ok(None);
+        }
+        let arguments = self.source_list(
+            initializer,
+            self.ast(initializer)?.node(initializer)?.argument_list(),
+        )?;
+        Ok(arguments.first().copied())
     }
     // port: tsc/internal/checker/checker.go:Checker.getExportOfModule
     pub(crate) fn module_export_member(

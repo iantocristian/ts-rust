@@ -343,8 +343,13 @@ impl CheckerState {
         }
         let declarations = self.symbol_declarations(symbol)?.to_vec();
         let mut declaration = None;
+        // Upstream's `IsTypeOrJSTypeAliasDeclaration`: a JSDoc `@typedef` or
+        // `@callback` declares a JS type alias.
         for node in declarations.into_iter().flatten() {
-            if self.ast(node)?.node(node)?.kind() == K::TypeAliasDeclaration {
+            if matches!(
+                self.ast(node)?.node(node)?.kind().known(),
+                Some(K::TypeAliasDeclaration | K::JSTypeAliasDeclaration)
+            ) {
                 declaration = Some(node);
                 break;
             }
@@ -781,6 +786,13 @@ impl CheckerState {
             Some(K::PrefixUnaryExpression | K::PostfixUnaryExpression) => {
                 return self.check_unary_expression(node)
             }
+            Some(K::RegularExpressionLiteral) => {
+                return self.check_regular_expression_literal(node)
+            }
+            Some(K::DeleteExpression) => return self.check_delete_expression(node),
+            Some(K::MetaProperty) => return self.check_meta_property(node),
+            // JSX expressions are outside the frozen denominator; every other
+            // kind upstream accepts is ported above.
             _ => return Err(Error::Unsupported("checkExpressionWorker")),
         };
         self.get_fresh_type_of_literal_type(ty)

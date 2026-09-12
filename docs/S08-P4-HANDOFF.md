@@ -217,3 +217,70 @@ first; the runner correctly rejects stale binary/source pairs. The old full
 inventory is useful for provenance and historical attribution, not the current
 remaining-work count. All subagent tasks and local build/replay commands have
 completed; no background continuation is scheduled.
+
+## Resume increment (2026-09-12)
+
+Two passes on the paused draft, committed together as one increment.
+
+**First pass.** The three retained focused failures were reproduced against
+their native captures with the handoff's immutable binary, root-caused in the
+pinned Go and fixed: the CommonJS destructured `require` alias (`BindingElement`
+arm of `getTargetOfAliasDeclaration` plus the `getExternalModuleRequireArgument`
+port in `module_aliases.rs`/`external_aliases.rs`), the two missing TS2530 chains
+(`Property_0_is_incompatible_with_index_signature` and `indexInfoRelatedTo` in
+`relater_properties.rs`), and the extra declaration TS2527 (upstream widens a
+unique symbol in `checkExpressionForMutableLocation`). The declaration suites went
+from 94/98 to 98/98 exact; the 14 P3 suites replay 108/108; nine specs under
+`tools/s08/p4/` that had never been captured now match pinned Go, 82/82 programs.
+Two full inventories were run, `target/s08/p4-inventory-02` from the pristine
+checkpoint and `-03` from the fixed source: acceptance variants completing all
+requested phases 8,457 → 8,471, semantic failures 848 → 833, declaration failures
+61 → 58, the external/CommonJS alias bucket 21 → 0, no new failure reason.
+
+**Second pass.** The fixes above were reviewed against pinned Go
+(`checker.go:16036`, `utilities.go:233`, `ast/utilities.go:2885`,
+`relater.go:4688–4715`, `checker.go:25855` and `25865`) and match. The three
+largest tractable inventory-03 buckets were then closed:
+
+- `checkExpressionWorker` (153 acceptance variants): regular expression literals
+  with the scanner re-scan grammar check, `delete` with its optional/read-only
+  rules, and `new.target`/`import.meta` with their grammar and module checks
+  (`regular_expressions.rs`, `delete_expressions.rs`, `meta_properties.rs`).
+  JSX expression kinds remain the named boundary.
+- `checkSourceElementWorker: statement/type family` (65): `debugger` under the
+  ambient-context grammar check, missing declarations, and the two kinds
+  upstream's switch has no case for (`export as namespace`, `;` class members).
+- `missing type alias declaration` (53): `getDeclaredTypeOfTypeAlias` accepted
+  only TS aliases where upstream's `IsTypeOrJSTypeAliasDeclaration` also takes
+  JSDoc `@typedef`/`@callback` aliases.
+
+Focused regressions cover each (`checker_semantics.rs`). An 18-variant probe
+drawn from those buckets on `target/s08/p4-claude-build-01` runs 17 of 18
+through every requested phase; the 18th now reaches the excess-property
+reporting boundary below. Clippy, formatting, ledger validation and tracking
+views are current. **The full 10,728-variant inventory was not re-run after
+this pass**; build a new immutable snapshot and run it before quoting counts.
+
+Remaining inventory-03 acceptance buckets, largest first, with what each needs:
+
+| Bucket | Variants | Needs |
+| --- | ---: | --- |
+| `checkSourceFile: unused declarations pass` | 125 | `registerForUnusedIdentifiersCheck` at its three named sites and the `checkUnusedIdentifiers` family |
+| `report excess properties: source object expression` | 43 | an error-node override in the relater, `getSuggestionForNonexistentProperty` over property symbols, `filterType` by `isExcessPropertyCheckTarget` |
+| `resolveStructuredTypeMembers: type family` | 45 | the remaining object payload families |
+| `resolveExternalModule: CommonJS/ESM mismatch details` | 41 | the Node16/18 mismatch diagnostic and its related information |
+| `checkExternalEmitHelpers: imported module helpers` | 34 | `tslib` resolution and helper existence checks |
+| `checkGrammarVariableDeclarationList: using contexts` | 34 | `using` declaration grammar |
+| `Node.Text` / `Node.Expression` panics | 39 | faithful to pinned Go; the Rust callers that reach them are the bug |
+| declaration `unclassified` | 58 | per-variant classification |
+
+Eight pre-existing tests in `checker_semantics.rs` still assert `Unsupported`
+for operations that are now implemented and need re-pointing with per-case
+evidence: `failed_intersection_reduction_clears_its_computed_flag_on_every_retry`,
+`failed_query_caches_and_resolution_stack_cannot_convert_failure_to_success`,
+`compound_constituents_are_checked_even_after_reduction_and_on_retry`,
+`lazy_jsdoc_type_names_do_not_resolve_as_ordinary_wrapper_interfaces`,
+`source_check_failure_after_a_diagnostic_stays_failed_across_operations`,
+`unsupported_variable_widening_does_not_rebuild_a_successful_cached_initializer`,
+`source_check_rejects_unported_grammar_relations_and_options`,
+`union_property_failure_does_not_publish_a_partial_property_list`.

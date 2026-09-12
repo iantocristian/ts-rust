@@ -419,11 +419,18 @@ impl CheckerState {
         &mut self,
         node: NodeId,
     ) -> Result<Option<SymbolId>, Error> {
+        // A binding element is an alias only when its root declaration is
+        // initialized to `require`; upstream routes both through the import
+        // specifier path. Decide that before borrowing the node view.
+        let binding_require = self.ast(node)?.node(node)?.kind() == K::BindingElement
+            && self.require_module_specifier(node)?.is_some();
         let read = self.ast(node)?.node(node)?;
         match read.kind().known() {
             Some(
                 K::ImportClause | K::NamespaceImport | K::NamespaceExport | K::ImportSpecifier,
             ) => self.target_of_external_alias(node),
+            // Other destructured shapes keep the named boundary below.
+            Some(K::BindingElement) if binding_require => self.target_of_external_alias(node),
             Some(K::ImportEqualsDeclaration) => {
                 let reference = read
                     .data_source()

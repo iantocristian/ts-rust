@@ -179,15 +179,27 @@ fn source_check_rejects_unported_grammar_relations_and_options() {
 
 #[test]
 fn source_check_reports_structural_assignment_failures() {
-    for (source, code, child) in [
+    // Pinned Go emits no chain for either shape: the elaborated property
+    // mismatch carries a TS6500 note, and the missing property carries TS2728.
+    for (text, code, range, note_code, note_range, note_args) in [
         (
             b"let value: { field: number } = { field: \"wrong\" };".as_slice(),
             2322,
-            Some(2326),
+            (33, 38),
+            6500,
+            (13, 18),
+            vec!["field".to_string(), "{ field: number; }".to_string()],
         ),
-        (b"let value: { field: number } = {};".as_slice(), 2741, None),
+        (
+            b"let value: { field: number } = {};".as_slice(),
+            2741,
+            (4, 9),
+            2728,
+            (13, 18),
+            vec!["field".to_string()],
+        ),
     ] {
-        let (owner, source) = checker(source, options());
+        let (owner, source) = checker(text, options());
         for _ in 0..2 {
             let diagnostics = owner
                 .operation()
@@ -196,7 +208,23 @@ fn source_check_reports_structural_assignment_failures() {
                 .unwrap();
             assert_eq!(diagnostics.len(), 1);
             assert_eq!(diagnostics[0].code, code);
-            assert_eq!(diagnostics[0].message_chain.first().map(|d| d.code), child);
+            assert_eq!(
+                (diagnostics[0].loc.pos(), diagnostics[0].loc.end()),
+                range,
+                "diagnostic range for {text:?}"
+            );
+            assert!(diagnostics[0].message_chain.is_empty());
+            assert_eq!(diagnostics[0].related_information.len(), 1);
+            let note = &diagnostics[0].related_information[0];
+            assert_eq!(note.code, note_code);
+            assert_eq!((note.loc.pos(), note.loc.end()), note_range);
+            assert_eq!(
+                note.message_args
+                    .iter()
+                    .map(|argument| String::from_utf8_lossy(argument.as_bytes()).into_owned())
+                    .collect::<Vec<_>>(),
+                note_args
+            );
         }
     }
 }
@@ -722,6 +750,59 @@ fn compound_constituents_are_checked_even_after_reduction_and_on_retry() {
 }
 
 #[test]
+fn a_unique_symbol_widens_in_a_mutable_object_literal_location() {
+    // Upstream widens a unique symbol outside its const-like declaration, so a
+    // later declaration serialization never reaches an inaccessible one.
+    let (owner, program, _) = fixture(
+        b"declare function Symbol(): symbol; const key = Symbol(); const inner = { key }; type Probe = typeof inner;",
+        options(),
+    );
+    let mut op = owner.operation().unwrap();
+    let symbol = op
+        .get_symbol_at_location(declaration_name(&program, declarations(&program)[3]))
+        .unwrap()
+        .unwrap();
+    let ty = op.get_declared_type_of_symbol(symbol).unwrap();
+    assert_eq!(
+        op.type_to_string(ty, 0).unwrap().as_bytes(),
+        b"{ key: symbol; }"
+    );
+}
+
+#[test]
+fn an_incompatible_property_reports_the_index_signature_wrapper_chain() {
+    // A fresh object literal elaborates to the offending property instead, so
+    // the wrapper is only observable through an already-typed source.
+    let (owner, source) = checker(
+        b"interface Target { [key: string]: string }\ndeclare const source: { type: number };\nconst check: Target = source;",
+        options(),
+    );
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(diagnostics.len(), 1);
+    assert_eq!(diagnostics[0].code, 2322);
+    let wrapper = diagnostics[0]
+        .message_chain
+        .first()
+        .expect("index signature wrapper");
+    assert_eq!(wrapper.code, 2530);
+    assert_eq!(
+        wrapper
+            .message_args
+            .first()
+            .map(|argument| argument.as_bytes().to_vec()),
+        Some(b"type".to_vec())
+    );
+    assert_eq!(
+        wrapper.message_chain.first().map(|inner| inner.code),
+        Some(2322)
+    );
+}
+
+#[test]
 fn intersection_discriminant_reduction_is_lazy_and_raw_display_is_available() {
     use ts_checker::{object_flags as of, type_format_flags as ff};
     let (owner, program, _) = fixture(
@@ -867,4 +948,101 @@ fn recursive_intersection_properties_preserve_order_and_identity_on_a_small_stac
         assert_eq!(op.properties_of_type(ty).unwrap(), properties);
         assert!(op.semantic_diagnostics(program.file(b"/main.ts").unwrap().source()).unwrap().is_empty());
     }).unwrap().join().unwrap();
+}
+
+#[test]
+fn delete_operands_must_be_optional_writable_property_references() {
+    let (owner, source) = checker(
+        b"declare const o: { a?: number; b: number; readonly c?: number };\ndelete o.a;\ndelete o.b;\ndelete o.c;\ndelete 1;\n",
+        options(),
+    );
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+    assert_eq!(
+        codes,
+        vec![
+            ts_diagnostics::The_operand_of_a_delete_operator_must_be_optional.code,
+            ts_diagnostics::The_operand_of_a_delete_operator_cannot_be_a_read_only_property.code,
+            ts_diagnostics::The_operand_of_a_delete_operator_must_be_a_property_reference.code,
+        ]
+    );
+}
+
+#[test]
+fn meta_properties_need_their_containers_and_module_targets() {
+    let (owner, source) = checker(
+        b"const outer = new.target;\nfunction f() { return new.target; }\n",
+        options(),
+    );
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(diagnostics.len(), 1);
+    assert_eq!(
+        diagnostics[0].code,
+        ts_diagnostics::Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constructor.code
+    );
+    assert_eq!(
+        (diagnostics[0].loc.pos(), diagnostics[0].loc.end()),
+        (14, 24),
+        "the diagnostic spans `new.target` without its leading trivia"
+    );
+    let mut es2015 = options();
+    es2015.module = ModuleKind::ES2015;
+    let (owner, source) = checker(b"const m = import.meta;\n", es2015);
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+    assert_eq!(
+        codes,
+        vec![ts_diagnostics::The_import_meta_meta_property_is_only_allowed_when_the_module_option_is_es2020_es2022_esnext_system_node16_node18_node20_or_nodenext.code]
+    );
+}
+
+#[test]
+fn regular_expression_literals_report_grammar_errors_once() {
+    let (owner, source) = checker(b"const a = /x/gg;\nconst b = /y/i;\n", options());
+    for _ in 0..2 {
+        let diagnostics = owner
+            .operation()
+            .unwrap()
+            .semantic_diagnostics(source)
+            .unwrap();
+        let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+        assert_eq!(
+            codes,
+            vec![ts_diagnostics::Duplicate_regular_expression_flag.code],
+            "one flag error for the duplicated `g`, none for `/y/i`"
+        );
+    }
+}
+
+#[test]
+fn debugger_statements_in_ambient_blocks_report_once_per_block() {
+    let (owner, source) = checker(
+        b"declare namespace N { debugger; debugger; }\ndeclare namespace M { debugger; }\n",
+        options(),
+    );
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+    assert_eq!(
+        codes,
+        vec![
+            ts_diagnostics::Statements_are_not_allowed_in_ambient_contexts.code,
+            ts_diagnostics::Statements_are_not_allowed_in_ambient_contexts.code,
+        ]
+    );
 }

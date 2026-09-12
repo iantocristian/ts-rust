@@ -262,10 +262,23 @@ impl CheckerState {
                 .check_expression(required(read.expression(), "expression statement")?)
                 .map(|_| ()),
             Some(K::EmptyStatement) => Ok(()),
+            Some(K::DebuggerStatement) => self.check_statement_ambient_context(node).map(|_| ()),
+            Some(K::MissingDeclaration) => self.check_missing_declaration(node),
+            // Upstream's switch has no case for these; `export as namespace` is
+            // checked through its alias target and a stray `;` class member has
+            // nothing to check.
+            Some(K::NamespaceExportDeclaration | K::SemicolonClassElement) => Ok(()),
             _ => Err(Error::Unsupported(
                 "checkSourceElementWorker: statement/type family",
             )),
         }
+    }
+
+    /// A missing declaration can carry modifiers but never decorators upstream
+    /// recognizes (`CanHaveDecorators`), so `checkDecorators` returns at once.
+    // port: tsc/internal/checker/checker.go:Checker.checkMissingDeclaration
+    fn check_missing_declaration(&mut self, _node: NodeId) -> Result<(), Error> {
+        Ok(())
     }
 
     // port: tsc/internal/checker/checker.go:Checker.checkUnionOrIntersectionType

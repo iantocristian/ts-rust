@@ -504,37 +504,7 @@ impl Relater<'_> {
                 .checker
                 .applicable_index_info(source, target_info.key_type)?
             {
-                {
-                    let source_info = self.checker.signatures.index_info(info)?.clone();
-                    let related = self.related(
-                        source_info.value_type,
-                        target_info.value_type,
-                        BOTH,
-                        intersection,
-                    )?;
-                    if related == tr::FALSE && self.report_errors {
-                        let source_name = self.checker.type_to_string(
-                            source_info.key_type,
-                            crate::type_display::DEFAULT_FLAGS,
-                        )?;
-                        if source_info.key_type == target_info.key_type {
-                            self.report_error(
-                                ts_diagnostics::X_0_index_signatures_are_incompatible,
-                                vec![source_name],
-                            );
-                        } else {
-                            let target_name = self.checker.type_to_string(
-                                target_info.key_type,
-                                crate::type_display::DEFAULT_FLAGS,
-                            )?;
-                            self.report_error(
-                                ts_diagnostics::X_0_and_1_index_signatures_are_incompatible,
-                                vec![source_name, target_name],
-                            );
-                        }
-                    }
-                    related
-                }
+                self.index_info_related(info, index, intersection)?
             } else if intersection & SOURCE == 0
                 && (self.kind != RelationKind::StrictSubtype
                     || self.checker.types.get(source)?.object_flags & of::FRESH_LITERAL != 0)
@@ -586,24 +556,70 @@ impl Relater<'_> {
                 {
                     value = self.checker.filter_type_flags(value, !tf::UNDEFINED)?;
                 }
-                result &= self.related(value, info.value_type, BOTH, intersection)?;
-                if result == tr::FALSE {
-                    return Ok(result);
+                let related = self.related(value, info.value_type, BOTH, intersection)?;
+                if related == tr::FALSE {
+                    if self.report_errors {
+                        let name = self.checker.symbol_to_string(property)?;
+                        self.report_error(
+                            ts_diagnostics::Property_0_is_incompatible_with_index_signature,
+                            vec![name],
+                        );
+                    }
+                    return Ok(tr::FALSE);
                 }
+                result &= related;
             }
         }
-        for index in self.checker.index_infos_of_type(source)? {
-            let index = self.checker.signatures.index_info(index)?.clone();
+        for source_index in self.checker.index_infos_of_type(source)? {
+            let source_info = self.checker.signatures.index_info(source_index)?.clone();
             if self
                 .checker
-                .applicable_index_type(index.key_type, info.key_type)?
+                .applicable_index_type(source_info.key_type, info.key_type)?
             {
-                result &= self.related(index.value_type, info.value_type, BOTH, intersection)?;
-                if result == tr::FALSE {
-                    break;
+                let related = self.index_info_related(source_index, target, intersection)?;
+                if related == tr::FALSE {
+                    return Ok(tr::FALSE);
                 }
+                result &= related;
             }
         }
         Ok(result)
+    }
+
+    // port: tsc/internal/checker/relater.go:Relater.indexInfoRelatedTo
+    fn index_info_related(
+        &mut self,
+        source: IndexInfoId,
+        target: IndexInfoId,
+        intersection: u32,
+    ) -> Result<Ternary, Error> {
+        let source_info = self.checker.signatures.index_info(source)?.clone();
+        let target_info = self.checker.signatures.index_info(target)?.clone();
+        let related = self.related(
+            source_info.value_type,
+            target_info.value_type,
+            BOTH,
+            intersection,
+        )?;
+        if related == tr::FALSE && self.report_errors {
+            let source_name = self
+                .checker
+                .type_to_string(source_info.key_type, crate::type_display::DEFAULT_FLAGS)?;
+            if source_info.key_type == target_info.key_type {
+                self.report_error(
+                    ts_diagnostics::X_0_index_signatures_are_incompatible,
+                    vec![source_name],
+                );
+            } else {
+                let target_name = self
+                    .checker
+                    .type_to_string(target_info.key_type, crate::type_display::DEFAULT_FLAGS)?;
+                self.report_error(
+                    ts_diagnostics::X_0_and_1_index_signatures_are_incompatible,
+                    vec![source_name, target_name],
+                );
+            }
+        }
+        Ok(related)
     }
 }

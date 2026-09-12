@@ -462,7 +462,28 @@ impl CheckerState {
             .transpose()?;
         if !self.literal_of_context(ty, contextual)? {
             ty = self.widen_literal_type(ty)?;
+            ty = self.widened_unique_es_symbol_type(ty)?;
         }
         self.get_regular_type_of_literal_type(ty)
+    }
+
+    /// A unique symbol keeps its identity only in a const-like location. Every
+    /// other mutable location widens it to `symbol`, so a later declaration
+    /// serialization never reaches an inaccessible unique symbol.
+    // port: tsc/internal/checker/checker.go:Checker.getWidenedUniqueESSymbolType
+    pub(crate) fn widened_unique_es_symbol_type(&mut self, ty: TypeId) -> Result<TypeId, Error> {
+        let flags = self.types.flags(ty)?;
+        if flags & tf::UNIQUE_ES_SYMBOL != 0 {
+            return Ok(self.builtins.es_symbol_type);
+        }
+        if flags & tf::UNION != 0 {
+            // The mapper is total, so upstream's `mapType` always yields a type.
+            return self
+                .map_type(ty, &mut |checker, part| {
+                    checker.widened_unique_es_symbol_type(part).map(Some)
+                })?
+                .ok_or(Error::MissingLink("widened unique symbol union"));
+        }
+        Ok(ty)
     }
 }
