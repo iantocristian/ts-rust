@@ -255,7 +255,7 @@ E8: Separate Rust consumer feasibility and Node parse latency measured separatel
 | deny | stale: source, pin, command or inputs changed | [result](status/evidence/15576dbef02793bf57c9fe6ea001049e7fb50445aee3c5c1a77efa734c3b4caa.json) |
 | e1 | stale: source, pin, command or inputs changed | [result](status/evidence/8475c96bcb9a17161ade95d00164c73369b45b736c4b50a6ce7668b8c78fc027.json) |
 | e2 | current | [result](status/evidence/977685191da1d565651bb44e65255c86f52b936d68275f946998d13efe5ce415.json) |
-| e3 | current | [result](status/evidence/38c5e78497936b04663b19ec7da1c5262455edf8d114693fd01eac29d7eefdf0.json) |
+| e3 | current | [result](status/evidence/44495844cd9abc5fd66c257f927ec9138f9093cb30e9dcf364c8ccd07db2b3b1.json) |
 | e4 | stale: source, pin, command or inputs changed | [result](status/evidence/bd37e12efba7dedbec65804f52dc0fb91fb7efd482b7e65f0349b02e6787ff4e.json) |
 | e5 | stale: source, pin, command or inputs changed | [result](status/evidence/b759d3fd808558dba3f4af4412874a414a65e12198d300fd3fd7b59088a43ff8.json) |
 | e6 | stale: source, pin, command or inputs changed | [result](status/evidence/2b01576766f38e65a440cc933442c5fd7df833d8c89924ff8448797ce8fbf36a.json) |
