@@ -3,7 +3,7 @@
 use super::NodeBuilder;
 use crate::{object_flags as of, signature_flags as sigf, type_flags as tf, Error, TypeId};
 use ts_arena::{NodeId, SymbolId};
-use ts_ast::{modifier_flags as mf, symbol_flags as sf, FactoryMethods, JsString, SyntaxKind as K};
+use ts_ast::{modifier_flags as mf, symbol_flags as sf, JsString, SyntaxKind as K};
 use ts_nodebuilder::flags as nf;
 use ts_printer::emit_resolver::{DeclarationTrackerEvent as Event, SymbolAccessibility as Access};
 
@@ -333,9 +333,8 @@ impl NodeBuilder<'_> {
             return self.module_type_node(symbol, true, &[]);
         }
         self.track_symbol(symbol, meaning)?;
-        let name = self.symbol_expression_with_meaning(symbol, self.enclosing, meaning)?;
         self.approximate_length += 6;
-        Ok(self.ast.new_type_query_node(Some(name), None))
+        self.symbol_type_node_from_chain(symbol, meaning, None)
     }
 
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.typeReferenceToTypeNode

@@ -275,20 +275,15 @@ impl<'a> NodeBuilder<'a> {
         Ok(None)
     }
 
-    // With no enclosing declaration or UseFullyQualifiedType, upstream's
-    // lookupSymbolChain returns the symbol itself, regardless of its parent.
-    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.symbolToExpression
+    /// The entity name of a type symbol: an identifier or qualified name built
+    /// over the accessible symbol chain. With no enclosing declaration or
+    /// UseFullyQualifiedType, upstream's lookupSymbolChain returns the symbol
+    /// itself, regardless of its parent.
+    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.symbolToTypeNode
     pub(crate) fn symbol_node(&mut self, symbol: SymbolId) -> Result<NodeId, Error> {
         self.track_symbol(symbol, sf::TYPE)?;
-        if self.enclosing.is_some() || self.flags & nf::USE_FULLY_QUALIFIED_TYPE != 0 {
-            return self.symbol_expression_with_meaning(symbol, self.enclosing, sf::TYPE);
-        }
-        let name = self.symbol_name(symbol)?;
-        self.approximate_length += name.len() + 1;
-        let node = self.ast.new_identifier(name);
-        self.emit
-            .add_emit_flags(node, emit_flags::NO_ASCII_ESCAPING);
-        Ok(node)
+        let chain = self.type_symbol_chain(symbol, sf::TYPE)?;
+        self.access_from_symbol_chain(&chain, chain.len() - 1, 0, None)
     }
 
     fn list(&mut self, nodes: Vec<NodeId>) -> Result<NodeListId, Error> {
@@ -324,11 +319,8 @@ impl<'a> NodeBuilder<'a> {
         } else {
             Some(self.type_list(arguments, false)?)
         };
-        let name = self.symbol_node(symbol)?;
-        // createAccessFromSymbolChain charges the first component both when
-        // obtaining its written name and when constructing its access node.
-        self.approximate_length += self.ast.view().node_text(name)?.as_bytes().len() + 1;
-        Ok(self.ast.new_type_reference_node(Some(name), arguments))
+        self.track_symbol(symbol, sf::TYPE)?;
+        self.symbol_type_node_from_chain(symbol, sf::TYPE, arguments)
     }
 
     // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.checkTruncationLength

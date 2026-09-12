@@ -337,16 +337,44 @@ boundary itself is closed by `getContextualImportAttributeType` and
 `module` node16+ upstream forces every non-declaration file to be a module, so
 global helper declarations for such tests must live in a `.d.ts` file.
 
-Remaining inventory-03 acceptance buckets, largest first, with what each needs:
+**Fifth pass: the two panic signatures.** Inventory-05 (source at 62051a9)
+reported 39 + 10 `Node.Text: *ast.PropertyAccessExpression` panics and one
+`Node.Expression: KindShorthandPropertyAssignment` panic; the first bucket had
+gained `declarationsForFileShadowingGlobalNoError` because the `any`-base fix
+let that program reach declaration emit. Both were Rust caller bugs:
+
+- The node builder built type references over `symbolToExpression`, so a
+  qualified type name came out as a `PropertyAccessExpression` inside a
+  `TypeReferenceNode`, and the length accounting then asked `Node.Text` for it.
+  `createAccessFromSymbolChain` is now ported (`node_builder_names.rs`); type
+  references and `typeof` queries build `QualifiedName` chains with upstream's
+  per-component length charges, export-alias naming, and indexed-access members.
+  The computed-entity-name member and instantiation-expression access branches
+  are named boundaries.
+- `checkPropertyAccessibilityAtLocation` tested "this property" through the
+  generic receiver accessor, which upstream guards by node kind;
+  `isThisProperty`, `isThisInitializedObjectBindingExpression` and the
+  binding-pattern form are ported. Binding elements now run
+  `checkPropertyAccessibility` (with `markPropertyAsReferenced`) instead of the
+  `destructuring private/protected property` boundary.
+
+Rerunning the 49 previously panicking variants with the rebuilt example binary:
+43 complete every phase, 5 stop at `getSymbolChain: external module specifier
+ranking`, 1 was the shorthand panic and now completes. Regressions:
+`inferred_qualified_type_names_emit_as_entity_names_in_declarations` (runs the
+declaration phase) and `abstract_properties_destructured_from_this_in_constructors_are_reported`
+(pinned `abstractPropertyInConstructor` class `C1`, plus a private destructuring).
+
+Remaining inventory-05 acceptance buckets, largest first, with what each needs:
 
 | Bucket | Variants | Needs |
 | --- | ---: | --- |
-| declaration `getSymbolChain: external module specifier ranking` | 22 | node-builder specifier ranking |
+| `getSymbolChain: external module specifier ranking` | 22 declaration + 5 former panics | node-builder specifier ranking |
 | `checkSourceFile: JSX or non-script input` | 24 | out of P4 scope |
 | `getSuggestedLibForNonExistentProperty` | 19 | the lib suggestion table |
 | `errorOnImplicitAnyModule: package install diagnostic chain` | 14 | the package-install chain |
 | `resolveAlias during mergeSymbol` | 13 | alias resolution inside symbol merging |
-| `Node.Text` / `Node.Expression` panics | 39 | faithful to pinned Go; the Rust callers that reach them are the bug |
+| the single 60-second timeout | 1 | profiling |
 
 Eight pre-existing tests in `checker_semantics.rs` still assert `Unsupported`
 for operations that are now implemented and need re-pointing with per-case

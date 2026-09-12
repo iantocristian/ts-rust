@@ -877,3 +877,265 @@ fn unquote_name(mut name: &[u8]) -> JsString {
     }
     JsString::from_bytes(result)
 }
+
+// port: tsc/internal/checker/utilities.go:isLateBoundName
+fn is_late_bound_name(name: &[u8]) -> bool {
+    name.len() >= 2 && name[0] == 0xFE && name[1] == b'@'
+}
+
+impl NodeBuilder<'_> {
+    /// `lookupSymbolChain` for type-node construction; the module-root case is
+    /// handled by the callers through `module_type_node`.
+    pub(super) fn type_symbol_chain(
+        &mut self,
+        symbol: SymbolId,
+        meaning: u32,
+    ) -> Result<Vec<SymbolId>, Error> {
+        let chain = self.display_name_chain(symbol, self.enclosing, meaning)?;
+        if chain.is_empty() {
+            return Err(Error::MissingLink("symbol type node chain"));
+        }
+        Ok(chain)
+    }
+
+    /// The non-module-root tail of `symbolToTypeNode`.
+    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.symbolToTypeNode
+    pub(super) fn symbol_type_node_from_chain(
+        &mut self,
+        symbol: SymbolId,
+        meaning: u32,
+        type_arguments: Option<ts_ast::NodeListId>,
+    ) -> Result<NodeId, Error> {
+        use ts_ast::FactoryMethods;
+        let chain = self.type_symbol_chain(symbol, meaning)?;
+        let is_type_of = meaning == sf::VALUE;
+        let entity_name =
+            self.access_from_symbol_chain(&chain, chain.len() - 1, 0, type_arguments)?;
+        let kind = self.ast.view().node(entity_name)?.kind();
+        if kind == K::IndexedAccessType {
+            // Indexed accesses can never be `typeof`
+            return Ok(entity_name);
+        }
+        if matches!(kind.known(), Some(K::Identifier | K::QualifiedName)) {
+            return Ok(if is_type_of {
+                self.ast.new_type_query_node(Some(entity_name), None)
+            } else {
+                self.ast
+                    .new_type_reference_node(Some(entity_name), type_arguments)
+            });
+        }
+        Err(Error::Unsupported(
+            "symbolToTypeNode: expression with type arguments",
+        ))
+    }
+
+    /// Type arguments written for a non-final chain component.
+    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.lookupTypeParameterNodes
+    fn qualified_type_parameter_nodes(
+        &mut self,
+        chain: &[SymbolId],
+        index: usize,
+    ) -> Result<Option<ts_ast::NodeListId>, Error> {
+        if self.flags & ts_nodebuilder::flags::WRITE_TYPE_PARAMETERS_IN_QUALIFIED_NAME == 0
+            || index + 1 >= chain.len()
+        {
+            return Ok(None);
+        }
+        for declaration in self
+            .checker
+            .symbol_declarations(chain[index])?
+            .iter()
+            .flatten()
+        {
+            if self
+                .checker
+                .ast(declaration)?
+                .node(declaration)?
+                .type_parameter_list()
+                .is_some()
+            {
+                return Err(Error::Unsupported(
+                    "lookupTypeParameterNodes: generic qualified type name",
+                ));
+            }
+        }
+        Ok(None)
+    }
+
+    // port: tsc/internal/checker/nodebuilderimpl.go:NodeBuilderImpl.createAccessFromSymbolChain
+    pub(super) fn access_from_symbol_chain(
+        &mut self,
+        chain: &[SymbolId],
+        index: usize,
+        stopper: usize,
+        override_type_arguments: Option<ts_ast::NodeListId>,
+    ) -> Result<NodeId, Error> {
+        use ts_ast::FactoryMethods;
+        let type_parameter_nodes = if index + 1 == chain.len() {
+            override_type_arguments
+        } else {
+            self.qualified_type_parameter_nodes(chain, index)?
+        };
+        let symbol = chain[index];
+        let parent = (index > 0).then(|| chain[index - 1]);
+        let raw_name = self.checker.symbol(symbol)?.name_to_owned();
+        let mut symbol_name: Option<JsString> = None;
+        if index == 0 {
+            self.flags |= ts_nodebuilder::flags::IN_INITIAL_ENTITY_NAME;
+            let name = self.symbol_name(symbol);
+            self.flags ^= ts_nodebuilder::flags::IN_INITIAL_ENTITY_NAME;
+            let name = name?;
+            self.approximate_length += name.len() + 1;
+            symbol_name = Some(name);
+        } else if let Some(parent) = parent {
+            // lookup a ref to symbol within parent to handle export aliases
+            if let Some(exports) = self.checker.module_exports_of_symbol(parent)? {
+                let direct = self
+                    .checker
+                    .table(exports)?
+                    .get(raw_name.as_bytes())
+                    .flatten();
+                let export_equals =
+                    raw_name.as_bytes() == ts_ast::internal_symbol_names::EXPORT_EQUALS;
+                let same_direct = match direct {
+                    Some(direct) if !export_equals && !is_late_bound_name(raw_name.as_bytes()) => {
+                        self.checker.module_symbols_same_reference(direct, symbol)?
+                    }
+                    _ => false,
+                };
+                if same_direct {
+                    symbol_name = Some(raw_name.clone());
+                } else {
+                    let entries: Vec<(JsString, SymbolId)> = self
+                        .checker
+                        .table(exports)?
+                        .iter()
+                        .filter_map(|(name, export)| {
+                            export.map(|e| (JsString::from_bytes(name), e))
+                        })
+                        .collect();
+                    // must collect all results and sort them - exports are randomly iterated
+                    let mut results: Vec<(SymbolId, JsString)> = Vec::new();
+                    for (name, export) in entries {
+                        if !is_late_bound_name(name.as_bytes())
+                            && name.as_bytes() != ts_ast::internal_symbol_names::EXPORT_EQUALS
+                            && self.checker.module_symbols_same_reference(export, symbol)?
+                        {
+                            results.push((export, name));
+                        }
+                    }
+                    if !results.is_empty() {
+                        let mut symbols: Vec<SymbolId> = results.iter().map(|r| r.0).collect();
+                        self.checker.sort_symbols(&mut symbols)?;
+                        symbol_name = results
+                            .iter()
+                            .find(|r| r.0 == symbols[0])
+                            .map(|r| r.1.clone());
+                    }
+                }
+            }
+        }
+        let symbol_name = if let Some(name) = symbol_name {
+            name
+        } else {
+            let mut declared_name = None;
+            for declaration in self.checker.symbol_declarations(symbol)?.iter().flatten() {
+                let view = self.checker.ast(declaration)?;
+                if let Some(name) = ts_ast::get_name_of_declaration(view, Some(declaration))? {
+                    declared_name = Some((view, name));
+                    break;
+                }
+            }
+            if let Some((view, name)) = declared_name {
+                let read = view.node(name)?;
+                if read.kind() == K::ComputedPropertyName
+                    && read
+                        .expression()
+                        .map(|expression| {
+                            Ok::<_, Error>(ts_ast::utilities::is_entity_name(
+                                &view.node(expression)?,
+                            ))
+                        })
+                        .transpose()?
+                        .unwrap_or(false)
+                {
+                    return Err(Error::Unsupported(
+                        "createAccessFromSymbolChain: computed entity-name member",
+                    ));
+                }
+            }
+            self.symbol_name(symbol)?
+        };
+        self.approximate_length += symbol_name.len() + 1;
+
+        if self.flags & ts_nodebuilder::flags::FORBID_INDEXED_ACCESS_SYMBOL_REFERENCES == 0 {
+            if let Some(parent) = parent {
+                if let Some(members) = self.checker.members_of_symbol(parent)? {
+                    let member = self
+                        .checker
+                        .table(members)?
+                        .get(raw_name.as_bytes())
+                        .flatten();
+                    let same = match member {
+                        Some(member) => {
+                            self.checker.module_symbols_same_reference(member, symbol)?
+                        }
+                        None => false,
+                    };
+                    if same {
+                        // Should use an indexed access
+                        let lhs = self.access_from_symbol_chain(
+                            chain,
+                            index - 1,
+                            stopper,
+                            override_type_arguments,
+                        )?;
+                        let literal = self.string_literal(symbol_name);
+                        let literal = self.ast.new_literal_type_node(Some(literal));
+                        if self.ast.view().node(lhs)?.kind() == K::IndexedAccessType {
+                            return Ok(self
+                                .ast
+                                .new_indexed_access_type_node(Some(lhs), Some(literal)));
+                        }
+                        let object = self
+                            .ast
+                            .new_type_reference_node(Some(lhs), type_parameter_nodes);
+                        return Ok(self
+                            .ast
+                            .new_indexed_access_type_node(Some(object), Some(literal)));
+                    }
+                }
+            }
+        }
+
+        let identifier = self.ast.new_identifier(symbol_name);
+        self.emit
+            .add_emit_flags(identifier, ts_printer::emit_flags::NO_ASCII_ESCAPING);
+        if index > stopper {
+            let lhs =
+                self.access_from_symbol_chain(chain, index - 1, stopper, override_type_arguments)?;
+            let lhs_kind = self.ast.view().node(lhs)?.kind();
+            let entity = matches!(lhs_kind.known(), Some(K::Identifier | K::QualifiedName));
+            let bare = type_parameter_nodes
+                .map(|list| {
+                    Ok::<_, Error>(
+                        self.ast
+                            .view()
+                            .node_slice(self.ast.view().list(list)?.nodes())?
+                            .is_empty(),
+                    )
+                })
+                .transpose()?
+                .unwrap_or(true);
+            if self.flags & ts_nodebuilder::flags::USE_INSTANTIATION_EXPRESSIONS == 0
+                || entity && bare
+            {
+                return Ok(self.ast.new_qualified_name(Some(lhs), Some(identifier)));
+            }
+            return Err(Error::Unsupported(
+                "createAccessFromSymbolChain: instantiation expression access",
+            ));
+        }
+        Ok(identifier)
+    }
+}

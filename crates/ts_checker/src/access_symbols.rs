@@ -158,16 +158,10 @@ impl CheckerState {
             for property in self.underlying_access_properties(property)? {
                 nonmethod |= self.symbol(property)?.flags() & sf::METHOD == 0;
             }
-            let this = self
-                .access_receiver(node)?
-                .map(|left| {
-                    self.ast(left)?
-                        .node(left)
-                        .map(|read| read.kind() == K::ThisKeyword)
-                        .map_err(Error::from)
-                })
-                .transpose()?
-                .unwrap_or(false);
+            // Referencing abstract properties within their own constructors is not allowed
+            let this = self.is_this_property(node)?
+                || self.is_this_initialized_object_binding_expression(node)?
+                || self.is_binding_element_of_this_initialized_declaration(node)?;
             if nonmethod && this {
                 if let Some(parent) = self.parent_of_symbol(property)? {
                     if self.symbol(parent)?.flags() & sf::CLASS != 0
@@ -536,5 +530,83 @@ impl CheckerState {
             };
             node = parent;
         }
+    }
+}
+
+impl CheckerState {
+    // port: tsc/internal/checker/utilities.go:isThisProperty
+    fn is_this_property(&self, node: NodeId) -> Result<bool, Error> {
+        let view = self.ast(node)?;
+        let read = view.node(node)?;
+        if !matches!(
+            read.kind().known(),
+            Some(K::PropertyAccessExpression | K::ElementAccessExpression)
+        ) {
+            return Ok(false);
+        }
+        Ok(read
+            .expression()
+            .map(|expression| Ok::<_, Error>(view.node(expression)?.kind() == K::ThisKeyword))
+            .transpose()?
+            .unwrap_or(false))
+    }
+
+    // port: tsc/internal/checker/utilities.go:isThisInitializedObjectBindingExpression
+    fn is_this_initialized_object_binding_expression(&self, node: NodeId) -> Result<bool, Error> {
+        let view = self.ast(node)?;
+        let read = view.node(node)?;
+        if !matches!(
+            read.kind().known(),
+            Some(K::ShorthandPropertyAssignment | K::PropertyAssignment)
+        ) {
+            return Ok(false);
+        }
+        let Some(literal) = read.parent() else {
+            return Ok(false);
+        };
+        let Some(assignment) = view.node(literal)?.parent() else {
+            return Ok(false);
+        };
+        let assignment_read = view.node(assignment)?;
+        let Some(data) = assignment_read.data_source().as_binary_expression() else {
+            return Ok(false);
+        };
+        let operator = data
+            .operator_token()
+            .map(|token| view.node(token).map(|read| read.kind()))
+            .transpose()?;
+        let right = data
+            .right()
+            .map(|right| view.node(right).map(|read| read.kind()))
+            .transpose()?;
+        Ok(operator == Some(K::EqualsToken.into()) && right == Some(K::ThisKeyword.into()))
+    }
+
+    /// `IsObjectBindingPattern(location.Parent) && isThisInitializedDeclaration(location.Parent.Parent)`
+    // port: tsc/internal/checker/utilities.go:isThisInitializedDeclaration
+    fn is_binding_element_of_this_initialized_declaration(
+        &self,
+        node: NodeId,
+    ) -> Result<bool, Error> {
+        let view = self.ast(node)?;
+        let Some(pattern) = view.node(node)?.parent() else {
+            return Ok(false);
+        };
+        let pattern_read = view.node(pattern)?;
+        if pattern_read.kind() != K::ObjectBindingPattern {
+            return Ok(false);
+        }
+        let Some(declaration) = pattern_read.parent() else {
+            return Ok(false);
+        };
+        let declaration_read = view.node(declaration)?;
+        if declaration_read.kind() != K::VariableDeclaration {
+            return Ok(false);
+        }
+        Ok(declaration_read
+            .initializer()
+            .map(|initializer| Ok::<_, Error>(view.node(initializer)?.kind() == K::ThisKeyword))
+            .transpose()?
+            .unwrap_or(false))
     }
 }

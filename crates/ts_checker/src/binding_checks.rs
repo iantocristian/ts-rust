@@ -2,7 +2,7 @@
 //! binding elements are checked before the enclosing initializer is related.
 use crate::{type_flags as tf, CheckerState, Error, RelationKind, TypeId};
 use ts_arena::NodeId;
-use ts_ast::{modifier_flags as mf, node_flags as nf, SyntaxKind as K};
+use ts_ast::{node_flags as nf, SyntaxKind as K};
 use ts_diagnostics as d;
 
 impl CheckerState {
@@ -132,17 +132,29 @@ impl CheckerState {
                         if let Some(symbol) =
                             self.constituent_property(parent_type, text.as_bytes(), false)?
                         {
-                            if let Some(declaration) = self.symbol(symbol)?.value_declaration() {
-                                if self
-                                    .ast(declaration)?
-                                    .node(declaration)?
-                                    .modifier_flags(self.ast(declaration)?)?
-                                    & mf::NON_PUBLIC_ACCESSIBILITY_MODIFIER
-                                    != 0
-                                {
-                                    return Err(Error::Unsupported("checkPropertyAccessibility: destructuring private/protected property"));
-                                }
-                            }
+                            self.mark_property_as_referenced(symbol, None, false)?;
+                            // A destructuring is never a write-only reference.
+                            let is_super = self
+                                .ast(declaration)?
+                                .node(declaration)?
+                                .initializer()
+                                .map(|initializer| {
+                                    Ok::<_, Error>(
+                                        self.ast(initializer)?.node(initializer)?.kind()
+                                            == K::SuperKeyword,
+                                    )
+                                })
+                                .transpose()?
+                                .unwrap_or(false);
+                            let error_node = self.ast(node)?.node(node)?.property_name_or_name();
+                            self.check_access_property_accessibility(
+                                node,
+                                is_super,
+                                false,
+                                parent_type,
+                                symbol,
+                                error_node,
+                            )?;
                         }
                     }
                 }

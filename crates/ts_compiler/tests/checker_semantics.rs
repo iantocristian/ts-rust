@@ -1550,3 +1550,74 @@ import * as thing6 from \"./mod.mjs\" with { type: \"json\", field: 0..toString(
     let diagnostics = owner.operation().unwrap().semantic_diagnostics(source);
     assert!(diagnostics.is_ok(), "{diagnostics:?}");
 }
+
+#[test]
+fn inferred_qualified_type_names_emit_as_entity_names_in_declarations() {
+    // Inferred types are written by the node builder; upstream builds
+    // `NS.I` as a qualified name and `typeof C` over an entity name.
+    let text = b"export namespace NS { export interface I { x: number } }
+declare const make: () => NS.I;
+export const v = make();
+export class C {}
+export const cls = C;
+export const mixin = (Base: new (...args: any[]) => any) => class extends Base { get(node: NS.I) {} };
+";
+    let (owner, program, _) = fixture(text, options());
+    let file = program.file(b"/main.ts").unwrap();
+    let mut op = owner.operation().unwrap();
+    assert!(op.semantic_diagnostics(file.source()).unwrap().is_empty());
+    let declarations = program.declaration_diagnostics_with_checker(&mut op, file);
+    assert!(declarations.is_ok(), "{declarations:?}");
+    assert!(declarations.unwrap().is_empty());
+}
+
+#[test]
+fn abstract_properties_destructured_from_this_in_constructors_are_reported() {
+    // Pinned Go: abstractPropertyInConstructor.errors.txt, class C1.
+    let text = b"abstract class C1 {
+    abstract x: string;
+    abstract y: string;
+    constructor() {
+        let self = this;
+        let { x, y: y1 } = this;
+        ({ x, y: y1, \"y\": y1 } = this);
+    }
+}
+";
+    let (owner, source) = checker(text, options());
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let code =
+        ts_diagnostics::Abstract_property_0_in_class_1_cannot_be_accessed_in_the_constructor.code;
+    assert_eq!(
+        codes_and_args(&diagnostics),
+        ["x", "y", "x", "y", "y"]
+            .iter()
+            .map(|name| (code, vec![(*name).to_string(), "C1".to_string()]))
+            .collect::<Vec<_>>()
+    );
+
+    // Destructuring a private member checks accessibility at the binding element.
+    let private = b"class A { private p = 1; q = 2; }\nconst { p, q } = new A();\np; q;\n";
+    let (owner, source) = checker(private, options());
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(
+        codes_and_args(&diagnostics),
+        vec![(
+            ts_diagnostics::Property_0_is_private_and_only_accessible_within_class_1.code,
+            vec!["p".to_string(), "A".to_string()]
+        )]
+    );
+    let start = private.windows(8).position(|w| w == b"{ p, q }").unwrap() as i64 + 2;
+    assert_eq!(
+        (diagnostics[0].loc.pos(), diagnostics[0].loc.end()),
+        (start, start + 1)
+    );
+}
