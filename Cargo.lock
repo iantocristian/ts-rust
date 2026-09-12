@@ -588,6 +588,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ts_testhost"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "ts_tspath",
+ "ts_vfs",
+]
+
+[[package]]
 name = "ts_tsoptions"
 version = "0.1.0"
 dependencies = [

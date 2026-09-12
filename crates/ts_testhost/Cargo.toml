@@ -1,0 +1,17 @@
+[package]
+name = "ts_testhost"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ts_vfs = { version = "0.1.0", path = "../ts_vfs" }
+
+ts_tspath = { version = "0.1.0", path = "../ts_tspath" }
+
+[lints]
+workspace = true
