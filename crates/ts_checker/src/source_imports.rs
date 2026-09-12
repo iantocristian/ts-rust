@@ -59,7 +59,10 @@ impl CheckerState {
                             self.check_import_binding(named)?;
                             if self.module_emit_format(node)? == ModuleKind::COMMON_JS {
                                 needs_star = true;
-                                self.check_module_emit_helpers(node)?;
+                                self.check_external_emit_helpers(
+                                    node,
+                                    crate::external_emit_helpers::IMPORT_STAR,
+                                )?;
                             }
                         } else {
                             resolved = self.resolve_external_module_name(node, specifier, false)?;
@@ -77,7 +80,10 @@ impl CheckerState {
                         && !needs_star
                         && self.module_emit_format(node)? == ModuleKind::COMMON_JS
                     {
-                        self.check_module_emit_helpers(node)?;
+                        self.check_external_emit_helpers(
+                            node,
+                            crate::external_emit_helpers::IMPORT_DEFAULT,
+                        )?;
                     }
                     let kind = self.program()?.host.options().emit_module_kind();
                     if !type_only
@@ -292,7 +298,10 @@ impl CheckerState {
                 == b"default"
                 && self.module_emit_format(node)? == ModuleKind::COMMON_JS
             {
-                self.check_module_emit_helpers(node)?;
+                self.check_external_emit_helpers(
+                    node,
+                    crate::external_emit_helpers::IMPORT_DEFAULT,
+                )?;
             }
         }
         Ok(())
@@ -302,16 +311,5 @@ impl CheckerState {
         self.program()?
             .host
             .get_emit_module_format_of_file(file.as_bytes())
-    }
-    // port: tsc/internal/checker/checker.go:Checker.checkExternalEmitHelpers
-    pub(crate) fn check_module_emit_helpers(&self, node: NodeId) -> Result<(), Error> {
-        if self.program()?.host.options().import_helpers.is_true()
-            && self.ast(node)?.node(node)?.flags() & nf::AMBIENT == 0
-        {
-            return Err(Error::Unsupported(
-                "checkExternalEmitHelpers: imported module helpers",
-            ));
-        }
-        Ok(())
     }
 }

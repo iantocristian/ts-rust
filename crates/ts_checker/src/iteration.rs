@@ -787,9 +787,11 @@ impl CheckerState {
                 && self.program()?.host.options().emit_script_target()
                     < ts_core::ScriptTarget::ES2018
             {
-                return Err(Error::Unsupported(
-                    "checkForOfStatement: downlevel async values emit helper",
-                ));
+                // for..await..of in an async function or async generator function prior to ESNext requires the __asyncValues helper
+                self.check_external_emit_helpers(
+                    node,
+                    crate::external_emit_helpers::FOR_AWAIT_OF_INCLUDES,
+                )?;
             }
         }
         Ok(())

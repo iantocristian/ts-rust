@@ -292,15 +292,48 @@ union, one Node16 test over a two-file fixture). Clippy, formatting, ledger
 validation and tracking views are current (3,577 functions mapped). **The full
 inventory was not re-run after this pass either.**
 
+**Fourth pass.** Three more buckets, sized against the code rather than their
+names:
+
+- `resolveStructuredTypeMembers: type family` (45 + 1 declaration): not a
+  missing family. Rust dispatches every Go family; the failing variants extend an
+  `any` base, which upstream records as the base type and reads through
+  `getSignaturesOfType`/`getIndexInfosOfType` with the `anyBaseTypeIndexInfo`
+  special case. `resolveObjectTypeMembers` now does the same instead of resolving
+  structured members on the base directly.
+- `checkExternalEmitHelpers` (five boundaries, 83): `checkExternalEmitHelpers`
+  was already fully ported in `emit_checks.rs`; the import/export declaration,
+  object-rest binding, `yield*`, `for await`, destructuring-rest and `using`
+  call sites now use it, and `checkSignatureDeclaration` requests the
+  `__awaiter`/`__asyncGenerator` helpers as upstream does.
+- `checkGrammarVariableDeclarationList: using` (two boundaries, 38): the three
+  `using` grammar errors, `checkGrammarAwaitOrAwaitUsing` generalized over
+  `await` expressions and `await using` lists, and the Disposable/AsyncDisposable
+  initializer check with memoized global type lookups.
+
+Declaration `unclassified` (58) is the driver's label for a declaration-phase
+failure whose reason sits in a per-file result. Aggregated over inventory-03:
+22 `getSymbolChain: external module specifier ranking`, 16
+`checkExpressionWorker`, 12 CommonJS/ESM mismatch, 8 JS type-alias lookup, 6
+`isInlineImportAttributes`, 3 `getContainersOfSymbol: class-expression CommonJS
+assignment`, 3 singletons. The middle 36 are closed by the passes above; the
+specifier ranking is node-builder work.
+
+Focused regressions cover each (`checker_semantics.rs`; the tslib test asserts a
+single TS2354 per file at the binding name, the `using` tests use a global
+fixture file). **The full inventory was not re-run after this pass.**
+
 Remaining inventory-03 acceptance buckets, largest first, with what each needs:
 
 | Bucket | Variants | Needs |
 | --- | ---: | --- |
-| `resolveStructuredTypeMembers: type family` | 45 | the remaining object payload families |
-| `checkExternalEmitHelpers: imported module helpers` | 34 | `tslib` resolution and helper existence checks |
-| `checkGrammarVariableDeclarationList: using contexts` | 34 | `using` declaration grammar |
+| declaration `getSymbolChain: external module specifier ranking` | 22 | node-builder specifier ranking |
+| `checkSourceFile: JSX or non-script input` | 24 | out of P4 scope |
+| `isInlineImportAttributes` | 20 (+6 declaration) | the import-attribute inline check |
+| `getSuggestedLibForNonExistentProperty` | 19 | the lib suggestion table |
+| `errorOnImplicitAnyModule: package install diagnostic chain` | 14 | the package-install chain |
+| `resolveAlias during mergeSymbol` | 13 | alias resolution inside symbol merging |
 | `Node.Text` / `Node.Expression` panics | 39 | faithful to pinned Go; the Rust callers that reach them are the bug |
-| declaration `unclassified` | 58 | per-variant classification |
 
 Eight pre-existing tests in `checker_semantics.rs` still assert `Unsupported`
 for operations that are now implemented and need re-pointing with per-case

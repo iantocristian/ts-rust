@@ -184,9 +184,7 @@ impl CheckerState {
                 if self.program()?.host.options().emit_script_target()
                     < ts_core::ScriptTarget::ES2018
                 {
-                    return Err(Error::Unsupported(
-                        "checkObjectLiteralAssignment: rest emit helper",
-                    ));
+                    self.check_external_emit_helpers(property, crate::external_emit_helpers::REST)?;
                 }
                 let mut names = Vec::new();
                 for &other in properties {

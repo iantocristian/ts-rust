@@ -677,7 +677,6 @@
       "tsc/internal/checker/checker.go:Checker.checkTypeQuery",
       "tsc/internal/checker/checker.go:Checker.checkTypeReferenceOrImport",
       "tsc/internal/checker/checker.go:Checker.checkVariableDeclaration",
-      "tsc/internal/checker/checker.go:Checker.checkVariableDeclarationList",
       "tsc/internal/checker/checker.go:Checker.checkVariableStatement",
       "tsc/internal/checker/checker.go:Checker.checkVoidExpression",
       "tsc/internal/checker/checker.go:Checker.cloneTypeParameter",

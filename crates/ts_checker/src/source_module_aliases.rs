@@ -121,7 +121,16 @@ impl CheckerState {
             self.check_module_export_name(self.ast(clause)?.node(clause)?.name(), true)?;
         }
         if self.module_emit_format(node)? == ts_core::ModuleKind::COMMON_JS {
-            self.check_module_emit_helpers(node)?;
+            self.check_external_emit_helpers(
+                node,
+                if clause.is_some() {
+                    // export * as ns from "foo";
+                    crate::external_emit_helpers::IMPORT_STAR
+                } else {
+                    // export * from "foo"
+                    crate::external_emit_helpers::EXPORT_STAR
+                },
+            )?;
         }
         Ok(())
     }
@@ -308,7 +317,10 @@ impl CheckerState {
                     .as_bytes()
                     == b"default"
             {
-                self.check_module_emit_helpers(node)?;
+                self.check_external_emit_helpers(
+                    node,
+                    crate::external_emit_helpers::IMPORT_DEFAULT,
+                )?;
             }
             return Ok(());
         }

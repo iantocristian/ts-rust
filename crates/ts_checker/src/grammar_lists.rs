@@ -154,10 +154,64 @@ impl CheckerState {
                 d::Variable_declaration_list_cannot_be_empty,
             );
         }
-        if self.ast(node)?.node(node)?.flags() & nf::USING != 0 {
-            return Err(Error::Unsupported(
-                "checkGrammarVariableDeclarationList: using contexts",
-            ));
+        let read = self.ast(node)?.node(node)?;
+        let flags = read.flags();
+        let block_scope = flags & nf::BLOCK_SCOPED;
+        if block_scope == nf::USING || block_scope == nf::AWAIT_USING {
+            let using = block_scope == nf::USING;
+            let parent = self
+                .ast(node)?
+                .node(node)?
+                .parent()
+                .ok_or(Error::MissingLink("variable list parent"))?;
+            let parent_read = self.ast(parent)?.node(parent)?;
+            if parent_read.kind() == K::ForInStatement {
+                return self.grammar_error_node(
+                    node,
+                    if using {
+                        d::The_left_hand_side_of_a_for_in_statement_cannot_be_a_using_declaration
+                    } else {
+                        d::The_left_hand_side_of_a_for_in_statement_cannot_be_an_await_using_declaration
+                    },
+                    vec![],
+                );
+            }
+            if flags & nf::AMBIENT != 0 {
+                return self.grammar_error_node(
+                    node,
+                    if using {
+                        d::X_using_declarations_are_not_allowed_in_ambient_contexts
+                    } else {
+                        d::X_await_using_declarations_are_not_allowed_in_ambient_contexts
+                    },
+                    vec![],
+                );
+            }
+            let in_clause = parent_read.kind() == K::VariableStatement
+                && parent_read
+                    .parent()
+                    .map(|grandparent| {
+                        Ok::<_, Error>(matches!(
+                            self.ast(grandparent)?.node(grandparent)?.kind().known(),
+                            Some(K::CaseClause | K::DefaultClause)
+                        ))
+                    })
+                    .transpose()?
+                    .unwrap_or(false);
+            if in_clause {
+                return self.grammar_error_node(
+                    node,
+                    if using {
+                        d::X_using_declarations_are_not_allowed_in_case_or_default_clauses_unless_contained_within_a_block
+                    } else {
+                        d::X_await_using_declarations_are_not_allowed_in_case_or_default_clauses_unless_contained_within_a_block
+                    },
+                    vec![],
+                );
+            }
+        }
+        if block_scope == nf::AWAIT_USING {
+            return self.check_grammar_await_or_await_using(node);
         }
         Ok(false)
     }

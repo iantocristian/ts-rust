@@ -488,9 +488,12 @@ impl CheckerState {
             && asynchronous
             && self.program()?.host.options().emit_script_target() < ts_core::ScriptTarget::ES2018
         {
-            return Err(Error::Unsupported(
-                "checkExternalEmitHelpers: async yield delegation",
-            ));
+            // Async generator functions prior to ES2018 require the __await, __asyncDelegator,
+            // and __asyncValues helpers
+            self.check_external_emit_helpers(
+                node,
+                crate::external_emit_helpers::ASYNC_DELEGATOR_INCLUDES,
+            )?;
         }
         let mut returned = self.return_type_from_annotation(function)?;
         if let Some(ty) = returned {

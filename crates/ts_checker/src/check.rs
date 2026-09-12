@@ -190,13 +190,22 @@ impl CheckerState {
                 self.check_source_element(list)
             }
             Some(K::VariableDeclarationList) => {
-                if read.flags() & nf::USING != 0 {
-                    return Err(Error::Unsupported(
-                        "checkGrammarVariableDeclarationList: using",
-                    ));
+                // port: tsc/internal/checker/checker.go:Checker.checkVariableDeclarationList
+                let block_scope =
+                    ts_ast::utilities::get_combined_node_flags(view, node)? & nf::BLOCK_SCOPED;
+                if (block_scope == nf::USING || block_scope == nf::AWAIT_USING)
+                    && self.program()?.host.options().emit_script_target()
+                        < ts_core::ScriptTarget::ESNEXT
+                {
+                    self.check_external_emit_helpers(
+                        node,
+                        crate::external_emit_helpers::ADD_DISPOSABLE_RESOURCE_AND_DISPOSE_RESOURCES,
+                    )?;
                 }
+                let view = self.ast(node)?;
                 let list = required(
-                    read.data_source()
+                    view.node(node)?
+                        .data_source()
                         .as_variable_declaration_list()
                         .ok_or(ts_arena::Error::InvalidGraph)?
                         .declarations(),
@@ -510,6 +519,7 @@ impl CheckerState {
                     Some(initializer),
                     None,
                 )?;
+                self.check_using_initializer(node, initializer, source)?;
             }
         }
         self.check_variable_declaration_flags(node, symbol, true)?;
@@ -583,6 +593,70 @@ impl CheckerState {
             crate::RelationKind::Assignable,
             Some(node),
             None,
+        )?;
+        if let Some(diagnostic) = diagnostic {
+            self.add_diagnostic(diagnostic)?;
+        }
+        Ok(())
+    }
+}
+
+impl CheckerState {
+    /// Resolved once and cached like upstream's memoized global type resolvers.
+    // port: tsc/internal/checker/checker.go:Checker.getGlobalTypeResolver
+    fn cached_global_type(&mut self, name: &'static str) -> Result<TypeId, Error> {
+        if let Some(ty) = self.query.global_types.get(name) {
+            return Ok(*ty);
+        }
+        let ty = self.get_global_type(name, 0, true)?;
+        self.query.global_types.insert(name, ty);
+        Ok(ty)
+    }
+
+    /// The `using`/`await using` branch of `checkVariableLikeDeclaration`: the
+    /// initializer must be disposable, or null or undefined.
+    // port: tsc/internal/checker/checker.go:Checker.checkVariableLikeDeclaration
+    fn check_using_initializer(
+        &mut self,
+        node: NodeId,
+        initializer: NodeId,
+        initializer_type: TypeId,
+    ) -> Result<(), Error> {
+        let block_scope =
+            ts_ast::utilities::get_combined_node_flags(self.ast(node)?, node)? & nf::BLOCK_SCOPED;
+        let empty = self.builtins.empty_object_type;
+        let (mut parts, message) = if block_scope == nf::AWAIT_USING {
+            let async_disposable = self.cached_global_type("AsyncDisposable")?;
+            let disposable = self.cached_global_type("Disposable")?;
+            if async_disposable == empty || disposable == empty {
+                return Ok(());
+            }
+            (
+                vec![async_disposable, disposable],
+                messages::The_initializer_of_an_await_using_declaration_must_be_either_an_object_with_a_Symbol_asyncDispose_or_Symbol_dispose_method_or_be_null_or_undefined,
+            )
+        } else if block_scope == nf::USING {
+            let disposable = self.cached_global_type("Disposable")?;
+            if disposable == empty {
+                return Ok(());
+            }
+            (
+                vec![disposable],
+                messages::The_initializer_of_a_using_declaration_must_be_either_an_object_with_a_Symbol_dispose_method_or_be_null_or_undefined,
+            )
+        } else {
+            return Ok(());
+        };
+        parts.push(self.builtins.null_type);
+        parts.push(self.builtins.undefined_type);
+        let optional_disposable = self.get_union_type(&parts)?;
+        let widened = self.widen_type_for_variable_like(node, Some(initializer_type), false)?;
+        let (_, diagnostic) = self.check_type_related_ex(
+            widened,
+            optional_disposable,
+            crate::RelationKind::Assignable,
+            Some(initializer),
+            Some(message),
         )?;
         if let Some(diagnostic) = diagnostic {
             self.add_diagnostic(diagnostic)?;

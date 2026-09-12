@@ -283,6 +283,20 @@ impl CheckerState {
         ) {
             self.check_grammar_function_like(node)?;
         }
+        if self.ast(node)?.node(node)?.body().is_some() {
+            let (asynchronous, generator) = self.body_function_flags(node)?;
+            let target = self.program()?.host.options().emit_script_target();
+            if asynchronous && generator && target < ts_core::ScriptTarget::ES2018 {
+                // Async generators prior to ES2018 require the __await and __asyncGenerator helpers
+                self.check_external_emit_helpers(
+                    node,
+                    crate::external_emit_helpers::ASYNC_GENERATOR_INCLUDES,
+                )?;
+            }
+            if asynchronous && !generator && target < ts_core::ScriptTarget::ES2017 {
+                self.check_external_emit_helpers(node, crate::external_emit_helpers::AWAITER)?;
+            }
+        }
         self.check_type_parameters(node)?;
         self.check_unmatched_jsdoc_parameters(node)?;
         for parameter in parameters {

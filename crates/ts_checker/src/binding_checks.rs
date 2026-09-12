@@ -116,9 +116,7 @@ impl CheckerState {
                 && self.program()?.host.options().emit_script_target()
                     < ts_core::ScriptTarget::ES2018
             {
-                return Err(Error::Unsupported(
-                    "checkExternalEmitHelpers: object rest binding",
-                ));
+                self.check_external_emit_helpers(node, crate::external_emit_helpers::REST)?;
             }
             let declaration = self
                 .ast(parent)?

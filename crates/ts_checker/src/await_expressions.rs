@@ -8,7 +8,7 @@ use ts_diagnostics as d;
 impl CheckerState {
     // port: tsc/internal/checker/checker.go:Checker.checkAwaitExpression
     pub(crate) fn check_await_expression(&mut self, node: NodeId) -> Result<TypeId, Error> {
-        self.check_grammar_await(node)?;
+        self.check_grammar_await_or_await_using(node)?;
         let operand = self
             .ast(node)?
             .node(node)?
@@ -36,7 +36,12 @@ impl CheckerState {
     }
 
     // port: tsc/internal/checker/grammarchecks.go:Checker.checkGrammarAwaitOrAwaitUsing
-    fn check_grammar_await(&mut self, node: NodeId) -> Result<(), Error> {
+    pub(crate) fn check_grammar_await_or_await_using(
+        &mut self,
+        node: NodeId,
+    ) -> Result<bool, Error> {
+        let await_expression = self.ast(node)?.node(node)?.kind() == K::AwaitExpression;
+        let mut has_error = false;
         let container = self.containing_function_or_static_block(node)?;
         let static_block = container
             .map(|container| {
@@ -48,11 +53,17 @@ impl CheckerState {
             .transpose()?
             .unwrap_or(false);
         if static_block {
+            // NOTE: We report this regardless as to whether there are parse diagnostics.
             self.error_at(
                 Some(node),
-                d::X_await_expression_cannot_be_used_inside_a_class_static_block,
+                if await_expression {
+                    d::X_await_expression_cannot_be_used_inside_a_class_static_block
+                } else {
+                    d::X_await_using_statements_cannot_be_used_inside_a_class_static_block
+                },
                 vec![],
             )?;
+            has_error = true;
         } else if self.ast(node)?.node(node)?.flags() & nf::AWAIT_CONTEXT == 0 {
             let source = ts_ast::utilities::get_source_file_of_node(self.ast(node)?, Some(node))?
                 .ok_or(Error::MissingLink("await source"))?;
@@ -72,7 +83,18 @@ impl CheckerState {
                             || M::NODE16 <= module && module <= M::NODE_NEXT)
                             && file.common_js_module_indicator().is_some();
                     if !external {
-                        self.add_diagnostic(ts_ast::Diagnostic::new(Some(source),range,d::X_await_expressions_are_only_allowed_at_the_top_level_of_a_file_when_that_file_is_a_module_but_this_file_has_no_imports_or_exports_Consider_adding_an_empty_export_to_make_this_file_a_module,vec![]))?;
+                        let message = if await_expression {
+                            d::X_await_expressions_are_only_allowed_at_the_top_level_of_a_file_when_that_file_is_a_module_but_this_file_has_no_imports_or_exports_Consider_adding_an_empty_export_to_make_this_file_a_module
+                        } else {
+                            d::X_await_using_statements_are_only_allowed_at_the_top_level_of_a_file_when_that_file_is_a_module_but_this_file_has_no_imports_or_exports_Consider_adding_an_empty_export_to_make_this_file_a_module
+                        };
+                        self.add_diagnostic(ts_ast::Diagnostic::new(
+                            Some(source),
+                            range,
+                            message,
+                            vec![],
+                        ))?;
+                        has_error = true;
                     }
                     let node_module =
                         matches!(module, M::NODE16 | M::NODE18 | M::NODE20 | M::NODE_NEXT);
@@ -88,14 +110,33 @@ impl CheckerState {
                     };
                     if common_js {
                         self.add_diagnostic(ts_ast::Diagnostic::new(Some(source),range,d::The_current_file_is_a_CommonJS_module_and_cannot_use_await_at_the_top_level,vec![]))?;
+                        has_error = true;
                     } else if !(node_module
                         || matches!(module, M::ES2022 | M::ESNEXT | M::PRESERVE | M::SYSTEM))
                         || target < ScriptTarget::ES2017
                     {
-                        self.add_diagnostic(ts_ast::Diagnostic::new(Some(source),range,d::Top_level_await_expressions_are_only_allowed_when_the_module_option_is_set_to_es2022_esnext_system_node16_node18_node20_nodenext_or_preserve_and_the_target_option_is_set_to_es2017_or_higher,vec![]))?;
+                        let message = if await_expression {
+                            d::Top_level_await_expressions_are_only_allowed_when_the_module_option_is_set_to_es2022_esnext_system_node16_node18_node20_nodenext_or_preserve_and_the_target_option_is_set_to_es2017_or_higher
+                        } else {
+                            d::Top_level_await_using_statements_are_only_allowed_when_the_module_option_is_set_to_es2022_esnext_system_node16_node18_node20_nodenext_or_preserve_and_the_target_option_is_set_to_es2017_or_higher
+                        };
+                        self.add_diagnostic(ts_ast::Diagnostic::new(
+                            Some(source),
+                            range,
+                            message,
+                            vec![],
+                        ))?;
+                        has_error = true;
                     }
                 } else {
-                    let mut diagnostic=ts_ast::Diagnostic::new(Some(source),range,d::X_await_expressions_are_only_allowed_within_async_functions_and_at_the_top_levels_of_modules,vec![]);
+                    let message = if await_expression {
+                        d::X_await_expressions_are_only_allowed_within_async_functions_and_at_the_top_levels_of_modules
+                    } else {
+                        d::X_await_using_statements_are_only_allowed_within_async_functions_and_at_the_top_levels_of_modules
+                    };
+                    let mut diagnostic =
+                        ts_ast::Diagnostic::new(Some(source), range, message, vec![]);
+                    has_error = true;
                     if let Some(container) = container {
                         let read = self.ast(container)?.node(container)?;
                         if read.kind() != K::Constructor
@@ -114,13 +155,15 @@ impl CheckerState {
                 }
             }
         }
-        if self.in_parameter_initializer_before_function(node)? {
+        if await_expression && self.in_parameter_initializer_before_function(node)? {
+            // NOTE: We report this regardless as to whether there are parse diagnostics.
             self.error_at(
                 Some(node),
                 d::X_await_expressions_cannot_be_used_in_a_parameter_initializer,
                 vec![],
             )?;
+            has_error = true;
         }
-        Ok(())
+        Ok(has_error)
     }
 }

@@ -44,7 +44,15 @@ fn fixture_files(
             ProgramOptions {
                 config: ts_tsoptions::ParsedCommandLine::new(
                     options,
-                    vec![JsString::from_bytes(root)],
+                    std::iter::once(root)
+                        .chain(
+                            files
+                                .iter()
+                                .map(|&(path, _)| path)
+                                .filter(|&path| path != root),
+                        )
+                        .map(JsString::from_bytes)
+                        .collect(),
                 ),
                 host: Arc::new(fs.finish()),
                 current_directory: JsString::from_bytes(b"/".as_slice()),
@@ -1344,4 +1352,129 @@ fn commonjs_files_cannot_import_ecmascript_modules_synchronously_under_node16() 
             vec!["./esm.mjs".to_string()]
         )]
     );
+}
+
+#[test]
+fn classes_extending_an_any_base_check_without_resolving_members_on_any() {
+    let text = b"declare var Err: any;\nclass A extends Err {\n    payload: string;\n    constructor() {\n        super(1, 2);\n        super.unknown;\n        super[\"unknown\"];\n    }\n    process() { return this.payload + \"!\"; }\n}\nvar o = { m() { super.unknown; } };\n";
+    let (owner, source) = checker(text, options());
+    let diagnostics = owner.operation().unwrap().semantic_diagnostics(source);
+    assert!(diagnostics.is_ok(), "{diagnostics:?}");
+}
+
+#[test]
+fn using_declarations_report_grammar_and_disposable_initializer_errors() {
+    const GLOBALS: &[u8] = b"interface Disposable { dispose(): void }
+interface AsyncDisposable { asyncDispose(): void }
+";
+    let script = b"interface Disposable { dispose(): void }
+interface AsyncDisposable { asyncDispose(): void }
+using bad = 1;
+using good = { dispose() {} };
+switch (1) { case 1: using inClause = null; }
+";
+    let (owner, source) = checker(script, options());
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    // The relation error carries the generalized source and the nullable-stripped
+    // target as arguments even though the head message has no placeholders.
+    assert_eq!(
+        codes_and_args(&diagnostics),
+        vec![
+            (
+                ts_diagnostics::The_initializer_of_a_using_declaration_must_be_either_an_object_with_a_Symbol_dispose_method_or_be_null_or_undefined.code,
+                vec!["number".to_string(), "Disposable".to_string()]
+            ),
+            (
+                ts_diagnostics::X_using_declarations_are_not_allowed_in_case_or_default_clauses_unless_contained_within_a_block.code,
+                vec![]
+            ),
+        ]
+    );
+    let start = script.windows(7).position(|w| w == b"bad = 1").unwrap() as i64 + 6;
+    assert_eq!(
+        (diagnostics[0].loc.pos(), diagnostics[0].loc.end()),
+        (start, start + 1),
+        "the initializer is the error node"
+    );
+
+    // `await using` at the top level of a module checks against AsyncDisposable | Disposable.
+    let module = b"export {};\nawait using x = { asyncDispose() {} };\nawait using y = 2;\n";
+    let (owner, program, _) = fixture_files(
+        b"/main.ts",
+        &[(b"/main.ts", module), (b"/globals.ts", GLOBALS)],
+        options(),
+    );
+    let source = program.file(b"/main.ts").unwrap().source();
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+    assert_eq!(
+        codes,
+        vec![
+            ts_diagnostics::The_initializer_of_an_await_using_declaration_must_be_either_an_object_with_a_Symbol_asyncDispose_or_Symbol_dispose_method_or_be_null_or_undefined.code
+        ]
+    );
+
+    let top_level = b"await using x = null;\n";
+    let (owner, source) = checker(top_level, options());
+    let diagnostics = owner
+        .operation()
+        .unwrap()
+        .semantic_diagnostics(source)
+        .unwrap();
+    assert_eq!(
+        codes_and_args(&diagnostics),
+        vec![(
+            ts_diagnostics::X_await_using_statements_are_only_allowed_at_the_top_level_of_a_file_when_that_file_is_a_module_but_this_file_has_no_imports_or_exports_Consider_adding_an_empty_export_to_make_this_file_a_module.code,
+            vec![]
+        )]
+    );
+}
+
+#[test]
+fn import_helpers_report_a_missing_tslib_once_per_file() {
+    let text = b"export const { a, ...rest } = { a: 1, b: 2 };\n";
+    for (target, expected) in [
+        (ScriptTarget::ES2018, 0),
+        (ScriptTarget::ES2017, 1),
+        (ScriptTarget::ES2015, 1),
+    ] {
+        let (owner, source) = checker(
+            text,
+            CompilerOptions {
+                target,
+                import_helpers: Tristate::TRUE,
+                ..options()
+            },
+        );
+        let diagnostics = owner
+            .operation()
+            .unwrap()
+            .semantic_diagnostics(source)
+            .unwrap();
+        let codes: Vec<i32> = diagnostics.iter().map(|d| d.code).collect();
+        assert_eq!(
+            codes,
+            vec![
+                ts_diagnostics::This_syntax_requires_an_imported_helper_but_module_0_cannot_be_found.code;
+                expected
+            ],
+            "target {target:?}"
+        );
+        if expected == 1 {
+            let start = text.windows(7).position(|w| w == b"...rest").unwrap() as i64 + 3;
+            assert_eq!(
+                (diagnostics[0].loc.pos(), diagnostics[0].loc.end()),
+                (start, start + 4),
+                "the rest binding element is the error node, spanning its name"
+            );
+        }
+    }
 }

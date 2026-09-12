@@ -204,22 +204,24 @@ impl CheckerState {
                         table.insert(name, Some(property));
                     }
                 }
-                self.resolve_type_members(base)?;
-                let structured = self.types.structured(base)?;
-                if let Some(signatures) = &structured.signatures {
-                    calls
-                        .extend_from_slice(&signatures[..structured.call_signature_count as usize]);
-                    constructs
-                        .extend_from_slice(&signatures[structured.call_signature_count as usize..]);
-                }
-                for index in structured.index_infos.as_deref().unwrap_or_default() {
-                    let key = self.signatures.index_info(*index)?.key_type;
+                // A class extending an `any` base records `any` as its base type;
+                // upstream reads its signatures and index infos through the
+                // type-level accessors rather than resolving structured members.
+                calls.extend(self.signatures_of_type(base, false)?);
+                constructs.extend(self.signatures_of_type(base, true)?);
+                let inherited = if base == self.builtins.any_type {
+                    vec![self.builtins.any_base_type_index_info]
+                } else {
+                    self.index_infos_of_type(base)?
+                };
+                for index in inherited {
+                    let key = self.signatures.index_info(index)?.key_type;
                     let mut found = false;
                     for &existing in &indexes {
                         found |= self.signatures.index_info(existing)?.key_type == key;
                     }
                     if !found {
-                        indexes.push(*index);
+                        indexes.push(index);
                     }
                 }
             }
