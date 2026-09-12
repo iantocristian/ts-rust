@@ -16,8 +16,8 @@
       "S04_RUSTUP_HOME": ""
     },
     "host": "macos-aarch64",
-    "revision": "d7ab38bfd8e41d61fdfb2eaa20f0c51d69ce3a3f",
-    "source_sha256": "1642320eccbe01a00c0088709b7cedb289d297b30464ae3d14eadbe037db9ebd",
+    "revision": "7bc3756c9a7b2d4f9bbcfa60b66fd8835541d97d",
+    "source_sha256": "c8de337ab5322e94ba8cc1bd54aa8163b245ecee609c540461ad48d30fb7b8ee",
     "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
     "upstream_pin": "1f70213d4922b434345f639b441681e470c7cfc1"
   },
@@ -39,6 +39,7 @@
     "program": "status/evidence/4bb29fc53082d6c4067cdaa9ce3cd8852ab5867aa9d4803f7ba50a36509dd0fd.json",
     "scanner": "status/evidence/892280d5dbaf40c6508d7e4e3d3182fee73a260b3d58fdb422a5f978a9dc6fc5.json",
     "selftest": "status/evidence/c47146285285f3e563e94d2ebc2167f4a429b7ced6dcb7375da66bf1252dc374.json",
+    "testhost": "status/evidence/6bada01c0052e07e35af0bf9aa5abdb51bd7643c3840d4007ba58907d9b7b1a6.json",
     "workspace": "status/evidence/aede797a622ef7d919caae40f290f25ad24c25c70a118a5d81665081cf0459bd.json"
   },
   "evidence_states": {
@@ -58,9 +59,10 @@
     "program": "stale: source, pin, command or inputs changed",
     "scanner": "stale: source, pin, command or inputs changed",
     "selftest": "stale: source, pin, command or inputs changed",
+    "testhost": "current",
     "workspace": "stale: source, pin, command or inputs changed"
   },
-  "generated": "2026-09-11",
+  "generated": "2026-09-12",
   "metrics": {
     "adr.0001.status": "Accepted",
     "adr.0002.status": "Accepted",
@@ -1116,6 +1118,12 @@
     "run.e2.frozen_subset": true,
     "run.oracle.build": true,
     "run.oracle.smoke": true,
+    "run.testhost.controls": true,
+    "run.testhost.parity": 1.0,
+    "run.testhost.tests_failed": 0.0,
+    "run.testhost.tests_passed": 72.0,
+    "run.testhost.tests_skipped": 0.0,
+    "run.testhost.tests_total": 72.0,
     "sprint.S01.done": 0.0,
     "sprint.S02.done": 0.0,
     "sprint.S03.done": 0.0,

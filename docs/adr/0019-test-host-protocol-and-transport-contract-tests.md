@@ -10,7 +10,29 @@ The Go fourslash harness injects an in-memory filesystem, symlinks and configura
 
 ## Decision
 
-To be written in S11 with its design note: the test-host endpoint, its callback filesystem operations (`readFile`, `fileExists`, `directoryExists`, `getAccessibleEntries`, `realpath`), test-only initialization, options and plugin controls, cancellation and callback progress, and the transport contract fixtures (case-insensitive, symlink and mapper cases). Transport contract tests verify these operations without asserting language-service results.
+Proposed for owner review: use the versioned `ts_testhost --stdio` endpoint and
+the contract in [S11](../S11.md). Valid messages use Content-Length JSON-RPC
+framing. A bounded, single-threaded router continues servicing cancellation,
+progress and unrelated responses while reverse callbacks are outstanding.
+
+Use pinned Go callbackFS semantics for the five read operations, including the
+null/delegate versus missing/empty distinctions. Fallback is restricted to an
+explicitly injected immutable filesystem. Accept strict Unicode JSON strings;
+do not silently replace arbitrary source bytes. Initialization and inferred
+options use a configuration callback as an explicit completion barrier.
+
+Register plugin names/options at initialization and proxy their spawn,
+initialize, project, transform and disposal requests over the same connection.
+The test client owns plugin processes and project handles; this binary does not
+execute external code. Cancellation retires an affected plugin name, and the
+client must clean up its resources, including late spawn results.
+
+Carry small access-only Go oracle overlays against the pin rather than fork the
+fourslash harness. Compare actual upstream callbackFS observations and actual
+framed mapper responses with the Rust subprocess transport. Report new control
+and malformed-protocol cases separately from Go observations. These tests do
+not certify project integration, mapper semantics in a compiler, or language
+service results. The existing Go fixtures remain unchanged.
 
 ## Consequences
 
@@ -18,4 +40,8 @@ Until accepted, S11 stays open. Acceptance requires the owner's review of the de
 
 ## Evidence
 
-`tsc/internal/fourslash` and `tsc/internal/testutil` in the pinned checkout; the transport fixtures once they exist.
+`tsc/internal/api/callbackfs.go`, `tsc/internal/jsonrpc/baseproto.go`,
+`tsc/internal/contentmapper/hostimpl.go`, `tsc/internal/fourslash/fourslash.go`,
+and `tsc/internal/testutil/contentmappertest` in the pinned checkout.
+The frozen inventories are under `data/s11/`, access-only bridges under
+`tools/s11/`, and the producer is `cargo xtask run testhost`.
